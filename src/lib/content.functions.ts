@@ -139,11 +139,24 @@ export const getRegionBySlug = createServerFn({ method: "GET" })
       .eq("slug", data.slug)
       .eq("ativa", true)
       .maybeSingle();
-    if (error) {
-      if (isMissingSchema(error)) throw notFound();
+    if (error && !isMissingSchema(error)) {
       throw new Error(error.message);
     }
-    if (!row) throw notFound();
+    if (!row) {
+      // Fallback enquanto o schema/seed não está no Supabase — evita 500 na rota /$region.
+      return {
+        id: data.slug,
+        slug: data.slug,
+        name: data.slug
+          .split("-")
+          .map((p) => p.charAt(0).toUpperCase() + p.slice(1))
+          .join(" "),
+        main_city: "",
+        description: null,
+        hero_image_url: null,
+        tema_config: {},
+      };
+    }
     return mapRegiao(row as RegiaoRow);
   });
 
