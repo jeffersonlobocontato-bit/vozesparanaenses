@@ -1,7 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { queryOptions, useSuspenseQuery } from "@tanstack/react-query";
 import { listRegions, listLatestArticles, type ArticleListItem, type Region } from "@/lib/content.functions";
-import { Logo } from "@/components/Logo";
 import logoAsset from "@/assets/vozes-paranaenses-logo.png.asset.json";
 
 const regionsQO = queryOptions({
