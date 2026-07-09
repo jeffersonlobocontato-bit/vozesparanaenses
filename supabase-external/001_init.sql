@@ -48,8 +48,11 @@ create table if not exists public.profiles (
 grant select, insert, update on public.profiles to authenticated;
 grant all on public.profiles to service_role;
 alter table public.profiles enable row level security;
+drop policy if exists "profiles self read" on public.profiles;
+drop policy if exists "profiles self update" on public.profiles;
 create policy "profiles self read" on public.profiles for select to authenticated using (auth.uid() = id);
 create policy "profiles self update" on public.profiles for update to authenticated using (auth.uid() = id);
+drop trigger if exists trg_profiles_updated on public.profiles;
 create trigger trg_profiles_updated before update on public.profiles for each row execute function public.set_updated_at();
 
 create table if not exists public.user_roles (
@@ -68,6 +71,8 @@ returns boolean language sql stable security definer set search_path = public as
   select exists (select 1 from public.user_roles where user_id = _user_id and role = _role)
 $$;
 
+drop policy if exists "roles self read" on public.user_roles;
+drop policy if exists "roles admin all" on public.user_roles;
 create policy "roles self read" on public.user_roles for select to authenticated using (auth.uid() = user_id);
 create policy "roles admin all" on public.user_roles for all to authenticated
   using (public.has_role(auth.uid(),'admin')) with check (public.has_role(auth.uid(),'admin'));
@@ -91,9 +96,12 @@ create table if not exists public.regions (
 grant select on public.regions to anon, authenticated;
 grant all on public.regions to service_role;
 alter table public.regions enable row level security;
+drop policy if exists "regions public read" on public.regions;
+drop policy if exists "regions admin write" on public.regions;
 create policy "regions public read" on public.regions for select to anon, authenticated using (active = true);
 create policy "regions admin write" on public.regions for all to authenticated
   using (public.has_role(auth.uid(),'admin')) with check (public.has_role(auth.uid(),'admin'));
+drop trigger if exists trg_regions_updated on public.regions;
 create trigger trg_regions_updated before update on public.regions for each row execute function public.set_updated_at();
 
 -- =====================================================================
@@ -108,6 +116,8 @@ create table if not exists public.categories (
 grant select on public.categories to anon, authenticated;
 grant all on public.categories to service_role;
 alter table public.categories enable row level security;
+drop policy if exists "categories public read" on public.categories;
+drop policy if exists "categories admin write" on public.categories;
 create policy "categories public read" on public.categories for select to anon, authenticated using (true);
 create policy "categories admin write" on public.categories for all to authenticated
   using (public.has_role(auth.uid(),'admin')) with check (public.has_role(auth.uid(),'admin'));
@@ -130,10 +140,13 @@ create table if not exists public.sources (
 grant select, insert, update, delete on public.sources to authenticated;
 grant all on public.sources to service_role;
 alter table public.sources enable row level security;
+drop policy if exists "sources editors read" on public.sources;
+drop policy if exists "sources admin write" on public.sources;
 create policy "sources editors read" on public.sources for select to authenticated
   using (public.has_role(auth.uid(),'admin') or public.has_role(auth.uid(),'editor') or public.has_role(auth.uid(),'reviewer'));
 create policy "sources admin write" on public.sources for all to authenticated
   using (public.has_role(auth.uid(),'admin')) with check (public.has_role(auth.uid(),'admin'));
+drop trigger if exists trg_sources_updated on public.sources;
 create trigger trg_sources_updated before update on public.sources for each row execute function public.set_updated_at();
 
 -- =====================================================================
@@ -157,6 +170,7 @@ create table if not exists public.raw_items (
 );
 grant all on public.raw_items to service_role;
 alter table public.raw_items enable row level security;
+drop policy if exists "raw_items editors read" on public.raw_items;
 create policy "raw_items editors read" on public.raw_items for select to authenticated
   using (public.has_role(auth.uid(),'admin') or public.has_role(auth.uid(),'editor'));
 create index if not exists raw_items_region_idx on public.raw_items(region_id);
@@ -176,6 +190,7 @@ create table if not exists public.facts (
 );
 grant all on public.facts to service_role;
 alter table public.facts enable row level security;
+drop policy if exists "facts editors read" on public.facts;
 create policy "facts editors read" on public.facts for select to authenticated
   using (public.has_role(auth.uid(),'admin') or public.has_role(auth.uid(),'editor'));
 create index if not exists facts_cluster_idx on public.facts(cluster_id);
@@ -210,6 +225,9 @@ grant select on public.articles to anon;
 grant select, insert, update, delete on public.articles to authenticated;
 grant all on public.articles to service_role;
 alter table public.articles enable row level security;
+drop policy if exists "articles public read published" on public.articles;
+drop policy if exists "articles editors read all" on public.articles;
+drop policy if exists "articles editors write" on public.articles;
 create policy "articles public read published" on public.articles for select to anon, authenticated
   using (status = 'published');
 create policy "articles editors read all" on public.articles for select to authenticated
@@ -218,6 +236,7 @@ create policy "articles editors write" on public.articles for all to authenticat
   using (public.has_role(auth.uid(),'admin') or public.has_role(auth.uid(),'editor'))
   with check (public.has_role(auth.uid(),'admin') or public.has_role(auth.uid(),'editor'));
 create index if not exists articles_region_status_idx on public.articles(region_id, status, published_at desc);
+drop trigger if exists trg_articles_updated on public.articles;
 create trigger trg_articles_updated before update on public.articles for each row execute function public.set_updated_at();
 
 create table if not exists public.article_versions (
@@ -234,6 +253,7 @@ create table if not exists public.article_versions (
 grant all on public.article_versions to service_role;
 grant select on public.article_versions to authenticated;
 alter table public.article_versions enable row level security;
+drop policy if exists "versions editors read" on public.article_versions;
 create policy "versions editors read" on public.article_versions for select to authenticated
   using (public.has_role(auth.uid(),'admin') or public.has_role(auth.uid(),'editor') or public.has_role(auth.uid(),'reviewer'));
 
@@ -245,6 +265,7 @@ create table if not exists public.article_sources (
 grant all on public.article_sources to service_role;
 grant select on public.article_sources to anon, authenticated;
 alter table public.article_sources enable row level security;
+drop policy if exists "article_sources public read" on public.article_sources;
 create policy "article_sources public read" on public.article_sources for select to anon, authenticated using (true);
 
 -- =====================================================================
@@ -266,6 +287,8 @@ create table if not exists public.leads (
 grant insert on public.leads to anon, authenticated;
 grant all on public.leads to service_role;
 alter table public.leads enable row level security;
+drop policy if exists "leads public insert" on public.leads;
+drop policy if exists "leads admin read" on public.leads;
 create policy "leads public insert" on public.leads for insert to anon, authenticated with check (consent_lgpd = true);
 create policy "leads admin read" on public.leads for select to authenticated
   using (public.has_role(auth.uid(),'admin') or public.has_role(auth.uid(),'editor'));
@@ -292,6 +315,11 @@ grant select on public.classifieds to anon;
 grant select, insert, update, delete on public.classifieds to authenticated;
 grant all on public.classifieds to service_role;
 alter table public.classifieds enable row level security;
+drop policy if exists "classifieds public read" on public.classifieds;
+drop policy if exists "classifieds owner read" on public.classifieds;
+drop policy if exists "classifieds owner insert" on public.classifieds;
+drop policy if exists "classifieds owner update" on public.classifieds;
+drop policy if exists "classifieds admin all" on public.classifieds;
 create policy "classifieds public read" on public.classifieds for select to anon, authenticated using (status = 'published');
 create policy "classifieds owner read" on public.classifieds for select to authenticated using (auth.uid() = user_id);
 create policy "classifieds owner insert" on public.classifieds for insert to authenticated with check (auth.uid() = user_id);
@@ -299,6 +327,7 @@ create policy "classifieds owner update" on public.classifieds for update to aut
 create policy "classifieds admin all" on public.classifieds for all to authenticated
   using (public.has_role(auth.uid(),'admin') or public.has_role(auth.uid(),'editor'))
   with check (public.has_role(auth.uid(),'admin') or public.has_role(auth.uid(),'editor'));
+drop trigger if exists trg_classifieds_updated on public.classifieds;
 create trigger trg_classifieds_updated before update on public.classifieds for each row execute function public.set_updated_at();
 
 -- =====================================================================
@@ -318,6 +347,8 @@ grant insert on public.page_views to anon, authenticated;
 grant usage, select on sequence public.page_views_id_seq to anon, authenticated;
 grant all on public.page_views to service_role;
 alter table public.page_views enable row level security;
+drop policy if exists "pageviews public insert" on public.page_views;
+drop policy if exists "pageviews admin read" on public.page_views;
 create policy "pageviews public insert" on public.page_views for insert to anon, authenticated with check (true);
 create policy "pageviews admin read" on public.page_views for select to authenticated
   using (public.has_role(auth.uid(),'admin') or public.has_role(auth.uid(),'editor'));
