@@ -33,13 +33,17 @@ function AdminClusters() {
         .order("prioridade_score", { ascending: false })
         .limit(80);
       if (error) throw error;
-      const mapped = (data ?? []).map((r: {
+      type Row = {
         id: string; status: Cluster["status"]; prioridade_score: number; criado_em: string;
-        regiao: Cluster["regiao"]; categoria: Cluster["categoria"];
-        cluster_articles: { count: number }[];
-      }) => ({
+        regiao: { slug: string; nome: string } | { slug: string; nome: string }[] | null;
+        categoria: { slug: string; nome: string } | { slug: string; nome: string }[] | null;
+        cluster_articles: { count: number }[] | null;
+      };
+      const first = <T,>(v: T | T[] | null): T | null =>
+        Array.isArray(v) ? (v[0] ?? null) : v;
+      const mapped: Cluster[] = ((data ?? []) as unknown as Row[]).map((r) => ({
         id: r.id, status: r.status, prioridade_score: r.prioridade_score, criado_em: r.criado_em,
-        regiao: r.regiao, categoria: r.categoria,
+        regiao: first(r.regiao), categoria: first(r.categoria),
         fontes: r.cluster_articles?.[0]?.count ?? 0,
       }));
       setItems(mapped);

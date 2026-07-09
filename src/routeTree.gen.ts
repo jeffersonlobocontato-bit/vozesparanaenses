@@ -10,8 +10,12 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as WhatsappRouteImport } from './routes/whatsapp'
+import { Route as AdminRouteImport } from './routes/admin'
 import { Route as RegionRouteImport } from './routes/$region'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as AdminIndexRouteImport } from './routes/admin.index'
+import { Route as AdminLoginRouteImport } from './routes/admin.login'
+import { Route as AdminClustersRouteImport } from './routes/admin.clusters'
 import { Route as RegionClassificadosRouteImport } from './routes/$region.classificados'
 import { Route as RegionSlugRouteImport } from './routes/$region.$slug'
 import { Route as ApiPublicSitemapDotxmlRouteImport } from './routes/api/public/sitemap[.]xml'
@@ -20,6 +24,11 @@ import { Route as RegionEditoriaCategoriaRouteImport } from './routes/$region.ed
 const WhatsappRoute = WhatsappRouteImport.update({
   id: '/whatsapp',
   path: '/whatsapp',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminRoute = AdminRouteImport.update({
+  id: '/admin',
+  path: '/admin',
   getParentRoute: () => rootRouteImport,
 } as any)
 const RegionRoute = RegionRouteImport.update({
@@ -31,6 +40,21 @@ const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
+} as any)
+const AdminIndexRoute = AdminIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminLoginRoute = AdminLoginRouteImport.update({
+  id: '/login',
+  path: '/login',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminClustersRoute = AdminClustersRouteImport.update({
+  id: '/clusters',
+  path: '/clusters',
+  getParentRoute: () => AdminRoute,
 } as any)
 const RegionClassificadosRoute = RegionClassificadosRouteImport.update({
   id: '/classificados',
@@ -56,9 +80,13 @@ const RegionEditoriaCategoriaRoute = RegionEditoriaCategoriaRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/$region': typeof RegionRouteWithChildren
+  '/admin': typeof AdminRouteWithChildren
   '/whatsapp': typeof WhatsappRoute
   '/$region/$slug': typeof RegionSlugRoute
   '/$region/classificados': typeof RegionClassificadosRoute
+  '/admin/clusters': typeof AdminClustersRoute
+  '/admin/login': typeof AdminLoginRoute
+  '/admin/': typeof AdminIndexRoute
   '/$region/editoria/$categoria': typeof RegionEditoriaCategoriaRoute
   '/api/public/sitemap.xml': typeof ApiPublicSitemapDotxmlRoute
 }
@@ -68,6 +96,9 @@ export interface FileRoutesByTo {
   '/whatsapp': typeof WhatsappRoute
   '/$region/$slug': typeof RegionSlugRoute
   '/$region/classificados': typeof RegionClassificadosRoute
+  '/admin/clusters': typeof AdminClustersRoute
+  '/admin/login': typeof AdminLoginRoute
+  '/admin': typeof AdminIndexRoute
   '/$region/editoria/$categoria': typeof RegionEditoriaCategoriaRoute
   '/api/public/sitemap.xml': typeof ApiPublicSitemapDotxmlRoute
 }
@@ -75,9 +106,13 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/$region': typeof RegionRouteWithChildren
+  '/admin': typeof AdminRouteWithChildren
   '/whatsapp': typeof WhatsappRoute
   '/$region/$slug': typeof RegionSlugRoute
   '/$region/classificados': typeof RegionClassificadosRoute
+  '/admin/clusters': typeof AdminClustersRoute
+  '/admin/login': typeof AdminLoginRoute
+  '/admin/': typeof AdminIndexRoute
   '/$region/editoria/$categoria': typeof RegionEditoriaCategoriaRoute
   '/api/public/sitemap.xml': typeof ApiPublicSitemapDotxmlRoute
 }
@@ -86,9 +121,13 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/$region'
+    | '/admin'
     | '/whatsapp'
     | '/$region/$slug'
     | '/$region/classificados'
+    | '/admin/clusters'
+    | '/admin/login'
+    | '/admin/'
     | '/$region/editoria/$categoria'
     | '/api/public/sitemap.xml'
   fileRoutesByTo: FileRoutesByTo
@@ -98,15 +137,22 @@ export interface FileRouteTypes {
     | '/whatsapp'
     | '/$region/$slug'
     | '/$region/classificados'
+    | '/admin/clusters'
+    | '/admin/login'
+    | '/admin'
     | '/$region/editoria/$categoria'
     | '/api/public/sitemap.xml'
   id:
     | '__root__'
     | '/'
     | '/$region'
+    | '/admin'
     | '/whatsapp'
     | '/$region/$slug'
     | '/$region/classificados'
+    | '/admin/clusters'
+    | '/admin/login'
+    | '/admin/'
     | '/$region/editoria/$categoria'
     | '/api/public/sitemap.xml'
   fileRoutesById: FileRoutesById
@@ -114,6 +160,7 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   RegionRoute: typeof RegionRouteWithChildren
+  AdminRoute: typeof AdminRouteWithChildren
   WhatsappRoute: typeof WhatsappRoute
   ApiPublicSitemapDotxmlRoute: typeof ApiPublicSitemapDotxmlRoute
 }
@@ -125,6 +172,13 @@ declare module '@tanstack/react-router' {
       path: '/whatsapp'
       fullPath: '/whatsapp'
       preLoaderRoute: typeof WhatsappRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin': {
+      id: '/admin'
+      path: '/admin'
+      fullPath: '/admin'
+      preLoaderRoute: typeof AdminRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/$region': {
@@ -140,6 +194,27 @@ declare module '@tanstack/react-router' {
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
+    }
+    '/admin/': {
+      id: '/admin/'
+      path: '/'
+      fullPath: '/admin/'
+      preLoaderRoute: typeof AdminIndexRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/login': {
+      id: '/admin/login'
+      path: '/login'
+      fullPath: '/admin/login'
+      preLoaderRoute: typeof AdminLoginRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/clusters': {
+      id: '/admin/clusters'
+      path: '/clusters'
+      fullPath: '/admin/clusters'
+      preLoaderRoute: typeof AdminClustersRouteImport
+      parentRoute: typeof AdminRoute
     }
     '/$region/classificados': {
       id: '/$region/classificados'
@@ -187,9 +262,24 @@ const RegionRouteChildren: RegionRouteChildren = {
 const RegionRouteWithChildren =
   RegionRoute._addFileChildren(RegionRouteChildren)
 
+interface AdminRouteChildren {
+  AdminClustersRoute: typeof AdminClustersRoute
+  AdminLoginRoute: typeof AdminLoginRoute
+  AdminIndexRoute: typeof AdminIndexRoute
+}
+
+const AdminRouteChildren: AdminRouteChildren = {
+  AdminClustersRoute: AdminClustersRoute,
+  AdminLoginRoute: AdminLoginRoute,
+  AdminIndexRoute: AdminIndexRoute,
+}
+
+const AdminRouteWithChildren = AdminRoute._addFileChildren(AdminRouteChildren)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   RegionRoute: RegionRouteWithChildren,
+  AdminRoute: AdminRouteWithChildren,
   WhatsappRoute: WhatsappRoute,
   ApiPublicSitemapDotxmlRoute: ApiPublicSitemapDotxmlRoute,
 }
