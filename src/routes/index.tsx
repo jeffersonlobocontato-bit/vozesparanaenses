@@ -201,7 +201,7 @@ function PortalHome({ regions, articles }: { regions: Region[]; articles: Articl
               <img
                 src={logoAsset.url}
                 alt="Vozes Paranaenses"
-                className="h-14 md:h-20 lg:h-24 w-auto select-none"
+                className="h-20 md:h-28 lg:h-36 w-auto select-none"
                 draggable={false}
               />
               <span className="hidden md:block h-12 w-px bg-slate-200" aria-hidden />
