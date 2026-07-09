@@ -453,7 +453,7 @@ function PortalHome({ regions, articles }: { regions: Region[]; articles: Ranked
   );
 }
 
-function HeroCard({ article }: { article: ArticleListItem | undefined }) {
+function HeroCard({ article }: { article: RankedArticle | undefined }) {
   const title = article?.title ?? HERO_FALLBACK.title;
   const summary = article?.summary ?? HERO_FALLBACK.summary;
   const catName = article?.categoria?.name ?? article?.region?.name ?? HERO_FALLBACK.category;
@@ -473,8 +473,9 @@ function HeroCard({ article }: { article: ArticleListItem | undefined }) {
       </div>
       <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/30 to-transparent" />
       <div className="absolute bottom-0 left-0 p-6 md:p-8">
-        <div className="mb-3">
+        <div className="mb-3 flex items-center gap-2 flex-wrap">
           <CategoryTag name={catName} slug={catSlug} className="text-xs px-3 py-1.5" />
+          {article && <ProximityBadge proximidade={article.proximidade} />}
         </div>
         <h2 className="font-display text-3xl md:text-5xl text-white leading-tight group-hover:underline">
           {title}
