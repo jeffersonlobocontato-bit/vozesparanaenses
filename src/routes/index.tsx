@@ -14,16 +14,16 @@ const latestQO = queryOptions({
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "Paraná Total — Notícias das 10 regiões do Paraná" },
+      { title: "Vozes Paranaenses — Notícias das 10 macrorregiões do Paraná" },
       {
         name: "description",
         content:
-          "Cobertura completa e regional do Paraná: Curitiba, RMC, Litoral, Campos Gerais, Norte Pioneiro, Norte Central, Noroeste, Oeste, Sudoeste e Centro-Sul.",
+          "Cobertura editorial regional do Paraná: Metropolitana, Litoral, Campos Gerais, Norte Pioneiro, Norte Central, Noroeste, Centro Ocidental, Oeste, Sudoeste e Centro-Sul.",
       },
-      { property: "og:title", content: "Paraná Total" },
+      { property: "og:title", content: "Vozes Paranaenses" },
       {
         property: "og:description",
-        content: "Notícias das 10 regiões do Paraná em um só lugar.",
+        content: "Notícias das 10 macrorregiões do Paraná em um só lugar.",
       },
       { property: "og:type", content: "website" },
     ],
@@ -54,13 +54,13 @@ function Home() {
    conteúdo real assim que o artigo daquela região for publicado. */
 
 const REGION_FALLBACK: Record<string, string> = {
-  curitiba: "Curitiba anuncia novo BRT e prevê operação a partir de 2027",
-  "rmc": "Grande Curitiba integra tarifa entre 14 municípios da região",
+  metropolitana: "Grande Curitiba integra tarifa entre 14 municípios da região",
   litoral: "Trecho da BR-277 é liberado após 12h de interdição em Paranaguá",
   "campos-gerais": "Indústrias de Ponta Grossa abrem mais de 500 vagas de emprego",
   "norte-pioneiro": "Jacarezinho recebe R$ 40 milhões para revitalização urbana",
   "norte-central": "Londrina lança programa de incentivo a startups de saúde",
   noroeste: "Setor de serviços lidera crescimento econômico em Umuarama",
+  "centro-ocidental": "Campo Mourão inaugura polo tecnológico com apoio da UEM",
   oeste: "Cascavel bate recorde histórico de exportação de soja",
   sudoeste: "Francisco Beltrão inaugura novo hospital regional nesta semana",
   "centro-sul": "Guarapuava atrai investimento bilionário para energia renovável",
@@ -131,10 +131,10 @@ function PortalHome({ regions, articles }: { regions: Region[]; articles: Articl
           <div className="py-5 flex flex-col md:flex-row justify-between items-center gap-4">
             <Link to="/" className="flex flex-col">
               <h1 className="font-display text-4xl md:text-5xl leading-none tracking-tight text-primary flex items-baseline gap-2">
-                PARANÁ <span className="text-secondary font-light">TOTAL</span>
+                VOZES <span className="text-secondary font-light">PARANAENSES</span>
               </h1>
               <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-slate-400 mt-1">
-                O portal de notícias do estado
+                O portal editorial das 10 regiões do Paraná
               </p>
             </Link>
             <div className="hidden lg:flex items-center gap-4">
@@ -318,14 +318,14 @@ function PortalHome({ regions, articles }: { regions: Region[]; articles: Articl
       <footer className="bg-primary text-primary-foreground py-12 mt-8">
         <div className="mx-auto max-w-7xl px-4 grid grid-cols-1 md:grid-cols-4 gap-8">
           <div className="md:col-span-2">
-            <h2 className="font-display text-3xl tracking-tight mb-3">PARANÁ TOTAL</h2>
+            <h2 className="font-display text-3xl tracking-tight mb-3">VOZES PARANAENSES</h2>
             <p className="text-white/70 text-xs leading-relaxed max-w-md">
-              A cobertura mais completa do estado em tempo real, conectando as 10 regiões do Paraná em um só lugar.
+              Cobertura editorial das 10 macrorregiões do Paraná — cada região com sua identidade, todas em um só domínio.
             </p>
           </div>
           <div className="md:col-span-2 flex md:justify-end items-end">
             <p className="text-[10px] text-white/50 font-bold uppercase tracking-widest">
-              © {new Date().getFullYear()} Paraná Total — Grupo de Comunicação
+              © {new Date().getFullYear()} Vozes Paranaenses
             </p>
           </div>
         </div>
