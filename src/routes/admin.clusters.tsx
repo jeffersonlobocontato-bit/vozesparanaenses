@@ -15,6 +15,7 @@ type Cluster = {
   regiao: { slug: string; nome: string } | null;
   categoria: { slug: string; nome: string } | null;
   fontes: number;
+  artigos: { titulo: string | null; url: string; fonte: string | null }[];
 };
 
 function AdminClusters() {
@@ -29,7 +30,7 @@ function AdminClusters() {
       const sb = await getExternalBrowser();
       const { data, error } = await sb
         .from("article_clusters")
-        .select("id, status, prioridade_score, criado_em, regiao:regioes(slug, nome), categoria:editorial_categories(slug, nome), cluster_articles(count)")
+        .select("id, status, prioridade_score, criado_em, regiao:regioes(slug, nome), categoria:editorial_categories(slug, nome), cluster_articles(raw_article:raw_articles(titulo, url, fonte:fontes(nome)))")
         .order("prioridade_score", { ascending: false })
         .limit(80);
       if (error) throw error;
@@ -37,15 +38,28 @@ function AdminClusters() {
         id: string; status: Cluster["status"]; prioridade_score: number; criado_em: string;
         regiao: { slug: string; nome: string } | { slug: string; nome: string }[] | null;
         categoria: { slug: string; nome: string } | { slug: string; nome: string }[] | null;
-        cluster_articles: { count: number }[] | null;
+        cluster_articles: {
+          raw_article: {
+            titulo: string | null;
+            url: string;
+            fonte: { nome: string } | { nome: string }[] | null;
+          } | { titulo: string | null; url: string; fonte: { nome: string } | { nome: string }[] | null }[] | null;
+        }[] | null;
       };
       const first = <T,>(v: T | T[] | null): T | null =>
         Array.isArray(v) ? (v[0] ?? null) : v;
-      const mapped: Cluster[] = ((data ?? []) as unknown as Row[]).map((r) => ({
-        id: r.id, status: r.status, prioridade_score: r.prioridade_score, criado_em: r.criado_em,
-        regiao: first(r.regiao), categoria: first(r.categoria),
-        fontes: r.cluster_articles?.[0]?.count ?? 0,
-      }));
+      const mapped: Cluster[] = ((data ?? []) as unknown as Row[]).map((r) => {
+        const artigos = (r.cluster_articles ?? [])
+          .map((ca) => first(ca.raw_article))
+          .filter((a): a is { titulo: string | null; url: string; fonte: { nome: string } | { nome: string }[] | null } => !!a)
+          .map((a) => ({ titulo: a.titulo, url: a.url, fonte: first(a.fonte)?.nome ?? null }));
+        return {
+          id: r.id, status: r.status, prioridade_score: r.prioridade_score, criado_em: r.criado_em,
+          regiao: first(r.regiao), categoria: first(r.categoria),
+          fontes: artigos.length,
+          artigos,
+        };
+      });
       setItems(mapped);
     } catch (e: unknown) {
       setErr(e instanceof Error ? e.message : "Erro ao carregar");
@@ -91,6 +105,18 @@ function AdminClusters() {
               <span className="text-muted-foreground">· {c.status}</span>
             </div>
             <div className="text-xs text-muted-foreground">{new Date(c.criado_em).toLocaleString("pt-BR")}</div>
+            {c.artigos.length > 0 && (
+              <ul className="mt-3 space-y-1.5 border-t pt-3 text-xs">
+                {c.artigos.map((a, i) => (
+                  <li key={i} className="leading-snug">
+                    <a href={a.url} target="_blank" rel="noreferrer" className="font-medium text-[#0A2540] hover:underline">
+                      {a.titulo ?? a.url}
+                    </a>
+                    {a.fonte && <span className="ml-1 text-muted-foreground">· {a.fonte}</span>}
+                  </li>
+                ))}
+              </ul>
+            )}
             <div className="mt-3">
               <button disabled={busyId === c.id} onClick={() => generate(c.id)}
                 className="rounded bg-[#0066CC] px-3 py-1.5 text-xs font-semibold text-white hover:bg-[#0055aa] disabled:opacity-60">
