@@ -14,6 +14,8 @@ import { Route as RegionRouteImport } from './routes/$region'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as RegionClassificadosRouteImport } from './routes/$region.classificados'
 import { Route as RegionSlugRouteImport } from './routes/$region.$slug'
+import { Route as ApiPublicSitemapDotxmlRouteImport } from './routes/api/public/sitemap[.]xml'
+import { Route as RegionEditoriaCategoriaRouteImport } from './routes/$region.editoria.$categoria'
 
 const WhatsappRoute = WhatsappRouteImport.update({
   id: '/whatsapp',
@@ -40,6 +42,16 @@ const RegionSlugRoute = RegionSlugRouteImport.update({
   path: '/$slug',
   getParentRoute: () => RegionRoute,
 } as any)
+const ApiPublicSitemapDotxmlRoute = ApiPublicSitemapDotxmlRouteImport.update({
+  id: '/api/public/sitemap.xml',
+  path: '/api/public/sitemap.xml',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const RegionEditoriaCategoriaRoute = RegionEditoriaCategoriaRouteImport.update({
+  id: '/editoria/$categoria',
+  path: '/editoria/$categoria',
+  getParentRoute: () => RegionRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -47,6 +59,8 @@ export interface FileRoutesByFullPath {
   '/whatsapp': typeof WhatsappRoute
   '/$region/$slug': typeof RegionSlugRoute
   '/$region/classificados': typeof RegionClassificadosRoute
+  '/$region/editoria/$categoria': typeof RegionEditoriaCategoriaRoute
+  '/api/public/sitemap.xml': typeof ApiPublicSitemapDotxmlRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -54,6 +68,8 @@ export interface FileRoutesByTo {
   '/whatsapp': typeof WhatsappRoute
   '/$region/$slug': typeof RegionSlugRoute
   '/$region/classificados': typeof RegionClassificadosRoute
+  '/$region/editoria/$categoria': typeof RegionEditoriaCategoriaRoute
+  '/api/public/sitemap.xml': typeof ApiPublicSitemapDotxmlRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -62,6 +78,8 @@ export interface FileRoutesById {
   '/whatsapp': typeof WhatsappRoute
   '/$region/$slug': typeof RegionSlugRoute
   '/$region/classificados': typeof RegionClassificadosRoute
+  '/$region/editoria/$categoria': typeof RegionEditoriaCategoriaRoute
+  '/api/public/sitemap.xml': typeof ApiPublicSitemapDotxmlRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -71,6 +89,8 @@ export interface FileRouteTypes {
     | '/whatsapp'
     | '/$region/$slug'
     | '/$region/classificados'
+    | '/$region/editoria/$categoria'
+    | '/api/public/sitemap.xml'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -78,6 +98,8 @@ export interface FileRouteTypes {
     | '/whatsapp'
     | '/$region/$slug'
     | '/$region/classificados'
+    | '/$region/editoria/$categoria'
+    | '/api/public/sitemap.xml'
   id:
     | '__root__'
     | '/'
@@ -85,12 +107,15 @@ export interface FileRouteTypes {
     | '/whatsapp'
     | '/$region/$slug'
     | '/$region/classificados'
+    | '/$region/editoria/$categoria'
+    | '/api/public/sitemap.xml'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   RegionRoute: typeof RegionRouteWithChildren
   WhatsappRoute: typeof WhatsappRoute
+  ApiPublicSitemapDotxmlRoute: typeof ApiPublicSitemapDotxmlRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -130,17 +155,33 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof RegionSlugRouteImport
       parentRoute: typeof RegionRoute
     }
+    '/api/public/sitemap.xml': {
+      id: '/api/public/sitemap.xml'
+      path: '/api/public/sitemap.xml'
+      fullPath: '/api/public/sitemap.xml'
+      preLoaderRoute: typeof ApiPublicSitemapDotxmlRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/$region/editoria/$categoria': {
+      id: '/$region/editoria/$categoria'
+      path: '/editoria/$categoria'
+      fullPath: '/$region/editoria/$categoria'
+      preLoaderRoute: typeof RegionEditoriaCategoriaRouteImport
+      parentRoute: typeof RegionRoute
+    }
   }
 }
 
 interface RegionRouteChildren {
   RegionSlugRoute: typeof RegionSlugRoute
   RegionClassificadosRoute: typeof RegionClassificadosRoute
+  RegionEditoriaCategoriaRoute: typeof RegionEditoriaCategoriaRoute
 }
 
 const RegionRouteChildren: RegionRouteChildren = {
   RegionSlugRoute: RegionSlugRoute,
   RegionClassificadosRoute: RegionClassificadosRoute,
+  RegionEditoriaCategoriaRoute: RegionEditoriaCategoriaRoute,
 }
 
 const RegionRouteWithChildren =
@@ -150,6 +191,7 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   RegionRoute: RegionRouteWithChildren,
   WhatsappRoute: WhatsappRoute,
+  ApiPublicSitemapDotxmlRoute: ApiPublicSitemapDotxmlRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

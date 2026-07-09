@@ -1,0 +1,29 @@
+# Vozes Paranaenses
+
+> Portal regional de notícias cobrindo as 10 macrorregiões do Paraná (IPARDES). Cobertura editorial com foco no impacto local, apoiada em coleta automatizada de fontes públicas e reescrita editorial pelo Método DEL (Denso, Editorial, Local) com verificação 5W1H.
+
+O Vozes Paranaenses agrega, categoriza e reescreve com editoria humana matérias sobre política, economia, cultura, esporte, segurança e cotidiano das cidades paranaenses. Cada matéria cita as fontes originais e é organizada por região.
+
+## Regiões
+
+- [Curitiba e RMC](/curitiba-rmc): Capital e Região Metropolitana
+- [Litoral](/litoral): Paranaguá, Matinhos, Guaratuba e demais
+- [Campos Gerais](/campos-gerais): Ponta Grossa e cidades vizinhas
+- [Norte Pioneiro](/norte-pioneiro): Jacarezinho, Cornélio Procópio
+- [Norte Central](/norte-central): Londrina, Maringá, Apucarana
+- [Noroeste](/noroeste): Umuarama, Paranavaí
+- [Oeste](/oeste): Cascavel, Foz do Iguaçu, Toledo
+- [Sudoeste](/sudoeste): Pato Branco, Francisco Beltrão
+- [Centro-Sul](/centro-sul): Guarapuava, Laranjeiras do Sul
+- [Vale do Ivaí](/vale-do-ivai): Ivaiporã, Jandaia do Sul
+
+## Serviços
+
+- [Canal no WhatsApp](/whatsapp): Cadastro para receber notícias por WhatsApp
+
+## Sobre
+
+- Portal editorial regional independente
+- Cobertura das 10 macrorregiões do Paraná
+- Método DEL: reescrita editorial com fatos 5W1H validados
+- Fontes citadas em cada matéria
