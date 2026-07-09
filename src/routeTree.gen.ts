@@ -16,6 +16,7 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as AdminIndexRouteImport } from './routes/admin.index'
 import { Route as AdminResetPasswordRouteImport } from './routes/admin.reset-password'
 import { Route as AdminLoginRouteImport } from './routes/admin.login'
+import { Route as AdminFontesRouteImport } from './routes/admin.fontes'
 import { Route as AdminClustersRouteImport } from './routes/admin.clusters'
 import { Route as RegionClassificadosRouteImport } from './routes/$region.classificados'
 import { Route as RegionSlugRouteImport } from './routes/$region.$slug'
@@ -57,6 +58,11 @@ const AdminLoginRoute = AdminLoginRouteImport.update({
   path: '/login',
   getParentRoute: () => AdminRoute,
 } as any)
+const AdminFontesRoute = AdminFontesRouteImport.update({
+  id: '/fontes',
+  path: '/fontes',
+  getParentRoute: () => AdminRoute,
+} as any)
 const AdminClustersRoute = AdminClustersRouteImport.update({
   id: '/clusters',
   path: '/clusters',
@@ -91,6 +97,7 @@ export interface FileRoutesByFullPath {
   '/$region/$slug': typeof RegionSlugRoute
   '/$region/classificados': typeof RegionClassificadosRoute
   '/admin/clusters': typeof AdminClustersRoute
+  '/admin/fontes': typeof AdminFontesRoute
   '/admin/login': typeof AdminLoginRoute
   '/admin/reset-password': typeof AdminResetPasswordRoute
   '/admin/': typeof AdminIndexRoute
@@ -104,6 +111,7 @@ export interface FileRoutesByTo {
   '/$region/$slug': typeof RegionSlugRoute
   '/$region/classificados': typeof RegionClassificadosRoute
   '/admin/clusters': typeof AdminClustersRoute
+  '/admin/fontes': typeof AdminFontesRoute
   '/admin/login': typeof AdminLoginRoute
   '/admin/reset-password': typeof AdminResetPasswordRoute
   '/admin': typeof AdminIndexRoute
@@ -119,6 +127,7 @@ export interface FileRoutesById {
   '/$region/$slug': typeof RegionSlugRoute
   '/$region/classificados': typeof RegionClassificadosRoute
   '/admin/clusters': typeof AdminClustersRoute
+  '/admin/fontes': typeof AdminFontesRoute
   '/admin/login': typeof AdminLoginRoute
   '/admin/reset-password': typeof AdminResetPasswordRoute
   '/admin/': typeof AdminIndexRoute
@@ -135,6 +144,7 @@ export interface FileRouteTypes {
     | '/$region/$slug'
     | '/$region/classificados'
     | '/admin/clusters'
+    | '/admin/fontes'
     | '/admin/login'
     | '/admin/reset-password'
     | '/admin/'
@@ -148,6 +158,7 @@ export interface FileRouteTypes {
     | '/$region/$slug'
     | '/$region/classificados'
     | '/admin/clusters'
+    | '/admin/fontes'
     | '/admin/login'
     | '/admin/reset-password'
     | '/admin'
@@ -162,6 +173,7 @@ export interface FileRouteTypes {
     | '/$region/$slug'
     | '/$region/classificados'
     | '/admin/clusters'
+    | '/admin/fontes'
     | '/admin/login'
     | '/admin/reset-password'
     | '/admin/'
@@ -228,6 +240,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminLoginRouteImport
       parentRoute: typeof AdminRoute
     }
+    '/admin/fontes': {
+      id: '/admin/fontes'
+      path: '/fontes'
+      fullPath: '/admin/fontes'
+      preLoaderRoute: typeof AdminFontesRouteImport
+      parentRoute: typeof AdminRoute
+    }
     '/admin/clusters': {
       id: '/admin/clusters'
       path: '/clusters'
@@ -283,6 +302,7 @@ const RegionRouteWithChildren =
 
 interface AdminRouteChildren {
   AdminClustersRoute: typeof AdminClustersRoute
+  AdminFontesRoute: typeof AdminFontesRoute
   AdminLoginRoute: typeof AdminLoginRoute
   AdminResetPasswordRoute: typeof AdminResetPasswordRoute
   AdminIndexRoute: typeof AdminIndexRoute
@@ -290,6 +310,7 @@ interface AdminRouteChildren {
 
 const AdminRouteChildren: AdminRouteChildren = {
   AdminClustersRoute: AdminClustersRoute,
+  AdminFontesRoute: AdminFontesRoute,
   AdminLoginRoute: AdminLoginRoute,
   AdminResetPasswordRoute: AdminResetPasswordRoute,
   AdminIndexRoute: AdminIndexRoute,

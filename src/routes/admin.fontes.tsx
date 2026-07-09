@@ -20,11 +20,19 @@ type Fonte = {
   regiao: { slug: string; nome: string } | null;
 };
 
-const empty = {
+const empty: {
+  nome: string;
+  url_base: string;
+  regiao_id: string;
+  tipo_renderizacao: "estatico" | "spa_js";
+  protecao_antibot: boolean;
+  frequencia_horas: number;
+  ativo: boolean;
+} = {
   nome: "",
   url_base: "",
   regiao_id: "",
-  tipo_renderizacao: "estatico" as const,
+  tipo_renderizacao: "estatico",
   protecao_antibot: false,
   frequencia_horas: 6,
   ativo: true,
