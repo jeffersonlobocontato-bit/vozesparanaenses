@@ -159,6 +159,13 @@ function PortalHome({ regions, articles }: { regions: Region[]; articles: Articl
       </header>
 
       <main className="mx-auto max-w-7xl px-4 py-8">
+        {/* Publicidade — Super Banner topo */}
+        <div className="mb-8 rounded bg-slate-100 border border-slate-200 h-24 md:h-28 flex items-center justify-center">
+          <span className="text-[10px] font-bold uppercase tracking-widest text-slate-400">
+            Publicidade — 970x90
+          </span>
+        </div>
+
         {/* Hero */}
         <div className="grid grid-cols-12 gap-6 mb-12">
           <div className="col-span-12 lg:col-span-8">
@@ -173,10 +180,10 @@ function PortalHome({ regions, articles }: { regions: Region[]; articles: Articl
                 : null;
               const inner = (
                 <>
-                  <span className={`text-[10px] font-black uppercase tracking-widest ${i === 0 ? "text-secondary" : "text-slate-500"}`}>
+                  <span className={`text-xs font-black uppercase tracking-widest ${i === 0 ? "text-secondary" : "text-slate-500"}`}>
                     {a?.region?.name ?? fb.cat}
                   </span>
-                  <h3 className="font-display text-xl leading-snug mt-1 hover:text-secondary transition-colors">
+                  <h3 className="font-display text-2xl md:text-[1.6rem] leading-tight mt-2 hover:text-secondary transition-colors">
                     {a?.title ?? fb.title}
                   </h3>
                 </>
@@ -188,16 +195,23 @@ function PortalHome({ regions, articles }: { regions: Region[]; articles: Articl
                 <div key={i} className={`border-l-4 pl-4 py-1 ${borderCls} cursor-pointer`}>{inner}</div>
               );
             })}
-            <div className="mt-auto rounded bg-slate-100 border border-slate-200 h-24 flex items-center justify-center">
-              <span className="text-[10px] font-bold uppercase tracking-widest text-slate-400">Publicidade</span>
+            <div className="mt-auto rounded bg-slate-100 border border-slate-200 h-64 flex items-center justify-center">
+              <span className="text-[10px] font-bold uppercase tracking-widest text-slate-400">Publicidade — 300x250</span>
             </div>
           </div>
+        </div>
+
+        {/* Publicidade — Retângulo entre blocos */}
+        <div className="mb-12 rounded bg-slate-100 border border-slate-200 h-24 md:h-28 flex items-center justify-center">
+          <span className="text-[10px] font-bold uppercase tracking-widest text-slate-400">
+            Publicidade — 728x90
+          </span>
         </div>
 
         {/* Notícias das Regiões */}
         <section className="mb-12">
           <div className="flex items-center gap-4 mb-6">
-            <h2 className="font-display text-2xl text-primary uppercase tracking-tight shrink-0">
+            <h2 className="font-display text-3xl md:text-4xl text-primary uppercase tracking-tight shrink-0">
               Notícias das Regiões
             </h2>
             <div className="h-1 w-full bg-slate-200 rounded-full">
@@ -205,7 +219,7 @@ function PortalHome({ regions, articles }: { regions: Region[]; articles: Articl
             </div>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-px bg-slate-200 border border-slate-200 rounded-lg overflow-hidden">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-px bg-slate-200 border border-slate-200 rounded-lg overflow-hidden">
             {regions.map((r) => {
               const a = articleByRegion.get(r.slug);
               const title = a?.title ?? REGION_FALLBACK[r.slug] ?? `Últimas notícias de ${r.name}`;
@@ -214,12 +228,12 @@ function PortalHome({ regions, articles }: { regions: Region[]; articles: Articl
                   key={r.id}
                   to={a ? "/$region/$slug" : "/$region"}
                   params={a ? { region: r.slug, slug: a.slug } : { region: r.slug }}
-                  className="bg-white p-5 hover:bg-accent transition-colors group block"
+                  className="bg-white p-6 hover:bg-accent transition-colors group block"
                 >
-                  <p className="text-xs font-bold text-secondary mb-2 uppercase tracking-wider">
+                  <p className="text-xs md:text-sm font-bold text-secondary mb-2 uppercase tracking-wider">
                     {r.name}
                   </p>
-                  <h4 className="text-lg md:text-base lg:text-lg font-bold group-hover:underline leading-snug text-slate-900">
+                  <h4 className="font-display text-2xl md:text-xl xl:text-2xl leading-tight group-hover:underline text-slate-900">
                     {title}
                   </h4>
                 </Link>
@@ -227,6 +241,13 @@ function PortalHome({ regions, articles }: { regions: Region[]; articles: Articl
             })}
           </div>
         </section>
+
+        {/* Publicidade — Half-page antes de secundárias */}
+        <div className="mb-12 rounded bg-slate-100 border border-slate-200 h-24 md:h-28 flex items-center justify-center">
+          <span className="text-[10px] font-bold uppercase tracking-widest text-slate-400">
+            Publicidade — 970x90
+          </span>
+        </div>
 
         {/* Secondary + Mais lidas */}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
@@ -247,13 +268,13 @@ function PortalHome({ regions, articles }: { regions: Region[]; articles: Articl
                       <div className="h-full w-full bg-gradient-to-br from-slate-200 to-slate-300" />
                     )}
                   </div>
-                  <span className="text-secondary text-[10px] font-bold uppercase tracking-wider">
+                  <span className="text-secondary text-xs font-bold uppercase tracking-wider">
                     {a?.region?.name ?? fb.cat}
                   </span>
-                  <h4 className="font-display text-xl leading-snug group-hover:text-secondary">
+                  <h4 className="font-display text-2xl md:text-3xl leading-tight group-hover:text-secondary">
                     {a?.title ?? fb.title}
                   </h4>
-                  <p className="text-sm text-slate-500 line-clamp-2">
+                  <p className="text-base text-slate-600 line-clamp-2">
                     {a?.summary ?? fb.summary}
                   </p>
                 </Wrap>
@@ -263,14 +284,14 @@ function PortalHome({ regions, articles }: { regions: Region[]; articles: Articl
 
           <aside className="space-y-6">
             <div className="bg-white p-5 rounded-lg border border-slate-200">
-              <h5 className="text-xs font-black uppercase text-primary border-b border-slate-100 pb-2 mb-4 tracking-wider">
+              <h5 className="text-sm font-black uppercase text-primary border-b border-slate-100 pb-2 mb-4 tracking-wider">
                 Mais Lidas
               </h5>
               <div className="space-y-4">
                 {MOST_READ_FALLBACK.map((t, i) => (
                   <div key={i} className="flex gap-3 group cursor-pointer">
-                    <span className="font-display text-3xl leading-none text-slate-200">{i + 1}</span>
-                    <p className="text-sm font-bold group-hover:text-secondary transition-colors">
+                    <span className="font-display text-4xl leading-none text-slate-200">{i + 1}</span>
+                    <p className="text-base font-bold leading-snug group-hover:text-secondary transition-colors">
                       {t}
                     </p>
                   </div>
@@ -278,9 +299,19 @@ function PortalHome({ regions, articles }: { regions: Region[]; articles: Articl
               </div>
             </div>
             <div className="rounded bg-slate-100 border border-slate-200 h-64 flex items-center justify-center">
-              <span className="text-[10px] font-bold uppercase tracking-widest text-slate-400">Publicidade</span>
+              <span className="text-[10px] font-bold uppercase tracking-widest text-slate-400">Publicidade — 300x250</span>
+            </div>
+            <div className="rounded bg-slate-100 border border-slate-200 h-[600px] flex items-center justify-center">
+              <span className="text-[10px] font-bold uppercase tracking-widest text-slate-400">Publicidade — 300x600</span>
             </div>
           </aside>
+        </div>
+
+        {/* Publicidade — Rodapé */}
+        <div className="mt-12 rounded bg-slate-100 border border-slate-200 h-24 md:h-28 flex items-center justify-center">
+          <span className="text-[10px] font-bold uppercase tracking-widest text-slate-400">
+            Publicidade — 970x90
+          </span>
         </div>
       </main>
 
