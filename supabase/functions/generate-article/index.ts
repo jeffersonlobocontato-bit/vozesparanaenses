@@ -160,6 +160,8 @@ Deno.serve(async (req) => {
       corpo: parsed.corpo,
       seo_title: parsed.seo_title ?? parsed.titulo,
       seo_description: parsed.seo_description ?? parsed.resumo ?? null,
+      cidade_principal: parsed.cidade_principal ?? null,
+      cidades_mencionadas: parsed.cidades_mencionadas ?? [],
       status: "rascunho",
     })
     .select("id, slug")
