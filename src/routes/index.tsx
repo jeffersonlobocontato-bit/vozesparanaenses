@@ -103,25 +103,40 @@ const CATEGORIES = [
   "Cultura",
 ];
 
-/* --------------------------- Editorias: cores --------------------------- */
-/* Cada editoria tem uma cor-tag (padrão portais regionais tipo Catve). */
-const EDITORIA_COLORS: Record<string, string> = {
-  "ultimas-noticias": "bg-rose-600",
-  "ultimas": "bg-rose-600",
-  "destaque": "bg-rose-600",
-  "politica": "bg-red-700",
-  "economia": "bg-blue-700",
-  "agronegocio": "bg-green-700",
-  "agro": "bg-green-700",
-  "educacao": "bg-indigo-600",
-  "seguranca": "bg-slate-900",
-  "policia": "bg-slate-900",
-  "transito": "bg-red-600",
-  "esportes": "bg-emerald-600",
-  "cultura": "bg-fuchsia-600",
-  "saude": "bg-teal-600",
-  "cidades": "bg-amber-600",
-  "geral": "bg-yellow-500",
+/* --------------------------- Editorias: paleta monocromática azul --------------------------- */
+/* Escala de 6 tons — do azul-marinho ao azul-céu. Cada editoria ancora num tom;
+   no hover, desloca para o tom vizinho (mais claro ou mais escuro), criando
+   interação sutil sem quebrar a identidade cromática do portal. */
+type BlueTag = { base: string; hover: string; text: string };
+
+const BLUE_SCALE: Record<string, BlueTag> = {
+  // 900 — azul-marinho profundo
+  "seguranca":  { base: "bg-[#002147]", hover: "hover:bg-[#0D3D6C]", text: "text-white" },
+  "policia":    { base: "bg-[#002147]", hover: "hover:bg-[#0D3D6C]", text: "text-white" },
+  "politica":   { base: "bg-[#002147]", hover: "hover:bg-[#2E6DA4]", text: "text-white" },
+  // 800 — azul-noite
+  "economia":   { base: "bg-[#0D3D6C]", hover: "hover:bg-[#2E6DA4]", text: "text-white" },
+  "transito":   { base: "bg-[#0D3D6C]", hover: "hover:bg-[#002147]", text: "text-white" },
+  // 600 — azul-clássico (institucional Vozes)
+  "ultimas-noticias": { base: "bg-[#2E6DA4]", hover: "hover:bg-[#0D3D6C]", text: "text-white" },
+  "ultimas":    { base: "bg-[#2E6DA4]", hover: "hover:bg-[#0D3D6C]", text: "text-white" },
+  "destaque":   { base: "bg-[#2E6DA4]", hover: "hover:bg-[#0D3D6C]", text: "text-white" },
+  "cidades":    { base: "bg-[#2E6DA4]", hover: "hover:bg-[#4A85B0]", text: "text-white" },
+  "geral":      { base: "bg-[#2E6DA4]", hover: "hover:bg-[#4A85B0]", text: "text-white" },
+  // 500 — azul-aço
+  "agronegocio":{ base: "bg-[#4A85B0]", hover: "hover:bg-[#2E6DA4]", text: "text-white" },
+  "agro":       { base: "bg-[#4A85B0]", hover: "hover:bg-[#2E6DA4]", text: "text-white" },
+  "educacao":   { base: "bg-[#4A85B0]", hover: "hover:bg-[#7BB3D9]", text: "text-white" },
+  // 400 — azul-céu
+  "saude":      { base: "bg-[#7BB3D9]", hover: "hover:bg-[#4A85B0]", text: "text-[#002147]" },
+  "esportes":   { base: "bg-[#7BB3D9]", hover: "hover:bg-[#4A85B0]", text: "text-[#002147]" },
+  "cultura":    { base: "bg-[#7BB3D9]", hover: "hover:bg-[#A9D0E5]", text: "text-[#002147]" },
+};
+
+const BLUE_DEFAULT: BlueTag = {
+  base: "bg-[#2E6DA4]",
+  hover: "hover:bg-[#0D3D6C]",
+  text: "text-white",
 };
 
 function slugify(v: string) {
@@ -133,9 +148,9 @@ function slugify(v: string) {
     .replace(/(^-|-$)/g, "");
 }
 
-function editoriaColor(name?: string | null, slug?: string | null) {
+function editoriaTag(name?: string | null, slug?: string | null): BlueTag {
   const key = (slug || (name ? slugify(name) : "")).trim();
-  return EDITORIA_COLORS[key] ?? "bg-secondary";
+  return BLUE_SCALE[key] ?? BLUE_DEFAULT;
 }
 
 function CategoryTag({
@@ -147,10 +162,10 @@ function CategoryTag({
   slug?: string | null;
   className?: string;
 }) {
-  const color = editoriaColor(name, slug);
+  const tag = editoriaTag(name, slug);
   return (
     <span
-      className={`inline-block ${color} text-white text-[11px] font-black uppercase tracking-wider px-2 py-1 rounded-sm ${className}`}
+      className={`inline-block cursor-pointer ${tag.base} ${tag.hover} ${tag.text} text-[11px] font-black uppercase tracking-wider px-2 py-1 rounded-sm transition-colors duration-200 ${className}`}
     >
       {name}
     </span>
