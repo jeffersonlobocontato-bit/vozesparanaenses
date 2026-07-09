@@ -406,7 +406,8 @@ function PortalHome({ regions, articles }: { regions: Region[]; articles: Articl
 function HeroCard({ article }: { article: ArticleListItem | undefined }) {
   const title = article?.title ?? HERO_FALLBACK.title;
   const summary = article?.summary ?? HERO_FALLBACK.summary;
-  const cat = article?.region?.name ?? HERO_FALLBACK.category;
+  const catName = article?.categoria?.name ?? article?.region?.name ?? HERO_FALLBACK.category;
+  const catSlug = article?.categoria?.slug ?? null;
   const to = article?.region
     ? { to: "/$region/$slug" as const, params: { region: article.region.slug, slug: article.slug } }
     : null;
@@ -422,9 +423,9 @@ function HeroCard({ article }: { article: ArticleListItem | undefined }) {
       </div>
       <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/30 to-transparent" />
       <div className="absolute bottom-0 left-0 p-6 md:p-8">
-        <span className="bg-secondary text-white text-[10px] font-bold px-2 py-1 uppercase mb-3 inline-block tracking-wider">
-          {cat}
-        </span>
+        <div className="mb-3">
+          <CategoryTag name={catName} slug={catSlug} className="text-xs px-3 py-1.5" />
+        </div>
         <h2 className="font-display text-3xl md:text-5xl text-white leading-tight group-hover:underline">
           {title}
         </h2>
