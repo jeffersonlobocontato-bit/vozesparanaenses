@@ -1,6 +1,15 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { queryOptions, useSuspenseQuery } from "@tanstack/react-query";
-import { listRegions, listLatestArticles, type ArticleListItem, type Region } from "@/lib/content.functions";
+import {
+  listRegions,
+  listRankedArticles,
+  getViewerLocation,
+  type ArticleListItem,
+  type RankedArticle,
+  type Region,
+  type ViewerLocation,
+} from "@/lib/content.functions";
+import { LocationBar, ProximityBadge } from "@/components/LocationBar";
 import logoBlue from "@/assets/vozes-logo-blue.png.asset.json";
 import logoWhite from "@/assets/vozes-logo-white.png.asset.json";
 
@@ -8,10 +17,18 @@ const regionsQO = queryOptions({
   queryKey: ["regions"],
   queryFn: () => listRegions(),
 });
-const latestQO = queryOptions({
-  queryKey: ["articles", "latest", 12],
-  queryFn: () => listLatestArticles({ data: { limit: 12 } }),
+const viewerLocQO = queryOptions({
+  queryKey: ["viewer-location"],
+  queryFn: () => getViewerLocation(),
 });
+const rankedQO = (loc: ViewerLocation) =>
+  queryOptions({
+    queryKey: ["articles", "ranked", loc.cidade ?? "", loc.regiaoSlug ?? "", 12],
+    queryFn: () =>
+      listRankedArticles({
+        data: { cidade: loc.cidade, regiaoSlug: loc.regiaoSlug, limit: 12 },
+      }),
+  });
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -31,10 +48,11 @@ export const Route = createFileRoute("/")({
     ],
   }),
   loader: async ({ context }) => {
-    await Promise.all([
+    const [loc] = await Promise.all([
+      context.queryClient.ensureQueryData(viewerLocQO),
       context.queryClient.ensureQueryData(regionsQO),
-      context.queryClient.ensureQueryData(latestQO),
     ]);
+    await context.queryClient.ensureQueryData(rankedQO(loc));
   },
   component: Home,
   errorComponent: ({ error }) => (
@@ -46,7 +64,8 @@ export const Route = createFileRoute("/")({
 
 function Home() {
   const { data: regions } = useSuspenseQuery(regionsQO);
-  const { data: articles } = useSuspenseQuery(latestQO);
+  const { data: loc } = useSuspenseQuery(viewerLocQO);
+  const { data: articles } = useSuspenseQuery(rankedQO(loc));
   return <PortalHome regions={regions} articles={articles} />;
 }
 
@@ -184,7 +203,7 @@ function formatDateBR() {
   });
 }
 
-function PortalHome({ regions, articles }: { regions: Region[]; articles: ArticleListItem[] }) {
+function PortalHome({ regions, articles }: { regions: Region[]; articles: RankedArticle[] }) {
   const REGIONS_FALLBACK: Region[] = [
     { id: "fb-metropolitana", slug: "metropolitana", name: "Metropolitana" },
     { id: "fb-litoral", slug: "litoral", name: "Litoral" },
@@ -246,6 +265,8 @@ function PortalHome({ regions, articles }: { regions: Region[]; articles: Articl
         </div>
       </header>
 
+      <LocationBar />
+
       <main className="mx-auto max-w-7xl px-4 py-8">
         {/* Publicidade — Super Banner topo */}
         <div className="mb-8 rounded bg-slate-100 border border-slate-200 h-24 md:h-28 flex items-center justify-center">
@@ -270,7 +291,10 @@ function PortalHome({ regions, articles }: { regions: Region[]; articles: Articl
               const catSlug = a?.categoria?.slug ?? null;
               const inner = (
                 <>
-                  <CategoryTag name={catName} slug={catSlug} />
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <CategoryTag name={catName} slug={catSlug} />
+                    {a && <ProximityBadge proximidade={a.proximidade} />}
+                  </div>
                   <h3 className="font-display text-2xl md:text-[1.6rem] leading-tight mt-2 hover:text-secondary transition-colors">
                     {a?.title ?? fb.title}
                   </h3>
@@ -429,7 +453,7 @@ function PortalHome({ regions, articles }: { regions: Region[]; articles: Articl
   );
 }
 
-function HeroCard({ article }: { article: ArticleListItem | undefined }) {
+function HeroCard({ article }: { article: RankedArticle | undefined }) {
   const title = article?.title ?? HERO_FALLBACK.title;
   const summary = article?.summary ?? HERO_FALLBACK.summary;
   const catName = article?.categoria?.name ?? article?.region?.name ?? HERO_FALLBACK.category;
@@ -449,8 +473,9 @@ function HeroCard({ article }: { article: ArticleListItem | undefined }) {
       </div>
       <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/30 to-transparent" />
       <div className="absolute bottom-0 left-0 p-6 md:p-8">
-        <div className="mb-3">
+        <div className="mb-3 flex items-center gap-2 flex-wrap">
           <CategoryTag name={catName} slug={catSlug} className="text-xs px-3 py-1.5" />
+          {article && <ProximityBadge proximidade={article.proximidade} />}
         </div>
         <h2 className="font-display text-3xl md:text-5xl text-white leading-tight group-hover:underline">
           {title}

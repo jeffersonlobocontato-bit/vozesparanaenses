@@ -111,6 +111,9 @@ function mapMateria(m: MateriaRow): ArticleListItem {
 const MATERIA_LIST_COLS =
   "id, slug, titulo, subtitulo, resumo, imagem_capa_url, publicado_em, regiao:regioes(slug, nome), categoria:editorial_categories(slug, nome)";
 
+const MATERIA_LIST_COLS_GEO =
+  "id, slug, titulo, subtitulo, resumo, imagem_capa_url, publicado_em, cidade_principal, cidades_mencionadas, regiao:regioes(slug, nome), categoria:editorial_categories(slug, nome)";
+
 export const listRegions = createServerFn({ method: "GET" }).handler(
   async (): Promise<Region[]> => {
     const { getExternalSupabase } = await import("./external-supabase.server");
@@ -195,6 +198,152 @@ export const listLatestArticles = createServerFn({ method: "GET" })
       throw new Error(error.message);
     }
     return ((rows ?? []) as unknown as MateriaRow[]).map(mapMateria);
+  });
+
+/* -------------------- Geolocalização editorial (cidade + entorno) -------------------- */
+
+export type ViewerLocation = {
+  cidade: string | null;
+  regiaoSlug: string | null;
+  source: "cookie" | "ip" | "none";
+};
+
+export type RankedArticle = ArticleListItem & {
+  proximidade: "cidade" | "regiao" | "estado";
+  cidade_principal: string | null;
+};
+
+function normalizeCidade(v: string | null | undefined): string {
+  if (!v) return "";
+  return v
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .trim();
+}
+
+const LOC_COOKIE = "vp_loc";
+
+export const getViewerLocation = createServerFn({ method: "GET" }).handler(
+  async (): Promise<ViewerLocation> => {
+    const { getCookie, getRequestHeader } = await import(
+      "@tanstack/react-start/server"
+    );
+    const raw = getCookie(LOC_COOKIE);
+    if (raw) {
+      try {
+        const parsed = JSON.parse(raw) as {
+          cidade?: string | null;
+          regiaoSlug?: string | null;
+        };
+        if (parsed.cidade || parsed.regiaoSlug) {
+          return {
+            cidade: parsed.cidade ?? null,
+            regiaoSlug: parsed.regiaoSlug ?? null,
+            source: "cookie",
+          };
+        }
+      } catch {
+        /* cookie inválido — ignorar */
+      }
+    }
+    // Cloudflare Workers: header cf-ipcity (best-effort, sem região)
+    const cfCity = getRequestHeader("cf-ipcity");
+    if (cfCity) {
+      return { cidade: cfCity, regiaoSlug: null, source: "ip" };
+    }
+    return { cidade: null, regiaoSlug: null, source: "none" };
+  },
+);
+
+export const setViewerLocation = createServerFn({ method: "POST" })
+  .inputValidator((d: { cidade?: string | null; regiaoSlug?: string | null }) => ({
+    cidade: d.cidade ? String(d.cidade).slice(0, 80) : null,
+    regiaoSlug: d.regiaoSlug ? String(d.regiaoSlug).slice(0, 60) : null,
+  }))
+  .handler(async ({ data }): Promise<{ ok: true }> => {
+    const { setCookie } = await import("@tanstack/react-start/server");
+    setCookie(LOC_COOKIE, JSON.stringify(data), {
+      httpOnly: false,
+      sameSite: "lax",
+      path: "/",
+      maxAge: 60 * 60 * 24 * 180, // 180 dias
+    });
+    return { ok: true };
+  });
+
+export const listRankedArticles = createServerFn({ method: "GET" })
+  .inputValidator((d: { cidade?: string | null; regiaoSlug?: string | null; limit?: number }) => ({
+    cidade: d.cidade ?? null,
+    regiaoSlug: d.regiaoSlug ?? null,
+    limit: d.limit ?? 12,
+  }))
+  .handler(async ({ data }): Promise<RankedArticle[]> => {
+    const { getExternalSupabase } = await import("./external-supabase.server");
+    const sb = getExternalSupabase();
+    // Puxamos um pool maior para reordenar em memória.
+    const poolSize = Math.max(data.limit * 4, 40);
+    const { data: rows, error } = await sb
+      .from("generated_articles")
+      .select(MATERIA_LIST_COLS_GEO)
+      .eq("status", "publicado")
+      .order("publicado_em", { ascending: false })
+      .limit(poolSize);
+    if (error) {
+      if (isMissingSchema(error)) return [];
+      // Se o schema geo ainda não rodou, cai no listagem simples.
+      if ((error.message ?? "").toLowerCase().includes("cidade")) {
+        const simple = await sb
+          .from("generated_articles")
+          .select(MATERIA_LIST_COLS)
+          .eq("status", "publicado")
+          .order("publicado_em", { ascending: false })
+          .limit(data.limit);
+        if (simple.error) throw new Error(simple.error.message);
+        return ((simple.data ?? []) as unknown as MateriaRow[]).map((m) => ({
+          ...mapMateria(m),
+          proximidade: "estado" as const,
+          cidade_principal: null,
+        }));
+      }
+      throw new Error(error.message);
+    }
+
+    const cidadeNorm = normalizeCidade(data.cidade);
+    const regiao = data.regiaoSlug;
+
+    type Row = MateriaRow & {
+      cidade_principal: string | null;
+      cidades_mencionadas: string[] | null;
+    };
+
+    const scored = ((rows ?? []) as unknown as Row[]).map((r) => {
+      const cp = normalizeCidade(r.cidade_principal);
+      const mencionadas = (r.cidades_mencionadas ?? []).map(normalizeCidade);
+      let score = 0;
+      let prox: RankedArticle["proximidade"] = "estado";
+      if (cidadeNorm && (cp === cidadeNorm || mencionadas.includes(cidadeNorm))) {
+        score += 100;
+        prox = "cidade";
+      }
+      if (regiao && r.regiao?.slug === regiao) {
+        score += 50;
+        if (prox === "estado") prox = "regiao";
+      }
+      const ts = r.publicado_em ? new Date(r.publicado_em).getTime() : 0;
+      // recência entra como desempate leve (max ~10 pontos)
+      const ageDays = (Date.now() - ts) / (1000 * 60 * 60 * 24);
+      score += Math.max(0, 10 - Math.min(10, ageDays));
+      return { row: r, score, prox };
+    });
+
+    scored.sort((a, b) => b.score - a.score);
+
+    return scored.slice(0, data.limit).map(({ row, prox }) => ({
+      ...mapMateria(row),
+      proximidade: prox,
+      cidade_principal: row.cidade_principal,
+    }));
   });
 
 export const listArticlesByRegion = createServerFn({ method: "GET" })
