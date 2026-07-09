@@ -132,6 +132,7 @@ async function scrapeFonte(fonte: Fonte): Promise<Item[]> {
       const res = await fetch(rss, {
         headers: { "user-agent": "Mozilla/5.0 (compatible; VozesParanaensesBot/1.0; +contato@vozesparanaenses.com.br)" },
       });
+      console.log(`[${fonte.nome}] RSS ${rss} -> ${res.status}`);
       if (!res.ok) continue;
       const text = await res.text();
       if (!text.includes("<item") && !text.includes("<entry")) continue;
@@ -149,9 +150,11 @@ async function scrapeFonte(fonte: Fonte): Promise<Item[]> {
       const res = await fetch(target, {
         headers: { "user-agent": "Mozilla/5.0 (compatible; VozesParanaensesBot/1.0)" },
       });
+      console.log(`[${fonte.nome}] HTML ${target} -> ${res.status}`);
       if (!res.ok) continue;
       const html = await res.text();
       const items = parseHtmlLinks(html, target).slice(0, 30);
+      console.log(`[${fonte.nome}] HTML ${target} html_len=${html.length} items=${items.length}`);
       if (items.length) return items;
     } catch {
       // tenta próximo
