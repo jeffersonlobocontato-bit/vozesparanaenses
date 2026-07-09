@@ -18,6 +18,7 @@ type Fonte = {
   nome: string;
   url_base: string;
   tipo_renderizacao: "estatico" | "spa_js";
+  protecao_antibot: boolean;
   frequencia_horas: number;
   ultimo_scrape_em: string | null;
 };
@@ -48,7 +49,7 @@ Deno.serve(async (req) => {
 
   let query = sb
     .from("fontes")
-    .select("id, regiao_id, nome, url_base, tipo_renderizacao, frequencia_horas, ultimo_scrape_em")
+    .select("id, regiao_id, nome, url_base, tipo_renderizacao, protecao_antibot, frequencia_horas, ultimo_scrape_em")
     .eq("ativo", true);
   if (body.fonte_id) query = query.eq("id", body.fonte_id);
 
@@ -114,6 +115,12 @@ async function sha256(input: string): Promise<string> {
 }
 
 async function scrapeFonte(fonte: Fonte): Promise<Item[]> {
+  const useFirecrawl = fonte.protecao_antibot || fonte.tipo_renderizacao === "spa_js";
+  if (useFirecrawl) {
+    const fc = await scrapeViaFirecrawl(fonte);
+    if (fc.length) return fc;
+  }
+
   // Normaliza: se o usuário cadastrou já uma URL de feed, tenta ela primeiro;
   // caso contrário, monta candidatos comuns a partir do host raiz.
   const origin = new URL(fonte.url_base).origin;
@@ -161,6 +168,63 @@ async function scrapeFonte(fonte: Fonte): Promise<Item[]> {
     }
   }
   return [];
+}
+
+async function scrapeViaFirecrawl(fonte: Fonte): Promise<Item[]> {
+  const apiKey = Deno.env.get("FIRECRAWL_API_KEY");
+  if (!apiKey) {
+    console.warn(`[${fonte.nome}] FIRECRAWL_API_KEY missing; skipping firecrawl`);
+    return [];
+  }
+  const origin = new URL(fonte.url_base).origin;
+  const target = fonte.url_base;
+  try {
+    const res = await fetch("https://api.firecrawl.dev/v2/scrape", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${apiKey}`,
+      },
+      body: JSON.stringify({
+        url: target,
+        formats: ["html", "links"],
+        onlyMainContent: false,
+      }),
+    });
+    console.log(`[${fonte.nome}] Firecrawl ${target} -> ${res.status}`);
+    if (!res.ok) {
+      const detail = await res.text().catch(() => "");
+      console.error(`[${fonte.nome}] firecrawl error: ${detail.slice(0, 300)}`);
+      return [];
+    }
+    const data = await res.json();
+    const doc = data?.data ?? data;
+    const html: string = doc?.html ?? doc?.rawHtml ?? "";
+    const links: string[] = Array.isArray(doc?.links) ? doc.links : [];
+
+    const items: Item[] = [];
+    if (html) {
+      items.push(...parseHtmlLinks(html, target));
+    }
+    if (items.length < 5 && links.length) {
+      const seen = new Set(items.map((i) => i.url));
+      for (const href of links) {
+        if (!/\/(noticia|materia|reportagem|20\d\d|editorial|geral|policia|politica|economia|cultura|esporte|regional)/i.test(href)) continue;
+        const abs = href.startsWith("http") ? href : new URL(href, origin).toString();
+        if (seen.has(abs)) continue;
+        seen.add(abs);
+        // sem título ainda — usa slug do path como fallback
+        const slug = decodeURIComponent(abs.split("/").filter(Boolean).pop() ?? "").replace(/[-_]+/g, " ").slice(0, 200);
+        if (slug.length < 20) continue;
+        items.push({ url: abs, titulo: slug, corpo: "", data: null });
+      }
+    }
+    console.log(`[${fonte.nome}] Firecrawl items=${items.length}`);
+    return items.slice(0, 30);
+  } catch (e) {
+    console.error(`[${fonte.nome}] firecrawl exception`, (e as Error).message);
+    return [];
+  }
 }
 
 function parseRss(xml: string): Item[] {
