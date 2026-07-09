@@ -245,11 +245,11 @@ function PortalHome({ regions, articles }: { regions: Region[]; articles: Articl
               const to = a?.region
                 ? { to: "/$region/$slug" as const, params: { region: a.region.slug, slug: a.slug } }
                 : null;
+              const catName = a?.categoria?.name ?? a?.region?.name ?? fb.cat;
+              const catSlug = a?.categoria?.slug ?? null;
               const inner = (
                 <>
-                  <span className={`text-xs font-black uppercase tracking-widest ${i === 0 ? "text-secondary" : "text-slate-500"}`}>
-                    {a?.region?.name ?? fb.cat}
-                  </span>
+                  <CategoryTag name={catName} slug={catSlug} />
                   <h3 className="font-display text-2xl md:text-[1.6rem] leading-tight mt-2 hover:text-secondary transition-colors">
                     {a?.title ?? fb.title}
                   </h3>
@@ -335,9 +335,11 @@ function PortalHome({ regions, articles }: { regions: Region[]; articles: Articl
                       <div className="h-full w-full bg-gradient-to-br from-slate-200 to-slate-300" />
                     )}
                   </div>
-                  <span className="text-secondary text-xs font-bold uppercase tracking-wider">
-                    {a?.region?.name ?? fb.cat}
-                  </span>
+                  <CategoryTag
+                    name={a?.categoria?.name ?? a?.region?.name ?? fb.cat}
+                    slug={a?.categoria?.slug ?? null}
+                    className="self-start"
+                  />
                   <h4 className="font-display text-2xl md:text-3xl leading-tight group-hover:text-secondary">
                     {a?.title ?? fb.title}
                   </h4>
