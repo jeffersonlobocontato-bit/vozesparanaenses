@@ -209,6 +209,8 @@ function buildUserPrompt(raws: Array<{ url: string; titulo: string | null; corpo
   "corpo": "texto em markdown, 4-8 parágrafos curtos, com seção final ### Fontes listando os veículos",
   "seo_title": "string até 60 chars",
   "seo_description": "string até 155 chars",
+  "cidade_principal": "nome da cidade paranaense onde o fato ocorreu (string) ou null se não aplicável",
+  "cidades_mencionadas": ["cidades adicionais citadas nas fontes"],
   "fatos": {
     "quem": "string",
     "o_que": "string",
