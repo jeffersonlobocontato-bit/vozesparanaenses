@@ -180,6 +180,8 @@ type GeneratedPayload = {
   corpo: string;
   seo_title?: string;
   seo_description?: string;
+  cidade_principal?: string | null;
+  cidades_mencionadas?: string[];
   fatos?: {
     quem?: string;
     o_que?: string;
