@@ -205,7 +205,7 @@ function PortalHome({ regions, articles }: { regions: Region[]; articles: Articl
             </div>
           </div>
 
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-px bg-slate-200 border border-slate-200 rounded-lg overflow-hidden">
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-px bg-slate-200 border border-slate-200 rounded-lg overflow-hidden">
             {regions.map((r) => {
               const a = articleByRegion.get(r.slug);
               const title = a?.title ?? REGION_FALLBACK[r.slug] ?? `Últimas notícias de ${r.name}`;
@@ -214,12 +214,12 @@ function PortalHome({ regions, articles }: { regions: Region[]; articles: Articl
                   key={r.id}
                   to={a ? "/$region/$slug" : "/$region"}
                   params={a ? { region: r.slug, slug: a.slug } : { region: r.slug }}
-                  className="bg-white p-4 hover:bg-accent transition-colors group block"
+                  className="bg-white p-5 hover:bg-accent transition-colors group block"
                 >
-                  <p className="text-[10px] font-bold text-secondary mb-1 uppercase tracking-wider">
+                  <p className="text-xs font-bold text-secondary mb-2 uppercase tracking-wider">
                     {r.name}
                   </p>
-                  <h4 className="text-sm font-bold group-hover:underline leading-tight">
+                  <h4 className="text-lg md:text-base lg:text-lg font-bold group-hover:underline leading-snug text-slate-900">
                     {title}
                   </h4>
                 </Link>
