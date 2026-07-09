@@ -215,10 +215,10 @@ function PortalHome({ regions, articles }: { regions: Region[]; articles: Articl
               </button>
             </div>
           </div>
-          <nav className="flex overflow-x-auto no-scrollbar py-3 border-t border-slate-100 gap-6 text-xs font-bold uppercase text-slate-600 whitespace-nowrap">
-            {CATEGORIES.map((c, i) => (
-              <a key={c} href="#" className={i === 0 ? "text-secondary" : "hover:text-secondary transition-colors"}>
-                {c}
+          <nav className="flex overflow-x-auto no-scrollbar py-3 border-t border-slate-100 gap-2 whitespace-nowrap">
+            {CATEGORIES.map((c) => (
+              <a key={c} href="#" className="shrink-0 hover:opacity-80 transition">
+                <CategoryTag name={c} />
               </a>
             ))}
           </nav>
