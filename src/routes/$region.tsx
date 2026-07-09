@@ -4,6 +4,7 @@ import {
   getRegionBySlug,
   listArticlesByRegion,
 } from "@/lib/content.functions";
+import { Logo } from "@/components/Logo";
 
 const regionQO = (slug: string) =>
   queryOptions({
