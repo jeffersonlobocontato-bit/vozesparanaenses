@@ -265,6 +265,8 @@ function PortalHome({ regions, articles }: { regions: Region[]; articles: Ranked
         </div>
       </header>
 
+      <LocationBar />
+
       <main className="mx-auto max-w-7xl px-4 py-8">
         {/* Publicidade — Super Banner topo */}
         <div className="mb-8 rounded bg-slate-100 border border-slate-200 h-24 md:h-28 flex items-center justify-center">
@@ -289,7 +291,10 @@ function PortalHome({ regions, articles }: { regions: Region[]; articles: Ranked
               const catSlug = a?.categoria?.slug ?? null;
               const inner = (
                 <>
-                  <CategoryTag name={catName} slug={catSlug} />
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <CategoryTag name={catName} slug={catSlug} />
+                    {a && <ProximityBadge proximidade={a.proximidade} />}
+                  </div>
                   <h3 className="font-display text-2xl md:text-[1.6rem] leading-tight mt-2 hover:text-secondary transition-colors">
                     {a?.title ?? fb.title}
                   </h3>
