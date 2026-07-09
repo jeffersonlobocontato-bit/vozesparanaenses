@@ -9,10 +9,17 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as WhatsappRouteImport } from './routes/whatsapp'
 import { Route as RegionRouteImport } from './routes/$region'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as RegionClassificadosRouteImport } from './routes/$region.classificados'
 import { Route as RegionSlugRouteImport } from './routes/$region.$slug'
 
+const WhatsappRoute = WhatsappRouteImport.update({
+  id: '/whatsapp',
+  path: '/whatsapp',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const RegionRoute = RegionRouteImport.update({
   id: '/$region',
   path: '/$region',
@@ -23,6 +30,11 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const RegionClassificadosRoute = RegionClassificadosRouteImport.update({
+  id: '/classificados',
+  path: '/classificados',
+  getParentRoute: () => RegionRoute,
+} as any)
 const RegionSlugRoute = RegionSlugRouteImport.update({
   id: '/$slug',
   path: '/$slug',
@@ -32,34 +44,64 @@ const RegionSlugRoute = RegionSlugRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/$region': typeof RegionRouteWithChildren
+  '/whatsapp': typeof WhatsappRoute
   '/$region/$slug': typeof RegionSlugRoute
+  '/$region/classificados': typeof RegionClassificadosRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/$region': typeof RegionRouteWithChildren
+  '/whatsapp': typeof WhatsappRoute
   '/$region/$slug': typeof RegionSlugRoute
+  '/$region/classificados': typeof RegionClassificadosRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/$region': typeof RegionRouteWithChildren
+  '/whatsapp': typeof WhatsappRoute
   '/$region/$slug': typeof RegionSlugRoute
+  '/$region/classificados': typeof RegionClassificadosRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/$region' | '/$region/$slug'
+  fullPaths:
+    | '/'
+    | '/$region'
+    | '/whatsapp'
+    | '/$region/$slug'
+    | '/$region/classificados'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/$region' | '/$region/$slug'
-  id: '__root__' | '/' | '/$region' | '/$region/$slug'
+  to:
+    | '/'
+    | '/$region'
+    | '/whatsapp'
+    | '/$region/$slug'
+    | '/$region/classificados'
+  id:
+    | '__root__'
+    | '/'
+    | '/$region'
+    | '/whatsapp'
+    | '/$region/$slug'
+    | '/$region/classificados'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   RegionRoute: typeof RegionRouteWithChildren
+  WhatsappRoute: typeof WhatsappRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/whatsapp': {
+      id: '/whatsapp'
+      path: '/whatsapp'
+      fullPath: '/whatsapp'
+      preLoaderRoute: typeof WhatsappRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/$region': {
       id: '/$region'
       path: '/$region'
@@ -74,6 +116,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/$region/classificados': {
+      id: '/$region/classificados'
+      path: '/classificados'
+      fullPath: '/$region/classificados'
+      preLoaderRoute: typeof RegionClassificadosRouteImport
+      parentRoute: typeof RegionRoute
+    }
     '/$region/$slug': {
       id: '/$region/$slug'
       path: '/$slug'
@@ -86,10 +135,12 @@ declare module '@tanstack/react-router' {
 
 interface RegionRouteChildren {
   RegionSlugRoute: typeof RegionSlugRoute
+  RegionClassificadosRoute: typeof RegionClassificadosRoute
 }
 
 const RegionRouteChildren: RegionRouteChildren = {
   RegionSlugRoute: RegionSlugRoute,
+  RegionClassificadosRoute: RegionClassificadosRoute,
 }
 
 const RegionRouteWithChildren =
@@ -98,6 +149,7 @@ const RegionRouteWithChildren =
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   RegionRoute: RegionRouteWithChildren,
+  WhatsappRoute: WhatsappRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

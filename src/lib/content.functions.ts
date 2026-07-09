@@ -1,15 +1,28 @@
 import { createServerFn } from "@tanstack/react-start";
 import { notFound } from "@tanstack/react-router";
 
+export type TemaConfig = {
+  paleta?: { primaria?: string; acento?: string; fundo?: string };
+  tipografia_destaque?: string;
+  tipografia_corpo?: string;
+  densidade?: "compacta" | "media" | "alta";
+  elemento_assinatura?: string;
+};
+
 export type Region = {
   id: string;
   slug: string;
   name: string;
   main_city: string;
   description: string | null;
-  primary_color: string | null;
-  accent_color: string | null;
   hero_image_url: string | null;
+  tema_config: TemaConfig;
+};
+
+export type Categoria = {
+  id: string;
+  slug: string;
+  name: string;
 };
 
 export type ArticleListItem = {
@@ -21,6 +34,7 @@ export type ArticleListItem = {
   cover_image_url: string | null;
   published_at: string | null;
   region: { slug: string; name: string } | null;
+  categoria: { slug: string; name: string } | null;
 };
 
 export type ArticleFull = ArticleListItem & {
@@ -30,19 +44,68 @@ export type ArticleFull = ArticleListItem & {
   og_image_url: string | null;
 };
 
+type RegiaoRow = {
+  id: string;
+  slug: string;
+  nome: string;
+  cidade_principal: string;
+  descricao: string | null;
+  hero_image_url: string | null;
+  tema_config: TemaConfig | null;
+};
+
+function mapRegiao(r: RegiaoRow): Region {
+  return {
+    id: r.id,
+    slug: r.slug,
+    name: r.nome,
+    main_city: r.cidade_principal,
+    description: r.descricao,
+    hero_image_url: r.hero_image_url,
+    tema_config: r.tema_config ?? {},
+  };
+}
+
+type MateriaRow = {
+  id: string;
+  slug: string;
+  titulo: string;
+  subtitulo: string | null;
+  resumo: string | null;
+  imagem_capa_url: string | null;
+  publicado_em: string | null;
+  regiao: { slug: string; nome: string } | null;
+  categoria: { slug: string; nome: string } | null;
+};
+
+function mapMateria(m: MateriaRow): ArticleListItem {
+  return {
+    id: m.id,
+    slug: m.slug,
+    title: m.titulo,
+    subtitle: m.subtitulo,
+    summary: m.resumo,
+    cover_image_url: m.imagem_capa_url,
+    published_at: m.publicado_em,
+    region: m.regiao ? { slug: m.regiao.slug, name: m.regiao.nome } : null,
+    categoria: m.categoria ? { slug: m.categoria.slug, name: m.categoria.nome } : null,
+  };
+}
+
+const MATERIA_LIST_COLS =
+  "id, slug, titulo, subtitulo, resumo, imagem_capa_url, publicado_em, regiao:regioes(slug, nome), categoria:editorial_categories(slug, nome)";
+
 export const listRegions = createServerFn({ method: "GET" }).handler(
   async (): Promise<Region[]> => {
     const { getExternalSupabase } = await import("./external-supabase.server");
     const sb = getExternalSupabase();
     const { data, error } = await sb
-      .from("regions")
-      .select(
-        "id, slug, name, main_city, description, primary_color, accent_color, hero_image_url",
-      )
-      .eq("active", true)
-      .order("name");
+      .from("regioes")
+      .select("id, slug, nome, cidade_principal, descricao, hero_image_url, tema_config")
+      .eq("ativa", true)
+      .order("nome");
     if (error) throw new Error(error.message);
-    return (data ?? []) as Region[];
+    return ((data ?? []) as RegiaoRow[]).map(mapRegiao);
   },
 );
 
@@ -52,16 +115,30 @@ export const getRegionBySlug = createServerFn({ method: "GET" })
     const { getExternalSupabase } = await import("./external-supabase.server");
     const sb = getExternalSupabase();
     const { data: row, error } = await sb
-      .from("regions")
-      .select(
-        "id, slug, name, main_city, description, primary_color, accent_color, hero_image_url",
-      )
+      .from("regioes")
+      .select("id, slug, nome, cidade_principal, descricao, hero_image_url, tema_config")
       .eq("slug", data.slug)
-      .eq("active", true)
+      .eq("ativa", true)
       .maybeSingle();
     if (error) throw new Error(error.message);
     if (!row) throw notFound();
-    return row as Region;
+    return mapRegiao(row as RegiaoRow);
+  });
+
+export const listCategorias = createServerFn({ method: "GET" }).handler(
+  async (): Promise<Categoria[]> => {
+    const { getExternalSupabase } = await import("./external-supabase.server");
+    const sb = getExternalSupabase();
+    const { data, error } = await sb
+      .from("editorial_categories")
+      .select("id, slug, nome")
+      .order("nome");
+    if (error) throw new Error(error.message);
+    return ((data ?? []) as { id: string; slug: string; nome: string }[]).map((c) => ({
+      id: c.id,
+      slug: c.slug,
+      name: c.nome,
+    }));
   });
 
 export const listLatestArticles = createServerFn({ method: "GET" })
@@ -70,15 +147,13 @@ export const listLatestArticles = createServerFn({ method: "GET" })
     const { getExternalSupabase } = await import("./external-supabase.server");
     const sb = getExternalSupabase();
     const { data: rows, error } = await sb
-      .from("articles")
-      .select(
-        "id, slug, title, subtitle, summary, cover_image_url, published_at, region:regions(slug, name)",
-      )
-      .eq("status", "published")
-      .order("published_at", { ascending: false })
+      .from("generated_articles")
+      .select(MATERIA_LIST_COLS)
+      .eq("status", "publicado")
+      .order("publicado_em", { ascending: false })
       .limit(data.limit);
     if (error) throw new Error(error.message);
-    return (rows ?? []) as unknown as ArticleListItem[];
+    return ((rows ?? []) as unknown as MateriaRow[]).map(mapMateria);
   });
 
 export const listArticlesByRegion = createServerFn({ method: "GET" })
@@ -90,22 +165,46 @@ export const listArticlesByRegion = createServerFn({ method: "GET" })
     const { getExternalSupabase } = await import("./external-supabase.server");
     const sb = getExternalSupabase();
     const { data: region } = await sb
-      .from("regions")
+      .from("regioes")
       .select("id")
       .eq("slug", data.regionSlug)
       .maybeSingle();
     if (!region) return [];
     const { data: rows, error } = await sb
-      .from("articles")
-      .select(
-        "id, slug, title, subtitle, summary, cover_image_url, published_at, region:regions(slug, name)",
-      )
-      .eq("status", "published")
-      .eq("region_id", (region as { id: string }).id)
-      .order("published_at", { ascending: false })
+      .from("generated_articles")
+      .select(MATERIA_LIST_COLS)
+      .eq("status", "publicado")
+      .eq("regiao_id", (region as { id: string }).id)
+      .order("publicado_em", { ascending: false })
       .limit(data.limit);
     if (error) throw new Error(error.message);
-    return (rows ?? []) as unknown as ArticleListItem[];
+    return ((rows ?? []) as unknown as MateriaRow[]).map(mapMateria);
+  });
+
+export const listArticlesByCategory = createServerFn({ method: "GET" })
+  .inputValidator((d: { regionSlug: string; categorySlug: string; limit?: number }) => ({
+    regionSlug: d.regionSlug,
+    categorySlug: d.categorySlug,
+    limit: d.limit ?? 30,
+  }))
+  .handler(async ({ data }): Promise<ArticleListItem[]> => {
+    const { getExternalSupabase } = await import("./external-supabase.server");
+    const sb = getExternalSupabase();
+    const [{ data: region }, { data: category }] = await Promise.all([
+      sb.from("regioes").select("id").eq("slug", data.regionSlug).maybeSingle(),
+      sb.from("editorial_categories").select("id").eq("slug", data.categorySlug).maybeSingle(),
+    ]);
+    if (!region || !category) return [];
+    const { data: rows, error } = await sb
+      .from("generated_articles")
+      .select(MATERIA_LIST_COLS)
+      .eq("status", "publicado")
+      .eq("regiao_id", (region as { id: string }).id)
+      .eq("categoria_id", (category as { id: string }).id)
+      .order("publicado_em", { ascending: false })
+      .limit(data.limit);
+    if (error) throw new Error(error.message);
+    return ((rows ?? []) as unknown as MateriaRow[]).map(mapMateria);
   });
 
 export const getArticle = createServerFn({ method: "GET" })
@@ -114,21 +213,108 @@ export const getArticle = createServerFn({ method: "GET" })
     const { getExternalSupabase } = await import("./external-supabase.server");
     const sb = getExternalSupabase();
     const { data: region } = await sb
-      .from("regions")
+      .from("regioes")
       .select("id")
       .eq("slug", data.regionSlug)
       .maybeSingle();
     if (!region) throw notFound();
     const { data: row, error } = await sb
-      .from("articles")
+      .from("generated_articles")
       .select(
-        "id, slug, title, subtitle, summary, body_md, cover_image_url, published_at, seo_title, seo_description, og_image_url, region:regions(slug, name)",
+        "id, slug, titulo, subtitulo, resumo, corpo, imagem_capa_url, publicado_em, seo_title, seo_description, og_image_url, regiao:regioes(slug, nome), categoria:editorial_categories(slug, nome)",
       )
-      .eq("region_id", (region as { id: string }).id)
+      .eq("regiao_id", (region as { id: string }).id)
       .eq("slug", data.slug)
-      .eq("status", "published")
+      .eq("status", "publicado")
       .maybeSingle();
     if (error) throw new Error(error.message);
     if (!row) throw notFound();
-    return row as unknown as ArticleFull;
+    const r = row as unknown as MateriaRow & {
+      corpo: string | null;
+      seo_title: string | null;
+      seo_description: string | null;
+      og_image_url: string | null;
+    };
+    return {
+      ...mapMateria(r),
+      body_md: r.corpo,
+      seo_title: r.seo_title,
+      seo_description: r.seo_description,
+      og_image_url: r.og_image_url,
+    };
+  });
+
+export const createWhatsappLead = createServerFn({ method: "POST" })
+  .inputValidator((d: { nome: string; telefone: string; regiaoSlug?: string; fonte?: string }) => d)
+  .handler(async ({ data }): Promise<{ ok: true }> => {
+    const { getExternalSupabase } = await import("./external-supabase.server");
+    const sb = getExternalSupabase();
+    let regiao_id: string | null = null;
+    if (data.regiaoSlug) {
+      const { data: r } = await sb.from("regioes").select("id").eq("slug", data.regiaoSlug).maybeSingle();
+      regiao_id = (r as { id: string } | null)?.id ?? null;
+    }
+    const { error } = await sb.from("whatsapp_leads").insert({
+      nome: data.nome,
+      telefone: data.telefone,
+      regiao_id,
+      fonte_captura: data.fonte ?? "site",
+      consentimento_lgpd: true,
+      consentimento_timestamp: new Date().toISOString(),
+      canal_ou_lista: "canal_nativo",
+    });
+    if (error) throw new Error(error.message);
+    return { ok: true };
+  });
+
+export const listClassificados = createServerFn({ method: "GET" })
+  .inputValidator((d: { regionSlug: string }) => d)
+  .handler(async ({ data }): Promise<
+    { id: string; categoria: string; titulo: string; descricao: string | null; contato: string | null; criado_em: string }[]
+  > => {
+    const { getExternalSupabase } = await import("./external-supabase.server");
+    const sb = getExternalSupabase();
+    const { data: region } = await sb.from("regioes").select("id").eq("slug", data.regionSlug).maybeSingle();
+    if (!region) return [];
+    const { data: rows, error } = await sb
+      .from("classificados")
+      .select("id, categoria, titulo, descricao, contato, criado_em")
+      .eq("regiao_id", (region as { id: string }).id)
+      .eq("ativo", true)
+      .order("criado_em", { ascending: false })
+      .limit(100);
+    if (error) throw new Error(error.message);
+    return (rows ?? []) as {
+      id: string;
+      categoria: string;
+      titulo: string;
+      descricao: string | null;
+      contato: string | null;
+      criado_em: string;
+    }[];
+  });
+
+export const createClassificado = createServerFn({ method: "POST" })
+  .inputValidator((d: {
+    regionSlug: string;
+    categoria: "emprego" | "imovel" | "veiculo";
+    titulo: string;
+    descricao?: string;
+    contato: string;
+  }) => d)
+  .handler(async ({ data }): Promise<{ ok: true }> => {
+    const { getExternalSupabase } = await import("./external-supabase.server");
+    const sb = getExternalSupabase();
+    const { data: region } = await sb.from("regioes").select("id").eq("slug", data.regionSlug).maybeSingle();
+    if (!region) throw new Error("Região não encontrada");
+    const { error } = await sb.from("classificados").insert({
+      regiao_id: (region as { id: string }).id,
+      categoria: data.categoria,
+      titulo: data.titulo,
+      descricao: data.descricao ?? null,
+      contato: data.contato,
+      ativo: true,
+    });
+    if (error) throw new Error(error.message);
+    return { ok: true };
   });

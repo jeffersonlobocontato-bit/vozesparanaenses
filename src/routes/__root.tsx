@@ -77,15 +77,15 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "Paraná Total" },
+      { title: "Vozes Paranaenses" },
       {
         name: "description",
-        content: "Notícias das 10 regiões do Paraná em um só lugar.",
+        content: "Portal de notícias das 10 macrorregiões do Paraná — cobertura editorial regional em um só lugar.",
       },
-      { property: "og:title", content: "Paraná Total" },
+      { property: "og:title", content: "Vozes Paranaenses" },
       {
         property: "og:description",
-        content: "Notícias das 10 regiões do Paraná.",
+        content: "Portal de notícias das 10 macrorregiões do Paraná.",
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
@@ -100,7 +100,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { rel: "preconnect", href: "https://fonts.gstatic.com", crossOrigin: "anonymous" },
       {
         rel: "stylesheet",
-        href: "https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Barlow:wght@400;500;600;700;800&display=swap",
+        href: "https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Barlow:wght@400;500;600;700;800&family=Bitter:wght@600;700&family=Playfair+Display:wght@700;900&family=Merriweather:wght@700;900&family=Oswald:wght@600;700&family=Poppins:wght@700;800&family=Rubik:wght@600;700&family=Archivo:wght@700;800&family=Space+Grotesk:wght@600;700&display=swap",
       },
     ],
   }),
