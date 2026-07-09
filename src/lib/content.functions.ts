@@ -139,8 +139,7 @@ export const getRegionBySlug = createServerFn({ method: "GET" })
       .eq("slug", data.slug)
       .eq("ativa", true)
       .maybeSingle();
-    if (error) {
-      if (isMissingSchema(error)) throw notFound();
+    if (error && !isMissingSchema(error)) {
       throw new Error(error.message);
     }
     if (!row) {
