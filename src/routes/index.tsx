@@ -1,7 +1,8 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { queryOptions, useSuspenseQuery } from "@tanstack/react-query";
 import { listRegions, listLatestArticles, type ArticleListItem, type Region } from "@/lib/content.functions";
-import logoAsset from "@/assets/vozes-logo.png.asset.json";
+import logoBlue from "@/assets/vozes-logo-blue.png.asset.json";
+import logoWhite from "@/assets/vozes-logo-white.png.asset.json";
 
 const regionsQO = queryOptions({
   queryKey: ["regions"],
@@ -214,7 +215,7 @@ function PortalHome({ regions, articles }: { regions: Region[]; articles: Articl
           <div className="py-5 flex flex-col md:flex-row justify-between items-center gap-4">
             <Link to="/" aria-label="Vozes Paranaenses — Página inicial" className="flex items-center gap-4">
               <img
-                src={logoAsset.url}
+                src={logoBlue.url}
                 alt="Vozes Paranaenses"
                 className="h-20 md:h-28 lg:h-36 w-auto select-none"
                 draggable={false}
@@ -407,9 +408,12 @@ function PortalHome({ regions, articles }: { regions: Region[]; articles: Articl
       <footer className="bg-primary text-primary-foreground py-12 mt-8">
         <div className="mx-auto max-w-7xl px-4 grid grid-cols-1 md:grid-cols-4 gap-8">
           <div className="md:col-span-2">
-            <div className="mb-4 inline-block bg-white/95 rounded-md px-4 py-3">
-              <img src={logoAsset.url} alt="Vozes Paranaenses" className="h-14 md:h-16 w-auto" />
-            </div>
+            <img
+              src={logoWhite.url}
+              alt="Vozes Paranaenses"
+              className="mb-4 h-14 md:h-16 w-auto select-none"
+              draggable={false}
+            />
             <p className="text-white/70 text-xs leading-relaxed max-w-md">
               Cobertura editorial das 10 macrorregiões do Paraná — cada região com sua identidade, todas em um só domínio.
             </p>
