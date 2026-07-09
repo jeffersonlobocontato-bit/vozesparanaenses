@@ -14,6 +14,7 @@ import { Route as RegionRouteImport } from './routes/$region'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as RegionClassificadosRouteImport } from './routes/$region.classificados'
 import { Route as RegionSlugRouteImport } from './routes/$region.$slug'
+import { Route as RegionCategoriaRouteImport } from './routes/$region.$categoria'
 
 const WhatsappRoute = WhatsappRouteImport.update({
   id: '/whatsapp',
@@ -40,11 +41,17 @@ const RegionSlugRoute = RegionSlugRouteImport.update({
   path: '/$slug',
   getParentRoute: () => RegionRoute,
 } as any)
+const RegionCategoriaRoute = RegionCategoriaRouteImport.update({
+  id: '/$categoria',
+  path: '/$categoria',
+  getParentRoute: () => RegionRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/$region': typeof RegionRouteWithChildren
   '/whatsapp': typeof WhatsappRoute
+  '/$region/$categoria': typeof RegionCategoriaRoute
   '/$region/$slug': typeof RegionSlugRoute
   '/$region/classificados': typeof RegionClassificadosRoute
 }
@@ -52,6 +59,7 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/$region': typeof RegionRouteWithChildren
   '/whatsapp': typeof WhatsappRoute
+  '/$region/$categoria': typeof RegionCategoriaRoute
   '/$region/$slug': typeof RegionSlugRoute
   '/$region/classificados': typeof RegionClassificadosRoute
 }
@@ -60,6 +68,7 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/$region': typeof RegionRouteWithChildren
   '/whatsapp': typeof WhatsappRoute
+  '/$region/$categoria': typeof RegionCategoriaRoute
   '/$region/$slug': typeof RegionSlugRoute
   '/$region/classificados': typeof RegionClassificadosRoute
 }
@@ -69,6 +78,7 @@ export interface FileRouteTypes {
     | '/'
     | '/$region'
     | '/whatsapp'
+    | '/$region/$categoria'
     | '/$region/$slug'
     | '/$region/classificados'
   fileRoutesByTo: FileRoutesByTo
@@ -76,6 +86,7 @@ export interface FileRouteTypes {
     | '/'
     | '/$region'
     | '/whatsapp'
+    | '/$region/$categoria'
     | '/$region/$slug'
     | '/$region/classificados'
   id:
@@ -83,6 +94,7 @@ export interface FileRouteTypes {
     | '/'
     | '/$region'
     | '/whatsapp'
+    | '/$region/$categoria'
     | '/$region/$slug'
     | '/$region/classificados'
   fileRoutesById: FileRoutesById
@@ -130,15 +142,24 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof RegionSlugRouteImport
       parentRoute: typeof RegionRoute
     }
+    '/$region/$categoria': {
+      id: '/$region/$categoria'
+      path: '/$categoria'
+      fullPath: '/$region/$categoria'
+      preLoaderRoute: typeof RegionCategoriaRouteImport
+      parentRoute: typeof RegionRoute
+    }
   }
 }
 
 interface RegionRouteChildren {
+  RegionCategoriaRoute: typeof RegionCategoriaRoute
   RegionSlugRoute: typeof RegionSlugRoute
   RegionClassificadosRoute: typeof RegionClassificadosRoute
 }
 
 const RegionRouteChildren: RegionRouteChildren = {
+  RegionCategoriaRoute: RegionCategoriaRoute,
   RegionSlugRoute: RegionSlugRoute,
   RegionClassificadosRoute: RegionClassificadosRoute,
 }
