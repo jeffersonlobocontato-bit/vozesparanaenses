@@ -14,7 +14,7 @@ import { Route as RegionRouteImport } from './routes/$region'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as RegionClassificadosRouteImport } from './routes/$region.classificados'
 import { Route as RegionSlugRouteImport } from './routes/$region.$slug'
-import { Route as RegionCategoriaRouteImport } from './routes/$region.$categoria'
+import { Route as RegionEditoriaCategoriaRouteImport } from './routes/$region.editoria.$categoria'
 
 const WhatsappRoute = WhatsappRouteImport.update({
   id: '/whatsapp',
@@ -41,9 +41,9 @@ const RegionSlugRoute = RegionSlugRouteImport.update({
   path: '/$slug',
   getParentRoute: () => RegionRoute,
 } as any)
-const RegionCategoriaRoute = RegionCategoriaRouteImport.update({
-  id: '/$categoria',
-  path: '/$categoria',
+const RegionEditoriaCategoriaRoute = RegionEditoriaCategoriaRouteImport.update({
+  id: '/editoria/$categoria',
+  path: '/editoria/$categoria',
   getParentRoute: () => RegionRoute,
 } as any)
 
@@ -51,26 +51,26 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/$region': typeof RegionRouteWithChildren
   '/whatsapp': typeof WhatsappRoute
-  '/$region/$categoria': typeof RegionCategoriaRoute
   '/$region/$slug': typeof RegionSlugRoute
   '/$region/classificados': typeof RegionClassificadosRoute
+  '/$region/editoria/$categoria': typeof RegionEditoriaCategoriaRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/$region': typeof RegionRouteWithChildren
   '/whatsapp': typeof WhatsappRoute
-  '/$region/$categoria': typeof RegionCategoriaRoute
   '/$region/$slug': typeof RegionSlugRoute
   '/$region/classificados': typeof RegionClassificadosRoute
+  '/$region/editoria/$categoria': typeof RegionEditoriaCategoriaRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/$region': typeof RegionRouteWithChildren
   '/whatsapp': typeof WhatsappRoute
-  '/$region/$categoria': typeof RegionCategoriaRoute
   '/$region/$slug': typeof RegionSlugRoute
   '/$region/classificados': typeof RegionClassificadosRoute
+  '/$region/editoria/$categoria': typeof RegionEditoriaCategoriaRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -78,25 +78,25 @@ export interface FileRouteTypes {
     | '/'
     | '/$region'
     | '/whatsapp'
-    | '/$region/$categoria'
     | '/$region/$slug'
     | '/$region/classificados'
+    | '/$region/editoria/$categoria'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
     | '/$region'
     | '/whatsapp'
-    | '/$region/$categoria'
     | '/$region/$slug'
     | '/$region/classificados'
+    | '/$region/editoria/$categoria'
   id:
     | '__root__'
     | '/'
     | '/$region'
     | '/whatsapp'
-    | '/$region/$categoria'
     | '/$region/$slug'
     | '/$region/classificados'
+    | '/$region/editoria/$categoria'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -142,26 +142,26 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof RegionSlugRouteImport
       parentRoute: typeof RegionRoute
     }
-    '/$region/$categoria': {
-      id: '/$region/$categoria'
-      path: '/$categoria'
-      fullPath: '/$region/$categoria'
-      preLoaderRoute: typeof RegionCategoriaRouteImport
+    '/$region/editoria/$categoria': {
+      id: '/$region/editoria/$categoria'
+      path: '/editoria/$categoria'
+      fullPath: '/$region/editoria/$categoria'
+      preLoaderRoute: typeof RegionEditoriaCategoriaRouteImport
       parentRoute: typeof RegionRoute
     }
   }
 }
 
 interface RegionRouteChildren {
-  RegionCategoriaRoute: typeof RegionCategoriaRoute
   RegionSlugRoute: typeof RegionSlugRoute
   RegionClassificadosRoute: typeof RegionClassificadosRoute
+  RegionEditoriaCategoriaRoute: typeof RegionEditoriaCategoriaRoute
 }
 
 const RegionRouteChildren: RegionRouteChildren = {
-  RegionCategoriaRoute: RegionCategoriaRoute,
   RegionSlugRoute: RegionSlugRoute,
   RegionClassificadosRoute: RegionClassificadosRoute,
+  RegionEditoriaCategoriaRoute: RegionEditoriaCategoriaRoute,
 }
 
 const RegionRouteWithChildren =

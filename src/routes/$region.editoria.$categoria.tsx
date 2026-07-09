@@ -25,7 +25,7 @@ const listQO = (regionSlug: string, categorySlug: string) =>
       listArticlesByCategory({ data: { regionSlug, categorySlug } }),
   });
 
-export const Route = createFileRoute("/$region/$categoria")({
+export const Route = createFileRoute("/$region/editoria/$categoria")({
   loader: async ({ context, params }) => {
     const [region, cats] = await Promise.all([
       context.queryClient.ensureQueryData(regionQO(params.region)),
