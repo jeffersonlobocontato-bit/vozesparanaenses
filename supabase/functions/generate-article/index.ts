@@ -86,7 +86,7 @@ Deno.serve(async (req) => {
 
   const { data: raws, error: rErr } = await sb
     .from("raw_articles")
-    .select("id, url, titulo, corpo_limpo, regiao_id, fontes:fonte_id(id, nome, dominio)")
+    .select("id, url, titulo, corpo_limpo, regiao_id, fontes:fonte_id(id, nome, url_base)")
     .in("id", rawIds);
   if (rErr || !raws?.length) return json({ error: "raws_fetch_failed", detail: rErr?.message }, 500);
 
@@ -142,7 +142,7 @@ Deno.serve(async (req) => {
       por_que: parsed.fatos.por_que ?? null,
       dados: parsed.fatos.dados ?? {},
       citacoes: parsed.fatos.citacoes ?? [],
-      fontes: raws.map((r) => ({ url: r.url, veiculo: r.fontes?.nome ?? r.fontes?.dominio })),
+      fontes: raws.map((r) => ({ url: r.url, veiculo: r.fontes?.nome ?? r.fontes?.url_base })),
     });
   }
 
@@ -196,10 +196,10 @@ type GeneratedPayload = {
   };
 };
 
-function buildUserPrompt(raws: Array<{ url: string; titulo: string | null; corpo_limpo: string | null; fontes?: { nome?: string; dominio?: string } | null }>) {
+function buildUserPrompt(raws: Array<{ url: string; titulo: string | null; corpo_limpo: string | null; fontes?: { nome?: string; url_base?: string } | null }>) {
   const sources = raws
     .map((r, i) => {
-      const veiculo = r.fontes?.nome ?? r.fontes?.dominio ?? "fonte";
+      const veiculo = r.fontes?.nome ?? r.fontes?.url_base ?? "fonte";
       return `--- FONTE ${i + 1} (${veiculo}) ---\nURL: ${r.url}\nTítulo: ${r.titulo ?? ""}\n\n${(r.corpo_limpo ?? "").slice(0, 8000)}`;
     })
     .join("\n\n");
