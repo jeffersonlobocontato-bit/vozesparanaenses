@@ -4,6 +4,7 @@ import { useMutation } from "@tanstack/react-query";
 import { useState } from "react";
 import { createWhatsappLead, listRegions } from "@/lib/content.functions";
 import { queryOptions, useSuspenseQuery } from "@tanstack/react-query";
+import { Logo } from "@/components/Logo";
 
 const regionsQO = queryOptions({
   queryKey: ["regions"],
@@ -55,9 +56,7 @@ function WhatsappPage() {
     <div className="min-h-screen bg-slate-50 text-slate-900">
       <header className="border-b-4 border-primary bg-white">
         <div className="mx-auto max-w-3xl px-4 py-5">
-          <h1 className="font-display text-3xl leading-none tracking-tight text-primary">
-            VOZES <span className="text-secondary font-light">PARANAENSES</span>
-          </h1>
+          <Logo size="md" />
         </div>
       </header>
       <main className="mx-auto max-w-xl px-4 py-12">

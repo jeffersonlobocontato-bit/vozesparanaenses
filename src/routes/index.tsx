@@ -1,6 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { queryOptions, useSuspenseQuery } from "@tanstack/react-query";
 import { listRegions, listLatestArticles, type ArticleListItem, type Region } from "@/lib/content.functions";
+import logoAsset from "@/assets/vozes-paranaenses-logo.png.asset.json";
 
 const regionsQO = queryOptions({
   queryKey: ["regions"],
@@ -196,11 +197,15 @@ function PortalHome({ regions, articles }: { regions: Region[]; articles: Articl
       <header className="bg-white border-b-4 border-primary">
         <div className="mx-auto max-w-7xl px-4">
           <div className="py-5 flex flex-col md:flex-row justify-between items-center gap-4">
-            <Link to="/" className="flex flex-col">
-              <h1 className="font-display text-4xl md:text-5xl leading-none tracking-tight text-primary flex items-baseline gap-2">
-                VOZES <span className="text-secondary font-light">PARANAENSES</span>
-              </h1>
-              <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-slate-400 mt-1">
+            <Link to="/" aria-label="Vozes Paranaenses — Página inicial" className="flex items-center gap-4">
+              <img
+                src={logoAsset.url}
+                alt="Vozes Paranaenses"
+                className="h-14 md:h-20 lg:h-24 w-auto select-none"
+                draggable={false}
+              />
+              <span className="hidden md:block h-12 w-px bg-slate-200" aria-hidden />
+              <p className="hidden md:block text-[10px] font-bold uppercase tracking-[0.2em] text-slate-500 max-w-[16ch] leading-snug">
                 O portal editorial das 10 regiões do Paraná
               </p>
             </Link>
@@ -387,7 +392,9 @@ function PortalHome({ regions, articles }: { regions: Region[]; articles: Articl
       <footer className="bg-primary text-primary-foreground py-12 mt-8">
         <div className="mx-auto max-w-7xl px-4 grid grid-cols-1 md:grid-cols-4 gap-8">
           <div className="md:col-span-2">
-            <h2 className="font-display text-3xl tracking-tight mb-3">VOZES PARANAENSES</h2>
+            <div className="mb-4 inline-block bg-white/95 rounded-md px-4 py-3">
+              <img src={logoAsset.url} alt="Vozes Paranaenses" className="h-14 md:h-16 w-auto" />
+            </div>
             <p className="text-white/70 text-xs leading-relaxed max-w-md">
               Cobertura editorial das 10 macrorregiões do Paraná — cada região com sua identidade, todas em um só domínio.
             </p>

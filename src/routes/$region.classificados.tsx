@@ -7,6 +7,7 @@ import {
   listClassificados,
   createClassificado,
 } from "@/lib/content.functions";
+import { Logo } from "@/components/Logo";
 
 const regionQO = (slug: string) =>
   queryOptions({ queryKey: ["region", slug], queryFn: () => getRegionBySlug({ data: { slug } }) });
@@ -69,11 +70,11 @@ function ClassificadosPage() {
   return (
     <div className="min-h-screen bg-slate-50">
       <header className="border-b-4 bg-white" style={{ borderColor: primary }}>
-        <div className="mx-auto flex max-w-6xl items-center justify-between px-4 py-4">
-          <Link to="/$region" params={{ region: slug }} className="font-display text-2xl tracking-tight" style={{ color: primary }}>
+        <div className="mx-auto flex max-w-6xl items-center justify-between px-4 py-4 gap-4">
+          <Logo size="md" />
+          <Link to="/$region" params={{ region: slug }} className="text-sm font-bold uppercase tracking-widest" style={{ color: primary }}>
             ← {region.name}
           </Link>
-          <Link to="/" className="text-sm text-slate-500">Vozes Paranaenses</Link>
         </div>
       </header>
       <main className="mx-auto max-w-6xl px-4 py-10 grid grid-cols-1 lg:grid-cols-3 gap-8">

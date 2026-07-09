@@ -1,6 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { queryOptions, useSuspenseQuery } from "@tanstack/react-query";
 import { getArticle } from "@/lib/content.functions";
+import { Logo } from "@/components/Logo";
 
 const articleQO = (regionSlug: string, slug: string) =>
   queryOptions({
@@ -98,9 +99,7 @@ function ArticlePage() {
     <div className="min-h-screen bg-white text-slate-900">
       <header className="border-b-4 border-primary">
         <div className="mx-auto flex max-w-3xl items-center justify-between px-4 py-4">
-          <Link to="/" className="font-display text-2xl leading-none tracking-tight text-primary">
-            VOZES <span className="text-secondary">PARANAENSES</span>
-          </Link>
+          <Logo size="md" />
           <Link
             to="/$region"
             params={{ region }}
