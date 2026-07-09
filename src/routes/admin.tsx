@@ -23,7 +23,9 @@ function AdminLayout() {
       if (!alive) return;
       if (!sess.session) {
         setState("anon");
-        if (loc.pathname !== "/admin/login") nav({ to: "/admin/login", replace: true });
+        if (loc.pathname !== "/admin/login" && loc.pathname !== "/admin/reset-password") {
+          nav({ to: "/admin/login", replace: true });
+        }
         return;
       }
       setEmail(sess.session.user.email ?? null);
@@ -46,7 +48,9 @@ function AdminLayout() {
     return () => { alive = false; };
   }, [loc.pathname, nav]);
 
-  if (loc.pathname === "/admin/login") return <Outlet />;
+  if (loc.pathname === "/admin/login" || loc.pathname === "/admin/reset-password") {
+    return <Outlet />;
+  }
 
   if (state === "loading") {
     return <div className="flex min-h-screen items-center justify-center text-sm text-muted-foreground">Carregando painel…</div>;

@@ -13,6 +13,8 @@ function AdminLogin() {
   const [pass, setPass] = useState("");
   const [err, setErr] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
+  const [resetMsg, setResetMsg] = useState<string | null>(null);
+  const [resetBusy, setResetBusy] = useState(false);
 
   async function onSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -26,6 +28,24 @@ function AdminLogin() {
       setErr(e instanceof Error ? e.message : "Falha ao entrar");
     } finally {
       setBusy(false);
+    }
+  }
+
+  async function onReset() {
+    setResetMsg(null); setErr(null);
+    if (!email) { setErr("Digite seu e-mail para receber o link."); return; }
+    setResetBusy(true);
+    try {
+      const sb = await getExternalBrowser();
+      const { error } = await sb.auth.resetPasswordForEmail(email, {
+        redirectTo: `${window.location.origin}/admin/reset-password`,
+      });
+      if (error) throw error;
+      setResetMsg("Se o e-mail existir, um link de redefinição foi enviado.");
+    } catch (e: unknown) {
+      setErr(e instanceof Error ? e.message : "Falha ao enviar link");
+    } finally {
+      setResetBusy(false);
     }
   }
 
@@ -45,9 +65,14 @@ function AdminLogin() {
             className="w-full rounded border px-3 py-2 text-sm" autoComplete="current-password" />
         </label>
         {err && <p className="text-xs text-red-600">{err}</p>}
+        {resetMsg && <p className="text-xs text-green-700">{resetMsg}</p>}
         <button disabled={busy} type="submit"
           className="w-full rounded bg-[#0066CC] px-3 py-2 text-sm font-semibold text-white hover:bg-[#0055aa] disabled:opacity-60">
           {busy ? "Entrando…" : "Entrar"}
+        </button>
+        <button type="button" onClick={onReset} disabled={resetBusy}
+          className="w-full text-center text-xs text-[#0066CC] hover:underline disabled:opacity-60">
+          {resetBusy ? "Enviando…" : "Esqueci minha senha"}
         </button>
       </form>
     </div>
