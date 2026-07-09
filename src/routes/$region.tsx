@@ -28,7 +28,7 @@ export const Route = createFileRoute("/$region")({
     loaderData
       ? {
           meta: [
-            { title: `${loaderData.region.name} — Paraná Total` },
+            { title: `${loaderData.region.name} — Vozes Paranaenses` },
             {
               name: "description",
               content:
@@ -37,7 +37,7 @@ export const Route = createFileRoute("/$region")({
             },
             {
               property: "og:title",
-              content: `${loaderData.region.name} — Paraná Total`,
+              content: `${loaderData.region.name} — Vozes Paranaenses`,
             },
             {
               property: "og:description",
@@ -74,31 +74,52 @@ function RegionPage() {
   const { data: region } = useSuspenseQuery(regionQO(slug));
   const { data: articles } = useSuspenseQuery(articlesQO(slug));
 
-  const primary = region.primary_color ?? "#0EA5E9";
+  const tema = region.tema_config ?? {};
+  const primary = tema.paleta?.primaria ?? "#0A2540";
+  const accent = tema.paleta?.acento ?? "#0066CC";
+  const bg = tema.paleta?.fundo ?? "#FFFFFF";
+  const fontDisplay = tema.tipografia_destaque ?? "Bebas Neue";
+  const fontBody = tema.tipografia_corpo ?? "Barlow";
 
   return (
-    <div className="min-h-screen bg-background text-foreground">
-      <header className="border-b">
+    <div
+      className="min-h-screen"
+      style={{
+        background: bg,
+        color: "#0f172a",
+        fontFamily: `'${fontBody}', system-ui, sans-serif`,
+      }}
+    >
+      <header className="border-b-4" style={{ borderColor: primary, background: "#fff" }}>
         <div className="mx-auto flex max-w-6xl items-center justify-between px-4 py-4">
-          <Link to="/" className="text-xl font-bold">
-            Paraná<span style={{ color: primary }}>Total</span>
+          <Link
+            to="/"
+            className="text-2xl leading-none tracking-tight"
+            style={{ fontFamily: `'${fontDisplay}', system-ui, sans-serif`, color: primary }}
+          >
+            VOZES <span style={{ color: accent }}>PARANAENSES</span>
           </Link>
-          <Link to="/" className="text-sm text-muted-foreground hover:text-primary">
+          <Link to="/" className="text-sm text-slate-600 hover:opacity-70">
             ← Todas as regiões
           </Link>
         </div>
       </header>
 
       <section
-        className="border-b"
-        style={{ background: `linear-gradient(135deg, ${primary}22, transparent)` }}
+        className="border-b border-slate-200"
+        style={{ background: `linear-gradient(135deg, ${primary}18, transparent)` }}
       >
         <div className="mx-auto max-w-6xl px-4 py-10">
-          <div className="text-xs font-semibold uppercase tracking-widest" style={{ color: primary }}>
+          <div className="text-xs font-bold uppercase tracking-widest" style={{ color: accent }}>
             Região
           </div>
-          <h1 className="mt-1 text-4xl font-bold">{region.name}</h1>
-          <p className="mt-2 text-muted-foreground">
+          <h1
+            className="mt-1 text-5xl md:text-6xl leading-none"
+            style={{ fontFamily: `'${fontDisplay}', system-ui, sans-serif`, color: primary }}
+          >
+            {region.name}
+          </h1>
+          <p className="mt-3 text-slate-600 max-w-2xl">
             {region.description ?? `Notícias de ${region.main_city} e cidades vizinhas.`}
           </p>
         </div>
@@ -106,9 +127,11 @@ function RegionPage() {
 
       <section className="mx-auto max-w-6xl px-4 py-10">
         {articles.length === 0 ? (
-          <p className="text-sm text-muted-foreground">
-            Ainda não há notícias publicadas para esta região.
-          </p>
+          <div className="rounded-lg border border-slate-200 bg-white p-8 text-center">
+            <p className="text-slate-500">
+              Ainda não há matérias publicadas para {region.name}. Volte em breve.
+            </p>
+          </div>
         ) : (
           <div className="grid gap-4 md:grid-cols-3">
             {articles.map((a) => (
@@ -116,7 +139,8 @@ function RegionPage() {
                 key={a.id}
                 to="/$region/$slug"
                 params={{ region: slug, slug: a.slug }}
-                className="group overflow-hidden rounded-lg border hover:border-primary"
+                className="group overflow-hidden rounded-lg border border-slate-200 bg-white transition hover:shadow-md"
+                style={{ borderTopWidth: 3, borderTopColor: accent }}
               >
                 {a.cover_image_url ? (
                   <img
@@ -126,12 +150,17 @@ function RegionPage() {
                     loading="lazy"
                   />
                 ) : (
-                  <div className="h-40 w-full bg-muted" />
+                  <div className="h-40 w-full" style={{ background: `${primary}15` }} />
                 )}
                 <div className="p-4">
-                  <h3 className="font-semibold group-hover:text-primary">{a.title}</h3>
+                  <h3
+                    className="text-lg leading-tight group-hover:underline"
+                    style={{ fontFamily: `'${fontDisplay}', system-ui, sans-serif`, color: primary }}
+                  >
+                    {a.title}
+                  </h3>
                   {a.summary && (
-                    <p className="mt-2 line-clamp-2 text-sm text-muted-foreground">
+                    <p className="mt-2 line-clamp-2 text-sm text-slate-600">
                       {a.summary}
                     </p>
                   )}
