@@ -1,6 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { queryOptions, useSuspenseQuery } from "@tanstack/react-query";
-import { listRegions, listLatestArticles } from "@/lib/content.functions";
+import { listRegions, listLatestArticles, type ArticleListItem, type Region } from "@/lib/content.functions";
 
 const regionsQO = queryOptions({
   queryKey: ["regions"],
@@ -45,99 +45,295 @@ export const Route = createFileRoute("/")({
 function Home() {
   const { data: regions } = useSuspenseQuery(regionsQO);
   const { data: articles } = useSuspenseQuery(latestQO);
+  return <PortalHome regions={regions} articles={articles} />;
+}
+
+/* --------------------------- Filler manchetes --------------------------- */
+/* Enquanto o pipeline não publica, exibimos manchetes plausíveis por região
+   para que a home nunca apareça vazia. Substituídas automaticamente pelo
+   conteúdo real assim que o artigo daquela região for publicado. */
+
+const REGION_FALLBACK: Record<string, string> = {
+  curitiba: "Curitiba anuncia novo BRT e prevê operação a partir de 2027",
+  "rmc": "Grande Curitiba integra tarifa entre 14 municípios da região",
+  litoral: "Trecho da BR-277 é liberado após 12h de interdição em Paranaguá",
+  "campos-gerais": "Indústrias de Ponta Grossa abrem mais de 500 vagas de emprego",
+  "norte-pioneiro": "Jacarezinho recebe R$ 40 milhões para revitalização urbana",
+  "norte-central": "Londrina lança programa de incentivo a startups de saúde",
+  noroeste: "Setor de serviços lidera crescimento econômico em Umuarama",
+  oeste: "Cascavel bate recorde histórico de exportação de soja",
+  sudoeste: "Francisco Beltrão inaugura novo hospital regional nesta semana",
+  "centro-sul": "Guarapuava atrai investimento bilionário para energia renovável",
+};
+
+const HERO_FALLBACK = {
+  category: "Destaque",
+  title:
+    "Governo anuncia novo pacote de investimentos em infraestrutura para os Campos Gerais",
+  summary:
+    "Obras incluem a duplicação de rodovias e a modernização do escoamento de safra, prometendo reduzir custos logísticos em até 15%.",
+};
+
+const SIDE_FALLBACK = [
+  { cat: "Agronegócio", title: "Safra de soja no Paraná deve bater novo recorde histórico em 2024" },
+  { cat: "Política", title: "Assembleia Legislativa vota hoje projeto que altera previdência estadual" },
+  { cat: "Saúde", title: "Paraná reforça campanha de vacinação contra a gripe em todo o estado" },
+];
+
+const SECONDARY_FALLBACK = [
+  { cat: "Esportes", title: "Paranaense 2024: confira os confrontos das quartas de final", summary: "Federação Paranaense confirmou datas e horários dos jogos decisivos." },
+  { cat: "Cultura", title: "Museu Oscar Niemeyer abre nova exposição sobre arte paranaense", summary: "Mostra reúne 25 artistas que retratam a diversidade cultural do estado." },
+];
+
+const MOST_READ_FALLBACK = [
+  "Concurso público estadual abre 1.200 vagas de nível superior",
+  "Previsão do tempo: frente fria chega ao sul do estado na quarta",
+  "Nota Paraná: confira os números sorteados do prêmio mensal",
+];
+
+const CATEGORIES = [
+  "Últimas Notícias",
+  "Política",
+  "Economia",
+  "Agronegócio",
+  "Educação",
+  "Segurança",
+  "Esportes",
+  "Cultura",
+];
+
+/* --------------------------- Portal Home --------------------------- */
+
+function formatDateBR() {
+  const d = new Date();
+  return d.toLocaleDateString("pt-BR", {
+    weekday: "long",
+    day: "2-digit",
+    month: "long",
+  });
+}
+
+function PortalHome({ regions, articles }: { regions: Region[]; articles: ArticleListItem[] }) {
+  const [hero, ...rest] = articles;
+  const side = rest.slice(0, 3);
+  const secondary = rest.slice(3, 5);
+
+  const articleByRegion = new Map<string, ArticleListItem>();
+  for (const a of articles) {
+    if (a.region && !articleByRegion.has(a.region.slug)) articleByRegion.set(a.region.slug, a);
+  }
 
   return (
-    <div className="min-h-screen bg-background text-foreground">
-      <header className="border-b">
-        <div className="mx-auto flex max-w-6xl items-center justify-between px-4 py-4">
-          <Link to="/" className="text-2xl font-bold tracking-tight">
-            Paraná<span className="text-primary">Total</span>
-          </Link>
-          <nav className="hidden gap-4 text-sm md:flex">
-            {regions.slice(0, 6).map((r) => (
-              <Link
-                key={r.id}
-                to="/$region"
-                params={{ region: r.slug }}
-                className="hover:text-primary"
-              >
-                {r.name}
-              </Link>
+    <div className="w-full bg-slate-50 text-slate-900">
+      {/* Header */}
+      <header className="bg-white border-b-4 border-primary">
+        <div className="mx-auto max-w-7xl px-4">
+          <div className="py-5 flex flex-col md:flex-row justify-between items-center gap-4">
+            <Link to="/" className="flex flex-col">
+              <h1 className="font-display text-4xl md:text-5xl leading-none tracking-tight text-primary flex items-baseline gap-2">
+                PARANÁ <span className="text-secondary font-light">TOTAL</span>
+              </h1>
+              <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-slate-400 mt-1">
+                O portal de notícias do estado
+              </p>
+            </Link>
+            <div className="hidden lg:flex items-center gap-4">
+              <div className="text-right">
+                <p className="text-xs font-bold text-primary">Curitiba, 22°C</p>
+                <p className="text-[10px] text-slate-500 uppercase capitalize">{formatDateBR()}</p>
+              </div>
+              <div className="h-8 w-px bg-slate-200" />
+              <button className="bg-primary text-primary-foreground px-4 py-2 text-xs font-bold rounded uppercase hover:opacity-90 transition">
+                Assine Já
+              </button>
+            </div>
+          </div>
+          <nav className="flex overflow-x-auto no-scrollbar py-3 border-t border-slate-100 gap-6 text-xs font-bold uppercase text-slate-600 whitespace-nowrap">
+            {CATEGORIES.map((c, i) => (
+              <a key={c} href="#" className={i === 0 ? "text-secondary" : "hover:text-secondary transition-colors"}>
+                {c}
+              </a>
             ))}
           </nav>
         </div>
       </header>
 
-      <section className="mx-auto max-w-6xl px-4 py-10">
-        <h1 className="text-3xl font-bold md:text-4xl">As 10 regiões do Paraná</h1>
-        <p className="mt-2 text-muted-foreground">
-          Escolha uma região para ver as notícias locais.
-        </p>
-        <div className="mt-6 grid grid-cols-2 gap-3 md:grid-cols-5">
-          {regions.map((r) => (
-            <Link
-              key={r.id}
-              to="/$region"
-              params={{ region: r.slug }}
-              className="group rounded-lg border p-4 transition-colors hover:border-primary"
-              style={{ borderTop: `4px solid ${r.primary_color ?? "#0EA5E9"}` }}
-            >
-              <div className="text-sm font-semibold group-hover:text-primary">
-                {r.name}
-              </div>
-              <div className="text-xs text-muted-foreground">{r.main_city}</div>
-            </Link>
-          ))}
-        </div>
-      </section>
-
-      <section className="mx-auto max-w-6xl px-4 pb-16">
-        <h2 className="mb-4 text-2xl font-bold">Últimas notícias</h2>
-        {articles.length === 0 ? (
-          <p className="text-sm text-muted-foreground">
-            Ainda não há notícias publicadas. O pipeline editorial começa em breve.
-          </p>
-        ) : (
-          <div className="grid gap-4 md:grid-cols-3">
-            {articles.map((a) => (
-              <Link
-                key={a.id}
-                to="/$region/$slug"
-                params={{ region: a.region?.slug ?? "", slug: a.slug }}
-                className="group overflow-hidden rounded-lg border hover:border-primary"
-              >
-                {a.cover_image_url ? (
-                  <img
-                    src={a.cover_image_url}
-                    alt=""
-                    className="h-40 w-full object-cover"
-                    loading="lazy"
-                  />
-                ) : (
-                  <div className="h-40 w-full bg-muted" />
-                )}
-                <div className="p-4">
-                  <div className="text-xs uppercase tracking-wide text-primary">
-                    {a.region?.name}
-                  </div>
-                  <h3 className="mt-1 font-semibold group-hover:text-primary">
-                    {a.title}
-                  </h3>
-                  {a.summary && (
-                    <p className="mt-2 line-clamp-2 text-sm text-muted-foreground">
-                      {a.summary}
-                    </p>
-                  )}
-                </div>
-              </Link>
-            ))}
+      <main className="mx-auto max-w-7xl px-4 py-8">
+        {/* Hero */}
+        <div className="grid grid-cols-12 gap-6 mb-12">
+          <div className="col-span-12 lg:col-span-8">
+            <HeroCard article={hero} />
           </div>
-        )}
-      </section>
+          <div className="col-span-12 lg:col-span-4 flex flex-col gap-6">
+            {[0, 1, 2].map((i) => {
+              const a = side[i];
+              const fb = SIDE_FALLBACK[i];
+              const to = a?.region
+                ? { to: "/$region/$slug" as const, params: { region: a.region.slug, slug: a.slug } }
+                : null;
+              const inner = (
+                <>
+                  <span className={`text-[10px] font-black uppercase tracking-widest ${i === 0 ? "text-secondary" : "text-slate-500"}`}>
+                    {a?.region?.name ?? fb.cat}
+                  </span>
+                  <h3 className="font-display text-xl leading-snug mt-1 hover:text-secondary transition-colors">
+                    {a?.title ?? fb.title}
+                  </h3>
+                </>
+              );
+              const borderCls = i === 0 ? "border-secondary" : "border-slate-300";
+              return to ? (
+                <Link key={i} {...to} className={`block border-l-4 pl-4 py-1 ${borderCls}`}>{inner}</Link>
+              ) : (
+                <div key={i} className={`border-l-4 pl-4 py-1 ${borderCls} cursor-pointer`}>{inner}</div>
+              );
+            })}
+            <div className="mt-auto rounded bg-slate-100 border border-slate-200 h-24 flex items-center justify-center">
+              <span className="text-[10px] font-bold uppercase tracking-widest text-slate-400">Publicidade</span>
+            </div>
+          </div>
+        </div>
 
-      <footer className="border-t py-6 text-center text-xs text-muted-foreground">
-        © {new Date().getFullYear()} Paraná Total
+        {/* Notícias das Regiões */}
+        <section className="mb-12">
+          <div className="flex items-center gap-4 mb-6">
+            <h2 className="font-display text-2xl text-primary uppercase tracking-tight shrink-0">
+              Notícias das Regiões
+            </h2>
+            <div className="h-1 w-full bg-slate-200 rounded-full">
+              <div className="h-1 w-24 bg-secondary rounded-full" />
+            </div>
+          </div>
+
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-px bg-slate-200 border border-slate-200 rounded-lg overflow-hidden">
+            {regions.map((r) => {
+              const a = articleByRegion.get(r.slug);
+              const title = a?.title ?? REGION_FALLBACK[r.slug] ?? `Últimas notícias de ${r.name}`;
+              return (
+                <Link
+                  key={r.id}
+                  to={a ? "/$region/$slug" : "/$region"}
+                  params={a ? { region: r.slug, slug: a.slug } : { region: r.slug }}
+                  className="bg-white p-4 hover:bg-accent transition-colors group block"
+                >
+                  <p className="text-[10px] font-bold text-secondary mb-1 uppercase tracking-wider">
+                    {r.name}
+                  </p>
+                  <h4 className="text-sm font-bold group-hover:underline leading-tight">
+                    {title}
+                  </h4>
+                </Link>
+              );
+            })}
+          </div>
+        </section>
+
+        {/* Secondary + Mais lidas */}
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
+          <div className="md:col-span-3 grid grid-cols-1 sm:grid-cols-2 gap-8">
+            {[0, 1].map((i) => {
+              const a = secondary[i];
+              const fb = SECONDARY_FALLBACK[i];
+              const Wrap: React.ElementType = a?.region ? Link : "div";
+              const wrapProps = a?.region
+                ? { to: "/$region/$slug", params: { region: a.region.slug, slug: a.slug } }
+                : {};
+              return (
+                <Wrap key={i} {...wrapProps} className="flex flex-col gap-3 group cursor-pointer">
+                  <div className="w-full aspect-video bg-slate-200 rounded-lg overflow-hidden">
+                    {a?.cover_image_url ? (
+                      <img src={a.cover_image_url} alt="" className="h-full w-full object-cover group-hover:scale-105 transition-transform duration-500" loading="lazy" />
+                    ) : (
+                      <div className="h-full w-full bg-gradient-to-br from-slate-200 to-slate-300" />
+                    )}
+                  </div>
+                  <span className="text-secondary text-[10px] font-bold uppercase tracking-wider">
+                    {a?.region?.name ?? fb.cat}
+                  </span>
+                  <h4 className="font-display text-xl leading-snug group-hover:text-secondary">
+                    {a?.title ?? fb.title}
+                  </h4>
+                  <p className="text-sm text-slate-500 line-clamp-2">
+                    {a?.summary ?? fb.summary}
+                  </p>
+                </Wrap>
+              );
+            })}
+          </div>
+
+          <aside className="space-y-6">
+            <div className="bg-white p-5 rounded-lg border border-slate-200">
+              <h5 className="text-xs font-black uppercase text-primary border-b border-slate-100 pb-2 mb-4 tracking-wider">
+                Mais Lidas
+              </h5>
+              <div className="space-y-4">
+                {MOST_READ_FALLBACK.map((t, i) => (
+                  <div key={i} className="flex gap-3 group cursor-pointer">
+                    <span className="font-display text-3xl leading-none text-slate-200">{i + 1}</span>
+                    <p className="text-sm font-bold group-hover:text-secondary transition-colors">
+                      {t}
+                    </p>
+                  </div>
+                ))}
+              </div>
+            </div>
+            <div className="rounded bg-slate-100 border border-slate-200 h-64 flex items-center justify-center">
+              <span className="text-[10px] font-bold uppercase tracking-widest text-slate-400">Publicidade</span>
+            </div>
+          </aside>
+        </div>
+      </main>
+
+      <footer className="bg-primary text-primary-foreground py-12 mt-8">
+        <div className="mx-auto max-w-7xl px-4 grid grid-cols-1 md:grid-cols-4 gap-8">
+          <div className="md:col-span-2">
+            <h2 className="font-display text-3xl tracking-tight mb-3">PARANÁ TOTAL</h2>
+            <p className="text-white/70 text-xs leading-relaxed max-w-md">
+              A cobertura mais completa do estado em tempo real, conectando as 10 regiões do Paraná em um só lugar.
+            </p>
+          </div>
+          <div className="md:col-span-2 flex md:justify-end items-end">
+            <p className="text-[10px] text-white/50 font-bold uppercase tracking-widest">
+              © {new Date().getFullYear()} Paraná Total — Grupo de Comunicação
+            </p>
+          </div>
+        </div>
       </footer>
     </div>
   );
+}
+
+function HeroCard({ article }: { article: ArticleListItem | undefined }) {
+  const title = article?.title ?? HERO_FALLBACK.title;
+  const summary = article?.summary ?? HERO_FALLBACK.summary;
+  const cat = article?.region?.name ?? HERO_FALLBACK.category;
+  const to = article?.region
+    ? { to: "/$region/$slug" as const, params: { region: article.region.slug, slug: article.slug } }
+    : null;
+
+  const Inner = (
+    <div className="group relative overflow-hidden rounded-lg h-full">
+      <div className="w-full aspect-[16/9] bg-slate-200">
+        {article?.cover_image_url ? (
+          <img src={article.cover_image_url} alt="" className="h-full w-full object-cover" />
+        ) : (
+          <div className="h-full w-full bg-gradient-to-br from-primary/80 via-primary to-secondary/60" />
+        )}
+      </div>
+      <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/30 to-transparent" />
+      <div className="absolute bottom-0 left-0 p-6 md:p-8">
+        <span className="bg-secondary text-white text-[10px] font-bold px-2 py-1 uppercase mb-3 inline-block tracking-wider">
+          {cat}
+        </span>
+        <h2 className="font-display text-3xl md:text-5xl text-white leading-tight group-hover:underline">
+          {title}
+        </h2>
+        <p className="mt-3 text-slate-200 text-sm md:text-base max-w-2xl line-clamp-2">
+          {summary}
+        </p>
+      </div>
+    </div>
+  );
+
+  return to ? <Link {...to} className="block h-full">{Inner}</Link> : Inner;
 }
