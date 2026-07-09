@@ -92,13 +92,7 @@ function RegionPage() {
     >
       <header className="border-b-4" style={{ borderColor: primary, background: "#fff" }}>
         <div className="mx-auto flex max-w-6xl items-center justify-between px-4 py-4">
-          <Link
-            to="/"
-            className="text-2xl leading-none tracking-tight"
-            style={{ fontFamily: `'${fontDisplay}', system-ui, sans-serif`, color: primary }}
-          >
-            VOZES <span style={{ color: accent }}>PARANAENSES</span>
-          </Link>
+          <Logo size="md" />
           <Link to="/" className="text-sm text-slate-600 hover:opacity-70">
             ← Todas as regiões
           </Link>
