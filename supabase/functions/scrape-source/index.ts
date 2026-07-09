@@ -37,7 +37,7 @@ Deno.serve(async (req) => {
   const key = Deno.env.get("EXTERNAL_SUPABASE_SERVICE_ROLE_KEY");
   if (!url || !key) return json({ error: "missing_external_supabase_env" }, 500);
 
-  let body: { fonte_id?: string } = {};
+  let body: { fonte_id?: string; force?: boolean } = {};
   try {
     body = await req.json();
   } catch {
@@ -57,7 +57,7 @@ Deno.serve(async (req) => {
 
   const now = Date.now();
   const eligible = (fontes ?? []).filter((f) => {
-    if (body.fonte_id) return true;
+    if (body.fonte_id || body.force) return true;
     if (!f.ultimo_scrape_em) return true;
     const last = new Date(f.ultimo_scrape_em).getTime();
     return now - last >= f.frequencia_horas * 3600 * 1000;
