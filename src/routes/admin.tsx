@@ -78,10 +78,13 @@ function AdminLayout() {
             <nav className="flex gap-4 text-sm">
               <Link to="/admin" activeOptions={{ exact: true }} className="hover:underline [&.active]:font-bold">Fila</Link>
               <Link to="/admin/clusters" className="hover:underline [&.active]:font-bold">Pautas</Link>
+              <Link to="/admin/fontes" className="hover:underline [&.active]:font-bold">Fontes</Link>
+              <Link to="/admin/regioes" className="hover:underline [&.active]:font-bold">Regiões</Link>
             </nav>
           </div>
           <div className="flex items-center gap-3 text-xs">
             <span className="opacity-80">{email}</span>
+            <Link to="/admin/senha" className="rounded border border-white/30 px-2 py-1 hover:bg-white/10">Senha</Link>
             <button
               onClick={async () => { const sb = await getExternalBrowser(); await sb.auth.signOut(); nav({ to: "/admin/login", replace: true }); }}
               className="rounded border border-white/30 px-2 py-1 hover:bg-white/10"

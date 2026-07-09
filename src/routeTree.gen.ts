@@ -14,6 +14,7 @@ import { Route as AdminRouteImport } from './routes/admin'
 import { Route as RegionRouteImport } from './routes/$region'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AdminIndexRouteImport } from './routes/admin.index'
+import { Route as AdminSenhaRouteImport } from './routes/admin.senha'
 import { Route as AdminResetPasswordRouteImport } from './routes/admin.reset-password'
 import { Route as AdminRegioesRouteImport } from './routes/admin.regioes'
 import { Route as AdminLoginRouteImport } from './routes/admin.login'
@@ -47,6 +48,11 @@ const IndexRoute = IndexRouteImport.update({
 const AdminIndexRoute = AdminIndexRouteImport.update({
   id: '/',
   path: '/',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminSenhaRoute = AdminSenhaRouteImport.update({
+  id: '/senha',
+  path: '/senha',
   getParentRoute: () => AdminRoute,
 } as any)
 const AdminResetPasswordRoute = AdminResetPasswordRouteImport.update({
@@ -107,6 +113,7 @@ export interface FileRoutesByFullPath {
   '/admin/login': typeof AdminLoginRoute
   '/admin/regioes': typeof AdminRegioesRoute
   '/admin/reset-password': typeof AdminResetPasswordRoute
+  '/admin/senha': typeof AdminSenhaRoute
   '/admin/': typeof AdminIndexRoute
   '/$region/editoria/$categoria': typeof RegionEditoriaCategoriaRoute
   '/api/public/sitemap.xml': typeof ApiPublicSitemapDotxmlRoute
@@ -122,6 +129,7 @@ export interface FileRoutesByTo {
   '/admin/login': typeof AdminLoginRoute
   '/admin/regioes': typeof AdminRegioesRoute
   '/admin/reset-password': typeof AdminResetPasswordRoute
+  '/admin/senha': typeof AdminSenhaRoute
   '/admin': typeof AdminIndexRoute
   '/$region/editoria/$categoria': typeof RegionEditoriaCategoriaRoute
   '/api/public/sitemap.xml': typeof ApiPublicSitemapDotxmlRoute
@@ -139,6 +147,7 @@ export interface FileRoutesById {
   '/admin/login': typeof AdminLoginRoute
   '/admin/regioes': typeof AdminRegioesRoute
   '/admin/reset-password': typeof AdminResetPasswordRoute
+  '/admin/senha': typeof AdminSenhaRoute
   '/admin/': typeof AdminIndexRoute
   '/$region/editoria/$categoria': typeof RegionEditoriaCategoriaRoute
   '/api/public/sitemap.xml': typeof ApiPublicSitemapDotxmlRoute
@@ -157,6 +166,7 @@ export interface FileRouteTypes {
     | '/admin/login'
     | '/admin/regioes'
     | '/admin/reset-password'
+    | '/admin/senha'
     | '/admin/'
     | '/$region/editoria/$categoria'
     | '/api/public/sitemap.xml'
@@ -172,6 +182,7 @@ export interface FileRouteTypes {
     | '/admin/login'
     | '/admin/regioes'
     | '/admin/reset-password'
+    | '/admin/senha'
     | '/admin'
     | '/$region/editoria/$categoria'
     | '/api/public/sitemap.xml'
@@ -188,6 +199,7 @@ export interface FileRouteTypes {
     | '/admin/login'
     | '/admin/regioes'
     | '/admin/reset-password'
+    | '/admin/senha'
     | '/admin/'
     | '/$region/editoria/$categoria'
     | '/api/public/sitemap.xml'
@@ -236,6 +248,13 @@ declare module '@tanstack/react-router' {
       path: '/'
       fullPath: '/admin/'
       preLoaderRoute: typeof AdminIndexRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/senha': {
+      id: '/admin/senha'
+      path: '/senha'
+      fullPath: '/admin/senha'
+      preLoaderRoute: typeof AdminSenhaRouteImport
       parentRoute: typeof AdminRoute
     }
     '/admin/reset-password': {
@@ -325,6 +344,7 @@ interface AdminRouteChildren {
   AdminLoginRoute: typeof AdminLoginRoute
   AdminRegioesRoute: typeof AdminRegioesRoute
   AdminResetPasswordRoute: typeof AdminResetPasswordRoute
+  AdminSenhaRoute: typeof AdminSenhaRoute
   AdminIndexRoute: typeof AdminIndexRoute
 }
 
@@ -334,6 +354,7 @@ const AdminRouteChildren: AdminRouteChildren = {
   AdminLoginRoute: AdminLoginRoute,
   AdminRegioesRoute: AdminRegioesRoute,
   AdminResetPasswordRoute: AdminResetPasswordRoute,
+  AdminSenhaRoute: AdminSenhaRoute,
   AdminIndexRoute: AdminIndexRoute,
 }
 
