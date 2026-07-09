@@ -1,14 +1,14 @@
 import { Link } from "@tanstack/react-router";
-import logo from "@/assets/vozes-paranaenses-logo.png.asset.json";
+import logo from "@/assets/vozes-logo.png.asset.json";
 
 type Size = "sm" | "md" | "lg";
 
 // Alturas seguindo proporção áurea (≈1.618) entre breakpoints:
 // sm 40 → md 64 → lg 104. Largura automática preserva o aspecto da marca.
 const HEIGHTS: Record<Size, string> = {
-  sm: "h-10 md:h-12",
-  md: "h-12 md:h-16 lg:h-20",
-  lg: "h-16 md:h-24 lg:h-28",
+  sm: "h-12 md:h-14",
+  md: "h-16 md:h-20 lg:h-24",
+  lg: "h-20 md:h-28 lg:h-36",
 };
 
 export function Logo({
