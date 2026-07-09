@@ -114,17 +114,23 @@ async function sha256(input: string): Promise<string> {
 }
 
 async function scrapeFonte(fonte: Fonte): Promise<Item[]> {
-  // Estratégia 1: tentar RSS comum
-  const rssCandidates = [
-    fonte.url_base.replace(/\/$/, "") + "/feed",
-    fonte.url_base.replace(/\/$/, "") + "/rss",
-    fonte.url_base.replace(/\/$/, "") + "/feed.xml",
-    fonte.url_base.replace(/\/$/, "") + "/rss.xml",
-  ];
+  // Normaliza: se o usuário cadastrou já uma URL de feed, tenta ela primeiro;
+  // caso contrário, monta candidatos comuns a partir do host raiz.
+  const origin = new URL(fonte.url_base).origin;
+  const looksLikeFeed = /\/(feed|rss)(\.xml)?\/?$/i.test(fonte.url_base) || /feed=/.test(fonte.url_base);
+  const rssCandidates = looksLikeFeed
+    ? [fonte.url_base]
+    : [
+        fonte.url_base.replace(/\/$/, "") + "/feed",
+        fonte.url_base.replace(/\/$/, "") + "/rss",
+        fonte.url_base.replace(/\/$/, "") + "/feed.xml",
+        fonte.url_base.replace(/\/$/, "") + "/rss.xml",
+        origin + "/?feed=rss2",
+      ];
   for (const rss of rssCandidates) {
     try {
       const res = await fetch(rss, {
-        headers: { "user-agent": "VozesParanaensesBot/1.0 (+contato@vozesparanaenses.com.br)" },
+        headers: { "user-agent": "Mozilla/5.0 (compatible; VozesParanaensesBot/1.0; +contato@vozesparanaenses.com.br)" },
       });
       if (!res.ok) continue;
       const text = await res.text();
@@ -135,17 +141,23 @@ async function scrapeFonte(fonte: Fonte): Promise<Item[]> {
     }
   }
 
-  // Estratégia 2: HTML — coleta apenas <a> com heurística de matéria
-  try {
-    const res = await fetch(fonte.url_base, {
-      headers: { "user-agent": "VozesParanaensesBot/1.0" },
-    });
-    if (!res.ok) return [];
-    const html = await res.text();
-    return parseHtmlLinks(html, fonte.url_base).slice(0, 20);
-  } catch {
-    return [];
+  // Estratégia 2: HTML — se a URL cadastrada retornar 404 (ex.: /feed inexistente),
+  // cai para a home do domínio automaticamente.
+  const htmlTargets = looksLikeFeed ? [origin + "/", fonte.url_base] : [fonte.url_base, origin + "/"];
+  for (const target of htmlTargets) {
+    try {
+      const res = await fetch(target, {
+        headers: { "user-agent": "Mozilla/5.0 (compatible; VozesParanaensesBot/1.0)" },
+      });
+      if (!res.ok) continue;
+      const html = await res.text();
+      const items = parseHtmlLinks(html, target).slice(0, 30);
+      if (items.length) return items;
+    } catch {
+      // tenta próximo
+    }
   }
+  return [];
 }
 
 function parseRss(xml: string): Item[] {
