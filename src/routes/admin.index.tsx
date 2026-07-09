@@ -1,6 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useState, useCallback } from "react";
 import { getExternalBrowser } from "@/lib/external-supabase-browser";
+import { supabase } from "@/integrations/supabase/client";
 
 export const Route = createFileRoute("/admin/")({
   component: AdminQueue,
@@ -25,6 +26,8 @@ function AdminQueue() {
   const [items, setItems] = useState<Draft[] | null>(null);
   const [err, setErr] = useState<string | null>(null);
   const [busyId, setBusyId] = useState<string | null>(null);
+  const [pipelineBusy, setPipelineBusy] = useState(false);
+  const [pipelineLog, setPipelineLog] = useState<string[]>([]);
 
   const load = useCallback(async () => {
     setItems(null); setErr(null);
@@ -44,6 +47,31 @@ function AdminQueue() {
   }, [tab]);
 
   useEffect(() => { load(); }, [load]);
+
+  async function runPipeline() {
+    setPipelineBusy(true);
+    setPipelineLog(["Iniciando pipeline…"]);
+    const steps: Array<{ name: string; fn: string }> = [
+      { name: "1/3 Scrape de fontes ativas", fn: "scrape-source" },
+      { name: "2/3 Clustering por similaridade", fn: "cluster-articles" },
+      { name: "3/3 Classificação + cotas", fn: "classify-and-quota" },
+    ];
+    for (const s of steps) {
+      setPipelineLog((l) => [...l, `${s.name}…`]);
+      try {
+        const { data, error } = await supabase.functions.invoke(s.fn, { body: {} });
+        if (error) throw error;
+        const summary = data && typeof data === "object" ? JSON.stringify(data).slice(0, 140) : "ok";
+        setPipelineLog((l) => [...l, `  ✓ ${summary}`]);
+      } catch (e: unknown) {
+        setPipelineLog((l) => [...l, `  ✗ ${e instanceof Error ? e.message : "erro"}`]);
+        break;
+      }
+    }
+    setPipelineLog((l) => [...l, "Pipeline finalizado."]);
+    setPipelineBusy(false);
+    load();
+  }
 
   async function updateStatus(id: string, next: Draft["status"]) {
     setBusyId(id);
@@ -65,15 +93,27 @@ function AdminQueue() {
     <div className="space-y-4">
       <div className="flex flex-wrap items-center justify-between gap-2">
         <h1 className="text-2xl font-bold">Fila editorial</h1>
-        <div className="flex gap-1 rounded-md border bg-muted p-1 text-sm">
+        <div className="flex flex-wrap items-center gap-2">
+          <button onClick={runPipeline} disabled={pipelineBusy}
+            className="rounded bg-[#0A2540] px-3 py-1.5 text-xs font-semibold text-white hover:bg-[#0d2f52] disabled:opacity-60">
+            {pipelineBusy ? "Rodando pipeline…" : "▶ Rodar pipeline agora"}
+          </button>
+          <div className="flex gap-1 rounded-md border bg-muted p-1 text-sm">
           {STATUS_TABS.map((s) => (
             <button key={s} onClick={() => setTab(s)}
               className={`rounded px-3 py-1 capitalize ${tab === s ? "bg-white shadow-sm font-semibold" : "text-muted-foreground hover:text-foreground"}`}>
               {s}
             </button>
           ))}
+          </div>
         </div>
       </div>
+
+      {pipelineLog.length > 0 && (
+        <pre className="max-h-48 overflow-auto rounded border bg-muted p-2 text-[11px] leading-tight">
+          {pipelineLog.join("\n")}
+        </pre>
+      )}
 
       {err && <p className="rounded border border-red-200 bg-red-50 p-3 text-sm text-red-700">{err}</p>}
       {!items && !err && <p className="text-sm text-muted-foreground">Carregando…</p>}

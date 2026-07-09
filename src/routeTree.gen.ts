@@ -14,8 +14,11 @@ import { Route as AdminRouteImport } from './routes/admin'
 import { Route as RegionRouteImport } from './routes/$region'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AdminIndexRouteImport } from './routes/admin.index'
+import { Route as AdminSenhaRouteImport } from './routes/admin.senha'
 import { Route as AdminResetPasswordRouteImport } from './routes/admin.reset-password'
+import { Route as AdminRegioesRouteImport } from './routes/admin.regioes'
 import { Route as AdminLoginRouteImport } from './routes/admin.login'
+import { Route as AdminFontesRouteImport } from './routes/admin.fontes'
 import { Route as AdminClustersRouteImport } from './routes/admin.clusters'
 import { Route as RegionClassificadosRouteImport } from './routes/$region.classificados'
 import { Route as RegionSlugRouteImport } from './routes/$region.$slug'
@@ -47,14 +50,29 @@ const AdminIndexRoute = AdminIndexRouteImport.update({
   path: '/',
   getParentRoute: () => AdminRoute,
 } as any)
+const AdminSenhaRoute = AdminSenhaRouteImport.update({
+  id: '/senha',
+  path: '/senha',
+  getParentRoute: () => AdminRoute,
+} as any)
 const AdminResetPasswordRoute = AdminResetPasswordRouteImport.update({
   id: '/reset-password',
   path: '/reset-password',
   getParentRoute: () => AdminRoute,
 } as any)
+const AdminRegioesRoute = AdminRegioesRouteImport.update({
+  id: '/regioes',
+  path: '/regioes',
+  getParentRoute: () => AdminRoute,
+} as any)
 const AdminLoginRoute = AdminLoginRouteImport.update({
   id: '/login',
   path: '/login',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminFontesRoute = AdminFontesRouteImport.update({
+  id: '/fontes',
+  path: '/fontes',
   getParentRoute: () => AdminRoute,
 } as any)
 const AdminClustersRoute = AdminClustersRouteImport.update({
@@ -91,8 +109,11 @@ export interface FileRoutesByFullPath {
   '/$region/$slug': typeof RegionSlugRoute
   '/$region/classificados': typeof RegionClassificadosRoute
   '/admin/clusters': typeof AdminClustersRoute
+  '/admin/fontes': typeof AdminFontesRoute
   '/admin/login': typeof AdminLoginRoute
+  '/admin/regioes': typeof AdminRegioesRoute
   '/admin/reset-password': typeof AdminResetPasswordRoute
+  '/admin/senha': typeof AdminSenhaRoute
   '/admin/': typeof AdminIndexRoute
   '/$region/editoria/$categoria': typeof RegionEditoriaCategoriaRoute
   '/api/public/sitemap.xml': typeof ApiPublicSitemapDotxmlRoute
@@ -104,8 +125,11 @@ export interface FileRoutesByTo {
   '/$region/$slug': typeof RegionSlugRoute
   '/$region/classificados': typeof RegionClassificadosRoute
   '/admin/clusters': typeof AdminClustersRoute
+  '/admin/fontes': typeof AdminFontesRoute
   '/admin/login': typeof AdminLoginRoute
+  '/admin/regioes': typeof AdminRegioesRoute
   '/admin/reset-password': typeof AdminResetPasswordRoute
+  '/admin/senha': typeof AdminSenhaRoute
   '/admin': typeof AdminIndexRoute
   '/$region/editoria/$categoria': typeof RegionEditoriaCategoriaRoute
   '/api/public/sitemap.xml': typeof ApiPublicSitemapDotxmlRoute
@@ -119,8 +143,11 @@ export interface FileRoutesById {
   '/$region/$slug': typeof RegionSlugRoute
   '/$region/classificados': typeof RegionClassificadosRoute
   '/admin/clusters': typeof AdminClustersRoute
+  '/admin/fontes': typeof AdminFontesRoute
   '/admin/login': typeof AdminLoginRoute
+  '/admin/regioes': typeof AdminRegioesRoute
   '/admin/reset-password': typeof AdminResetPasswordRoute
+  '/admin/senha': typeof AdminSenhaRoute
   '/admin/': typeof AdminIndexRoute
   '/$region/editoria/$categoria': typeof RegionEditoriaCategoriaRoute
   '/api/public/sitemap.xml': typeof ApiPublicSitemapDotxmlRoute
@@ -135,8 +162,11 @@ export interface FileRouteTypes {
     | '/$region/$slug'
     | '/$region/classificados'
     | '/admin/clusters'
+    | '/admin/fontes'
     | '/admin/login'
+    | '/admin/regioes'
     | '/admin/reset-password'
+    | '/admin/senha'
     | '/admin/'
     | '/$region/editoria/$categoria'
     | '/api/public/sitemap.xml'
@@ -148,8 +178,11 @@ export interface FileRouteTypes {
     | '/$region/$slug'
     | '/$region/classificados'
     | '/admin/clusters'
+    | '/admin/fontes'
     | '/admin/login'
+    | '/admin/regioes'
     | '/admin/reset-password'
+    | '/admin/senha'
     | '/admin'
     | '/$region/editoria/$categoria'
     | '/api/public/sitemap.xml'
@@ -162,8 +195,11 @@ export interface FileRouteTypes {
     | '/$region/$slug'
     | '/$region/classificados'
     | '/admin/clusters'
+    | '/admin/fontes'
     | '/admin/login'
+    | '/admin/regioes'
     | '/admin/reset-password'
+    | '/admin/senha'
     | '/admin/'
     | '/$region/editoria/$categoria'
     | '/api/public/sitemap.xml'
@@ -214,6 +250,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminIndexRouteImport
       parentRoute: typeof AdminRoute
     }
+    '/admin/senha': {
+      id: '/admin/senha'
+      path: '/senha'
+      fullPath: '/admin/senha'
+      preLoaderRoute: typeof AdminSenhaRouteImport
+      parentRoute: typeof AdminRoute
+    }
     '/admin/reset-password': {
       id: '/admin/reset-password'
       path: '/reset-password'
@@ -221,11 +264,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminResetPasswordRouteImport
       parentRoute: typeof AdminRoute
     }
+    '/admin/regioes': {
+      id: '/admin/regioes'
+      path: '/regioes'
+      fullPath: '/admin/regioes'
+      preLoaderRoute: typeof AdminRegioesRouteImport
+      parentRoute: typeof AdminRoute
+    }
     '/admin/login': {
       id: '/admin/login'
       path: '/login'
       fullPath: '/admin/login'
       preLoaderRoute: typeof AdminLoginRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/fontes': {
+      id: '/admin/fontes'
+      path: '/fontes'
+      fullPath: '/admin/fontes'
+      preLoaderRoute: typeof AdminFontesRouteImport
       parentRoute: typeof AdminRoute
     }
     '/admin/clusters': {
@@ -283,15 +340,21 @@ const RegionRouteWithChildren =
 
 interface AdminRouteChildren {
   AdminClustersRoute: typeof AdminClustersRoute
+  AdminFontesRoute: typeof AdminFontesRoute
   AdminLoginRoute: typeof AdminLoginRoute
+  AdminRegioesRoute: typeof AdminRegioesRoute
   AdminResetPasswordRoute: typeof AdminResetPasswordRoute
+  AdminSenhaRoute: typeof AdminSenhaRoute
   AdminIndexRoute: typeof AdminIndexRoute
 }
 
 const AdminRouteChildren: AdminRouteChildren = {
   AdminClustersRoute: AdminClustersRoute,
+  AdminFontesRoute: AdminFontesRoute,
   AdminLoginRoute: AdminLoginRoute,
+  AdminRegioesRoute: AdminRegioesRoute,
   AdminResetPasswordRoute: AdminResetPasswordRoute,
+  AdminSenhaRoute: AdminSenhaRoute,
   AdminIndexRoute: AdminIndexRoute,
 }
 
