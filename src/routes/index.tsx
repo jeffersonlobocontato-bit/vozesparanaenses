@@ -114,6 +114,19 @@ function formatDateBR() {
 }
 
 function PortalHome({ regions, articles }: { regions: Region[]; articles: ArticleListItem[] }) {
+  const REGIONS_FALLBACK: Region[] = [
+    { id: "fb-metropolitana", slug: "metropolitana", name: "Metropolitana" },
+    { id: "fb-litoral", slug: "litoral", name: "Litoral" },
+    { id: "fb-campos-gerais", slug: "campos-gerais", name: "Campos Gerais" },
+    { id: "fb-norte-pioneiro", slug: "norte-pioneiro", name: "Norte Pioneiro" },
+    { id: "fb-norte-central", slug: "norte-central", name: "Norte Central" },
+    { id: "fb-noroeste", slug: "noroeste", name: "Noroeste" },
+    { id: "fb-centro-ocidental", slug: "centro-ocidental", name: "Centro Ocidental" },
+    { id: "fb-oeste", slug: "oeste", name: "Oeste" },
+    { id: "fb-sudoeste", slug: "sudoeste", name: "Sudoeste" },
+    { id: "fb-centro-sul", slug: "centro-sul", name: "Centro-Sul" },
+  ] as unknown as Region[];
+  if (!regions || regions.length === 0) regions = REGIONS_FALLBACK;
   const [hero, ...rest] = articles;
   const side = rest.slice(0, 3);
   const secondary = rest.slice(3, 5);
