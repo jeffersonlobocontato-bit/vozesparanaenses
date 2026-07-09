@@ -1,6 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { queryOptions, useSuspenseQuery } from "@tanstack/react-query";
 import { getArticle } from "@/lib/content.functions";
+import { Logo } from "@/components/Logo";
 
 const articleQO = (regionSlug: string, slug: string) =>
   queryOptions({
