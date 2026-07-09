@@ -102,6 +102,60 @@ const CATEGORIES = [
   "Cultura",
 ];
 
+/* --------------------------- Editorias: cores --------------------------- */
+/* Cada editoria tem uma cor-tag (padrão portais regionais tipo Catve). */
+const EDITORIA_COLORS: Record<string, string> = {
+  "ultimas-noticias": "bg-rose-600",
+  "ultimas": "bg-rose-600",
+  "destaque": "bg-rose-600",
+  "politica": "bg-red-700",
+  "economia": "bg-blue-700",
+  "agronegocio": "bg-green-700",
+  "agro": "bg-green-700",
+  "educacao": "bg-indigo-600",
+  "seguranca": "bg-slate-900",
+  "policia": "bg-slate-900",
+  "transito": "bg-red-600",
+  "esportes": "bg-emerald-600",
+  "cultura": "bg-fuchsia-600",
+  "saude": "bg-teal-600",
+  "cidades": "bg-amber-600",
+  "geral": "bg-yellow-500",
+};
+
+function slugify(v: string) {
+  return v
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/(^-|-$)/g, "");
+}
+
+function editoriaColor(name?: string | null, slug?: string | null) {
+  const key = (slug || (name ? slugify(name) : "")).trim();
+  return EDITORIA_COLORS[key] ?? "bg-secondary";
+}
+
+function CategoryTag({
+  name,
+  slug,
+  className = "",
+}: {
+  name: string;
+  slug?: string | null;
+  className?: string;
+}) {
+  const color = editoriaColor(name, slug);
+  return (
+    <span
+      className={`inline-block ${color} text-white text-[11px] font-black uppercase tracking-wider px-2 py-1 rounded-sm ${className}`}
+    >
+      {name}
+    </span>
+  );
+}
+
 /* --------------------------- Portal Home --------------------------- */
 
 function formatDateBR() {
@@ -161,10 +215,10 @@ function PortalHome({ regions, articles }: { regions: Region[]; articles: Articl
               </button>
             </div>
           </div>
-          <nav className="flex overflow-x-auto no-scrollbar py-3 border-t border-slate-100 gap-6 text-xs font-bold uppercase text-slate-600 whitespace-nowrap">
-            {CATEGORIES.map((c, i) => (
-              <a key={c} href="#" className={i === 0 ? "text-secondary" : "hover:text-secondary transition-colors"}>
-                {c}
+          <nav className="flex overflow-x-auto no-scrollbar py-3 border-t border-slate-100 gap-2 whitespace-nowrap">
+            {CATEGORIES.map((c) => (
+              <a key={c} href="#" className="shrink-0 hover:opacity-80 transition">
+                <CategoryTag name={c} />
               </a>
             ))}
           </nav>
@@ -191,11 +245,11 @@ function PortalHome({ regions, articles }: { regions: Region[]; articles: Articl
               const to = a?.region
                 ? { to: "/$region/$slug" as const, params: { region: a.region.slug, slug: a.slug } }
                 : null;
+              const catName = a?.categoria?.name ?? a?.region?.name ?? fb.cat;
+              const catSlug = a?.categoria?.slug ?? null;
               const inner = (
                 <>
-                  <span className={`text-xs font-black uppercase tracking-widest ${i === 0 ? "text-secondary" : "text-slate-500"}`}>
-                    {a?.region?.name ?? fb.cat}
-                  </span>
+                  <CategoryTag name={catName} slug={catSlug} />
                   <h3 className="font-display text-2xl md:text-[1.6rem] leading-tight mt-2 hover:text-secondary transition-colors">
                     {a?.title ?? fb.title}
                   </h3>
@@ -281,9 +335,11 @@ function PortalHome({ regions, articles }: { regions: Region[]; articles: Articl
                       <div className="h-full w-full bg-gradient-to-br from-slate-200 to-slate-300" />
                     )}
                   </div>
-                  <span className="text-secondary text-xs font-bold uppercase tracking-wider">
-                    {a?.region?.name ?? fb.cat}
-                  </span>
+                  <CategoryTag
+                    name={a?.categoria?.name ?? a?.region?.name ?? fb.cat}
+                    slug={a?.categoria?.slug ?? null}
+                    className="self-start"
+                  />
                   <h4 className="font-display text-2xl md:text-3xl leading-tight group-hover:text-secondary">
                     {a?.title ?? fb.title}
                   </h4>
@@ -350,7 +406,8 @@ function PortalHome({ regions, articles }: { regions: Region[]; articles: Articl
 function HeroCard({ article }: { article: ArticleListItem | undefined }) {
   const title = article?.title ?? HERO_FALLBACK.title;
   const summary = article?.summary ?? HERO_FALLBACK.summary;
-  const cat = article?.region?.name ?? HERO_FALLBACK.category;
+  const catName = article?.categoria?.name ?? article?.region?.name ?? HERO_FALLBACK.category;
+  const catSlug = article?.categoria?.slug ?? null;
   const to = article?.region
     ? { to: "/$region/$slug" as const, params: { region: article.region.slug, slug: article.slug } }
     : null;
@@ -366,9 +423,9 @@ function HeroCard({ article }: { article: ArticleListItem | undefined }) {
       </div>
       <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/30 to-transparent" />
       <div className="absolute bottom-0 left-0 p-6 md:p-8">
-        <span className="bg-secondary text-white text-[10px] font-bold px-2 py-1 uppercase mb-3 inline-block tracking-wider">
-          {cat}
-        </span>
+        <div className="mb-3">
+          <CategoryTag name={catName} slug={catSlug} className="text-xs px-3 py-1.5" />
+        </div>
         <h2 className="font-display text-3xl md:text-5xl text-white leading-tight group-hover:underline">
           {title}
         </h2>
