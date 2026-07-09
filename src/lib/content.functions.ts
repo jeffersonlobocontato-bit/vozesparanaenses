@@ -1,6 +1,22 @@
 import { createServerFn } from "@tanstack/react-start";
 import { notFound } from "@tanstack/react-router";
 
+/**
+ * Trata erros esperados enquanto o schema `002_vozes.sql` não foi rodado
+ * no Supabase externo. Retorna `true` quando é seguro devolver vazio.
+ */
+function isMissingSchema(err: { message?: string; code?: string } | null): boolean {
+  if (!err) return false;
+  const msg = (err.message ?? "").toLowerCase();
+  return (
+    err.code === "42P01" ||
+    err.code === "PGRST205" ||
+    msg.includes("could not find the table") ||
+    msg.includes("does not exist") ||
+    msg.includes("schema cache")
+  );
+}
+
 export type TemaConfig = {
   paleta?: { primaria?: string; acento?: string; fundo?: string };
   tipografia_destaque?: string;
@@ -104,7 +120,10 @@ export const listRegions = createServerFn({ method: "GET" }).handler(
       .select("id, slug, nome, cidade_principal, descricao, hero_image_url, tema_config")
       .eq("ativa", true)
       .order("nome");
-    if (error) throw new Error(error.message);
+    if (error) {
+      if (isMissingSchema(error)) return [];
+      throw new Error(error.message);
+    }
     return ((data ?? []) as RegiaoRow[]).map(mapRegiao);
   },
 );
@@ -120,7 +139,10 @@ export const getRegionBySlug = createServerFn({ method: "GET" })
       .eq("slug", data.slug)
       .eq("ativa", true)
       .maybeSingle();
-    if (error) throw new Error(error.message);
+    if (error) {
+      if (isMissingSchema(error)) throw notFound();
+      throw new Error(error.message);
+    }
     if (!row) throw notFound();
     return mapRegiao(row as RegiaoRow);
   });
@@ -133,7 +155,10 @@ export const listCategorias = createServerFn({ method: "GET" }).handler(
       .from("editorial_categories")
       .select("id, slug, nome")
       .order("nome");
-    if (error) throw new Error(error.message);
+    if (error) {
+      if (isMissingSchema(error)) return [];
+      throw new Error(error.message);
+    }
     return ((data ?? []) as { id: string; slug: string; nome: string }[]).map((c) => ({
       id: c.id,
       slug: c.slug,
@@ -152,7 +177,10 @@ export const listLatestArticles = createServerFn({ method: "GET" })
       .eq("status", "publicado")
       .order("publicado_em", { ascending: false })
       .limit(data.limit);
-    if (error) throw new Error(error.message);
+    if (error) {
+      if (isMissingSchema(error)) return [];
+      throw new Error(error.message);
+    }
     return ((rows ?? []) as unknown as MateriaRow[]).map(mapMateria);
   });
 
@@ -164,11 +192,12 @@ export const listArticlesByRegion = createServerFn({ method: "GET" })
   .handler(async ({ data }): Promise<ArticleListItem[]> => {
     const { getExternalSupabase } = await import("./external-supabase.server");
     const sb = getExternalSupabase();
-    const { data: region } = await sb
+    const { data: region, error: regionErr } = await sb
       .from("regioes")
       .select("id")
       .eq("slug", data.regionSlug)
       .maybeSingle();
+    if (regionErr && isMissingSchema(regionErr)) return [];
     if (!region) return [];
     const { data: rows, error } = await sb
       .from("generated_articles")
@@ -177,7 +206,10 @@ export const listArticlesByRegion = createServerFn({ method: "GET" })
       .eq("regiao_id", (region as { id: string }).id)
       .order("publicado_em", { ascending: false })
       .limit(data.limit);
-    if (error) throw new Error(error.message);
+    if (error) {
+      if (isMissingSchema(error)) return [];
+      throw new Error(error.message);
+    }
     return ((rows ?? []) as unknown as MateriaRow[]).map(mapMateria);
   });
 
@@ -203,7 +235,10 @@ export const listArticlesByCategory = createServerFn({ method: "GET" })
       .eq("categoria_id", (category as { id: string }).id)
       .order("publicado_em", { ascending: false })
       .limit(data.limit);
-    if (error) throw new Error(error.message);
+    if (error) {
+      if (isMissingSchema(error)) return [];
+      throw new Error(error.message);
+    }
     return ((rows ?? []) as unknown as MateriaRow[]).map(mapMateria);
   });
 
@@ -274,7 +309,8 @@ export const listClassificados = createServerFn({ method: "GET" })
   > => {
     const { getExternalSupabase } = await import("./external-supabase.server");
     const sb = getExternalSupabase();
-    const { data: region } = await sb.from("regioes").select("id").eq("slug", data.regionSlug).maybeSingle();
+    const { data: region, error: regionErr } = await sb.from("regioes").select("id").eq("slug", data.regionSlug).maybeSingle();
+    if (regionErr && isMissingSchema(regionErr)) return [];
     if (!region) return [];
     const { data: rows, error } = await sb
       .from("classificados")
@@ -283,7 +319,10 @@ export const listClassificados = createServerFn({ method: "GET" })
       .eq("ativo", true)
       .order("criado_em", { ascending: false })
       .limit(100);
-    if (error) throw new Error(error.message);
+    if (error) {
+      if (isMissingSchema(error)) return [];
+      throw new Error(error.message);
+    }
     return (rows ?? []) as {
       id: string;
       categoria: string;
