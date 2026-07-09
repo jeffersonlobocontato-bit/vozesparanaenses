@@ -9,38 +9,64 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as RegionRouteImport } from './routes/$region'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as RegionSlugRouteImport } from './routes/$region.$slug'
 
+const RegionRoute = RegionRouteImport.update({
+  id: '/$region',
+  path: '/$region',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const RegionSlugRoute = RegionSlugRouteImport.update({
+  id: '/$slug',
+  path: '/$slug',
+  getParentRoute: () => RegionRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/$region': typeof RegionRouteWithChildren
+  '/$region/$slug': typeof RegionSlugRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/$region': typeof RegionRouteWithChildren
+  '/$region/$slug': typeof RegionSlugRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/$region': typeof RegionRouteWithChildren
+  '/$region/$slug': typeof RegionSlugRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/'
+  fullPaths: '/' | '/$region' | '/$region/$slug'
   fileRoutesByTo: FileRoutesByTo
-  to: '/'
-  id: '__root__' | '/'
+  to: '/' | '/$region' | '/$region/$slug'
+  id: '__root__' | '/' | '/$region' | '/$region/$slug'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  RegionRoute: typeof RegionRouteWithChildren
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/$region': {
+      id: '/$region'
+      path: '/$region'
+      fullPath: '/$region'
+      preLoaderRoute: typeof RegionRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/': {
       id: '/'
       path: '/'
@@ -48,11 +74,30 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/$region/$slug': {
+      id: '/$region/$slug'
+      path: '/$slug'
+      fullPath: '/$region/$slug'
+      preLoaderRoute: typeof RegionSlugRouteImport
+      parentRoute: typeof RegionRoute
+    }
   }
 }
 
+interface RegionRouteChildren {
+  RegionSlugRoute: typeof RegionSlugRoute
+}
+
+const RegionRouteChildren: RegionRouteChildren = {
+  RegionSlugRoute: RegionSlugRoute,
+}
+
+const RegionRouteWithChildren =
+  RegionRoute._addFileChildren(RegionRouteChildren)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  RegionRoute: RegionRouteWithChildren,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
