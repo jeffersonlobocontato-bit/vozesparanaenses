@@ -102,6 +102,60 @@ const CATEGORIES = [
   "Cultura",
 ];
 
+/* --------------------------- Editorias: cores --------------------------- */
+/* Cada editoria tem uma cor-tag (padrão portais regionais tipo Catve). */
+const EDITORIA_COLORS: Record<string, string> = {
+  "ultimas-noticias": "bg-rose-600",
+  "ultimas": "bg-rose-600",
+  "destaque": "bg-rose-600",
+  "politica": "bg-red-700",
+  "economia": "bg-blue-700",
+  "agronegocio": "bg-green-700",
+  "agro": "bg-green-700",
+  "educacao": "bg-indigo-600",
+  "seguranca": "bg-slate-900",
+  "policia": "bg-slate-900",
+  "transito": "bg-red-600",
+  "esportes": "bg-emerald-600",
+  "cultura": "bg-fuchsia-600",
+  "saude": "bg-teal-600",
+  "cidades": "bg-amber-600",
+  "geral": "bg-yellow-500",
+};
+
+function slugify(v: string) {
+  return v
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/(^-|-$)/g, "");
+}
+
+function editoriaColor(name?: string | null, slug?: string | null) {
+  const key = (slug || (name ? slugify(name) : "")).trim();
+  return EDITORIA_COLORS[key] ?? "bg-secondary";
+}
+
+function CategoryTag({
+  name,
+  slug,
+  className = "",
+}: {
+  name: string;
+  slug?: string | null;
+  className?: string;
+}) {
+  const color = editoriaColor(name, slug);
+  return (
+    <span
+      className={`inline-block ${color} text-white text-[11px] font-black uppercase tracking-wider px-2 py-1 rounded-sm ${className}`}
+    >
+      {name}
+    </span>
+  );
+}
+
 /* --------------------------- Portal Home --------------------------- */
 
 function formatDateBR() {
