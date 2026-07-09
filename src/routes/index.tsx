@@ -1,6 +1,15 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { queryOptions, useSuspenseQuery } from "@tanstack/react-query";
-import { listRegions, listLatestArticles, type ArticleListItem, type Region } from "@/lib/content.functions";
+import {
+  listRegions,
+  listRankedArticles,
+  getViewerLocation,
+  type ArticleListItem,
+  type RankedArticle,
+  type Region,
+  type ViewerLocation,
+} from "@/lib/content.functions";
+import { LocationBar, ProximityBadge } from "@/components/LocationBar";
 import logoBlue from "@/assets/vozes-logo-blue.png.asset.json";
 import logoWhite from "@/assets/vozes-logo-white.png.asset.json";
 
@@ -8,10 +17,18 @@ const regionsQO = queryOptions({
   queryKey: ["regions"],
   queryFn: () => listRegions(),
 });
-const latestQO = queryOptions({
-  queryKey: ["articles", "latest", 12],
-  queryFn: () => listLatestArticles({ data: { limit: 12 } }),
+const viewerLocQO = queryOptions({
+  queryKey: ["viewer-location"],
+  queryFn: () => getViewerLocation(),
 });
+const rankedQO = (loc: ViewerLocation) =>
+  queryOptions({
+    queryKey: ["articles", "ranked", loc.cidade ?? "", loc.regiaoSlug ?? "", 12],
+    queryFn: () =>
+      listRankedArticles({
+        data: { cidade: loc.cidade, regiaoSlug: loc.regiaoSlug, limit: 12 },
+      }),
+  });
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -31,10 +48,11 @@ export const Route = createFileRoute("/")({
     ],
   }),
   loader: async ({ context }) => {
-    await Promise.all([
+    const [loc] = await Promise.all([
+      context.queryClient.ensureQueryData(viewerLocQO),
       context.queryClient.ensureQueryData(regionsQO),
-      context.queryClient.ensureQueryData(latestQO),
     ]);
+    await context.queryClient.ensureQueryData(rankedQO(loc));
   },
   component: Home,
   errorComponent: ({ error }) => (
@@ -46,7 +64,8 @@ export const Route = createFileRoute("/")({
 
 function Home() {
   const { data: regions } = useSuspenseQuery(regionsQO);
-  const { data: articles } = useSuspenseQuery(latestQO);
+  const { data: loc } = useSuspenseQuery(viewerLocQO);
+  const { data: articles } = useSuspenseQuery(rankedQO(loc));
   return <PortalHome regions={regions} articles={articles} />;
 }
 
@@ -184,7 +203,7 @@ function formatDateBR() {
   });
 }
 
-function PortalHome({ regions, articles }: { regions: Region[]; articles: ArticleListItem[] }) {
+function PortalHome({ regions, articles }: { regions: Region[]; articles: RankedArticle[] }) {
   const REGIONS_FALLBACK: Region[] = [
     { id: "fb-metropolitana", slug: "metropolitana", name: "Metropolitana" },
     { id: "fb-litoral", slug: "litoral", name: "Litoral" },
