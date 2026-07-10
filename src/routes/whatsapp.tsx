@@ -4,7 +4,7 @@ import { useMutation } from "@tanstack/react-query";
 import { useState } from "react";
 import { createWhatsappLead, listRegions } from "@/lib/content.functions";
 import { queryOptions, useSuspenseQuery } from "@tanstack/react-query";
-import { Logo } from "@/components/Logo";
+import { SiteHeader, SiteFooter } from "@/components/SiteHeader";
 
 const regionsQO = queryOptions({
   queryKey: ["regions"],
@@ -53,14 +53,13 @@ function WhatsappPage() {
   });
 
   return (
-    <div className="min-h-screen bg-slate-50 text-slate-900">
-      <header className="border-b-4 border-primary bg-white">
-        <div className="mx-auto max-w-3xl px-4 py-5">
-          <Logo size="md" />
-        </div>
-      </header>
+    <div className="min-h-screen bg-white text-slate-900">
+      <SiteHeader />
       <main className="mx-auto max-w-xl px-4 py-12">
-        <h2 className="font-display text-4xl leading-tight text-primary">
+        <div className="text-[11px] font-bold uppercase tracking-[0.16em] text-[#0A2540]/70">
+          Newsletter
+        </div>
+        <h2 className="mt-1 font-display text-5xl leading-[1.02] text-[#0A2540] md:text-6xl">
           Notícias da sua região no WhatsApp
         </h2>
         <p className="mt-3 text-slate-600">
@@ -143,6 +142,7 @@ function WhatsappPage() {
           )}
         </form>
       </main>
+      <SiteFooter />
     </div>
   );
 }
