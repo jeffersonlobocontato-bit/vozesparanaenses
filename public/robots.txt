@@ -1,5 +1,156 @@
+# Vozes Paranaenses — robots.txt
+# Objetivo: máxima indexação por motores de busca tradicionais e de IA.
+
+# ---------- Crawlers de busca tradicionais ----------
+User-agent: Googlebot
+Allow: /
+Disallow: /api/
+Allow: /api/public/
+Disallow: /admin/
+
+User-agent: Googlebot-News
+Allow: /
+Disallow: /api/
+Allow: /api/public/
+Disallow: /admin/
+
+User-agent: Googlebot-Image
+Allow: /
+
+User-agent: Bingbot
+Allow: /
+Disallow: /api/
+Allow: /api/public/
+Disallow: /admin/
+
+User-agent: DuckDuckBot
+Allow: /
+Disallow: /api/
+Allow: /api/public/
+Disallow: /admin/
+
+User-agent: Applebot
+Allow: /
+Disallow: /api/
+Allow: /api/public/
+Disallow: /admin/
+
+# ---------- Crawlers de motores de resposta (GEO) ----------
+# OpenAI / ChatGPT
+User-agent: GPTBot
+Allow: /
+Disallow: /api/
+Allow: /api/public/
+Disallow: /admin/
+
+User-agent: OAI-SearchBot
+Allow: /
+Disallow: /api/
+Allow: /api/public/
+Disallow: /admin/
+
+User-agent: ChatGPT-User
+Allow: /
+Disallow: /api/
+Allow: /api/public/
+Disallow: /admin/
+
+# Anthropic / Claude
+User-agent: ClaudeBot
+Allow: /
+Disallow: /api/
+Allow: /api/public/
+Disallow: /admin/
+
+User-agent: Claude-Web
+Allow: /
+Disallow: /api/
+Allow: /api/public/
+Disallow: /admin/
+
+User-agent: anthropic-ai
+Allow: /
+
+# Perplexity
+User-agent: PerplexityBot
+Allow: /
+Disallow: /api/
+Allow: /api/public/
+Disallow: /admin/
+
+User-agent: Perplexity-User
+Allow: /
+Disallow: /api/
+Allow: /api/public/
+Disallow: /admin/
+
+# Google Gemini / AI Overviews
+User-agent: Google-Extended
+Allow: /
+Disallow: /api/
+Allow: /api/public/
+Disallow: /admin/
+
+# Apple Intelligence
+User-agent: Applebot-Extended
+Allow: /
+Disallow: /api/
+Allow: /api/public/
+Disallow: /admin/
+
+# Meta AI
+User-agent: Meta-ExternalAgent
+Allow: /
+Disallow: /api/
+Allow: /api/public/
+Disallow: /admin/
+
+User-agent: FacebookBot
+Allow: /
+
+# Amazon
+User-agent: Amazonbot
+Allow: /
+Disallow: /api/
+Allow: /api/public/
+Disallow: /admin/
+
+# Bytedance / TikTok
+User-agent: Bytespider
+Allow: /
+Disallow: /api/
+Allow: /api/public/
+Disallow: /admin/
+
+# Common Crawl (base de treinamento de vários LLMs)
+User-agent: CCBot
+Allow: /
+Disallow: /api/
+Allow: /api/public/
+Disallow: /admin/
+
+# Cohere
+User-agent: cohere-ai
+Allow: /
+
+# You.com
+User-agent: YouBot
+Allow: /
+
+# DuckDuckGo AI
+User-agent: DuckAssistBot
+Allow: /
+
+# Mistral
+User-agent: MistralAI-User
+Allow: /
+
+# ---------- Default ----------
 User-agent: *
 Allow: /
 Disallow: /api/
+Allow: /api/public/
+Disallow: /admin/
 
 Sitemap: /api/public/sitemap.xml
+Sitemap: /api/public/sitemap-news.xml

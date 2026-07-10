@@ -1,6 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { queryOptions, useSuspenseQuery } from "@tanstack/react-query";
-import { getArticle, listArticlesByRegion } from "@/lib/content.functions";
+import { getArticle, listArticlesByRegion, cidadeSlug } from "@/lib/content.functions";
 import { SiteHeader, SiteFooter } from "@/components/SiteHeader";
 
 const articleQO = (regionSlug: string, slug: string) =>
@@ -23,68 +23,173 @@ export const Route = createFileRoute("/$region/$slug")({
     ]);
     return { article };
   },
-  head: ({ loaderData }) =>
-    loaderData
+  head: ({ loaderData, params }) => {
+    if (!loaderData) {
+      return {
+        meta: [
+          { title: "Matéria indisponível — Vozes Paranaenses" },
+          { name: "robots", content: "noindex, follow" },
+        ],
+      };
+    }
+    const a = loaderData.article;
+    const title = a.seo_title ?? a.title;
+    const description = a.seo_description ?? a.summary ?? a.title;
+    const image = a.og_image_url ?? a.cover_image_url ?? null;
+    const regionName = a.region?.name ?? null;
+    const regionSlug = a.region?.slug ?? params.region;
+    const cidade = a.cidade_principal ?? null;
+    const url = `/${regionSlug}/${a.slug}`;
+    const keywords = [
+      cidade,
+      regionName,
+      a.categoria?.name,
+      ...(a.cidades_mencionadas ?? []),
+      "Paraná",
+      "notícias",
+    ]
+      .filter(Boolean)
+      .join(", ");
+
+    const meta: Array<Record<string, string>> = [
+      { title: `${title} — Vozes Paranaenses` },
+      { name: "description", content: description },
+      { name: "keywords", content: keywords },
+      { name: "news_keywords", content: keywords },
+      { name: "author", content: "Redação Vozes Paranaenses" },
+      { name: "robots", content: "index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1" },
+      { name: "googlebot", content: "index, follow, max-image-preview:large, max-snippet:-1" },
+      // Geo tags — o site inteiro é PR
+      { name: "geo.region", content: "BR-PR" },
+      { name: "geo.country", content: "BR" },
+      ...(cidade
+        ? [{ name: "geo.placename", content: `${cidade}, Paraná, Brasil` }]
+        : regionName
+          ? [{ name: "geo.placename", content: `${regionName}, Paraná, Brasil` }]
+          : []),
+      // Open Graph
+      { property: "og:title", content: title },
+      { property: "og:description", content: description },
+      { property: "og:type", content: "article" },
+      { property: "og:url", content: url },
+      { property: "og:site_name", content: "Vozes Paranaenses" },
+      { property: "og:locale", content: "pt_BR" },
+      { property: "article:published_time", content: a.published_at ?? "" },
+      { property: "article:modified_time", content: a.updated_at ?? a.published_at ?? "" },
+      { property: "article:section", content: a.categoria?.name ?? "Notícia" },
+      ...(cidade ? [{ property: "article:tag", content: cidade }] : []),
+      ...(regionName ? [{ property: "article:tag", content: regionName }] : []),
+      // Twitter
+      { name: "twitter:card", content: "summary_large_image" },
+      { name: "twitter:title", content: title },
+      { name: "twitter:description", content: description },
+      ...(image
+        ? [
+            { property: "og:image", content: image },
+            { property: "og:image:alt", content: a.title },
+            { name: "twitter:image", content: image },
+          ]
+        : []),
+    ];
+
+    // JSON-LD: NewsArticle enriquecido geograficamente
+    const contentLocation = cidade
       ? {
-          meta: [
-            { title: `${loaderData.article.seo_title ?? loaderData.article.title} — Vozes Paranaenses` },
-            {
-              name: "description",
-              content:
-                loaderData.article.seo_description ??
-                loaderData.article.summary ??
-                loaderData.article.title,
+          "@type": "City",
+          name: cidade,
+          containedInPlace: {
+            "@type": "AdministrativeArea",
+            name: regionName ?? "Paraná",
+            containedInPlace: {
+              "@type": "State",
+              name: "Paraná",
+              containedInPlace: { "@type": "Country", name: "Brasil" },
             },
-            {
-              property: "og:title",
-              content: loaderData.article.seo_title ?? loaderData.article.title,
-            },
-            {
-              property: "og:description",
-              content:
-                loaderData.article.seo_description ??
-                loaderData.article.summary ??
-                loaderData.article.title,
-            },
-            { property: "og:type", content: "article" },
-            ...(loaderData.article.og_image_url ?? loaderData.article.cover_image_url
-              ? [
-                  {
-                    property: "og:image",
-                    content:
-                      loaderData.article.og_image_url ??
-                      loaderData.article.cover_image_url!,
-                  },
-                  {
-                    name: "twitter:image",
-                    content:
-                      loaderData.article.og_image_url ??
-                      loaderData.article.cover_image_url!,
-                  },
-                ]
-              : []),
-          ],
-          scripts: [
-            {
-              type: "application/ld+json",
-              children: JSON.stringify({
-                "@context": "https://schema.org",
-                "@type": "NewsArticle",
-                headline: loaderData.article.title,
-                description:
-                  loaderData.article.seo_description ?? loaderData.article.summary ?? undefined,
-                image: loaderData.article.og_image_url ?? loaderData.article.cover_image_url ?? undefined,
-                datePublished: loaderData.article.published_at ?? undefined,
-                articleSection: loaderData.article.categoria?.name ?? undefined,
-                publisher: {
-                  "@type": "Organization",
-                  name: "Vozes Paranaenses",
-                },
-              }),
-            },
-          ],
+          },
         }
-      : { meta: [] },
+      : undefined;
+
+    const spatialCoverage = (a.cidades_mencionadas ?? [])
+      .filter((c) => !!c)
+      .map((c) => ({
+        "@type": "Place",
+        name: c,
+        containedInPlace: { "@type": "State", name: "Paraná" },
+      }));
+
+    const wordCount = a.body_md ? a.body_md.trim().split(/\s+/).filter(Boolean).length : undefined;
+
+    const newsArticle = {
+      "@context": "https://schema.org",
+      "@type": "NewsArticle",
+      mainEntityOfPage: { "@type": "WebPage", "@id": url },
+      headline: a.title,
+      alternativeHeadline: a.subtitle ?? undefined,
+      description,
+      image: image ? [image] : undefined,
+      datePublished: a.published_at ?? undefined,
+      dateModified: a.updated_at ?? a.published_at ?? undefined,
+      inLanguage: "pt-BR",
+      isAccessibleForFree: true,
+      articleSection: a.categoria?.name ?? undefined,
+      wordCount,
+      keywords,
+      author: { "@type": "Organization", name: "Redação Vozes Paranaenses" },
+      publisher: {
+        "@type": "NewsMediaOrganization",
+        name: "Vozes Paranaenses",
+        url: "/",
+        logo: {
+          "@type": "ImageObject",
+          url: "/favicon.ico",
+        },
+        areaServed: { "@type": "State", name: "Paraná", containedInPlace: { "@type": "Country", name: "Brasil" } },
+      },
+      contentLocation,
+      spatialCoverage: spatialCoverage.length > 0 ? spatialCoverage : undefined,
+      about: contentLocation ? [contentLocation] : undefined,
+      speakable: {
+        "@type": "SpeakableSpecification",
+        cssSelector: ["h1", ".article-lead", ".article-tldr"],
+      },
+    };
+
+    const breadcrumb = {
+      "@context": "https://schema.org",
+      "@type": "BreadcrumbList",
+      itemListElement: [
+        { "@type": "ListItem", position: 1, name: "Vozes Paranaenses", item: "/" },
+        ...(regionName
+          ? [{ "@type": "ListItem", position: 2, name: regionName, item: `/${regionSlug}` }]
+          : []),
+        ...(cidade
+          ? [
+              {
+                "@type": "ListItem",
+                position: 3,
+                name: cidade,
+                item: `/${regionSlug}/cidade/${cidadeSlug(cidade)}`,
+              },
+              { "@type": "ListItem", position: 4, name: a.title, item: url },
+            ]
+          : [{ "@type": "ListItem", position: 3, name: a.title, item: url }]),
+      ],
+    };
+
+    return {
+      meta,
+      links: [
+        { rel: "canonical", href: url },
+        ...(cidade
+          ? [{ rel: "alternate", href: `/${regionSlug}/cidade/${cidadeSlug(cidade)}` }]
+          : []),
+      ],
+      scripts: [
+        { type: "application/ld+json", children: JSON.stringify(newsArticle) },
+        { type: "application/ld+json", children: JSON.stringify(breadcrumb) },
+      ],
+    };
+  },
   component: ArticlePage,
   notFoundComponent: () => (
     <div className="p-8 text-center text-sm text-muted-foreground">

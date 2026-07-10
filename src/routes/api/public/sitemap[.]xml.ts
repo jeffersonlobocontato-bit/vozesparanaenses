@@ -1,24 +1,35 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { listRegions, listLatestArticles } from "@/lib/content.functions";
+import { listRegions, listLatestArticles, listAllCityLandings } from "@/lib/content.functions";
 
 export const Route = createFileRoute("/api/public/sitemap.xml")({
   server: {
     handlers: {
       GET: async ({ request }) => {
         const origin = new URL(request.url).origin;
-        const [regions, articles] = await Promise.all([
+        const [regions, articles, cities] = await Promise.all([
           listRegions().catch(() => []),
-          listLatestArticles({ data: { limit: 500 } }).catch(() => []),
+          listLatestArticles({ data: { limit: 1000 } }).catch(() => []),
+          listAllCityLandings().catch(() => []),
         ]);
 
         const urls: { loc: string; lastmod?: string; priority?: string }[] = [
           { loc: `${origin}/`, priority: "1.0" },
+          { loc: `${origin}/sobre`, priority: "0.5" },
           { loc: `${origin}/whatsapp`, priority: "0.6" },
         ];
         for (const r of regions) {
           urls.push({ loc: `${origin}/${r.slug}`, priority: "0.8" });
           urls.push({ loc: `${origin}/${r.slug}/classificados`, priority: "0.5" });
         }
+
+        for (const c of cities) {
+          urls.push({
+            loc: `${origin}/${c.regionSlug}/cidade/${c.citySlug}`,
+            lastmod: c.lastmod ?? undefined,
+            priority: "0.7",
+          });
+        }
+
         for (const a of articles) {
           if (!a.region) continue;
           urls.push({

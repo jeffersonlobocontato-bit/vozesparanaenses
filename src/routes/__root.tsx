@@ -82,12 +82,19 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
         name: "description",
         content: "Portal de notícias das 10 macrorregiões do Paraná — cobertura editorial regional em um só lugar.",
       },
+      { name: "robots", content: "index, follow, max-image-preview:large, max-snippet:-1" },
+      { name: "geo.region", content: "BR-PR" },
+      { name: "geo.country", content: "BR" },
+      { name: "geo.placename", content: "Paraná, Brasil" },
+      { httpEquiv: "content-language", content: "pt-BR" },
       { property: "og:title", content: "Vozes Paranaenses" },
       {
         property: "og:description",
         content: "Portal de notícias das 10 macrorregiões do Paraná.",
       },
       { property: "og:type", content: "website" },
+      { property: "og:site_name", content: "Vozes Paranaenses" },
+      { property: "og:locale", content: "pt_BR" },
       { name: "twitter:card", content: "summary_large_image" },
     ],
     links: [
@@ -101,6 +108,47 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       {
         rel: "stylesheet",
         href: "https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Barlow:wght@400;500;600;700;800&family=Bitter:wght@600;700&family=Playfair+Display:wght@700;900&family=Merriweather:wght@700;900&family=Oswald:wght@600;700&family=Poppins:wght@700;800&family=Rubik:wght@600;700&family=Archivo:wght@700;800&family=Space+Grotesk:wght@600;700&display=swap",
+      },
+    ],
+    scripts: [
+      {
+        type: "application/ld+json",
+        children: JSON.stringify({
+          "@context": "https://schema.org",
+          "@type": "NewsMediaOrganization",
+          name: "Vozes Paranaenses",
+          alternateName: "Vozes Paranaenses",
+          url: "/",
+          logo: { "@type": "ImageObject", url: "/favicon.ico" },
+          description:
+            "Portal de notícias das 10 macrorregiões do Paraná — cobertura editorial regional com foco no impacto local.",
+          inLanguage: "pt-BR",
+          areaServed: {
+            "@type": "State",
+            name: "Paraná",
+            containedInPlace: { "@type": "Country", name: "Brasil" },
+          },
+          knowsLanguage: "pt-BR",
+          publishingPrinciples: "/sobre",
+          diversityPolicy: "/sobre",
+          ethicsPolicy: "/sobre",
+          actionableFeedbackPolicy: "/sobre",
+        }),
+      },
+      {
+        type: "application/ld+json",
+        children: JSON.stringify({
+          "@context": "https://schema.org",
+          "@type": "WebSite",
+          name: "Vozes Paranaenses",
+          url: "/",
+          inLanguage: "pt-BR",
+          potentialAction: {
+            "@type": "SearchAction",
+            target: "/?q={search_term_string}",
+            "query-input": "required name=search_term_string",
+          },
+        }),
       },
     ],
   }),

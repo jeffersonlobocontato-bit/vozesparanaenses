@@ -10,6 +10,7 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as WhatsappRouteImport } from './routes/whatsapp'
+import { Route as SobreRouteImport } from './routes/sobre'
 import { Route as AdminRouteImport } from './routes/admin'
 import { Route as RegionRouteImport } from './routes/$region'
 import { Route as IndexRouteImport } from './routes/index'
@@ -24,11 +25,21 @@ import { Route as AdminClustersRouteImport } from './routes/admin.clusters'
 import { Route as RegionClassificadosRouteImport } from './routes/$region.classificados'
 import { Route as RegionSlugRouteImport } from './routes/$region.$slug'
 import { Route as ApiPublicSitemapDotxmlRouteImport } from './routes/api/public/sitemap[.]xml'
+import { Route as ApiPublicSitemapNewsDotxmlRouteImport } from './routes/api/public/sitemap-news[.]xml'
+import { Route as ApiPublicRssDotxmlRouteImport } from './routes/api/public/rss[.]xml'
+import { Route as ApiPublicLlmsDottxtRouteImport } from './routes/api/public/llms[.]txt'
+import { Route as ApiPublicLlmsFullDottxtRouteImport } from './routes/api/public/llms-full[.]txt'
 import { Route as RegionEditoriaCategoriaRouteImport } from './routes/$region.editoria.$categoria'
+import { Route as RegionCidadeCidadeRouteImport } from './routes/$region.cidade.$cidade'
 
 const WhatsappRoute = WhatsappRouteImport.update({
   id: '/whatsapp',
   path: '/whatsapp',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SobreRoute = SobreRouteImport.update({
+  id: '/sobre',
+  path: '/sobre',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AdminRoute = AdminRouteImport.update({
@@ -101,9 +112,35 @@ const ApiPublicSitemapDotxmlRoute = ApiPublicSitemapDotxmlRouteImport.update({
   path: '/api/public/sitemap.xml',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiPublicSitemapNewsDotxmlRoute =
+  ApiPublicSitemapNewsDotxmlRouteImport.update({
+    id: '/api/public/sitemap-news.xml',
+    path: '/api/public/sitemap-news.xml',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const ApiPublicRssDotxmlRoute = ApiPublicRssDotxmlRouteImport.update({
+  id: '/api/public/rss.xml',
+  path: '/api/public/rss.xml',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiPublicLlmsDottxtRoute = ApiPublicLlmsDottxtRouteImport.update({
+  id: '/api/public/llms.txt',
+  path: '/api/public/llms.txt',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiPublicLlmsFullDottxtRoute = ApiPublicLlmsFullDottxtRouteImport.update({
+  id: '/api/public/llms-full.txt',
+  path: '/api/public/llms-full.txt',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const RegionEditoriaCategoriaRoute = RegionEditoriaCategoriaRouteImport.update({
   id: '/editoria/$categoria',
   path: '/editoria/$categoria',
+  getParentRoute: () => RegionRoute,
+} as any)
+const RegionCidadeCidadeRoute = RegionCidadeCidadeRouteImport.update({
+  id: '/cidade/$cidade',
+  path: '/cidade/$cidade',
   getParentRoute: () => RegionRoute,
 } as any)
 
@@ -111,6 +148,7 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/$region': typeof RegionRouteWithChildren
   '/admin': typeof AdminRouteWithChildren
+  '/sobre': typeof SobreRoute
   '/whatsapp': typeof WhatsappRoute
   '/$region/$slug': typeof RegionSlugRoute
   '/$region/classificados': typeof RegionClassificadosRoute
@@ -122,11 +160,17 @@ export interface FileRoutesByFullPath {
   '/admin/senha': typeof AdminSenhaRoute
   '/$region/': typeof RegionIndexRoute
   '/admin/': typeof AdminIndexRoute
+  '/$region/cidade/$cidade': typeof RegionCidadeCidadeRoute
   '/$region/editoria/$categoria': typeof RegionEditoriaCategoriaRoute
+  '/api/public/llms-full.txt': typeof ApiPublicLlmsFullDottxtRoute
+  '/api/public/llms.txt': typeof ApiPublicLlmsDottxtRoute
+  '/api/public/rss.xml': typeof ApiPublicRssDotxmlRoute
+  '/api/public/sitemap-news.xml': typeof ApiPublicSitemapNewsDotxmlRoute
   '/api/public/sitemap.xml': typeof ApiPublicSitemapDotxmlRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/sobre': typeof SobreRoute
   '/whatsapp': typeof WhatsappRoute
   '/$region/$slug': typeof RegionSlugRoute
   '/$region/classificados': typeof RegionClassificadosRoute
@@ -138,7 +182,12 @@ export interface FileRoutesByTo {
   '/admin/senha': typeof AdminSenhaRoute
   '/$region': typeof RegionIndexRoute
   '/admin': typeof AdminIndexRoute
+  '/$region/cidade/$cidade': typeof RegionCidadeCidadeRoute
   '/$region/editoria/$categoria': typeof RegionEditoriaCategoriaRoute
+  '/api/public/llms-full.txt': typeof ApiPublicLlmsFullDottxtRoute
+  '/api/public/llms.txt': typeof ApiPublicLlmsDottxtRoute
+  '/api/public/rss.xml': typeof ApiPublicRssDotxmlRoute
+  '/api/public/sitemap-news.xml': typeof ApiPublicSitemapNewsDotxmlRoute
   '/api/public/sitemap.xml': typeof ApiPublicSitemapDotxmlRoute
 }
 export interface FileRoutesById {
@@ -146,6 +195,7 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/$region': typeof RegionRouteWithChildren
   '/admin': typeof AdminRouteWithChildren
+  '/sobre': typeof SobreRoute
   '/whatsapp': typeof WhatsappRoute
   '/$region/$slug': typeof RegionSlugRoute
   '/$region/classificados': typeof RegionClassificadosRoute
@@ -157,7 +207,12 @@ export interface FileRoutesById {
   '/admin/senha': typeof AdminSenhaRoute
   '/$region/': typeof RegionIndexRoute
   '/admin/': typeof AdminIndexRoute
+  '/$region/cidade/$cidade': typeof RegionCidadeCidadeRoute
   '/$region/editoria/$categoria': typeof RegionEditoriaCategoriaRoute
+  '/api/public/llms-full.txt': typeof ApiPublicLlmsFullDottxtRoute
+  '/api/public/llms.txt': typeof ApiPublicLlmsDottxtRoute
+  '/api/public/rss.xml': typeof ApiPublicRssDotxmlRoute
+  '/api/public/sitemap-news.xml': typeof ApiPublicSitemapNewsDotxmlRoute
   '/api/public/sitemap.xml': typeof ApiPublicSitemapDotxmlRoute
 }
 export interface FileRouteTypes {
@@ -166,6 +221,7 @@ export interface FileRouteTypes {
     | '/'
     | '/$region'
     | '/admin'
+    | '/sobre'
     | '/whatsapp'
     | '/$region/$slug'
     | '/$region/classificados'
@@ -177,11 +233,17 @@ export interface FileRouteTypes {
     | '/admin/senha'
     | '/$region/'
     | '/admin/'
+    | '/$region/cidade/$cidade'
     | '/$region/editoria/$categoria'
+    | '/api/public/llms-full.txt'
+    | '/api/public/llms.txt'
+    | '/api/public/rss.xml'
+    | '/api/public/sitemap-news.xml'
     | '/api/public/sitemap.xml'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
+    | '/sobre'
     | '/whatsapp'
     | '/$region/$slug'
     | '/$region/classificados'
@@ -193,13 +255,19 @@ export interface FileRouteTypes {
     | '/admin/senha'
     | '/$region'
     | '/admin'
+    | '/$region/cidade/$cidade'
     | '/$region/editoria/$categoria'
+    | '/api/public/llms-full.txt'
+    | '/api/public/llms.txt'
+    | '/api/public/rss.xml'
+    | '/api/public/sitemap-news.xml'
     | '/api/public/sitemap.xml'
   id:
     | '__root__'
     | '/'
     | '/$region'
     | '/admin'
+    | '/sobre'
     | '/whatsapp'
     | '/$region/$slug'
     | '/$region/classificados'
@@ -211,7 +279,12 @@ export interface FileRouteTypes {
     | '/admin/senha'
     | '/$region/'
     | '/admin/'
+    | '/$region/cidade/$cidade'
     | '/$region/editoria/$categoria'
+    | '/api/public/llms-full.txt'
+    | '/api/public/llms.txt'
+    | '/api/public/rss.xml'
+    | '/api/public/sitemap-news.xml'
     | '/api/public/sitemap.xml'
   fileRoutesById: FileRoutesById
 }
@@ -219,7 +292,12 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   RegionRoute: typeof RegionRouteWithChildren
   AdminRoute: typeof AdminRouteWithChildren
+  SobreRoute: typeof SobreRoute
   WhatsappRoute: typeof WhatsappRoute
+  ApiPublicLlmsFullDottxtRoute: typeof ApiPublicLlmsFullDottxtRoute
+  ApiPublicLlmsDottxtRoute: typeof ApiPublicLlmsDottxtRoute
+  ApiPublicRssDotxmlRoute: typeof ApiPublicRssDotxmlRoute
+  ApiPublicSitemapNewsDotxmlRoute: typeof ApiPublicSitemapNewsDotxmlRoute
   ApiPublicSitemapDotxmlRoute: typeof ApiPublicSitemapDotxmlRoute
 }
 
@@ -230,6 +308,13 @@ declare module '@tanstack/react-router' {
       path: '/whatsapp'
       fullPath: '/whatsapp'
       preLoaderRoute: typeof WhatsappRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/sobre': {
+      id: '/sobre'
+      path: '/sobre'
+      fullPath: '/sobre'
+      preLoaderRoute: typeof SobreRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/admin': {
@@ -330,11 +415,46 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicSitemapDotxmlRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/sitemap-news.xml': {
+      id: '/api/public/sitemap-news.xml'
+      path: '/api/public/sitemap-news.xml'
+      fullPath: '/api/public/sitemap-news.xml'
+      preLoaderRoute: typeof ApiPublicSitemapNewsDotxmlRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/public/rss.xml': {
+      id: '/api/public/rss.xml'
+      path: '/api/public/rss.xml'
+      fullPath: '/api/public/rss.xml'
+      preLoaderRoute: typeof ApiPublicRssDotxmlRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/public/llms.txt': {
+      id: '/api/public/llms.txt'
+      path: '/api/public/llms.txt'
+      fullPath: '/api/public/llms.txt'
+      preLoaderRoute: typeof ApiPublicLlmsDottxtRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/public/llms-full.txt': {
+      id: '/api/public/llms-full.txt'
+      path: '/api/public/llms-full.txt'
+      fullPath: '/api/public/llms-full.txt'
+      preLoaderRoute: typeof ApiPublicLlmsFullDottxtRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/$region/editoria/$categoria': {
       id: '/$region/editoria/$categoria'
       path: '/editoria/$categoria'
       fullPath: '/$region/editoria/$categoria'
       preLoaderRoute: typeof RegionEditoriaCategoriaRouteImport
+      parentRoute: typeof RegionRoute
+    }
+    '/$region/cidade/$cidade': {
+      id: '/$region/cidade/$cidade'
+      path: '/cidade/$cidade'
+      fullPath: '/$region/cidade/$cidade'
+      preLoaderRoute: typeof RegionCidadeCidadeRouteImport
       parentRoute: typeof RegionRoute
     }
   }
@@ -344,6 +464,7 @@ interface RegionRouteChildren {
   RegionSlugRoute: typeof RegionSlugRoute
   RegionClassificadosRoute: typeof RegionClassificadosRoute
   RegionIndexRoute: typeof RegionIndexRoute
+  RegionCidadeCidadeRoute: typeof RegionCidadeCidadeRoute
   RegionEditoriaCategoriaRoute: typeof RegionEditoriaCategoriaRoute
 }
 
@@ -351,6 +472,7 @@ const RegionRouteChildren: RegionRouteChildren = {
   RegionSlugRoute: RegionSlugRoute,
   RegionClassificadosRoute: RegionClassificadosRoute,
   RegionIndexRoute: RegionIndexRoute,
+  RegionCidadeCidadeRoute: RegionCidadeCidadeRoute,
   RegionEditoriaCategoriaRoute: RegionEditoriaCategoriaRoute,
 }
 
@@ -383,7 +505,12 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   RegionRoute: RegionRouteWithChildren,
   AdminRoute: AdminRouteWithChildren,
+  SobreRoute: SobreRoute,
   WhatsappRoute: WhatsappRoute,
+  ApiPublicLlmsFullDottxtRoute: ApiPublicLlmsFullDottxtRoute,
+  ApiPublicLlmsDottxtRoute: ApiPublicLlmsDottxtRoute,
+  ApiPublicRssDotxmlRoute: ApiPublicRssDotxmlRoute,
+  ApiPublicSitemapNewsDotxmlRoute: ApiPublicSitemapNewsDotxmlRoute,
   ApiPublicSitemapDotxmlRoute: ApiPublicSitemapDotxmlRoute,
 }
 export const routeTree = rootRouteImport
