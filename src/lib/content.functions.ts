@@ -225,6 +225,119 @@ function normalizeCidade(v: string | null | undefined): string {
     .trim();
 }
 
+/** Converte um nome de cidade em slug URL-safe (ex.: "Foz do Iguaçu" → "foz-do-iguacu"). */
+export function cidadeSlug(v: string | null | undefined): string {
+  const base = normalizeCidade(v);
+  return base.replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "");
+}
+
+/** Formata o slug de volta em nome legível ("foz-do-iguacu" → "Foz Do Iguacu").
+ *  Preferimos o `cidade_principal` original quando disponível. */
+export function cidadeFromSlug(slug: string): string {
+  return slug
+    .split("-")
+    .map((p) => (p.length > 0 ? p.charAt(0).toUpperCase() + p.slice(1) : p))
+    .join(" ");
+}
+
+export type CityInRegion = { citySlug: string; name: string; count: number };
+
+/** Lista as cidades cobertas em uma região com contagem de matérias publicadas. */
+export const listCitiesInRegion = createServerFn({ method: "GET" })
+  .inputValidator((d: { regionSlug: string; limit?: number }) => ({
+    regionSlug: d.regionSlug,
+    limit: d.limit ?? 400,
+  }))
+  .handler(async ({ data }): Promise<CityInRegion[]> => {
+    const { getExternalSupabase } = await import("./external-supabase.server");
+    const sb = getExternalSupabase();
+    const { data: region } = await sb
+      .from("regioes")
+      .select("id")
+      .eq("slug", data.regionSlug)
+      .maybeSingle();
+    if (!region) return [];
+    const { data: rows, error } = await sb
+      .from("generated_articles")
+      .select("cidade_principal")
+      .eq("status", "publicado")
+      .eq("regiao_id", (region as { id: string }).id)
+      .not("cidade_principal", "is", null)
+      .order("publicado_em", { ascending: false })
+      .limit(data.limit);
+    if (error) {
+      if (isMissingSchema(error)) return [];
+      if (/cidade_/i.test(error.message)) return [];
+      throw new Error(error.message);
+    }
+    const acc = new Map<string, CityInRegion>();
+    for (const r of (rows ?? []) as { cidade_principal: string | null }[]) {
+      const name = (r.cidade_principal ?? "").trim();
+      if (!name) continue;
+      const s = cidadeSlug(name);
+      if (!s) continue;
+      const cur = acc.get(s);
+      if (cur) cur.count += 1;
+      else acc.set(s, { citySlug: s, name, count: 1 });
+    }
+    return [...acc.values()].sort((a, b) => b.count - a.count);
+  });
+
+/** Matérias publicadas cujo `cidade_principal` (slugificado) bate com `citySlug`. */
+export const listArticlesByCity = createServerFn({ method: "GET" })
+  .inputValidator((d: { regionSlug: string; citySlug: string; limit?: number }) => ({
+    regionSlug: d.regionSlug,
+    citySlug: d.citySlug,
+    limit: d.limit ?? 30,
+  }))
+  .handler(async ({ data }): Promise<{
+    articles: ArticleListItem[];
+    cityName: string;
+  }> => {
+    const { getExternalSupabase } = await import("./external-supabase.server");
+    const sb = getExternalSupabase();
+    const { data: region } = await sb
+      .from("regioes")
+      .select("id")
+      .eq("slug", data.regionSlug)
+      .maybeSingle();
+    if (!region) return { articles: [], cityName: cidadeFromSlug(data.citySlug) };
+    const { data: rows, error } = await sb
+      .from("generated_articles")
+      .select(MATERIA_LIST_COLS_GEO)
+      .eq("status", "publicado")
+      .eq("regiao_id", (region as { id: string }).id)
+      .order("publicado_em", { ascending: false })
+      .limit(400);
+    if (error) {
+      if (isMissingSchema(error) || /cidade_/i.test(error.message)) {
+        return { articles: [], cityName: cidadeFromSlug(data.citySlug) };
+      }
+      throw new Error(error.message);
+    }
+    let cityName = cidadeFromSlug(data.citySlug);
+    const matched: MateriaRow[] = [];
+    for (const row of (rows ?? []) as unknown as (MateriaRow & {
+      cidade_principal: string | null;
+      cidades_mencionadas: string[] | null;
+    })[]) {
+      const cp = row.cidade_principal ?? "";
+      const mentions = row.cidades_mencionadas ?? [];
+      if (cidadeSlug(cp) === data.citySlug) {
+        if (cp && cityName.toLowerCase() === cidadeFromSlug(data.citySlug).toLowerCase()) cityName = cp;
+        matched.push(row);
+        continue;
+      }
+      if (mentions.some((m) => cidadeSlug(m) === data.citySlug)) {
+        matched.push(row);
+      }
+    }
+    return {
+      articles: matched.slice(0, data.limit).map(mapMateria),
+      cityName,
+    };
+  });
+
 const LOC_COOKIE = "vp_loc";
 
 export const getViewerLocation = createServerFn({ method: "GET" }).handler(
