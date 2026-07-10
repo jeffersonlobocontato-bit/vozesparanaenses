@@ -11,6 +11,7 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as WhatsappRouteImport } from './routes/whatsapp'
 import { Route as SobreRouteImport } from './routes/sobre'
+import { Route as PoliticaEditorialRouteImport } from './routes/politica-editorial'
 import { Route as AdminRouteImport } from './routes/admin'
 import { Route as RegionRouteImport } from './routes/$region'
 import { Route as IndexRouteImport } from './routes/index'
@@ -43,6 +44,11 @@ const WhatsappRoute = WhatsappRouteImport.update({
 const SobreRoute = SobreRouteImport.update({
   id: '/sobre',
   path: '/sobre',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PoliticaEditorialRoute = PoliticaEditorialRouteImport.update({
+  id: '/politica-editorial',
+  path: '/politica-editorial',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AdminRoute = AdminRouteImport.update({
@@ -166,6 +172,7 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/$region': typeof RegionRouteWithChildren
   '/admin': typeof AdminRouteWithChildren
+  '/politica-editorial': typeof PoliticaEditorialRoute
   '/sobre': typeof SobreRoute
   '/whatsapp': typeof WhatsappRoute
   '/$region/$slug': typeof RegionSlugRoute
@@ -191,6 +198,7 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/politica-editorial': typeof PoliticaEditorialRoute
   '/sobre': typeof SobreRoute
   '/whatsapp': typeof WhatsappRoute
   '/$region/$slug': typeof RegionSlugRoute
@@ -219,6 +227,7 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/$region': typeof RegionRouteWithChildren
   '/admin': typeof AdminRouteWithChildren
+  '/politica-editorial': typeof PoliticaEditorialRoute
   '/sobre': typeof SobreRoute
   '/whatsapp': typeof WhatsappRoute
   '/$region/$slug': typeof RegionSlugRoute
@@ -248,6 +257,7 @@ export interface FileRouteTypes {
     | '/'
     | '/$region'
     | '/admin'
+    | '/politica-editorial'
     | '/sobre'
     | '/whatsapp'
     | '/$region/$slug'
@@ -273,6 +283,7 @@ export interface FileRouteTypes {
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
+    | '/politica-editorial'
     | '/sobre'
     | '/whatsapp'
     | '/$region/$slug'
@@ -300,6 +311,7 @@ export interface FileRouteTypes {
     | '/'
     | '/$region'
     | '/admin'
+    | '/politica-editorial'
     | '/sobre'
     | '/whatsapp'
     | '/$region/$slug'
@@ -328,6 +340,7 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   RegionRoute: typeof RegionRouteWithChildren
   AdminRoute: typeof AdminRouteWithChildren
+  PoliticaEditorialRoute: typeof PoliticaEditorialRoute
   SobreRoute: typeof SobreRoute
   WhatsappRoute: typeof WhatsappRoute
   RIdRoute: typeof RIdRoute
@@ -352,6 +365,13 @@ declare module '@tanstack/react-router' {
       path: '/sobre'
       fullPath: '/sobre'
       preLoaderRoute: typeof SobreRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/politica-editorial': {
+      id: '/politica-editorial'
+      path: '/politica-editorial'
+      fullPath: '/politica-editorial'
+      preLoaderRoute: typeof PoliticaEditorialRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/admin': {
@@ -567,6 +587,7 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   RegionRoute: RegionRouteWithChildren,
   AdminRoute: AdminRouteWithChildren,
+  PoliticaEditorialRoute: PoliticaEditorialRoute,
   SobreRoute: SobreRoute,
   WhatsappRoute: WhatsappRoute,
   RIdRoute: RIdRoute,
