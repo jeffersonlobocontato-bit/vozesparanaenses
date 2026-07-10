@@ -11,6 +11,7 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as WhatsappRouteImport } from './routes/whatsapp'
 import { Route as SobreRouteImport } from './routes/sobre'
+import { Route as PrivacidadeRouteImport } from './routes/privacidade'
 import { Route as PoliticaEditorialRouteImport } from './routes/politica-editorial'
 import { Route as AdminRouteImport } from './routes/admin'
 import { Route as RegionRouteImport } from './routes/$region'
@@ -44,6 +45,11 @@ const WhatsappRoute = WhatsappRouteImport.update({
 const SobreRoute = SobreRouteImport.update({
   id: '/sobre',
   path: '/sobre',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PrivacidadeRoute = PrivacidadeRouteImport.update({
+  id: '/privacidade',
+  path: '/privacidade',
   getParentRoute: () => rootRouteImport,
 } as any)
 const PoliticaEditorialRoute = PoliticaEditorialRouteImport.update({
@@ -173,6 +179,7 @@ export interface FileRoutesByFullPath {
   '/$region': typeof RegionRouteWithChildren
   '/admin': typeof AdminRouteWithChildren
   '/politica-editorial': typeof PoliticaEditorialRoute
+  '/privacidade': typeof PrivacidadeRoute
   '/sobre': typeof SobreRoute
   '/whatsapp': typeof WhatsappRoute
   '/$region/$slug': typeof RegionSlugRoute
@@ -199,6 +206,7 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/politica-editorial': typeof PoliticaEditorialRoute
+  '/privacidade': typeof PrivacidadeRoute
   '/sobre': typeof SobreRoute
   '/whatsapp': typeof WhatsappRoute
   '/$region/$slug': typeof RegionSlugRoute
@@ -228,6 +236,7 @@ export interface FileRoutesById {
   '/$region': typeof RegionRouteWithChildren
   '/admin': typeof AdminRouteWithChildren
   '/politica-editorial': typeof PoliticaEditorialRoute
+  '/privacidade': typeof PrivacidadeRoute
   '/sobre': typeof SobreRoute
   '/whatsapp': typeof WhatsappRoute
   '/$region/$slug': typeof RegionSlugRoute
@@ -258,6 +267,7 @@ export interface FileRouteTypes {
     | '/$region'
     | '/admin'
     | '/politica-editorial'
+    | '/privacidade'
     | '/sobre'
     | '/whatsapp'
     | '/$region/$slug'
@@ -284,6 +294,7 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/politica-editorial'
+    | '/privacidade'
     | '/sobre'
     | '/whatsapp'
     | '/$region/$slug'
@@ -312,6 +323,7 @@ export interface FileRouteTypes {
     | '/$region'
     | '/admin'
     | '/politica-editorial'
+    | '/privacidade'
     | '/sobre'
     | '/whatsapp'
     | '/$region/$slug'
@@ -341,6 +353,7 @@ export interface RootRouteChildren {
   RegionRoute: typeof RegionRouteWithChildren
   AdminRoute: typeof AdminRouteWithChildren
   PoliticaEditorialRoute: typeof PoliticaEditorialRoute
+  PrivacidadeRoute: typeof PrivacidadeRoute
   SobreRoute: typeof SobreRoute
   WhatsappRoute: typeof WhatsappRoute
   RIdRoute: typeof RIdRoute
@@ -365,6 +378,13 @@ declare module '@tanstack/react-router' {
       path: '/sobre'
       fullPath: '/sobre'
       preLoaderRoute: typeof SobreRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/privacidade': {
+      id: '/privacidade'
+      path: '/privacidade'
+      fullPath: '/privacidade'
+      preLoaderRoute: typeof PrivacidadeRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/politica-editorial': {
@@ -588,6 +608,7 @@ const rootRouteChildren: RootRouteChildren = {
   RegionRoute: RegionRouteWithChildren,
   AdminRoute: AdminRouteWithChildren,
   PoliticaEditorialRoute: PoliticaEditorialRoute,
+  PrivacidadeRoute: PrivacidadeRoute,
   SobreRoute: SobreRoute,
   WhatsappRoute: WhatsappRoute,
   RIdRoute: RIdRoute,
