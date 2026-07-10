@@ -152,14 +152,39 @@ export function SiteFooter() {
           </h4>
           <ul className="space-y-1 text-sm">
             <li>
+              <Link to="/sobre" className="text-white/80 hover:text-white">
+                Sobre o portal
+              </Link>
+            </li>
+            <li>
+              <Link to="/politica-editorial" className="text-white/80 hover:text-white">
+                Política editorial
+              </Link>
+            </li>
+            <li>
+              <Link to="/correcoes" className="text-white/80 hover:text-white">
+                Correções
+              </Link>
+            </li>
+            <li>
+              <Link to="/privacidade" className="text-white/80 hover:text-white">
+                Privacidade
+              </Link>
+            </li>
+            <li>
+              <Link to="/termos" className="text-white/80 hover:text-white">
+                Termos de uso
+              </Link>
+            </li>
+            <li>
               <Link to="/whatsapp" className="text-white/80 hover:text-white">
                 Notícias no WhatsApp
               </Link>
             </li>
             <li>
-              <a href="mailto:contato@vozesparanaenses.com.br" className="text-white/80 hover:text-white">
+              <Link to="/contato" className="text-white/80 hover:text-white">
                 Contato
-              </a>
+              </Link>
             </li>
           </ul>
         </div>
