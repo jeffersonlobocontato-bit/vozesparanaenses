@@ -58,6 +58,9 @@ export type ArticleFull = ArticleListItem & {
   seo_title: string | null;
   seo_description: string | null;
   og_image_url: string | null;
+  cidade_principal: string | null;
+  cidades_mencionadas: string[] | null;
+  updated_at: string | null;
 };
 
 type RegiaoRow = {
@@ -418,19 +421,54 @@ export const getArticle = createServerFn({ method: "GET" })
     const { data: row, error } = await sb
       .from("generated_articles")
       .select(
-        "id, slug, titulo, subtitulo, resumo, corpo, imagem_capa_url, publicado_em, seo_title, seo_description, og_image_url, regiao:regioes(slug, nome), categoria:editorial_categories(slug, nome)",
+        "id, slug, titulo, subtitulo, resumo, corpo, imagem_capa_url, publicado_em, updated_at, cidade_principal, cidades_mencionadas, seo_title, seo_description, og_image_url, regiao:regioes(slug, nome), categoria:editorial_categories(slug, nome)",
       )
       .eq("regiao_id", (region as { id: string }).id)
       .eq("slug", data.slug)
       .eq("status", "publicado")
       .maybeSingle();
-    if (error) throw new Error(error.message);
+    if (error) {
+      // Fallback quando as colunas geo/updated_at ainda não existirem no schema.
+      if (/column .* does not exist|cidade_|updated_at/i.test(error.message)) {
+        const { data: legacy, error: legacyErr } = await sb
+          .from("generated_articles")
+          .select(
+            "id, slug, titulo, subtitulo, resumo, corpo, imagem_capa_url, publicado_em, seo_title, seo_description, og_image_url, regiao:regioes(slug, nome), categoria:editorial_categories(slug, nome)",
+          )
+          .eq("regiao_id", (region as { id: string }).id)
+          .eq("slug", data.slug)
+          .eq("status", "publicado")
+          .maybeSingle();
+        if (legacyErr) throw new Error(legacyErr.message);
+        if (!legacy) throw notFound();
+        const lr = legacy as unknown as MateriaRow & {
+          corpo: string | null;
+          seo_title: string | null;
+          seo_description: string | null;
+          og_image_url: string | null;
+        };
+        return {
+          ...mapMateria(lr),
+          body_md: lr.corpo,
+          seo_title: lr.seo_title,
+          seo_description: lr.seo_description,
+          og_image_url: lr.og_image_url,
+          cidade_principal: null,
+          cidades_mencionadas: null,
+          updated_at: null,
+        };
+      }
+      throw new Error(error.message);
+    }
     if (!row) throw notFound();
     const r = row as unknown as MateriaRow & {
       corpo: string | null;
       seo_title: string | null;
       seo_description: string | null;
       og_image_url: string | null;
+      cidade_principal: string | null;
+      cidades_mencionadas: string[] | null;
+      updated_at: string | null;
     };
     return {
       ...mapMateria(r),
@@ -438,6 +476,9 @@ export const getArticle = createServerFn({ method: "GET" })
       seo_title: r.seo_title,
       seo_description: r.seo_description,
       og_image_url: r.og_image_url,
+      cidade_principal: r.cidade_principal,
+      cidades_mencionadas: r.cidades_mencionadas,
+      updated_at: r.updated_at,
     };
   });
 
