@@ -1,9 +1,8 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState, useCallback, useMemo } from "react";
 import { getExternalBrowser } from "@/lib/external-supabase-browser";
 import { supabase } from "@/integrations/supabase/client";
 import { BLOCOS, blocoDoHorario, horaSaoPaulo } from "@/lib/pauta-blocos";
-import { useMemo } from "react";
 
 export const Route = createFileRoute("/admin/clusters")({
   component: AdminClusters,
