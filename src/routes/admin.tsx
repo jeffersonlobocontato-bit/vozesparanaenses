@@ -76,6 +76,7 @@ function AdminLayout() {
           <div className="flex items-center gap-6">
             <Logo size="sm" variant="white" withLink={false} />
             <nav className="flex gap-4 text-sm">
+              <Link to="/admin/painel" className="hover:underline [&.active]:font-bold">Painel</Link>
               <Link to="/admin" activeOptions={{ exact: true }} className="hover:underline [&.active]:font-bold">Fila</Link>
               <Link to="/admin/clusters" className="hover:underline [&.active]:font-bold">Pautas</Link>
               <Link to="/admin/fontes" className="hover:underline [&.active]:font-bold">Fontes</Link>
