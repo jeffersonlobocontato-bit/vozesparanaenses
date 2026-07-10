@@ -78,9 +78,12 @@ function RegionPage() {
   const tema = region.tema_config ?? {};
   const primary = tema.paleta?.primaria ?? "#0A2540";
   const accent = tema.paleta?.acento ?? "#0066CC";
-  const bg = tema.paleta?.fundo ?? "#FFFFFF";
   const fontDisplay = tema.tipografia_destaque ?? "Bebas Neue";
   const fontBody = tema.tipografia_corpo ?? "Barlow";
+
+  const hero = articles[0];
+  const sideCards = articles.slice(1, 5);
+  const rest = articles.slice(5);
 
   return (
     <div
@@ -93,68 +96,180 @@ function RegionPage() {
     >
       <SiteHeader />
 
-      <section className="border-b border-slate-200 bg-white">
-        <div className="mx-auto max-w-7xl px-4 py-8">
-          <div className="text-[11px] font-bold uppercase tracking-[0.16em]" style={{ color: accent }}>
-            Região · Paraná
-          </div>
-          <h1
-            className="mt-1 text-5xl leading-[1.02] md:text-6xl"
-            style={{ fontFamily: `'${fontDisplay}', system-ui, sans-serif`, color: primary }}
+      {/* Region sub-header — thin bar CGN-style */}
+      <div className="border-b border-slate-200 bg-white">
+        <div className="mx-auto flex max-w-7xl items-baseline gap-4 px-4 py-3">
+          <span
+            className="text-[11px] font-bold uppercase tracking-[0.18em]"
+            style={{ color: accent }}
           >
             {region.name}
-          </h1>
-          <p className="mt-3 max-w-2xl text-slate-600">
-            {region.description ?? `Notícias de ${region.main_city} e cidades vizinhas.`}
-          </p>
+          </span>
+          <span className="text-[11px] uppercase tracking-[0.16em] text-slate-400">
+            {region.description ?? `${region.main_city} e cidades vizinhas`}
+          </span>
         </div>
-      </section>
+      </div>
 
-      <section className="mx-auto max-w-7xl px-4 py-10">
-        {articles.length === 0 ? (
-          <div className="rounded-lg border border-slate-200 bg-white p-8 text-center">
+      {articles.length === 0 ? (
+        <section className="mx-auto max-w-7xl px-4 py-16">
+          <div className="border border-slate-200 bg-white p-10 text-center">
             <p className="text-slate-500">
               Ainda não há matérias publicadas para {region.name}. Volte em breve.
             </p>
           </div>
-        ) : (
-          <div className="grid gap-6 md:grid-cols-3">
-            {articles.map((a) => (
-              <Link
-                key={a.id}
-                to="/$region/$slug"
-                params={{ region: slug, slug: a.slug }}
-                className="group block"
-              >
-                {a.cover_image_url ? (
-                  <img
-                    src={a.cover_image_url}
-                    alt=""
-                    className="aspect-[16/10] w-full object-cover transition-transform duration-500 group-hover:scale-[1.02]"
-                    loading="lazy"
-                  />
-                ) : (
-                  <div className="aspect-[16/10] w-full" style={{ background: `${primary}15` }} />
-                )}
-                <div className="pt-3">
-                  <div className="text-[10px] font-bold uppercase tracking-[0.14em]" style={{ color: accent }}>
-                    {region.name}
-                  </div>
-                  <h3
-                    className="mt-1 text-xl font-black leading-tight text-[#0A2540] group-hover:text-[#0d2f52] md:text-2xl"
-                    style={{ fontFamily: `'${fontDisplay}', system-ui, sans-serif` }}
-                  >
-                    {a.title}
-                  </h3>
-                  {a.summary && (
-                    <p className="mt-2 line-clamp-2 text-sm text-slate-600">{a.summary}</p>
+        </section>
+      ) : (
+        <>
+          {/* Hero + side 2x2 grid (CGN pattern) */}
+          <section className="mx-auto max-w-7xl px-4 py-6">
+            <div className="grid gap-6 lg:grid-cols-3">
+              {hero && (
+                <Link
+                  to="/$region/$slug"
+                  params={{ region: slug, slug: hero.slug }}
+                  className="group block lg:col-span-2"
+                >
+                  {hero.cover_image_url ? (
+                    <img
+                      src={hero.cover_image_url}
+                      alt=""
+                      className="aspect-[16/10] w-full object-cover"
+                      loading="eager"
+                    />
+                  ) : (
+                    <div
+                      className="aspect-[16/10] w-full"
+                      style={{ background: `${primary}15` }}
+                    />
                   )}
-                </div>
-              </Link>
-            ))}
-          </div>
-        )}
-      </section>
+                  <div className="pt-4">
+                    <div
+                      className="text-[11px] font-bold uppercase tracking-[0.18em]"
+                      style={{ color: accent }}
+                    >
+                      {region.name}
+                    </div>
+                    <h2
+                      className="mt-2 text-4xl font-black leading-[1.05] md:text-5xl lg:text-6xl"
+                      style={{
+                        fontFamily: `'${fontDisplay}', system-ui, sans-serif`,
+                        color: primary,
+                      }}
+                    >
+                      {hero.title}
+                    </h2>
+                    {hero.summary && (
+                      <p className="mt-3 max-w-3xl text-base leading-relaxed text-slate-600 md:text-lg">
+                        {hero.summary}
+                      </p>
+                    )}
+                  </div>
+                </Link>
+              )}
+
+              <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-2">
+                {sideCards.map((a) => (
+                  <Link
+                    key={a.id}
+                    to="/$region/$slug"
+                    params={{ region: slug, slug: a.slug }}
+                    className="group block"
+                  >
+                    {a.cover_image_url ? (
+                      <img
+                        src={a.cover_image_url}
+                        alt=""
+                        className="aspect-[16/10] w-full object-cover"
+                        loading="lazy"
+                      />
+                    ) : (
+                      <div
+                        className="aspect-[16/10] w-full"
+                        style={{ background: `${primary}15` }}
+                      />
+                    )}
+                    <div className="pt-3">
+                      <div
+                        className="text-[10px] font-bold uppercase tracking-[0.18em]"
+                        style={{ color: accent }}
+                      >
+                        {region.name}
+                      </div>
+                      <h3
+                        className="mt-1 text-lg font-black leading-tight md:text-xl"
+                        style={{
+                          fontFamily: `'${fontDisplay}', system-ui, sans-serif`,
+                          color: primary,
+                        }}
+                      >
+                        {a.title}
+                      </h3>
+                    </div>
+                  </Link>
+                ))}
+              </div>
+            </div>
+          </section>
+
+          {rest.length > 0 && (
+            <section className="mx-auto max-w-7xl px-4 py-8">
+              <div
+                className="mb-6 border-b border-slate-200 pb-2 text-[11px] font-bold uppercase tracking-[0.2em]"
+                style={{ color: primary }}
+              >
+                Mais de {region.name}
+              </div>
+              <div className="grid gap-8 md:grid-cols-3">
+                {rest.map((a) => (
+                  <Link
+                    key={a.id}
+                    to="/$region/$slug"
+                    params={{ region: slug, slug: a.slug }}
+                    className="group block"
+                  >
+                    {a.cover_image_url ? (
+                      <img
+                        src={a.cover_image_url}
+                        alt=""
+                        className="aspect-[16/10] w-full object-cover"
+                        loading="lazy"
+                      />
+                    ) : (
+                      <div
+                        className="aspect-[16/10] w-full"
+                        style={{ background: `${primary}15` }}
+                      />
+                    )}
+                    <div className="pt-3">
+                      <div
+                        className="text-[10px] font-bold uppercase tracking-[0.18em]"
+                        style={{ color: accent }}
+                      >
+                        {region.name}
+                      </div>
+                      <h3
+                        className="mt-1 text-xl font-black leading-tight md:text-2xl"
+                        style={{
+                          fontFamily: `'${fontDisplay}', system-ui, sans-serif`,
+                          color: primary,
+                        }}
+                      >
+                        {a.title}
+                      </h3>
+                      {a.summary && (
+                        <p className="mt-2 line-clamp-2 text-sm text-slate-600">
+                          {a.summary}
+                        </p>
+                      )}
+                    </div>
+                  </Link>
+                ))}
+              </div>
+            </section>
+          )}
+        </>
+      )}
 
       <SiteFooter />
     </div>
