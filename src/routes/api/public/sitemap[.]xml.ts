@@ -1,15 +1,21 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { listRegions, listLatestArticles, listAllCityLandings } from "@/lib/content.functions";
+import {
+  listRegions,
+  listLatestArticles,
+  listAllCityLandings,
+  listAuthors,
+} from "@/lib/content.functions";
 
 export const Route = createFileRoute("/api/public/sitemap.xml")({
   server: {
     handlers: {
       GET: async ({ request }) => {
         const origin = new URL(request.url).origin;
-        const [regions, articles, cities] = await Promise.all([
+        const [regions, articles, cities, authors] = await Promise.all([
           listRegions().catch(() => []),
           listLatestArticles({ data: { limit: 1000 } }).catch(() => []),
           listAllCityLandings().catch(() => []),
+          listAuthors().catch(() => []),
         ]);
 
         const urls: { loc: string; lastmod?: string; priority?: string }[] = [
@@ -41,6 +47,14 @@ export const Route = createFileRoute("/api/public/sitemap.xml")({
             loc: `${origin}/${a.region.slug}/${a.slug}`,
             lastmod: a.published_at ?? undefined,
             priority: "0.9",
+          });
+        }
+
+        for (const au of authors) {
+          urls.push({
+            loc: `${origin}/autor/${au.slug}`,
+            lastmod: au.lastmod ?? undefined,
+            priority: "0.5",
           });
         }
 
