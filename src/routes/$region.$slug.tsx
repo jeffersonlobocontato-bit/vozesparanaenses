@@ -1,6 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { queryOptions, useSuspenseQuery } from "@tanstack/react-query";
-import { getArticle } from "@/lib/content.functions";
+import { getArticle, listArticlesByRegion } from "@/lib/content.functions";
 import { SiteHeader, SiteFooter } from "@/components/SiteHeader";
 
 const articleQO = (regionSlug: string, slug: string) =>
@@ -9,11 +9,18 @@ const articleQO = (regionSlug: string, slug: string) =>
     queryFn: () => getArticle({ data: { regionSlug, slug } }),
   });
 
+const relatedQO = (regionSlug: string) =>
+  queryOptions({
+    queryKey: ["region-related", regionSlug],
+    queryFn: () => listArticlesByRegion({ data: { regionSlug, limit: 9 } }),
+  });
+
 export const Route = createFileRoute("/$region/$slug")({
   loader: async ({ context, params }) => {
-    const article = await context.queryClient.ensureQueryData(
-      articleQO(params.region, params.slug),
-    );
+    const [article] = await Promise.all([
+      context.queryClient.ensureQueryData(articleQO(params.region, params.slug)),
+      context.queryClient.ensureQueryData(relatedQO(params.region)),
+    ]);
     return { article };
   },
   head: ({ loaderData }) =>
@@ -94,6 +101,8 @@ export const Route = createFileRoute("/$region/$slug")({
 function ArticlePage() {
   const { region, slug } = Route.useParams();
   const { data: article } = useSuspenseQuery(articleQO(region, slug));
+  const { data: relatedAll } = useSuspenseQuery(relatedQO(region));
+  const related = relatedAll.filter((r) => r.slug !== slug).slice(0, 8);
 
   const publishedAt = article.published_at ? new Date(article.published_at) : null;
   const publishedLabel = publishedAt
@@ -192,18 +201,62 @@ function ArticlePage() {
           </div>
         </div>
 
-        {/* CTA voltar */}
-        <div className="mx-auto mt-12 max-w-3xl">
-          <Link
-            to="/$region"
-            params={{ region }}
-            className="group inline-flex items-center gap-2 text-sm font-bold uppercase tracking-[0.18em] text-[#0A2540] hover:text-[#0d2f52]"
-          >
-            <span className="inline-block h-px w-8 bg-[#0A2540] transition-all group-hover:w-12" />
-            Mais de {article.region?.name ?? "sua região"}
-          </Link>
-        </div>
       </article>
+
+      {/* MAIS {REGIÃO} — grade de miniaturas ao estilo CGN */}
+      {related.length > 0 && (
+        <section className="border-t border-slate-200 bg-slate-50">
+          <div className="mx-auto max-w-6xl px-4 py-12">
+            <div className="mb-6 flex items-center gap-3">
+              <span className="inline-block bg-[#0A2540] px-3 py-1 text-xs font-bold uppercase tracking-[0.18em] text-white">
+                Mais {article.region?.name ?? "da região"}
+              </span>
+              <span className="h-px flex-1 bg-slate-200" />
+              <Link
+                to="/$region"
+                params={{ region }}
+                className="text-[11px] font-bold uppercase tracking-[0.18em] text-[#0A2540] hover:text-[#0d2f52]"
+              >
+                Ver todas ›
+              </Link>
+            </div>
+
+            <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
+              {related.map((r) => (
+                <Link
+                  key={r.id}
+                  to="/$region/$slug"
+                  params={{ region, slug: r.slug }}
+                  className="group block"
+                >
+                  <div className="aspect-[4/3] w-full overflow-hidden bg-slate-200">
+                    {r.cover_image_url ? (
+                      <img
+                        src={r.cover_image_url}
+                        alt={r.title}
+                        className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
+                        loading="lazy"
+                      />
+                    ) : (
+                      <div className="flex h-full w-full items-center justify-center bg-[#0A2540]/10 text-xs uppercase tracking-widest text-[#0A2540]/60">
+                        Sem imagem
+                      </div>
+                    )}
+                  </div>
+                  {r.categoria && (
+                    <div className="mt-3 text-[10px] font-bold uppercase tracking-[0.18em] text-[#0A2540]">
+                      {r.categoria.name}
+                    </div>
+                  )}
+                  <h3 className="mt-1 font-display text-xl font-bold leading-[1.1] text-slate-900 group-hover:text-[#0A2540]">
+                    {r.title}
+                  </h3>
+                </Link>
+              ))}
+            </div>
+          </div>
+        </section>
+      )}
 
       <SiteFooter />
     </div>
