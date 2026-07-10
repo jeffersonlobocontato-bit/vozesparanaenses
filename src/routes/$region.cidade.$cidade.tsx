@@ -2,6 +2,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { queryOptions, useSuspenseQuery } from "@tanstack/react-query";
 import { getRegionBySlug, listArticlesByCity } from "@/lib/content.functions";
 import { SiteHeader, SiteFooter } from "@/components/SiteHeader";
+import { getCityCoords, formatGeoPosition, formatICBM } from "@/lib/geo-cities";
 
 const cityQO = (regionSlug: string, citySlug: string) =>
   queryOptions({
@@ -28,6 +29,7 @@ export const Route = createFileRoute("/$region/cidade/$cidade")({
     const cityName = loaderData.city.cityName;
     const regionName = loaderData.region.name;
     const url = `/${params.region}/cidade/${params.cidade}`;
+    const coords = getCityCoords(params.cidade);
     const title = `Notícias de ${cityName} — ${regionName} | Vozes Paranaenses`;
     const description = `Últimas notícias, política, economia, esporte e cultura de ${cityName} e cidades vizinhas no ${regionName}, Paraná.`;
 
@@ -40,6 +42,15 @@ export const Route = createFileRoute("/$region/cidade/$cidade")({
       about: {
         "@type": "City",
         name: cityName,
+        ...(coords
+          ? {
+              geo: {
+                "@type": "GeoCoordinates",
+                latitude: coords.lat,
+                longitude: coords.lng,
+              },
+            }
+          : {}),
         containedInPlace: {
           "@type": "AdministrativeArea",
           name: regionName,
@@ -66,6 +77,12 @@ export const Route = createFileRoute("/$region/cidade/$cidade")({
         { name: "keywords", content: `${cityName}, ${regionName}, Paraná, notícias` },
         { name: "geo.region", content: "BR-PR" },
         { name: "geo.placename", content: `${cityName}, Paraná, Brasil` },
+        ...(coords
+          ? [
+              { name: "geo.position", content: formatGeoPosition(coords) },
+              { name: "ICBM", content: formatICBM(coords) },
+            ]
+          : []),
         { name: "robots", content: "index, follow, max-image-preview:large" },
         { property: "og:title", content: title },
         { property: "og:description", content: description },
