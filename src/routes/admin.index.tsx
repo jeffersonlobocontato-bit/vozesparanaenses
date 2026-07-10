@@ -2,6 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useState, useCallback } from "react";
 import { getExternalBrowser } from "@/lib/external-supabase-browser";
 import { supabase } from "@/integrations/supabase/client";
+import { ArticleImageEditor } from "@/components/admin/ArticleImageEditor";
 
 export const Route = createFileRoute("/admin/")({
   component: AdminQueue,
@@ -132,6 +133,12 @@ function AdminQueue() {
             <h2 className="text-lg font-semibold leading-snug">{it.titulo}</h2>
             {it.subtitulo && <p className="mt-1 text-sm text-muted-foreground">{it.subtitulo}</p>}
             {it.resumo && <p className="mt-2 text-sm">{it.resumo}</p>}
+            <ArticleImageEditor
+              articleId={it.id}
+              currentUrl={it.imagem_capa_url}
+              currentCredito={it.imagem_credito}
+              onUpdated={load}
+            />
             <div className="mt-3 flex flex-wrap gap-2">
               {it.status === "publicado" && it.regiao && (
                 <a href={`/${it.regiao.slug}/${it.slug}`} target="_blank" rel="noreferrer"
