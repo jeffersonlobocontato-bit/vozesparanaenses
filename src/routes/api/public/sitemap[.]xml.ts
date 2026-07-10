@@ -1,14 +1,15 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { listRegions, listLatestArticles, cidadeSlug } from "@/lib/content.functions";
+import { listRegions, listLatestArticles, listAllCityLandings } from "@/lib/content.functions";
 
 export const Route = createFileRoute("/api/public/sitemap.xml")({
   server: {
     handlers: {
       GET: async ({ request }) => {
         const origin = new URL(request.url).origin;
-        const [regions, articles] = await Promise.all([
+        const [regions, articles, cities] = await Promise.all([
           listRegions().catch(() => []),
           listLatestArticles({ data: { limit: 1000 } }).catch(() => []),
+          listAllCityLandings().catch(() => []),
         ]);
 
         const urls: { loc: string; lastmod?: string; priority?: string }[] = [
@@ -21,20 +22,12 @@ export const Route = createFileRoute("/api/public/sitemap.xml")({
           urls.push({ loc: `${origin}/${r.slug}/classificados`, priority: "0.5" });
         }
 
-        // Landings de cidade (derivadas de cidade_principal das matérias)
-        const citiesByRegion = new Map<string, Set<string>>();
-        for (const a of articles) {
-          const anyA = a as unknown as { cidade_principal?: string | null };
-          if (!a.region || !anyA.cidade_principal) continue;
-          const s = cidadeSlug(anyA.cidade_principal);
-          if (!s) continue;
-          if (!citiesByRegion.has(a.region.slug)) citiesByRegion.set(a.region.slug, new Set());
-          citiesByRegion.get(a.region.slug)!.add(s);
-        }
-        for (const [regionSlug, set] of citiesByRegion) {
-          for (const citySlug of set) {
-            urls.push({ loc: `${origin}/${regionSlug}/cidade/${citySlug}`, priority: "0.7" });
-          }
+        for (const c of cities) {
+          urls.push({
+            loc: `${origin}/${c.regionSlug}/cidade/${c.citySlug}`,
+            lastmod: c.lastmod ?? undefined,
+            priority: "0.7",
+          });
         }
 
         for (const a of articles) {
