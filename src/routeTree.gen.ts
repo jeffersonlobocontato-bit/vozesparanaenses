@@ -25,6 +25,9 @@ import { Route as RegionClassificadosRouteImport } from './routes/$region.classi
 import { Route as RegionSlugRouteImport } from './routes/$region.$slug'
 import { Route as ApiPublicSitemapDotxmlRouteImport } from './routes/api/public/sitemap[.]xml'
 import { Route as ApiPublicSitemapNewsDotxmlRouteImport } from './routes/api/public/sitemap-news[.]xml'
+import { Route as ApiPublicRssDotxmlRouteImport } from './routes/api/public/rss[.]xml'
+import { Route as ApiPublicLlmsDottxtRouteImport } from './routes/api/public/llms[.]txt'
+import { Route as ApiPublicLlmsFullDottxtRouteImport } from './routes/api/public/llms-full[.]txt'
 import { Route as RegionEditoriaCategoriaRouteImport } from './routes/$region.editoria.$categoria'
 
 const WhatsappRoute = WhatsappRouteImport.update({
@@ -108,6 +111,21 @@ const ApiPublicSitemapNewsDotxmlRoute =
     path: '/api/public/sitemap-news.xml',
     getParentRoute: () => rootRouteImport,
   } as any)
+const ApiPublicRssDotxmlRoute = ApiPublicRssDotxmlRouteImport.update({
+  id: '/api/public/rss.xml',
+  path: '/api/public/rss.xml',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiPublicLlmsDottxtRoute = ApiPublicLlmsDottxtRouteImport.update({
+  id: '/api/public/llms.txt',
+  path: '/api/public/llms.txt',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiPublicLlmsFullDottxtRoute = ApiPublicLlmsFullDottxtRouteImport.update({
+  id: '/api/public/llms-full.txt',
+  path: '/api/public/llms-full.txt',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const RegionEditoriaCategoriaRoute = RegionEditoriaCategoriaRouteImport.update({
   id: '/editoria/$categoria',
   path: '/editoria/$categoria',
@@ -130,6 +148,9 @@ export interface FileRoutesByFullPath {
   '/$region/': typeof RegionIndexRoute
   '/admin/': typeof AdminIndexRoute
   '/$region/editoria/$categoria': typeof RegionEditoriaCategoriaRoute
+  '/api/public/llms-full.txt': typeof ApiPublicLlmsFullDottxtRoute
+  '/api/public/llms.txt': typeof ApiPublicLlmsDottxtRoute
+  '/api/public/rss.xml': typeof ApiPublicRssDotxmlRoute
   '/api/public/sitemap-news.xml': typeof ApiPublicSitemapNewsDotxmlRoute
   '/api/public/sitemap.xml': typeof ApiPublicSitemapDotxmlRoute
 }
@@ -147,6 +168,9 @@ export interface FileRoutesByTo {
   '/$region': typeof RegionIndexRoute
   '/admin': typeof AdminIndexRoute
   '/$region/editoria/$categoria': typeof RegionEditoriaCategoriaRoute
+  '/api/public/llms-full.txt': typeof ApiPublicLlmsFullDottxtRoute
+  '/api/public/llms.txt': typeof ApiPublicLlmsDottxtRoute
+  '/api/public/rss.xml': typeof ApiPublicRssDotxmlRoute
   '/api/public/sitemap-news.xml': typeof ApiPublicSitemapNewsDotxmlRoute
   '/api/public/sitemap.xml': typeof ApiPublicSitemapDotxmlRoute
 }
@@ -167,6 +191,9 @@ export interface FileRoutesById {
   '/$region/': typeof RegionIndexRoute
   '/admin/': typeof AdminIndexRoute
   '/$region/editoria/$categoria': typeof RegionEditoriaCategoriaRoute
+  '/api/public/llms-full.txt': typeof ApiPublicLlmsFullDottxtRoute
+  '/api/public/llms.txt': typeof ApiPublicLlmsDottxtRoute
+  '/api/public/rss.xml': typeof ApiPublicRssDotxmlRoute
   '/api/public/sitemap-news.xml': typeof ApiPublicSitemapNewsDotxmlRoute
   '/api/public/sitemap.xml': typeof ApiPublicSitemapDotxmlRoute
 }
@@ -188,6 +215,9 @@ export interface FileRouteTypes {
     | '/$region/'
     | '/admin/'
     | '/$region/editoria/$categoria'
+    | '/api/public/llms-full.txt'
+    | '/api/public/llms.txt'
+    | '/api/public/rss.xml'
     | '/api/public/sitemap-news.xml'
     | '/api/public/sitemap.xml'
   fileRoutesByTo: FileRoutesByTo
@@ -205,6 +235,9 @@ export interface FileRouteTypes {
     | '/$region'
     | '/admin'
     | '/$region/editoria/$categoria'
+    | '/api/public/llms-full.txt'
+    | '/api/public/llms.txt'
+    | '/api/public/rss.xml'
     | '/api/public/sitemap-news.xml'
     | '/api/public/sitemap.xml'
   id:
@@ -224,6 +257,9 @@ export interface FileRouteTypes {
     | '/$region/'
     | '/admin/'
     | '/$region/editoria/$categoria'
+    | '/api/public/llms-full.txt'
+    | '/api/public/llms.txt'
+    | '/api/public/rss.xml'
     | '/api/public/sitemap-news.xml'
     | '/api/public/sitemap.xml'
   fileRoutesById: FileRoutesById
@@ -233,6 +269,9 @@ export interface RootRouteChildren {
   RegionRoute: typeof RegionRouteWithChildren
   AdminRoute: typeof AdminRouteWithChildren
   WhatsappRoute: typeof WhatsappRoute
+  ApiPublicLlmsFullDottxtRoute: typeof ApiPublicLlmsFullDottxtRoute
+  ApiPublicLlmsDottxtRoute: typeof ApiPublicLlmsDottxtRoute
+  ApiPublicRssDotxmlRoute: typeof ApiPublicRssDotxmlRoute
   ApiPublicSitemapNewsDotxmlRoute: typeof ApiPublicSitemapNewsDotxmlRoute
   ApiPublicSitemapDotxmlRoute: typeof ApiPublicSitemapDotxmlRoute
 }
@@ -351,6 +390,27 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicSitemapNewsDotxmlRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/rss.xml': {
+      id: '/api/public/rss.xml'
+      path: '/api/public/rss.xml'
+      fullPath: '/api/public/rss.xml'
+      preLoaderRoute: typeof ApiPublicRssDotxmlRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/public/llms.txt': {
+      id: '/api/public/llms.txt'
+      path: '/api/public/llms.txt'
+      fullPath: '/api/public/llms.txt'
+      preLoaderRoute: typeof ApiPublicLlmsDottxtRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/public/llms-full.txt': {
+      id: '/api/public/llms-full.txt'
+      path: '/api/public/llms-full.txt'
+      fullPath: '/api/public/llms-full.txt'
+      preLoaderRoute: typeof ApiPublicLlmsFullDottxtRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/$region/editoria/$categoria': {
       id: '/$region/editoria/$categoria'
       path: '/editoria/$categoria'
@@ -405,6 +465,9 @@ const rootRouteChildren: RootRouteChildren = {
   RegionRoute: RegionRouteWithChildren,
   AdminRoute: AdminRouteWithChildren,
   WhatsappRoute: WhatsappRoute,
+  ApiPublicLlmsFullDottxtRoute: ApiPublicLlmsFullDottxtRoute,
+  ApiPublicLlmsDottxtRoute: ApiPublicLlmsDottxtRoute,
+  ApiPublicRssDotxmlRoute: ApiPublicRssDotxmlRoute,
   ApiPublicSitemapNewsDotxmlRoute: ApiPublicSitemapNewsDotxmlRoute,
   ApiPublicSitemapDotxmlRoute: ApiPublicSitemapDotxmlRoute,
 }
