@@ -30,14 +30,6 @@ type RecentDraft = {
   regiao: { slug: string; nome: string } | null;
 };
 
-async function countRows(sb: Awaited<ReturnType<typeof getExternalBrowser>>, table: string, filter?: (q: ReturnType<typeof sb.from>) => ReturnType<typeof sb.from>) {
-  let q = sb.from(table).select("*", { count: "exact", head: true });
-  if (filter) q = filter(q) as typeof q;
-  const { count, error } = await q;
-  if (error) throw error;
-  return count ?? 0;
-}
-
 function AdminDashboard() {
   const [m, setM] = useState<Metrics | null>(null);
   const [recent, setRecent] = useState<RecentDraft[]>([]);
