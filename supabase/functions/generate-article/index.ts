@@ -1,8 +1,15 @@
 // Vozes Paranaenses — generate-article
-// Recebe { cluster_id } (ou { raw_article_ids }) e gera uma matéria via
-// Lovable AI Gateway (google/gemini-2.5-pro) seguindo o Método DEL + 5W1H.
-// Grava em extracted_facts e generated_articles (status='rascunho') no
-// Supabase externo, para revisão no dashboard editorial.
+// Etapa 2 de 2 do pipeline editorial (separada de extract-facts em
+// 2026-07): recebe { cluster_id } ou { extracted_facts_id }, lê os fatos
+// JÁ EXTRAÍDOS (não chama IA para extrair nada de novo) e redige a
+// matéria seguindo o Método DEL. Grava em `generated_articles`
+// (status='rascunho') para revisão no dashboard editorial.
+//
+// Pré-requisito: rode extract-facts para o cluster antes de chamar isto.
+// Se não houver extracted_facts para o cluster, retorna erro
+// `facts_not_extracted_yet` — não faz fallback silencioso para extrair
+// fatos aqui, propositalmente, para manter as duas etapas realmente
+// separadas e auditáveis.
 
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
 
@@ -16,34 +23,57 @@ const AI_URL = "https://ai.gateway.lovable.dev/v1/chat/completions";
 const MODEL = "google/gemini-2.5-pro";
 
 const SYSTEM_PROMPT = `Você é editor-chefe do portal regional "Vozes Paranaenses".
-Sua tarefa: a partir de matérias-fonte sobre o MESMO fato, produzir UMA reportagem
-original em português brasileiro, seguindo o Método DEL (Denso, Editorial, Local).
+Sua tarefa: a partir de FATOS JÁ APURADOS (fornecidos como JSON, não como
+texto-fonte bruto), redigir UMA reportagem original em português brasileiro,
+seguindo o Método DEL (Denso, Editorial, Local).
 
 REGRAS INEGOCIÁVEIS:
-1. NUNCA copie frases das fontes. Reescreva integralmente.
-2. NUNCA invente fatos, nomes, números, datas, cargos, citações.
-3. Só afirme o que estiver nas fontes. Em caso de conflito, registre a divergência.
-4. Extraia rigorosamente os 5W1H: quem, o_que, quando, onde, por_que, como.
-5. Tom editorial: informativo, direto, sem opinião, foco no impacto local.
-7. Título: até 90 caracteres, sem clickbait, com o fato central.
-8. Subtítulo: contexto complementar, até 160 caracteres.
-9. Resumo: 2-3 frases, autocontido (para redes sociais e SEO).
-10. Corpo: 4-8 parágrafos curtos, lead na primeira frase.
-11. TL;DR (answer-first): 2 a 3 frases curtas com a resposta direta ao "o que
-    aconteceu?", otimizado para AI Overviews / ChatGPT / Perplexity.
-12. FAQ: 3 a 5 perguntas frequentes que uma pessoa da região faria sobre esse
-    fato, cada resposta com 1-3 frases baseadas SOMENTE nas fontes. Se as fontes
-    não permitirem perguntas úteis, retorne array vazio.
+1. Use SOMENTE os fatos fornecidos no JSON de entrada — nunca invente nomes,
+   números, datas, cargos ou citações que não estejam ali.
+2. Se um campo do JSON de fatos vier null ou vazio, não mencione esse ponto
+   na matéria em vez de inventar um valor.
+3. Tom editorial: informativo, direto, sem opinião, foco no impacto local.
+4. Título: até 90 caracteres, sem clickbait, com o fato central.
+5. Subtítulo: contexto complementar, até 160 caracteres.
+6. Resumo: 2-3 frases, autocontido (para redes sociais e SEO).
+7. Corpo: 4-8 parágrafos curtos, lead na primeira frase.
+8. TL;DR (answer-first): 2 a 3 frases curtas com a resposta direta ao "o que
+   aconteceu?", otimizado para AI Overviews / ChatGPT / Perplexity.
+9. FAQ: 3 a 5 perguntas frequentes que uma pessoa da região faria sobre esse
+   fato, cada resposta com 1-3 frases baseadas SOMENTE nos fatos fornecidos.
+   Se os fatos não permitirem perguntas úteis, retorne array vazio.
 
 Retorne APENAS JSON válido, sem markdown, no schema fornecido.`;
 
-type Payload = { cluster_id?: string; raw_article_ids?: string[] };
+type Payload = { cluster_id?: string; extracted_facts_id?: string };
+
+type ExtractedFactsRow = {
+  id: string;
+  cluster_id: string;
+  quem: string | null;
+  o_que: string | null;
+  quando: string | null;
+  onde: string | null;
+  por_que: string | null;
+  dados: Record<string, unknown> | null;
+  citacoes: Array<{ autor?: string; texto?: string }> | null;
+  fontes: Array<{ url?: string; veiculo?: string }> | null;
+};
+
+type GeneratedPayload = {
+  titulo: string;
+  subtitulo?: string;
+  resumo?: string;
+  corpo: string;
+  seo_title?: string;
+  seo_description?: string;
+  tldr?: string;
+  faq?: Array<{ pergunta: string; resposta: string }>;
+};
 
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: cors });
-  if (req.method !== "POST") {
-    return json({ error: "method_not_allowed" }, 405);
-  }
+  if (req.method !== "POST") return json({ error: "method_not_allowed" }, 405);
 
   const url = Deno.env.get("EXTERNAL_SUPABASE_URL");
   const key = Deno.env.get("EXTERNAL_SUPABASE_SERVICE_ROLE_KEY");
@@ -57,48 +87,52 @@ Deno.serve(async (req) => {
   } catch {
     return json({ error: "invalid_json_body" }, 400);
   }
+  if (!body.cluster_id && !body.extracted_facts_id) {
+    return json({ error: "missing_cluster_id_or_extracted_facts_id" }, 400);
+  }
 
   const sb = createClient(url, key, { auth: { persistSession: false } });
 
-  // 1. Resolver artigos-fonte
-  let rawIds: string[] = [];
-  let clusterId = body.cluster_id ?? null;
-  let regiaoId: string | null = null;
-  let categoriaId: string | null = null;
-
-  if (clusterId) {
-    const { data: cluster, error: cErr } = await sb
-      .from("article_clusters")
-      .select("id, regiao_id, categoria_id")
-      .eq("id", clusterId)
+  // 1. Buscar os fatos JÁ EXTRAÍDOS — nunca chama IA de extração aqui
+  let facts: ExtractedFactsRow | null = null;
+  if (body.extracted_facts_id) {
+    const { data, error } = await sb
+      .from("extracted_facts")
+      .select("id, cluster_id, quem, o_que, quando, onde, por_que, dados, citacoes, fontes")
+      .eq("id", body.extracted_facts_id)
       .maybeSingle();
-    if (cErr || !cluster) return json({ error: "cluster_not_found", detail: cErr?.message }, 404);
-    regiaoId = cluster.regiao_id;
-    categoriaId = cluster.categoria_id;
-    const { data: ca } = await sb
-      .from("cluster_articles")
-      .select("raw_article_id")
-      .eq("cluster_id", clusterId);
-    rawIds = (ca ?? []).map((r) => r.raw_article_id);
-  } else if (body.raw_article_ids?.length) {
-    rawIds = body.raw_article_ids;
-  } else {
-    return json({ error: "missing_cluster_id_or_raw_article_ids" }, 400);
+    if (error) return json({ error: "facts_fetch_failed", detail: error.message }, 500);
+    facts = data;
+  } else if (body.cluster_id) {
+    const { data, error } = await sb
+      .from("extracted_facts")
+      .select("id, cluster_id, quem, o_que, quando, onde, por_que, dados, citacoes, fontes")
+      .eq("cluster_id", body.cluster_id)
+      .order("criado_em", { ascending: false })
+      .limit(1)
+      .maybeSingle();
+    if (error) return json({ error: "facts_fetch_failed", detail: error.message }, 500);
+    facts = data;
   }
 
-  if (!rawIds.length) return json({ error: "no_raw_articles" }, 400);
+  if (!facts) {
+    return json(
+      { error: "facts_not_extracted_yet", hint: "Rode a função extract-facts para este cluster antes de gerar a matéria." },
+      409,
+    );
+  }
 
-  const { data: raws, error: rErr } = await sb
-    .from("raw_articles")
-    .select("id, url, titulo, corpo_limpo, regiao_id, fontes:fonte_id(id, nome, url_base)")
-    .in("id", rawIds);
-  if (rErr || !raws?.length) return json({ error: "raws_fetch_failed", detail: rErr?.message }, 500);
+  const clusterId = facts.cluster_id;
+  const { data: cluster, error: cErr } = await sb
+    .from("article_clusters")
+    .select("id, regiao_id, categoria_id")
+    .eq("id", clusterId)
+    .maybeSingle();
+  if (cErr || !cluster) return json({ error: "cluster_not_found", detail: cErr?.message }, 404);
 
-  regiaoId = regiaoId ?? raws[0].regiao_id;
-  if (!regiaoId) return json({ error: "missing_regiao" }, 400);
-
-  // 2. Chamar Lovable AI Gateway
-  const userPrompt = buildUserPrompt(raws);
+  // 2. Chamar IA — só para redação (Método DEL), a partir dos fatos já prontos
+  const dados = (facts.dados ?? {}) as Record<string, unknown>;
+  const userPrompt = buildUserPrompt(facts, dados);
   const aiRes = await fetch(AI_URL, {
     method: "POST",
     headers: {
@@ -134,29 +168,16 @@ Deno.serve(async (req) => {
   }
 
   const slug = slugify(parsed.titulo);
+  const cidadePrincipal = (dados.cidade_principal as string | null) ?? null;
+  const cidadesMencionadas = (dados.cidades_mencionadas as string[] | undefined) ?? [];
 
-  // 3. Persistir extracted_facts (se houver cluster)
-  if (clusterId && parsed.fatos) {
-    await sb.from("extracted_facts").insert({
-      cluster_id: clusterId,
-      quem: parsed.fatos.quem ?? null,
-      o_que: parsed.fatos.o_que ?? null,
-      quando: parsed.fatos.quando ?? null,
-      onde: parsed.fatos.onde ?? null,
-      por_que: parsed.fatos.por_que ?? null,
-      dados: parsed.fatos.dados ?? {},
-      citacoes: parsed.fatos.citacoes ?? [],
-      fontes: raws.map((r) => ({ url: r.url, veiculo: r.fontes?.nome ?? r.fontes?.url_base })),
-    });
-  }
-
-  // 4. Persistir generated_articles (rascunho)
+  // 3. Persistir generated_articles (rascunho) — extracted_facts já existe, não regrava
   const { data: inserted, error: insErr } = await sb
     .from("generated_articles")
     .insert({
       cluster_id: clusterId,
-      regiao_id: regiaoId,
-      categoria_id: categoriaId,
+      regiao_id: cluster.regiao_id,
+      categoria_id: cluster.categoria_id,
       slug,
       titulo: parsed.titulo,
       subtitulo: parsed.subtitulo ?? null,
@@ -164,10 +185,13 @@ Deno.serve(async (req) => {
       corpo: parsed.corpo,
       seo_title: parsed.seo_title ?? parsed.titulo,
       seo_description: parsed.seo_description ?? parsed.resumo ?? null,
-      cidade_principal: parsed.cidade_principal ?? null,
-      cidades_mencionadas: parsed.cidades_mencionadas ?? [],
+      cidade_principal: cidadePrincipal,
+      cidades_mencionadas: cidadesMencionadas,
       tldr: parsed.tldr ?? null,
-      fatos_5w1h: parsed.fatos ?? null,
+      fatos_5w1h: {
+        quem: facts.quem, o_que: facts.o_que, quando: facts.quando, onde: facts.onde,
+        por_que: facts.por_que, como: dados.como ?? null,
+      },
       faq: Array.isArray(parsed.faq) ? parsed.faq : [],
       status: "rascunho",
     })
@@ -176,45 +200,36 @@ Deno.serve(async (req) => {
 
   if (insErr) return json({ error: "insert_failed", detail: insErr.message }, 500);
 
-  // 5. Marcar raws como processados
-  await sb.from("raw_articles").update({ processado: true }).in("id", rawIds);
+  // 4. Marcar raws desse cluster como processados
+  const { data: ca } = await sb.from("cluster_articles").select("raw_article_id").eq("cluster_id", clusterId);
+  const rawIds = (ca ?? []).map((r) => r.raw_article_id);
+  if (rawIds.length) await sb.from("raw_articles").update({ processado: true }).in("id", rawIds);
 
-  return json({ ok: true, article: inserted, model: MODEL });
+  return json({ ok: true, article: inserted, model: MODEL, titulo: parsed.titulo });
 });
 
-type GeneratedPayload = {
-  titulo: string;
-  subtitulo?: string;
-  resumo?: string;
-  corpo: string;
-  seo_title?: string;
-  seo_description?: string;
-  cidade_principal?: string | null;
-  cidades_mencionadas?: string[];
-  tldr?: string;
-  faq?: Array<{ pergunta: string; resposta: string }>;
-  fatos?: {
-    quem?: string;
-    o_que?: string;
-    quando?: string;
-    onde?: string;
-    por_que?: string;
-    como?: string;
-    dados?: Record<string, unknown>;
-    citacoes?: Array<{ autor?: string; texto?: string }>;
-  };
-};
+function buildUserPrompt(facts: ExtractedFactsRow, dados: Record<string, unknown>) {
+  const fontesTxt = (facts.fontes ?? [])
+    .map((f, i) => `${i + 1}. ${f.veiculo ?? "fonte"} — ${f.url ?? ""}`)
+    .join("\n");
 
-function buildUserPrompt(raws: Array<{ url: string; titulo: string | null; corpo_limpo: string | null; fontes?: { nome?: string; url_base?: string } | null }>) {
-  const sources = raws
-    .map((r, i) => {
-      const veiculo = r.fontes?.nome ?? r.fontes?.url_base ?? "fonte";
-      return `--- FONTE ${i + 1} (${veiculo}) ---\nURL: ${r.url}\nTítulo: ${r.titulo ?? ""}\n\n${(r.corpo_limpo ?? "").slice(0, 8000)}`;
-    })
-    .join("\n\n");
+  return `Fatos apurados sobre este acontecimento (já extraídos, não invente nada além disto):
 
-  return `Abaixo estão ${raws.length} matéria(s) fonte sobre o mesmo fato. Produza a reportagem única no schema JSON:
+{
+  "quem": ${JSON.stringify(facts.quem)},
+  "o_que": ${JSON.stringify(facts.o_que)},
+  "quando": ${JSON.stringify(facts.quando)},
+  "onde": ${JSON.stringify(facts.onde)},
+  "por_que": ${JSON.stringify(facts.por_que)},
+  "como": ${JSON.stringify(dados.como ?? null)},
+  "dados": ${JSON.stringify(dados)},
+  "citacoes": ${JSON.stringify(facts.citacoes ?? [])}
+}
 
+Fontes originais (para referência editorial, ex.: "segundo apurou o Vozes Paranaenses" ou citar o veículo quando fizer sentido):
+${fontesTxt}
+
+Redija a reportagem no schema JSON:
 {
   "titulo": "string até 90 chars",
   "subtitulo": "string até 160 chars",
@@ -223,25 +238,8 @@ function buildUserPrompt(raws: Array<{ url: string; titulo: string | null; corpo
   "corpo": "texto em markdown, 4-8 parágrafos curtos",
   "seo_title": "string até 60 chars",
   "seo_description": "string até 155 chars",
-  "cidade_principal": "nome da cidade paranaense onde o fato ocorreu (string) ou null se não aplicável",
-  "cidades_mencionadas": ["cidades adicionais citadas nas fontes"],
-  "faq": [
-    { "pergunta": "string", "resposta": "1-3 frases baseadas nas fontes" }
-  ],
-  "fatos": {
-    "quem": "string",
-    "o_que": "string",
-    "quando": "string ISO ou descritivo",
-    "onde": "string com cidade/região",
-    "por_que": "string",
-    "como": "string",
-    "dados": { "chave": "valor numérico ou textual" },
-    "citacoes": [{ "autor": "Nome (cargo)", "texto": "citação literal entre aspas" }]
-  }
-}
-
-FONTES:
-${sources}`;
+  "faq": [ { "pergunta": "string", "resposta": "1-3 frases baseadas SOMENTE nos fatos acima" } ]
+}`;
 }
 
 function slugify(s: string) {
