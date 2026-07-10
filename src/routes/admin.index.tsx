@@ -38,20 +38,15 @@ function AdminQueue() {
       const sb = await getExternalBrowser();
       const fullSelect = "id, slug, titulo, subtitulo, resumo, status, gerado_em, imagem_capa_url, imagem_credito, regiao:regioes(slug, nome), categoria:editorial_categories(slug, nome)";
       const fallbackSelect = "id, slug, titulo, subtitulo, resumo, status, gerado_em, regiao:regioes(slug, nome), categoria:editorial_categories(slug, nome)";
-      let res = await sb
-        .from("generated_articles")
-        .select(fullSelect)
-        .eq("status", tab)
-        .order("gerado_em", { ascending: false })
-        .limit(50);
-      // Se as colunas de imagem ainda não existem (migration 005 não rodada), tenta sem elas.
-      if (res.error && /column .* does not exist|imagem_/i.test(res.error.message)) {
-        res = await sb
-          .from("generated_articles")
-          .select(fallbackSelect)
+      const run = (sel: string) =>
+        sb.from("generated_articles")
+          .select(sel)
           .eq("status", tab)
           .order("gerado_em", { ascending: false })
           .limit(50);
+      let res = await run(fullSelect);
+      if (res.error && /column .* does not exist|imagem_/i.test(res.error.message)) {
+        res = await run(fallbackSelect);
       }
       if (res.error) throw res.error;
       setItems((res.data ?? []) as unknown as Draft[]);
