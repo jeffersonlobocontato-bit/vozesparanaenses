@@ -1,7 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { queryOptions, useSuspenseQuery } from "@tanstack/react-query";
 import { getArticle } from "@/lib/content.functions";
-import { Logo } from "@/components/Logo";
+import { SiteHeader, SiteFooter } from "@/components/SiteHeader";
 
 const articleQO = (regionSlug: string, slug: string) =>
   queryOptions({
@@ -111,35 +111,7 @@ function ArticlePage() {
 
   return (
     <div className="min-h-screen bg-white text-slate-900">
-      {/* Top bar — dense, dark, editorial */}
-      <header className="sticky top-0 z-30 bg-[#0A2540] text-white shadow-sm">
-        <div className="mx-auto flex max-w-6xl items-center gap-4 px-4 py-3">
-          <Logo size="sm" variant="white" />
-          <nav className="ml-2 hidden items-center gap-5 text-[11px] font-bold uppercase tracking-[0.18em] text-white/80 md:flex">
-            <Link to="/$region" params={{ region }} className="hover:text-white">
-              {article.region?.name ?? "Região"}
-            </Link>
-            <span className="h-3 w-px bg-white/25" />
-            <Link
-              to="/$region"
-              params={{ region }}
-              className="hover:text-white"
-            >
-              Últimas
-            </Link>
-            <Link
-              to="/$region/classificados"
-              params={{ region }}
-              className="hover:text-white"
-            >
-              Classificados
-            </Link>
-          </nav>
-          <div className="ml-auto text-[11px] uppercase tracking-widest text-white/60">
-            Vozes Paranaenses
-          </div>
-        </div>
-      </header>
+      <SiteHeader />
 
       <article className="mx-auto max-w-4xl px-4 pb-16 pt-8 md:pt-12">
         {/* Breadcrumb + categoria */}
@@ -230,6 +202,8 @@ function ArticlePage() {
           </Link>
         </div>
       </article>
+
+      <SiteFooter />
     </div>
   );
 }
