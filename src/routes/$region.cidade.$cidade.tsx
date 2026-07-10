@@ -96,6 +96,7 @@ export const Route = createFileRoute("/$region/cidade/$cidade")({
         { property: "og:locale", content: "pt_BR" },
       ],
       links: [{ rel: "canonical", href: url }],
+      // será estendido logo abaixo
       scripts: [
         { type: "application/ld+json", children: JSON.stringify(collectionPage) },
         { type: "application/ld+json", children: JSON.stringify(breadcrumb) },
