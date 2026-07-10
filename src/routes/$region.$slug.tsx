@@ -96,7 +96,9 @@ export const Route = createFileRoute("/$region/$slug")({
       { name: "description", content: description },
       { name: "keywords", content: keywords },
       { name: "news_keywords", content: keywords },
-      { name: "author", content: "Redação Vozes Paranaenses" },
+      { name: "author", content: a.editor_responsavel ?? "Redação Vozes Paranaenses" },
+      { name: "ai-content-declaration", content: "assisted; editorial-review-by-human" },
+      { name: "generator", content: "Vozes Paranaenses — redação assistida por IA com revisão humana" },
       { name: "robots", content: "index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1" },
       { name: "googlebot", content: "index, follow, max-image-preview:large, max-snippet:-1" },
       // Geo tags — o site inteiro é PR
@@ -174,7 +176,17 @@ export const Route = createFileRoute("/$region/$slug")({
       articleSection: a.categoria?.name ?? undefined,
       wordCount,
       keywords,
-      author: { "@type": "Organization", name: "Redação Vozes Paranaenses" },
+      author: a.editor_responsavel
+        ? [
+            {
+              "@type": "Person",
+              name: a.editor_responsavel,
+              jobTitle: "Editor(a) responsável",
+              worksFor: { "@type": "NewsMediaOrganization", name: "Vozes Paranaenses" },
+            },
+            { "@type": "Organization", name: "Redação Vozes Paranaenses" },
+          ]
+        : { "@type": "Organization", name: "Redação Vozes Paranaenses" },
       publisher: {
         "@type": "NewsMediaOrganization",
         name: "Vozes Paranaenses",
@@ -188,6 +200,9 @@ export const Route = createFileRoute("/$region/$slug")({
       contentLocation,
       spatialCoverage: spatialCoverage.length > 0 ? spatialCoverage : undefined,
       about: contentLocation ? [contentLocation] : undefined,
+      correctionsPolicy: "/correcoes",
+      diversityPolicy: "/politica-editorial",
+      ethicsPolicy: "/politica-editorial",
       speakable: {
         "@type": "SpeakableSpecification",
         cssSelector: ["h1", ".article-lead", ".article-tldr"],
