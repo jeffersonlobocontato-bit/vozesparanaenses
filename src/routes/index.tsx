@@ -1,5 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { queryOptions, useSuspenseQuery } from "@tanstack/react-query";
+import { useEffect, useState } from "react";
 import {
   listRegions,
   listRankedArticles,
@@ -194,13 +195,19 @@ function CategoryTag({
 
 /* --------------------------- Portal Home --------------------------- */
 
-function formatDateBR() {
-  const d = new Date();
-  return d.toLocaleDateString("pt-BR", {
-    weekday: "long",
-    day: "2-digit",
-    month: "long",
-  });
+function useTodayBR() {
+  const [label, setLabel] = useState<string | null>(null);
+  useEffect(() => {
+    setLabel(
+      new Date().toLocaleDateString("pt-BR", {
+        weekday: "long",
+        day: "2-digit",
+        month: "long",
+        timeZone: "America/Sao_Paulo",
+      }),
+    );
+  }, []);
+  return label;
 }
 
 function PortalHome({ regions, articles }: { regions: Region[]; articles: RankedArticle[] }) {
