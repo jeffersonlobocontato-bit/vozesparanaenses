@@ -267,7 +267,7 @@ export const listLatestArticles = createServerFn({ method: "GET" })
         .order("publicado_em", { ascending: false })
         .limit(data.limit);
     let res = await run(MATERIA_LIST_COLS);
-    if (res.error && /fixado_posicao/i.test(res.error.message)) {
+    if (res.error && /fixado_(posicao|escopo|regioes|cidades)/i.test(res.error.message)) {
       res = await run(
         "id, slug, titulo, subtitulo, resumo, imagem_capa_url, publicado_em, regiao:regioes(slug, nome), categoria:editorial_categories(slug, nome)",
       );
@@ -528,7 +528,7 @@ export const listRankedArticles = createServerFn({ method: "GET" })
         .order("publicado_em", { ascending: false })
         .limit(poolSize);
     let rankedRes = await runRanked(MATERIA_LIST_COLS_GEO);
-    if (rankedRes.error && /fixado_posicao/i.test(rankedRes.error.message)) {
+    if (rankedRes.error && /fixado_(posicao|escopo|regioes|cidades)/i.test(rankedRes.error.message)) {
       rankedRes = await runRanked(
         "id, slug, titulo, subtitulo, resumo, imagem_capa_url, publicado_em, cidade_principal, cidades_mencionadas, regiao:regioes(slug, nome), categoria:editorial_categories(slug, nome)",
       );
@@ -640,7 +640,7 @@ export const listArticlesByRegion = createServerFn({ method: "GET" })
         .order("publicado_em", { ascending: false })
         .limit(data.limit);
     let res = await runRegion(MATERIA_LIST_COLS);
-    if (res.error && /fixado_posicao/i.test(res.error.message)) {
+    if (res.error && /fixado_(posicao|escopo|regioes|cidades)/i.test(res.error.message)) {
       res = await runRegion(
         "id, slug, titulo, subtitulo, resumo, imagem_capa_url, publicado_em, regiao:regioes(slug, nome), categoria:editorial_categories(slug, nome)",
       );
