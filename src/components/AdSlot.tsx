@@ -1,11 +1,17 @@
 import { useEffect, useMemo, useState } from "react";
 import { pickAd, type PickedAd } from "@/lib/ads.functions";
+import { GamSlot } from "@/components/GamSlot";
 
 /**
- * Mock de anúncio display com dimensões reais IAB.
- * Usa fotos aleatórias (picsum.photos) com overlay de marca + CTA
- * para simular como ficaria a publicidade real veiculada.
- * TODO: substituir por integração real (Google Ad Manager, etc.).
+ * Hierarquia de preenchimento do slot, do mais valioso pro mais genérico:
+ *   1. Venda direta / patrocínio (pickAd() — respeita geo-targeting e cap diário)
+ *   2. Programática via Google Ad Manager (GamSlot — só ativa com
+ *      VITE_GAM_NETWORK_CODE configurado)
+ *   3. House ad / mock — usado apenas se 1 e 2 não preencherem, para nunca
+ *      deixar um espaço em branco no layout.
+ * TODO: uma vez com o Google Ad Manager configurado, considerar remover o
+ * mock em produção e deixar o espaço vazio "colapsar" em vez de mostrar
+ * um anúncio falso — hoje ele existe só para visualizar o layout.
  */
 
 type AdSize = "970x90" | "728x90" | "300x250" | "300x600" | "320x50";
@@ -53,6 +59,7 @@ export function AdSlot({
   const dim = DIMS[size];
   const [real, setReal] = useState<PickedAd | null>(null);
   const [tried, setTried] = useState(false);
+  const [gamFilled, setGamFilled] = useState(false);
 
   useEffect(() => {
     let alive = true;
@@ -116,44 +123,53 @@ export function AdSlot({
       style={{ aspectRatio: `${dim.w} / ${dim.h}` }}
       aria-label={`Publicidade ${size}`}
     >
-      <img src={img} alt="" className="absolute inset-0 h-full w-full object-cover" loading="lazy" />
-      <div className={`absolute inset-0 bg-gradient-to-r ${creative.bg} opacity-80 mix-blend-multiply`} />
-
-      <span className="absolute left-2 top-2 rounded bg-black/60 px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-widest text-white">
-        Publicidade
-      </span>
-
-      {dim.layout === "wide" ? (
-        <div className="absolute inset-0 flex items-center gap-4 px-5 text-white">
-          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-white/95 text-xs font-black text-slate-900">
-            {creative.brand.slice(0, 2).toUpperCase()}
-          </div>
-          <div className="min-w-0 flex-1">
-            <p className="truncate text-[10px] font-bold uppercase tracking-wider opacity-90">{creative.brand}</p>
-            <p className="truncate text-sm font-bold leading-tight sm:text-base">{creative.headline}</p>
-          </div>
-          <button className="shrink-0 rounded bg-white px-3 py-1.5 text-xs font-bold text-slate-900 hover:bg-slate-100">
-            {creative.cta}
-          </button>
+      {!gamFilled && (
+        <div className="absolute inset-0 flex items-center justify-center">
+          <GamSlot size={size} regiao={regiao} cidade={cidade} editoria={editoria} onFillChange={setGamFilled} />
         </div>
-      ) : (
-        <div className="absolute inset-0 flex flex-col justify-between p-4 text-white">
-          <div className="flex items-center gap-2">
-            <div className="flex h-8 w-8 items-center justify-center rounded-full bg-white/95 text-[10px] font-black text-slate-900">
-              {creative.brand.slice(0, 2).toUpperCase()}
+      )}
+      {gamFilled ? null : (
+        <>
+          <img src={img} alt="" className="absolute inset-0 h-full w-full object-cover" loading="lazy" />
+          <div className={`absolute inset-0 bg-gradient-to-r ${creative.bg} opacity-80 mix-blend-multiply`} />
+
+          <span className="absolute left-2 top-2 rounded bg-black/60 px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-widest text-white">
+            Publicidade
+          </span>
+
+          {dim.layout === "wide" ? (
+            <div className="absolute inset-0 flex items-center gap-4 px-5 text-white">
+              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-white/95 text-xs font-black text-slate-900">
+                {creative.brand.slice(0, 2).toUpperCase()}
+              </div>
+              <div className="min-w-0 flex-1">
+                <p className="truncate text-[10px] font-bold uppercase tracking-wider opacity-90">{creative.brand}</p>
+                <p className="truncate text-sm font-bold leading-tight sm:text-base">{creative.headline}</p>
+              </div>
+              <button className="shrink-0 rounded bg-white px-3 py-1.5 text-xs font-bold text-slate-900 hover:bg-slate-100">
+                {creative.cta}
+              </button>
             </div>
-            <p className="text-[10px] font-bold uppercase tracking-wider">{creative.brand}</p>
-          </div>
-          <div>
-            <p className={`font-display font-bold leading-tight ${dim.layout === "tall" ? "text-2xl" : "text-lg"}`}>
-              {creative.headline}
-            </p>
-            <button className="mt-3 rounded bg-white px-3 py-1.5 text-xs font-bold text-slate-900 hover:bg-slate-100">
-              {creative.cta}
-            </button>
-          </div>
-          <p className="text-[9px] uppercase tracking-widest opacity-80">{size}</p>
-        </div>
+          ) : (
+            <div className="absolute inset-0 flex flex-col justify-between p-4 text-white">
+              <div className="flex items-center gap-2">
+                <div className="flex h-8 w-8 items-center justify-center rounded-full bg-white/95 text-[10px] font-black text-slate-900">
+                  {creative.brand.slice(0, 2).toUpperCase()}
+                </div>
+                <p className="text-[10px] font-bold uppercase tracking-wider">{creative.brand}</p>
+              </div>
+              <div>
+                <p className={`font-display font-bold leading-tight ${dim.layout === "tall" ? "text-2xl" : "text-lg"}`}>
+                  {creative.headline}
+                </p>
+                <button className="mt-3 rounded bg-white px-3 py-1.5 text-xs font-bold text-slate-900 hover:bg-slate-100">
+                  {creative.cta}
+                </button>
+              </div>
+              <p className="text-[9px] uppercase tracking-widest opacity-80">{size}</p>
+            </div>
+          )}
+        </>
       )}
     </div>
   );
