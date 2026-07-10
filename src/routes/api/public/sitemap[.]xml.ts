@@ -16,6 +16,11 @@ export const Route = createFileRoute("/api/public/sitemap.xml")({
           { loc: `${origin}/`, priority: "1.0" },
           { loc: `${origin}/sobre`, priority: "0.5" },
           { loc: `${origin}/whatsapp`, priority: "0.6" },
+          { loc: `${origin}/contato`, priority: "0.4" },
+          { loc: `${origin}/politica-editorial`, priority: "0.4" },
+          { loc: `${origin}/correcoes`, priority: "0.4" },
+          { loc: `${origin}/privacidade`, priority: "0.3" },
+          { loc: `${origin}/termos`, priority: "0.3" },
         ];
         for (const r of regions) {
           urls.push({ loc: `${origin}/${r.slug}`, priority: "0.8" });
