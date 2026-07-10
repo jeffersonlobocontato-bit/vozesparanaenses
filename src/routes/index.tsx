@@ -233,6 +233,8 @@ function PortalHome({ regions, articles }: { regions: Region[]; articles: Ranked
     if (a.region && !articleByRegion.has(a.region.slug)) articleByRegion.set(a.region.slug, a);
   }
 
+  const todayBR = useTodayBR();
+
   return (
     <div className="w-full bg-white text-slate-900">
       <SiteHeader />
