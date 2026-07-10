@@ -28,6 +28,7 @@ type Item = {
   titulo: string;
   corpo: string;
   data: string | null;
+  imagem?: string | null;
 };
 
 Deno.serve(async (req) => {
@@ -80,6 +81,7 @@ Deno.serve(async (req) => {
           corpo_limpo: it.corpo,
           hash_conteudo: hash,
           data_publicacao_original: it.data,
+          imagem_original_url: it.imagem ?? null,
           processado: false,
         });
         if (insErr) {
