@@ -24,6 +24,7 @@ import { Route as AdminPainelRouteImport } from './routes/admin.painel'
 import { Route as AdminLoginRouteImport } from './routes/admin.login'
 import { Route as AdminFontesRouteImport } from './routes/admin.fontes'
 import { Route as AdminClustersRouteImport } from './routes/admin.clusters'
+import { Route as AdminAnunciosRouteImport } from './routes/admin.anuncios'
 import { Route as RegionClassificadosRouteImport } from './routes/$region.classificados'
 import { Route as RegionSlugRouteImport } from './routes/$region.$slug'
 import { Route as ApiPublicSitemapDotxmlRouteImport } from './routes/api/public/sitemap[.]xml'
@@ -109,6 +110,11 @@ const AdminClustersRoute = AdminClustersRouteImport.update({
   path: '/clusters',
   getParentRoute: () => AdminRoute,
 } as any)
+const AdminAnunciosRoute = AdminAnunciosRouteImport.update({
+  id: '/anuncios',
+  path: '/anuncios',
+  getParentRoute: () => AdminRoute,
+} as any)
 const RegionClassificadosRoute = RegionClassificadosRouteImport.update({
   id: '/classificados',
   path: '/classificados',
@@ -164,6 +170,7 @@ export interface FileRoutesByFullPath {
   '/whatsapp': typeof WhatsappRoute
   '/$region/$slug': typeof RegionSlugRoute
   '/$region/classificados': typeof RegionClassificadosRoute
+  '/admin/anuncios': typeof AdminAnunciosRoute
   '/admin/clusters': typeof AdminClustersRoute
   '/admin/fontes': typeof AdminFontesRoute
   '/admin/login': typeof AdminLoginRoute
@@ -188,6 +195,7 @@ export interface FileRoutesByTo {
   '/whatsapp': typeof WhatsappRoute
   '/$region/$slug': typeof RegionSlugRoute
   '/$region/classificados': typeof RegionClassificadosRoute
+  '/admin/anuncios': typeof AdminAnunciosRoute
   '/admin/clusters': typeof AdminClustersRoute
   '/admin/fontes': typeof AdminFontesRoute
   '/admin/login': typeof AdminLoginRoute
@@ -215,6 +223,7 @@ export interface FileRoutesById {
   '/whatsapp': typeof WhatsappRoute
   '/$region/$slug': typeof RegionSlugRoute
   '/$region/classificados': typeof RegionClassificadosRoute
+  '/admin/anuncios': typeof AdminAnunciosRoute
   '/admin/clusters': typeof AdminClustersRoute
   '/admin/fontes': typeof AdminFontesRoute
   '/admin/login': typeof AdminLoginRoute
@@ -243,6 +252,7 @@ export interface FileRouteTypes {
     | '/whatsapp'
     | '/$region/$slug'
     | '/$region/classificados'
+    | '/admin/anuncios'
     | '/admin/clusters'
     | '/admin/fontes'
     | '/admin/login'
@@ -267,6 +277,7 @@ export interface FileRouteTypes {
     | '/whatsapp'
     | '/$region/$slug'
     | '/$region/classificados'
+    | '/admin/anuncios'
     | '/admin/clusters'
     | '/admin/fontes'
     | '/admin/login'
@@ -293,6 +304,7 @@ export interface FileRouteTypes {
     | '/whatsapp'
     | '/$region/$slug'
     | '/$region/classificados'
+    | '/admin/anuncios'
     | '/admin/clusters'
     | '/admin/fontes'
     | '/admin/login'
@@ -433,6 +445,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminClustersRouteImport
       parentRoute: typeof AdminRoute
     }
+    '/admin/anuncios': {
+      id: '/admin/anuncios'
+      path: '/anuncios'
+      fullPath: '/admin/anuncios'
+      preLoaderRoute: typeof AdminAnunciosRouteImport
+      parentRoute: typeof AdminRoute
+    }
     '/$region/classificados': {
       id: '/$region/classificados'
       path: '/classificados'
@@ -519,6 +538,7 @@ const RegionRouteWithChildren =
   RegionRoute._addFileChildren(RegionRouteChildren)
 
 interface AdminRouteChildren {
+  AdminAnunciosRoute: typeof AdminAnunciosRoute
   AdminClustersRoute: typeof AdminClustersRoute
   AdminFontesRoute: typeof AdminFontesRoute
   AdminLoginRoute: typeof AdminLoginRoute
@@ -530,6 +550,7 @@ interface AdminRouteChildren {
 }
 
 const AdminRouteChildren: AdminRouteChildren = {
+  AdminAnunciosRoute: AdminAnunciosRoute,
   AdminClustersRoute: AdminClustersRoute,
   AdminFontesRoute: AdminFontesRoute,
   AdminLoginRoute: AdminLoginRoute,
