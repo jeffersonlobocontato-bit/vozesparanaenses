@@ -11,6 +11,7 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as WhatsappRouteImport } from './routes/whatsapp'
 import { Route as AdminRouteImport } from './routes/admin'
+import { Route as RegionRouteImport } from './routes/$region'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AdminIndexRouteImport } from './routes/admin.index'
 import { Route as RegionIndexRouteImport } from './routes/$region.index'
@@ -35,6 +36,11 @@ const AdminRoute = AdminRouteImport.update({
   path: '/admin',
   getParentRoute: () => rootRouteImport,
 } as any)
+const RegionRoute = RegionRouteImport.update({
+  id: '/$region',
+  path: '/$region',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
@@ -46,9 +52,9 @@ const AdminIndexRoute = AdminIndexRouteImport.update({
   getParentRoute: () => AdminRoute,
 } as any)
 const RegionIndexRoute = RegionIndexRouteImport.update({
-  id: '/$region/',
-  path: '/$region/',
-  getParentRoute: () => rootRouteImport,
+  id: '/',
+  path: '/',
+  getParentRoute: () => RegionRoute,
 } as any)
 const AdminSenhaRoute = AdminSenhaRouteImport.update({
   id: '/senha',
@@ -81,14 +87,14 @@ const AdminClustersRoute = AdminClustersRouteImport.update({
   getParentRoute: () => AdminRoute,
 } as any)
 const RegionClassificadosRoute = RegionClassificadosRouteImport.update({
-  id: '/$region/classificados',
-  path: '/$region/classificados',
-  getParentRoute: () => rootRouteImport,
+  id: '/classificados',
+  path: '/classificados',
+  getParentRoute: () => RegionRoute,
 } as any)
 const RegionSlugRoute = RegionSlugRouteImport.update({
-  id: '/$region/$slug',
-  path: '/$region/$slug',
-  getParentRoute: () => rootRouteImport,
+  id: '/$slug',
+  path: '/$slug',
+  getParentRoute: () => RegionRoute,
 } as any)
 const ApiPublicSitemapDotxmlRoute = ApiPublicSitemapDotxmlRouteImport.update({
   id: '/api/public/sitemap.xml',
@@ -96,13 +102,14 @@ const ApiPublicSitemapDotxmlRoute = ApiPublicSitemapDotxmlRouteImport.update({
   getParentRoute: () => rootRouteImport,
 } as any)
 const RegionEditoriaCategoriaRoute = RegionEditoriaCategoriaRouteImport.update({
-  id: '/$region/editoria/$categoria',
-  path: '/$region/editoria/$categoria',
-  getParentRoute: () => rootRouteImport,
+  id: '/editoria/$categoria',
+  path: '/editoria/$categoria',
+  getParentRoute: () => RegionRoute,
 } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/$region': typeof RegionRouteWithChildren
   '/admin': typeof AdminRouteWithChildren
   '/whatsapp': typeof WhatsappRoute
   '/$region/$slug': typeof RegionSlugRoute
@@ -137,6 +144,7 @@ export interface FileRoutesByTo {
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/$region': typeof RegionRouteWithChildren
   '/admin': typeof AdminRouteWithChildren
   '/whatsapp': typeof WhatsappRoute
   '/$region/$slug': typeof RegionSlugRoute
@@ -156,6 +164,7 @@ export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/$region'
     | '/admin'
     | '/whatsapp'
     | '/$region/$slug'
@@ -189,6 +198,7 @@ export interface FileRouteTypes {
   id:
     | '__root__'
     | '/'
+    | '/$region'
     | '/admin'
     | '/whatsapp'
     | '/$region/$slug'
@@ -207,12 +217,9 @@ export interface FileRouteTypes {
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  RegionRoute: typeof RegionRouteWithChildren
   AdminRoute: typeof AdminRouteWithChildren
   WhatsappRoute: typeof WhatsappRoute
-  RegionSlugRoute: typeof RegionSlugRoute
-  RegionClassificadosRoute: typeof RegionClassificadosRoute
-  RegionIndexRoute: typeof RegionIndexRoute
-  RegionEditoriaCategoriaRoute: typeof RegionEditoriaCategoriaRoute
   ApiPublicSitemapDotxmlRoute: typeof ApiPublicSitemapDotxmlRoute
 }
 
@@ -232,6 +239,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/$region': {
+      id: '/$region'
+      path: '/$region'
+      fullPath: '/$region'
+      preLoaderRoute: typeof RegionRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/': {
       id: '/'
       path: '/'
@@ -248,10 +262,10 @@ declare module '@tanstack/react-router' {
     }
     '/$region/': {
       id: '/$region/'
-      path: '/$region'
+      path: '/'
       fullPath: '/$region/'
       preLoaderRoute: typeof RegionIndexRouteImport
-      parentRoute: typeof rootRouteImport
+      parentRoute: typeof RegionRoute
     }
     '/admin/senha': {
       id: '/admin/senha'
@@ -297,17 +311,17 @@ declare module '@tanstack/react-router' {
     }
     '/$region/classificados': {
       id: '/$region/classificados'
-      path: '/$region/classificados'
+      path: '/classificados'
       fullPath: '/$region/classificados'
       preLoaderRoute: typeof RegionClassificadosRouteImport
-      parentRoute: typeof rootRouteImport
+      parentRoute: typeof RegionRoute
     }
     '/$region/$slug': {
       id: '/$region/$slug'
-      path: '/$region/$slug'
+      path: '/$slug'
       fullPath: '/$region/$slug'
       preLoaderRoute: typeof RegionSlugRouteImport
-      parentRoute: typeof rootRouteImport
+      parentRoute: typeof RegionRoute
     }
     '/api/public/sitemap.xml': {
       id: '/api/public/sitemap.xml'
@@ -318,13 +332,30 @@ declare module '@tanstack/react-router' {
     }
     '/$region/editoria/$categoria': {
       id: '/$region/editoria/$categoria'
-      path: '/$region/editoria/$categoria'
+      path: '/editoria/$categoria'
       fullPath: '/$region/editoria/$categoria'
       preLoaderRoute: typeof RegionEditoriaCategoriaRouteImport
-      parentRoute: typeof rootRouteImport
+      parentRoute: typeof RegionRoute
     }
   }
 }
+
+interface RegionRouteChildren {
+  RegionSlugRoute: typeof RegionSlugRoute
+  RegionClassificadosRoute: typeof RegionClassificadosRoute
+  RegionIndexRoute: typeof RegionIndexRoute
+  RegionEditoriaCategoriaRoute: typeof RegionEditoriaCategoriaRoute
+}
+
+const RegionRouteChildren: RegionRouteChildren = {
+  RegionSlugRoute: RegionSlugRoute,
+  RegionClassificadosRoute: RegionClassificadosRoute,
+  RegionIndexRoute: RegionIndexRoute,
+  RegionEditoriaCategoriaRoute: RegionEditoriaCategoriaRoute,
+}
+
+const RegionRouteWithChildren =
+  RegionRoute._addFileChildren(RegionRouteChildren)
 
 interface AdminRouteChildren {
   AdminClustersRoute: typeof AdminClustersRoute
@@ -350,14 +381,21 @@ const AdminRouteWithChildren = AdminRoute._addFileChildren(AdminRouteChildren)
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  RegionRoute: RegionRouteWithChildren,
   AdminRoute: AdminRouteWithChildren,
   WhatsappRoute: WhatsappRoute,
-  RegionSlugRoute: RegionSlugRoute,
-  RegionClassificadosRoute: RegionClassificadosRoute,
-  RegionIndexRoute: RegionIndexRoute,
-  RegionEditoriaCategoriaRoute: RegionEditoriaCategoriaRoute,
   ApiPublicSitemapDotxmlRoute: ApiPublicSitemapDotxmlRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { startInstance } from './start.ts'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+    config: Awaited<ReturnType<typeof startInstance.getOptions>>
+  }
+}
