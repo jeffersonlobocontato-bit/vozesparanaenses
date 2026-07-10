@@ -871,7 +871,7 @@ export const listArticlesByAuthor = createServerFn({ method: "GET" })
         if (isMissingSchema(error)) return { authorName: null, articles: [] };
         throw new Error(error.message);
       }
-      const list = (rows ?? []) as (MateriaRow & {
+      const list = (rows ?? []) as unknown as (MateriaRow & {
         editor_responsavel: string | null;
       })[];
       const matched = list.filter(
