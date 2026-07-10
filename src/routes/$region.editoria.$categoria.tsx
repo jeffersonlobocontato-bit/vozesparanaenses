@@ -42,7 +42,7 @@ export const Route = createFileRoute("/$region/editoria/$categoria")({
     };
     return { region, categoria };
   },
-  head: ({ loaderData }) =>
+  head: ({ loaderData, params }) =>
     loaderData
       ? {
           meta: [
@@ -60,6 +60,14 @@ export const Route = createFileRoute("/$region/editoria/$categoria")({
             {
               property: "og:description",
               content: `Cobertura de ${loaderData.categoria.name.toLowerCase()} em ${loaderData.region.name}.`,
+            },
+          ],
+          links: [
+            {
+              rel: "alternate",
+              type: "application/rss+xml",
+              title: `RSS — ${loaderData.categoria.name}`,
+              href: `/api/public/rss/categoria/${params.categoria}`,
             },
           ],
         }
