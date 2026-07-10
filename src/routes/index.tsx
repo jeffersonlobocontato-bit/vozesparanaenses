@@ -10,8 +10,7 @@ import {
   type ViewerLocation,
 } from "@/lib/content.functions";
 import { LocationBar, ProximityBadge } from "@/components/LocationBar";
-import logoBlue from "@/assets/vozes-logo-blue.png.asset.json";
-import logoWhite from "@/assets/vozes-logo-white.png.asset.json";
+import { SiteHeader, SiteFooter } from "@/components/SiteHeader";
 
 const regionsQO = queryOptions({
   queryKey: ["regions"],
@@ -227,43 +226,27 @@ function PortalHome({ regions, articles }: { regions: Region[]; articles: Ranked
   }
 
   return (
-    <div className="w-full bg-slate-50 text-slate-900">
-      {/* Header */}
-      <header className="bg-white border-b-4 border-primary">
-        <div className="mx-auto max-w-7xl px-4">
-          <div className="py-5 flex flex-col md:flex-row justify-between items-center gap-4">
-            <Link to="/" aria-label="Vozes Paranaenses — Página inicial" className="flex items-center gap-4">
-              <img
-                src={logoBlue.url}
-                alt="Vozes Paranaenses"
-                className="h-20 md:h-28 lg:h-36 w-auto select-none"
-                draggable={false}
-              />
-              <span className="hidden md:block h-12 w-px bg-slate-200" aria-hidden />
-              <p className="hidden md:block text-[10px] font-bold uppercase tracking-[0.2em] text-slate-500 max-w-[16ch] leading-snug">
-                O portal editorial das 10 regiões do Paraná
-              </p>
-            </Link>
-            <div className="hidden lg:flex items-center gap-4">
-              <div className="text-right">
-                <p className="text-xs font-bold text-primary">Curitiba, 22°C</p>
-                <p className="text-[10px] text-slate-500 uppercase capitalize">{formatDateBR()}</p>
-              </div>
-              <div className="h-8 w-px bg-slate-200" />
-              <button className="bg-primary text-primary-foreground px-4 py-2 text-xs font-bold rounded uppercase hover:opacity-90 transition">
-                Assine Já
-              </button>
-            </div>
-          </div>
-          <nav className="flex overflow-x-auto no-scrollbar py-3 border-t border-slate-100 gap-2 whitespace-nowrap">
-            {CATEGORIES.map((c) => (
-              <a key={c} href="#" className="shrink-0 hover:opacity-80 transition">
-                <CategoryTag name={c} />
-              </a>
-            ))}
-          </nav>
+    <div className="w-full bg-white text-slate-900">
+      <SiteHeader />
+
+      {/* Faixa data/editorias — sub-nav densa estilo CGN */}
+      <div className="border-b border-slate-200 bg-white">
+        <div className="mx-auto flex max-w-7xl items-center gap-3 overflow-x-auto px-4 py-2 whitespace-nowrap">
+          <span className="shrink-0 text-[10px] font-bold uppercase tracking-[0.16em] text-slate-400 capitalize">
+            {formatDateBR()}
+          </span>
+          <span className="h-3 w-px shrink-0 bg-slate-300" />
+          {CATEGORIES.map((c) => (
+            <a
+              key={c}
+              href="#"
+              className="shrink-0 text-[11px] font-bold uppercase tracking-[0.06em] text-slate-600 transition-colors hover:text-[#0A2540]"
+            >
+              {c}
+            </a>
+          ))}
         </div>
-      </header>
+      </div>
 
       <LocationBar />
 
@@ -429,26 +412,7 @@ function PortalHome({ regions, articles }: { regions: Region[]; articles: Ranked
         </div>
       </main>
 
-      <footer className="bg-primary text-primary-foreground py-12 mt-8">
-        <div className="mx-auto max-w-7xl px-4 grid grid-cols-1 md:grid-cols-4 gap-8">
-          <div className="md:col-span-2">
-            <img
-              src={logoWhite.url}
-              alt="Vozes Paranaenses"
-              className="mb-4 h-14 md:h-16 w-auto select-none"
-              draggable={false}
-            />
-            <p className="text-white/70 text-xs leading-relaxed max-w-md">
-              Cobertura editorial das 10 macrorregiões do Paraná — cada região com sua identidade, todas em um só domínio.
-            </p>
-          </div>
-          <div className="md:col-span-2 flex md:justify-end items-end">
-            <p className="text-[10px] text-white/50 font-bold uppercase tracking-widest">
-              © {new Date().getFullYear()} Vozes Paranaenses
-            </p>
-          </div>
-        </div>
-      </footer>
+      <SiteFooter />
     </div>
   );
 }
