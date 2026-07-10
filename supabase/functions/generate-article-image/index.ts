@@ -24,6 +24,10 @@ const EDIT_PROMPT =
   "Estilo: fotografia editorial realista, cores naturais, sem texto, sem marca d'água.";
 const GEN_PROMPT_FALLBACK =
   "Fotografia editorial realista, estilo fotojornalismo brasileiro, cores naturais, sem texto, sem marca d'água, para a seguinte matéria:\n";
+const SAFE_PROMPT =
+  "Ilustração editorial neutra e segura para jornal, sem pessoas identificáveis, sem violência, " +
+  "sem sangue, sem armas, sem crianças. Foco no cenário/ambiente genérico relacionado ao tema. " +
+  "Estilo: fotografia editorial realista, cores naturais, sem texto, sem marca d'água. Tema:\n";
 
 type Body = {
   article_id: string;
@@ -97,31 +101,55 @@ Deno.serve(async (req) => {
       credito = "Imagem: gerada por IA (Vozes Paranaenses)";
     }
 
-    const aiRes = await fetch(AI_URL, {
-      method: "POST",
-      headers: { "Content-Type": "application/json", Authorization: `Bearer ${aiKey}` },
-      body: JSON.stringify({
-        model: IMG_MODEL,
-        messages: [{ role: "user", content }],
-        modalities: ["image", "text"],
-      }),
-    });
+    const callAI = async (msgContent: Array<Record<string, unknown>>) => {
+      const r = await fetch(AI_URL, {
+        method: "POST",
+        headers: { "Content-Type": "application/json", Authorization: `Bearer ${aiKey}` },
+        body: JSON.stringify({
+          model: IMG_MODEL,
+          messages: [{ role: "user", content: msgContent }],
+          modalities: ["image", "text"],
+        }),
+      });
+      return r;
+    };
 
+    const extractImg = (j: any): { url?: string; finish?: string } => {
+      const choice = j?.choices?.[0];
+      const msg = choice?.message;
+      const url =
+        msg?.images?.[0]?.image_url?.url ??
+        (typeof msg?.content === "string" && msg.content.startsWith("data:image") ? msg.content : undefined);
+      return { url, finish: choice?.native_finish_reason ?? choice?.finish_reason };
+    };
+
+    let aiRes = await callAI(content);
     if (aiRes.status === 429) return json({ error: "rate_limited" }, 429);
     if (aiRes.status === 402) return json({ error: "ai_credits_exhausted" }, 402);
     if (!aiRes.ok) {
       const t = await aiRes.text();
       return json({ error: "ai_gateway_error", status: aiRes.status, detail: t.slice(0, 500) }, 502);
     }
+    let aiJson = await aiRes.json();
+    let { url: imgUrl, finish } = extractImg(aiJson);
 
-    const aiJson = await aiRes.json();
-    const msg = aiJson?.choices?.[0]?.message;
-    // O Gateway normaliza retornos multimodais em message.images[].image_url.url (data URL b64)
-    const imgUrl: string | undefined =
-      msg?.images?.[0]?.image_url?.url ??
-      (typeof msg?.content === "string" && msg.content.startsWith("data:image") ? msg.content : undefined);
+    // Retry com prompt neutro se filtro de segurança bloqueou (comum quando a imagem-fonte tem pessoas/violência)
+    if ((!imgUrl || finish === "IMAGE_SAFETY" || finish === "content_filter")) {
+      const safeContent = [{
+        type: "text",
+        text: SAFE_PROMPT + `${article.titulo}\n${article.resumo ?? ""}`,
+      }];
+      aiRes = await callAI(safeContent);
+      if (aiRes.ok) {
+        aiJson = await aiRes.json();
+        ({ url: imgUrl, finish } = extractImg(aiJson));
+        credito = "Imagem: gerada por IA (Vozes Paranaenses)";
+      }
+    }
+
     if (!imgUrl || !imgUrl.startsWith("data:image")) {
-      return json({ error: "ai_no_image", detail: JSON.stringify(aiJson).slice(0, 500) }, 502);
+      const reason = finish === "IMAGE_SAFETY" || finish === "content_filter" ? "ai_image_safety_blocked" : "ai_no_image";
+      return json({ error: reason, detail: "O modelo bloqueou a geração por segurança. Tente fazer upload manual." }, 502);
     }
     const commaIdx = imgUrl.indexOf(",");
     mime = imgUrl.slice(5, imgUrl.indexOf(";")) || "image/png";
