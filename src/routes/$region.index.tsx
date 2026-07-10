@@ -78,8 +78,6 @@ function RegionPage() {
   const tema = region.tema_config ?? {};
   const primary = tema.paleta?.primaria ?? "#0A2540";
   const accent = tema.paleta?.acento ?? "#0066CC";
-  const fontDisplay = tema.tipografia_destaque ?? "Bebas Neue";
-  const fontBody = tema.tipografia_corpo ?? "Barlow";
 
   const hero = articles[0];
   const sideCards = articles.slice(1, 5);
@@ -91,7 +89,6 @@ function RegionPage() {
       style={{
         background: "#ffffff",
         color: "#0f172a",
-        fontFamily: `'${fontBody}', system-ui, sans-serif`,
       }}
     >
       <SiteHeader />
