@@ -148,6 +148,15 @@ export const Route = createFileRoute("/$region/$slug")({
       ? {
           "@type": "City",
           name: cidade,
+          ...(coords
+            ? {
+                geo: {
+                  "@type": "GeoCoordinates",
+                  latitude: coords.lat,
+                  longitude: coords.lng,
+                },
+              }
+            : {}),
           containedInPlace: {
             "@type": "AdministrativeArea",
             name: regionName ?? "Paraná",
