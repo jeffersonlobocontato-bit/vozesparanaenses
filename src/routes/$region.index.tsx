@@ -5,6 +5,7 @@ import {
   listArticlesByRegion,
 } from "@/lib/content.functions";
 import { SiteHeader, SiteFooter } from "@/components/SiteHeader";
+import { arrangePinnedSlots } from "@/lib/pinned-layout";
 
 const regionQO = (slug: string) =>
   queryOptions({
@@ -87,9 +88,7 @@ function RegionPage() {
   const primary = tema.paleta?.primaria ?? "#0A2540";
   const accent = tema.paleta?.acento ?? "#0066CC";
 
-  const hero = articles[0];
-  const sideCards = articles.slice(1, 5);
-  const rest = articles.slice(5);
+  const { hero, side: sideCards, rest } = arrangePinnedSlots(articles, 4);
 
   return (
     <div
