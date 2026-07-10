@@ -15,6 +15,8 @@ type Draft = {
   resumo: string | null;
   status: "rascunho" | "aprovado" | "rejeitado" | "publicado";
   gerado_em: string;
+  imagem_capa_url: string | null;
+  imagem_credito: string | null;
   regiao: { slug: string; nome: string } | null;
   categoria: { slug: string; nome: string } | null;
 };
@@ -35,7 +37,7 @@ function AdminQueue() {
       const sb = await getExternalBrowser();
       const { data, error } = await sb
         .from("generated_articles")
-        .select("id, slug, titulo, subtitulo, resumo, status, gerado_em, regiao:regioes(slug, nome), categoria:editorial_categories(slug, nome)")
+        .select("id, slug, titulo, subtitulo, resumo, status, gerado_em, imagem_capa_url, imagem_credito, regiao:regioes(slug, nome), categoria:editorial_categories(slug, nome)")
         .eq("status", tab)
         .order("gerado_em", { ascending: false })
         .limit(50);
