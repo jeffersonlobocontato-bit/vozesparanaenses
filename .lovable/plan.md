@@ -1,85 +1,132 @@
-## Pivô: Paraná Total → Vozes Paranaenses
+# Revisão da estratégia de SEO + GEO
 
-Rebranding + refazer o schema do Supabase externo com o modelo em português do brief. Frontend passa a ler as tabelas novas e ganha rotas de categoria, classificados e WhatsApp. Pipeline (edge functions) fica preparado como próxima fase.
-
----
-
-### 1. Novo schema SQL (arquivo `supabase-external/002_vozes.sql`)
-
-Você roda no SQL Editor do seu Supabase externo. Substitui o modelo anterior (drop das tabelas atuais `regions/articles/leads/classifieds/sources` e recria em português). Tabelas:
-
-- `regioes` (com `tema_config jsonb` — paleta/tipografia/densidade por região)
-- `fontes` (fontes monitoradas, tipo de renderização, antibot)
-- `raw_articles` (coletados, hash único)
-- `editorial_categories` + seed (Política, Economia, Agro, Segurança, Educação, Esportes, Cultura, Saúde, Cidades)
-- `quota_rules` (piso/teto % por região×categoria)
-- `article_clusters` + `cluster_articles` (pauta agrupada por similaridade)
-- `extracted_facts` (5W1H)
-- `generated_articles` (rascunho/aprovado/rejeitado/publicado, Método DEL)
-- `whatsapp_leads` (com consentimento LGPD)
-- `advertisers` + `campaigns`
-- `classificados` (emprego/imóvel/veículo)
-- `analytics_events`
-
-Extensões: `vector`, `pg_cron`, `pg_net` (mantém das anteriores).
-RLS: leitura pública só para `regioes` e `generated_articles WHERE status='publicado'`; escrita/admin via `has_role(auth.uid(),'admin')`. `whatsapp_leads`, `raw_articles`, `extracted_facts`, `analytics_events` ficam bloqueados para anon.
-
-Seed das **10 regiões IPARDES** com `tema_config` por região:
-Metropolitana, Litoral, Campos Gerais, Norte Pioneiro, Norte Central, Noroeste, **Centro Ocidental**, Oeste, Sudoeste, Centro-Sul.
-
-Seed de `quota_rules` padrão (ex.: Política 15/25, Economia 10/20, Cidades 15/30…).
-
-### 2. Frontend — rebranding + rotas
-
-Renomear "Paraná Total" → **Vozes Paranaenses** em todo lugar (header, footer, meta tags, `__root.tsx`).
-
-Atualizar `src/lib/content.functions.ts` para as novas tabelas:
-- `listRegioes()` — lê `regioes` (ordenada), retorna `tema_config` tipado
-- `getRegiaoBySlug(slug)`
-- `listLatestPublicados(limit)` — de `generated_articles` join `regioes` join `editorial_categories`
-- `listPorRegiao(slug, limit)`
-- `listPorCategoria(regiaoSlug, categoriaSlug, limit)` — nova
-- `getMateria(regiaoSlug, slug)`
-
-Rotas novas em `src/routes/`:
-- `/` — home nacional (mantém layout Portal Denso; passa a ler tabelas novas)
-- `/$regiao` — home regional (aplica `tema_config` via CSS variables)
-- `/$regiao/$categoria` — listagem por editoria (nova)
-- `/$regiao/$slug` — matéria com schema.org NewsArticle
-- `/$regiao/classificados` — listagem por categoria + form de cadastro
-- `/whatsapp` — form de opt-in LGPD
-- `/admin/aprovacao` — placeholder autenticado (fica pra próxima fase)
-- `/admin/dashboard` — placeholder autenticado
-
-Regra: `/$regiao/$slug` e `/$regiao/$categoria` são caminhos ambíguos — resolvo priorizando categoria (lista fixa vinda do banco) e caindo pra matéria se não bater.
-
-Tema por região: componente `RegionLayout` lê `tema_config` da rota atual e injeta `--color-primary`, `--font-display` etc. via CSS variables no `<div>` raiz. Sem componente por região.
-
-### 3. SEO
-
-- `head()` de cada rota com título/descrição próprios
-- `/$regiao/$slug` adiciona `<script type="application/ld+json">` com schema.org `NewsArticle`
-- `src/routes/api/public/llms.ts` — endpoint gerando `llms.txt`
-- `src/routes/api/public/sitemap.ts` — sitemap dinâmico das matérias publicadas
-- `src/routes/api/public/robots.ts` — robots com link pro sitemap
-
-### 4. Edge Functions (fica pra próxima fase — só marco os stubs)
-
-Depois que confirmar que o schema rodou e o front está OK, crio:
-`scrape-source`, `cluster-articles`, `classify-and-quota`, `extract-facts`, `generate-article`, `whatsapp-capture` — cada uma como Supabase Edge Function no projeto externo. Prompt de sistema DEL fica embutido em `generate-article`.
+Objetivo duplo:
+1. **SEO geo-taxonômico** — cada matéria é indexada e priorizada pelo lugar (cidade, microrregião, macrorregião, estado), casando com o público local que faz a busca.
+2. **GEO (Generative Engine Optimization)** — o site é lido, citado e recomendado por motores de resposta de IA (Google AI Overviews, ChatGPT Search, Perplexity, Claude, Gemini, Copilot).
 
 ---
 
-### O que NÃO vou fazer nesta rodada
+## Parte 1 — SEO geo-taxonômico
 
-- Não implemento o pipeline de scraping/IA ainda (fase seguinte, quando o schema estiver no ar)
-- Não construo dashboards admin funcionais (só stubs autenticados)
-- Não migro dados das tabelas antigas — você disse que não publicou nada real
+### 1.1 Hierarquia de URLs geográficas (indexáveis)
+Hoje temos `/` → `/{regiao}` → `/{regiao}/{slug}`. Adicionar camada de **cidade** aproveitando `cidade_principal` já existente na tabela `generated_articles`:
 
-### O que você precisa fazer
+- `/{regiao}/cidade/{cidade-slug}` — landing por município com últimas matérias
+- `/{regiao}/editoria/{categoria}` (já existe) mantém-se
+- Breadcrumb JSON-LD: `Paraná › Oeste › Cascavel › Matéria`
 
-1. Aprovar este plano
-2. Depois que eu gerar o `002_vozes.sql`, rodar no SQL Editor do Supabase externo
-3. Me confirmar "rodou" — aí eu troco o frontend pras tabelas novas e verifico o build
+### 1.2 JSON-LD `NewsArticle` enriquecido geograficamente
+No `head()` de `/$region/$slug` adicionar:
+- `contentLocation`: `{ @type: "City", name, containedInPlace: { Region, State: "Paraná" } }` a partir de `cidade_principal`
+- `spatialCoverage`: array de `Place` a partir de `cidades_mencionadas`
+- `about` / `mentions`: entidades detectadas (pessoas, órgãos, locais) — extensível
+- `dateModified`, `wordCount`, `articleBody`, `inLanguage: "pt-BR"`, `isAccessibleForFree: true`
+- `publisher` com `NewsMediaOrganization` + `areaServed` (Paraná)
 
-Confirma pra eu executar?
+### 1.3 Meta tags geo específicas
+Por matéria e por página de cidade/região:
+- `<meta name="geo.region" content="BR-PR">`
+- `<meta name="geo.placename" content="{cidade}, Paraná">`
+- `<meta name="geo.position" content="{lat};{lng}">` (quando cidade tiver coordenadas)
+- `<meta name="ICBM" content="{lat}, {lng}">`
+- `<meta name="news_keywords" content="{cidade}, {região}, {categoria}, {tags}">`
+
+### 1.4 Sitemap segmentado + Google News
+Substituir o `sitemap.xml` monolítico atual por **índice + shards**:
+- `/api/public/sitemap.xml` → `<sitemapindex>`
+- `/api/public/sitemap-news.xml` → últimas 48h com namespace `news:` (obrigatório p/ Google News)
+- `/api/public/sitemap-regiao-{slug}.xml` por macrorregião
+- `/api/public/sitemap-cidades.xml` com todas as landings de cidade
+
+Cada URL de matéria carrega `<news:news>` com `<news:publication_date>`, `<news:title>`, `<news:keywords>` (cidade + categoria).
+
+### 1.5 Landing page por cidade
+Nova rota `/$region/cidade/$cidade` com:
+- H1 "Notícias de {Cidade}"
+- Últimas N matérias com `cidade_principal = cidade`
+- JSON-LD `CollectionPage` + `Place`
+- Link cruzado no rodapé de cada matéria: "Mais de {Cidade}"
+
+### 1.6 Sinais internos de proximidade
+Já existe `listRankedArticles` com score geo. Complementar com:
+- Bloco "Nas cidades vizinhas" na página de cidade
+- `<link rel="alternate">` entre matéria e sua página-cidade
+- Internal linking automático: quando uma cidade é mencionada no corpo, virar link para `/{regiao}/cidade/{cidade}`
+
+---
+
+## Parte 2 — GEO (indexação por motores de IA)
+
+### 2.1 `robots.txt` — liberar explicitamente crawlers de IA
+Substituir o `robots.txt` atual por regras nomeadas permitindo **GPTBot, OAI-SearchBot, ChatGPT-User, ClaudeBot, Claude-Web, PerplexityBot, Perplexity-User, Google-Extended, Applebot-Extended, Amazonbot, Bytespider, CCBot, Meta-ExternalAgent, DuckAssistBot, cohere-ai, YouBot**. Manter `Disallow: /api/` e `Disallow: /admin/`. Adicionar linha `Sitemap:`.
+
+### 2.2 `/llms.txt` e `/llms-full.txt`
+Servir via server route (já existe `public/llms.txt` — vamos torná-lo dinâmico):
+- `/llms.txt`: descrição curta do portal, regiões cobertas, links canônicos
+- `/llms-full.txt`: índice completo de matérias recentes com título + resumo + URL, otimizado para ingestão por LLM
+
+### 2.3 Estrutura "answer-first" no corpo
+Instruir o pipeline `generate-article` a começar toda matéria com:
+- **TL;DR** de 2–3 frases (renderizado como `<p class="tldr">` + `speakable-schema`)
+- Bloco **5W1H** já extraído em campos separados, renderizado como `<dl>` estruturado
+- **FAQ** ao final (3–5 perguntas frequentes) quando aplicável
+
+### 2.4 Schemas extras que motores de IA priorizam
+- `FAQPage` embutido na matéria quando houver bloco de perguntas
+- `SpeakableSpecification` apontando para TL;DR e H1 (Google Assistant / Nano-banana / AI Overviews)
+- `ClaimReview` opcional quando a matéria for verificação de fato
+- `BreadcrumbList` com hierarquia geográfica
+
+### 2.5 Autoridade e citabilidade
+- Página `/sobre` com `NewsMediaOrganization`, editor responsável, endereço, e-mail de correções, política editorial
+- Cada matéria expõe `author` (Redação Vozes Paranaenses ou humano), `dateModified`, e link "Corrigir esta matéria"
+- `sameAs` do publisher apontando para perfis oficiais (quando existirem)
+
+### 2.6 Feed RSS + JSON Feed
+- `/api/public/rss.xml` (RSS 2.0 com `content:encoded` completo)
+- `/api/public/feed.json` (JSON Feed 1.1) — ChatGPT/Perplexity ingerem bem
+- Um feed geral + um por macrorregião
+
+### 2.7 Meta e headers pró-IA
+- `<meta name="ai-content-declaration" content="human-edited, AI-assisted">` (transparência)
+- Header HTTP `X-Robots-Tag: index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1` nas rotas públicas
+- `<link rel="canonical">` absoluto em toda matéria
+
+---
+
+## Parte 3 — Ordem de execução sugerida
+
+1. **Fundação (rápido, alto impacto)**
+   - `robots.txt` com crawlers de IA + `X-Robots-Tag`
+   - Sitemap-index + `sitemap-news.xml` com namespace News
+   - JSON-LD `NewsArticle` enriquecido (contentLocation, spatialCoverage, dateModified, inLanguage)
+   - Meta `geo.*` e `news_keywords` por matéria
+
+2. **Camada de cidade**
+   - Nova rota `/$region/cidade/$cidade` + JSON-LD `CollectionPage`
+   - Bloco "Mais de {Cidade}" e "Cidades vizinhas"
+   - Sitemap `sitemap-cidades.xml`
+   - Internal linking automático de menções a cidades
+
+3. **GEO — camada de IA**
+   - `/llms.txt` e `/llms-full.txt` dinâmicos
+   - Ajustar prompt do `generate-article` para produzir TL;DR + FAQ + 5W1H
+   - Schemas `FAQPage`, `SpeakableSpecification`, `BreadcrumbList`
+   - Feeds RSS + JSON Feed (geral + por região)
+
+4. **Autoridade editorial**
+   - Página `/sobre` com `NewsMediaOrganization` completa
+   - Autoria e política de correções nas matérias
+
+---
+
+## Detalhes técnicos (referência)
+
+- **Onde entra o JSON-LD:** `head().scripts` dos arquivos `src/routes/$region.$slug.tsx`, `src/routes/$region.index.tsx`, nova `src/routes/$region.cidade.$cidade.tsx`, `src/routes/index.tsx`, `src/routes/__root.tsx` (WebSite + NewsMediaOrganization sitewide).
+- **Onde entram as meta geo:** mesmo `head()` das rotas acima, condicional à existência de `cidade_principal`/coordenadas.
+- **Sitemap:** dividir `src/routes/api/public/sitemap[.]xml.ts` em índice + shards; adicionar `src/routes/api/public/sitemap-news[.]xml.ts` com namespace `xmlns:news="http://www.google.com/schemas/sitemap-news/0.9"`.
+- **robots.txt:** editar `public/robots.txt` diretamente (arquivo estático).
+- **llms.txt dinâmicos:** trocar `public/llms.txt` estático por server routes `src/routes/api/public/llms[.]txt.ts` e `llms-full[.]txt.ts` usando `listLatestArticles` e `listRegions`.
+- **Coordenadas de cidade:** requer coluna `lat/lng` em `regioes` ou nova tabela `cidades` (migração externa). Sem coordenadas, `geo.position`/`ICBM` são omitidos e o restante funciona igual.
+- **Feeds:** novos server routes `src/routes/api/public/rss[.]xml.ts` e `feed[.]json.ts`.
+- **Prompt do gerador:** ajuste em `supabase/functions/generate-article/index.ts` para retornar campos `tldr` + `faq[]` + preservar `5w1h`; migração opcional para persistir esses campos em `generated_articles`.
