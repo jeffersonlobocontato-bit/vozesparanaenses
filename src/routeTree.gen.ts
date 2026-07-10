@@ -14,6 +14,7 @@ import { Route as AdminRouteImport } from './routes/admin'
 import { Route as RegionRouteImport } from './routes/$region'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AdminIndexRouteImport } from './routes/admin.index'
+import { Route as RegionIndexRouteImport } from './routes/$region.index'
 import { Route as AdminSenhaRouteImport } from './routes/admin.senha'
 import { Route as AdminResetPasswordRouteImport } from './routes/admin.reset-password'
 import { Route as AdminRegioesRouteImport } from './routes/admin.regioes'
@@ -49,6 +50,11 @@ const AdminIndexRoute = AdminIndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => AdminRoute,
+} as any)
+const RegionIndexRoute = RegionIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => RegionRoute,
 } as any)
 const AdminSenhaRoute = AdminSenhaRouteImport.update({
   id: '/senha',
@@ -114,13 +120,13 @@ export interface FileRoutesByFullPath {
   '/admin/regioes': typeof AdminRegioesRoute
   '/admin/reset-password': typeof AdminResetPasswordRoute
   '/admin/senha': typeof AdminSenhaRoute
+  '/$region/': typeof RegionIndexRoute
   '/admin/': typeof AdminIndexRoute
   '/$region/editoria/$categoria': typeof RegionEditoriaCategoriaRoute
   '/api/public/sitemap.xml': typeof ApiPublicSitemapDotxmlRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
-  '/$region': typeof RegionRouteWithChildren
   '/whatsapp': typeof WhatsappRoute
   '/$region/$slug': typeof RegionSlugRoute
   '/$region/classificados': typeof RegionClassificadosRoute
@@ -130,6 +136,7 @@ export interface FileRoutesByTo {
   '/admin/regioes': typeof AdminRegioesRoute
   '/admin/reset-password': typeof AdminResetPasswordRoute
   '/admin/senha': typeof AdminSenhaRoute
+  '/$region': typeof RegionIndexRoute
   '/admin': typeof AdminIndexRoute
   '/$region/editoria/$categoria': typeof RegionEditoriaCategoriaRoute
   '/api/public/sitemap.xml': typeof ApiPublicSitemapDotxmlRoute
@@ -148,6 +155,7 @@ export interface FileRoutesById {
   '/admin/regioes': typeof AdminRegioesRoute
   '/admin/reset-password': typeof AdminResetPasswordRoute
   '/admin/senha': typeof AdminSenhaRoute
+  '/$region/': typeof RegionIndexRoute
   '/admin/': typeof AdminIndexRoute
   '/$region/editoria/$categoria': typeof RegionEditoriaCategoriaRoute
   '/api/public/sitemap.xml': typeof ApiPublicSitemapDotxmlRoute
@@ -167,13 +175,13 @@ export interface FileRouteTypes {
     | '/admin/regioes'
     | '/admin/reset-password'
     | '/admin/senha'
+    | '/$region/'
     | '/admin/'
     | '/$region/editoria/$categoria'
     | '/api/public/sitemap.xml'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
-    | '/$region'
     | '/whatsapp'
     | '/$region/$slug'
     | '/$region/classificados'
@@ -183,6 +191,7 @@ export interface FileRouteTypes {
     | '/admin/regioes'
     | '/admin/reset-password'
     | '/admin/senha'
+    | '/$region'
     | '/admin'
     | '/$region/editoria/$categoria'
     | '/api/public/sitemap.xml'
@@ -200,6 +209,7 @@ export interface FileRouteTypes {
     | '/admin/regioes'
     | '/admin/reset-password'
     | '/admin/senha'
+    | '/$region/'
     | '/admin/'
     | '/$region/editoria/$categoria'
     | '/api/public/sitemap.xml'
@@ -249,6 +259,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/admin/'
       preLoaderRoute: typeof AdminIndexRouteImport
       parentRoute: typeof AdminRoute
+    }
+    '/$region/': {
+      id: '/$region/'
+      path: '/'
+      fullPath: '/$region/'
+      preLoaderRoute: typeof RegionIndexRouteImport
+      parentRoute: typeof RegionRoute
     }
     '/admin/senha': {
       id: '/admin/senha'
@@ -326,12 +343,14 @@ declare module '@tanstack/react-router' {
 interface RegionRouteChildren {
   RegionSlugRoute: typeof RegionSlugRoute
   RegionClassificadosRoute: typeof RegionClassificadosRoute
+  RegionIndexRoute: typeof RegionIndexRoute
   RegionEditoriaCategoriaRoute: typeof RegionEditoriaCategoriaRoute
 }
 
 const RegionRouteChildren: RegionRouteChildren = {
   RegionSlugRoute: RegionSlugRoute,
   RegionClassificadosRoute: RegionClassificadosRoute,
+  RegionIndexRoute: RegionIndexRoute,
   RegionEditoriaCategoriaRoute: RegionEditoriaCategoriaRoute,
 }
 
