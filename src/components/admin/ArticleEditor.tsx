@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { getExternalBrowser } from "@/lib/external-supabase-browser";
 import {
   PARANA_MUNICIPIOS,
@@ -57,18 +57,21 @@ export function ArticleEditor({ articleId, initial, onSaved, onCancel }: Props) 
   const [msg, setMsg] = useState<string | null>(null);
 
   // Carrega regiões cadastradas (para o multi-select de "Regiões específicas").
-  useState(() => {
+  useEffect(() => {
+    let cancelled = false;
     (async () => {
       try {
         const sb = await getExternalBrowser();
         const { data } = await sb.from("regioes").select("slug, nome").order("nome");
-        if (data) setAvailableRegions(data as Regiao[]);
+        if (!cancelled && data) setAvailableRegions(data as Regiao[]);
       } catch {
         /* silencioso */
       }
     })();
-    return undefined;
-  });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   function set<K extends keyof typeof form>(k: K, v: string) {
     setForm((f) => ({ ...f, [k]: v }));
