@@ -887,3 +887,34 @@ export const listArticlesByAuthor = createServerFn({ method: "GET" })
       return { authorName, articles };
     },
   );
+
+export const listAuthors = createServerFn({ method: "GET" }).handler(
+  async (): Promise<{ slug: string; name: string; lastmod: string | null }[]> => {
+    const { getExternalSupabase } = await import("./external-supabase.server");
+    const { slugifyAuthor } = await import("./authors");
+    const sb = getExternalSupabase();
+    const { data: rows, error } = await sb
+      .from("generated_articles")
+      .select("editor_responsavel, publicado_em")
+      .eq("status", "publicado")
+      .not("editor_responsavel", "is", null)
+      .order("publicado_em", { ascending: false })
+      .limit(1000);
+    if (error) {
+      if (isMissingSchema(error)) return [];
+      throw new Error(error.message);
+    }
+    const seen = new Map<string, { name: string; lastmod: string | null }>();
+    for (const r of (rows ?? []) as {
+      editor_responsavel: string | null;
+      publicado_em: string | null;
+    }[]) {
+      const name = r.editor_responsavel?.trim();
+      if (!name) continue;
+      const slug = slugifyAuthor(name);
+      if (!slug) continue;
+      if (!seen.has(slug)) seen.set(slug, { name, lastmod: r.publicado_em });
+    }
+    return Array.from(seen.entries()).map(([slug, v]) => ({ slug, ...v }));
+  },
+);
