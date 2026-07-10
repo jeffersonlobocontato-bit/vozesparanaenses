@@ -20,6 +20,12 @@ type Metrics = {
   fontesTotal: number;
   regioesAtivas: number;
   ultimaGeracao: string | null;
+  campanhasAtivas: number;
+  campanhasTotal: number;
+  criativosPendentes: number;
+  criativosAprovados: number;
+  impressoesHoje: number;
+  cliquesHoje: number;
 };
 
 type RecentDraft = {
@@ -46,7 +52,9 @@ function AdminDashboard() {
 
       const [drafts, approved, published, rejected, publishedToday,
         clustersNovos, clustersSelecionados, rawLast24h,
-        fontesAtivas, fontesTotal, regioesAtivas, ultima, recentRes] = await Promise.all([
+        fontesAtivas, fontesTotal, regioesAtivas, ultima, recentRes,
+        campanhasAtivas, campanhasTotal, criativosPendentes, criativosAprovados,
+        impressoesHoje, cliquesHoje] = await Promise.all([
         sb.from("generated_articles").select("*", { count: "exact", head: true }).eq("status", "rascunho"),
         sb.from("generated_articles").select("*", { count: "exact", head: true }).eq("status", "aprovado"),
         sb.from("generated_articles").select("*", { count: "exact", head: true }).eq("status", "publicado"),
@@ -63,9 +71,15 @@ function AdminDashboard() {
           .select("id, titulo, status, gerado_em, regiao:regioes(slug, nome)")
           .order("gerado_em", { ascending: false })
           .limit(8),
+        sb.from("ad_campaigns").select("*", { count: "exact", head: true }).eq("status", "ativa"),
+        sb.from("ad_campaigns").select("*", { count: "exact", head: true }),
+        sb.from("ad_creatives").select("*", { count: "exact", head: true }).eq("aprovado", false),
+        sb.from("ad_creatives").select("*", { count: "exact", head: true }).eq("aprovado", true),
+        sb.from("ad_impressions").select("*", { count: "exact", head: true }).gte("servido_em", startOfDay.toISOString()),
+        sb.from("ad_clicks").select("*", { count: "exact", head: true }).gte("clicado_em", startOfDay.toISOString()),
       ]);
 
-      const errs = [drafts, approved, published, rejected, publishedToday, clustersNovos, clustersSelecionados, rawLast24h, fontesAtivas, fontesTotal, regioesAtivas, recentRes].map(r => r.error).filter(Boolean);
+      const errs = [drafts, approved, published, rejected, publishedToday, clustersNovos, clustersSelecionados, rawLast24h, fontesAtivas, fontesTotal, regioesAtivas, recentRes, campanhasAtivas, campanhasTotal, criativosPendentes, criativosAprovados, impressoesHoje, cliquesHoje].map(r => r.error).filter(Boolean);
       if (errs.length) throw errs[0];
 
       setM({
@@ -81,6 +95,12 @@ function AdminDashboard() {
         fontesTotal: fontesTotal.count ?? 0,
         regioesAtivas: regioesAtivas.count ?? 0,
         ultimaGeracao: (ultima.data as { gerado_em: string } | null)?.gerado_em ?? null,
+        campanhasAtivas: campanhasAtivas.count ?? 0,
+        campanhasTotal: campanhasTotal.count ?? 0,
+        criativosPendentes: criativosPendentes.count ?? 0,
+        criativosAprovados: criativosAprovados.count ?? 0,
+        impressoesHoje: impressoesHoje.count ?? 0,
+        cliquesHoje: cliquesHoje.count ?? 0,
       });
       setRecent((recentRes.data ?? []) as unknown as RecentDraft[]);
     } catch (e: unknown) {
@@ -175,7 +195,22 @@ function AdminDashboard() {
           <Shortcut to="/admin/clusters" title="Pautas" desc="Clusters de notícias por relevância." />
           <Shortcut to="/admin/fontes" title="Fontes" desc="Cadastrar e ativar veículos monitorados." />
           <Shortcut to="/admin/regioes" title="Regiões e cotas" desc={`${m?.regioesAtivas ?? "—"} regiões ativas.`} />
+          <Shortcut to="/admin/anuncios" title="Anúncios" desc="Anunciantes, campanhas, criativos e targeting." />
           <Shortcut to="/admin/senha" title="Minha senha" desc="Trocar a senha da conta editorial." />
+        </div>
+      </section>
+
+      {/* Anúncios */}
+      <section>
+        <h2 className="mb-2 text-xs font-bold uppercase tracking-wider text-muted-foreground">Anúncios</h2>
+        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-5">
+          <Kpi label="Campanhas ativas" value={m ? `${m.campanhasAtivas}/${m.campanhasTotal}` : undefined} tone="green" to="/admin/anuncios" />
+          <Kpi label="Criativos aprovados" value={m?.criativosAprovados} tone="blue" to="/admin/anuncios" />
+          <Kpi label="Criativos pendentes" value={m?.criativosPendentes} tone="amber" to="/admin/anuncios" />
+          <Kpi label="Impressões hoje" value={m?.impressoesHoje} tone="slate" to="/admin/anuncios" />
+          <Kpi label="Cliques hoje" value={
+            m ? `${m.cliquesHoje}${m.impressoesHoje ? ` · ${((m.cliquesHoje / m.impressoesHoje) * 100).toFixed(1)}%` : ""}` : undefined
+          } tone="green" to="/admin/anuncios" />
         </div>
       </section>
 
