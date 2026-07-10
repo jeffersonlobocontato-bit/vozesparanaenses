@@ -95,61 +95,138 @@ function ArticlePage() {
   const { region, slug } = Route.useParams();
   const { data: article } = useSuspenseQuery(articleQO(region, slug));
 
+  const publishedAt = article.published_at ? new Date(article.published_at) : null;
+  const publishedLabel = publishedAt
+    ? `${publishedAt.toLocaleDateString("pt-BR", {
+        day: "2-digit",
+        month: "2-digit",
+        year: "numeric",
+      })} às ${publishedAt.toLocaleTimeString("pt-BR", {
+        hour: "2-digit",
+        minute: "2-digit",
+      })}`
+    : null;
+  const categoria = article.categoria?.name ?? article.region?.name ?? "Notícia";
+  const categoriaSlug = article.categoria?.slug ?? null;
+
   return (
     <div className="min-h-screen bg-white text-slate-900">
-      <header className="border-b-4 border-primary">
-        <div className="mx-auto flex max-w-3xl items-center justify-between px-4 py-4">
-          <Logo size="md" />
-          <Link
-            to="/$region"
-            params={{ region }}
-            className="text-sm text-slate-600 hover:text-secondary"
-          >
-            ← {article.region?.name ?? "Região"}
-          </Link>
+      {/* Top bar — dense, dark, editorial */}
+      <header className="sticky top-0 z-30 bg-[#0A2540] text-white shadow-sm">
+        <div className="mx-auto flex max-w-6xl items-center gap-4 px-4 py-3">
+          <Logo size="sm" variant="white" />
+          <nav className="ml-2 hidden items-center gap-5 text-[11px] font-bold uppercase tracking-[0.18em] text-white/80 md:flex">
+            <Link to="/$region" params={{ region }} className="hover:text-white">
+              {article.region?.name ?? "Região"}
+            </Link>
+            <span className="h-3 w-px bg-white/25" />
+            <Link
+              to="/$region"
+              params={{ region }}
+              className="hover:text-white"
+            >
+              Últimas
+            </Link>
+            <Link
+              to="/$region/classificados"
+              params={{ region }}
+              className="hover:text-white"
+            >
+              Classificados
+            </Link>
+          </nav>
+          <div className="ml-auto text-[11px] uppercase tracking-widest text-white/60">
+            Vozes Paranaenses
+          </div>
         </div>
       </header>
 
-      <article className="mx-auto max-w-3xl px-4 py-10">
-        <div className="text-xs font-bold uppercase tracking-widest text-secondary">
-          {article.categoria?.name ?? article.region?.name}
+      <article className="mx-auto max-w-4xl px-4 pb-16 pt-8 md:pt-12">
+        {/* Breadcrumb + categoria */}
+        <div className="mb-6 flex flex-wrap items-center gap-3 text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-500">
+          <Link to="/$region" params={{ region }} className="hover:text-[#0A2540]">
+            {article.region?.name}
+          </Link>
+          <span className="text-slate-300">›</span>
+          {categoriaSlug ? (
+            <Link
+              to="/$region/editoria/$categoria"
+              params={{ region, categoria: categoriaSlug }}
+              className="rounded-sm bg-[#0A2540] px-2 py-1 text-white transition-colors hover:bg-[#0d2f52]"
+            >
+              {categoria}
+            </Link>
+          ) : (
+            <span className="rounded-sm bg-[#0A2540] px-2 py-1 text-white">{categoria}</span>
+          )}
         </div>
-        <h1 className="mt-2 font-display text-4xl leading-tight md:text-5xl">{article.title}</h1>
-        {article.subtitle && (
-          <p className="mt-3 text-lg text-slate-600">{article.subtitle}</p>
-        )}
-        {article.published_at && (
-          <div className="mt-3 text-xs text-slate-500">
-            {new Date(article.published_at).toLocaleDateString("pt-BR", {
-              day: "2-digit",
-              month: "long",
-              year: "numeric",
-            })}
+
+        {/* Headline massivo, no acento da marca */}
+        <h1 className="font-display text-4xl font-black leading-[1.02] tracking-tight text-[#0A2540] md:text-6xl lg:text-7xl">
+          {article.title}
+        </h1>
+
+        {/* Publicação */}
+        {publishedLabel && (
+          <div className="mt-6 border-l-2 border-[#0A2540]/20 pl-3 text-sm text-slate-600">
+            Publicado em <span className="font-semibold text-slate-800">{publishedLabel}</span>
           </div>
         )}
-        {article.cover_image_url && (
-          <img
-            src={article.cover_image_url}
-            alt=""
-            className="mt-6 aspect-video w-full rounded-lg object-cover"
-          />
+
+        {/* Lead (subtítulo) */}
+        {article.subtitle && (
+          <p className="mt-6 max-w-3xl text-xl leading-relaxed text-slate-700 md:text-2xl">
+            {article.subtitle}
+          </p>
         )}
+
+        {/* Hero visual */}
+        {article.cover_image_url && (
+          <figure className="mt-8">
+            <img
+              src={article.cover_image_url}
+              alt={article.title}
+              className="w-full rounded-sm object-cover shadow-[0_20px_60px_-20px_rgba(10,37,64,0.35)]"
+            />
+            {"imagem_credito" in article && (article as { imagem_credito?: string }).imagem_credito && (
+              <figcaption className="mt-2 text-xs italic text-slate-500">
+                {(article as { imagem_credito?: string }).imagem_credito}
+              </figcaption>
+            )}
+          </figure>
+        )}
+
+        {/* Corpo */}
         {article.body_md && (
-          <div className="mt-8 whitespace-pre-wrap text-base leading-relaxed text-slate-800">
+          <div
+            className="mx-auto mt-10 max-w-3xl whitespace-pre-wrap font-body text-lg leading-[1.75] text-slate-800
+                       [&>p]:mb-6 first-letter:float-left first-letter:mr-3 first-letter:pt-1
+                       first-letter:font-display first-letter:text-6xl first-letter:font-black
+                       first-letter:leading-[0.85] first-letter:text-[#0A2540]"
+          >
             {article.body_md}
           </div>
         )}
 
-        <div className="mt-12 rounded-lg border border-slate-200 bg-slate-50 p-5 text-center">
-          <p className="text-sm text-slate-600">
-            Recebeu essa matéria? Continue acompanhando as notícias da sua região.
-          </p>
+        {/* Assinatura / marca no fim do texto */}
+        <div className="mx-auto mt-10 max-w-3xl border-t border-slate-200 pt-6">
+          <div className="flex flex-wrap items-center justify-between gap-3 text-xs uppercase tracking-widest text-slate-500">
+            <span>
+              Redação <span className="font-bold text-[#0A2540]">Vozes Paranaenses</span>
+            </span>
+            {article.region?.name && <span>{article.region.name} · PR</span>}
+          </div>
+        </div>
+
+        {/* CTA voltar */}
+        <div className="mx-auto mt-12 max-w-3xl">
           <Link
             to="/$region"
             params={{ region }}
-            className="mt-3 inline-block rounded bg-primary px-4 py-2 text-xs font-bold uppercase tracking-wider text-primary-foreground"
+            className="group inline-flex items-center gap-2 text-sm font-bold uppercase tracking-[0.18em] text-[#0A2540] hover:text-[#0d2f52]"
           >
-            Ver mais de {article.region?.name}
+            <span className="inline-block h-px w-8 bg-[#0A2540] transition-all group-hover:w-12" />
+            Mais de {article.region?.name ?? "sua região"}
           </Link>
         </div>
       </article>
