@@ -34,16 +34,16 @@ const rankedQO = (loc: ViewerLocation) =>
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "Vozes Paranaenses — Notícias das 10 macrorregiões do Paraná" },
+      { title: "Vozes Paranaenses — Notícias de todas as regiões do Estado" },
       {
         name: "description",
         content:
-          "Cobertura editorial do Paraná: Curitiba, RMC, Litoral, Campos Gerais, Norte Pioneiro, Norte Central, Noroeste, Centro Ocidental, Oeste, Sudoeste e Centro-Sul.",
+          "Portal de Curitiba, RMC, Litoral, Campos Gerais, Norte Pioneiro, Norte, Noroeste, Centro Oeste, Oeste, Sudoeste e Centro-Sul.",
       },
-      { property: "og:title", content: "Vozes Paranaenses — Notícias das 10 macrorregiões do Paraná" },
+      { property: "og:title", content: "Vozes Paranaenses — Notícias de todas as regiões do Estado" },
       {
         property: "og:description",
-        content: "Cobertura editorial do Paraná: Curitiba, RMC, Litoral, Campos Gerais, Norte Pioneiro, Norte Central, Noroeste, Centro Ocidental, Oeste, Sudoeste e Centro-Sul.",
+        content: "Portal de Curitiba, RMC, Litoral, Campos Gerais, Norte Pioneiro, Norte, Noroeste, Centro Oeste, Oeste, Sudoeste e Centro-Sul.",
       },
       { property: "og:type", content: "website" },
     ],
