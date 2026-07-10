@@ -36,14 +36,25 @@ function AdminQueue() {
     setItems(null); setErr(null);
     try {
       const sb = await getExternalBrowser();
-      const { data, error } = await sb
+      const fullSelect = "id, slug, titulo, subtitulo, resumo, status, gerado_em, imagem_capa_url, imagem_credito, regiao:regioes(slug, nome), categoria:editorial_categories(slug, nome)";
+      const fallbackSelect = "id, slug, titulo, subtitulo, resumo, status, gerado_em, regiao:regioes(slug, nome), categoria:editorial_categories(slug, nome)";
+      let res = await sb
         .from("generated_articles")
-        .select("id, slug, titulo, subtitulo, resumo, status, gerado_em, imagem_capa_url, imagem_credito, regiao:regioes(slug, nome), categoria:editorial_categories(slug, nome)")
+        .select(fullSelect)
         .eq("status", tab)
         .order("gerado_em", { ascending: false })
         .limit(50);
-      if (error) throw error;
-      setItems((data ?? []) as unknown as Draft[]);
+      // Se as colunas de imagem ainda não existem (migration 005 não rodada), tenta sem elas.
+      if (res.error && /column .* does not exist|imagem_/i.test(res.error.message)) {
+        res = await sb
+          .from("generated_articles")
+          .select(fallbackSelect)
+          .eq("status", tab)
+          .order("gerado_em", { ascending: false })
+          .limit(50);
+      }
+      if (res.error) throw res.error;
+      setItems((res.data ?? []) as unknown as Draft[]);
     } catch (e: unknown) {
       setErr(e instanceof Error ? e.message : "Erro ao carregar");
     }
