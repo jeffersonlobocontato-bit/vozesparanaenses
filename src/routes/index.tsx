@@ -242,8 +242,11 @@ function PortalHome({ regions, articles }: { regions: Region[]; articles: Ranked
       {/* Faixa data/editorias — sub-nav densa estilo CGN */}
       <div className="border-b border-slate-200 bg-white">
         <div className="mx-auto flex max-w-7xl items-center gap-3 overflow-x-auto px-4 py-2 whitespace-nowrap">
-          <span className="shrink-0 text-[10px] font-bold uppercase tracking-[0.16em] text-slate-400 capitalize">
-            {formatDateBR()}
+          <span
+            suppressHydrationWarning
+            className="shrink-0 text-[10px] font-bold uppercase tracking-[0.16em] text-slate-400 capitalize"
+          >
+            {todayBR ?? "\u00A0"}
           </span>
           <span className="h-3 w-px shrink-0 bg-slate-300" />
           {CATEGORIES.map((c) => (
