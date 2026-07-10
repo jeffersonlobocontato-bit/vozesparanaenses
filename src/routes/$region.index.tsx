@@ -86,7 +86,7 @@ function RegionPage() {
   return (
     <div
       className="min-h-screen"
-      style={{
+      
         background: "#ffffff",
         color: "#0f172a",
       }}
@@ -149,8 +149,8 @@ function RegionPage() {
                     </div>
                     <h2
                       className="mt-2 text-4xl font-black leading-[1.05] md:text-5xl lg:text-6xl"
-                      style={{
-                        fontFamily: `'${fontDisplay}', system-ui, sans-serif`,
+                      
+                        
                         color: primary,
                       }}
                     >
@@ -195,8 +195,8 @@ function RegionPage() {
                       </div>
                       <h3
                         className="mt-1 text-lg font-black leading-tight md:text-xl"
-                        style={{
-                          fontFamily: `'${fontDisplay}', system-ui, sans-serif`,
+                        
+                          
                           color: primary,
                         }}
                       >
@@ -247,8 +247,8 @@ function RegionPage() {
                       </div>
                       <h3
                         className="mt-1 text-xl font-black leading-tight md:text-2xl"
-                        style={{
-                          fontFamily: `'${fontDisplay}', system-ui, sans-serif`,
+                        
+                          
                           color: primary,
                         }}
                       >
