@@ -13,7 +13,7 @@ export const Route = createFileRoute("/api/public/rss/regiao/$region")({
         const regionName = scopeName ?? params.region;
         const body = renderRss({
           origin,
-          selfPath: `/api/public/rss/regiao/${params.region}.xml`,
+          selfPath: `/api/public/rss/regiao/${params.region}`,
           title: `Vozes Paranaenses — ${regionName}`,
           description: `Últimas notícias da região ${regionName}, Paraná.`,
           articles,
