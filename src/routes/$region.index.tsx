@@ -17,7 +17,7 @@ const articlesQO = (slug: string) =>
     queryFn: () => listArticlesByRegion({ data: { regionSlug: slug } }),
   });
 
-export const Route = createFileRoute("/$region")({
+export const Route = createFileRoute("/$region/")({
   loader: async ({ context, params }) => {
     const region = await context.queryClient.ensureQueryData(
       regionQO(params.region),
