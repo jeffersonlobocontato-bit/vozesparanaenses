@@ -39,6 +39,7 @@ import { Route as ApiPublicLlmsDottxtRouteImport } from './routes/api/public/llm
 import { Route as ApiPublicLlmsFullDottxtRouteImport } from './routes/api/public/llms-full[.]txt'
 import { Route as RegionEditoriaCategoriaRouteImport } from './routes/$region.editoria.$categoria'
 import { Route as RegionCidadeCidadeRouteImport } from './routes/$region.cidade.$cidade'
+import { Route as ApiPublicIndexnowKeyRouteImport } from './routes/api/public/indexnow.$key'
 import { Route as ApiPublicRssRegiaoRegionRouteImport } from './routes/api/public/rss.regiao.$region'
 import { Route as ApiPublicRssCategoriaSlugRouteImport } from './routes/api/public/rss.categoria.$slug'
 import { Route as ApiPublicRssCidadeRegionCidadeRouteImport } from './routes/api/public/rss.cidade.$region.$cidade'
@@ -194,6 +195,11 @@ const RegionCidadeCidadeRoute = RegionCidadeCidadeRouteImport.update({
   path: '/cidade/$cidade',
   getParentRoute: () => RegionRoute,
 } as any)
+const ApiPublicIndexnowKeyRoute = ApiPublicIndexnowKeyRouteImport.update({
+  id: '/api/public/indexnow/$key',
+  path: '/api/public/indexnow/$key',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiPublicRssRegiaoRegionRoute =
   ApiPublicRssRegiaoRegionRouteImport.update({
     id: '/api/public/rss/regiao/$region',
@@ -244,6 +250,7 @@ export interface FileRoutesByFullPath {
   '/api/public/rss.xml': typeof ApiPublicRssDotxmlRoute
   '/api/public/sitemap-news.xml': typeof ApiPublicSitemapNewsDotxmlRoute
   '/api/public/sitemap.xml': typeof ApiPublicSitemapDotxmlRoute
+  '/api/public/indexnow/$key': typeof ApiPublicIndexnowKeyRoute
   '/api/public/rss/categoria/$slug': typeof ApiPublicRssCategoriaSlugRoute
   '/api/public/rss/regiao/$region': typeof ApiPublicRssRegiaoRegionRoute
   '/api/public/rss/cidade/$region/$cidade': typeof ApiPublicRssCidadeRegionCidadeRoute
@@ -277,6 +284,7 @@ export interface FileRoutesByTo {
   '/api/public/rss.xml': typeof ApiPublicRssDotxmlRoute
   '/api/public/sitemap-news.xml': typeof ApiPublicSitemapNewsDotxmlRoute
   '/api/public/sitemap.xml': typeof ApiPublicSitemapDotxmlRoute
+  '/api/public/indexnow/$key': typeof ApiPublicIndexnowKeyRoute
   '/api/public/rss/categoria/$slug': typeof ApiPublicRssCategoriaSlugRoute
   '/api/public/rss/regiao/$region': typeof ApiPublicRssRegiaoRegionRoute
   '/api/public/rss/cidade/$region/$cidade': typeof ApiPublicRssCidadeRegionCidadeRoute
@@ -313,6 +321,7 @@ export interface FileRoutesById {
   '/api/public/rss.xml': typeof ApiPublicRssDotxmlRoute
   '/api/public/sitemap-news.xml': typeof ApiPublicSitemapNewsDotxmlRoute
   '/api/public/sitemap.xml': typeof ApiPublicSitemapDotxmlRoute
+  '/api/public/indexnow/$key': typeof ApiPublicIndexnowKeyRoute
   '/api/public/rss/categoria/$slug': typeof ApiPublicRssCategoriaSlugRoute
   '/api/public/rss/regiao/$region': typeof ApiPublicRssRegiaoRegionRoute
   '/api/public/rss/cidade/$region/$cidade': typeof ApiPublicRssCidadeRegionCidadeRoute
@@ -350,6 +359,7 @@ export interface FileRouteTypes {
     | '/api/public/rss.xml'
     | '/api/public/sitemap-news.xml'
     | '/api/public/sitemap.xml'
+    | '/api/public/indexnow/$key'
     | '/api/public/rss/categoria/$slug'
     | '/api/public/rss/regiao/$region'
     | '/api/public/rss/cidade/$region/$cidade'
@@ -383,6 +393,7 @@ export interface FileRouteTypes {
     | '/api/public/rss.xml'
     | '/api/public/sitemap-news.xml'
     | '/api/public/sitemap.xml'
+    | '/api/public/indexnow/$key'
     | '/api/public/rss/categoria/$slug'
     | '/api/public/rss/regiao/$region'
     | '/api/public/rss/cidade/$region/$cidade'
@@ -418,6 +429,7 @@ export interface FileRouteTypes {
     | '/api/public/rss.xml'
     | '/api/public/sitemap-news.xml'
     | '/api/public/sitemap.xml'
+    | '/api/public/indexnow/$key'
     | '/api/public/rss/categoria/$slug'
     | '/api/public/rss/regiao/$region'
     | '/api/public/rss/cidade/$region/$cidade'
@@ -440,6 +452,7 @@ export interface RootRouteChildren {
   ApiPublicRssDotxmlRoute: typeof ApiPublicRssDotxmlRoute
   ApiPublicSitemapNewsDotxmlRoute: typeof ApiPublicSitemapNewsDotxmlRoute
   ApiPublicSitemapDotxmlRoute: typeof ApiPublicSitemapDotxmlRoute
+  ApiPublicIndexnowKeyRoute: typeof ApiPublicIndexnowKeyRoute
   ApiPublicRssCategoriaSlugRoute: typeof ApiPublicRssCategoriaSlugRoute
   ApiPublicRssRegiaoRegionRoute: typeof ApiPublicRssRegiaoRegionRoute
   ApiPublicRssCidadeRegionCidadeRoute: typeof ApiPublicRssCidadeRegionCidadeRoute
@@ -657,6 +670,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof RegionCidadeCidadeRouteImport
       parentRoute: typeof RegionRoute
     }
+    '/api/public/indexnow/$key': {
+      id: '/api/public/indexnow/$key'
+      path: '/api/public/indexnow/$key'
+      fullPath: '/api/public/indexnow/$key'
+      preLoaderRoute: typeof ApiPublicIndexnowKeyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/public/rss/regiao/$region': {
       id: '/api/public/rss/regiao/$region'
       path: '/api/public/rss/regiao/$region'
@@ -743,6 +763,7 @@ const rootRouteChildren: RootRouteChildren = {
   ApiPublicRssDotxmlRoute: ApiPublicRssDotxmlRoute,
   ApiPublicSitemapNewsDotxmlRoute: ApiPublicSitemapNewsDotxmlRoute,
   ApiPublicSitemapDotxmlRoute: ApiPublicSitemapDotxmlRoute,
+  ApiPublicIndexnowKeyRoute: ApiPublicIndexnowKeyRoute,
   ApiPublicRssCategoriaSlugRoute: ApiPublicRssCategoriaSlugRoute,
   ApiPublicRssRegiaoRegionRoute: ApiPublicRssRegiaoRegionRoute,
   ApiPublicRssCidadeRegionCidadeRoute: ApiPublicRssCidadeRegionCidadeRoute,
