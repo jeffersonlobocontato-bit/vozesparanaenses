@@ -521,7 +521,7 @@ export const listRankedArticles = createServerFn({ method: "GET" })
         "id, slug, titulo, subtitulo, resumo, imagem_capa_url, publicado_em, cidade_principal, cidades_mencionadas, regiao:regioes(slug, nome), categoria:editorial_categories(slug, nome)",
       );
     }
-    let rows = rankedRes.data ?? [];
+    let rows = (rankedRes.data ?? []) as unknown[];
     const { error } = rankedRes;
     if (error) {
       if (isMissingSchema(error)) return [];
@@ -551,10 +551,11 @@ export const listRankedArticles = createServerFn({ method: "GET" })
       .order("fixado_posicao", { ascending: true })
       .limit(10);
     if (!pinnedRes.error && pinnedRes.data) {
-      const seen = new Set(((rows ?? []) as { id: string }[]).map((row) => row.id));
+      const seen = new Set((rows as Array<{ id: string }>).map((row) => row.id));
+      const pinnedRows = pinnedRes.data as unknown as Array<{ id: string }>;
       rows = [
         ...rows,
-        ...((pinnedRes.data as typeof rows).filter((row) => !seen.has((row as { id: string }).id))),
+        ...pinnedRows.filter((row) => !seen.has(row.id)),
       ];
     }
 
@@ -636,7 +637,7 @@ export const listArticlesByRegion = createServerFn({ method: "GET" })
       if (isMissingSchema(res.error)) return [];
       throw new Error(res.error.message);
     }
-    let rows = res.data ?? [];
+    let rows = (res.data ?? []) as unknown[];
     const pinnedRes = await sb
       .from("generated_articles")
       .select(MATERIA_LIST_COLS)
@@ -646,10 +647,11 @@ export const listArticlesByRegion = createServerFn({ method: "GET" })
       .order("fixado_posicao", { ascending: true })
       .limit(10);
     if (!pinnedRes.error && pinnedRes.data) {
-      const seen = new Set((rows as { id: string }[]).map((row) => row.id));
+      const seen = new Set((rows as Array<{ id: string }>).map((row) => row.id));
+      const pinnedRows = pinnedRes.data as unknown as Array<{ id: string }>;
       rows = [
         ...rows,
-        ...((pinnedRes.data as typeof rows).filter((row) => !seen.has((row as { id: string }).id))),
+        ...pinnedRows.filter((row) => !seen.has(row.id)),
       ];
     }
     const mapped = ((rows ?? []) as unknown as MateriaRow[]).map(mapMateria);
