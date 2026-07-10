@@ -33,13 +33,13 @@ Deno.serve(async (req) => {
 
   const sb = createClient(url, key, { auth: { persistSession: false } });
 
-  const { data: cats } = await sb.from("editorial_categories").select("id, slug, nome");
-  const categorias = (cats ?? []) as { id: string; slug: string; nome: string }[];
+  const { data: cats } = await sb.from("editorial_categories").select("id, slug, nome, peso_engajamento");
+  const categorias = (cats ?? []) as { id: string; slug: string; nome: string; peso_engajamento: number }[];
   if (!categorias.length) return json({ error: "no_categories_defined" }, 400);
 
   let cq = sb
     .from("article_clusters")
-    .select("id, regiao_id, categoria_id, prioridade_score")
+    .select("id, regiao_id, categoria_id, prioridade_score, criado_em")
     .eq("status", "novo")
     .is("categoria_id", null)
     .order("prioridade_score", { ascending: false })
@@ -51,7 +51,7 @@ Deno.serve(async (req) => {
 
   // 1. Classificar cada cluster (usa título do primeiro artigo do cluster)
   const classified: { id: string; regiao_id: string; categoria_id: string; score: number }[] = [];
-  for (const c of clusters as { id: string; regiao_id: string; prioridade_score: number }[]) {
+  for (const c of clusters as { id: string; regiao_id: string; prioridade_score: number; criado_em: string }[]) {
     const { data: ca } = await sb
       .from("cluster_articles")
       .select("raw_article_id")
@@ -68,7 +68,14 @@ Deno.serve(async (req) => {
       .slice(0, 3000);
     const catSlug = await classify(excerpt, categorias, aiKey);
     const cat = categorias.find((k) => k.slug === catSlug) ?? categorias[0];
-    await sb.from("article_clusters").update({ categoria_id: cat.id }).eq("id", c.id);
+
+    // Interesse de leitura = nº de fontes (prova social) × peso da categoria
+    // (comportamento histórico de consumo) × fator de recência (decai em 48h).
+    const horasDesdeCriacao = (Date.now() - new Date(c.criado_em).getTime()) / 3_600_000;
+    const fatorRecencia = Math.max(0.3, 1 - horasDesdeCriacao / 48);
+    const interesseScore = Number((c.prioridade_score * cat.peso_engajamento * fatorRecencia).toFixed(2));
+
+    await sb.from("article_clusters").update({ categoria_id: cat.id, interesse_score: interesseScore }).eq("id", c.id);
     classified.push({ id: c.id, regiao_id: c.regiao_id, categoria_id: cat.id, score: c.prioridade_score });
   }
 
