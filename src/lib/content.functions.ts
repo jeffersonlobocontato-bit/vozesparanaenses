@@ -51,6 +51,7 @@ export type ArticleListItem = {
   published_at: string | null;
   region: { slug: string; name: string } | null;
   categoria: { slug: string; name: string } | null;
+  fixado_posicao?: number | null;
 };
 
 export type ArticleFull = ArticleListItem & {
@@ -139,6 +140,7 @@ type MateriaRow = {
   publicado_em: string | null;
   regiao: { slug: string; nome: string } | null;
   categoria: { slug: string; nome: string } | null;
+  fixado_posicao?: number | null;
 };
 
 function mapMateria(m: MateriaRow): ArticleListItem {
@@ -152,14 +154,30 @@ function mapMateria(m: MateriaRow): ArticleListItem {
     published_at: m.publicado_em,
     region: m.regiao ? { slug: m.regiao.slug, name: m.regiao.nome } : null,
     categoria: m.categoria ? { slug: m.categoria.slug, name: m.categoria.nome } : null,
+    fixado_posicao: typeof m.fixado_posicao === "number" ? m.fixado_posicao : null,
   };
 }
 
 const MATERIA_LIST_COLS =
-  "id, slug, titulo, subtitulo, resumo, imagem_capa_url, publicado_em, regiao:regioes(slug, nome), categoria:editorial_categories(slug, nome)";
+  "id, slug, titulo, subtitulo, resumo, imagem_capa_url, publicado_em, fixado_posicao, regiao:regioes(slug, nome), categoria:editorial_categories(slug, nome)";
 
 const MATERIA_LIST_COLS_GEO =
-  "id, slug, titulo, subtitulo, resumo, imagem_capa_url, publicado_em, cidade_principal, cidades_mencionadas, regiao:regioes(slug, nome), categoria:editorial_categories(slug, nome)";
+  "id, slug, titulo, subtitulo, resumo, imagem_capa_url, publicado_em, cidade_principal, cidades_mencionadas, fixado_posicao, regiao:regioes(slug, nome), categoria:editorial_categories(slug, nome)";
+
+/**
+ * Reordena colocando as matérias fixadas primeiro, na ordem de `fixado_posicao`
+ * (0 = manchete, 1..N = destaques laterais), preservando o restante já ordenado
+ * por data de publicação.
+ */
+function sortWithPinned<T extends { fixado_posicao?: number | null }>(rows: T[]): T[] {
+  const pinned = rows
+    .filter((r) => typeof r.fixado_posicao === "number" && r.fixado_posicao !== null)
+    .sort((a, b) => (a.fixado_posicao ?? 999) - (b.fixado_posicao ?? 999));
+  const rest = rows.filter(
+    (r) => !(typeof r.fixado_posicao === "number" && r.fixado_posicao !== null),
+  );
+  return [...pinned, ...rest];
+}
 
 export const listRegions = createServerFn({ method: "GET" }).handler(
   async (): Promise<Region[]> => {
