@@ -513,12 +513,20 @@ export const listRankedArticles = createServerFn({ method: "GET" })
     const sb = getExternalSupabase();
     // Puxamos um pool maior para reordenar em memória.
     const poolSize = Math.max(data.limit * 4, 40);
-    const { data: rows, error } = await sb
-      .from("generated_articles")
-      .select(MATERIA_LIST_COLS_GEO)
-      .eq("status", "publicado")
-      .order("publicado_em", { ascending: false })
-      .limit(poolSize);
+    const runRanked = (cols: string) =>
+      sb
+        .from("generated_articles")
+        .select(cols)
+        .eq("status", "publicado")
+        .order("publicado_em", { ascending: false })
+        .limit(poolSize);
+    let rankedRes = await runRanked(MATERIA_LIST_COLS_GEO);
+    if (rankedRes.error && /fixado_posicao/i.test(rankedRes.error.message)) {
+      rankedRes = await runRanked(
+        "id, slug, titulo, subtitulo, resumo, imagem_capa_url, publicado_em, cidade_principal, cidades_mencionadas, regiao:regioes(slug, nome), categoria:editorial_categories(slug, nome)",
+      );
+    }
+    const { data: rows, error } = rankedRes;
     if (error) {
       if (isMissingSchema(error)) return [];
       // Se o schema geo ainda não rodou, cai no listagem simples.
