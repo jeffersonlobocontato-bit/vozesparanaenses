@@ -25,7 +25,7 @@ export const Route = createFileRoute("/$region/")({
     await context.queryClient.ensureQueryData(articlesQO(params.region));
     return { region };
   },
-  head: ({ loaderData }) =>
+  head: ({ loaderData, params }) =>
     loaderData
       ? {
           meta: [
@@ -54,6 +54,14 @@ export const Route = createFileRoute("/$region/")({
                   },
                 ]
               : []),
+          ],
+          links: [
+            {
+              rel: "alternate",
+              type: "application/rss+xml",
+              title: `RSS — ${loaderData.region.name}`,
+              href: `/api/public/rss/regiao/${params.region}`,
+            },
           ],
         }
       : { meta: [] },
