@@ -226,7 +226,9 @@ function PortalHome({ regions, articles }: { regions: Region[]; articles: Ranked
     { id: "fb-centro-sul", slug: "centro-sul", name: "Centro-Sul" },
   ] as unknown as Region[];
   if (!regions || regions.length === 0) regions = REGIONS_FALLBACK;
-  const { hero, side, rest } = arrangePinnedSlots(articles, 4);
+  // Home estadual — só pins de escopo 'estado' aparecem como fixados;
+  // pins de região/cidade caem no rest e viram matéria comum.
+  const { hero, side, rest } = arrangePinnedSlots(articles, 4, {});
   const secondary = rest.slice(0, 2);
 
   const articleByRegion = new Map<string, ArticleListItem>();

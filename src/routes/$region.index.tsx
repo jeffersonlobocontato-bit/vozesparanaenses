@@ -88,7 +88,7 @@ function RegionPage() {
   const primary = tema.paleta?.primaria ?? "#0A2540";
   const accent = tema.paleta?.acento ?? "#0066CC";
 
-  const { hero, side: sideCards, rest } = arrangePinnedSlots(articles, 4);
+  const { hero, side: sideCards, rest } = arrangePinnedSlots(articles, 4, { region: slug });
 
   return (
     <div
