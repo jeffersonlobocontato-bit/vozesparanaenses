@@ -578,6 +578,82 @@ export const listArticlesByRegion = createServerFn({ method: "GET" })
     return ((rows ?? []) as unknown as MateriaRow[]).map(mapMateria);
   });
 
+/**
+ * Matérias relacionadas para cross-linking dentro de uma matéria aberta.
+ * Prioriza: mesma cidade (match em cidade_principal OU em cidades_mencionadas)
+ * → resto da mesma região. Retorna dois grupos exclusivos entre si.
+ */
+export const listRelatedArticles = createServerFn({ method: "GET" })
+  .inputValidator(
+    (d: {
+      articleId: string;
+      regionSlug: string;
+      cidade?: string | null;
+      limit?: number;
+    }) => ({
+      articleId: d.articleId,
+      regionSlug: d.regionSlug,
+      cidade: d.cidade ?? null,
+      limit: d.limit ?? 6,
+    }),
+  )
+  .handler(
+    async ({
+      data,
+    }): Promise<{ mesmaCidade: ArticleListItem[]; mesmaRegiao: ArticleListItem[] }> => {
+      const { getExternalSupabase } = await import("./external-supabase.server");
+      const sb = getExternalSupabase();
+      const { data: region } = await sb
+        .from("regioes")
+        .select("id")
+        .eq("slug", data.regionSlug)
+        .maybeSingle();
+      if (!region) return { mesmaCidade: [], mesmaRegiao: [] };
+      const { data: rows, error } = await sb
+        .from("generated_articles")
+        .select(MATERIA_LIST_COLS_GEO)
+        .eq("status", "publicado")
+        .eq("regiao_id", (region as { id: string }).id)
+        .neq("id", data.articleId)
+        .order("publicado_em", { ascending: false })
+        .limit(80);
+      if (error) {
+        if (isMissingSchema(error) || /cidade_/i.test(error.message)) {
+          // Fallback sem colunas geo
+          const simple = await sb
+            .from("generated_articles")
+            .select(MATERIA_LIST_COLS)
+            .eq("status", "publicado")
+            .eq("regiao_id", (region as { id: string }).id)
+            .neq("id", data.articleId)
+            .order("publicado_em", { ascending: false })
+            .limit(data.limit);
+          if (simple.error) return { mesmaCidade: [], mesmaRegiao: [] };
+          return {
+            mesmaCidade: [],
+            mesmaRegiao: ((simple.data ?? []) as unknown as MateriaRow[]).map(mapMateria),
+          };
+        }
+        throw new Error(error.message);
+      }
+      const cityKey = data.cidade ? cidadeSlug(data.cidade) : null;
+      const mesmaCidade: ArticleListItem[] = [];
+      const mesmaRegiao: ArticleListItem[] = [];
+      for (const r of (rows ?? []) as unknown as (MateriaRow & {
+        cidade_principal: string | null;
+        cidades_mencionadas: string[] | null;
+      })[]) {
+        const item = mapMateria(r);
+        const rowCity = cidadeSlug(r.cidade_principal);
+        const mentions = (r.cidades_mencionadas ?? []).map((m) => cidadeSlug(m));
+        const cityMatch = !!cityKey && (rowCity === cityKey || mentions.includes(cityKey));
+        if (cityMatch && mesmaCidade.length < data.limit) mesmaCidade.push(item);
+        else if (mesmaRegiao.length < data.limit) mesmaRegiao.push(item);
+      }
+      return { mesmaCidade, mesmaRegiao };
+    },
+  );
+
 export const listArticlesByCategory = createServerFn({ method: "GET" })
   .inputValidator((d: { regionSlug: string; categorySlug: string; limit?: number }) => ({
     regionSlug: d.regionSlug,

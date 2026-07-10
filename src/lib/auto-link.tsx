@@ -1,0 +1,138 @@
+import type { ReactNode } from "react";
+import { Link } from "@tanstack/react-router";
+
+/**
+ * Auto-linking utilitário para o corpo da matéria.
+ * - Cidades → /{regionSlug}/cidade/{citySlug}
+ * - Regiões → /{regionSlug}
+ * - Editorias → /{regionSlug}/editoria/{categorySlug}
+ *
+ * Regras SEO:
+ *  - Cada termo é linkado no máximo 1 vez por matéria (dedupe via Set compartilhado).
+ *  - Termos mais longos ganham prioridade ("Foz do Iguaçu" antes de "Foz").
+ *  - Máx. 3 links por parágrafo (evita over-optimization).
+ */
+
+export type LinkTerm =
+  | { type: "city"; term: string; regionSlug: string; citySlug: string }
+  | { type: "region"; term: string; regionSlug: string }
+  | { type: "category"; term: string; regionSlug: string; categorySlug: string };
+
+function escapeRegex(s: string): string {
+  return s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+}
+
+export function buildLinkTerms(opts: {
+  regions: { slug: string; name: string }[];
+  cities: { regionSlug: string; citySlug: string; name: string }[];
+  categories: { slug: string; name: string }[];
+  currentRegionSlug: string;
+  currentCitySlug: string | null;
+}): LinkTerm[] {
+  const terms: LinkTerm[] = [];
+  for (const c of opts.cities) {
+    if (!c.name || c.name.length < 4) continue;
+    // Não auto-linkar a própria cidade da matéria.
+    if (c.regionSlug === opts.currentRegionSlug && c.citySlug === opts.currentCitySlug) continue;
+    terms.push({ type: "city", term: c.name, regionSlug: c.regionSlug, citySlug: c.citySlug });
+  }
+  for (const r of opts.regions) {
+    if (!r.name || r.name.length < 4) continue;
+    if (r.slug === opts.currentRegionSlug) continue;
+    terms.push({ type: "region", term: r.name, regionSlug: r.slug });
+  }
+  for (const cat of opts.categories) {
+    if (!cat.name || cat.name.length < 4) continue;
+    terms.push({
+      type: "category",
+      term: cat.name,
+      regionSlug: opts.currentRegionSlug,
+      categorySlug: cat.slug,
+    });
+  }
+  // Termos mais longos primeiro para evitar match parcial ("Foz" vs "Foz do Iguaçu").
+  return terms.sort((a, b) => b.term.length - a.term.length);
+}
+
+function renderTermLink(term: LinkTerm, label: string, key: string): ReactNode {
+  const cls =
+    "text-[#0A2540] underline decoration-[#0A2540]/30 underline-offset-2 hover:decoration-[#0A2540]";
+  if (term.type === "city") {
+    return (
+      <Link
+        key={key}
+        to="/$region/cidade/$cidade"
+        params={{ region: term.regionSlug, cidade: term.citySlug }}
+        className={cls}
+      >
+        {label}
+      </Link>
+    );
+  }
+  if (term.type === "region") {
+    return (
+      <Link key={key} to="/$region" params={{ region: term.regionSlug }} className={cls}>
+        {label}
+      </Link>
+    );
+  }
+  return (
+    <Link
+      key={key}
+      to="/$region/editoria/$categoria"
+      params={{ region: term.regionSlug, categoria: term.categorySlug }}
+      className={cls}
+    >
+      {label}
+    </Link>
+  );
+}
+
+/**
+ * Linkifica um parágrafo. Mutates `used` (Set de termos já linkados no artigo inteiro).
+ * Retorna array de ReactNode (strings + <Link>).
+ */
+export function autoLinkParagraph(
+  text: string,
+  terms: LinkTerm[],
+  used: Set<string>,
+  paragraphIdx: number,
+): ReactNode[] {
+  if (!text) return [text];
+  let nodes: ReactNode[] = [text];
+  let linksInParagraph = 0;
+  const MAX_PER_PARAGRAPH = 3;
+
+  for (const term of terms) {
+    if (linksInParagraph >= MAX_PER_PARAGRAPH) break;
+    const key = term.term.toLowerCase();
+    if (used.has(key)) continue;
+    const re = new RegExp("\\b" + escapeRegex(term.term) + "\\b", "iu");
+    const next: ReactNode[] = [];
+    let matched = false;
+    for (const n of nodes) {
+      if (matched || typeof n !== "string") {
+        next.push(n);
+        continue;
+      }
+      const m = re.exec(n);
+      if (!m || m.index === undefined) {
+        next.push(n);
+        continue;
+      }
+      const before = n.slice(0, m.index);
+      const hit = n.slice(m.index, m.index + m[0].length);
+      const after = n.slice(m.index + m[0].length);
+      if (before) next.push(before);
+      next.push(renderTermLink(term, hit, `p${paragraphIdx}-${key}`));
+      if (after) next.push(after);
+      matched = true;
+    }
+    if (matched) {
+      used.add(key);
+      nodes = next;
+      linksInParagraph++;
+    }
+  }
+  return nodes;
+}
