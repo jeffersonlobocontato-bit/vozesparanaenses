@@ -14,6 +14,7 @@ import { Route as TermosRouteImport } from './routes/termos'
 import { Route as SobreRouteImport } from './routes/sobre'
 import { Route as PrivacidadeRouteImport } from './routes/privacidade'
 import { Route as PoliticaEditorialRouteImport } from './routes/politica-editorial'
+import { Route as ContatoRouteImport } from './routes/contato'
 import { Route as AdminRouteImport } from './routes/admin'
 import { Route as RegionRouteImport } from './routes/$region'
 import { Route as IndexRouteImport } from './routes/index'
@@ -61,6 +62,11 @@ const PrivacidadeRoute = PrivacidadeRouteImport.update({
 const PoliticaEditorialRoute = PoliticaEditorialRouteImport.update({
   id: '/politica-editorial',
   path: '/politica-editorial',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ContatoRoute = ContatoRouteImport.update({
+  id: '/contato',
+  path: '/contato',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AdminRoute = AdminRouteImport.update({
@@ -184,6 +190,7 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/$region': typeof RegionRouteWithChildren
   '/admin': typeof AdminRouteWithChildren
+  '/contato': typeof ContatoRoute
   '/politica-editorial': typeof PoliticaEditorialRoute
   '/privacidade': typeof PrivacidadeRoute
   '/sobre': typeof SobreRoute
@@ -212,6 +219,7 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/contato': typeof ContatoRoute
   '/politica-editorial': typeof PoliticaEditorialRoute
   '/privacidade': typeof PrivacidadeRoute
   '/sobre': typeof SobreRoute
@@ -243,6 +251,7 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/$region': typeof RegionRouteWithChildren
   '/admin': typeof AdminRouteWithChildren
+  '/contato': typeof ContatoRoute
   '/politica-editorial': typeof PoliticaEditorialRoute
   '/privacidade': typeof PrivacidadeRoute
   '/sobre': typeof SobreRoute
@@ -275,6 +284,7 @@ export interface FileRouteTypes {
     | '/'
     | '/$region'
     | '/admin'
+    | '/contato'
     | '/politica-editorial'
     | '/privacidade'
     | '/sobre'
@@ -303,6 +313,7 @@ export interface FileRouteTypes {
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
+    | '/contato'
     | '/politica-editorial'
     | '/privacidade'
     | '/sobre'
@@ -333,6 +344,7 @@ export interface FileRouteTypes {
     | '/'
     | '/$region'
     | '/admin'
+    | '/contato'
     | '/politica-editorial'
     | '/privacidade'
     | '/sobre'
@@ -364,6 +376,7 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   RegionRoute: typeof RegionRouteWithChildren
   AdminRoute: typeof AdminRouteWithChildren
+  ContatoRoute: typeof ContatoRoute
   PoliticaEditorialRoute: typeof PoliticaEditorialRoute
   PrivacidadeRoute: typeof PrivacidadeRoute
   SobreRoute: typeof SobreRoute
@@ -412,6 +425,13 @@ declare module '@tanstack/react-router' {
       path: '/politica-editorial'
       fullPath: '/politica-editorial'
       preLoaderRoute: typeof PoliticaEditorialRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/contato': {
+      id: '/contato'
+      path: '/contato'
+      fullPath: '/contato'
+      preLoaderRoute: typeof ContatoRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/admin': {
@@ -627,6 +647,7 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   RegionRoute: RegionRouteWithChildren,
   AdminRoute: AdminRouteWithChildren,
+  ContatoRoute: ContatoRoute,
   PoliticaEditorialRoute: PoliticaEditorialRoute,
   PrivacidadeRoute: PrivacidadeRoute,
   SobreRoute: SobreRoute,
