@@ -39,7 +39,7 @@ import { Route as ApiPublicLlmsDottxtRouteImport } from './routes/api/public/llm
 import { Route as ApiPublicLlmsFullDottxtRouteImport } from './routes/api/public/llms-full[.]txt'
 import { Route as RegionEditoriaCategoriaRouteImport } from './routes/$region.editoria.$categoria'
 import { Route as RegionCidadeCidadeRouteImport } from './routes/$region.cidade.$cidade'
-import { Route as ApiPublicRssRegiaoRegionDotxmlRouteImport } from './routes/api/public/rss.regiao.$region[.]xml'
+import { Route as ApiPublicRssRegiaoRegionRouteImport } from './routes/api/public/rss.regiao.$region'
 
 const WhatsappRoute = WhatsappRouteImport.update({
   id: '/whatsapp',
@@ -192,10 +192,10 @@ const RegionCidadeCidadeRoute = RegionCidadeCidadeRouteImport.update({
   path: '/cidade/$cidade',
   getParentRoute: () => RegionRoute,
 } as any)
-const ApiPublicRssRegiaoRegionDotxmlRoute =
-  ApiPublicRssRegiaoRegionDotxmlRouteImport.update({
-    id: '/api/public/rss/regiao/$region.xml',
-    path: '/api/public/rss/regiao/$region.xml',
+const ApiPublicRssRegiaoRegionRoute =
+  ApiPublicRssRegiaoRegionRouteImport.update({
+    id: '/api/public/rss/regiao/$region',
+    path: '/api/public/rss/regiao/$region',
     getParentRoute: () => rootRouteImport,
   } as any)
 
@@ -230,7 +230,7 @@ export interface FileRoutesByFullPath {
   '/api/public/rss.xml': typeof ApiPublicRssDotxmlRoute
   '/api/public/sitemap-news.xml': typeof ApiPublicSitemapNewsDotxmlRoute
   '/api/public/sitemap.xml': typeof ApiPublicSitemapDotxmlRoute
-  '/api/public/rss/regiao/$region.xml': typeof ApiPublicRssRegiaoRegionDotxmlRoute
+  '/api/public/rss/regiao/$region': typeof ApiPublicRssRegiaoRegionRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -261,7 +261,7 @@ export interface FileRoutesByTo {
   '/api/public/rss.xml': typeof ApiPublicRssDotxmlRoute
   '/api/public/sitemap-news.xml': typeof ApiPublicSitemapNewsDotxmlRoute
   '/api/public/sitemap.xml': typeof ApiPublicSitemapDotxmlRoute
-  '/api/public/rss/regiao/$region.xml': typeof ApiPublicRssRegiaoRegionDotxmlRoute
+  '/api/public/rss/regiao/$region': typeof ApiPublicRssRegiaoRegionRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -295,7 +295,7 @@ export interface FileRoutesById {
   '/api/public/rss.xml': typeof ApiPublicRssDotxmlRoute
   '/api/public/sitemap-news.xml': typeof ApiPublicSitemapNewsDotxmlRoute
   '/api/public/sitemap.xml': typeof ApiPublicSitemapDotxmlRoute
-  '/api/public/rss/regiao/$region.xml': typeof ApiPublicRssRegiaoRegionDotxmlRoute
+  '/api/public/rss/regiao/$region': typeof ApiPublicRssRegiaoRegionRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -330,7 +330,7 @@ export interface FileRouteTypes {
     | '/api/public/rss.xml'
     | '/api/public/sitemap-news.xml'
     | '/api/public/sitemap.xml'
-    | '/api/public/rss/regiao/$region.xml'
+    | '/api/public/rss/regiao/$region'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -361,7 +361,7 @@ export interface FileRouteTypes {
     | '/api/public/rss.xml'
     | '/api/public/sitemap-news.xml'
     | '/api/public/sitemap.xml'
-    | '/api/public/rss/regiao/$region.xml'
+    | '/api/public/rss/regiao/$region'
   id:
     | '__root__'
     | '/'
@@ -394,7 +394,7 @@ export interface FileRouteTypes {
     | '/api/public/rss.xml'
     | '/api/public/sitemap-news.xml'
     | '/api/public/sitemap.xml'
-    | '/api/public/rss/regiao/$region.xml'
+    | '/api/public/rss/regiao/$region'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -414,7 +414,7 @@ export interface RootRouteChildren {
   ApiPublicRssDotxmlRoute: typeof ApiPublicRssDotxmlRoute
   ApiPublicSitemapNewsDotxmlRoute: typeof ApiPublicSitemapNewsDotxmlRoute
   ApiPublicSitemapDotxmlRoute: typeof ApiPublicSitemapDotxmlRoute
-  ApiPublicRssRegiaoRegionDotxmlRoute: typeof ApiPublicRssRegiaoRegionDotxmlRoute
+  ApiPublicRssRegiaoRegionRoute: typeof ApiPublicRssRegiaoRegionRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -629,11 +629,11 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof RegionCidadeCidadeRouteImport
       parentRoute: typeof RegionRoute
     }
-    '/api/public/rss/regiao/$region.xml': {
-      id: '/api/public/rss/regiao/$region.xml'
-      path: '/api/public/rss/regiao/$region.xml'
-      fullPath: '/api/public/rss/regiao/$region.xml'
-      preLoaderRoute: typeof ApiPublicRssRegiaoRegionDotxmlRouteImport
+    '/api/public/rss/regiao/$region': {
+      id: '/api/public/rss/regiao/$region'
+      path: '/api/public/rss/regiao/$region'
+      fullPath: '/api/public/rss/regiao/$region'
+      preLoaderRoute: typeof ApiPublicRssRegiaoRegionRouteImport
       parentRoute: typeof rootRouteImport
     }
   }
@@ -701,7 +701,7 @@ const rootRouteChildren: RootRouteChildren = {
   ApiPublicRssDotxmlRoute: ApiPublicRssDotxmlRoute,
   ApiPublicSitemapNewsDotxmlRoute: ApiPublicSitemapNewsDotxmlRoute,
   ApiPublicSitemapDotxmlRoute: ApiPublicSitemapDotxmlRoute,
-  ApiPublicRssRegiaoRegionDotxmlRoute: ApiPublicRssRegiaoRegionDotxmlRoute,
+  ApiPublicRssRegiaoRegionRoute: ApiPublicRssRegiaoRegionRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
