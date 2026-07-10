@@ -242,11 +242,18 @@ function parseRss(xml: string): Item[] {
     const descr = decode(match(b, /<description[^>]*>([\s\S]*?)<\/description>/) || match(b, /<summary[^>]*>([\s\S]*?)<\/summary>/));
     const data = match(b, /<pubDate[^>]*>([\s\S]*?)<\/pubDate>/) || match(b, /<published[^>]*>([\s\S]*?)<\/published>/) || null;
     if (!link || !titulo) continue;
+    // Tenta capturar imagem: enclosure, media:content, media:thumbnail, ou <img src=""> na descrição
+    const enclosure = b.match(/<enclosure[^>]+url="([^"]+)"[^>]*type="image/i)?.[1]
+      || b.match(/<media:content[^>]+url="([^"]+)"[^>]*(?:medium="image"|type="image)/i)?.[1]
+      || b.match(/<media:thumbnail[^>]+url="([^"]+)"/i)?.[1]
+      || b.match(/<img[^>]+src="([^"]+)"/i)?.[1]
+      || null;
     items.push({
       url: link.trim(),
       titulo: titulo.trim().slice(0, 500),
       corpo: stripTags(descr).slice(0, 4000),
       data: data ? new Date(data).toISOString() : null,
+      imagem: enclosure ? enclosure.trim() : null,
     });
   }
   return items;
