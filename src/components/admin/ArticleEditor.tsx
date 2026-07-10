@@ -11,6 +11,7 @@ type Props = {
     slug: string;
     seo_title: string | null;
     seo_description: string | null;
+    editor_responsavel?: string | null;
   };
   onSaved: () => void;
   onCancel: () => void;
@@ -25,6 +26,7 @@ export function ArticleEditor({ articleId, initial, onSaved, onCancel }: Props) 
     slug: initial.slug ?? "",
     seo_title: initial.seo_title ?? "",
     seo_description: initial.seo_description ?? "",
+    editor_responsavel: initial.editor_responsavel ?? "",
   });
   const [saving, setSaving] = useState(false);
   const [msg, setMsg] = useState<string | null>(null);
@@ -61,6 +63,7 @@ export function ArticleEditor({ articleId, initial, onSaved, onCancel }: Props) 
         slug: form.slug.trim(),
         seo_title: form.seo_title.trim() || null,
         seo_description: form.seo_description.trim() || null,
+        editor_responsavel: form.editor_responsavel.trim() || null,
       };
       const { error } = await sb.from("generated_articles").update(patch).eq("id", articleId);
       if (error) throw error;
@@ -132,6 +135,18 @@ export function ArticleEditor({ articleId, initial, onSaved, onCancel }: Props) 
       <div>
         <label className={labelCls}>SEO description</label>
         <textarea className={inputCls} rows={2} value={form.seo_description} onChange={(e) => set("seo_description", e.target.value)} />
+      </div>
+      <div>
+        <label className={labelCls}>Editor(a) responsável</label>
+        <input
+          className={inputCls}
+          placeholder="Ex.: Maria Silva"
+          value={form.editor_responsavel}
+          onChange={(e) => set("editor_responsavel", e.target.value)}
+        />
+        <p className="mt-1 text-[10px] text-muted-foreground">
+          Aparece como byline visível e como author Person no JSON-LD (E-E-A-T / Google News).
+        </p>
       </div>
       <div className="flex flex-wrap items-center gap-2">
         <button onClick={save} disabled={saving}
