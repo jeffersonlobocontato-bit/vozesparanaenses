@@ -13,6 +13,7 @@ import {
 import { buildLinkTerms, autoLinkParagraph } from "@/lib/auto-link";
 import { SiteHeader, SiteFooter } from "@/components/SiteHeader";
 import { getCityCoords, formatGeoPosition, formatICBM } from "@/lib/geo-cities";
+import { AdSlot } from "@/components/AdSlot";
 
 const articleQO = (regionSlug: string, slug: string) =>
   queryOptions({
@@ -346,6 +347,9 @@ function ArticlePage() {
     .filter(Boolean);
   const usedTerms = new Set<string>();
   const midpoint = paragraphs.length >= 6 ? Math.floor(paragraphs.length / 2) : -1;
+  // Posição do anúncio no meio do texto — deliberadamente distinta do midpoint
+  // (usado pelo widget "Leia também"), para nunca empilhar os dois no mesmo ponto.
+  const adMidIndex = paragraphs.length >= 4 ? Math.max(2, Math.floor(paragraphs.length / 3)) : -1;
   const midInsert: ArticleListItem[] =
     mesmaCidade.length > 0
       ? mesmaCidade.slice(0, 3)
@@ -441,6 +445,11 @@ function ArticlePage() {
           </p>
         )}
 
+        {/* Anúncio — topo da matéria, abaixo do lead */}
+        <div className="mx-auto mt-8 flex max-w-3xl justify-center">
+          <AdSlot size="728x90" regiao={region} cidade={cidadeAtualSlug ?? undefined} editoria={categoriaSlug ?? undefined} />
+        </div>
+
         {/* TL;DR — resposta direta (answer-first para motores de IA) */}
         {article.tldr && (
           <aside
@@ -519,6 +528,11 @@ function ArticlePage() {
                   >
                     {nodes}
                   </p>
+                  {i === adMidIndex && (
+                    <div className="my-8 flex justify-center">
+                      <AdSlot size="300x250" regiao={region} cidade={cidadeAtualSlug ?? undefined} editoria={categoriaSlug ?? undefined} />
+                    </div>
+                  )}
                   {i === midpoint && midInsert.length > 0 && (
                     <LeiaTambemInline items={midInsert} region={region} />
                   )}
@@ -627,6 +641,11 @@ function ArticlePage() {
             </div>
           </div>
         )}
+
+        {/* Anúncio — rodapé da matéria */}
+        <div className="mx-auto mt-10 flex max-w-3xl justify-center">
+          <AdSlot size="970x90" regiao={region} cidade={cidadeAtualSlug ?? undefined} editoria={categoriaSlug ?? undefined} />
+        </div>
 
       </article>
 
