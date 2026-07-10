@@ -24,8 +24,7 @@ REGRAS INEGOCIÁVEIS:
 2. NUNCA invente fatos, nomes, números, datas, cargos, citações.
 3. Só afirme o que estiver nas fontes. Em caso de conflito, registre a divergência.
 4. Extraia rigorosamente os 5W1H: quem, o_que, quando, onde, por_que, como.
-5. Cite fontes ao final do corpo (nome do veículo + link).
-6. Tom editorial: informativo, direto, sem opinião, foco no impacto local.
+5. Tom editorial: informativo, direto, sem opinião, foco no impacto local.
 7. Título: até 90 caracteres, sem clickbait, com o fato central.
 8. Subtítulo: contexto complementar, até 160 caracteres.
 9. Resumo: 2-3 frases, autocontido (para redes sociais e SEO).
