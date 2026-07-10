@@ -16,6 +16,7 @@ import { Route as RegionRouteImport } from './routes/$region'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AdminIndexRouteImport } from './routes/admin.index'
 import { Route as RegionIndexRouteImport } from './routes/$region.index'
+import { Route as RIdRouteImport } from './routes/r.$id'
 import { Route as AdminSenhaRouteImport } from './routes/admin.senha'
 import { Route as AdminResetPasswordRouteImport } from './routes/admin.reset-password'
 import { Route as AdminRegioesRouteImport } from './routes/admin.regioes'
@@ -23,6 +24,7 @@ import { Route as AdminPainelRouteImport } from './routes/admin.painel'
 import { Route as AdminLoginRouteImport } from './routes/admin.login'
 import { Route as AdminFontesRouteImport } from './routes/admin.fontes'
 import { Route as AdminClustersRouteImport } from './routes/admin.clusters'
+import { Route as AdminAnunciosRouteImport } from './routes/admin.anuncios'
 import { Route as RegionClassificadosRouteImport } from './routes/$region.classificados'
 import { Route as RegionSlugRouteImport } from './routes/$region.$slug'
 import { Route as ApiPublicSitemapDotxmlRouteImport } from './routes/api/public/sitemap[.]xml'
@@ -68,6 +70,11 @@ const RegionIndexRoute = RegionIndexRouteImport.update({
   path: '/',
   getParentRoute: () => RegionRoute,
 } as any)
+const RIdRoute = RIdRouteImport.update({
+  id: '/r/$id',
+  path: '/r/$id',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AdminSenhaRoute = AdminSenhaRouteImport.update({
   id: '/senha',
   path: '/senha',
@@ -101,6 +108,11 @@ const AdminFontesRoute = AdminFontesRouteImport.update({
 const AdminClustersRoute = AdminClustersRouteImport.update({
   id: '/clusters',
   path: '/clusters',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminAnunciosRoute = AdminAnunciosRouteImport.update({
+  id: '/anuncios',
+  path: '/anuncios',
   getParentRoute: () => AdminRoute,
 } as any)
 const RegionClassificadosRoute = RegionClassificadosRouteImport.update({
@@ -158,6 +170,7 @@ export interface FileRoutesByFullPath {
   '/whatsapp': typeof WhatsappRoute
   '/$region/$slug': typeof RegionSlugRoute
   '/$region/classificados': typeof RegionClassificadosRoute
+  '/admin/anuncios': typeof AdminAnunciosRoute
   '/admin/clusters': typeof AdminClustersRoute
   '/admin/fontes': typeof AdminFontesRoute
   '/admin/login': typeof AdminLoginRoute
@@ -165,6 +178,7 @@ export interface FileRoutesByFullPath {
   '/admin/regioes': typeof AdminRegioesRoute
   '/admin/reset-password': typeof AdminResetPasswordRoute
   '/admin/senha': typeof AdminSenhaRoute
+  '/r/$id': typeof RIdRoute
   '/$region/': typeof RegionIndexRoute
   '/admin/': typeof AdminIndexRoute
   '/$region/cidade/$cidade': typeof RegionCidadeCidadeRoute
@@ -181,6 +195,7 @@ export interface FileRoutesByTo {
   '/whatsapp': typeof WhatsappRoute
   '/$region/$slug': typeof RegionSlugRoute
   '/$region/classificados': typeof RegionClassificadosRoute
+  '/admin/anuncios': typeof AdminAnunciosRoute
   '/admin/clusters': typeof AdminClustersRoute
   '/admin/fontes': typeof AdminFontesRoute
   '/admin/login': typeof AdminLoginRoute
@@ -188,6 +203,7 @@ export interface FileRoutesByTo {
   '/admin/regioes': typeof AdminRegioesRoute
   '/admin/reset-password': typeof AdminResetPasswordRoute
   '/admin/senha': typeof AdminSenhaRoute
+  '/r/$id': typeof RIdRoute
   '/$region': typeof RegionIndexRoute
   '/admin': typeof AdminIndexRoute
   '/$region/cidade/$cidade': typeof RegionCidadeCidadeRoute
@@ -207,6 +223,7 @@ export interface FileRoutesById {
   '/whatsapp': typeof WhatsappRoute
   '/$region/$slug': typeof RegionSlugRoute
   '/$region/classificados': typeof RegionClassificadosRoute
+  '/admin/anuncios': typeof AdminAnunciosRoute
   '/admin/clusters': typeof AdminClustersRoute
   '/admin/fontes': typeof AdminFontesRoute
   '/admin/login': typeof AdminLoginRoute
@@ -214,6 +231,7 @@ export interface FileRoutesById {
   '/admin/regioes': typeof AdminRegioesRoute
   '/admin/reset-password': typeof AdminResetPasswordRoute
   '/admin/senha': typeof AdminSenhaRoute
+  '/r/$id': typeof RIdRoute
   '/$region/': typeof RegionIndexRoute
   '/admin/': typeof AdminIndexRoute
   '/$region/cidade/$cidade': typeof RegionCidadeCidadeRoute
@@ -234,6 +252,7 @@ export interface FileRouteTypes {
     | '/whatsapp'
     | '/$region/$slug'
     | '/$region/classificados'
+    | '/admin/anuncios'
     | '/admin/clusters'
     | '/admin/fontes'
     | '/admin/login'
@@ -241,6 +260,7 @@ export interface FileRouteTypes {
     | '/admin/regioes'
     | '/admin/reset-password'
     | '/admin/senha'
+    | '/r/$id'
     | '/$region/'
     | '/admin/'
     | '/$region/cidade/$cidade'
@@ -257,6 +277,7 @@ export interface FileRouteTypes {
     | '/whatsapp'
     | '/$region/$slug'
     | '/$region/classificados'
+    | '/admin/anuncios'
     | '/admin/clusters'
     | '/admin/fontes'
     | '/admin/login'
@@ -264,6 +285,7 @@ export interface FileRouteTypes {
     | '/admin/regioes'
     | '/admin/reset-password'
     | '/admin/senha'
+    | '/r/$id'
     | '/$region'
     | '/admin'
     | '/$region/cidade/$cidade'
@@ -282,6 +304,7 @@ export interface FileRouteTypes {
     | '/whatsapp'
     | '/$region/$slug'
     | '/$region/classificados'
+    | '/admin/anuncios'
     | '/admin/clusters'
     | '/admin/fontes'
     | '/admin/login'
@@ -289,6 +312,7 @@ export interface FileRouteTypes {
     | '/admin/regioes'
     | '/admin/reset-password'
     | '/admin/senha'
+    | '/r/$id'
     | '/$region/'
     | '/admin/'
     | '/$region/cidade/$cidade'
@@ -306,6 +330,7 @@ export interface RootRouteChildren {
   AdminRoute: typeof AdminRouteWithChildren
   SobreRoute: typeof SobreRoute
   WhatsappRoute: typeof WhatsappRoute
+  RIdRoute: typeof RIdRoute
   ApiPublicLlmsFullDottxtRoute: typeof ApiPublicLlmsFullDottxtRoute
   ApiPublicLlmsDottxtRoute: typeof ApiPublicLlmsDottxtRoute
   ApiPublicRssDotxmlRoute: typeof ApiPublicRssDotxmlRoute
@@ -364,6 +389,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof RegionIndexRouteImport
       parentRoute: typeof RegionRoute
     }
+    '/r/$id': {
+      id: '/r/$id'
+      path: '/r/$id'
+      fullPath: '/r/$id'
+      preLoaderRoute: typeof RIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/admin/senha': {
       id: '/admin/senha'
       path: '/senha'
@@ -411,6 +443,13 @@ declare module '@tanstack/react-router' {
       path: '/clusters'
       fullPath: '/admin/clusters'
       preLoaderRoute: typeof AdminClustersRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/anuncios': {
+      id: '/admin/anuncios'
+      path: '/anuncios'
+      fullPath: '/admin/anuncios'
+      preLoaderRoute: typeof AdminAnunciosRouteImport
       parentRoute: typeof AdminRoute
     }
     '/$region/classificados': {
@@ -499,6 +538,7 @@ const RegionRouteWithChildren =
   RegionRoute._addFileChildren(RegionRouteChildren)
 
 interface AdminRouteChildren {
+  AdminAnunciosRoute: typeof AdminAnunciosRoute
   AdminClustersRoute: typeof AdminClustersRoute
   AdminFontesRoute: typeof AdminFontesRoute
   AdminLoginRoute: typeof AdminLoginRoute
@@ -510,6 +550,7 @@ interface AdminRouteChildren {
 }
 
 const AdminRouteChildren: AdminRouteChildren = {
+  AdminAnunciosRoute: AdminAnunciosRoute,
   AdminClustersRoute: AdminClustersRoute,
   AdminFontesRoute: AdminFontesRoute,
   AdminLoginRoute: AdminLoginRoute,
@@ -528,6 +569,7 @@ const rootRouteChildren: RootRouteChildren = {
   AdminRoute: AdminRouteWithChildren,
   SobreRoute: SobreRoute,
   WhatsappRoute: WhatsappRoute,
+  RIdRoute: RIdRoute,
   ApiPublicLlmsFullDottxtRoute: ApiPublicLlmsFullDottxtRoute,
   ApiPublicLlmsDottxtRoute: ApiPublicLlmsDottxtRoute,
   ApiPublicRssDotxmlRoute: ApiPublicRssDotxmlRoute,

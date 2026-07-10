@@ -1,4 +1,5 @@
-import { useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
+import { pickAd, type PickedAd } from "@/lib/ads.functions";
 
 /**
  * Mock de anúncio display com dimensões reais IAB.
@@ -36,13 +37,78 @@ const DIMS: Record<AdSize, { w: number; h: number; layout: "wide" | "square" | "
   "300x600": { w: 300, h: 600, layout: "tall" },
 };
 
-export function AdSlot({ size, className = "" }: { size: AdSize; className?: string }) {
+export function AdSlot({
+  size,
+  className = "",
+  regiao,
+  cidade,
+  editoria,
+}: {
+  size: AdSize;
+  className?: string;
+  regiao?: string;
+  cidade?: string;
+  editoria?: string;
+}) {
   const dim = DIMS[size];
+  const [real, setReal] = useState<PickedAd | null>(null);
+  const [tried, setTried] = useState(false);
+
+  useEffect(() => {
+    let alive = true;
+    pickAd({
+      data: {
+        regiao,
+        cidade,
+        editoria,
+        size,
+        userAgent: typeof navigator !== "undefined" ? navigator.userAgent : undefined,
+      },
+    })
+      .then((r) => { if (alive) { setReal(r); setTried(true); } })
+      .catch(() => { if (alive) setTried(true); });
+    return () => { alive = false; };
+  }, [regiao, cidade, editoria, size]);
+
   const creative = useMemo(
     () => CREATIVES[Math.floor(Math.abs(hash(size + dim.w)) % CREATIVES.length)],
     [size, dim.w],
   );
   const img = `https://picsum.photos/seed/vozes-${creative.seed}/${dim.w}/${dim.h}`;
+
+  if (real) {
+    return (
+      <a
+        href={real.redirect_url}
+        target="_blank"
+        rel="sponsored noopener"
+        className={`relative block overflow-hidden rounded border border-slate-200 bg-slate-100 ${className}`}
+        style={{ aspectRatio: `${dim.w} / ${dim.h}` }}
+        aria-label={`Publicidade ${size}: ${real.headline}`}
+      >
+        <img src={real.imagem_url} alt={real.headline} className="absolute inset-0 h-full w-full object-cover" loading="lazy" />
+        <span className="absolute left-2 top-2 rounded bg-black/60 px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-widest text-white">
+          Publicidade
+        </span>
+        {(dim.layout === "square" || dim.layout === "tall") && (
+          <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent p-3 text-white">
+            <p className="text-sm font-bold leading-tight">{real.headline}</p>
+            <span className="mt-1 inline-block rounded bg-white px-2 py-0.5 text-[10px] font-bold text-slate-900">{real.cta_texto}</span>
+          </div>
+        )}
+      </a>
+    );
+  }
+
+  if (!tried) {
+    return (
+      <div
+        className={`relative overflow-hidden rounded border border-slate-200 bg-slate-100 ${className}`}
+        style={{ aspectRatio: `${dim.w} / ${dim.h}` }}
+        aria-hidden
+      />
+    );
+  }
 
   return (
     <div
