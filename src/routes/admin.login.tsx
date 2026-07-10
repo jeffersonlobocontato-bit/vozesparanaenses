@@ -3,6 +3,25 @@ import { useState } from "react";
 import { getExternalBrowser } from "@/lib/external-supabase-browser";
 import { Logo } from "@/components/Logo";
 
+const PUBLIC_PASSWORD_RESET_URL = "https://vozesparanaenses.lovable.app/admin/reset-password";
+
+function getPasswordResetRedirectUrl() {
+  const { hostname, origin } = window.location;
+
+  if (
+    hostname === "localhost" ||
+    hostname === "127.0.0.1" ||
+    hostname === "vozesparanaenses.lovable.app" ||
+    hostname === "vozesparanaenses.com.br" ||
+    hostname === "www.vozesparanaenses.com.br" ||
+    hostname.startsWith("id-preview--")
+  ) {
+    return `${origin}/admin/reset-password`;
+  }
+
+  return PUBLIC_PASSWORD_RESET_URL;
+}
+
 export const Route = createFileRoute("/admin/login")({
   component: AdminLogin,
 });
@@ -38,7 +57,7 @@ function AdminLogin() {
     try {
       const sb = await getExternalBrowser();
       const { error } = await sb.auth.resetPasswordForEmail(email, {
-        redirectTo: `${window.location.origin}/admin/reset-password`,
+        redirectTo: getPasswordResetRedirectUrl(),
       });
       if (error) throw error;
       setResetMsg("Se o e-mail existir, um link de redefinição foi enviado.");
