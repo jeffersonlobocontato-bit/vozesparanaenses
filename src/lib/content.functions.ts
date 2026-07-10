@@ -569,11 +569,12 @@ export const listRankedArticles = createServerFn({ method: "GET" })
 
     scored.sort((a, b) => b.score - a.score);
 
-    return scored.slice(0, data.limit).map(({ row, prox }) => ({
+    const ranked = scored.slice(0, data.limit).map(({ row, prox }) => ({
       ...mapMateria(row),
       proximidade: prox,
       cidade_principal: row.cidade_principal,
     }));
+    return sortWithPinned(ranked);
   });
 
 export const listArticlesByRegion = createServerFn({ method: "GET" })
@@ -591,18 +592,26 @@ export const listArticlesByRegion = createServerFn({ method: "GET" })
       .maybeSingle();
     if (regionErr && isMissingSchema(regionErr)) return [];
     if (!region) return [];
-    const { data: rows, error } = await sb
-      .from("generated_articles")
-      .select(MATERIA_LIST_COLS)
-      .eq("status", "publicado")
-      .eq("regiao_id", (region as { id: string }).id)
-      .order("publicado_em", { ascending: false })
-      .limit(data.limit);
-    if (error) {
-      if (isMissingSchema(error)) return [];
-      throw new Error(error.message);
+    const runRegion = (cols: string) =>
+      sb
+        .from("generated_articles")
+        .select(cols)
+        .eq("status", "publicado")
+        .eq("regiao_id", (region as { id: string }).id)
+        .order("publicado_em", { ascending: false })
+        .limit(data.limit);
+    let res = await runRegion(MATERIA_LIST_COLS);
+    if (res.error && /fixado_posicao/i.test(res.error.message)) {
+      res = await runRegion(
+        "id, slug, titulo, subtitulo, resumo, imagem_capa_url, publicado_em, regiao:regioes(slug, nome), categoria:editorial_categories(slug, nome)",
+      );
     }
-    return ((rows ?? []) as unknown as MateriaRow[]).map(mapMateria);
+    if (res.error) {
+      if (isMissingSchema(res.error)) return [];
+      throw new Error(res.error.message);
+    }
+    const mapped = ((res.data ?? []) as unknown as MateriaRow[]).map(mapMateria);
+    return sortWithPinned(mapped);
   });
 
 /**
