@@ -163,9 +163,12 @@ Deno.serve(async (req) => {
     .single();
   if (insErr) return json({ error: "insert_facts_failed", detail: insErr.message }, 500);
 
-  // 4. Marcar cluster como fatos_extraidos
+  // 4. Marcar cluster como fatos_extraidos, com timestamp para o Painel de Pauta
   if (clusterId) {
-    await sb.from("article_clusters").update({ status: "fatos_extraidos" }).eq("id", clusterId);
+    await sb
+      .from("article_clusters")
+      .update({ status: "fatos_extraidos", fatos_extraidos_em: new Date().toISOString() })
+      .eq("id", clusterId);
   }
 
   return json({
