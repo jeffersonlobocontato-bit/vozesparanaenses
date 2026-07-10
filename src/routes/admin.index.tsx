@@ -145,6 +145,11 @@ function AdminQueue() {
             <div className="mb-1 flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
               {it.regiao && <span className="rounded bg-[#0A2540] px-2 py-0.5 font-semibold text-white">{it.regiao.nome}</span>}
               {it.categoria && <span className="rounded bg-[#0066CC] px-2 py-0.5 font-semibold text-white">{it.categoria.nome}</span>}
+              {typeof it.fixado_posicao === "number" && it.fixado_posicao !== null && (
+                <span className="rounded bg-amber-500 px-2 py-0.5 font-semibold text-white">
+                  📌 {it.fixado_posicao === 0 ? "Manchete" : `Lateral ${it.fixado_posicao}`}
+                </span>
+              )}
               <span>{new Date(it.gerado_em).toLocaleString("pt-BR")}</span>
             </div>
             <h2 className="text-lg font-semibold leading-snug">{it.titulo}</h2>
