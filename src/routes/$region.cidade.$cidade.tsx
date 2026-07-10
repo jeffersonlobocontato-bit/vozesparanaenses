@@ -95,8 +95,15 @@ export const Route = createFileRoute("/$region/cidade/$cidade")({
         { property: "og:url", content: url },
         { property: "og:locale", content: "pt_BR" },
       ],
-      links: [{ rel: "canonical", href: url }],
-      // será estendido logo abaixo
+      links: [
+        { rel: "canonical", href: url },
+        {
+          rel: "alternate",
+          type: "application/rss+xml",
+          title: `RSS — ${cityName}`,
+          href: `/api/public/rss/cidade/${params.region}/${params.cidade}`,
+        },
+      ],
       scripts: [
         { type: "application/ld+json", children: JSON.stringify(collectionPage) },
         { type: "application/ld+json", children: JSON.stringify(breadcrumb) },
