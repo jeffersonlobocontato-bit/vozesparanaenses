@@ -262,19 +262,20 @@ export const listAllCityLandings = createServerFn({ method: "GET" }).handler(
       string,
       { regionSlug: string; citySlug: string; name: string; lastmod: string | null }
     >();
-    for (const r of (data ?? []) as {
+    for (const r of (data ?? []) as unknown as {
       cidade_principal: string | null;
       publicado_em: string | null;
-      regiao: { slug: string } | null;
+      regiao: { slug: string } | { slug: string }[] | null;
     }[]) {
-      if (!r.regiao?.slug || !r.cidade_principal) continue;
+      const regionSlug = Array.isArray(r.regiao) ? r.regiao[0]?.slug : r.regiao?.slug;
+      if (!regionSlug || !r.cidade_principal) continue;
       const citySlug = cidadeSlug(r.cidade_principal);
       if (!citySlug) continue;
-      const key = `${r.regiao.slug}/${citySlug}`;
+      const key = `${regionSlug}/${citySlug}`;
       const cur = acc.get(key);
       if (!cur) {
         acc.set(key, {
-          regionSlug: r.regiao.slug,
+          regionSlug,
           citySlug,
           name: r.cidade_principal,
           lastmod: r.publicado_em,
