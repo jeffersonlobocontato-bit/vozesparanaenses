@@ -16,6 +16,7 @@ import { Route as RegionRouteImport } from './routes/$region'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AdminIndexRouteImport } from './routes/admin.index'
 import { Route as RegionIndexRouteImport } from './routes/$region.index'
+import { Route as RIdRouteImport } from './routes/r.$id'
 import { Route as AdminSenhaRouteImport } from './routes/admin.senha'
 import { Route as AdminResetPasswordRouteImport } from './routes/admin.reset-password'
 import { Route as AdminRegioesRouteImport } from './routes/admin.regioes'
@@ -67,6 +68,11 @@ const RegionIndexRoute = RegionIndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => RegionRoute,
+} as any)
+const RIdRoute = RIdRouteImport.update({
+  id: '/r/$id',
+  path: '/r/$id',
+  getParentRoute: () => rootRouteImport,
 } as any)
 const AdminSenhaRoute = AdminSenhaRouteImport.update({
   id: '/senha',
@@ -165,6 +171,7 @@ export interface FileRoutesByFullPath {
   '/admin/regioes': typeof AdminRegioesRoute
   '/admin/reset-password': typeof AdminResetPasswordRoute
   '/admin/senha': typeof AdminSenhaRoute
+  '/r/$id': typeof RIdRoute
   '/$region/': typeof RegionIndexRoute
   '/admin/': typeof AdminIndexRoute
   '/$region/cidade/$cidade': typeof RegionCidadeCidadeRoute
@@ -188,6 +195,7 @@ export interface FileRoutesByTo {
   '/admin/regioes': typeof AdminRegioesRoute
   '/admin/reset-password': typeof AdminResetPasswordRoute
   '/admin/senha': typeof AdminSenhaRoute
+  '/r/$id': typeof RIdRoute
   '/$region': typeof RegionIndexRoute
   '/admin': typeof AdminIndexRoute
   '/$region/cidade/$cidade': typeof RegionCidadeCidadeRoute
@@ -214,6 +222,7 @@ export interface FileRoutesById {
   '/admin/regioes': typeof AdminRegioesRoute
   '/admin/reset-password': typeof AdminResetPasswordRoute
   '/admin/senha': typeof AdminSenhaRoute
+  '/r/$id': typeof RIdRoute
   '/$region/': typeof RegionIndexRoute
   '/admin/': typeof AdminIndexRoute
   '/$region/cidade/$cidade': typeof RegionCidadeCidadeRoute
@@ -241,6 +250,7 @@ export interface FileRouteTypes {
     | '/admin/regioes'
     | '/admin/reset-password'
     | '/admin/senha'
+    | '/r/$id'
     | '/$region/'
     | '/admin/'
     | '/$region/cidade/$cidade'
@@ -264,6 +274,7 @@ export interface FileRouteTypes {
     | '/admin/regioes'
     | '/admin/reset-password'
     | '/admin/senha'
+    | '/r/$id'
     | '/$region'
     | '/admin'
     | '/$region/cidade/$cidade'
@@ -289,6 +300,7 @@ export interface FileRouteTypes {
     | '/admin/regioes'
     | '/admin/reset-password'
     | '/admin/senha'
+    | '/r/$id'
     | '/$region/'
     | '/admin/'
     | '/$region/cidade/$cidade'
@@ -306,6 +318,7 @@ export interface RootRouteChildren {
   AdminRoute: typeof AdminRouteWithChildren
   SobreRoute: typeof SobreRoute
   WhatsappRoute: typeof WhatsappRoute
+  RIdRoute: typeof RIdRoute
   ApiPublicLlmsFullDottxtRoute: typeof ApiPublicLlmsFullDottxtRoute
   ApiPublicLlmsDottxtRoute: typeof ApiPublicLlmsDottxtRoute
   ApiPublicRssDotxmlRoute: typeof ApiPublicRssDotxmlRoute
@@ -363,6 +376,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/$region/'
       preLoaderRoute: typeof RegionIndexRouteImport
       parentRoute: typeof RegionRoute
+    }
+    '/r/$id': {
+      id: '/r/$id'
+      path: '/r/$id'
+      fullPath: '/r/$id'
+      preLoaderRoute: typeof RIdRouteImport
+      parentRoute: typeof rootRouteImport
     }
     '/admin/senha': {
       id: '/admin/senha'
@@ -528,6 +548,7 @@ const rootRouteChildren: RootRouteChildren = {
   AdminRoute: AdminRouteWithChildren,
   SobreRoute: SobreRoute,
   WhatsappRoute: WhatsappRoute,
+  RIdRoute: RIdRoute,
   ApiPublicLlmsFullDottxtRoute: ApiPublicLlmsFullDottxtRoute,
   ApiPublicLlmsDottxtRoute: ApiPublicLlmsDottxtRoute,
   ApiPublicRssDotxmlRoute: ApiPublicRssDotxmlRoute,
