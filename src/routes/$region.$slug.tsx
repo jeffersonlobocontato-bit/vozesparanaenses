@@ -263,7 +263,15 @@ function ArticlePage() {
   const { region, slug } = Route.useParams();
   const { data: article } = useSuspenseQuery(articleQO(region, slug));
   const { data: relatedAll } = useSuspenseQuery(relatedQO(region));
+  const { data: allRegions } = useSuspenseQuery(allRegionsQO);
+  const { data: allCategorias } = useSuspenseQuery(allCategoriasQO);
+  const { data: allCities } = useSuspenseQuery(allCityLandingsQO);
+  const { data: relatedCrosslink } = useSuspenseQuery(
+    relatedArticlesQO(article.id, region, article.cidade_principal),
+  );
   const related = relatedAll.filter((r) => r.slug !== slug).slice(0, 8);
+  const mesmaCidade = relatedCrosslink.mesmaCidade.filter((r) => r.slug !== slug).slice(0, 4);
+  const cidadeAtualSlug = article.cidade_principal ? cidadeSlug(article.cidade_principal) : null;
 
   const publishedAt = article.published_at ? new Date(article.published_at) : null;
   const publishedLabel = publishedAt
@@ -281,29 +289,76 @@ function ArticlePage() {
   const categoria = article.categoria?.name ?? article.region?.name ?? "Notícia";
   const categoriaSlug = article.categoria?.slug ?? null;
 
+  // --- Cross-linking: monta dicionário e transforma corpo em parágrafos linkados ---
+  const linkTerms = buildLinkTerms({
+    regions: allRegions.map((r) => ({ slug: r.slug, name: r.name })),
+    cities: allCities.map((c) => ({
+      regionSlug: c.regionSlug,
+      citySlug: c.citySlug,
+      name: c.name,
+    })),
+    categories: allCategorias.map((c) => ({ slug: c.slug, name: c.name })),
+    currentRegionSlug: region,
+    currentCitySlug: cidadeAtualSlug,
+  });
+  const paragraphs = (article.body_md ?? "")
+    .split(/\n\s*\n/)
+    .map((p) => p.trim())
+    .filter(Boolean);
+  const usedTerms = new Set<string>();
+  const midpoint = paragraphs.length >= 6 ? Math.floor(paragraphs.length / 2) : -1;
+  const midInsert: ArticleListItem[] =
+    mesmaCidade.length > 0
+      ? mesmaCidade.slice(0, 3)
+      : relatedCrosslink.mesmaRegiao.slice(0, 3);
+
   return (
     <div className="min-h-screen bg-white text-slate-900">
       <SiteHeader />
 
       <article className="mx-auto max-w-4xl px-4 pb-16 pt-8 md:pt-12">
-        {/* Breadcrumb + categoria */}
-        <div className="mb-6 flex flex-wrap items-center gap-3 text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-500">
-          <Link to="/$region" params={{ region }} className="hover:text-[#0A2540]">
-            {article.region?.name}
+        {/* Breadcrumb hierárquico (SEO interno) */}
+        <nav
+          aria-label="Trilha de navegação"
+          className="mb-6 flex flex-wrap items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-500"
+        >
+          <Link to="/" className="hover:text-[#0A2540]">
+            Início
           </Link>
           <span className="text-slate-300">›</span>
-          {categoriaSlug ? (
-            <Link
-              to="/$region/editoria/$categoria"
-              params={{ region, categoria: categoriaSlug }}
-              className="rounded-sm bg-[#0A2540] px-2 py-1 text-white transition-colors hover:bg-[#0d2f52]"
-            >
-              {categoria}
-            </Link>
-          ) : (
-            <span className="rounded-sm bg-[#0A2540] px-2 py-1 text-white">{categoria}</span>
+          <Link to="/$region" params={{ region }} className="hover:text-[#0A2540]">
+            {article.region?.name ?? region}
+          </Link>
+          {article.cidade_principal && cidadeAtualSlug && (
+            <>
+              <span className="text-slate-300">›</span>
+              <Link
+                to="/$region/cidade/$cidade"
+                params={{ region, cidade: cidadeAtualSlug }}
+                className="hover:text-[#0A2540]"
+              >
+                {article.cidade_principal}
+              </Link>
+            </>
           )}
-        </div>
+          {categoriaSlug ? (
+            <>
+              <span className="text-slate-300">›</span>
+              <Link
+                to="/$region/editoria/$categoria"
+                params={{ region, categoria: categoriaSlug }}
+                className="rounded-sm bg-[#0A2540] px-2 py-1 text-white transition-colors hover:bg-[#0d2f52]"
+              >
+                {categoria}
+              </Link>
+            </>
+          ) : (
+            <>
+              <span className="text-slate-300">›</span>
+              <span className="rounded-sm bg-[#0A2540] px-2 py-1 text-white">{categoria}</span>
+            </>
+          )}
+        </nav>
 
         {/* Headline massivo, no acento da marca */}
         <h1 className="font-display text-4xl font-black leading-[1.02] tracking-tight text-[#0A2540] md:text-6xl lg:text-7xl">
@@ -386,14 +441,28 @@ function ArticlePage() {
         )}
 
         {/* Corpo */}
-        {article.body_md && (
-          <div
-            className="mx-auto mt-10 max-w-3xl whitespace-pre-wrap font-body text-lg leading-[1.75] text-slate-800
-                       [&>p]:mb-6 first-letter:float-left first-letter:mr-3 first-letter:pt-1
-                       first-letter:font-display first-letter:text-6xl first-letter:font-black
-                       first-letter:leading-[0.85] first-letter:text-[#0A2540]"
-          >
-            {article.body_md}
+        {paragraphs.length > 0 && (
+          <div className="mx-auto mt-10 max-w-3xl font-body text-lg leading-[1.75] text-slate-800">
+            {paragraphs.map((p, i) => {
+              const nodes = autoLinkParagraph(p, linkTerms, usedTerms, i);
+              const isFirst = i === 0;
+              return (
+                <div key={`p-${i}`}>
+                  <p
+                    className={
+                      isFirst
+                        ? "mb-6 first-letter:float-left first-letter:mr-3 first-letter:pt-1 first-letter:font-display first-letter:text-6xl first-letter:font-black first-letter:leading-[0.85] first-letter:text-[#0A2540]"
+                        : "mb-6"
+                    }
+                  >
+                    {nodes}
+                  </p>
+                  {i === midpoint && midInsert.length > 0 && (
+                    <LeiaTambemInline items={midInsert} region={region} />
+                  )}
+                </div>
+              );
+            })}
           </div>
         )}
 
@@ -433,7 +502,103 @@ function ArticlePage() {
           </div>
         </div>
 
+        {/* Chips: cidades e editoria mencionadas — links internos ricos */}
+        {(article.cidades_mencionadas?.length || categoriaSlug) && (
+          <div className="mx-auto mt-6 max-w-3xl">
+            <div className="mb-2 text-[10px] font-bold uppercase tracking-[0.2em] text-slate-500">
+              Assuntos relacionados
+            </div>
+            <div className="flex flex-wrap gap-2">
+              {categoriaSlug && article.categoria && (
+                <Link
+                  to="/$region/editoria/$categoria"
+                  params={{ region, categoria: categoriaSlug }}
+                  className="rounded-full border border-[#0A2540]/20 bg-white px-3 py-1 text-xs font-semibold text-[#0A2540] hover:bg-[#0A2540] hover:text-white"
+                >
+                  {article.categoria.name}
+                </Link>
+              )}
+              {article.cidade_principal && cidadeAtualSlug && (
+                <Link
+                  to="/$region/cidade/$cidade"
+                  params={{ region, cidade: cidadeAtualSlug }}
+                  className="rounded-full border border-[#0A2540]/20 bg-white px-3 py-1 text-xs font-semibold text-[#0A2540] hover:bg-[#0A2540] hover:text-white"
+                >
+                  {article.cidade_principal}
+                </Link>
+              )}
+              {(article.cidades_mencionadas ?? [])
+                .filter((c) => cidadeSlug(c) !== cidadeAtualSlug)
+                .slice(0, 8)
+                .map((c) => (
+                  <Link
+                    key={c}
+                    to="/$region/cidade/$cidade"
+                    params={{ region, cidade: cidadeSlug(c) }}
+                    className="rounded-full border border-slate-200 bg-slate-50 px-3 py-1 text-xs font-medium text-slate-700 hover:border-[#0A2540] hover:text-[#0A2540]"
+                  >
+                    {c}
+                  </Link>
+                ))}
+            </div>
+          </div>
+        )}
+
       </article>
+
+      {/* MAIS DE {CIDADE} — cross-link municipal */}
+      {mesmaCidade.length > 0 && article.cidade_principal && cidadeAtualSlug && (
+        <section className="border-t border-slate-200 bg-white">
+          <div className="mx-auto max-w-6xl px-4 py-10">
+            <div className="mb-6 flex items-center gap-3">
+              <span className="inline-block bg-[#0A2540] px-3 py-1 text-xs font-bold uppercase tracking-[0.18em] text-white">
+                Mais de {article.cidade_principal}
+              </span>
+              <span className="h-px flex-1 bg-slate-200" />
+              <Link
+                to="/$region/cidade/$cidade"
+                params={{ region, cidade: cidadeAtualSlug }}
+                className="text-[11px] font-bold uppercase tracking-[0.18em] text-[#0A2540] hover:text-[#0d2f52]"
+              >
+                Ver todas ›
+              </Link>
+            </div>
+            <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
+              {mesmaCidade.map((r) => (
+                <Link
+                  key={r.id}
+                  to="/$region/$slug"
+                  params={{ region, slug: r.slug }}
+                  className="group block"
+                >
+                  <div className="aspect-[4/3] w-full overflow-hidden bg-slate-200">
+                    {r.cover_image_url ? (
+                      <img
+                        src={r.cover_image_url}
+                        alt={r.title}
+                        className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
+                        loading="lazy"
+                      />
+                    ) : (
+                      <div className="flex h-full w-full items-center justify-center bg-[#0A2540]/10 text-xs uppercase tracking-widest text-[#0A2540]/60">
+                        Sem imagem
+                      </div>
+                    )}
+                  </div>
+                  {r.categoria && (
+                    <div className="mt-3 text-[10px] font-bold uppercase tracking-[0.18em] text-[#0A2540]">
+                      {r.categoria.name}
+                    </div>
+                  )}
+                  <h3 className="mt-1 font-display text-lg font-bold leading-[1.15] text-slate-900 group-hover:text-[#0A2540]">
+                    {r.title}
+                  </h3>
+                </Link>
+              ))}
+            </div>
+          </div>
+        </section>
+      )}
 
       {/* MAIS {REGIÃO} — grade de miniaturas ao estilo CGN */}
       {related.length > 0 && (
