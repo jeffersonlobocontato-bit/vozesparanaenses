@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { listRegions, listLatestArticles } from "@/lib/content.functions";
+import { listRegions, listLatestArticles, cidadeSlug } from "@/lib/content.functions";
 
 export const Route = createFileRoute("/api/public/sitemap.xml")({
   server: {
@@ -8,17 +8,35 @@ export const Route = createFileRoute("/api/public/sitemap.xml")({
         const origin = new URL(request.url).origin;
         const [regions, articles] = await Promise.all([
           listRegions().catch(() => []),
-          listLatestArticles({ data: { limit: 500 } }).catch(() => []),
+          listLatestArticles({ data: { limit: 1000 } }).catch(() => []),
         ]);
 
         const urls: { loc: string; lastmod?: string; priority?: string }[] = [
           { loc: `${origin}/`, priority: "1.0" },
+          { loc: `${origin}/sobre`, priority: "0.5" },
           { loc: `${origin}/whatsapp`, priority: "0.6" },
         ];
         for (const r of regions) {
           urls.push({ loc: `${origin}/${r.slug}`, priority: "0.8" });
           urls.push({ loc: `${origin}/${r.slug}/classificados`, priority: "0.5" });
         }
+
+        // Landings de cidade (derivadas de cidade_principal das matérias)
+        const citiesByRegion = new Map<string, Set<string>>();
+        for (const a of articles) {
+          const anyA = a as unknown as { cidade_principal?: string | null };
+          if (!a.region || !anyA.cidade_principal) continue;
+          const s = cidadeSlug(anyA.cidade_principal);
+          if (!s) continue;
+          if (!citiesByRegion.has(a.region.slug)) citiesByRegion.set(a.region.slug, new Set());
+          citiesByRegion.get(a.region.slug)!.add(s);
+        }
+        for (const [regionSlug, set] of citiesByRegion) {
+          for (const citySlug of set) {
+            urls.push({ loc: `${origin}/${regionSlug}/cidade/${citySlug}`, priority: "0.7" });
+          }
+        }
+
         for (const a of articles) {
           if (!a.region) continue;
           urls.push({
