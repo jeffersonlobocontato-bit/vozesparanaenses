@@ -51,6 +51,7 @@ export type ArticleListItem = {
   published_at: string | null;
   region: { slug: string; name: string } | null;
   categoria: { slug: string; name: string } | null;
+  fixado_posicao?: number | null;
 };
 
 export type ArticleFull = ArticleListItem & {
@@ -139,6 +140,7 @@ type MateriaRow = {
   publicado_em: string | null;
   regiao: { slug: string; nome: string } | null;
   categoria: { slug: string; nome: string } | null;
+  fixado_posicao?: number | null;
 };
 
 function mapMateria(m: MateriaRow): ArticleListItem {
@@ -152,14 +154,30 @@ function mapMateria(m: MateriaRow): ArticleListItem {
     published_at: m.publicado_em,
     region: m.regiao ? { slug: m.regiao.slug, name: m.regiao.nome } : null,
     categoria: m.categoria ? { slug: m.categoria.slug, name: m.categoria.nome } : null,
+    fixado_posicao: typeof m.fixado_posicao === "number" ? m.fixado_posicao : null,
   };
 }
 
 const MATERIA_LIST_COLS =
-  "id, slug, titulo, subtitulo, resumo, imagem_capa_url, publicado_em, regiao:regioes(slug, nome), categoria:editorial_categories(slug, nome)";
+  "id, slug, titulo, subtitulo, resumo, imagem_capa_url, publicado_em, fixado_posicao, regiao:regioes(slug, nome), categoria:editorial_categories(slug, nome)";
 
 const MATERIA_LIST_COLS_GEO =
-  "id, slug, titulo, subtitulo, resumo, imagem_capa_url, publicado_em, cidade_principal, cidades_mencionadas, regiao:regioes(slug, nome), categoria:editorial_categories(slug, nome)";
+  "id, slug, titulo, subtitulo, resumo, imagem_capa_url, publicado_em, cidade_principal, cidades_mencionadas, fixado_posicao, regiao:regioes(slug, nome), categoria:editorial_categories(slug, nome)";
+
+/**
+ * Reordena colocando as matérias fixadas primeiro, na ordem de `fixado_posicao`
+ * (0 = manchete, 1..N = destaques laterais), preservando o restante já ordenado
+ * por data de publicação.
+ */
+function sortWithPinned<T extends { fixado_posicao?: number | null }>(rows: T[]): T[] {
+  const pinned = rows
+    .filter((r) => typeof r.fixado_posicao === "number" && r.fixado_posicao !== null)
+    .sort((a, b) => (a.fixado_posicao ?? 999) - (b.fixado_posicao ?? 999));
+  const rest = rows.filter(
+    (r) => !(typeof r.fixado_posicao === "number" && r.fixado_posicao !== null),
+  );
+  return [...pinned, ...rest];
+}
 
 export const listRegions = createServerFn({ method: "GET" }).handler(
   async (): Promise<Region[]> => {
@@ -234,17 +252,25 @@ export const listLatestArticles = createServerFn({ method: "GET" })
   .handler(async ({ data }): Promise<ArticleListItem[]> => {
     const { getExternalSupabase } = await import("./external-supabase.server");
     const sb = getExternalSupabase();
-    const { data: rows, error } = await sb
-      .from("generated_articles")
-      .select(MATERIA_LIST_COLS)
-      .eq("status", "publicado")
-      .order("publicado_em", { ascending: false })
-      .limit(data.limit);
-    if (error) {
-      if (isMissingSchema(error)) return [];
-      throw new Error(error.message);
+    const run = (cols: string) =>
+      sb
+        .from("generated_articles")
+        .select(cols)
+        .eq("status", "publicado")
+        .order("publicado_em", { ascending: false })
+        .limit(data.limit);
+    let res = await run(MATERIA_LIST_COLS);
+    if (res.error && /fixado_posicao/i.test(res.error.message)) {
+      res = await run(
+        "id, slug, titulo, subtitulo, resumo, imagem_capa_url, publicado_em, regiao:regioes(slug, nome), categoria:editorial_categories(slug, nome)",
+      );
     }
-    return ((rows ?? []) as unknown as MateriaRow[]).map(mapMateria);
+    if (res.error) {
+      if (isMissingSchema(res.error)) return [];
+      throw new Error(res.error.message);
+    }
+    const mapped = ((res.data ?? []) as unknown as MateriaRow[]).map(mapMateria);
+    return sortWithPinned(mapped);
   });
 
 /* -------------------- Geolocalização editorial (cidade + entorno) -------------------- */
@@ -487,12 +513,20 @@ export const listRankedArticles = createServerFn({ method: "GET" })
     const sb = getExternalSupabase();
     // Puxamos um pool maior para reordenar em memória.
     const poolSize = Math.max(data.limit * 4, 40);
-    const { data: rows, error } = await sb
-      .from("generated_articles")
-      .select(MATERIA_LIST_COLS_GEO)
-      .eq("status", "publicado")
-      .order("publicado_em", { ascending: false })
-      .limit(poolSize);
+    const runRanked = (cols: string) =>
+      sb
+        .from("generated_articles")
+        .select(cols)
+        .eq("status", "publicado")
+        .order("publicado_em", { ascending: false })
+        .limit(poolSize);
+    let rankedRes = await runRanked(MATERIA_LIST_COLS_GEO);
+    if (rankedRes.error && /fixado_posicao/i.test(rankedRes.error.message)) {
+      rankedRes = await runRanked(
+        "id, slug, titulo, subtitulo, resumo, imagem_capa_url, publicado_em, cidade_principal, cidades_mencionadas, regiao:regioes(slug, nome), categoria:editorial_categories(slug, nome)",
+      );
+    }
+    const { data: rows, error } = rankedRes;
     if (error) {
       if (isMissingSchema(error)) return [];
       // Se o schema geo ainda não rodou, cai no listagem simples.
@@ -543,11 +577,12 @@ export const listRankedArticles = createServerFn({ method: "GET" })
 
     scored.sort((a, b) => b.score - a.score);
 
-    return scored.slice(0, data.limit).map(({ row, prox }) => ({
+    const ranked = scored.slice(0, data.limit).map(({ row, prox }) => ({
       ...mapMateria(row),
       proximidade: prox,
       cidade_principal: row.cidade_principal,
     }));
+    return sortWithPinned(ranked);
   });
 
 export const listArticlesByRegion = createServerFn({ method: "GET" })
@@ -565,18 +600,26 @@ export const listArticlesByRegion = createServerFn({ method: "GET" })
       .maybeSingle();
     if (regionErr && isMissingSchema(regionErr)) return [];
     if (!region) return [];
-    const { data: rows, error } = await sb
-      .from("generated_articles")
-      .select(MATERIA_LIST_COLS)
-      .eq("status", "publicado")
-      .eq("regiao_id", (region as { id: string }).id)
-      .order("publicado_em", { ascending: false })
-      .limit(data.limit);
-    if (error) {
-      if (isMissingSchema(error)) return [];
-      throw new Error(error.message);
+    const runRegion = (cols: string) =>
+      sb
+        .from("generated_articles")
+        .select(cols)
+        .eq("status", "publicado")
+        .eq("regiao_id", (region as { id: string }).id)
+        .order("publicado_em", { ascending: false })
+        .limit(data.limit);
+    let res = await runRegion(MATERIA_LIST_COLS);
+    if (res.error && /fixado_posicao/i.test(res.error.message)) {
+      res = await runRegion(
+        "id, slug, titulo, subtitulo, resumo, imagem_capa_url, publicado_em, regiao:regioes(slug, nome), categoria:editorial_categories(slug, nome)",
+      );
     }
-    return ((rows ?? []) as unknown as MateriaRow[]).map(mapMateria);
+    if (res.error) {
+      if (isMissingSchema(res.error)) return [];
+      throw new Error(res.error.message);
+    }
+    const mapped = ((res.data ?? []) as unknown as MateriaRow[]).map(mapMateria);
+    return sortWithPinned(mapped);
   });
 
 /**

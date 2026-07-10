@@ -12,6 +12,7 @@ type Props = {
     seo_title: string | null;
     seo_description: string | null;
     editor_responsavel?: string | null;
+    fixado_posicao?: number | null;
   };
   onSaved: () => void;
   onCancel: () => void;
@@ -27,6 +28,10 @@ export function ArticleEditor({ articleId, initial, onSaved, onCancel }: Props) 
     seo_title: initial.seo_title ?? "",
     seo_description: initial.seo_description ?? "",
     editor_responsavel: initial.editor_responsavel ?? "",
+    fixado_posicao:
+      typeof initial.fixado_posicao === "number" && initial.fixado_posicao !== null
+        ? String(initial.fixado_posicao)
+        : "",
   });
   const [saving, setSaving] = useState(false);
   const [msg, setMsg] = useState<string | null>(null);
@@ -55,7 +60,7 @@ export function ArticleEditor({ articleId, initial, onSaved, onCancel }: Props) 
     setSaving(true); setMsg(null);
     try {
       const sb = await getExternalBrowser();
-      const patch = {
+      const patch: Record<string, unknown> = {
         titulo: form.titulo.trim(),
         subtitulo: form.subtitulo.trim() || null,
         resumo: form.resumo.trim() || null,
@@ -64,8 +69,15 @@ export function ArticleEditor({ articleId, initial, onSaved, onCancel }: Props) 
         seo_title: form.seo_title.trim() || null,
         seo_description: form.seo_description.trim() || null,
         editor_responsavel: form.editor_responsavel.trim() || null,
+        fixado_posicao:
+          form.fixado_posicao === "" ? null : Number(form.fixado_posicao),
       };
-      const { error } = await sb.from("generated_articles").update(patch).eq("id", articleId);
+      let { error } = await sb.from("generated_articles").update(patch).eq("id", articleId);
+      if (error && /fixado_posicao/i.test(error.message)) {
+        // Coluna ainda não existe no schema (migration 014 não rodou) — salva o resto.
+        delete patch.fixado_posicao;
+        ({ error } = await sb.from("generated_articles").update(patch).eq("id", articleId));
+      }
       if (error) throw error;
       setMsg("Salvo.");
       onSaved();
@@ -146,6 +158,25 @@ export function ArticleEditor({ articleId, initial, onSaved, onCancel }: Props) 
         />
         <p className="mt-1 text-[10px] text-muted-foreground">
           Aparece como byline visível e como author Person no JSON-LD (E-E-A-T / Google News).
+        </p>
+      </div>
+      <div className="rounded-md border border-amber-300 bg-amber-50/60 p-3 dark:border-amber-500/40 dark:bg-amber-500/10">
+        <label className={labelCls}>📌 Fixar na home / região</label>
+        <select
+          className={inputCls}
+          value={form.fixado_posicao}
+          onChange={(e) => set("fixado_posicao", e.target.value)}
+        >
+          <option value="">Não fixar — ordem automática por data</option>
+          <option value="0">Manchete principal (capa)</option>
+          <option value="1">Destaque lateral · posição 1</option>
+          <option value="2">Destaque lateral · posição 2</option>
+          <option value="3">Destaque lateral · posição 3</option>
+          <option value="4">Destaque lateral · posição 4</option>
+        </select>
+        <p className="mt-1 text-[10px] text-muted-foreground">
+          Sem fixação, novas matérias publicadas assumem a manchete automaticamente.
+          Ao fixar, a matéria trava nessa posição até ser desfixada.
         </p>
       </div>
       <div className="flex flex-wrap items-center gap-2">

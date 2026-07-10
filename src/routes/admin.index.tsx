@@ -23,6 +23,7 @@ type Draft = {
   gerado_em: string;
   imagem_capa_url: string | null;
   imagem_credito: string | null;
+  fixado_posicao: number | null;
   regiao: { slug: string; nome: string } | null;
   categoria: { slug: string; nome: string } | null;
 };
@@ -42,7 +43,8 @@ function AdminQueue() {
     setItems(null); setErr(null);
     try {
       const sb = await getExternalBrowser();
-      const fullSelect = "id, slug, titulo, subtitulo, resumo, corpo, seo_title, seo_description, editor_responsavel, status, gerado_em, imagem_capa_url, imagem_credito, regiao:regioes(slug, nome), categoria:editorial_categories(slug, nome)";
+      const fullSelect = "id, slug, titulo, subtitulo, resumo, corpo, seo_title, seo_description, editor_responsavel, status, gerado_em, imagem_capa_url, imagem_credito, fixado_posicao, regiao:regioes(slug, nome), categoria:editorial_categories(slug, nome)";
+      const midSelect = "id, slug, titulo, subtitulo, resumo, corpo, seo_title, seo_description, editor_responsavel, status, gerado_em, imagem_capa_url, imagem_credito, regiao:regioes(slug, nome), categoria:editorial_categories(slug, nome)";
       const fallbackSelect = "id, slug, titulo, subtitulo, resumo, corpo, seo_title, seo_description, status, gerado_em, regiao:regioes(slug, nome), categoria:editorial_categories(slug, nome)";
       const run = (sel: string) =>
         sb.from("generated_articles")
@@ -51,6 +53,9 @@ function AdminQueue() {
           .order("gerado_em", { ascending: false })
           .limit(50);
       let res = await run(fullSelect);
+      if (res.error && /fixado_posicao/i.test(res.error.message)) {
+        res = await run(midSelect);
+      }
       if (res.error && /column .* does not exist|imagem_|editor_responsavel/i.test(res.error.message)) {
         res = await run(fallbackSelect);
       }
@@ -140,6 +145,11 @@ function AdminQueue() {
             <div className="mb-1 flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
               {it.regiao && <span className="rounded bg-[#0A2540] px-2 py-0.5 font-semibold text-white">{it.regiao.nome}</span>}
               {it.categoria && <span className="rounded bg-[#0066CC] px-2 py-0.5 font-semibold text-white">{it.categoria.nome}</span>}
+              {typeof it.fixado_posicao === "number" && it.fixado_posicao !== null && (
+                <span className="rounded bg-amber-500 px-2 py-0.5 font-semibold text-white">
+                  📌 {it.fixado_posicao === 0 ? "Manchete" : `Lateral ${it.fixado_posicao}`}
+                </span>
+              )}
               <span>{new Date(it.gerado_em).toLocaleString("pt-BR")}</span>
             </div>
             <h2 className="text-lg font-semibold leading-snug">{it.titulo}</h2>
@@ -163,6 +173,7 @@ function AdminQueue() {
                   seo_title: it.seo_title,
                   seo_description: it.seo_description,
                   editor_responsavel: it.editor_responsavel,
+                  fixado_posicao: it.fixado_posicao ?? null,
                 }}
                 onSaved={() => { setEditingId(null); load(); }}
                 onCancel={() => setEditingId(null)}
