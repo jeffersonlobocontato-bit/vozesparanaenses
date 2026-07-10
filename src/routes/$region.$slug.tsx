@@ -1,6 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { queryOptions, useSuspenseQuery } from "@tanstack/react-query";
-import { getArticle } from "@/lib/content.functions";
+import { getArticle, listArticlesByRegion } from "@/lib/content.functions";
 import { SiteHeader, SiteFooter } from "@/components/SiteHeader";
 
 const articleQO = (regionSlug: string, slug: string) =>
@@ -9,11 +9,18 @@ const articleQO = (regionSlug: string, slug: string) =>
     queryFn: () => getArticle({ data: { regionSlug, slug } }),
   });
 
+const relatedQO = (regionSlug: string) =>
+  queryOptions({
+    queryKey: ["region-related", regionSlug],
+    queryFn: () => listArticlesByRegion({ data: { regionSlug, limit: 9 } }),
+  });
+
 export const Route = createFileRoute("/$region/$slug")({
   loader: async ({ context, params }) => {
-    const article = await context.queryClient.ensureQueryData(
-      articleQO(params.region, params.slug),
-    );
+    const [article] = await Promise.all([
+      context.queryClient.ensureQueryData(articleQO(params.region, params.slug)),
+      context.queryClient.ensureQueryData(relatedQO(params.region)),
+    ]);
     return { article };
   },
   head: ({ loaderData }) =>
