@@ -40,6 +40,7 @@ import { Route as ApiPublicLlmsFullDottxtRouteImport } from './routes/api/public
 import { Route as RegionEditoriaCategoriaRouteImport } from './routes/$region.editoria.$categoria'
 import { Route as RegionCidadeCidadeRouteImport } from './routes/$region.cidade.$cidade'
 import { Route as ApiPublicRssRegiaoRegionRouteImport } from './routes/api/public/rss.regiao.$region'
+import { Route as ApiPublicRssCategoriaSlugRouteImport } from './routes/api/public/rss.categoria.$slug'
 
 const WhatsappRoute = WhatsappRouteImport.update({
   id: '/whatsapp',
@@ -198,6 +199,12 @@ const ApiPublicRssRegiaoRegionRoute =
     path: '/api/public/rss/regiao/$region',
     getParentRoute: () => rootRouteImport,
   } as any)
+const ApiPublicRssCategoriaSlugRoute =
+  ApiPublicRssCategoriaSlugRouteImport.update({
+    id: '/api/public/rss/categoria/$slug',
+    path: '/api/public/rss/categoria/$slug',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -230,6 +237,7 @@ export interface FileRoutesByFullPath {
   '/api/public/rss.xml': typeof ApiPublicRssDotxmlRoute
   '/api/public/sitemap-news.xml': typeof ApiPublicSitemapNewsDotxmlRoute
   '/api/public/sitemap.xml': typeof ApiPublicSitemapDotxmlRoute
+  '/api/public/rss/categoria/$slug': typeof ApiPublicRssCategoriaSlugRoute
   '/api/public/rss/regiao/$region': typeof ApiPublicRssRegiaoRegionRoute
 }
 export interface FileRoutesByTo {
@@ -261,6 +269,7 @@ export interface FileRoutesByTo {
   '/api/public/rss.xml': typeof ApiPublicRssDotxmlRoute
   '/api/public/sitemap-news.xml': typeof ApiPublicSitemapNewsDotxmlRoute
   '/api/public/sitemap.xml': typeof ApiPublicSitemapDotxmlRoute
+  '/api/public/rss/categoria/$slug': typeof ApiPublicRssCategoriaSlugRoute
   '/api/public/rss/regiao/$region': typeof ApiPublicRssRegiaoRegionRoute
 }
 export interface FileRoutesById {
@@ -295,6 +304,7 @@ export interface FileRoutesById {
   '/api/public/rss.xml': typeof ApiPublicRssDotxmlRoute
   '/api/public/sitemap-news.xml': typeof ApiPublicSitemapNewsDotxmlRoute
   '/api/public/sitemap.xml': typeof ApiPublicSitemapDotxmlRoute
+  '/api/public/rss/categoria/$slug': typeof ApiPublicRssCategoriaSlugRoute
   '/api/public/rss/regiao/$region': typeof ApiPublicRssRegiaoRegionRoute
 }
 export interface FileRouteTypes {
@@ -330,6 +340,7 @@ export interface FileRouteTypes {
     | '/api/public/rss.xml'
     | '/api/public/sitemap-news.xml'
     | '/api/public/sitemap.xml'
+    | '/api/public/rss/categoria/$slug'
     | '/api/public/rss/regiao/$region'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -361,6 +372,7 @@ export interface FileRouteTypes {
     | '/api/public/rss.xml'
     | '/api/public/sitemap-news.xml'
     | '/api/public/sitemap.xml'
+    | '/api/public/rss/categoria/$slug'
     | '/api/public/rss/regiao/$region'
   id:
     | '__root__'
@@ -394,6 +406,7 @@ export interface FileRouteTypes {
     | '/api/public/rss.xml'
     | '/api/public/sitemap-news.xml'
     | '/api/public/sitemap.xml'
+    | '/api/public/rss/categoria/$slug'
     | '/api/public/rss/regiao/$region'
   fileRoutesById: FileRoutesById
 }
@@ -414,6 +427,7 @@ export interface RootRouteChildren {
   ApiPublicRssDotxmlRoute: typeof ApiPublicRssDotxmlRoute
   ApiPublicSitemapNewsDotxmlRoute: typeof ApiPublicSitemapNewsDotxmlRoute
   ApiPublicSitemapDotxmlRoute: typeof ApiPublicSitemapDotxmlRoute
+  ApiPublicRssCategoriaSlugRoute: typeof ApiPublicRssCategoriaSlugRoute
   ApiPublicRssRegiaoRegionRoute: typeof ApiPublicRssRegiaoRegionRoute
 }
 
@@ -636,6 +650,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicRssRegiaoRegionRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/rss/categoria/$slug': {
+      id: '/api/public/rss/categoria/$slug'
+      path: '/api/public/rss/categoria/$slug'
+      fullPath: '/api/public/rss/categoria/$slug'
+      preLoaderRoute: typeof ApiPublicRssCategoriaSlugRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -701,6 +722,7 @@ const rootRouteChildren: RootRouteChildren = {
   ApiPublicRssDotxmlRoute: ApiPublicRssDotxmlRoute,
   ApiPublicSitemapNewsDotxmlRoute: ApiPublicSitemapNewsDotxmlRoute,
   ApiPublicSitemapDotxmlRoute: ApiPublicSitemapDotxmlRoute,
+  ApiPublicRssCategoriaSlugRoute: ApiPublicRssCategoriaSlugRoute,
   ApiPublicRssRegiaoRegionRoute: ApiPublicRssRegiaoRegionRoute,
 }
 export const routeTree = rootRouteImport
