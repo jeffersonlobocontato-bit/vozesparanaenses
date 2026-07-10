@@ -284,6 +284,19 @@ function ArticlePage() {
           </p>
         )}
 
+        {/* TL;DR — resposta direta (answer-first para motores de IA) */}
+        {article.tldr && (
+          <aside
+            className="article-tldr mx-auto mt-8 max-w-3xl border-l-4 border-[#0A2540] bg-slate-50 p-4"
+            aria-label="Resumo rápido"
+          >
+            <div className="mb-1 text-[10px] font-bold uppercase tracking-[0.2em] text-[#0A2540]">
+              Em resumo
+            </div>
+            <p className="text-base leading-relaxed text-slate-800">{article.tldr}</p>
+          </aside>
+        )}
+
         {/* Hero visual */}
         {article.cover_image_url && (
           <figure className="mt-8">
@@ -300,6 +313,38 @@ function ArticlePage() {
           </figure>
         )}
 
+        {/* 5W1H — os fatos essenciais */}
+        {article.fatos_5w1h && (
+          <section className="mx-auto mt-10 max-w-3xl border border-slate-200 bg-white p-5">
+            <h2 className="mb-4 text-[11px] font-bold uppercase tracking-[0.2em] text-[#0A2540]">
+              Os fatos
+            </h2>
+            <dl className="grid grid-cols-1 gap-x-6 gap-y-3 sm:grid-cols-2">
+              {(
+                [
+                  ["quem", "Quem"],
+                  ["o_que", "O quê"],
+                  ["quando", "Quando"],
+                  ["onde", "Onde"],
+                  ["por_que", "Por quê"],
+                  ["como", "Como"],
+                ] as const
+              ).map(([k, label]) => {
+                const v = article.fatos_5w1h?.[k];
+                if (!v) return null;
+                return (
+                  <div key={k} className="border-l-2 border-slate-200 pl-3">
+                    <dt className="text-[10px] font-bold uppercase tracking-[0.16em] text-slate-500">
+                      {label}
+                    </dt>
+                    <dd className="mt-1 text-sm text-slate-800">{v}</dd>
+                  </div>
+                );
+              })}
+            </dl>
+          </section>
+        )}
+
         {/* Corpo */}
         {article.body_md && (
           <div
@@ -310,6 +355,32 @@ function ArticlePage() {
           >
             {article.body_md}
           </div>
+        )}
+
+        {/* FAQ — perguntas frequentes */}
+        {article.faq && article.faq.length > 0 && (
+          <section className="mx-auto mt-12 max-w-3xl border-t border-slate-200 pt-8">
+            <h2 className="mb-6 font-display text-2xl font-black text-[#0A2540]">
+              Perguntas frequentes
+            </h2>
+            <div className="space-y-5">
+              {article.faq.map((f, i) => (
+                <details
+                  key={i}
+                  className="group border-b border-slate-200 pb-4"
+                  {...(i === 0 ? { open: true } : {})}
+                >
+                  <summary className="cursor-pointer list-none text-base font-bold text-slate-900 marker:hidden hover:text-[#0A2540]">
+                    <span className="mr-2 text-[#0A2540] group-open:rotate-90 inline-block transition-transform">›</span>
+                    {f.pergunta}
+                  </summary>
+                  <p className="mt-3 pl-5 text-[15px] leading-relaxed text-slate-700">
+                    {f.resposta}
+                  </p>
+                </details>
+              ))}
+            </div>
+          </section>
         )}
 
         {/* Assinatura / marca no fim do texto */}
