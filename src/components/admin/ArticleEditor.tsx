@@ -60,6 +60,7 @@ export function ArticleEditor({ articleId, initial, onSaved, onCancel }: Props) 
     setSaving(true); setMsg(null);
     try {
       const sb = await getExternalBrowser();
+      const selectedPin = form.fixado_posicao === "" ? null : Number(form.fixado_posicao);
       const patch: Record<string, unknown> = {
         titulo: form.titulo.trim(),
         subtitulo: form.subtitulo.trim() || null,
@@ -69,16 +70,28 @@ export function ArticleEditor({ articleId, initial, onSaved, onCancel }: Props) 
         seo_title: form.seo_title.trim() || null,
         seo_description: form.seo_description.trim() || null,
         editor_responsavel: form.editor_responsavel.trim() || null,
-        fixado_posicao:
-          form.fixado_posicao === "" ? null : Number(form.fixado_posicao),
+        fixado_posicao: selectedPin,
       };
-      let { error } = await sb.from("generated_articles").update(patch).eq("id", articleId);
-      if (error && /fixado_posicao/i.test(error.message)) {
-        // Coluna ainda não existe no schema (migration 014 não rodou) — salva o resto.
-        delete patch.fixado_posicao;
-        ({ error } = await sb.from("generated_articles").update(patch).eq("id", articleId));
-      }
+      const { data, error } = await sb
+        .from("generated_articles")
+        .update(patch)
+        .eq("id", articleId)
+        .select("id, fixado_posicao")
+        .maybeSingle();
       if (error) throw error;
+      if (!data) throw new Error("A alteração não foi aplicada. Verifique sua permissão de editor.");
+      const savedPin = typeof data.fixado_posicao === "number" ? data.fixado_posicao : null;
+      if (savedPin !== selectedPin) {
+        throw new Error("A posição de fixação não foi gravada no banco.");
+      }
+      if (selectedPin !== null) {
+        const { error: clearError } = await sb
+          .from("generated_articles")
+          .update({ fixado_posicao: null })
+          .eq("fixado_posicao", selectedPin)
+          .neq("id", articleId);
+        if (clearError) throw clearError;
+      }
       setMsg("Salvo.");
       onSaved();
     } catch (e: unknown) {

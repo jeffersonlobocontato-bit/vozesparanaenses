@@ -13,6 +13,7 @@ import {
 import { LocationBar, ProximityBadge } from "@/components/LocationBar";
 import { SiteHeader, SiteFooter } from "@/components/SiteHeader";
 import { AdSlot } from "@/components/AdSlot";
+import { arrangePinnedSlots } from "@/lib/pinned-layout";
 
 const regionsQO = queryOptions({
   queryKey: ["regions"],
@@ -100,6 +101,7 @@ const SIDE_FALLBACK = [
   { cat: "Agronegócio", title: "Safra de soja no Paraná deve bater novo recorde histórico em 2024" },
   { cat: "Política", title: "Assembleia Legislativa vota hoje projeto que altera previdência estadual" },
   { cat: "Saúde", title: "Paraná reforça campanha de vacinação contra a gripe em todo o estado" },
+  { cat: "Cidades", title: "Municípios do Paraná ampliam serviços digitais para moradores" },
 ];
 
 const SECONDARY_FALLBACK = [
@@ -224,9 +226,8 @@ function PortalHome({ regions, articles }: { regions: Region[]; articles: Ranked
     { id: "fb-centro-sul", slug: "centro-sul", name: "Centro-Sul" },
   ] as unknown as Region[];
   if (!regions || regions.length === 0) regions = REGIONS_FALLBACK;
-  const [hero, ...rest] = articles;
-  const side = rest.slice(0, 3);
-  const secondary = rest.slice(3, 5);
+  const { hero, side, rest } = arrangePinnedSlots(articles, 4);
+  const secondary = rest.slice(0, 2);
 
   const articleByRegion = new Map<string, ArticleListItem>();
   for (const a of articles) {
@@ -273,7 +274,7 @@ function PortalHome({ regions, articles }: { regions: Region[]; articles: Ranked
             <HeroCard article={hero} />
           </div>
           <div className="col-span-12 lg:col-span-4 flex flex-col gap-6">
-            {[0, 1, 2].map((i) => {
+            {[0, 1, 2, 3].map((i) => {
               const a = side[i];
               const fb = SIDE_FALLBACK[i];
               const to = a?.region

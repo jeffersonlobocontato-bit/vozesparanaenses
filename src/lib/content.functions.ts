@@ -165,18 +165,13 @@ const MATERIA_LIST_COLS_GEO =
   "id, slug, titulo, subtitulo, resumo, imagem_capa_url, publicado_em, cidade_principal, cidades_mencionadas, fixado_posicao, regiao:regioes(slug, nome), categoria:editorial_categories(slug, nome)";
 
 /**
- * Reordena colocando as matérias fixadas primeiro, na ordem de `fixado_posicao`
- * (0 = manchete, 1..N = destaques laterais), preservando o restante já ordenado
- * por data de publicação.
+ * Só a posição 0 deve subir automaticamente para o topo da lista.
+ * As posições 1..N são laterais e são encaixadas pelo layout, não pela ordem.
  */
 function sortWithPinned<T extends { fixado_posicao?: number | null }>(rows: T[]): T[] {
-  const pinned = rows
-    .filter((r) => typeof r.fixado_posicao === "number" && r.fixado_posicao !== null)
-    .sort((a, b) => (a.fixado_posicao ?? 999) - (b.fixado_posicao ?? 999));
-  const rest = rows.filter(
-    (r) => !(typeof r.fixado_posicao === "number" && r.fixado_posicao !== null),
-  );
-  return [...pinned, ...rest];
+  const headline = rows.filter((r) => r.fixado_posicao === 0);
+  const rest = rows.filter((r) => r.fixado_posicao !== 0);
+  return [...headline, ...rest];
 }
 
 export const listRegions = createServerFn({ method: "GET" }).handler(
@@ -526,7 +521,8 @@ export const listRankedArticles = createServerFn({ method: "GET" })
         "id, slug, titulo, subtitulo, resumo, imagem_capa_url, publicado_em, cidade_principal, cidades_mencionadas, regiao:regioes(slug, nome), categoria:editorial_categories(slug, nome)",
       );
     }
-    const { data: rows, error } = rankedRes;
+    let rows = (rankedRes.data ?? []) as unknown[];
+    const { error } = rankedRes;
     if (error) {
       if (isMissingSchema(error)) return [];
       // Se o schema geo ainda não rodou, cai no listagem simples.
@@ -545,6 +541,22 @@ export const listRankedArticles = createServerFn({ method: "GET" })
         }));
       }
       throw new Error(error.message);
+    }
+
+    const pinnedRes = await sb
+      .from("generated_articles")
+      .select(MATERIA_LIST_COLS_GEO)
+      .eq("status", "publicado")
+      .not("fixado_posicao", "is", null)
+      .order("fixado_posicao", { ascending: true })
+      .limit(10);
+    if (!pinnedRes.error && pinnedRes.data) {
+      const seen = new Set((rows as Array<{ id: string }>).map((row) => row.id));
+      const pinnedRows = pinnedRes.data as unknown as Array<{ id: string }>;
+      rows = [
+        ...rows,
+        ...pinnedRows.filter((row) => !seen.has(row.id)),
+      ];
     }
 
     const cidadeNorm = normalizeCidade(data.cidade);
@@ -577,7 +589,14 @@ export const listRankedArticles = createServerFn({ method: "GET" })
 
     scored.sort((a, b) => b.score - a.score);
 
-    const ranked = scored.slice(0, data.limit).map(({ row, prox }) => ({
+    const pinnedScored = scored
+      .filter(({ row }) => typeof row.fixado_posicao === "number" && row.fixado_posicao !== null)
+      .sort((a, b) => (a.row.fixado_posicao ?? 999) - (b.row.fixado_posicao ?? 999));
+    const regularScored = scored.filter(
+      ({ row }) => !(typeof row.fixado_posicao === "number" && row.fixado_posicao !== null),
+    );
+
+    const ranked = [...pinnedScored, ...regularScored].slice(0, data.limit).map(({ row, prox }) => ({
       ...mapMateria(row),
       proximidade: prox,
       cidade_principal: row.cidade_principal,
@@ -618,7 +637,24 @@ export const listArticlesByRegion = createServerFn({ method: "GET" })
       if (isMissingSchema(res.error)) return [];
       throw new Error(res.error.message);
     }
-    const mapped = ((res.data ?? []) as unknown as MateriaRow[]).map(mapMateria);
+    let rows = (res.data ?? []) as unknown[];
+    const pinnedRes = await sb
+      .from("generated_articles")
+      .select(MATERIA_LIST_COLS)
+      .eq("status", "publicado")
+      .eq("regiao_id", (region as { id: string }).id)
+      .not("fixado_posicao", "is", null)
+      .order("fixado_posicao", { ascending: true })
+      .limit(10);
+    if (!pinnedRes.error && pinnedRes.data) {
+      const seen = new Set((rows as Array<{ id: string }>).map((row) => row.id));
+      const pinnedRows = pinnedRes.data as unknown as Array<{ id: string }>;
+      rows = [
+        ...rows,
+        ...pinnedRows.filter((row) => !seen.has(row.id)),
+      ];
+    }
+    const mapped = ((rows ?? []) as unknown as MateriaRow[]).map(mapMateria);
     return sortWithPinned(mapped);
   });
 
