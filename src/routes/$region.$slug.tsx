@@ -659,3 +659,43 @@ function ArticlePage() {
     </div>
   );
 }
+
+function LeiaTambemInline({
+  items,
+  region,
+}: {
+  items: ArticleListItem[];
+  region: string;
+}) {
+  return (
+    <aside
+      aria-label="Leia também"
+      className="my-8 border-y border-slate-200 bg-slate-50 px-5 py-5"
+    >
+      <div className="mb-3 text-[10px] font-bold uppercase tracking-[0.2em] text-[#0A2540]">
+        Leia também
+      </div>
+      <ul className="space-y-2">
+        {items.map((it) => (
+          <li key={it.id}>
+            <Link
+              to="/$region/$slug"
+              params={{ region, slug: it.slug }}
+              className="group flex items-baseline gap-2 text-base leading-snug"
+            >
+              <span className="mt-0.5 text-[#0A2540]">›</span>
+              <span className="font-semibold text-slate-800 underline decoration-[#0A2540]/20 underline-offset-2 group-hover:text-[#0A2540] group-hover:decoration-[#0A2540]">
+                {it.title}
+              </span>
+              {it.region && (
+                <span className="ml-1 shrink-0 text-[10px] font-bold uppercase tracking-[0.16em] text-slate-500">
+                  · {it.region.name}
+                </span>
+              )}
+            </Link>
+          </li>
+        ))}
+      </ul>
+    </aside>
+  );
+}
