@@ -176,6 +176,19 @@ export const Route = createFileRoute("/$region/$slug")({
       ],
     };
 
+    const faqSchema =
+      a.faq && a.faq.length > 0
+        ? {
+            "@context": "https://schema.org",
+            "@type": "FAQPage",
+            mainEntity: a.faq.map((f) => ({
+              "@type": "Question",
+              name: f.pergunta,
+              acceptedAnswer: { "@type": "Answer", text: f.resposta },
+            })),
+          }
+        : null;
+
     return {
       meta,
       links: [
@@ -187,6 +200,9 @@ export const Route = createFileRoute("/$region/$slug")({
       scripts: [
         { type: "application/ld+json", children: JSON.stringify(newsArticle) },
         { type: "application/ld+json", children: JSON.stringify(breadcrumb) },
+        ...(faqSchema
+          ? [{ type: "application/ld+json", children: JSON.stringify(faqSchema) }]
+          : []),
       ],
     };
   },
