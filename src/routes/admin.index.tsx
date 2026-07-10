@@ -3,6 +3,7 @@ import { useEffect, useState, useCallback } from "react";
 import { getExternalBrowser } from "@/lib/external-supabase-browser";
 import { supabase } from "@/integrations/supabase/client";
 import { ArticleImageEditor } from "@/components/admin/ArticleImageEditor";
+import { ArticleEditor } from "@/components/admin/ArticleEditor";
 
 export const Route = createFileRoute("/admin/")({
   component: AdminQueue,
@@ -14,6 +15,9 @@ type Draft = {
   titulo: string;
   subtitulo: string | null;
   resumo: string | null;
+  corpo: string | null;
+  seo_title: string | null;
+  seo_description: string | null;
   status: "rascunho" | "aprovado" | "rejeitado" | "publicado";
   gerado_em: string;
   imagem_capa_url: string | null;
@@ -29,6 +33,7 @@ function AdminQueue() {
   const [items, setItems] = useState<Draft[] | null>(null);
   const [err, setErr] = useState<string | null>(null);
   const [busyId, setBusyId] = useState<string | null>(null);
+  const [editingId, setEditingId] = useState<string | null>(null);
   const [pipelineBusy, setPipelineBusy] = useState(false);
   const [pipelineLog, setPipelineLog] = useState<string[]>([]);
 
@@ -36,8 +41,8 @@ function AdminQueue() {
     setItems(null); setErr(null);
     try {
       const sb = await getExternalBrowser();
-      const fullSelect = "id, slug, titulo, subtitulo, resumo, status, gerado_em, imagem_capa_url, imagem_credito, regiao:regioes(slug, nome), categoria:editorial_categories(slug, nome)";
-      const fallbackSelect = "id, slug, titulo, subtitulo, resumo, status, gerado_em, regiao:regioes(slug, nome), categoria:editorial_categories(slug, nome)";
+      const fullSelect = "id, slug, titulo, subtitulo, resumo, corpo, seo_title, seo_description, status, gerado_em, imagem_capa_url, imagem_credito, regiao:regioes(slug, nome), categoria:editorial_categories(slug, nome)";
+      const fallbackSelect = "id, slug, titulo, subtitulo, resumo, corpo, seo_title, seo_description, status, gerado_em, regiao:regioes(slug, nome), categoria:editorial_categories(slug, nome)";
       const run = (sel: string) =>
         sb.from("generated_articles")
           .select(sel)
@@ -145,7 +150,27 @@ function AdminQueue() {
               currentCredito={it.imagem_credito}
               onUpdated={load}
             />
+            {editingId === it.id ? (
+              <ArticleEditor
+                articleId={it.id}
+                initial={{
+                  titulo: it.titulo,
+                  subtitulo: it.subtitulo,
+                  resumo: it.resumo,
+                  corpo: it.corpo,
+                  slug: it.slug,
+                  seo_title: it.seo_title,
+                  seo_description: it.seo_description,
+                }}
+                onSaved={() => { setEditingId(null); load(); }}
+                onCancel={() => setEditingId(null)}
+              />
+            ) : null}
             <div className="mt-3 flex flex-wrap gap-2">
+              <button onClick={() => setEditingId(editingId === it.id ? null : it.id)}
+                className="rounded border px-3 py-1 text-xs font-semibold hover:bg-accent">
+                {editingId === it.id ? "Fechar editor" : "✎ Editar matéria"}
+              </button>
               {it.status === "publicado" && it.regiao && (
                 <a href={`/${it.regiao.slug}/${it.slug}`} target="_blank" rel="noreferrer"
                   className="rounded border px-3 py-1 text-xs hover:bg-accent">Ver no site</a>
