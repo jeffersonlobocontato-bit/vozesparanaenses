@@ -29,6 +29,11 @@ REGRAS INEGOCIÁVEIS:
 8. Subtítulo: contexto complementar, até 160 caracteres.
 9. Resumo: 2-3 frases, autocontido (para redes sociais e SEO).
 10. Corpo: 4-8 parágrafos curtos, lead na primeira frase.
+11. TL;DR (answer-first): 2 a 3 frases curtas com a resposta direta ao "o que
+    aconteceu?", otimizado para AI Overviews / ChatGPT / Perplexity.
+12. FAQ: 3 a 5 perguntas frequentes que uma pessoa da região faria sobre esse
+    fato, cada resposta com 1-3 frases baseadas SOMENTE nas fontes. Se as fontes
+    não permitirem perguntas úteis, retorne array vazio.
 
 Retorne APENAS JSON válido, sem markdown, no schema fornecido.`;
 
@@ -161,6 +166,9 @@ Deno.serve(async (req) => {
       seo_description: parsed.seo_description ?? parsed.resumo ?? null,
       cidade_principal: parsed.cidade_principal ?? null,
       cidades_mencionadas: parsed.cidades_mencionadas ?? [],
+      tldr: parsed.tldr ?? null,
+      fatos_5w1h: parsed.fatos ?? null,
+      faq: Array.isArray(parsed.faq) ? parsed.faq : [],
       status: "rascunho",
     })
     .select("id, slug")
@@ -183,6 +191,8 @@ type GeneratedPayload = {
   seo_description?: string;
   cidade_principal?: string | null;
   cidades_mencionadas?: string[];
+  tldr?: string;
+  faq?: Array<{ pergunta: string; resposta: string }>;
   fatos?: {
     quem?: string;
     o_que?: string;
@@ -209,11 +219,15 @@ function buildUserPrompt(raws: Array<{ url: string; titulo: string | null; corpo
   "titulo": "string até 90 chars",
   "subtitulo": "string até 160 chars",
   "resumo": "2-3 frases autocontidas",
+  "tldr": "2-3 frases curtas com a resposta direta (answer-first p/ IA)",
   "corpo": "texto em markdown, 4-8 parágrafos curtos",
   "seo_title": "string até 60 chars",
   "seo_description": "string até 155 chars",
   "cidade_principal": "nome da cidade paranaense onde o fato ocorreu (string) ou null se não aplicável",
   "cidades_mencionadas": ["cidades adicionais citadas nas fontes"],
+  "faq": [
+    { "pergunta": "string", "resposta": "1-3 frases baseadas nas fontes" }
+  ],
   "fatos": {
     "quem": "string",
     "o_que": "string",
