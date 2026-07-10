@@ -199,6 +199,12 @@ export const Route = createFileRoute("/$region/$slug")({
             {
               "@type": "Person",
               name: a.editor_responsavel,
+              url: `/autor/${a.editor_responsavel
+                .normalize("NFD")
+                .replace(/[\u0300-\u036f]/g, "")
+                .toLowerCase()
+                .replace(/[^a-z0-9]+/g, "-")
+                .replace(/(^-|-$)/g, "")}`,
               jobTitle: "Editor(a) responsável",
               worksFor: { "@type": "NewsMediaOrganization", name: "Vozes Paranaenses" },
             },
