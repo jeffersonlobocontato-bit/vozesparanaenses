@@ -62,6 +62,7 @@ export const Route = createFileRoute("/api/public/sitemap.xml")({
           headers: {
             "content-type": "application/xml; charset=utf-8",
             "cache-control": "public, max-age=1800",
+            "x-robots-tag": "all, max-image-preview:large, max-snippet:-1",
           },
         });
       },
