@@ -252,11 +252,7 @@ function PortalHome({ regions, articles }: { regions: Region[]; articles: Ranked
 
       <main className="mx-auto max-w-7xl px-4 py-8">
         {/* Publicidade — Super Banner topo */}
-        <div className="mb-8 rounded bg-slate-100 border border-slate-200 h-24 md:h-28 flex items-center justify-center">
-          <span className="text-[10px] font-bold uppercase tracking-widest text-slate-400">
-            Publicidade — 970x90
-          </span>
-        </div>
+        <AdSlot size="970x90" className="mb-8" />
 
         {/* Hero */}
         <div className="grid grid-cols-12 gap-6 mb-12">
@@ -290,18 +286,12 @@ function PortalHome({ regions, articles }: { regions: Region[]; articles: Ranked
                 <div key={i} className={`border-l-4 pl-4 py-1 ${borderCls} cursor-pointer`}>{inner}</div>
               );
             })}
-            <div className="mt-auto rounded bg-slate-100 border border-slate-200 h-64 flex items-center justify-center">
-              <span className="text-[10px] font-bold uppercase tracking-widest text-slate-400">Publicidade — 300x250</span>
-            </div>
+            <AdSlot size="300x250" className="mt-auto" />
           </div>
         </div>
 
         {/* Publicidade — Retângulo entre blocos */}
-        <div className="mb-12 rounded bg-slate-100 border border-slate-200 h-24 md:h-28 flex items-center justify-center">
-          <span className="text-[10px] font-bold uppercase tracking-widest text-slate-400">
-            Publicidade — 728x90
-          </span>
-        </div>
+        <AdSlot size="728x90" className="mb-12" />
 
         {/* Notícias das Regiões */}
         <section className="mb-12">
@@ -338,11 +328,7 @@ function PortalHome({ regions, articles }: { regions: Region[]; articles: Ranked
         </section>
 
         {/* Publicidade — Half-page antes de secundárias */}
-        <div className="mb-12 rounded bg-slate-100 border border-slate-200 h-24 md:h-28 flex items-center justify-center">
-          <span className="text-[10px] font-bold uppercase tracking-widest text-slate-400">
-            Publicidade — 970x90
-          </span>
-        </div>
+        <AdSlot size="970x90" className="mb-12" />
 
         {/* Secondary + Mais lidas */}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
@@ -395,21 +381,13 @@ function PortalHome({ regions, articles }: { regions: Region[]; articles: Ranked
                 ))}
               </div>
             </div>
-            <div className="rounded bg-slate-100 border border-slate-200 h-64 flex items-center justify-center">
-              <span className="text-[10px] font-bold uppercase tracking-widest text-slate-400">Publicidade — 300x250</span>
-            </div>
-            <div className="rounded bg-slate-100 border border-slate-200 h-[600px] flex items-center justify-center">
-              <span className="text-[10px] font-bold uppercase tracking-widest text-slate-400">Publicidade — 300x600</span>
-            </div>
+            <AdSlot size="300x250" />
+            <AdSlot size="300x600" />
           </aside>
         </div>
 
         {/* Publicidade — Rodapé */}
-        <div className="mt-12 rounded bg-slate-100 border border-slate-200 h-24 md:h-28 flex items-center justify-center">
-          <span className="text-[10px] font-bold uppercase tracking-widest text-slate-400">
-            Publicidade — 970x90
-          </span>
-        </div>
+        <AdSlot size="970x90" className="mt-12" />
       </main>
 
       <SiteFooter />
