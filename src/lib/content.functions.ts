@@ -621,7 +621,7 @@ export const getArticle = createServerFn({ method: "GET" })
     const { data: row, error } = await sb
       .from("generated_articles")
       .select(
-        "id, slug, titulo, subtitulo, resumo, corpo, imagem_capa_url, publicado_em, updated_at, cidade_principal, cidades_mencionadas, seo_title, seo_description, og_image_url, regiao:regioes(slug, nome), categoria:editorial_categories(slug, nome)",
+        "id, slug, titulo, subtitulo, resumo, corpo, imagem_capa_url, publicado_em, updated_at, cidade_principal, cidades_mencionadas, tldr, fatos_5w1h, faq, seo_title, seo_description, og_image_url, regiao:regioes(slug, nome), categoria:editorial_categories(slug, nome)",
       )
       .eq("regiao_id", (region as { id: string }).id)
       .eq("slug", data.slug)
@@ -629,7 +629,7 @@ export const getArticle = createServerFn({ method: "GET" })
       .maybeSingle();
     if (error) {
       // Fallback quando as colunas geo/updated_at ainda não existirem no schema.
-      if (/column .* does not exist|cidade_|updated_at/i.test(error.message)) {
+      if (/column .* does not exist|cidade_|updated_at|tldr|fatos_5w1h|faq/i.test(error.message)) {
         const { data: legacy, error: legacyErr } = await sb
           .from("generated_articles")
           .select(
@@ -656,6 +656,9 @@ export const getArticle = createServerFn({ method: "GET" })
           cidade_principal: null,
           cidades_mencionadas: null,
           updated_at: null,
+          tldr: null,
+          fatos_5w1h: null,
+          faq: null,
         };
       }
       throw new Error(error.message);
@@ -669,6 +672,9 @@ export const getArticle = createServerFn({ method: "GET" })
       cidade_principal: string | null;
       cidades_mencionadas: string[] | null;
       updated_at: string | null;
+      tldr: string | null;
+      fatos_5w1h: unknown;
+      faq: unknown;
     };
     return {
       ...mapMateria(r),
@@ -679,6 +685,9 @@ export const getArticle = createServerFn({ method: "GET" })
       cidade_principal: r.cidade_principal,
       cidades_mencionadas: r.cidades_mencionadas,
       updated_at: r.updated_at,
+      tldr: r.tldr && r.tldr.trim() ? r.tldr.trim() : null,
+      fatos_5w1h: coerce5W1H(r.fatos_5w1h),
+      faq: coerceFaq(r.faq),
     };
   });
 
