@@ -4,7 +4,7 @@ import {
   getRegionBySlug,
   listArticlesByRegion,
 } from "@/lib/content.functions";
-import { Logo } from "@/components/Logo";
+import { SiteHeader, SiteFooter } from "@/components/SiteHeader";
 
 const regionQO = (slug: string) =>
   queryOptions({
@@ -86,41 +86,31 @@ function RegionPage() {
     <div
       className="min-h-screen"
       style={{
-        background: bg,
+        background: "#ffffff",
         color: "#0f172a",
         fontFamily: `'${fontBody}', system-ui, sans-serif`,
       }}
     >
-      <header className="border-b-4" style={{ borderColor: primary, background: "#fff" }}>
-        <div className="mx-auto flex max-w-6xl items-center justify-between px-4 py-4">
-          <Logo size="md" />
-          <Link to="/" className="text-sm text-slate-600 hover:opacity-70">
-            ← Todas as regiões
-          </Link>
-        </div>
-      </header>
+      <SiteHeader />
 
-      <section
-        className="border-b border-slate-200"
-        style={{ background: `linear-gradient(135deg, ${primary}18, transparent)` }}
-      >
-        <div className="mx-auto max-w-6xl px-4 py-10">
-          <div className="text-xs font-bold uppercase tracking-widest" style={{ color: accent }}>
-            Região
+      <section className="border-b border-slate-200 bg-white">
+        <div className="mx-auto max-w-7xl px-4 py-8">
+          <div className="text-[11px] font-bold uppercase tracking-[0.16em]" style={{ color: accent }}>
+            Região · Paraná
           </div>
           <h1
-            className="mt-1 text-5xl md:text-6xl leading-none"
+            className="mt-1 text-5xl leading-[1.02] md:text-6xl"
             style={{ fontFamily: `'${fontDisplay}', system-ui, sans-serif`, color: primary }}
           >
             {region.name}
           </h1>
-          <p className="mt-3 text-slate-600 max-w-2xl">
+          <p className="mt-3 max-w-2xl text-slate-600">
             {region.description ?? `Notícias de ${region.main_city} e cidades vizinhas.`}
           </p>
         </div>
       </section>
 
-      <section className="mx-auto max-w-6xl px-4 py-10">
+      <section className="mx-auto max-w-7xl px-4 py-10">
         {articles.length === 0 ? (
           <div className="rounded-lg border border-slate-200 bg-white p-8 text-center">
             <p className="text-slate-500">
@@ -128,36 +118,36 @@ function RegionPage() {
             </p>
           </div>
         ) : (
-          <div className="grid gap-4 md:grid-cols-3">
+          <div className="grid gap-6 md:grid-cols-3">
             {articles.map((a) => (
               <Link
                 key={a.id}
                 to="/$region/$slug"
                 params={{ region: slug, slug: a.slug }}
-                className="group overflow-hidden rounded-lg border border-slate-200 bg-white transition hover:shadow-md"
-                style={{ borderTopWidth: 3, borderTopColor: accent }}
+                className="group block"
               >
                 {a.cover_image_url ? (
                   <img
                     src={a.cover_image_url}
                     alt=""
-                    className="h-40 w-full object-cover"
+                    className="aspect-[16/10] w-full object-cover transition-transform duration-500 group-hover:scale-[1.02]"
                     loading="lazy"
                   />
                 ) : (
-                  <div className="h-40 w-full" style={{ background: `${primary}15` }} />
+                  <div className="aspect-[16/10] w-full" style={{ background: `${primary}15` }} />
                 )}
-                <div className="p-4">
+                <div className="pt-3">
+                  <div className="text-[10px] font-bold uppercase tracking-[0.14em]" style={{ color: accent }}>
+                    {region.name}
+                  </div>
                   <h3
-                    className="text-lg leading-tight group-hover:underline"
-                    style={{ fontFamily: `'${fontDisplay}', system-ui, sans-serif`, color: primary }}
+                    className="mt-1 text-xl font-black leading-tight text-[#0A2540] group-hover:text-[#0d2f52] md:text-2xl"
+                    style={{ fontFamily: `'${fontDisplay}', system-ui, sans-serif` }}
                   >
                     {a.title}
                   </h3>
                   {a.summary && (
-                    <p className="mt-2 line-clamp-2 text-sm text-slate-600">
-                      {a.summary}
-                    </p>
+                    <p className="mt-2 line-clamp-2 text-sm text-slate-600">{a.summary}</p>
                   )}
                 </div>
               </Link>
@@ -165,6 +155,8 @@ function RegionPage() {
           </div>
         )}
       </section>
+
+      <SiteFooter />
     </div>
   );
 }

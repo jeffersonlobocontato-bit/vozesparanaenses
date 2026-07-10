@@ -7,7 +7,7 @@ import {
   listClassificados,
   createClassificado,
 } from "@/lib/content.functions";
-import { Logo } from "@/components/Logo";
+import { SiteHeader, SiteFooter } from "@/components/SiteHeader";
 
 const regionQO = (slug: string) =>
   queryOptions({ queryKey: ["region", slug], queryFn: () => getRegionBySlug({ data: { slug } }) });
@@ -68,19 +68,15 @@ function ClassificadosPage() {
   const primary = tema.paleta?.primaria ?? "#0A2540";
 
   return (
-    <div className="min-h-screen bg-slate-50">
-      <header className="border-b-4 bg-white" style={{ borderColor: primary }}>
-        <div className="mx-auto flex max-w-6xl items-center justify-between px-4 py-4 gap-4">
-          <Logo size="md" />
-          <Link to="/$region" params={{ region: slug }} className="text-sm font-bold uppercase tracking-widest" style={{ color: primary }}>
-            ← {region.name}
-          </Link>
-        </div>
-      </header>
-      <main className="mx-auto max-w-6xl px-4 py-10 grid grid-cols-1 lg:grid-cols-3 gap-8">
+    <div className="min-h-screen bg-white">
+      <SiteHeader />
+      <main className="mx-auto grid max-w-7xl grid-cols-1 gap-8 px-4 py-10 lg:grid-cols-3">
         <section className="lg:col-span-2">
-          <h1 className="font-display text-4xl" style={{ color: primary }}>
-            Classificados — {region.name}
+          <div className="text-[11px] font-bold uppercase tracking-[0.16em] text-[#0A2540]/70">
+            {region.name}
+          </div>
+          <h1 className="mt-1 font-display text-5xl leading-[1.02] text-[#0A2540] md:text-6xl">
+            Classificados
           </h1>
           <p className="mt-2 text-slate-600">Emprego, imóveis e veículos publicados por moradores da região.</p>
 
@@ -162,6 +158,7 @@ function ClassificadosPage() {
           </form>
         </aside>
       </main>
+      <SiteFooter />
     </div>
   );
 }
