@@ -73,3 +73,42 @@ export function formatGeoPosition(coords: LatLng): string {
 export function formatICBM(coords: LatLng): string {
   return `${coords.lat.toFixed(4)}, ${coords.lng.toFixed(4)}`;
 }
+
+/** Distância aproximada em km entre dois pontos (haversine). */
+function haversineKm(a: LatLng, b: LatLng): number {
+  const R = 6371;
+  const toRad = (d: number) => (d * Math.PI) / 180;
+  const dLat = toRad(b.lat - a.lat);
+  const dLng = toRad(b.lng - a.lng);
+  const s =
+    Math.sin(dLat / 2) ** 2 +
+    Math.cos(toRad(a.lat)) * Math.cos(toRad(b.lat)) * Math.sin(dLng / 2) ** 2;
+  return 2 * R * Math.asin(Math.sqrt(s));
+}
+
+export type NeighborCity = { slug: string; name: string; distanceKm: number };
+
+function slugToName(slug: string): string {
+  return slug
+    .split("-")
+    .map((w) => (w.length <= 2 ? w : w[0].toUpperCase() + w.slice(1)))
+    .join(" ");
+}
+
+/**
+ * Retorna as cidades mais próximas do slug informado, ordenadas por distância.
+ * Usa a tabela estática de CITIES; devolve [] se a cidade base for desconhecida.
+ */
+export function getNeighboringCities(citySlug: string, limit = 6): NeighborCity[] {
+  const base = CITIES[citySlug];
+  if (!base) return [];
+  return Object.entries(CITIES)
+    .filter(([slug]) => slug !== citySlug)
+    .map(([slug, coords]) => ({
+      slug,
+      name: slugToName(slug),
+      distanceKm: haversineKm(base, coords),
+    }))
+    .sort((a, b) => a.distanceKm - b.distanceKm)
+    .slice(0, limit);
+}

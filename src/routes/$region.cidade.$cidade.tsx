@@ -2,7 +2,12 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { queryOptions, useSuspenseQuery } from "@tanstack/react-query";
 import { getRegionBySlug, listArticlesByCity } from "@/lib/content.functions";
 import { SiteHeader, SiteFooter } from "@/components/SiteHeader";
-import { getCityCoords, formatGeoPosition, formatICBM } from "@/lib/geo-cities";
+import {
+  getCityCoords,
+  formatGeoPosition,
+  formatICBM,
+  getNeighboringCities,
+} from "@/lib/geo-cities";
 
 const cityQO = (regionSlug: string, citySlug: string) =>
   queryOptions({
@@ -110,6 +115,7 @@ function CityPage() {
   const { region, cidade } = Route.useParams();
   const { data: city } = useSuspenseQuery(cityQO(region, cidade));
   const { data: reg } = useSuspenseQuery(regionQO(region));
+  const neighbors = getNeighboringCities(cidade, 8);
 
   return (
     <div className="min-h-screen bg-white text-slate-900">
@@ -183,6 +189,33 @@ function CityPage() {
               </Link>
             ))}
           </div>
+        )}
+
+        {neighbors.length > 0 && (
+          <section className="mt-14 border-t border-slate-200 pt-8">
+            <h2 className="font-display text-2xl font-bold text-[#0A2540]">
+              Cidades vizinhas
+            </h2>
+            <p className="mt-1 text-sm text-slate-600">
+              Explore notícias das cidades mais próximas de {city.cityName}.
+            </p>
+            <ul className="mt-4 flex flex-wrap gap-2">
+              {neighbors.map((n) => (
+                <li key={n.slug}>
+                  <Link
+                    to="/$region/cidade/$cidade"
+                    params={{ region, cidade: n.slug }}
+                    className="inline-flex items-center gap-2 rounded-full border border-slate-300 bg-white px-3 py-1.5 text-xs font-semibold text-[#0A2540] transition-colors hover:border-[#0A2540] hover:bg-[#0A2540] hover:text-white"
+                  >
+                    <span>{n.name}</span>
+                    <span className="text-[10px] font-normal text-slate-500 group-hover:text-white/80">
+                      {Math.round(n.distanceKm)} km
+                    </span>
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </section>
         )}
       </main>
       <SiteFooter />
