@@ -209,7 +209,7 @@ function buildUserPrompt(raws: Array<{ url: string; titulo: string | null; corpo
   "titulo": "string até 90 chars",
   "subtitulo": "string até 160 chars",
   "resumo": "2-3 frases autocontidas",
-  "corpo": "texto em markdown, 4-8 parágrafos curtos, com seção final ### Fontes listando os veículos",
+  "corpo": "texto em markdown, 4-8 parágrafos curtos",
   "seo_title": "string até 60 chars",
   "seo_description": "string até 155 chars",
   "cidade_principal": "nome da cidade paranaense onde o fato ocorreu (string) ou null se não aplicável",
