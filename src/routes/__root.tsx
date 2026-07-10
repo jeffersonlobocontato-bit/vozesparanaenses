@@ -77,25 +77,29 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "Vozes Paranaenses" },
+      { title: "Vozes Paranaenses — Notícias das 10 macrorregiões do Paraná" },
       {
         name: "description",
-        content: "Portal de notícias das 10 macrorregiões do Paraná — cobertura editorial regional em um só lugar.",
+        content: "Cobertura editorial do Paraná: Curitiba, RMC, Litoral, Campos Gerais, Norte Pioneiro, Norte Central, Noroeste, Centro Ocidental, Oeste, Sudoeste e Centro-Sul.",
       },
       { name: "robots", content: "index, follow, max-image-preview:large, max-snippet:-1" },
       { name: "geo.region", content: "BR-PR" },
       { name: "geo.country", content: "BR" },
       { name: "geo.placename", content: "Paraná, Brasil" },
       { httpEquiv: "content-language", content: "pt-BR" },
-      { property: "og:title", content: "Vozes Paranaenses" },
+      { property: "og:title", content: "Vozes Paranaenses — Notícias das 10 macrorregiões do Paraná" },
       {
         property: "og:description",
-        content: "Portal de notícias das 10 macrorregiões do Paraná.",
+        content: "Cobertura editorial do Paraná: Curitiba, RMC, Litoral, Campos Gerais, Norte Pioneiro, Norte Central, Noroeste, Centro Ocidental, Oeste, Sudoeste e Centro-Sul.",
       },
       { property: "og:type", content: "website" },
       { property: "og:site_name", content: "Vozes Paranaenses" },
       { property: "og:locale", content: "pt_BR" },
       { name: "twitter:card", content: "summary_large_image" },
+      { name: "twitter:title", content: "Vozes Paranaenses — Notícias das 10 macrorregiões do Paraná" },
+      { name: "twitter:description", content: "Cobertura editorial do Paraná: Curitiba, RMC, Litoral, Campos Gerais, Norte Pioneiro, Norte Central, Noroeste, Centro Ocidental, Oeste, Sudoeste e Centro-Sul." },
+      { property: "og:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/2502007b-1507-40f2-91dd-3accc599964a/id-preview-eab56619--22784275-0a66-4923-aa16-dc254fe2ec74.lovable.app-1783649457443.png" },
+      { name: "twitter:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/2502007b-1507-40f2-91dd-3accc599964a/id-preview-eab56619--22784275-0a66-4923-aa16-dc254fe2ec74.lovable.app-1783649457443.png" },
     ],
     links: [
       {

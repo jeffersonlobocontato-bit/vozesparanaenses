@@ -38,12 +38,12 @@ export const Route = createFileRoute("/")({
       {
         name: "description",
         content:
-          "Cobertura editorial regional do Paraná: Metropolitana, Litoral, Campos Gerais, Norte Pioneiro, Norte Central, Noroeste, Centro Ocidental, Oeste, Sudoeste e Centro-Sul.",
+          "Cobertura editorial do Paraná: Curitiba, RMC, Litoral, Campos Gerais, Norte Pioneiro, Norte Central, Noroeste, Centro Ocidental, Oeste, Sudoeste e Centro-Sul.",
       },
-      { property: "og:title", content: "Vozes Paranaenses" },
+      { property: "og:title", content: "Vozes Paranaenses — Notícias das 10 macrorregiões do Paraná" },
       {
         property: "og:description",
-        content: "Notícias das 10 macrorregiões do Paraná em um só lugar.",
+        content: "Cobertura editorial do Paraná: Curitiba, RMC, Litoral, Campos Gerais, Norte Pioneiro, Norte Central, Noroeste, Centro Ocidental, Oeste, Sudoeste e Centro-Sul.",
       },
       { property: "og:type", content: "website" },
     ],
