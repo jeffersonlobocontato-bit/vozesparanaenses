@@ -64,6 +64,7 @@ export type ArticleFull = ArticleListItem & {
   tldr: string | null;
   fatos_5w1h: FiveWOneH | null;
   faq: FaqItem[] | null;
+  editor_responsavel: string | null;
 };
 
 export type FiveWOneH = {
