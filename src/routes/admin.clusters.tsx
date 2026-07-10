@@ -9,7 +9,7 @@ export const Route = createFileRoute("/admin/clusters")({
 
 type Cluster = {
   id: string;
-  status: "novo" | "selecionado_cota" | "descartado";
+  status: "novo" | "selecionado_cota" | "fatos_extraidos" | "descartado";
   prioridade_score: number;
   criado_em: string;
   regiao: { slug: string; nome: string } | null;
@@ -68,6 +68,22 @@ function AdminClusters() {
 
   useEffect(() => { load(); }, [load]);
 
+  async function extractFacts(id: string) {
+    setBusyId(id); setMsg(null);
+    try {
+      const { data, error } = await supabase.functions.invoke("extract-facts", {
+        body: { cluster_id: id },
+      });
+      if (error) throw error;
+      setMsg(`Fatos extraídos (${(data as { extracted_facts_id?: string })?.extracted_facts_id ?? "ok"}). Revise antes de gerar a matéria.`);
+      await load();
+    } catch (e: unknown) {
+      setMsg("Falha ao extrair fatos: " + (e instanceof Error ? e.message : "erro"));
+    } finally {
+      setBusyId(null);
+    }
+  }
+
   async function generate(id: string) {
     setBusyId(id); setMsg(null);
     try {
@@ -118,10 +134,17 @@ function AdminClusters() {
               </ul>
             )}
             <div className="mt-3">
-              <button disabled={busyId === c.id} onClick={() => generate(c.id)}
-                className="rounded bg-[#0066CC] px-3 py-1.5 text-xs font-semibold text-white hover:bg-[#0055aa] disabled:opacity-60">
-                {busyId === c.id ? "Gerando…" : "Gerar matéria"}
-              </button>
+              {c.status === "fatos_extraidos" ? (
+                <button disabled={busyId === c.id} onClick={() => generate(c.id)}
+                  className="rounded bg-[#0066CC] px-3 py-1.5 text-xs font-semibold text-white hover:bg-[#0055aa] disabled:opacity-60">
+                  {busyId === c.id ? "Gerando…" : "Gerar matéria"}
+                </button>
+              ) : (
+                <button disabled={busyId === c.id} onClick={() => extractFacts(c.id)}
+                  className="rounded bg-[#0A2540] px-3 py-1.5 text-xs font-semibold text-white hover:bg-[#0d2f52] disabled:opacity-60">
+                  {busyId === c.id ? "Extraindo…" : "Extrair fatos"}
+                </button>
+              )}
             </div>
           </li>
         ))}

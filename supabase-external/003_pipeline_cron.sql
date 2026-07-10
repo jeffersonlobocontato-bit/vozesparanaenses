@@ -4,7 +4,12 @@
 --   scrape-source      → a cada 30 min
 --   cluster-articles   → a cada 45 min
 --   classify-and-quota → a cada hora
---   generate-article   → chamado sob demanda pelo dashboard editorial
+--   extract-facts      → chamado sob demanda pelo dashboard editorial
+--                        (botão "Extrair fatos" em /admin/clusters), um
+--                        cluster por vez, para permitir revisão antes de
+--                        gerar a matéria
+--   generate-article   → chamado sob demanda pelo dashboard editorial,
+--                        só depois que o cluster estiver 'fatos_extraidos'
 --
 -- SUBSTITUA antes de rodar:
 --   {PROJECT_URL}    → ex: project--<id>.lovable.app
