@@ -10,7 +10,12 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as WhatsappRouteImport } from './routes/whatsapp'
+import { Route as TermosRouteImport } from './routes/termos'
 import { Route as SobreRouteImport } from './routes/sobre'
+import { Route as PrivacidadeRouteImport } from './routes/privacidade'
+import { Route as PoliticaEditorialRouteImport } from './routes/politica-editorial'
+import { Route as CorrecoesRouteImport } from './routes/correcoes'
+import { Route as ContatoRouteImport } from './routes/contato'
 import { Route as AdminRouteImport } from './routes/admin'
 import { Route as RegionRouteImport } from './routes/$region'
 import { Route as IndexRouteImport } from './routes/index'
@@ -40,9 +45,34 @@ const WhatsappRoute = WhatsappRouteImport.update({
   path: '/whatsapp',
   getParentRoute: () => rootRouteImport,
 } as any)
+const TermosRoute = TermosRouteImport.update({
+  id: '/termos',
+  path: '/termos',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const SobreRoute = SobreRouteImport.update({
   id: '/sobre',
   path: '/sobre',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PrivacidadeRoute = PrivacidadeRouteImport.update({
+  id: '/privacidade',
+  path: '/privacidade',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PoliticaEditorialRoute = PoliticaEditorialRouteImport.update({
+  id: '/politica-editorial',
+  path: '/politica-editorial',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CorrecoesRoute = CorrecoesRouteImport.update({
+  id: '/correcoes',
+  path: '/correcoes',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ContatoRoute = ContatoRouteImport.update({
+  id: '/contato',
+  path: '/contato',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AdminRoute = AdminRouteImport.update({
@@ -166,7 +196,12 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/$region': typeof RegionRouteWithChildren
   '/admin': typeof AdminRouteWithChildren
+  '/contato': typeof ContatoRoute
+  '/correcoes': typeof CorrecoesRoute
+  '/politica-editorial': typeof PoliticaEditorialRoute
+  '/privacidade': typeof PrivacidadeRoute
   '/sobre': typeof SobreRoute
+  '/termos': typeof TermosRoute
   '/whatsapp': typeof WhatsappRoute
   '/$region/$slug': typeof RegionSlugRoute
   '/$region/classificados': typeof RegionClassificadosRoute
@@ -191,7 +226,12 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/contato': typeof ContatoRoute
+  '/correcoes': typeof CorrecoesRoute
+  '/politica-editorial': typeof PoliticaEditorialRoute
+  '/privacidade': typeof PrivacidadeRoute
   '/sobre': typeof SobreRoute
+  '/termos': typeof TermosRoute
   '/whatsapp': typeof WhatsappRoute
   '/$region/$slug': typeof RegionSlugRoute
   '/$region/classificados': typeof RegionClassificadosRoute
@@ -219,7 +259,12 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/$region': typeof RegionRouteWithChildren
   '/admin': typeof AdminRouteWithChildren
+  '/contato': typeof ContatoRoute
+  '/correcoes': typeof CorrecoesRoute
+  '/politica-editorial': typeof PoliticaEditorialRoute
+  '/privacidade': typeof PrivacidadeRoute
   '/sobre': typeof SobreRoute
+  '/termos': typeof TermosRoute
   '/whatsapp': typeof WhatsappRoute
   '/$region/$slug': typeof RegionSlugRoute
   '/$region/classificados': typeof RegionClassificadosRoute
@@ -248,7 +293,12 @@ export interface FileRouteTypes {
     | '/'
     | '/$region'
     | '/admin'
+    | '/contato'
+    | '/correcoes'
+    | '/politica-editorial'
+    | '/privacidade'
     | '/sobre'
+    | '/termos'
     | '/whatsapp'
     | '/$region/$slug'
     | '/$region/classificados'
@@ -273,7 +323,12 @@ export interface FileRouteTypes {
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
+    | '/contato'
+    | '/correcoes'
+    | '/politica-editorial'
+    | '/privacidade'
     | '/sobre'
+    | '/termos'
     | '/whatsapp'
     | '/$region/$slug'
     | '/$region/classificados'
@@ -300,7 +355,12 @@ export interface FileRouteTypes {
     | '/'
     | '/$region'
     | '/admin'
+    | '/contato'
+    | '/correcoes'
+    | '/politica-editorial'
+    | '/privacidade'
     | '/sobre'
+    | '/termos'
     | '/whatsapp'
     | '/$region/$slug'
     | '/$region/classificados'
@@ -328,7 +388,12 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   RegionRoute: typeof RegionRouteWithChildren
   AdminRoute: typeof AdminRouteWithChildren
+  ContatoRoute: typeof ContatoRoute
+  CorrecoesRoute: typeof CorrecoesRoute
+  PoliticaEditorialRoute: typeof PoliticaEditorialRoute
+  PrivacidadeRoute: typeof PrivacidadeRoute
   SobreRoute: typeof SobreRoute
+  TermosRoute: typeof TermosRoute
   WhatsappRoute: typeof WhatsappRoute
   RIdRoute: typeof RIdRoute
   ApiPublicLlmsFullDottxtRoute: typeof ApiPublicLlmsFullDottxtRoute
@@ -347,11 +412,46 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof WhatsappRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/termos': {
+      id: '/termos'
+      path: '/termos'
+      fullPath: '/termos'
+      preLoaderRoute: typeof TermosRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/sobre': {
       id: '/sobre'
       path: '/sobre'
       fullPath: '/sobre'
       preLoaderRoute: typeof SobreRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/privacidade': {
+      id: '/privacidade'
+      path: '/privacidade'
+      fullPath: '/privacidade'
+      preLoaderRoute: typeof PrivacidadeRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/politica-editorial': {
+      id: '/politica-editorial'
+      path: '/politica-editorial'
+      fullPath: '/politica-editorial'
+      preLoaderRoute: typeof PoliticaEditorialRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/correcoes': {
+      id: '/correcoes'
+      path: '/correcoes'
+      fullPath: '/correcoes'
+      preLoaderRoute: typeof CorrecoesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/contato': {
+      id: '/contato'
+      path: '/contato'
+      fullPath: '/contato'
+      preLoaderRoute: typeof ContatoRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/admin': {
@@ -567,7 +667,12 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   RegionRoute: RegionRouteWithChildren,
   AdminRoute: AdminRouteWithChildren,
+  ContatoRoute: ContatoRoute,
+  CorrecoesRoute: CorrecoesRoute,
+  PoliticaEditorialRoute: PoliticaEditorialRoute,
+  PrivacidadeRoute: PrivacidadeRoute,
   SobreRoute: SobreRoute,
+  TermosRoute: TermosRoute,
   WhatsappRoute: WhatsappRoute,
   RIdRoute: RIdRoute,
   ApiPublicLlmsFullDottxtRoute: ApiPublicLlmsFullDottxtRoute,

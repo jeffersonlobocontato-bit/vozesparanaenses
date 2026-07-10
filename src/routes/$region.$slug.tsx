@@ -96,7 +96,9 @@ export const Route = createFileRoute("/$region/$slug")({
       { name: "description", content: description },
       { name: "keywords", content: keywords },
       { name: "news_keywords", content: keywords },
-      { name: "author", content: "Redação Vozes Paranaenses" },
+      { name: "author", content: a.editor_responsavel ?? "Redação Vozes Paranaenses" },
+      { name: "ai-content-declaration", content: "assisted; editorial-review-by-human" },
+      { name: "generator", content: "Vozes Paranaenses — redação assistida por IA com revisão humana" },
       { name: "robots", content: "index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1" },
       { name: "googlebot", content: "index, follow, max-image-preview:large, max-snippet:-1" },
       // Geo tags — o site inteiro é PR
@@ -174,7 +176,17 @@ export const Route = createFileRoute("/$region/$slug")({
       articleSection: a.categoria?.name ?? undefined,
       wordCount,
       keywords,
-      author: { "@type": "Organization", name: "Redação Vozes Paranaenses" },
+      author: a.editor_responsavel
+        ? [
+            {
+              "@type": "Person",
+              name: a.editor_responsavel,
+              jobTitle: "Editor(a) responsável",
+              worksFor: { "@type": "NewsMediaOrganization", name: "Vozes Paranaenses" },
+            },
+            { "@type": "Organization", name: "Redação Vozes Paranaenses" },
+          ]
+        : { "@type": "Organization", name: "Redação Vozes Paranaenses" },
       publisher: {
         "@type": "NewsMediaOrganization",
         name: "Vozes Paranaenses",
@@ -188,6 +200,9 @@ export const Route = createFileRoute("/$region/$slug")({
       contentLocation,
       spatialCoverage: spatialCoverage.length > 0 ? spatialCoverage : undefined,
       about: contentLocation ? [contentLocation] : undefined,
+      correctionsPolicy: "/correcoes",
+      diversityPolicy: "/politica-editorial",
+      ethicsPolicy: "/politica-editorial",
       speakable: {
         "@type": "SpeakableSpecification",
         cssSelector: ["h1", ".article-lead", ".article-tldr"],
@@ -365,10 +380,19 @@ function ArticlePage() {
           {article.title}
         </h1>
 
-        {/* Publicação */}
-        {publishedLabel && (
-          <div className="mt-6 border-l-2 border-[#0A2540]/20 pl-3 text-sm text-slate-600">
-            Publicado em <span className="font-semibold text-slate-800">{publishedLabel}</span>
+        {/* Publicação + byline */}
+        {(publishedLabel || article.editor_responsavel) && (
+          <div className="mt-6 flex flex-wrap items-center gap-x-4 gap-y-1 border-l-2 border-[#0A2540]/20 pl-3 text-sm text-slate-600">
+            {article.editor_responsavel && (
+              <span>
+                Por <span className="font-semibold text-slate-800">{article.editor_responsavel}</span>
+              </span>
+            )}
+            {publishedLabel && (
+              <span>
+                Publicado em <span className="font-semibold text-slate-800">{publishedLabel}</span>
+              </span>
+            )}
           </div>
         )}
 
@@ -492,13 +516,35 @@ function ArticlePage() {
           </section>
         )}
 
-        {/* Assinatura / marca no fim do texto */}
+        {/* Assinatura / marca + política de correções */}
         <div className="mx-auto mt-10 max-w-3xl border-t border-slate-200 pt-6">
           <div className="flex flex-wrap items-center justify-between gap-3 text-xs uppercase tracking-widest text-slate-500">
             <span>
-              Redação <span className="font-bold text-[#0A2540]">Vozes Paranaenses</span>
+              {article.editor_responsavel ? (
+                <>
+                  Editor(a) responsável:{" "}
+                  <span className="font-bold text-[#0A2540]">{article.editor_responsavel}</span> · Redação Vozes Paranaenses
+                </>
+              ) : (
+                <>Redação <span className="font-bold text-[#0A2540]">Vozes Paranaenses</span></>
+              )}
             </span>
             {article.region?.name && <span>{article.region.name} · PR</span>}
+          </div>
+          <div className="mt-3 flex flex-wrap items-center gap-3 text-[11px] normal-case tracking-normal text-slate-500">
+            <Link
+              to="/correcoes"
+              search={{ materia: `${region}/${slug}` }}
+              className="rounded border border-slate-300 px-2 py-1 font-semibold text-slate-700 hover:border-[#0A2540] hover:text-[#0A2540]"
+            >
+              Corrigir esta matéria
+            </Link>
+            <Link to="/politica-editorial" className="underline underline-offset-2 hover:text-[#0A2540]">
+              Política editorial
+            </Link>
+            <span className="italic text-slate-400">
+              Conteúdo produzido com assistência de IA e revisão humana.
+            </span>
           </div>
         </div>
 

@@ -18,6 +18,7 @@ type Draft = {
   corpo: string | null;
   seo_title: string | null;
   seo_description: string | null;
+  editor_responsavel: string | null;
   status: "rascunho" | "aprovado" | "rejeitado" | "publicado";
   gerado_em: string;
   imagem_capa_url: string | null;
@@ -41,7 +42,7 @@ function AdminQueue() {
     setItems(null); setErr(null);
     try {
       const sb = await getExternalBrowser();
-      const fullSelect = "id, slug, titulo, subtitulo, resumo, corpo, seo_title, seo_description, status, gerado_em, imagem_capa_url, imagem_credito, regiao:regioes(slug, nome), categoria:editorial_categories(slug, nome)";
+      const fullSelect = "id, slug, titulo, subtitulo, resumo, corpo, seo_title, seo_description, editor_responsavel, status, gerado_em, imagem_capa_url, imagem_credito, regiao:regioes(slug, nome), categoria:editorial_categories(slug, nome)";
       const fallbackSelect = "id, slug, titulo, subtitulo, resumo, corpo, seo_title, seo_description, status, gerado_em, regiao:regioes(slug, nome), categoria:editorial_categories(slug, nome)";
       const run = (sel: string) =>
         sb.from("generated_articles")
@@ -50,7 +51,7 @@ function AdminQueue() {
           .order("gerado_em", { ascending: false })
           .limit(50);
       let res = await run(fullSelect);
-      if (res.error && /column .* does not exist|imagem_/i.test(res.error.message)) {
+      if (res.error && /column .* does not exist|imagem_|editor_responsavel/i.test(res.error.message)) {
         res = await run(fallbackSelect);
       }
       if (res.error) throw res.error;
@@ -161,6 +162,7 @@ function AdminQueue() {
                   slug: it.slug,
                   seo_title: it.seo_title,
                   seo_description: it.seo_description,
+                  editor_responsavel: it.editor_responsavel,
                 }}
                 onSaved={() => { setEditingId(null); load(); }}
                 onCancel={() => setEditingId(null)}
