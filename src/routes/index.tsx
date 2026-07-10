@@ -11,6 +11,7 @@ import {
 } from "@/lib/content.functions";
 import { LocationBar, ProximityBadge } from "@/components/LocationBar";
 import { SiteHeader, SiteFooter } from "@/components/SiteHeader";
+import { AdSlot } from "@/components/AdSlot";
 
 const regionsQO = queryOptions({
   queryKey: ["regions"],
