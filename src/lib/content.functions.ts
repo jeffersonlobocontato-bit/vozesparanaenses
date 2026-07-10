@@ -52,6 +52,9 @@ export type ArticleListItem = {
   region: { slug: string; name: string } | null;
   categoria: { slug: string; name: string } | null;
   fixado_posicao?: number | null;
+  fixado_escopo?: "estado" | "regiao" | "cidades" | null;
+  fixado_regioes?: string[] | null;
+  fixado_cidades?: string[] | null;
 };
 
 export type ArticleFull = ArticleListItem & {
@@ -141,6 +144,9 @@ type MateriaRow = {
   regiao: { slug: string; nome: string } | null;
   categoria: { slug: string; nome: string } | null;
   fixado_posicao?: number | null;
+  fixado_escopo?: string | null;
+  fixado_regioes?: string[] | null;
+  fixado_cidades?: string[] | null;
 };
 
 function mapMateria(m: MateriaRow): ArticleListItem {
@@ -155,14 +161,20 @@ function mapMateria(m: MateriaRow): ArticleListItem {
     region: m.regiao ? { slug: m.regiao.slug, name: m.regiao.nome } : null,
     categoria: m.categoria ? { slug: m.categoria.slug, name: m.categoria.nome } : null,
     fixado_posicao: typeof m.fixado_posicao === "number" ? m.fixado_posicao : null,
+    fixado_escopo:
+      m.fixado_escopo === "regiao" || m.fixado_escopo === "cidades" || m.fixado_escopo === "estado"
+        ? m.fixado_escopo
+        : null,
+    fixado_regioes: Array.isArray(m.fixado_regioes) ? m.fixado_regioes : null,
+    fixado_cidades: Array.isArray(m.fixado_cidades) ? m.fixado_cidades : null,
   };
 }
 
 const MATERIA_LIST_COLS =
-  "id, slug, titulo, subtitulo, resumo, imagem_capa_url, publicado_em, fixado_posicao, regiao:regioes(slug, nome), categoria:editorial_categories(slug, nome)";
+  "id, slug, titulo, subtitulo, resumo, imagem_capa_url, publicado_em, fixado_posicao, fixado_escopo, fixado_regioes, fixado_cidades, regiao:regioes(slug, nome), categoria:editorial_categories(slug, nome)";
 
 const MATERIA_LIST_COLS_GEO =
-  "id, slug, titulo, subtitulo, resumo, imagem_capa_url, publicado_em, cidade_principal, cidades_mencionadas, fixado_posicao, regiao:regioes(slug, nome), categoria:editorial_categories(slug, nome)";
+  "id, slug, titulo, subtitulo, resumo, imagem_capa_url, publicado_em, cidade_principal, cidades_mencionadas, fixado_posicao, fixado_escopo, fixado_regioes, fixado_cidades, regiao:regioes(slug, nome), categoria:editorial_categories(slug, nome)";
 
 /**
  * Só a posição 0 deve subir automaticamente para o topo da lista.
@@ -255,7 +267,7 @@ export const listLatestArticles = createServerFn({ method: "GET" })
         .order("publicado_em", { ascending: false })
         .limit(data.limit);
     let res = await run(MATERIA_LIST_COLS);
-    if (res.error && /fixado_posicao/i.test(res.error.message)) {
+    if (res.error && /fixado_(posicao|escopo|regioes|cidades)/i.test(res.error.message)) {
       res = await run(
         "id, slug, titulo, subtitulo, resumo, imagem_capa_url, publicado_em, regiao:regioes(slug, nome), categoria:editorial_categories(slug, nome)",
       );
@@ -516,7 +528,7 @@ export const listRankedArticles = createServerFn({ method: "GET" })
         .order("publicado_em", { ascending: false })
         .limit(poolSize);
     let rankedRes = await runRanked(MATERIA_LIST_COLS_GEO);
-    if (rankedRes.error && /fixado_posicao/i.test(rankedRes.error.message)) {
+    if (rankedRes.error && /fixado_(posicao|escopo|regioes|cidades)/i.test(rankedRes.error.message)) {
       rankedRes = await runRanked(
         "id, slug, titulo, subtitulo, resumo, imagem_capa_url, publicado_em, cidade_principal, cidades_mencionadas, regiao:regioes(slug, nome), categoria:editorial_categories(slug, nome)",
       );
@@ -628,7 +640,7 @@ export const listArticlesByRegion = createServerFn({ method: "GET" })
         .order("publicado_em", { ascending: false })
         .limit(data.limit);
     let res = await runRegion(MATERIA_LIST_COLS);
-    if (res.error && /fixado_posicao/i.test(res.error.message)) {
+    if (res.error && /fixado_(posicao|escopo|regioes|cidades)/i.test(res.error.message)) {
       res = await runRegion(
         "id, slug, titulo, subtitulo, resumo, imagem_capa_url, publicado_em, regiao:regioes(slug, nome), categoria:editorial_categories(slug, nome)",
       );

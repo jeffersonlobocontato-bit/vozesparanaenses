@@ -1,5 +1,16 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { getExternalBrowser } from "@/lib/external-supabase-browser";
+import {
+  PARANA_MUNICIPIOS,
+  parseCityList,
+  suggestMunicipios,
+  findMunicipioBySlug,
+  type Municipio,
+} from "@/lib/parana-municipios";
+
+type PinScope = "estado" | "regiao" | "cidades";
+
+type Regiao = { slug: string; nome: string };
 
 type Props = {
   articleId: string;
@@ -13,6 +24,9 @@ type Props = {
     seo_description: string | null;
     editor_responsavel?: string | null;
     fixado_posicao?: number | null;
+    fixado_escopo?: PinScope | null;
+    fixado_regioes?: string[] | null;
+    fixado_cidades?: string[] | null;
   };
   onSaved: () => void;
   onCancel: () => void;
@@ -33,12 +47,60 @@ export function ArticleEditor({ articleId, initial, onSaved, onCancel }: Props) 
         ? String(initial.fixado_posicao)
         : "",
   });
+  const [escopo, setEscopo] = useState<PinScope>(initial.fixado_escopo ?? "estado");
+  const [regioes, setRegioes] = useState<string[]>(initial.fixado_regioes ?? []);
+  const [cidades, setCidades] = useState<string[]>(initial.fixado_cidades ?? []);
+  const [cityInput, setCityInput] = useState("");
+  const [cityMsg, setCityMsg] = useState<string | null>(null);
+  const [availableRegions, setAvailableRegions] = useState<Regiao[]>([]);
   const [saving, setSaving] = useState(false);
   const [msg, setMsg] = useState<string | null>(null);
+
+  // Carrega regiões cadastradas (para o multi-select de "Regiões específicas").
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      try {
+        const sb = await getExternalBrowser();
+        const { data } = await sb.from("regioes").select("slug, nome").order("nome");
+        if (!cancelled && data) setAvailableRegions(data as Regiao[]);
+      } catch {
+        /* silencioso */
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   function set<K extends keyof typeof form>(k: K, v: string) {
     setForm((f) => ({ ...f, [k]: v }));
   }
+
+  function addCitiesFromInput() {
+    if (!cityInput.trim()) return;
+    const { found, unknown } = parseCityList(cityInput);
+    const merged = Array.from(new Set([...cidades, ...found.map((m) => m.slug)]));
+    setCidades(merged);
+    setCityInput("");
+    setCityMsg(
+      unknown.length > 0
+        ? `Não reconhecidas: ${unknown.join(", ")}. Só municípios do Paraná são aceitos.`
+        : null,
+    );
+  }
+
+  function removeCity(slug: string) {
+    setCidades((prev) => prev.filter((s) => s !== slug));
+  }
+
+  function toggleRegion(slug: string) {
+    setRegioes((prev) =>
+      prev.includes(slug) ? prev.filter((s) => s !== slug) : [...prev, slug],
+    );
+  }
+
+  const suggestions: Municipio[] = cityInput.trim() ? suggestMunicipios(cityInput, 6) : [];
 
   function insertAtCursor(prefix: string, suffix = prefix) {
     const el = document.getElementById(`corpo-${articleId}`) as HTMLTextAreaElement | null;
@@ -61,6 +123,9 @@ export function ArticleEditor({ articleId, initial, onSaved, onCancel }: Props) 
     try {
       const sb = await getExternalBrowser();
       const selectedPin = form.fixado_posicao === "" ? null : Number(form.fixado_posicao);
+      const effectiveEscopo: PinScope | null = selectedPin === null ? null : escopo;
+      const effectiveRegioes = effectiveEscopo === "regiao" ? regioes : [];
+      const effectiveCidades = effectiveEscopo === "cidades" ? cidades : [];
       const patch: Record<string, unknown> = {
         titulo: form.titulo.trim(),
         subtitulo: form.subtitulo.trim() || null,
@@ -71,24 +136,37 @@ export function ArticleEditor({ articleId, initial, onSaved, onCancel }: Props) 
         seo_description: form.seo_description.trim() || null,
         editor_responsavel: form.editor_responsavel.trim() || null,
         fixado_posicao: selectedPin,
+        fixado_escopo: effectiveEscopo,
+        fixado_regioes: effectiveRegioes,
+        fixado_cidades: effectiveCidades,
       };
       const { data, error } = await sb
         .from("generated_articles")
         .update(patch)
         .eq("id", articleId)
-        .select("id, fixado_posicao")
+        .select("id, fixado_posicao, fixado_escopo, fixado_regioes, fixado_cidades")
         .maybeSingle();
-      if (error) throw error;
+      if (error) {
+        if (/fixado_(escopo|regioes|cidades)/i.test(error.message)) {
+          throw new Error(
+            "As colunas de fixação geo ainda não existem no banco. Rode a migração 015_pins_geo.sql.",
+          );
+        }
+        throw error;
+      }
       if (!data) throw new Error("A alteração não foi aplicada. Verifique sua permissão de editor.");
       const savedPin = typeof data.fixado_posicao === "number" ? data.fixado_posicao : null;
       if (savedPin !== selectedPin) {
         throw new Error("A posição de fixação não foi gravada no banco.");
       }
-      if (selectedPin !== null) {
+      // Exclusividade da posição só vale DENTRO do mesmo escopo.
+      // Dois pins "Manchete" para cidades diferentes convivem.
+      if (selectedPin !== null && effectiveEscopo === "estado") {
         const { error: clearError } = await sb
           .from("generated_articles")
           .update({ fixado_posicao: null })
           .eq("fixado_posicao", selectedPin)
+          .eq("fixado_escopo", "estado")
           .neq("id", articleId);
         if (clearError) throw clearError;
       }
@@ -103,6 +181,7 @@ export function ArticleEditor({ articleId, initial, onSaved, onCancel }: Props) 
 
   const inputCls = "w-full rounded border bg-background px-2 py-1.5 text-sm";
   const labelCls = "text-[11px] font-semibold uppercase tracking-wide text-muted-foreground";
+  const pinned = form.fixado_posicao !== "";
 
   return (
     <div className="mt-3 space-y-3 rounded-lg border bg-muted/30 p-3">
@@ -191,6 +270,142 @@ export function ArticleEditor({ articleId, initial, onSaved, onCancel }: Props) 
           Sem fixação, novas matérias publicadas assumem a manchete automaticamente.
           Ao fixar, a matéria trava nessa posição até ser desfixada.
         </p>
+
+        {pinned && (
+          <div className="mt-3 space-y-2 border-t border-amber-300/60 pt-3 dark:border-amber-500/30">
+            <label className={labelCls}>🎯 Aparecer para</label>
+            <div className="flex flex-wrap gap-3 text-xs">
+              {(["estado", "regiao", "cidades"] as PinScope[]).map((opt) => (
+                <label key={opt} className="flex cursor-pointer items-center gap-1.5">
+                  <input
+                    type="radio"
+                    name={`escopo-${articleId}`}
+                    checked={escopo === opt}
+                    onChange={() => setEscopo(opt)}
+                  />
+                  <span>
+                    {opt === "estado" && "Todo o estado"}
+                    {opt === "regiao" && "Regiões específicas"}
+                    {opt === "cidades" && "Cidades específicas"}
+                  </span>
+                </label>
+              ))}
+            </div>
+
+            {escopo === "regiao" && (
+              <div className="rounded border bg-background p-2">
+                <p className="mb-1 text-[10px] text-muted-foreground">
+                  Selecione uma ou mais regiões editoriais em que essa fixação deve aparecer:
+                </p>
+                <div className="flex flex-wrap gap-1.5">
+                  {availableRegions.length === 0 && (
+                    <span className="text-[10px] text-muted-foreground">
+                      Carregando regiões…
+                    </span>
+                  )}
+                  {availableRegions.map((r) => {
+                    const on = regioes.includes(r.slug);
+                    return (
+                      <button
+                        key={r.slug}
+                        type="button"
+                        onClick={() => toggleRegion(r.slug)}
+                        className={`rounded-full border px-2 py-0.5 text-[11px] font-medium transition-colors ${
+                          on
+                            ? "border-[#0A2540] bg-[#0A2540] text-white"
+                            : "border-slate-300 bg-white text-slate-700 hover:bg-accent"
+                        }`}
+                      >
+                        {r.nome}
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
+
+            {escopo === "cidades" && (
+              <div className="rounded border bg-background p-2">
+                <p className="mb-1 text-[10px] text-muted-foreground">
+                  Digite cidades do Paraná separadas por vírgula
+                  (ex.: <em>Cascavel, Toledo, Santa Tereza do Oeste, Medianeira</em>).
+                  Pressione Enter para adicionar.
+                </p>
+                <div className="flex flex-wrap items-center gap-1.5 rounded border bg-white px-2 py-1.5">
+                  {cidades.map((slug) => {
+                    const m = findMunicipioBySlug(slug);
+                    return (
+                      <span
+                        key={slug}
+                        className="inline-flex items-center gap-1 rounded-full bg-[#0A2540] px-2 py-0.5 text-[11px] font-medium text-white"
+                      >
+                        {m?.name ?? slug}
+                        <button
+                          type="button"
+                          onClick={() => removeCity(slug)}
+                          className="ml-0.5 text-white/80 hover:text-white"
+                          aria-label={`Remover ${m?.name ?? slug}`}
+                        >
+                          ×
+                        </button>
+                      </span>
+                    );
+                  })}
+                  <input
+                    list={`munic-${articleId}`}
+                    value={cityInput}
+                    onChange={(e) => setCityInput(e.target.value)}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter" || e.key === ",") {
+                        e.preventDefault();
+                        addCitiesFromInput();
+                      } else if (
+                        e.key === "Backspace" &&
+                        !cityInput &&
+                        cidades.length > 0
+                      ) {
+                        setCidades((prev) => prev.slice(0, -1));
+                      }
+                    }}
+                    onBlur={addCitiesFromInput}
+                    placeholder={cidades.length === 0 ? "Cascavel, Toledo, …" : ""}
+                    className="min-w-[140px] flex-1 bg-transparent px-1 py-0.5 text-xs outline-none"
+                  />
+                  <datalist id={`munic-${articleId}`}>
+                    {PARANA_MUNICIPIOS.slice(0, 399).map((m) => (
+                      <option key={m.slug} value={m.name} />
+                    ))}
+                  </datalist>
+                </div>
+                {suggestions.length > 0 && (
+                  <div className="mt-1 flex flex-wrap gap-1">
+                    {suggestions.map((s) => (
+                      <button
+                        key={s.slug}
+                        type="button"
+                        onClick={() => {
+                          setCidades((prev) =>
+                            prev.includes(s.slug) ? prev : [...prev, s.slug],
+                          );
+                          setCityInput("");
+                        }}
+                        className="rounded border border-slate-200 bg-white px-2 py-0.5 text-[11px] hover:bg-accent"
+                      >
+                        + {s.name}
+                      </button>
+                    ))}
+                  </div>
+                )}
+                {cityMsg && (
+                  <p className="mt-1 text-[10px] text-amber-700 dark:text-amber-400">{cityMsg}</p>
+                )}
+                <p className="mt-1 text-[10px] text-muted-foreground">
+                  {cidades.length} cidade(s) selecionada(s). Quem estiver fora dessas cidades verá a home/região normal, sem essa fixação.
+                </p>
+              </div>
+            )}
+          </div>
+        )}
       </div>
       <div className="flex flex-wrap items-center gap-2">
         <button onClick={save} disabled={saving}

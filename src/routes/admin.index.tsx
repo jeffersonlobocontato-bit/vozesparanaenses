@@ -24,6 +24,9 @@ type Draft = {
   imagem_capa_url: string | null;
   imagem_credito: string | null;
   fixado_posicao: number | null;
+  fixado_escopo: "estado" | "regiao" | "cidades" | null;
+  fixado_regioes: string[] | null;
+  fixado_cidades: string[] | null;
   regiao: { slug: string; nome: string } | null;
   categoria: { slug: string; nome: string } | null;
 };
@@ -43,7 +46,8 @@ function AdminQueue() {
     setItems(null); setErr(null);
     try {
       const sb = await getExternalBrowser();
-      const fullSelect = "id, slug, titulo, subtitulo, resumo, corpo, seo_title, seo_description, editor_responsavel, status, gerado_em, imagem_capa_url, imagem_credito, fixado_posicao, regiao:regioes(slug, nome), categoria:editorial_categories(slug, nome)";
+      const fullSelect = "id, slug, titulo, subtitulo, resumo, corpo, seo_title, seo_description, editor_responsavel, status, gerado_em, imagem_capa_url, imagem_credito, fixado_posicao, fixado_escopo, fixado_regioes, fixado_cidades, regiao:regioes(slug, nome), categoria:editorial_categories(slug, nome)";
+      const pinBasicSelect = "id, slug, titulo, subtitulo, resumo, corpo, seo_title, seo_description, editor_responsavel, status, gerado_em, imagem_capa_url, imagem_credito, fixado_posicao, regiao:regioes(slug, nome), categoria:editorial_categories(slug, nome)";
       const midSelect = "id, slug, titulo, subtitulo, resumo, corpo, seo_title, seo_description, editor_responsavel, status, gerado_em, imagem_capa_url, imagem_credito, regiao:regioes(slug, nome), categoria:editorial_categories(slug, nome)";
       const fallbackSelect = "id, slug, titulo, subtitulo, resumo, corpo, seo_title, seo_description, status, gerado_em, regiao:regioes(slug, nome), categoria:editorial_categories(slug, nome)";
       const run = (sel: string) =>
@@ -53,6 +57,9 @@ function AdminQueue() {
           .order("gerado_em", { ascending: false })
           .limit(50);
       let res = await run(fullSelect);
+      if (res.error && /fixado_(escopo|regioes|cidades)/i.test(res.error.message)) {
+        res = await run(pinBasicSelect);
+      }
       if (res.error && /fixado_posicao/i.test(res.error.message)) {
         res = await run(midSelect);
       }
@@ -148,6 +155,23 @@ function AdminQueue() {
               {typeof it.fixado_posicao === "number" && it.fixado_posicao !== null && (
                 <span className="rounded bg-amber-500 px-2 py-0.5 font-semibold text-white">
                   📌 {it.fixado_posicao === 0 ? "Manchete" : `Lateral ${it.fixado_posicao}`}
+                  {" · "}
+                  {(() => {
+                    const esc = it.fixado_escopo ?? "estado";
+                    if (esc === "estado") return "Estado";
+                    if (esc === "regiao") {
+                      const list = it.fixado_regioes ?? [];
+                      if (list.length === 0) return "Regiões";
+                      const first = list.slice(0, 2).join(", ");
+                      const extra = list.length > 2 ? ` (+${list.length - 2})` : "";
+                      return `Regiões: ${first}${extra}`;
+                    }
+                    const list = it.fixado_cidades ?? [];
+                    if (list.length === 0) return "Cidades";
+                    const first = list.slice(0, 2).join(", ");
+                    const extra = list.length > 2 ? ` (+${list.length - 2})` : "";
+                    return `Cidades: ${first}${extra}`;
+                  })()}
                 </span>
               )}
               <span>{new Date(it.gerado_em).toLocaleString("pt-BR")}</span>
@@ -174,6 +198,9 @@ function AdminQueue() {
                   seo_description: it.seo_description,
                   editor_responsavel: it.editor_responsavel,
                   fixado_posicao: it.fixado_posicao ?? null,
+                  fixado_escopo: it.fixado_escopo ?? null,
+                  fixado_regioes: it.fixado_regioes ?? null,
+                  fixado_cidades: it.fixado_cidades ?? null,
                 }}
                 onSaved={() => { setEditingId(null); load(); }}
                 onCancel={() => setEditingId(null)}
