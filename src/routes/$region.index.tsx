@@ -86,10 +86,7 @@ function RegionPage() {
   return (
     <div
       className="min-h-screen"
-      
-        background: "#ffffff",
-        color: "#0f172a",
-      }}
+      style={{ background: "#ffffff", color: "#0f172a" }}
     >
       <SiteHeader />
 
@@ -149,10 +146,7 @@ function RegionPage() {
                     </div>
                     <h2
                       className="mt-2 text-4xl font-black leading-[1.05] md:text-5xl lg:text-6xl"
-                      
-                        
-                        color: primary,
-                      }}
+                      style={{ color: primary }}
                     >
                       {hero.title}
                     </h2>
@@ -195,10 +189,7 @@ function RegionPage() {
                       </div>
                       <h3
                         className="mt-1 text-lg font-black leading-tight md:text-xl"
-                        
-                          
-                          color: primary,
-                        }}
+                      style={{ color: primary }}
                       >
                         {a.title}
                       </h3>
@@ -247,10 +238,7 @@ function RegionPage() {
                       </div>
                       <h3
                         className="mt-1 text-xl font-black leading-tight md:text-2xl"
-                        
-                          
-                          color: primary,
-                        }}
+                      style={{ color: primary }}
                       >
                         {a.title}
                       </h3>
