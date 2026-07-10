@@ -403,7 +403,21 @@ function ArticlePage() {
           <div className="mt-6 flex flex-wrap items-center gap-x-4 gap-y-1 border-l-2 border-[#0A2540]/20 pl-3 text-sm text-slate-600">
             {article.editor_responsavel && (
               <span>
-                Por <span className="font-semibold text-slate-800">{article.editor_responsavel}</span>
+                Por{" "}
+                <Link
+                  to="/autor/$slug"
+                  params={{
+                    slug: article.editor_responsavel
+                      .normalize("NFD")
+                      .replace(/[\u0300-\u036f]/g, "")
+                      .toLowerCase()
+                      .replace(/[^a-z0-9]+/g, "-")
+                      .replace(/(^-|-$)/g, ""),
+                  }}
+                  className="font-semibold text-slate-800 underline decoration-[#0A2540]/30 underline-offset-2 hover:decoration-[#0A2540]"
+                >
+                  {article.editor_responsavel}
+                </Link>
               </span>
             )}
             {publishedLabel && (
