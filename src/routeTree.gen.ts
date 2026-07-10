@@ -24,6 +24,7 @@ import { Route as AdminClustersRouteImport } from './routes/admin.clusters'
 import { Route as RegionClassificadosRouteImport } from './routes/$region.classificados'
 import { Route as RegionSlugRouteImport } from './routes/$region.$slug'
 import { Route as ApiPublicSitemapDotxmlRouteImport } from './routes/api/public/sitemap[.]xml'
+import { Route as ApiPublicSitemapNewsDotxmlRouteImport } from './routes/api/public/sitemap-news[.]xml'
 import { Route as RegionEditoriaCategoriaRouteImport } from './routes/$region.editoria.$categoria'
 
 const WhatsappRoute = WhatsappRouteImport.update({
@@ -101,6 +102,12 @@ const ApiPublicSitemapDotxmlRoute = ApiPublicSitemapDotxmlRouteImport.update({
   path: '/api/public/sitemap.xml',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiPublicSitemapNewsDotxmlRoute =
+  ApiPublicSitemapNewsDotxmlRouteImport.update({
+    id: '/api/public/sitemap-news.xml',
+    path: '/api/public/sitemap-news.xml',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const RegionEditoriaCategoriaRoute = RegionEditoriaCategoriaRouteImport.update({
   id: '/editoria/$categoria',
   path: '/editoria/$categoria',
@@ -123,6 +130,7 @@ export interface FileRoutesByFullPath {
   '/$region/': typeof RegionIndexRoute
   '/admin/': typeof AdminIndexRoute
   '/$region/editoria/$categoria': typeof RegionEditoriaCategoriaRoute
+  '/api/public/sitemap-news.xml': typeof ApiPublicSitemapNewsDotxmlRoute
   '/api/public/sitemap.xml': typeof ApiPublicSitemapDotxmlRoute
 }
 export interface FileRoutesByTo {
@@ -139,6 +147,7 @@ export interface FileRoutesByTo {
   '/$region': typeof RegionIndexRoute
   '/admin': typeof AdminIndexRoute
   '/$region/editoria/$categoria': typeof RegionEditoriaCategoriaRoute
+  '/api/public/sitemap-news.xml': typeof ApiPublicSitemapNewsDotxmlRoute
   '/api/public/sitemap.xml': typeof ApiPublicSitemapDotxmlRoute
 }
 export interface FileRoutesById {
@@ -158,6 +167,7 @@ export interface FileRoutesById {
   '/$region/': typeof RegionIndexRoute
   '/admin/': typeof AdminIndexRoute
   '/$region/editoria/$categoria': typeof RegionEditoriaCategoriaRoute
+  '/api/public/sitemap-news.xml': typeof ApiPublicSitemapNewsDotxmlRoute
   '/api/public/sitemap.xml': typeof ApiPublicSitemapDotxmlRoute
 }
 export interface FileRouteTypes {
@@ -178,6 +188,7 @@ export interface FileRouteTypes {
     | '/$region/'
     | '/admin/'
     | '/$region/editoria/$categoria'
+    | '/api/public/sitemap-news.xml'
     | '/api/public/sitemap.xml'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -194,6 +205,7 @@ export interface FileRouteTypes {
     | '/$region'
     | '/admin'
     | '/$region/editoria/$categoria'
+    | '/api/public/sitemap-news.xml'
     | '/api/public/sitemap.xml'
   id:
     | '__root__'
@@ -212,6 +224,7 @@ export interface FileRouteTypes {
     | '/$region/'
     | '/admin/'
     | '/$region/editoria/$categoria'
+    | '/api/public/sitemap-news.xml'
     | '/api/public/sitemap.xml'
   fileRoutesById: FileRoutesById
 }
@@ -220,6 +233,7 @@ export interface RootRouteChildren {
   RegionRoute: typeof RegionRouteWithChildren
   AdminRoute: typeof AdminRouteWithChildren
   WhatsappRoute: typeof WhatsappRoute
+  ApiPublicSitemapNewsDotxmlRoute: typeof ApiPublicSitemapNewsDotxmlRoute
   ApiPublicSitemapDotxmlRoute: typeof ApiPublicSitemapDotxmlRoute
 }
 
@@ -330,6 +344,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicSitemapDotxmlRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/sitemap-news.xml': {
+      id: '/api/public/sitemap-news.xml'
+      path: '/api/public/sitemap-news.xml'
+      fullPath: '/api/public/sitemap-news.xml'
+      preLoaderRoute: typeof ApiPublicSitemapNewsDotxmlRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/$region/editoria/$categoria': {
       id: '/$region/editoria/$categoria'
       path: '/editoria/$categoria'
@@ -384,6 +405,7 @@ const rootRouteChildren: RootRouteChildren = {
   RegionRoute: RegionRouteWithChildren,
   AdminRoute: AdminRouteWithChildren,
   WhatsappRoute: WhatsappRoute,
+  ApiPublicSitemapNewsDotxmlRoute: ApiPublicSitemapNewsDotxmlRoute,
   ApiPublicSitemapDotxmlRoute: ApiPublicSitemapDotxmlRoute,
 }
 export const routeTree = rootRouteImport
