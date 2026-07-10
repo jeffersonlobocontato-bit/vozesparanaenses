@@ -78,8 +78,6 @@ function RegionPage() {
   const tema = region.tema_config ?? {};
   const primary = tema.paleta?.primaria ?? "#0A2540";
   const accent = tema.paleta?.acento ?? "#0066CC";
-  const fontDisplay = tema.tipografia_destaque ?? "Bebas Neue";
-  const fontBody = tema.tipografia_corpo ?? "Barlow";
 
   const hero = articles[0];
   const sideCards = articles.slice(1, 5);
@@ -88,11 +86,7 @@ function RegionPage() {
   return (
     <div
       className="min-h-screen"
-      style={{
-        background: "#ffffff",
-        color: "#0f172a",
-        fontFamily: `'${fontBody}', system-ui, sans-serif`,
-      }}
+      style={{ background: "#ffffff", color: "#0f172a" }}
     >
       <SiteHeader />
 
@@ -152,10 +146,7 @@ function RegionPage() {
                     </div>
                     <h2
                       className="mt-2 text-4xl font-black leading-[1.05] md:text-5xl lg:text-6xl"
-                      style={{
-                        fontFamily: `'${fontDisplay}', system-ui, sans-serif`,
-                        color: primary,
-                      }}
+                      style={{ color: primary }}
                     >
                       {hero.title}
                     </h2>
@@ -198,10 +189,7 @@ function RegionPage() {
                       </div>
                       <h3
                         className="mt-1 text-lg font-black leading-tight md:text-xl"
-                        style={{
-                          fontFamily: `'${fontDisplay}', system-ui, sans-serif`,
-                          color: primary,
-                        }}
+                      style={{ color: primary }}
                       >
                         {a.title}
                       </h3>
@@ -250,10 +238,7 @@ function RegionPage() {
                       </div>
                       <h3
                         className="mt-1 text-xl font-black leading-tight md:text-2xl"
-                        style={{
-                          fontFamily: `'${fontDisplay}', system-ui, sans-serif`,
-                          color: primary,
-                        }}
+                      style={{ color: primary }}
                       >
                         {a.title}
                       </h3>

@@ -101,9 +101,11 @@ function ArticlePage() {
         day: "2-digit",
         month: "2-digit",
         year: "numeric",
+        timeZone: "America/Sao_Paulo",
       })} às ${publishedAt.toLocaleTimeString("pt-BR", {
         hour: "2-digit",
         minute: "2-digit",
+        timeZone: "America/Sao_Paulo",
       })}`
     : null;
   const categoria = article.categoria?.name ?? article.region?.name ?? "Notícia";

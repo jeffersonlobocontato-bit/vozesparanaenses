@@ -91,7 +91,6 @@ function CategoryPage() {
 
   const primary = region.tema_config?.paleta?.primaria ?? "#0A2540";
   const accent = region.tema_config?.paleta?.acento ?? "#0066CC";
-  const fontDisplay = region.tema_config?.tipografia_destaque ?? "Bebas Neue";
 
   return (
     <div className="min-h-screen bg-white text-slate-900 font-['Barlow',system-ui,sans-serif]">
@@ -104,7 +103,7 @@ function CategoryPage() {
           </div>
           <h1
             className="mt-1 text-5xl leading-[1.02] md:text-6xl"
-            style={{ fontFamily: `'${fontDisplay}', system-ui, sans-serif`, color: primary }}
+            style={{ color: primary }}
           >
             {cat.name}
           </h1>
@@ -136,7 +135,7 @@ function CategoryPage() {
                   </div>
                   <h3
                     className="mt-1 text-xl font-black leading-tight text-[#0A2540] group-hover:text-[#0d2f52] md:text-2xl"
-                    style={{ fontFamily: `'${fontDisplay}', system-ui, sans-serif` }}
+                    
                   >
                     {a.title}
                   </h3>
