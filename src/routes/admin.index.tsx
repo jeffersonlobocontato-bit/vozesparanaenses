@@ -36,14 +36,20 @@ function AdminQueue() {
     setItems(null); setErr(null);
     try {
       const sb = await getExternalBrowser();
-      const { data, error } = await sb
-        .from("generated_articles")
-        .select("id, slug, titulo, subtitulo, resumo, status, gerado_em, imagem_capa_url, imagem_credito, regiao:regioes(slug, nome), categoria:editorial_categories(slug, nome)")
-        .eq("status", tab)
-        .order("gerado_em", { ascending: false })
-        .limit(50);
-      if (error) throw error;
-      setItems((data ?? []) as unknown as Draft[]);
+      const fullSelect = "id, slug, titulo, subtitulo, resumo, status, gerado_em, imagem_capa_url, imagem_credito, regiao:regioes(slug, nome), categoria:editorial_categories(slug, nome)";
+      const fallbackSelect = "id, slug, titulo, subtitulo, resumo, status, gerado_em, regiao:regioes(slug, nome), categoria:editorial_categories(slug, nome)";
+      const run = (sel: string) =>
+        sb.from("generated_articles")
+          .select(sel)
+          .eq("status", tab)
+          .order("gerado_em", { ascending: false })
+          .limit(50);
+      let res = await run(fullSelect);
+      if (res.error && /column .* does not exist|imagem_/i.test(res.error.message)) {
+        res = await run(fallbackSelect);
+      }
+      if (res.error) throw res.error;
+      setItems((res.data ?? []) as unknown as Draft[]);
     } catch (e: unknown) {
       setErr(e instanceof Error ? e.message : "Erro ao carregar");
     }
