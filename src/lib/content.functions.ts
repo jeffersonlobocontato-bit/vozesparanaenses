@@ -61,7 +61,50 @@ export type ArticleFull = ArticleListItem & {
   cidade_principal: string | null;
   cidades_mencionadas: string[] | null;
   updated_at: string | null;
+  tldr: string | null;
+  fatos_5w1h: FiveWOneH | null;
+  faq: FaqItem[] | null;
 };
+
+export type FiveWOneH = {
+  quem?: string | null;
+  o_que?: string | null;
+  quando?: string | null;
+  onde?: string | null;
+  por_que?: string | null;
+  como?: string | null;
+};
+
+export type FaqItem = { pergunta: string; resposta: string };
+
+function coerceFaq(v: unknown): FaqItem[] | null {
+  if (!Array.isArray(v)) return null;
+  const out: FaqItem[] = [];
+  for (const item of v) {
+    if (!item || typeof item !== "object") continue;
+    const p = (item as Record<string, unknown>).pergunta ?? (item as Record<string, unknown>).question;
+    const r = (item as Record<string, unknown>).resposta ?? (item as Record<string, unknown>).answer;
+    if (typeof p === "string" && typeof r === "string" && p.trim() && r.trim()) {
+      out.push({ pergunta: p.trim(), resposta: r.trim() });
+    }
+  }
+  return out.length > 0 ? out : null;
+}
+
+function coerce5W1H(v: unknown): FiveWOneH | null {
+  if (!v || typeof v !== "object") return null;
+  const o = v as Record<string, unknown>;
+  const pick = (k: string) => (typeof o[k] === "string" && (o[k] as string).trim() ? (o[k] as string) : null);
+  const r: FiveWOneH = {
+    quem: pick("quem"),
+    o_que: pick("o_que"),
+    quando: pick("quando"),
+    onde: pick("onde"),
+    por_que: pick("por_que"),
+    como: pick("como"),
+  };
+  return Object.values(r).some((x) => x) ? r : null;
+}
 
 type RegiaoRow = {
   id: string;
