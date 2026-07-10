@@ -242,6 +242,49 @@ export function cidadeFromSlug(slug: string): string {
 
 export type CityInRegion = { citySlug: string; name: string; count: number };
 
+/** Todas as duplas (regionSlug, citySlug) publicadas — usado no sitemap. */
+export const listAllCityLandings = createServerFn({ method: "GET" }).handler(
+  async (): Promise<{ regionSlug: string; citySlug: string; name: string; lastmod: string | null }[]> => {
+    const { getExternalSupabase } = await import("./external-supabase.server");
+    const sb = getExternalSupabase();
+    const { data, error } = await sb
+      .from("generated_articles")
+      .select("cidade_principal, publicado_em, regiao:regioes(slug)")
+      .eq("status", "publicado")
+      .not("cidade_principal", "is", null)
+      .order("publicado_em", { ascending: false })
+      .limit(2000);
+    if (error) {
+      if (isMissingSchema(error) || /cidade_/i.test(error.message)) return [];
+      throw new Error(error.message);
+    }
+    const acc = new Map<
+      string,
+      { regionSlug: string; citySlug: string; name: string; lastmod: string | null }
+    >();
+    for (const r of (data ?? []) as {
+      cidade_principal: string | null;
+      publicado_em: string | null;
+      regiao: { slug: string } | null;
+    }[]) {
+      if (!r.regiao?.slug || !r.cidade_principal) continue;
+      const citySlug = cidadeSlug(r.cidade_principal);
+      if (!citySlug) continue;
+      const key = `${r.regiao.slug}/${citySlug}`;
+      const cur = acc.get(key);
+      if (!cur) {
+        acc.set(key, {
+          regionSlug: r.regiao.slug,
+          citySlug,
+          name: r.cidade_principal,
+          lastmod: r.publicado_em,
+        });
+      }
+    }
+    return [...acc.values()];
+  },
+);
+
 /** Lista as cidades cobertas em uma região com contagem de matérias publicadas. */
 export const listCitiesInRegion = createServerFn({ method: "GET" })
   .inputValidator((d: { regionSlug: string; limit?: number }) => ({
