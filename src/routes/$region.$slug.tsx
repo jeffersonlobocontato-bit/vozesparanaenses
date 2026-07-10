@@ -1,6 +1,16 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { queryOptions, useSuspenseQuery } from "@tanstack/react-query";
-import { getArticle, listArticlesByRegion, cidadeSlug } from "@/lib/content.functions";
+import {
+  getArticle,
+  listArticlesByRegion,
+  listRelatedArticles,
+  listRegions,
+  listCategorias,
+  listAllCityLandings,
+  cidadeSlug,
+  type ArticleListItem,
+} from "@/lib/content.functions";
+import { buildLinkTerms, autoLinkParagraph } from "@/lib/auto-link";
 import { SiteHeader, SiteFooter } from "@/components/SiteHeader";
 
 const articleQO = (regionSlug: string, slug: string) =>
@@ -15,11 +25,41 @@ const relatedQO = (regionSlug: string) =>
     queryFn: () => listArticlesByRegion({ data: { regionSlug, limit: 9 } }),
   });
 
+const relatedArticlesQO = (articleId: string, regionSlug: string, cidade: string | null) =>
+  queryOptions({
+    queryKey: ["related-articles", articleId, regionSlug, cidade],
+    queryFn: () =>
+      listRelatedArticles({ data: { articleId, regionSlug, cidade, limit: 6 } }),
+  });
+
+const allRegionsQO = queryOptions({
+  queryKey: ["all-regions"],
+  queryFn: () => listRegions(),
+});
+
+const allCategoriasQO = queryOptions({
+  queryKey: ["all-categorias"],
+  queryFn: () => listCategorias(),
+});
+
+const allCityLandingsQO = queryOptions({
+  queryKey: ["all-city-landings"],
+  queryFn: () => listAllCityLandings(),
+});
+
 export const Route = createFileRoute("/$region/$slug")({
   loader: async ({ context, params }) => {
-    const [article] = await Promise.all([
-      context.queryClient.ensureQueryData(articleQO(params.region, params.slug)),
+    const article = await context.queryClient.ensureQueryData(
+      articleQO(params.region, params.slug),
+    );
+    await Promise.all([
       context.queryClient.ensureQueryData(relatedQO(params.region)),
+      context.queryClient.ensureQueryData(allRegionsQO),
+      context.queryClient.ensureQueryData(allCategoriasQO),
+      context.queryClient.ensureQueryData(allCityLandingsQO),
+      context.queryClient.ensureQueryData(
+        relatedArticlesQO(article.id, params.region, article.cidade_principal),
+      ),
     ]);
     return { article };
   },
