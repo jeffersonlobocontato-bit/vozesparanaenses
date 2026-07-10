@@ -252,17 +252,25 @@ export const listLatestArticles = createServerFn({ method: "GET" })
   .handler(async ({ data }): Promise<ArticleListItem[]> => {
     const { getExternalSupabase } = await import("./external-supabase.server");
     const sb = getExternalSupabase();
-    const { data: rows, error } = await sb
-      .from("generated_articles")
-      .select(MATERIA_LIST_COLS)
-      .eq("status", "publicado")
-      .order("publicado_em", { ascending: false })
-      .limit(data.limit);
-    if (error) {
-      if (isMissingSchema(error)) return [];
-      throw new Error(error.message);
+    const run = (cols: string) =>
+      sb
+        .from("generated_articles")
+        .select(cols)
+        .eq("status", "publicado")
+        .order("publicado_em", { ascending: false })
+        .limit(data.limit);
+    let res = await run(MATERIA_LIST_COLS);
+    if (res.error && /fixado_posicao/i.test(res.error.message)) {
+      res = await run(
+        "id, slug, titulo, subtitulo, resumo, imagem_capa_url, publicado_em, regiao:regioes(slug, nome), categoria:editorial_categories(slug, nome)",
+      );
     }
-    return ((rows ?? []) as unknown as MateriaRow[]).map(mapMateria);
+    if (res.error) {
+      if (isMissingSchema(res.error)) return [];
+      throw new Error(res.error.message);
+    }
+    const mapped = ((res.data ?? []) as unknown as MateriaRow[]).map(mapMateria);
+    return sortWithPinned(mapped);
   });
 
 /* -------------------- Geolocalização editorial (cidade + entorno) -------------------- */
