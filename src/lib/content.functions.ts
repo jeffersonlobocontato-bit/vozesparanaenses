@@ -849,3 +849,41 @@ export const createClassificado = createServerFn({ method: "POST" })
     if (error) throw new Error(error.message);
     return { ok: true };
   });
+export const listArticlesByAuthor = createServerFn({ method: "GET" })
+  .inputValidator((d: { authorSlug: string; limit?: number }) => d)
+  .handler(
+    async ({
+      data,
+    }): Promise<{ authorName: string | null; articles: ArticleListItem[] }> => {
+      const { getExternalSupabase } = await import("./external-supabase.server");
+      const { slugifyAuthor } = await import("./authors");
+      const sb = getExternalSupabase();
+      const { data: rows, error } = await sb
+        .from("generated_articles")
+        .select(
+          "id, slug, titulo, subtitulo, resumo, imagem_capa_url, publicado_em, editor_responsavel, regiao:regioes(slug, nome), categoria:editorial_categories(slug, nome)",
+        )
+        .eq("status", "publicado")
+        .not("editor_responsavel", "is", null)
+        .order("publicado_em", { ascending: false })
+        .limit(500);
+      if (error) {
+        if (isMissingSchema(error)) return { authorName: null, articles: [] };
+        throw new Error(error.message);
+      }
+      const list = (rows ?? []) as (MateriaRow & {
+        editor_responsavel: string | null;
+      })[];
+      const matched = list.filter(
+        (r) =>
+          r.editor_responsavel &&
+          slugifyAuthor(r.editor_responsavel) === data.authorSlug,
+      );
+      const authorName =
+        matched[0]?.editor_responsavel?.trim() ?? null;
+      const articles = matched
+        .slice(0, data.limit ?? 50)
+        .map((r) => mapMateria(r));
+      return { authorName, articles };
+    },
+  );
