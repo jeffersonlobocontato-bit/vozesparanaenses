@@ -849,3 +849,72 @@ export const createClassificado = createServerFn({ method: "POST" })
     if (error) throw new Error(error.message);
     return { ok: true };
   });
+export const listArticlesByAuthor = createServerFn({ method: "GET" })
+  .inputValidator((d: { authorSlug: string; limit?: number }) => d)
+  .handler(
+    async ({
+      data,
+    }): Promise<{ authorName: string | null; articles: ArticleListItem[] }> => {
+      const { getExternalSupabase } = await import("./external-supabase.server");
+      const { slugifyAuthor } = await import("./authors");
+      const sb = getExternalSupabase();
+      const { data: rows, error } = await sb
+        .from("generated_articles")
+        .select(
+          "id, slug, titulo, subtitulo, resumo, imagem_capa_url, publicado_em, editor_responsavel, regiao:regioes(slug, nome), categoria:editorial_categories(slug, nome)",
+        )
+        .eq("status", "publicado")
+        .not("editor_responsavel", "is", null)
+        .order("publicado_em", { ascending: false })
+        .limit(500);
+      if (error) {
+        if (isMissingSchema(error)) return { authorName: null, articles: [] };
+        throw new Error(error.message);
+      }
+      const list = (rows ?? []) as unknown as (MateriaRow & {
+        editor_responsavel: string | null;
+      })[];
+      const matched = list.filter(
+        (r) =>
+          r.editor_responsavel &&
+          slugifyAuthor(r.editor_responsavel) === data.authorSlug,
+      );
+      const authorName =
+        matched[0]?.editor_responsavel?.trim() ?? null;
+      const articles = matched
+        .slice(0, data.limit ?? 50)
+        .map((r) => mapMateria(r));
+      return { authorName, articles };
+    },
+  );
+
+export const listAuthors = createServerFn({ method: "GET" }).handler(
+  async (): Promise<{ slug: string; name: string; lastmod: string | null }[]> => {
+    const { getExternalSupabase } = await import("./external-supabase.server");
+    const { slugifyAuthor } = await import("./authors");
+    const sb = getExternalSupabase();
+    const { data: rows, error } = await sb
+      .from("generated_articles")
+      .select("editor_responsavel, publicado_em")
+      .eq("status", "publicado")
+      .not("editor_responsavel", "is", null)
+      .order("publicado_em", { ascending: false })
+      .limit(1000);
+    if (error) {
+      if (isMissingSchema(error)) return [];
+      throw new Error(error.message);
+    }
+    const seen = new Map<string, { name: string; lastmod: string | null }>();
+    for (const r of (rows ?? []) as {
+      editor_responsavel: string | null;
+      publicado_em: string | null;
+    }[]) {
+      const name = r.editor_responsavel?.trim();
+      if (!name) continue;
+      const slug = slugifyAuthor(name);
+      if (!slug) continue;
+      if (!seen.has(slug)) seen.set(slug, { name, lastmod: r.publicado_em });
+    }
+    return Array.from(seen.entries()).map(([slug, v]) => ({ slug, ...v }));
+  },
+);
