@@ -12,6 +12,7 @@ import {
 } from "@/lib/content.functions";
 import { buildLinkTerms, autoLinkParagraph } from "@/lib/auto-link";
 import { SiteHeader, SiteFooter } from "@/components/SiteHeader";
+import { getCityCoords, formatGeoPosition, formatICBM } from "@/lib/geo-cities";
 
 const articleQO = (regionSlug: string, slug: string) =>
   queryOptions({
@@ -79,6 +80,8 @@ export const Route = createFileRoute("/$region/$slug")({
     const regionName = a.region?.name ?? null;
     const regionSlug = a.region?.slug ?? params.region;
     const cidade = a.cidade_principal ?? null;
+    const cidadeSlugStr = cidade ? cidadeSlug(cidade) : null;
+    const coords = getCityCoords(cidadeSlugStr);
     const url = `/${regionSlug}/${a.slug}`;
     const keywords = [
       cidade,
@@ -109,6 +112,12 @@ export const Route = createFileRoute("/$region/$slug")({
         : regionName
           ? [{ name: "geo.placename", content: `${regionName}, Paraná, Brasil` }]
           : []),
+      ...(coords
+        ? [
+            { name: "geo.position", content: formatGeoPosition(coords) },
+            { name: "ICBM", content: formatICBM(coords) },
+          ]
+        : []),
       // Open Graph
       { property: "og:title", content: title },
       { property: "og:description", content: description },
@@ -139,6 +148,15 @@ export const Route = createFileRoute("/$region/$slug")({
       ? {
           "@type": "City",
           name: cidade,
+          ...(coords
+            ? {
+                geo: {
+                  "@type": "GeoCoordinates",
+                  latitude: coords.lat,
+                  longitude: coords.lng,
+                },
+              }
+            : {}),
           containedInPlace: {
             "@type": "AdministrativeArea",
             name: regionName ?? "Paraná",
