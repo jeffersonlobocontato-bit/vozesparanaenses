@@ -48,6 +48,7 @@ export const Route = createFileRoute("/api/public/rss.xml")({
           headers: {
             "content-type": "application/rss+xml; charset=utf-8",
             "cache-control": "public, max-age=600",
+            "x-robots-tag": "all, max-image-preview:large, max-snippet:-1",
           },
         });
       },

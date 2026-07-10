@@ -55,6 +55,7 @@ export const Route = createFileRoute("/r/$id")({
           headers: {
             Location: creative.destino_url,
             "Cache-Control": "no-store",
+            "X-Robots-Tag": "noindex, nofollow",
           },
         });
       },

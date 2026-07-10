@@ -48,6 +48,7 @@ export const Route = createFileRoute("/api/public/llms.txt")({
           headers: {
             "content-type": "text/plain; charset=utf-8",
             "cache-control": "public, max-age=1800",
+            "x-robots-tag": "all, max-image-preview:large, max-snippet:-1",
           },
         });
       },
