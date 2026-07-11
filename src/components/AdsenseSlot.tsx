@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef } from "react";
 
 declare global {
   interface Window {
@@ -8,8 +8,11 @@ declare global {
 
 /**
  * Slot do Google AdSense (ca-pub-3867318545397573).
- * Renderiza apenas no cliente para evitar mismatch de hidratação —
- * o script do AdSense injeta atributos/estilos no <ins> assim que carrega.
+ *
+ * Renderiza o <ins> tanto no SSR quanto no cliente para evitar troca de tag
+ * durante a hidratação. O push no array adsbygoogle só acontece no cliente,
+ * após a montagem, e `suppressHydrationWarning` evita alertas quando o script
+ * do AdSense injeta atributos/iframe no elemento antes do React terminar.
  */
 export function AdsenseSlot({
   slot,
@@ -24,22 +27,17 @@ export function AdsenseSlot({
   className?: string;
   style?: React.CSSProperties;
 }) {
-  const [mounted, setMounted] = useState(false);
   const pushed = useRef(false);
 
-  useEffect(() => setMounted(true), []);
-
   useEffect(() => {
-    if (!mounted || pushed.current) return;
+    if (pushed.current) return;
     try {
       (window.adsbygoogle = window.adsbygoogle || []).push({});
       pushed.current = true;
     } catch {
       // adsbygoogle ainda não disponível — ignora
     }
-  }, [mounted]);
-
-  if (!mounted) return <div className={className} style={style} aria-hidden />;
+  }, []);
 
   return (
     <ins
@@ -49,6 +47,7 @@ export function AdsenseSlot({
       data-ad-slot={slot}
       data-ad-format={format}
       data-full-width-responsive={fullWidthResponsive ? "true" : "false"}
+      suppressHydrationWarning
     />
   );
 }
