@@ -364,12 +364,16 @@ function parseRss(xml: string): Item[] {
       || b.match(/<media:thumbnail[^>]+url="([^"]+)"/i)?.[1]
       || b.match(/<img[^>]+src="([^"]+)"/i)?.[1]
       || null;
+    const credito = decode(match(b, /<media:credit[^>]*>([\s\S]*?)<\/media:credit>/))
+      || decode(match(b, /<dc:creator[^>]*>([\s\S]*?)<\/dc:creator>/))
+      || null;
     items.push({
       url: link.trim(),
       titulo: titulo.trim().slice(0, 500),
       corpo: stripTags(descr).slice(0, 4000),
       data: data ? new Date(data).toISOString() : null,
       imagem: enclosure ? enclosure.trim() : null,
+      credito: credito ? credito.trim().slice(0, 200) : null,
     });
   }
   return items;
