@@ -86,13 +86,17 @@ Deno.serve(async (req) => {
     groups.push(g);
   }
 
-  // 3. Persistir clusters
+  // 3. Persistir clusters (por região, como já era) + calcular embedding
+  //    centróide de cada um, usado no passo seguinte para ligar clusters de
+  //    regiões diferentes quando é a mesma notícia estadual.
   let created = 0;
+  const novosClusters: { id: string; regiao_id: string; embedding: number[] }[] = [];
   for (const g of groups) {
     const regiao_id = g[0].regiao_id!;
+    const centroide = mediaVetores(g.map((r) => r.embedding!));
     const { data: cluster, error: cErr } = await sb
       .from("article_clusters")
-      .insert({ regiao_id, prioridade_score: g.length, status: "novo" })
+      .insert({ regiao_id, prioridade_score: g.length, status: "novo", embedding_centroide: centroide })
       .select("id")
       .single();
     if (cErr || !cluster) {
@@ -102,10 +106,46 @@ Deno.serve(async (req) => {
     const links = g.map((r) => ({ cluster_id: cluster.id, raw_article_id: r.id }));
     await sb.from("cluster_articles").insert(links);
     await sb.from("raw_articles").update({ processado: true }).in("id", g.map((r) => r.id));
+    novosClusters.push({ id: cluster.id, regiao_id, embedding: centroide });
     created++;
   }
 
-  return json({ ok: true, processed: items.length, clusters: created });
+  // 4. Vincular entre regiões: mesma notícia coberta por regiões diferentes
+  //    vira o mesmo grupo_estadual_id — sem fundir a publicação, só para
+  //    qualificar o interesse de leitura (ver classify-and-quota).
+  let linked = 0;
+  if (novosClusters.length) {
+    const since = new Date(Date.now() - 48 * 3600 * 1000).toISOString();
+    const { data: outrosData } = await sb
+      .from("article_clusters")
+      .select("id, regiao_id, grupo_estadual_id, embedding_centroide")
+      .not("embedding_centroide", "is", null)
+      .gte("criado_em", since)
+      .limit(300);
+    const outros = (outrosData ?? []) as { id: string; regiao_id: string; grupo_estadual_id: string | null; embedding_centroide: number[] }[];
+    const CROSS_REGION_THRESHOLD = 0.85;
+
+    for (const novo of novosClusters) {
+      let melhor: { id: string; grupo_estadual_id: string | null; sim: number } | null = null;
+      for (const outro of outros) {
+        if (outro.id === novo.id || outro.regiao_id === novo.regiao_id) continue;
+        const sim = cosine(novo.embedding, outro.embedding_centroide);
+        if (sim >= CROSS_REGION_THRESHOLD && (!melhor || sim > melhor.sim)) {
+          melhor = { id: outro.id, grupo_estadual_id: outro.grupo_estadual_id, sim };
+        }
+      }
+      if (melhor) {
+        const grupoId = melhor.grupo_estadual_id ?? crypto.randomUUID();
+        await sb.from("article_clusters").update({ grupo_estadual_id: grupoId }).eq("id", novo.id);
+        if (!melhor.grupo_estadual_id) {
+          await sb.from("article_clusters").update({ grupo_estadual_id: grupoId }).eq("id", melhor.id);
+        }
+        linked++;
+      }
+    }
+  }
+
+  return json({ ok: true, processed: items.length, clusters: created, linked_cross_regiao: linked });
 });
 
 function json(body: unknown, status = 200) {
@@ -147,4 +187,14 @@ function cosine(a: number[], b: number[]): number {
   }
   const denom = Math.sqrt(na) * Math.sqrt(nb);
   return denom === 0 ? 0 : dot / denom;
+}
+
+function mediaVetores(vetores: number[][]): number[] {
+  const n = vetores.length;
+  const dim = vetores[0]?.length ?? 0;
+  const soma = new Array(dim).fill(0);
+  for (const v of vetores) {
+    for (let i = 0; i < dim; i++) soma[i] += v[i] ?? 0;
+  }
+  return soma.map((s) => s / n);
 }
