@@ -155,6 +155,21 @@ Deno.serve(async (req) => {
     });
     await Promise.all(workers);
     console.log(`[scrape-source] background done: ${results.length} fontes`);
+    // Encadeia o resto do pipeline (cluster + classify) para que o usuário
+    // não precise ficar apertando 3 botões — o scrape roda em background e
+    // dispara os próximos passos automaticamente.
+    for (const fn of ["cluster-articles", "classify-and-quota"]) {
+      try {
+        const res = await fetch(`${url}/functions/v1/${fn}`, {
+          method: "POST",
+          headers: { "content-type": "application/json", Authorization: `Bearer ${key}`, apikey: key },
+          body: "{}",
+        });
+        console.log(`[scrape-source] chained ${fn} -> ${res.status}`);
+      } catch (e) {
+        console.error(`[scrape-source] chained ${fn} failed`, (e as Error).message);
+      }
+    }
   })();
   // deno-lint-ignore no-explicit-any
   const rt = (globalThis as any).EdgeRuntime;
