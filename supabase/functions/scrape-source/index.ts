@@ -53,7 +53,7 @@ Deno.serve(async (req) => {
   const key = Deno.env.get("EXTERNAL_SUPABASE_SERVICE_ROLE_KEY");
   if (!url || !key) return json({ error: "missing_external_supabase_env" }, 500);
 
-  let body: { fonte_id?: string; force?: boolean } = {};
+  let body: { fonte_id?: string; force?: boolean; sync?: boolean } = {};
   try {
     body = await req.json();
   } catch {
@@ -153,14 +153,9 @@ Deno.serve(async (req) => {
   // — o Edge Runtime tem timeout curto do lado do cliente (fetch) e o
   // pipeline no admin encadeia scrape → cluster → classify; travar aqui
   // fazia o botão "Rodar pipeline" abortar antes do fim.
-  if (body.fonte_id) {
-    const results = await Promise.all((eligible as Fonte[]).map(processFonte));
-    return json({ ok: true, processed: results.length, report: results });
-  }
-
   const CONCURRENCY = 6;
-  const queue = [...(eligible as Fonte[])];
-  const task = (async () => {
+  async function runAll(fontesList: Fonte[]): Promise<Record<string, unknown>[]> {
+    const queue = [...fontesList];
     const results: Record<string, unknown>[] = [];
     const workers = Array.from({ length: Math.min(CONCURRENCY, queue.length) }, async () => {
       while (queue.length) {
@@ -170,6 +165,21 @@ Deno.serve(async (req) => {
       }
     });
     await Promise.all(workers);
+    return results;
+  }
+
+  // Modo síncrono: usado pelo botão manual "Rodar pipeline" (que encadeia
+  // scrape → cluster → classify e precisa que cada etapa termine de
+  // verdade antes da próxima). Sem isso, os passos seguintes rodam sobre
+  // uma raw_articles ainda vazia, porque o scraping real ainda não terminou.
+  if (body.fonte_id || body.sync) {
+    const results = await runAll(eligible as Fonte[]);
+    return json({ ok: true, processed: results.length, report: results });
+  }
+
+  const queue = [...(eligible as Fonte[])];
+  const task = (async () => {
+    const results = await runAll(queue);
     console.log(`[scrape-source] background done: ${results.length} fontes`);
     // Encadeia o resto do pipeline (cluster + classify) para que o usuário
     // não precise ficar apertando 3 botões — o scrape roda em background e
