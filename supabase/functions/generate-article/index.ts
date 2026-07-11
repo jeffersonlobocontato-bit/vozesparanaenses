@@ -212,12 +212,12 @@ Deno.serve(async (req) => {
     if (rawIdsList.length) {
       const { data: raws } = await sb
         .from("raw_articles")
-        .select("imagem_original_url, fonte:fontes(nome)")
+        .select("imagem_original_url, imagem_credito, fonte:fontes(nome)")
         .in("id", rawIdsList)
         .not("imagem_original_url", "is", null)
         .limit(1);
       const raw = raws?.[0] as
-        | { imagem_original_url: string | null; fonte: { nome: string } | { nome: string }[] | null }
+        | { imagem_original_url: string | null; imagem_credito: string | null; fonte: { nome: string } | { nome: string }[] | null }
         | undefined;
       const srcUrl = raw?.imagem_original_url ?? null;
       if (srcUrl) {
@@ -236,12 +236,18 @@ Deno.serve(async (req) => {
             if (!upErr) {
               const { data: pub } = sb.storage.from("article-covers").getPublicUrl(path);
               const veic = Array.isArray(raw?.fonte) ? raw?.fonte[0]?.nome : raw?.fonte?.nome;
+              const creditoScraped = raw?.imagem_credito?.trim();
+              const credito = creditoScraped && creditoScraped.length
+                ? (veic && !creditoScraped.toLowerCase().includes(veic.toLowerCase())
+                    ? `${creditoScraped} / ${veic}`
+                    : creditoScraped)
+                : `Imagem: reprodução${veic ? ` — ${veic}` : ""}`;
               await sb.from("generated_articles")
                 .update({
                   imagem_original_url: pub.publicUrl,
                   imagem_capa_url: pub.publicUrl,
                   og_image_url: pub.publicUrl,
-                  imagem_credito: `Imagem: reprodução${veic ? ` — ${veic}` : ""}`,
+                  imagem_credito: credito,
                 })
                 .eq("id", inserted.id);
             }
