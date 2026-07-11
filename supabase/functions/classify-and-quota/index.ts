@@ -69,11 +69,27 @@ Deno.serve(async (req) => {
     const catSlug = await classify(excerpt, categorias, aiKey);
     const cat = categorias.find((k) => k.slug === catSlug) ?? categorias[0];
 
+    // Bônus por cobertura estadual: se este cluster está vinculado (mesma
+    // notícia detectada em outra região — ver cluster-articles), soma um
+    // reforço proporcional a quantas regiões distintas já cobriram o fato.
+    let bonusEstadual = 0;
+    const { data: grupoRow } = await sb.from("article_clusters").select("grupo_estadual_id").eq("id", c.id).maybeSingle();
+    const grupoEstadualId = grupoRow?.grupo_estadual_id ?? null;
+    if (grupoEstadualId) {
+      const { data: irmaos } = await sb
+        .from("article_clusters")
+        .select("regiao_id")
+        .eq("grupo_estadual_id", grupoEstadualId);
+      const regioesDistintas = new Set((irmaos ?? []).map((i) => i.regiao_id)).size;
+      bonusEstadual = Math.max(0, regioesDistintas - 1) * 0.5;
+    }
+
     // Interesse de leitura = nº de fontes (prova social) × peso da categoria
-    // (comportamento histórico de consumo) × fator de recência (decai em 48h).
+    // (comportamento histórico de consumo) × fator de recência (decai em 48h)
+    // + bônus por cobertura em múltiplas regiões.
     const horasDesdeCriacao = (Date.now() - new Date(c.criado_em).getTime()) / 3_600_000;
     const fatorRecencia = Math.max(0.3, 1 - horasDesdeCriacao / 48);
-    const interesseScore = Number((c.prioridade_score * cat.peso_engajamento * fatorRecencia).toFixed(2));
+    const interesseScore = Number((c.prioridade_score * cat.peso_engajamento * fatorRecencia + bonusEstadual).toFixed(2));
 
     await sb.from("article_clusters").update({ categoria_id: cat.id, interesse_score: interesseScore }).eq("id", c.id);
     classified.push({ id: c.id, regiao_id: c.regiao_id, categoria_id: cat.id, score: c.prioridade_score });
