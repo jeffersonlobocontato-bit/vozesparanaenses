@@ -364,9 +364,8 @@ function parseRss(xml: string): Item[] {
       || b.match(/<media:thumbnail[^>]+url="([^"]+)"/i)?.[1]
       || b.match(/<img[^>]+src="([^"]+)"/i)?.[1]
       || null;
-    const credito = decode(match(b, /<media:credit[^>]*>([\s\S]*?)<\/media:credit>/))
-      || decode(match(b, /<dc:creator[^>]*>([\s\S]*?)<\/dc:creator>/))
-      || null;
+    // Só usamos media:credit — dc:creator costuma ser o autor da matéria, não da foto.
+    const credito = decode(match(b, /<media:credit[^>]*>([\s\S]*?)<\/media:credit>/)) || null;
     items.push({
       url: link.trim(),
       titulo: titulo.trim().slice(0, 500),
