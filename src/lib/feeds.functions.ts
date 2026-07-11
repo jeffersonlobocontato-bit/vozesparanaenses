@@ -101,7 +101,9 @@ export const listFeedArticles = createServerFn({ method: "GET" })
         published_at: r.publicado_em,
         cidade_principal: r.cidade_principal,
         cidades_mencionadas: r.cidades_mencionadas,
-        region: r.regiao ? { slug: r.regiao.slug, name: r.regiao.nome } : null,
+        region: r.regiao
+          ? { slug: r.regiao.slug, name: displayRegionName(r.regiao.slug, r.regiao.nome) }
+          : null,
         categoria: r.categoria
           ? { slug: r.categoria.slug, name: r.categoria.nome }
           : null,
