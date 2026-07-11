@@ -26,7 +26,6 @@ import { Route as AutorSlugRouteImport } from './routes/autor.$slug'
 import { Route as AdminSenhaRouteImport } from './routes/admin.senha'
 import { Route as AdminResetPasswordRouteImport } from './routes/admin.reset-password'
 import { Route as AdminRegioesRouteImport } from './routes/admin.regioes'
-import { Route as AdminPautaRouteImport } from './routes/admin.pauta'
 import { Route as AdminPainelRouteImport } from './routes/admin.painel'
 import { Route as AdminLoginRouteImport } from './routes/admin.login'
 import { Route as AdminFontesRouteImport } from './routes/admin.fontes'
@@ -130,11 +129,6 @@ const AdminResetPasswordRoute = AdminResetPasswordRouteImport.update({
 const AdminRegioesRoute = AdminRegioesRouteImport.update({
   id: '/regioes',
   path: '/regioes',
-  getParentRoute: () => AdminRoute,
-} as any)
-const AdminPautaRoute = AdminPautaRouteImport.update({
-  id: '/pauta',
-  path: '/pauta',
   getParentRoute: () => AdminRoute,
 } as any)
 const AdminPainelRoute = AdminPainelRouteImport.update({
@@ -256,7 +250,6 @@ export interface FileRoutesByFullPath {
   '/admin/fontes': typeof AdminFontesRoute
   '/admin/login': typeof AdminLoginRoute
   '/admin/painel': typeof AdminPainelRoute
-  '/admin/pauta': typeof AdminPautaRoute
   '/admin/regioes': typeof AdminRegioesRoute
   '/admin/reset-password': typeof AdminResetPasswordRoute
   '/admin/senha': typeof AdminSenhaRoute
@@ -293,7 +286,6 @@ export interface FileRoutesByTo {
   '/admin/fontes': typeof AdminFontesRoute
   '/admin/login': typeof AdminLoginRoute
   '/admin/painel': typeof AdminPainelRoute
-  '/admin/pauta': typeof AdminPautaRoute
   '/admin/regioes': typeof AdminRegioesRoute
   '/admin/reset-password': typeof AdminResetPasswordRoute
   '/admin/senha': typeof AdminSenhaRoute
@@ -333,7 +325,6 @@ export interface FileRoutesById {
   '/admin/fontes': typeof AdminFontesRoute
   '/admin/login': typeof AdminLoginRoute
   '/admin/painel': typeof AdminPainelRoute
-  '/admin/pauta': typeof AdminPautaRoute
   '/admin/regioes': typeof AdminRegioesRoute
   '/admin/reset-password': typeof AdminResetPasswordRoute
   '/admin/senha': typeof AdminSenhaRoute
@@ -374,7 +365,6 @@ export interface FileRouteTypes {
     | '/admin/fontes'
     | '/admin/login'
     | '/admin/painel'
-    | '/admin/pauta'
     | '/admin/regioes'
     | '/admin/reset-password'
     | '/admin/senha'
@@ -411,7 +401,6 @@ export interface FileRouteTypes {
     | '/admin/fontes'
     | '/admin/login'
     | '/admin/painel'
-    | '/admin/pauta'
     | '/admin/regioes'
     | '/admin/reset-password'
     | '/admin/senha'
@@ -450,7 +439,6 @@ export interface FileRouteTypes {
     | '/admin/fontes'
     | '/admin/login'
     | '/admin/painel'
-    | '/admin/pauta'
     | '/admin/regioes'
     | '/admin/reset-password'
     | '/admin/senha'
@@ -618,13 +606,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminRegioesRouteImport
       parentRoute: typeof AdminRoute
     }
-    '/admin/pauta': {
-      id: '/admin/pauta'
-      path: '/pauta'
-      fullPath: '/admin/pauta'
-      preLoaderRoute: typeof AdminPautaRouteImport
-      parentRoute: typeof AdminRoute
-    }
     '/admin/painel': {
       id: '/admin/painel'
       path: '/painel'
@@ -786,7 +767,6 @@ interface AdminRouteChildren {
   AdminFontesRoute: typeof AdminFontesRoute
   AdminLoginRoute: typeof AdminLoginRoute
   AdminPainelRoute: typeof AdminPainelRoute
-  AdminPautaRoute: typeof AdminPautaRoute
   AdminRegioesRoute: typeof AdminRegioesRoute
   AdminResetPasswordRoute: typeof AdminResetPasswordRoute
   AdminSenhaRoute: typeof AdminSenhaRoute
@@ -799,7 +779,6 @@ const AdminRouteChildren: AdminRouteChildren = {
   AdminFontesRoute: AdminFontesRoute,
   AdminLoginRoute: AdminLoginRoute,
   AdminPainelRoute: AdminPainelRoute,
-  AdminPautaRoute: AdminPautaRoute,
   AdminRegioesRoute: AdminRegioesRoute,
   AdminResetPasswordRoute: AdminResetPasswordRoute,
   AdminSenhaRoute: AdminSenhaRoute,
@@ -835,13 +814,3 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}
