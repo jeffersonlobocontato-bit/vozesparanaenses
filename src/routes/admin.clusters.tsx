@@ -26,6 +26,7 @@ function AdminClusters() {
   const [err, setErr] = useState<string | null>(null);
   const [busyId, setBusyId] = useState<string | null>(null);
   const [msg, setMsg] = useState<string | null>(null);
+  const [cleaning, setCleaning] = useState(false);
 
   const load = useCallback(async () => {
     setItems(null); setErr(null);
@@ -75,6 +76,31 @@ function AdminClusters() {
   }, []);
 
   useEffect(() => { load(); }, [load]);
+
+  async function limparHistorico() {
+    const ok = window.confirm(
+      "Excluir todas as pautas não publicadas com scraping há mais de 24h? Esta ação não pode ser desfeita.",
+    );
+    if (!ok) return;
+    setCleaning(true); setMsg(null);
+    try {
+      const sb = await getExternalBrowser();
+      const corte = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
+      const { data, error } = await sb
+        .from("article_clusters")
+        .delete()
+        .lt("criado_em", corte)
+        .in("status", ["novo", "selecionado_cota", "fatos_extraidos", "descartado"])
+        .select("id");
+      if (error) throw error;
+      setMsg(`Histórico limpo: ${data?.length ?? 0} pauta(s) removida(s).`);
+      await load();
+    } catch (e: unknown) {
+      setMsg("Falha ao limpar histórico: " + (e instanceof Error ? e.message : "erro"));
+    } finally {
+      setCleaning(false);
+    }
+  }
 
   async function extractFacts(id: string) {
     setBusyId(id); setMsg(null);
@@ -166,7 +192,17 @@ function AdminClusters() {
     <div className="space-y-4">
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-bold">Pautas (clusters)</h1>
-        <button onClick={load} className="rounded border px-3 py-1 text-xs hover:bg-accent">Atualizar</button>
+        <div className="flex gap-2">
+          <button
+            onClick={limparHistorico}
+            disabled={cleaning}
+            className="rounded border border-red-300 bg-red-50 px-3 py-1 text-xs font-semibold text-red-700 hover:bg-red-100 disabled:opacity-60"
+            title="Remove pautas não publicadas com scraping há mais de 24h"
+          >
+            {cleaning ? "Limpando…" : "🧹 Limpar histórico (>24h)"}
+          </button>
+          <button onClick={load} className="rounded border px-3 py-1 text-xs hover:bg-accent">Atualizar</button>
+        </div>
       </div>
       {msg && <p className="rounded border bg-muted p-2 text-xs">{msg}</p>}
       {err && <p className="rounded border border-red-200 bg-red-50 p-3 text-sm text-red-700">{err}</p>}
