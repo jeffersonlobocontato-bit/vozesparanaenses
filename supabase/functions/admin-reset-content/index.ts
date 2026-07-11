@@ -29,7 +29,8 @@ Deno.serve(async (req) => {
 
   const results: Record<string, unknown> = {};
   for (const t of tables) {
-    const { error, count } = await sb.from(t).delete({ count: "exact" }).not("id", "is", null);
+    const filterCol = t === "cluster_articles" ? "cluster_id" : "id";
+    const { error, count } = await sb.from(t).delete({ count: "exact" }).not(filterCol, "is", null);
     results[t] = error ? { error: error.message } : { deleted: count };
   }
 
