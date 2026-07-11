@@ -120,11 +120,6 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
         async: true,
       },
       {
-        src: "https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-3867318545397573",
-        async: true,
-        crossOrigin: "anonymous",
-      },
-      {
         children:
           "window.dataLayer = window.dataLayer || [];function gtag(){dataLayer.push(arguments);}gtag('js', new Date());gtag('config', 'G-HPX9FLN7XV', { send_page_view: false });",
       },
@@ -200,6 +195,17 @@ function RootShell({ children }: { children: ReactNode }) {
 
 function RootComponent() {
   const { queryClient } = Route.useRouteContext();
+
+  useEffect(() => {
+    if (document.getElementById("adsbygoogle-js")) return;
+    const s = document.createElement("script");
+    s.id = "adsbygoogle-js";
+    s.async = true;
+    s.crossOrigin = "anonymous";
+    s.src =
+      "https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-3867318545397573";
+    document.head.appendChild(s);
+  }, []);
 
   return (
     <QueryClientProvider client={queryClient}>

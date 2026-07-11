@@ -267,12 +267,12 @@ function PortalHome({ regions, articles }: { regions: Region[]; articles: Ranked
 
       <LocationBar />
 
-      <main className="mx-auto max-w-7xl px-4 py-8">
+      <main className="mx-auto max-w-7xl px-4 py-6">
         {/* Publicidade — Super Banner topo */}
-        <AdSlot size="970x90" className="mb-8" />
+        <AdSlot size="970x90" className="mb-6" />
 
         {/* Hero */}
-        <div className="grid grid-cols-12 gap-6 mb-12">
+        <div className="grid grid-cols-12 gap-6 mb-8">
           <div className="col-span-12 lg:col-span-8">
             <HeroCard article={hero} />
           </div>
@@ -307,11 +307,13 @@ function PortalHome({ regions, articles }: { regions: Region[]; articles: Ranked
           </div>
         </div>
 
-        {/* Publicidade — Retângulo entre blocos */}
-        <AdSlot size="728x90" className="mb-12" />
+        {/* AdSense — Grupo 1 (entre hero e regiões) */}
+        <div className="mb-8 empty:hidden">
+          <AdsenseSlot slot="9449330789" />
+        </div>
 
         {/* Notícias das Regiões */}
-        <section className="mb-12">
+        <section className="mb-10">
           <div className="flex items-center gap-4 mb-6">
             <h2 className="font-display text-3xl md:text-4xl text-primary uppercase tracking-tight shrink-0">
               Notícias das Regiões
@@ -344,12 +346,9 @@ function PortalHome({ regions, articles }: { regions: Region[]; articles: Ranked
           </div>
         </section>
 
-        {/* Publicidade — Half-page antes de secundárias */}
-        <AdSlot size="970x90" className="mb-12" />
-
-        {/* AdSense — Grupo 1 */}
-        <div className="mb-12">
-          <AdsenseSlot slot="9449330789" />
+        {/* AdSense — Grupo 2 (antes das secundárias) */}
+        <div className="mb-8 empty:hidden">
+          <AdsenseSlot slot="5202964012" />
         </div>
 
         {/* Secondary + Mais lidas */}
@@ -408,18 +407,10 @@ function PortalHome({ regions, articles }: { regions: Region[]; articles: Ranked
           </aside>
         </div>
 
-        {/* AdSense — Grupo 2 */}
-        <div className="mb-12">
-          <AdsenseSlot slot="5202964012" />
-        </div>
-
-        {/* AdSense — Grupo 3 */}
-        <div className="mb-12">
+        {/* AdSense — Grupo 3 (rodapé) */}
+        <div className="mt-10 empty:hidden">
           <AdsenseSlot slot="2880053002" />
         </div>
-
-        {/* Publicidade — Rodapé */}
-        <AdSlot size="970x90" className="mt-12" />
       </main>
 
       <SiteFooter />
