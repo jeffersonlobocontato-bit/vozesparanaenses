@@ -64,12 +64,8 @@ export function AdsenseSlot({
     check();
     const obs = new MutationObserver(check);
     obs.observe(el, { attributes: true, attributeFilter: ["data-ad-status"] });
-    const timeout = window.setTimeout(() => {
-      if (!el.getAttribute("data-ad-status")) setStatus("unfilled");
-    }, 4000);
     return () => {
       obs.disconnect();
-      window.clearTimeout(timeout);
     };
   }, [hydrated]);
 
