@@ -392,6 +392,61 @@ function match(s: string, re: RegExp): string {
   const m = s.match(re);
   return m ? m[1] : "";
 }
+
+// Busca a página da matéria e extrai a imagem principal:
+// 1) og:image / og:image:secure_url
+// 2) twitter:image / twitter:image:src
+// 3) <link rel="image_src">
+// 4) primeiro <img src=""> do corpo (fallback)
+async function fetchArticleImage(url: string): Promise<string | null> {
+  const ctrl = new AbortController();
+  const t = setTimeout(() => ctrl.abort(), 8000);
+  try {
+    const res = await fetch(url, {
+      signal: ctrl.signal,
+      headers: {
+        "user-agent": "Mozilla/5.0 (compatible; VozesParanaensesBot/1.0; +contato@vozesparanaenses.com.br)",
+        accept: "text/html,application/xhtml+xml",
+      },
+    });
+    if (!res.ok) return null;
+    const html = await res.text();
+    const head = html.slice(0, 200_000); // og/twitter costumam estar no <head>
+    const patterns: RegExp[] = [
+      /<meta[^>]+property=["']og:image:secure_url["'][^>]+content=["']([^"']+)["']/i,
+      /<meta[^>]+property=["']og:image["'][^>]+content=["']([^"']+)["']/i,
+      /<meta[^>]+content=["']([^"']+)["'][^>]+property=["']og:image["']/i,
+      /<meta[^>]+name=["']twitter:image(?::src)?["'][^>]+content=["']([^"']+)["']/i,
+      /<meta[^>]+content=["']([^"']+)["'][^>]+name=["']twitter:image(?::src)?["']/i,
+      /<link[^>]+rel=["']image_src["'][^>]+href=["']([^"']+)["']/i,
+    ];
+    for (const re of patterns) {
+      const m = head.match(re);
+      if (m?.[1]) return absolutize(m[1], url);
+    }
+    // Fallback: primeiro <img src=""> razoável (evita logos/ícones minúsculos)
+    const imgs = html.match(/<img[^>]+src=["']([^"']+)["'][^>]*>/gi) ?? [];
+    for (const tag of imgs) {
+      const src = tag.match(/src=["']([^"']+)["']/i)?.[1];
+      if (!src) continue;
+      if (/(sprite|logo|icon|avatar|blank|placeholder|1x1|pixel)/i.test(src)) continue;
+      if (/\.(svg)(\?|$)/i.test(src)) continue;
+      return absolutize(src, url);
+    }
+    return null;
+  } finally {
+    clearTimeout(t);
+  }
+}
+
+function absolutize(src: string, base: string): string {
+  try {
+    return new URL(src, base).toString();
+  } catch {
+    return src;
+  }
+}
+
 function stripTags(s: string): string {
   return s.replace(/<!\[CDATA\[|\]\]>/g, "").replace(/<[^>]+>/g, " ").replace(/\s+/g, " ").trim();
 }
