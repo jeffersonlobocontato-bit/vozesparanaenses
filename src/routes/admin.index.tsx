@@ -178,12 +178,18 @@ function AdminQueue() {
         </pre>
       )}
 
-      {pinned && pinned.length > 0 && (
-        <section className="rounded-lg border-2 border-amber-400 bg-amber-50/70 p-4">
-          <div className="mb-2 flex items-center justify-between">
-            <h2 className="text-sm font-bold text-amber-900">📌 Matérias fixadas ({pinned.length})</h2>
-            <span className="text-[11px] text-amber-800">Publicadas em destaque na home</span>
-          </div>
+      <section className="rounded-lg border-2 border-amber-400 bg-amber-50/70 p-4">
+        <div className="mb-2 flex items-center justify-between">
+          <h2 className="text-sm font-bold text-amber-900">📌 Matérias fixadas ({pinned?.length ?? 0})</h2>
+          <span className="text-[11px] text-amber-800">Publicadas em destaque na home</span>
+        </div>
+        {pinned === null && <p className="text-xs text-amber-800">Carregando…</p>}
+        {pinned && pinned.length === 0 && (
+          <p className="text-xs text-amber-800">
+            Nenhuma matéria fixada. Abra uma matéria publicada, clique em «✎ Editar matéria» e escolha a posição de fixação (Manchete ou Lateral).
+          </p>
+        )}
+        {pinned && pinned.length > 0 && (
           <ul className="space-y-1.5">
             {pinned.map((p) => {
               const esc = p.fixado_escopo ?? "estado";
@@ -213,8 +219,8 @@ function AdminQueue() {
               );
             })}
           </ul>
-        </section>
-      )}
+        )}
+      </section>
 
       {err && <p className="rounded border border-red-200 bg-red-50 p-3 text-sm text-red-700">{err}</p>}
       {!items && !err && <p className="text-sm text-muted-foreground">Carregando…</p>}
