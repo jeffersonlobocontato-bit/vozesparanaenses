@@ -47,8 +47,15 @@ function Chamas({ n, cor }: { n: number; cor: string }) {
 function AdminClusters() {
   const [items, setItems] = useState<Cluster[] | null>(null);
   const [err, setErr] = useState<string | null>(null);
-  const [busyId, setBusyId] = useState<string | null>(null);
+  const [busyIds, setBusyIds] = useState<Set<string>>(new Set());
   const [msg, setMsg] = useState<string | null>(null);
+  const markBusy = useCallback((id: string, on: boolean) => {
+    setBusyIds((prev) => {
+      const next = new Set(prev);
+      if (on) next.add(id); else next.delete(id);
+      return next;
+    });
+  }, []);
   const [cleaning, setCleaning] = useState(false);
   const [fRegiao, setFRegiao] = useState<string>("");
   const [fCategoria, setFCategoria] = useState<string>("");
@@ -137,13 +144,13 @@ function AdminClusters() {
   }
 
   async function extractFacts(id: string) {
-    setBusyId(id); setMsg(null);
+    markBusy(id, true); setMsg(null);
     try {
       const { error } = await supabase.functions.invoke("extract-facts", {
         body: { cluster_id: id },
       });
       if (error) throw error;
-      setMsg("Fatos extraídos. Gerando matéria…");
+      setMsg(`Fatos extraídos (${id.slice(0, 6)}). Gerando matéria…`);
       const { data: gen, error: gErr } = await supabase.functions.invoke("generate-article", {
         body: { cluster_id: id },
       });
@@ -153,12 +160,12 @@ function AdminClusters() {
     } catch (e: unknown) {
       setMsg("Falha no pipeline: " + (e instanceof Error ? e.message : "erro"));
     } finally {
-      setBusyId(null);
+      markBusy(id, false);
     }
   }
 
   async function generate(id: string) {
-    setBusyId(id); setMsg(null);
+    markBusy(id, true); setMsg(null);
     try {
       const { data, error } = await supabase.functions.invoke("generate-article", {
         body: { cluster_id: id },
@@ -169,7 +176,7 @@ function AdminClusters() {
     } catch (e: unknown) {
       setMsg("Falha: " + (e instanceof Error ? e.message : "erro"));
     } finally {
-      setBusyId(null);
+      markBusy(id, false);
     }
   }
 
@@ -372,14 +379,14 @@ function AdminClusters() {
                               )}
                               <div className="mt-3">
                                 {c.status === "fatos_extraidos" ? (
-                                  <button disabled={busyId === c.id} onClick={() => generate(c.id)}
+                                  <button disabled={busyIds.has(c.id)} onClick={() => generate(c.id)}
                                     className="rounded bg-[#0066CC] px-3 py-1.5 text-xs font-semibold text-white hover:bg-[#0055aa] disabled:opacity-60">
-                                    {busyId === c.id ? "Gerando…" : "Gerar matéria"}
+                                    {busyIds.has(c.id) ? "Gerando…" : "Gerar matéria"}
                                   </button>
                                 ) : (
-                                  <button disabled={busyId === c.id} onClick={() => extractFacts(c.id)}
+                                  <button disabled={busyIds.has(c.id)} onClick={() => extractFacts(c.id)}
                                     className="rounded bg-[#0A2540] px-3 py-1.5 text-xs font-semibold text-white hover:bg-[#0d2f52] disabled:opacity-60">
-                                    {busyId === c.id ? "Processando…" : "Extrair fatos + gerar matéria"}
+                                    {busyIds.has(c.id) ? "Processando…" : "Extrair fatos + gerar matéria"}
                                   </button>
                                 )}
                               </div>
