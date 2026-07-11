@@ -1,4 +1,4 @@
-import { useEffect, useRef, useSyncExternalStore } from "react";
+import { useEffect, useRef, useState, useSyncExternalStore } from "react";
 
 declare global {
   interface Window {
@@ -37,6 +37,10 @@ export function AdsenseSlot({
 }) {
   const hydrated = useHydrated();
   const pushed = useRef(false);
+  const insRef = useRef<HTMLModElement | null>(null);
+  const [status, setStatus] = useState<"pending" | "filled" | "unfilled">(
+    "pending",
+  );
 
   useEffect(() => {
     if (!hydrated || pushed.current) return;
@@ -48,12 +52,35 @@ export function AdsenseSlot({
     }
   }, [hydrated]);
 
-  if (!hydrated) return <div className={className} style={style} aria-hidden />;
+  useEffect(() => {
+    if (!hydrated) return;
+    const el = insRef.current;
+    if (!el) return;
+    const check = () => {
+      const s = el.getAttribute("data-ad-status");
+      if (s === "filled") setStatus("filled");
+      else if (s === "unfilled") setStatus("unfilled");
+    };
+    check();
+    const obs = new MutationObserver(check);
+    obs.observe(el, { attributes: true, attributeFilter: ["data-ad-status"] });
+    const timeout = window.setTimeout(() => {
+      if (!el.getAttribute("data-ad-status")) setStatus("unfilled");
+    }, 4000);
+    return () => {
+      obs.disconnect();
+      window.clearTimeout(timeout);
+    };
+  }, [hydrated]);
+
+  if (!hydrated) return null;
+  if (status === "unfilled") return null;
 
   return (
     <ins
+      ref={insRef}
       className={`adsbygoogle ${className}`}
-      style={{ display: "block", ...style }}
+      style={{ display: "block", minHeight: status === "filled" ? undefined : 1, ...style }}
       data-ad-client="ca-pub-3867318545397573"
       data-ad-slot={slot}
       data-ad-format={format}
