@@ -125,13 +125,19 @@ function mapRegiao(r: RegiaoRow): Region {
   return {
     id: r.id,
     slug: r.slug,
-    name: r.nome,
+    name: REGION_NAME_OVERRIDES[r.slug] ?? r.nome,
     main_city: r.cidade_principal,
     description: r.descricao,
     hero_image_url: r.hero_image_url,
     tema_config: r.tema_config ?? {},
   };
 }
+
+// Overrides de rótulos exibidos publicamente, mantendo o slug original.
+const REGION_NAME_OVERRIDES: Record<string, string> = {
+  "norte-central": "Norte",
+  "centro-ocidental": "Centro Oeste",
+};
 
 type MateriaRow = {
   id: string;
@@ -222,10 +228,12 @@ export const getRegionBySlug = createServerFn({ method: "GET" })
       return {
         id: data.slug,
         slug: data.slug,
-        name: data.slug
-          .split("-")
-          .map((p) => p.charAt(0).toUpperCase() + p.slice(1))
-          .join(" "),
+        name:
+          REGION_NAME_OVERRIDES[data.slug] ??
+          data.slug
+            .split("-")
+            .map((p) => p.charAt(0).toUpperCase() + p.slice(1))
+            .join(" "),
         main_city: "",
         description: null,
         hero_image_url: null,
