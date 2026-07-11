@@ -164,7 +164,9 @@ function mapMateria(m: MateriaRow): ArticleListItem {
     summary: m.resumo,
     cover_image_url: m.imagem_capa_url,
     published_at: m.publicado_em,
-    region: m.regiao ? { slug: m.regiao.slug, name: m.regiao.nome } : null,
+    region: m.regiao
+      ? { slug: m.regiao.slug, name: displayRegionName(m.regiao.slug, m.regiao.nome) }
+      : null,
     categoria: m.categoria ? { slug: m.categoria.slug, name: m.categoria.nome } : null,
     fixado_posicao: typeof m.fixado_posicao === "number" ? m.fixado_posicao : null,
     fixado_escopo:
