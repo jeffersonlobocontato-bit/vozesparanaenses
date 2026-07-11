@@ -5,6 +5,8 @@
 //     (evita cópia literal / risco autoral).
 //   { article_id, mode: "ai", source_url }  → força usar essa URL como base.
 //   { article_id, mode: "upload", base64, mime } → upload manual do editor.
+//   { article_id, mode: "original" }        → restaura a foto original (já copiada
+//     para o storage no momento da geração) como capa da matéria.
 // Salva em storage `article-covers` e atualiza imagem_capa_url + og_image_url + imagem_credito.
 
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
@@ -31,7 +33,7 @@ const SAFE_PROMPT =
 
 type Body = {
   article_id: string;
-  mode: "ai" | "upload";
+  mode: "ai" | "upload" | "original";
   source_url?: string;
   base64?: string;
   mime?: string;
@@ -54,10 +56,27 @@ Deno.serve(async (req) => {
 
   const { data: article, error: aErr } = await sb
     .from("generated_articles")
-    .select("id, cluster_id, titulo, resumo")
+    .select("id, cluster_id, titulo, resumo, imagem_original_url")
     .eq("id", body.article_id)
     .maybeSingle();
   if (aErr || !article) return json({ error: "article_not_found", detail: aErr?.message }, 404);
+
+  // Modo "original": só reaponta a capa pra cópia permanente já feita.
+  if (body.mode === "original") {
+    if (!article.imagem_original_url) {
+      return json({ error: "no_original_image", detail: "Nenhuma foto original foi copiada da fonte para esta matéria." }, 404);
+    }
+    const { error: updErr } = await sb
+      .from("generated_articles")
+      .update({
+        imagem_capa_url: article.imagem_original_url,
+        og_image_url: article.imagem_original_url,
+        imagem_credito: "Imagem: reprodução da fonte original",
+      })
+      .eq("id", body.article_id);
+    if (updErr) return json({ error: "article_update_failed", detail: updErr.message }, 500);
+    return json({ ok: true, url: article.imagem_original_url, mode: "original" });
+  }
 
   let imgBytes: Uint8Array;
   let mime = "image/png";
@@ -73,6 +92,8 @@ Deno.serve(async (req) => {
 
     // Descobre imagem-fonte
     let sourceUrl = body.source_url ?? null;
+    // Preferir a cópia local (permanente e sempre acessível) antes de cair pras raws.
+    if (!sourceUrl && article.imagem_original_url) sourceUrl = article.imagem_original_url;
     if (!sourceUrl && article.cluster_id) {
       const { data: ca } = await sb.from("cluster_articles").select("raw_article_id").eq("cluster_id", article.cluster_id);
       const rawIds = (ca ?? []).map((r) => r.raw_article_id);

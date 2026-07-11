@@ -23,6 +23,7 @@ type Draft = {
   gerado_em: string;
   imagem_capa_url: string | null;
   imagem_credito: string | null;
+  imagem_original_url: string | null;
   fixado_posicao: number | null;
   fixado_escopo: "estado" | "regiao" | "cidades" | null;
   fixado_regioes: string[] | null;
@@ -46,9 +47,9 @@ function AdminQueue() {
     setItems(null); setErr(null);
     try {
       const sb = await getExternalBrowser();
-      const fullSelect = "id, slug, titulo, subtitulo, resumo, corpo, seo_title, seo_description, editor_responsavel, status, gerado_em, imagem_capa_url, imagem_credito, fixado_posicao, fixado_escopo, fixado_regioes, fixado_cidades, regiao:regioes(slug, nome), categoria:editorial_categories(slug, nome)";
-      const pinBasicSelect = "id, slug, titulo, subtitulo, resumo, corpo, seo_title, seo_description, editor_responsavel, status, gerado_em, imagem_capa_url, imagem_credito, fixado_posicao, regiao:regioes(slug, nome), categoria:editorial_categories(slug, nome)";
-      const midSelect = "id, slug, titulo, subtitulo, resumo, corpo, seo_title, seo_description, editor_responsavel, status, gerado_em, imagem_capa_url, imagem_credito, regiao:regioes(slug, nome), categoria:editorial_categories(slug, nome)";
+      const fullSelect = "id, slug, titulo, subtitulo, resumo, corpo, seo_title, seo_description, editor_responsavel, status, gerado_em, imagem_capa_url, imagem_credito, imagem_original_url, fixado_posicao, fixado_escopo, fixado_regioes, fixado_cidades, regiao:regioes(slug, nome), categoria:editorial_categories(slug, nome)";
+      const pinBasicSelect = "id, slug, titulo, subtitulo, resumo, corpo, seo_title, seo_description, editor_responsavel, status, gerado_em, imagem_capa_url, imagem_credito, imagem_original_url, fixado_posicao, regiao:regioes(slug, nome), categoria:editorial_categories(slug, nome)";
+      const midSelect = "id, slug, titulo, subtitulo, resumo, corpo, seo_title, seo_description, editor_responsavel, status, gerado_em, imagem_capa_url, imagem_credito, imagem_original_url, regiao:regioes(slug, nome), categoria:editorial_categories(slug, nome)";
       const fallbackSelect = "id, slug, titulo, subtitulo, resumo, corpo, seo_title, seo_description, status, gerado_em, regiao:regioes(slug, nome), categoria:editorial_categories(slug, nome)";
       const run = (sel: string) =>
         sb.from("generated_articles")
@@ -182,6 +183,7 @@ function AdminQueue() {
             <ArticleImageEditor
               articleId={it.id}
               currentUrl={it.imagem_capa_url}
+              originalUrl={it.imagem_original_url}
               currentCredito={it.imagem_credito}
               onUpdated={load}
             />
