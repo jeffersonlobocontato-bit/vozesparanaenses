@@ -120,6 +120,11 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
         async: true,
       },
       {
+        src: "https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-3867318545397573",
+        async: true,
+        crossOrigin: "anonymous",
+      },
+      {
         children:
           "window.dataLayer = window.dataLayer || [];function gtag(){dataLayer.push(arguments);}gtag('js', new Date());gtag('config', 'G-HPX9FLN7XV', { send_page_view: false });",
       },
