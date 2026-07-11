@@ -381,7 +381,7 @@ insert into public.regions (slug, name, main_city, description, primary_color, a
   ('litoral',        'Litoral',         'Paranaguá',       'Litoral do Paraná',            '#0891B2', '#F97316'),
   ('campos-gerais',  'Campos Gerais',   'Ponta Grossa',    'Campos Gerais',                '#65A30D', '#DC2626'),
   ('norte-pioneiro', 'Norte Pioneiro',  'Jacarezinho',     'Norte Pioneiro',               '#B45309', '#0EA5E9'),
-  ('norte-central',  'Norte Central',   'Londrina',        'Norte Central Paranaense',     '#7C3AED', '#F59E0B'),
+  ('norte-central',  'Norte',           'Londrina',        'Norte Paranaense',             '#7C3AED', '#F59E0B'),
   ('noroeste',       'Noroeste',        'Maringá',         'Noroeste do Paraná',           '#DB2777', '#22C55E'),
   ('oeste',          'Oeste',           'Cascavel',        'Oeste do Paraná',              '#DC2626', '#FACC15'),
   ('sudoeste',       'Sudoeste',        'Francisco Beltrão','Sudoeste do Paraná',          '#16A34A', '#F97316'),

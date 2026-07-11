@@ -8,7 +8,7 @@ const PRIMARY_NAV: { label: string; to: string; params?: Record<string, string> 
   { label: "Últimas", to: "/" },
   { label: "Metropolitana", to: "/$region", params: { region: "metropolitana" } },
   { label: "Oeste", to: "/$region", params: { region: "oeste" } },
-  { label: "Norte Central", to: "/$region", params: { region: "norte-central" } },
+  { label: "Norte", to: "/$region", params: { region: "norte-central" } },
   { label: "Campos Gerais", to: "/$region", params: { region: "campos-gerais" } },
   { label: "Litoral", to: "/$region", params: { region: "litoral" } },
   { label: "Sudoeste", to: "/$region", params: { region: "sudoeste" } },
