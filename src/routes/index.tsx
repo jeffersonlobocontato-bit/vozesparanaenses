@@ -13,6 +13,7 @@ import {
 import { LocationBar, ProximityBadge } from "@/components/LocationBar";
 import { SiteHeader, SiteFooter } from "@/components/SiteHeader";
 import { AdSlot } from "@/components/AdSlot";
+import { AdsenseSlot } from "@/components/AdsenseSlot";
 import { arrangePinnedSlots } from "@/lib/pinned-layout";
 
 const regionsQO = queryOptions({
@@ -345,6 +346,11 @@ function PortalHome({ regions, articles }: { regions: Region[]; articles: Ranked
 
         {/* Publicidade — Half-page antes de secundárias */}
         <AdSlot size="970x90" className="mb-12" />
+
+        {/* AdSense — Grupo 1 */}
+        <div className="mb-12">
+          <AdsenseSlot slot="9449330789" />
+        </div>
 
         {/* Secondary + Mais lidas */}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
