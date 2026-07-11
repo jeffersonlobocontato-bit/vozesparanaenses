@@ -254,7 +254,16 @@ Deno.serve(async (req) => {
     // o editor pode gerar/subir a capa manualmente depois.
   }
 
-  // 4. Marcar raws desse cluster como processados
+  // 4. Marcar cluster como "rascunho gerado" para que suma do Painel de Pautas
+  const { error: statusErr } = await sb
+    .from("article_clusters")
+    .update({ status: "rascunho_gerado" })
+    .eq("id", clusterId);
+  if (statusErr) {
+    console.error("Erro ao atualizar status do cluster:", statusErr);
+  }
+
+  // 5. Marcar raws desse cluster como processados
   const { data: ca } = await sb.from("cluster_articles").select("raw_article_id").eq("cluster_id", clusterId);
   const rawIds = (ca ?? []).map((r) => r.raw_article_id);
   if (rawIds.length) await sb.from("raw_articles").update({ processado: true }).in("id", rawIds);
