@@ -1,5 +1,5 @@
 import { createServerFn } from "@tanstack/react-start";
-import { cidadeSlug, type ArticleListItem } from "./content.functions";
+import { cidadeSlug, displayRegionName, type ArticleListItem } from "./content.functions";
 
 /**
  * Feed genérico usado pelos RSS por região / cidade / categoria.
