@@ -1,11 +1,16 @@
 -- =====================================================================
 -- Vozes Paranaenses — Cron do pipeline (rodar no SQL Editor externo)
 -- Agenda as edge functions do projeto Lovable para:
---   scrape-source      → a cada 30 min
+--   scrape-source      → o cron dispara a cada 30 min, mas a função só
+--                        processa de verdade nos 4 ciclos fixos do dia
+--                        (7h, 12h, 15h, 19h — horário de Brasília; ver
+--                        016_scraping_priorizado.sql). Fontes com
+--                        frequencia_horas preenchido são exceção e usam
+--                        o comportamento antigo (a cada N horas).
 --   cluster-articles   → a cada 45 min
 --   classify-and-quota → a cada hora
 --   extract-facts      → chamado sob demanda pelo dashboard editorial
---                        (botão "Extrair fatos" em /admin/clusters), um
+--                        (botão "Extrair fatos" em /admin/pauta), um
 --                        cluster por vez, para permitir revisão antes de
 --                        gerar a matéria
 --   generate-article   → chamado sob demanda pelo dashboard editorial,
