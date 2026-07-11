@@ -200,6 +200,60 @@ Deno.serve(async (req) => {
 
   if (insErr) return json({ error: "insert_failed", detail: insErr.message }, 500);
 
+  // 3b. Sempre copiar a foto original do scraping para o storage — assim o
+  // editor pode escolher, com um clique, entre a foto real e uma variação IA
+  // (mesmo se a fonte tirar o arquivo do ar depois).
+  try {
+    const { data: ca } = await sb
+      .from("cluster_articles")
+      .select("raw_article_id")
+      .eq("cluster_id", clusterId);
+    const rawIdsList = (ca ?? []).map((r) => r.raw_article_id);
+    if (rawIdsList.length) {
+      const { data: raws } = await sb
+        .from("raw_articles")
+        .select("imagem_original_url, fonte:fontes(nome)")
+        .in("id", rawIdsList)
+        .not("imagem_original_url", "is", null)
+        .limit(1);
+      const raw = raws?.[0] as
+        | { imagem_original_url: string | null; fonte: { nome: string } | { nome: string }[] | null }
+        | undefined;
+      const srcUrl = raw?.imagem_original_url ?? null;
+      if (srcUrl) {
+        const imgRes = await fetch(srcUrl, {
+          headers: { "User-Agent": "VozesParanaensesBot/1.0 (+https://vozesparanaenses.com.br)" },
+        });
+        if (imgRes.ok) {
+          const buf = new Uint8Array(await imgRes.arrayBuffer());
+          const mime = imgRes.headers.get("content-type")?.split(";")[0].trim() || "image/jpeg";
+          if (/^image\//.test(mime) && buf.byteLength > 1024) {
+            const ext = mime.split("/")[1]?.split("+")[0] ?? "jpg";
+            const path = `${inserted.id}/original.${ext}`;
+            const { error: upErr } = await sb.storage.from("article-covers").upload(path, buf, {
+              contentType: mime, upsert: true,
+            });
+            if (!upErr) {
+              const { data: pub } = sb.storage.from("article-covers").getPublicUrl(path);
+              const veic = Array.isArray(raw?.fonte) ? raw?.fonte[0]?.nome : raw?.fonte?.nome;
+              await sb.from("generated_articles")
+                .update({
+                  imagem_original_url: pub.publicUrl,
+                  imagem_capa_url: pub.publicUrl,
+                  og_image_url: pub.publicUrl,
+                  imagem_credito: `Imagem: reprodução${veic ? ` — ${veic}` : ""}`,
+                })
+                .eq("id", inserted.id);
+            }
+          }
+        }
+      }
+    }
+  } catch (_) {
+    // Falha ao copiar a foto original não bloqueia a geração da matéria —
+    // o editor pode gerar/subir a capa manualmente depois.
+  }
+
   // 4. Marcar raws desse cluster como processados
   const { data: ca } = await sb.from("cluster_articles").select("raw_article_id").eq("cluster_id", clusterId);
   const rawIds = (ca ?? []).map((r) => r.raw_article_id);
