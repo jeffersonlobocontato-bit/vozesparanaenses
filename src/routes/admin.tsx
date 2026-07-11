@@ -79,6 +79,7 @@ function AdminLayout() {
               <Link to="/admin/painel" className="hover:underline [&.active]:font-bold">Painel</Link>
               <Link to="/admin" activeOptions={{ exact: true }} className="hover:underline [&.active]:font-bold">Fila</Link>
             <Link to="/admin/clusters" className="hover:underline [&.active]:font-bold">Pautas</Link>
+              <Link to="/admin/analytics" className="hover:underline [&.active]:font-bold">Analytics</Link>
               <Link to="/admin/fontes" className="hover:underline [&.active]:font-bold">Fontes</Link>
               <Link to="/admin/regioes" className="hover:underline [&.active]:font-bold">Regiões</Link>
               <Link to="/admin/anuncios" className="hover:underline [&.active]:font-bold">Anúncios</Link>
