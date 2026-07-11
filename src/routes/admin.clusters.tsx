@@ -138,14 +138,19 @@ function AdminClusters() {
   async function extractFacts(id: string) {
     setBusyId(id); setMsg(null);
     try {
-      const { data, error } = await supabase.functions.invoke("extract-facts", {
+      const { error } = await supabase.functions.invoke("extract-facts", {
         body: { cluster_id: id },
       });
       if (error) throw error;
-      setMsg(`Fatos extraídos (${(data as { extracted_facts_id?: string })?.extracted_facts_id ?? "ok"}). Revise antes de gerar a matéria.`);
+      setMsg("Fatos extraídos. Gerando matéria…");
+      const { data: gen, error: gErr } = await supabase.functions.invoke("generate-article", {
+        body: { cluster_id: id },
+      });
+      if (gErr) throw gErr;
+      setMsg(`Rascunho criado: ${(gen as { titulo?: string })?.titulo ?? "ok"}`);
       await load();
     } catch (e: unknown) {
-      setMsg("Falha ao extrair fatos: " + (e instanceof Error ? e.message : "erro"));
+      setMsg("Falha no pipeline: " + (e instanceof Error ? e.message : "erro"));
     } finally {
       setBusyId(null);
     }
@@ -373,7 +378,7 @@ function AdminClusters() {
                                 ) : (
                                   <button disabled={busyId === c.id} onClick={() => extractFacts(c.id)}
                                     className="rounded bg-[#0A2540] px-3 py-1.5 text-xs font-semibold text-white hover:bg-[#0d2f52] disabled:opacity-60">
-                                    {busyId === c.id ? "Extraindo…" : "Extrair fatos"}
+                                    {busyId === c.id ? "Processando…" : "Extrair fatos + gerar matéria"}
                                   </button>
                                 )}
                               </div>
