@@ -210,7 +210,7 @@ function AdminFontes() {
                   <div className="font-medium">{f.nome}</div>
                   <a href={f.url_base} target="_blank" rel="noreferrer" className="text-xs text-muted-foreground hover:underline">{f.url_base}</a>
                 </td>
-                <td className="px-3 py-2 text-xs">{f.regiao?.nome ?? "—"}</td>
+                <td className="px-3 py-2 text-xs">{f.regiao ? displayRegionName(f.regiao.slug, f.regiao.nome) : "—"}</td>
                 <td className="px-3 py-2 text-xs">{f.tipo_renderizacao === "spa_js" ? "SPA" : "Estático"}{f.protecao_antibot ? " · antibot" : ""}</td>
                 <td className="px-3 py-2 text-xs">{f.frequencia_horas}h</td>
                 <td className="px-3 py-2 text-xs">{f.ultimo_scrape_em ? new Date(f.ultimo_scrape_em).toLocaleString("pt-BR") : "nunca"}</td>
