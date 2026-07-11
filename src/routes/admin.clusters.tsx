@@ -3,6 +3,7 @@ import { useEffect, useState, useCallback, useMemo } from "react";
 import { getExternalBrowser } from "@/lib/external-supabase-browser";
 import { supabase } from "@/integrations/supabase/client";
 import { BLOCOS, blocoDoHorario, horaSaoPaulo } from "@/lib/pauta-blocos";
+import { displayRegionName } from "@/lib/region-labels";
 
 export const Route = createFileRoute("/admin/clusters")({
   component: AdminClusters,
@@ -93,7 +94,10 @@ function AdminClusters() {
           .map((ca) => first(ca.raw_article))
           .filter((a): a is { titulo: string | null; url: string; fonte: { nome: string } | { nome: string }[] | null } => !!a)
           .map((a) => ({ titulo: a.titulo, url: a.url, fonte: first(a.fonte)?.nome ?? null }));
-        const regiao = first(r.regiao);
+        const rawRegiao = first(r.regiao);
+        const regiao = rawRegiao
+          ? { slug: rawRegiao.slug, nome: displayRegionName(rawRegiao.slug, rawRegiao.nome) }
+          : null;
         const fatos = (r.extracted_facts ?? [])[0] ?? null;
         const onde = fatos?.onde ?? null;
         const cidade = (onde && onde.trim()) || regiao?.nome || "Sem localidade";
