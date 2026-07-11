@@ -104,6 +104,17 @@ Deno.serve(async (req) => {
       for (const it of items) {
         const hash = await sha256(it.url + "|" + it.titulo);
         const deteccao = detectarCidade(`${it.titulo}\n${it.corpo}`, cidades);
+        // Se o RSS/HTML de listagem não trouxe imagem, busca a página da
+        // matéria e extrai og:image / twitter:image / primeiro <img> do corpo.
+        let imagem = it.imagem ?? null;
+        if (!imagem) {
+          try {
+            imagem = await fetchArticleImage(it.url);
+            if (imagem) console.log(`[${fonte.nome}] og:image ${it.url} -> ${imagem}`);
+          } catch (e) {
+            console.warn(`[${fonte.nome}] og:image fetch failed`, (e as Error).message);
+          }
+        }
         const { error: insErr } = await sb.from("raw_articles").insert({
           fonte_id: fonte.id,
           regiao_id: deteccao?.regiao_id ?? fonte.regiao_id,
@@ -114,7 +125,7 @@ Deno.serve(async (req) => {
           corpo_limpo: it.corpo,
           hash_conteudo: hash,
           data_publicacao_original: it.data,
-          imagem_original_url: it.imagem ?? null,
+          imagem_original_url: imagem,
           processado: false,
         });
         if (insErr) {
