@@ -1,5 +1,7 @@
 import { createServerFn } from "@tanstack/react-start";
 import { notFound } from "@tanstack/react-router";
+import { REGION_NAME_OVERRIDES, displayRegionName } from "./region-labels";
+export { REGION_NAME_OVERRIDES, displayRegionName };
 
 /**
  * Trata erros esperados enquanto o schema `002_vozes.sql` não foi rodado
@@ -133,7 +135,6 @@ function mapRegiao(r: RegiaoRow): Region {
   };
 }
 
-export { REGION_NAME_OVERRIDES, displayRegionName } from "./region-labels";
 
 type MateriaRow = {
   id: string;
