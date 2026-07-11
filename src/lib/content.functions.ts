@@ -1,5 +1,7 @@
 import { createServerFn } from "@tanstack/react-start";
 import { notFound } from "@tanstack/react-router";
+import { REGION_NAME_OVERRIDES, displayRegionName } from "./region-labels";
+export { REGION_NAME_OVERRIDES, displayRegionName };
 
 /**
  * Trata erros esperados enquanto o schema `002_vozes.sql` não foi rodado
@@ -125,13 +127,14 @@ function mapRegiao(r: RegiaoRow): Region {
   return {
     id: r.id,
     slug: r.slug,
-    name: r.nome,
+    name: REGION_NAME_OVERRIDES[r.slug] ?? r.nome,
     main_city: r.cidade_principal,
     description: r.descricao,
     hero_image_url: r.hero_image_url,
     tema_config: r.tema_config ?? {},
   };
 }
+
 
 type MateriaRow = {
   id: string;
@@ -158,7 +161,9 @@ function mapMateria(m: MateriaRow): ArticleListItem {
     summary: m.resumo,
     cover_image_url: m.imagem_capa_url,
     published_at: m.publicado_em,
-    region: m.regiao ? { slug: m.regiao.slug, name: m.regiao.nome } : null,
+    region: m.regiao
+      ? { slug: m.regiao.slug, name: displayRegionName(m.regiao.slug, m.regiao.nome) }
+      : null,
     categoria: m.categoria ? { slug: m.categoria.slug, name: m.categoria.nome } : null,
     fixado_posicao: typeof m.fixado_posicao === "number" ? m.fixado_posicao : null,
     fixado_escopo:
@@ -222,10 +227,12 @@ export const getRegionBySlug = createServerFn({ method: "GET" })
       return {
         id: data.slug,
         slug: data.slug,
-        name: data.slug
-          .split("-")
-          .map((p) => p.charAt(0).toUpperCase() + p.slice(1))
-          .join(" "),
+        name:
+          REGION_NAME_OVERRIDES[data.slug] ??
+          data.slug
+            .split("-")
+            .map((p) => p.charAt(0).toUpperCase() + p.slice(1))
+            .join(" "),
         main_city: "",
         description: null,
         hero_image_url: null,

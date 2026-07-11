@@ -4,6 +4,7 @@ import { getExternalBrowser } from "@/lib/external-supabase-browser";
 import { supabase } from "@/integrations/supabase/client";
 import { ArticleImageEditor } from "@/components/admin/ArticleImageEditor";
 import { ArticleEditor } from "@/components/admin/ArticleEditor";
+import { displayRegionName } from "@/lib/region-labels";
 
 export const Route = createFileRoute("/admin/")({
   component: AdminQueue,
@@ -230,7 +231,7 @@ function AdminQueue() {
         {items?.map((it) => (
           <li key={it.id} className="rounded-lg border bg-card p-4">
             <div className="mb-1 flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
-              {it.regiao && <span className="rounded bg-[#0A2540] px-2 py-0.5 font-semibold text-white">{it.regiao.nome}</span>}
+              {it.regiao && <span className="rounded bg-[#0A2540] px-2 py-0.5 font-semibold text-white">{displayRegionName(it.regiao.slug, it.regiao.nome)}</span>}
               {it.categoria && <span className="rounded bg-[#0066CC] px-2 py-0.5 font-semibold text-white">{it.categoria.nome}</span>}
               {typeof it.fixado_posicao === "number" && it.fixado_posicao !== null && (
                 <span className="rounded bg-amber-500 px-2 py-0.5 font-semibold text-white">

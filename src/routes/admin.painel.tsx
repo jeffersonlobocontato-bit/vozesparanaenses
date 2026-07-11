@@ -2,6 +2,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useCallback, useEffect, useState } from "react";
 import { getExternalBrowser } from "@/lib/external-supabase-browser";
 import { supabase } from "@/integrations/supabase/client";
+import { displayRegionName } from "@/lib/region-labels";
 
 export const Route = createFileRoute("/admin/painel")({
   component: AdminDashboard,
@@ -226,7 +227,7 @@ function AdminDashboard() {
                   {r.status}
                 </span>
                 <span className="flex-1 truncate">{r.titulo}</span>
-                {r.regiao && <span className="hidden text-xs text-muted-foreground sm:inline">{r.regiao.nome}</span>}
+                {r.regiao && <span className="hidden text-xs text-muted-foreground sm:inline">{displayRegionName(r.regiao.slug, r.regiao.nome)}</span>}
                 <span className="text-xs text-muted-foreground">{new Date(r.gerado_em).toLocaleString("pt-BR")}</span>
               </li>
             ))}
