@@ -42,6 +42,7 @@ type Item = {
   corpo: string;
   data: string | null;
   imagem?: string | null;
+  credito?: string | null;
 };
 
 Deno.serve(async (req) => {
