@@ -10,3 +10,13 @@
 -- =====================================================================
 
 alter type cluster_status add value if not exists 'rascunho_gerado';
+
+-- Pautas que já geraram uma matéria (rascunho ou publicada) somem do painel
+update public.article_clusters
+set status = 'rascunho_gerado'
+where status in ('novo', 'selecionado_cota', 'fatos_extraidos', 'descartado')
+  and exists (
+    select 1 from public.generated_articles ga
+    where ga.cluster_id = article_clusters.id
+  );
+
