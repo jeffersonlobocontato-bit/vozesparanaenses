@@ -134,10 +134,14 @@ function mapRegiao(r: RegiaoRow): Region {
 }
 
 // Overrides de rótulos exibidos publicamente, mantendo o slug original.
-const REGION_NAME_OVERRIDES: Record<string, string> = {
+export const REGION_NAME_OVERRIDES: Record<string, string> = {
   "norte-central": "Norte",
   "centro-ocidental": "Centro Oeste",
 };
+
+export function displayRegionName(slug: string, fallback: string): string {
+  return REGION_NAME_OVERRIDES[slug] ?? fallback;
+}
 
 type MateriaRow = {
   id: string;
