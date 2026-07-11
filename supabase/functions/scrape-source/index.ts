@@ -403,7 +403,7 @@ function match(s: string, re: RegExp): string {
 // 2) twitter:image / twitter:image:src
 // 3) <link rel="image_src">
 // 4) primeiro <img src=""> do corpo (fallback)
-async function fetchArticleImage(url: string): Promise<string | null> {
+async function fetchArticleImageMeta(url: string): Promise<{ imagem: string | null; credito: string | null }> {
   const ctrl = new AbortController();
   const t = setTimeout(() => ctrl.abort(), 8000);
   try {
@@ -414,7 +414,7 @@ async function fetchArticleImage(url: string): Promise<string | null> {
         accept: "text/html,application/xhtml+xml",
       },
     });
-    if (!res.ok) return null;
+    if (!res.ok) return { imagem: null, credito: null };
     const html = await res.text();
     const head = html.slice(0, 200_000); // og/twitter costumam estar no <head>
     const patterns: RegExp[] = [
@@ -425,23 +425,76 @@ async function fetchArticleImage(url: string): Promise<string | null> {
       /<meta[^>]+content=["']([^"']+)["'][^>]+name=["']twitter:image(?::src)?["']/i,
       /<link[^>]+rel=["']image_src["'][^>]+href=["']([^"']+)["']/i,
     ];
+    let imagem: string | null = null;
     for (const re of patterns) {
       const m = head.match(re);
-      if (m?.[1]) return absolutize(m[1], url);
+      if (m?.[1]) { imagem = absolutize(m[1], url); break; }
     }
-    // Fallback: primeiro <img src=""> razoável (evita logos/ícones minúsculos)
-    const imgs = html.match(/<img[^>]+src=["']([^"']+)["'][^>]*>/gi) ?? [];
-    for (const tag of imgs) {
-      const src = tag.match(/src=["']([^"']+)["']/i)?.[1];
-      if (!src) continue;
-      if (/(sprite|logo|icon|avatar|blank|placeholder|1x1|pixel)/i.test(src)) continue;
-      if (/\.(svg)(\?|$)/i.test(src)) continue;
-      return absolutize(src, url);
+    if (!imagem) {
+      // Fallback: primeiro <img src=""> razoável (evita logos/ícones minúsculos)
+      const imgs = html.match(/<img[^>]+src=["']([^"']+)["'][^>]*>/gi) ?? [];
+      for (const tag of imgs) {
+        const src = tag.match(/src=["']([^"']+)["']/i)?.[1];
+        if (!src) continue;
+        if (/(sprite|logo|icon|avatar|blank|placeholder|1x1|pixel)/i.test(src)) continue;
+        if (/\.(svg)(\?|$)/i.test(src)) continue;
+        imagem = absolutize(src, url); break;
+      }
     }
-    return null;
+    const credito = extractCredit(html, head);
+    return { imagem, credito };
   } finally {
     clearTimeout(t);
   }
+}
+
+// Extrai crédito/legenda da foto. Ordem de preferência:
+// 1) meta tags específicas (article:photo:credit, image:credit, dc.creator)
+// 2) <figure> com <figcaption> — primeira figure do artigo
+// 3) elementos com classe/label indicando crédito (wp-caption-text, credito, credit, foto-credito, image-caption)
+// 4) padrão "Foto:/Crédito:/Imagem:" em texto próximo (primeiros 100kb do body)
+function extractCredit(html: string, head: string): string | null {
+  const metaPatterns: RegExp[] = [
+    /<meta[^>]+(?:property|name)=["'](?:article:photo:credit|image:credit|og:image:credit)["'][^>]+content=["']([^"']+)["']/i,
+    /<meta[^>]+content=["']([^"']+)["'][^>]+(?:property|name)=["'](?:article:photo:credit|image:credit|og:image:credit)["']/i,
+  ];
+  for (const re of metaPatterns) {
+    const m = head.match(re);
+    if (m?.[1]) return cleanCredit(m[1]);
+  }
+  // <figcaption>...</figcaption>
+  const figcap = html.match(/<figcaption[^>]*>([\s\S]{1,500}?)<\/figcaption>/i);
+  if (figcap?.[1]) {
+    const txt = stripTags(decode(figcap[1]));
+    const c = cleanCredit(txt);
+    if (c) return c;
+  }
+  // Classes conhecidas
+  const classPatterns: RegExp[] = [
+    /<(?:span|p|div|small)[^>]+class=["'][^"']*(?:wp-caption-text|credito|credit|foto-credito|image-caption|photo-credit|legenda)[^"']*["'][^>]*>([\s\S]{1,500}?)<\/(?:span|p|div|small)>/i,
+  ];
+  for (const re of classPatterns) {
+    const m = html.match(re);
+    if (m?.[1]) {
+      const c = cleanCredit(stripTags(decode(m[1])));
+      if (c) return c;
+    }
+  }
+  // Padrão de texto solto: "Foto: Fulano/Órgão"
+  const body = html.slice(0, 150_000);
+  const looseRe = /(Foto|Crédito|Cr[eé]dito|Imagem)\s*[:\-–]\s*([A-Z0-9][^<\n\r|]{2,120}?)(?=[<\n\r|]|$)/;
+  const loose = body.match(looseRe);
+  if (loose) {
+    const c = cleanCredit(`${loose[1]}: ${loose[2]}`);
+    if (c) return c;
+  }
+  return null;
+}
+
+function cleanCredit(raw: string): string | null {
+  const s = raw.replace(/\s+/g, " ").trim().replace(/^["'“”]+|["'“”]+$/g, "");
+  if (!s || s.length < 3 || s.length > 200) return null;
+  return s;
 }
 
 function absolutize(src: string, base: string): string {
