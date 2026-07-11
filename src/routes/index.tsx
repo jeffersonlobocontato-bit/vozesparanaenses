@@ -413,6 +413,11 @@ function PortalHome({ regions, articles }: { regions: Region[]; articles: Ranked
           <AdsenseSlot slot="5202964012" />
         </div>
 
+        {/* AdSense — Grupo 3 */}
+        <div className="mb-12">
+          <AdsenseSlot slot="2880053002" />
+        </div>
+
         {/* Publicidade — Rodapé */}
         <AdSlot size="970x90" className="mt-12" />
       </main>
