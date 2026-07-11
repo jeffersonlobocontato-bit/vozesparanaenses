@@ -108,10 +108,13 @@ Deno.serve(async (req) => {
         // Se o RSS/HTML de listagem não trouxe imagem, busca a página da
         // matéria e extrai og:image / twitter:image / primeiro <img> do corpo.
         let imagem = it.imagem ?? null;
-        if (!imagem) {
+        let credito = it.credito ?? null;
+        if (!imagem || !credito) {
           try {
-            imagem = await fetchArticleImage(it.url);
-            if (imagem) console.log(`[${fonte.nome}] og:image ${it.url} -> ${imagem}`);
+            const meta = await fetchArticleImageMeta(it.url);
+            if (!imagem && meta.imagem) imagem = meta.imagem;
+            if (!credito && meta.credito) credito = meta.credito;
+            if (imagem) console.log(`[${fonte.nome}] og:image ${it.url} -> ${imagem}${credito ? ` (${credito})` : ""}`);
           } catch (e) {
             console.warn(`[${fonte.nome}] og:image fetch failed`, (e as Error).message);
           }
@@ -127,6 +130,7 @@ Deno.serve(async (req) => {
           hash_conteudo: hash,
           data_publicacao_original: it.data,
           imagem_original_url: imagem,
+          imagem_credito: credito,
           processado: false,
         });
         if (insErr) {
