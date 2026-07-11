@@ -14,12 +14,35 @@ type Cluster = {
   prioridade_score: number;
   interesse_score: number | null;
   criado_em: string;
+  fatos_extraidos_em: string | null;
+  grupo_estadual_id: string | null;
   regiao: { slug: string; nome: string } | null;
   categoria: { slug: string; nome: string } | null;
   cidade: string;
   fontes: number;
+  fontesNomes: string[];
+  quem: string | null;
+  o_que: string | null;
   artigos: { titulo: string | null; url: string; fonte: string | null }[];
 };
+
+function escalaInteresse(score: number | null): { label: string; chamas: number; cor: string } {
+  const s = score ?? 0;
+  if (s >= 3.5) return { label: "Muito alto", chamas: 4, cor: "#B42318" };
+  if (s >= 2) return { label: "Alto", chamas: 3, cor: "#C4650A" };
+  if (s >= 1) return { label: "Médio", chamas: 2, cor: "#946800" };
+  return { label: "Baixo", chamas: 1, cor: "#5B6470" };
+}
+
+function Chamas({ n, cor }: { n: number; cor: string }) {
+  return (
+    <span className="inline-flex gap-0.5" aria-hidden>
+      {Array.from({ length: 4 }).map((_, i) => (
+        <span key={i} style={{ color: i < n ? cor : "#D9DEE3" }}>●</span>
+      ))}
+    </span>
+  );
+}
 
 function AdminClusters() {
   const [items, setItems] = useState<Cluster[] | null>(null);
@@ -27,6 +50,9 @@ function AdminClusters() {
   const [busyId, setBusyId] = useState<string | null>(null);
   const [msg, setMsg] = useState<string | null>(null);
   const [cleaning, setCleaning] = useState(false);
+  const [fRegiao, setFRegiao] = useState<string>("");
+  const [fCategoria, setFCategoria] = useState<string>("");
+  const [fFonte, setFFonte] = useState<string>("");
 
   const load = useCallback(async () => {
     setItems(null); setErr(null);
@@ -34,12 +60,13 @@ function AdminClusters() {
       const sb = await getExternalBrowser();
       const { data, error } = await sb
         .from("article_clusters")
-        .select("id, status, prioridade_score, interesse_score, criado_em, regiao:regioes(slug, nome), categoria:editorial_categories(slug, nome), cluster_articles(raw_article:raw_articles(titulo, url, fonte:fontes(nome))), extracted_facts(onde)")
+        .select("id, status, prioridade_score, interesse_score, criado_em, fatos_extraidos_em, grupo_estadual_id, regiao:regioes(slug, nome), categoria:editorial_categories(slug, nome), cluster_articles(raw_article:raw_articles(titulo, url, fonte:fontes(nome))), extracted_facts(onde, quem, o_que)")
         .order("criado_em", { ascending: false })
         .limit(80);
       if (error) throw error;
       type Row = {
         id: string; status: Cluster["status"]; prioridade_score: number; interesse_score: number | null; criado_em: string;
+        fatos_extraidos_em: string | null; grupo_estadual_id: string | null;
         regiao: { slug: string; nome: string } | { slug: string; nome: string }[] | null;
         categoria: { slug: string; nome: string } | { slug: string; nome: string }[] | null;
         cluster_articles: {
@@ -49,7 +76,7 @@ function AdminClusters() {
             fonte: { nome: string } | { nome: string }[] | null;
           } | { titulo: string | null; url: string; fonte: { nome: string } | { nome: string }[] | null }[] | null;
         }[] | null;
-        extracted_facts: { onde: string | null }[] | null;
+        extracted_facts: { onde: string | null; quem: string | null; o_que: string | null }[] | null;
       };
       const first = <T,>(v: T | T[] | null): T | null =>
         Array.isArray(v) ? (v[0] ?? null) : v;
@@ -59,13 +86,19 @@ function AdminClusters() {
           .filter((a): a is { titulo: string | null; url: string; fonte: { nome: string } | { nome: string }[] | null } => !!a)
           .map((a) => ({ titulo: a.titulo, url: a.url, fonte: first(a.fonte)?.nome ?? null }));
         const regiao = first(r.regiao);
-        const onde = (r.extracted_facts ?? [])[0]?.onde ?? null;
+        const fatos = (r.extracted_facts ?? [])[0] ?? null;
+        const onde = fatos?.onde ?? null;
         const cidade = (onde && onde.trim()) || regiao?.nome || "Sem localidade";
+        const fontesNomes = Array.from(new Set(artigos.map((a) => a.fonte).filter((n): n is string => !!n)));
         return {
           id: r.id, status: r.status, prioridade_score: r.prioridade_score,
           interesse_score: r.interesse_score, criado_em: r.criado_em,
+          fatos_extraidos_em: r.fatos_extraidos_em, grupo_estadual_id: r.grupo_estadual_id,
           regiao, categoria: first(r.categoria), cidade,
           fontes: artigos.length,
+          fontesNomes,
+          quem: fatos?.quem ?? null,
+          o_que: fatos?.o_que ?? null,
           artigos,
         };
       });
@@ -134,6 +167,30 @@ function AdminClusters() {
     }
   }
 
+  const regioesOpts = useMemo(
+    () => Array.from(new Set((items ?? []).map((i) => i.regiao?.nome).filter((n): n is string => !!n))).sort(),
+    [items],
+  );
+  const categoriasOpts = useMemo(
+    () => Array.from(new Set((items ?? []).map((i) => i.categoria?.nome).filter((n): n is string => !!n))).sort(),
+    [items],
+  );
+  const fontesOpts = useMemo(
+    () => Array.from(new Set((items ?? []).flatMap((i) => i.fontesNomes))).sort(),
+    [items],
+  );
+
+  const filtrados = useMemo(
+    () =>
+      (items ?? []).filter(
+        (i) =>
+          (!fRegiao || i.regiao?.nome === fRegiao) &&
+          (!fCategoria || i.categoria?.nome === fCategoria) &&
+          (!fFonte || i.fontesNomes.includes(fFonte)),
+      ),
+    [items, fRegiao, fCategoria, fFonte],
+  );
+
   const agrupado = useMemo(() => {
     if (!items) return [];
     // Faixa → Editoria → Cidade → clusters[]
@@ -150,7 +207,7 @@ function AdminClusters() {
     };
     const porBloco = new Map<string, Cluster[]>();
     for (const b of BLOCOS) porBloco.set(b.label, []);
-    for (const c of items) porBloco.get(blocoDoHorario(c.criado_em).label)!.push(c);
+    for (const c of filtrados) porBloco.get(blocoDoHorario(c.criado_em).label)!.push(c);
 
     const grupos: Grupo[] = BLOCOS.map((b) => {
       const clusters = porBloco.get(b.label) ?? [];
@@ -186,7 +243,7 @@ function AdminClusters() {
     // Faixas mais recentes primeiro
     grupos.sort((a, b) => (b.maisRecente > a.maisRecente ? 1 : -1));
     return grupos;
-  }, [items]);
+  }, [items, filtrados]);
 
   return (
     <div className="space-y-4">
@@ -208,6 +265,27 @@ function AdminClusters() {
       {err && <p className="rounded border border-red-200 bg-red-50 p-3 text-sm text-red-700">{err}</p>}
       {!items && !err && <p className="text-sm text-muted-foreground">Carregando…</p>}
       {items && items.length === 0 && <p className="text-sm text-muted-foreground">Nenhum cluster. Rode o scrape + clustering.</p>}
+      {items && items.length > 0 && (
+        <div className="flex flex-wrap gap-2">
+          <select value={fRegiao} onChange={(e) => setFRegiao(e.target.value)} className="rounded border px-2 py-1 text-xs">
+            <option value="">Todas as regiões</option>
+            {regioesOpts.map((r) => <option key={r} value={r}>{r}</option>)}
+          </select>
+          <select value={fCategoria} onChange={(e) => setFCategoria(e.target.value)} className="rounded border px-2 py-1 text-xs">
+            <option value="">Todas as editorias</option>
+            {categoriasOpts.map((c) => <option key={c} value={c}>{c}</option>)}
+          </select>
+          <select value={fFonte} onChange={(e) => setFFonte(e.target.value)} className="rounded border px-2 py-1 text-xs">
+            <option value="">Todas as fontes</option>
+            {fontesOpts.map((f) => <option key={f} value={f}>{f}</option>)}
+          </select>
+          {(fRegiao || fCategoria || fFonte) && (
+            <button onClick={() => { setFRegiao(""); setFCategoria(""); setFFonte(""); }} className="rounded border px-2 py-1 text-xs hover:bg-accent">
+              Limpar filtros
+            </button>
+          )}
+        </div>
+      )}
 
       {agrupado.map((g, idx) => {
         const horaMaisRecente = g.maisRecente ? horaSaoPaulo(g.maisRecente) : g.fim;
@@ -249,14 +327,31 @@ function AdminClusters() {
                               <div className="mb-2 flex flex-wrap items-center gap-2 text-xs">
                                 {c.regiao && <span className="rounded bg-[#0A2540] px-2 py-0.5 font-semibold text-white">{c.regiao.nome}</span>}
                                 {c.categoria && <span className="rounded bg-[#0066CC] px-2 py-0.5 font-semibold text-white">{c.categoria.nome}</span>}
-                                {c.interesse_score != null && (
-                                  <span className="text-muted-foreground">interesse {c.interesse_score.toFixed(1)}</span>
+                                {(() => {
+                                  const e = escalaInteresse(c.interesse_score);
+                                  return (
+                                    <span className="flex items-center gap-1" title={`Interesse: ${e.label}${c.interesse_score != null ? ` (${c.interesse_score.toFixed(1)})` : ""}`}>
+                                      <Chamas n={e.chamas} cor={e.cor} />
+                                      <span className="text-muted-foreground">{e.label}</span>
+                                    </span>
+                                  );
+                                })()}
+                                {c.grupo_estadual_id && (
+                                  <span className="rounded bg-[#5B2A86] px-2 py-0.5 font-semibold text-white" title="Mesma notícia detectada em outra região">
+                                    🔗 Cobertura estadual
+                                  </span>
                                 )}
                                 <span className="text-muted-foreground">· score {c.prioridade_score.toFixed(1)}</span>
                                 <span className="text-muted-foreground">· {c.fontes} fonte(s)</span>
                                 <span className="text-muted-foreground">· {c.status}</span>
                               </div>
                               <div className="text-xs text-muted-foreground">{new Date(c.criado_em).toLocaleString("pt-BR", { timeZone: "America/Sao_Paulo" })}</div>
+                              {(c.quem || c.o_que) && (
+                                <div className="mt-2 border-t pt-2 text-xs leading-snug">
+                                  {c.quem && <p><span className="font-semibold">Quem:</span> {c.quem}</p>}
+                                  {c.o_que && <p><span className="font-semibold">O quê:</span> {c.o_que}</p>}
+                                </div>
+                              )}
                               {c.artigos.length > 0 && (
                                 <ul className="mt-3 space-y-1.5 border-t pt-3 text-xs">
                                   {c.artigos.map((a, i) => (
