@@ -14,6 +14,7 @@ type Pauta = {
   prioridade_score: number;
   criado_em: string;
   fatos_extraidos_em: string | null;
+  grupo_estadual_id: string | null;
   regiao: { slug: string; nome: string } | null;
   categoria: { slug: string; nome: string } | null;
   fontesNomes: string[];
@@ -78,7 +79,7 @@ function PainelDePauta() {
       const { data, error } = await sb
         .from("article_clusters")
         .select(
-          "id, status, interesse_score, prioridade_score, criado_em, fatos_extraidos_em, " +
+          "id, status, interesse_score, prioridade_score, criado_em, fatos_extraidos_em, grupo_estadual_id, " +
           "regiao:regioes(slug, nome), categoria:editorial_categories(slug, nome), " +
           "cluster_articles(raw_article:raw_articles(fonte:fontes(nome))), " +
           "extracted_facts(quem, o_que, criado_em)"
@@ -90,7 +91,7 @@ function PainelDePauta() {
 
       type Row = {
         id: string; status: Pauta["status"]; interesse_score: number | null; prioridade_score: number;
-        criado_em: string; fatos_extraidos_em: string | null;
+        criado_em: string; fatos_extraidos_em: string | null; grupo_estadual_id: string | null;
         regiao: { slug: string; nome: string } | { slug: string; nome: string }[] | null;
         categoria: { slug: string; nome: string } | { slug: string; nome: string }[] | null;
         cluster_articles: { raw_article: { fonte: { nome: string } | { nome: string }[] | null } | { fonte: { nome: string } | { nome: string }[] | null }[] | null }[] | null;
@@ -115,6 +116,7 @@ function PainelDePauta() {
           prioridade_score: r.prioridade_score,
           criado_em: r.criado_em,
           fatos_extraidos_em: r.fatos_extraidos_em,
+          grupo_estadual_id: r.grupo_estadual_id,
           regiao: first(r.regiao),
           categoria: first(r.categoria),
           fontesNomes,
@@ -243,6 +245,11 @@ function PainelDePauta() {
                             <Chamas n={escala.chamas} cor={escala.cor} />
                             <span className="text-muted-foreground">{escala.label}</span>
                           </span>
+                          {c.grupo_estadual_id && (
+                            <span className="rounded bg-[#5B2A86] px-2 py-0.5 font-semibold text-white" title="Mesma notícia detectada em outra região">
+                              🔗 Cobertura estadual
+                            </span>
+                          )}
                         </div>
                         <div className="text-xs text-muted-foreground">
                           {c.fontesNomes.length} fonte(s): {c.fontesNomes.join(", ") || "—"}

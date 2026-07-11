@@ -19,9 +19,22 @@ type Fonte = {
   url_base: string;
   tipo_renderizacao: "estatico" | "spa_js";
   protecao_antibot: boolean;
-  frequencia_horas: number;
+  frequencia_horas: number | null;
   ultimo_scrape_em: string | null;
 };
+
+type Cidade = { slug: string; nome: string; regiao_id: string };
+
+// Ciclos fixos de coleta (horário de Brasília) — ver 014_scraping_priorizado.sql.
+// Fontes com frequencia_horas = null seguem esses horários; um valor numérico
+// na fonte é tratado como exceção pontual (comportamento antigo, por tempo
+// decorrido desde a última coleta).
+const FIXED_HOURS = [7, 12, 15, 19];
+
+function horaSaoPaulo(d = new Date()): number {
+  const s = new Intl.DateTimeFormat("pt-BR", { timeZone: "America/Sao_Paulo", hour: "2-digit", hour12: false }).format(d);
+  return parseInt(s, 10);
+}
 
 type Item = {
   url: string;
@@ -57,25 +70,46 @@ Deno.serve(async (req) => {
   const { data: fontes, error } = await query;
   if (error) return json({ error: "fontes_query_failed", detail: error.message }, 500);
 
+  const { data: cidadesData } = await sb.from("cidades").select("slug, nome, regiao_id");
+  const cidades = (cidadesData ?? []) as Cidade[];
+
   const now = Date.now();
+  const horaAtual = horaSaoPaulo();
   const eligible = (fontes ?? []).filter((f) => {
     if (body.fonte_id || body.force) return true;
+    if (f.frequencia_horas != null) {
+      // Exceção: comportamento antigo, por tempo decorrido desde a última coleta.
+      if (!f.ultimo_scrape_em) return true;
+      const last = new Date(f.ultimo_scrape_em).getTime();
+      return now - last >= f.frequencia_horas * 3600 * 1000;
+    }
+    // Padrão: só coleta nos ciclos fixos do dia, com uma trava de 2h contra
+    // execuções duplicadas se o cron ticar mais de uma vez dentro do mesmo ciclo.
+    if (!FIXED_HOURS.includes(horaAtual)) return false;
     if (!f.ultimo_scrape_em) return true;
     const last = new Date(f.ultimo_scrape_em).getTime();
-    return now - last >= f.frequencia_horas * 3600 * 1000;
+    return now - last >= 2 * 3600 * 1000;
   });
 
   const report: Record<string, unknown>[] = [];
   for (const fonte of eligible as Fonte[]) {
     try {
       const items = await scrapeFonte(fonte);
-      let inserted = 0;
+      // 1 notícia por fonte, por ciclo: percorre em ordem de destaque (a ordem
+      // natural do RSS/HTML/Firecrawl) e fica com a PRIMEIRA ainda não vista
+      // — se já existe (hash duplicado), pula pra próxima; assim que uma
+      // inserção der certo, para. Isso limita o volume por ciclo e ainda
+      // captura a manchete mais recente que a fonte considerou relevante.
+      let insertedItem: Item | null = null;
       let duplicates = 0;
       for (const it of items) {
         const hash = await sha256(it.url + "|" + it.titulo);
+        const deteccao = detectarCidade(`${it.titulo}\n${it.corpo}`, cidades);
         const { error: insErr } = await sb.from("raw_articles").insert({
           fonte_id: fonte.id,
-          regiao_id: fonte.regiao_id,
+          regiao_id: deteccao?.regiao_id ?? fonte.regiao_id,
+          cidade_detectada_slug: deteccao?.slug ?? null,
+          regiao_detectada_id: deteccao?.regiao_id ?? null,
           url: it.url,
           titulo: it.titulo,
           corpo_limpo: it.corpo,
@@ -85,14 +119,15 @@ Deno.serve(async (req) => {
           processado: false,
         });
         if (insErr) {
-          if (insErr.code === "23505") duplicates++;
-          else console.error(`[${fonte.nome}] insert error`, insErr.message);
-        } else {
-          inserted++;
+          if (insErr.code === "23505") { duplicates++; continue; }
+          console.error(`[${fonte.nome}] insert error`, insErr.message);
+          continue;
         }
+        insertedItem = it;
+        break;
       }
       await sb.from("fontes").update({ ultimo_scrape_em: new Date().toISOString() }).eq("id", fonte.id);
-      report.push({ fonte: fonte.nome, total: items.length, inserted, duplicates });
+      report.push({ fonte: fonte.nome, total: items.length, inserted: insertedItem ? 1 : 0, duplicates });
     } catch (e) {
       report.push({ fonte: fonte.nome, error: (e as Error).message });
     }
@@ -100,6 +135,30 @@ Deno.serve(async (req) => {
 
   return json({ ok: true, processed: report.length, report });
 });
+
+// Detecta a cidade mais mencionada no texto (título + corpo) comparando
+// contra a base de `cidades`, e retorna a região correspondente. Usado para
+// classificar a matéria pela região da cidade citada, em vez de assumir
+// sempre a região configurada na fonte.
+function detectarCidade(texto: string, cidades: Cidade[]): { slug: string; regiao_id: string } | null {
+  if (!cidades.length) return null;
+  const alvo = normalizar(texto);
+  let melhor: { slug: string; regiao_id: string; count: number } | null = null;
+  for (const c of cidades) {
+    const nomeNorm = normalizar(c.nome);
+    if (nomeNorm.length < 4) continue; // evita falso-positivo em nomes curtos
+    const re = new RegExp(`\\b${nomeNorm.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}\\b`, "g");
+    const count = (alvo.match(re) ?? []).length;
+    if (count > 0 && (!melhor || count > melhor.count)) {
+      melhor = { slug: c.slug, regiao_id: c.regiao_id, count };
+    }
+  }
+  return melhor ? { slug: melhor.slug, regiao_id: melhor.regiao_id } : null;
+}
+
+function normalizar(s: string): string {
+  return s.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+}
 
 function json(body: unknown, status = 200) {
   return new Response(JSON.stringify(body), {
