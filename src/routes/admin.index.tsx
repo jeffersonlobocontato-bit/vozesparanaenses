@@ -37,8 +37,10 @@ const STATUS_TABS: Draft["status"][] = ["rascunho", "aprovado", "publicado", "re
 function AdminQueue() {
   const [tab, setTab] = useState<Draft["status"]>("rascunho");
   const [items, setItems] = useState<Draft[] | null>(null);
+  const [pinned, setPinned] = useState<Draft[] | null>(null);
   const [err, setErr] = useState<string | null>(null);
   const [busyId, setBusyId] = useState<string | null>(null);
+  const [unpinBusyId, setUnpinBusyId] = useState<string | null>(null);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [pipelineBusy, setPipelineBusy] = useState(false);
   const [pipelineLog, setPipelineLog] = useState<string[]>([]);
@@ -74,7 +76,46 @@ function AdminQueue() {
     }
   }, [tab]);
 
+  const loadPinned = useCallback(async () => {
+    try {
+      const sb = await getExternalBrowser();
+      const sel = "id, slug, titulo, status, gerado_em, fixado_posicao, fixado_escopo, fixado_regioes, fixado_cidades, regiao:regioes(slug, nome), categoria:editorial_categories(slug, nome)";
+      const { data, error } = await sb.from("generated_articles")
+        .select(sel)
+        .eq("status", "publicado")
+        .not("fixado_posicao", "is", null)
+        .order("fixado_posicao", { ascending: true })
+        .limit(50);
+      if (error) {
+        // Coluna pode não existir ainda em ambientes antigos; ignora.
+        setPinned([]);
+        return;
+      }
+      setPinned((data ?? []) as unknown as Draft[]);
+    } catch {
+      setPinned([]);
+    }
+  }, []);
+
   useEffect(() => { load(); }, [load]);
+  useEffect(() => { loadPinned(); }, [loadPinned]);
+
+  async function unpin(id: string) {
+    if (!confirm("Desfixar esta matéria?")) return;
+    setUnpinBusyId(id);
+    try {
+      const sb = await getExternalBrowser();
+      const { error } = await sb.from("generated_articles")
+        .update({ fixado_posicao: null, fixado_escopo: null, fixado_regioes: null, fixado_cidades: null })
+        .eq("id", id);
+      if (error) throw error;
+      await Promise.all([loadPinned(), load()]);
+    } catch (e: unknown) {
+      alert(e instanceof Error ? e.message : "Falha ao desfixar");
+    } finally {
+      setUnpinBusyId(null);
+    }
+  }
 
   async function runPipeline() {
     setPipelineBusy(true);
@@ -103,7 +144,7 @@ function AdminQueue() {
       if (next === "publicado") patch.publicado_em = new Date().toISOString();
       const { error } = await sb.from("generated_articles").update(patch).eq("id", id);
       if (error) throw error;
-      await load();
+      await Promise.all([load(), loadPinned()]);
     } catch (e: unknown) {
       alert(e instanceof Error ? e.message : "Falha ao atualizar");
     } finally {
@@ -135,6 +176,44 @@ function AdminQueue() {
         <pre className="max-h-48 overflow-auto rounded border bg-muted p-2 text-[11px] leading-tight">
           {pipelineLog.join("\n")}
         </pre>
+      )}
+
+      {pinned && pinned.length > 0 && (
+        <section className="rounded-lg border-2 border-amber-400 bg-amber-50/70 p-4">
+          <div className="mb-2 flex items-center justify-between">
+            <h2 className="text-sm font-bold text-amber-900">📌 Matérias fixadas ({pinned.length})</h2>
+            <span className="text-[11px] text-amber-800">Publicadas em destaque na home</span>
+          </div>
+          <ul className="space-y-1.5">
+            {pinned.map((p) => {
+              const esc = p.fixado_escopo ?? "estado";
+              const escLabel = esc === "estado"
+                ? "Estado"
+                : esc === "regiao"
+                ? `Regiões: ${(p.fixado_regioes ?? []).slice(0, 2).join(", ") || "—"}${(p.fixado_regioes ?? []).length > 2 ? ` (+${(p.fixado_regioes ?? []).length - 2})` : ""}`
+                : `Cidades: ${(p.fixado_cidades ?? []).slice(0, 2).join(", ") || "—"}${(p.fixado_cidades ?? []).length > 2 ? ` (+${(p.fixado_cidades ?? []).length - 2})` : ""}`;
+              return (
+                <li key={p.id} className="flex items-center gap-2 rounded border border-amber-200 bg-white px-2 py-1.5 text-sm">
+                  <span className="shrink-0 rounded bg-amber-500 px-2 py-0.5 text-[11px] font-semibold text-white">
+                    {p.fixado_posicao === 0 ? "Manchete" : `Lateral ${p.fixado_posicao}`}
+                  </span>
+                  <span className="shrink-0 text-[11px] text-amber-900">{escLabel}</span>
+                  <span className="min-w-0 flex-1 truncate font-medium">{p.titulo}</span>
+                  {p.regiao && (
+                    <a href={`/${p.regiao.slug}/${p.slug}`} target="_blank" rel="noreferrer"
+                      className="shrink-0 rounded border px-2 py-0.5 text-[11px] hover:bg-accent">Ver</a>
+                  )}
+                  <button
+                    disabled={unpinBusyId === p.id}
+                    onClick={() => unpin(p.id)}
+                    className="shrink-0 rounded bg-red-600 px-2 py-0.5 text-[11px] font-semibold text-white hover:bg-red-700 disabled:opacity-60">
+                    {unpinBusyId === p.id ? "…" : "✕ Desfixar"}
+                  </button>
+                </li>
+              );
+            })}
+          </ul>
+        </section>
       )}
 
       {err && <p className="rounded border border-red-200 bg-red-50 p-3 text-sm text-red-700">{err}</p>}
