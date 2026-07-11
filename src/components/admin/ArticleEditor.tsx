@@ -259,6 +259,43 @@ export function ArticleEditor({ articleId, initial, onSaved, onCancel }: Props) 
         <label className={labelCls}>SEO description</label>
         <textarea className={inputCls} rows={2} value={form.seo_description} onChange={(e) => set("seo_description", e.target.value)} />
       </div>
+      <div className="grid gap-3 sm:grid-cols-2">
+        <div>
+          <label className={labelCls}>Região (taxonomia)</label>
+          <select
+            className={inputCls}
+            value={form.regiao_id}
+            onChange={(e) => set("regiao_id", e.target.value)}
+          >
+            {regioesFull.length === 0 && <option value="">Carregando…</option>}
+            {regioesFull.length > 0 && !form.regiao_id && (
+              <option value="">— Selecione uma região —</option>
+            )}
+            {regioesFull.map((r) => (
+              <option key={r.id} value={r.id}>{r.nome}</option>
+            ))}
+          </select>
+          <p className="mt-1 text-[10px] text-muted-foreground">
+            Corrija aqui se o scraping classificou a matéria na região errada.
+          </p>
+        </div>
+        <div>
+          <label className={labelCls}>Editoria</label>
+          <select
+            className={inputCls}
+            value={form.categoria_id}
+            onChange={(e) => set("categoria_id", e.target.value)}
+          >
+            <option value="">— Sem editoria —</option>
+            {categorias.map((c) => (
+              <option key={c.id} value={c.id}>{c.nome}</option>
+            ))}
+          </select>
+          <p className="mt-1 text-[10px] text-muted-foreground">
+            Ex.: Política, Economia, Esportes, Cultura.
+          </p>
+        </div>
+      </div>
       <div>
         <label className={labelCls}>Editor(a) responsável</label>
         <input
