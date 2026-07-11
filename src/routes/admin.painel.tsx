@@ -114,7 +114,7 @@ function AdminDashboard() {
     setPipelineBusy(true);
     setPipelineLog(["Iniciando pipeline…"]);
     const steps: Array<{ name: string; fn: string; body?: Record<string, unknown> }> = [
-      { name: "1/3 Scrape de fontes (forçado)", fn: "scrape-source", body: { force: true } },
+      { name: "1/3 Scrape de fontes (forçado)", fn: "scrape-source", body: { force: true, sync: true } },
       { name: "2/3 Clustering", fn: "cluster-articles" },
       { name: "3/3 Classificação + cotas", fn: "classify-and-quota" },
     ];
