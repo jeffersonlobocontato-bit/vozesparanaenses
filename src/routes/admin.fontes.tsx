@@ -1,6 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useState, useCallback } from "react";
 import { getExternalBrowser } from "@/lib/external-supabase-browser";
+import { displayRegionName } from "@/lib/region-labels";
 
 export const Route = createFileRoute("/admin/fontes")({
   component: AdminFontes,
