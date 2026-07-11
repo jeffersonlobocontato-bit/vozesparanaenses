@@ -10,7 +10,7 @@ export const Route = createFileRoute("/admin/clusters")({
 
 type Cluster = {
   id: string;
-  status: "novo" | "selecionado_cota" | "fatos_extraidos" | "descartado";
+  status: "novo" | "selecionado_cota" | "fatos_extraidos" | "descartado" | "rascunho_gerado";
   prioridade_score: number;
   interesse_score: number | null;
   criado_em: string;
@@ -61,6 +61,7 @@ function AdminClusters() {
       const { data, error } = await sb
         .from("article_clusters")
         .select("id, status, prioridade_score, interesse_score, criado_em, fatos_extraidos_em, grupo_estadual_id, regiao:regioes(slug, nome), categoria:editorial_categories(slug, nome), cluster_articles(raw_article:raw_articles(titulo, url, fonte:fontes(nome))), extracted_facts(onde, quem, o_que)")
+        .in("status", ["novo", "selecionado_cota", "fatos_extraidos", "descartado"])
         .order("criado_em", { ascending: false })
         .limit(80);
       if (error) throw error;
@@ -123,7 +124,7 @@ function AdminClusters() {
         .from("article_clusters")
         .delete()
         .lt("criado_em", corte)
-        .in("status", ["novo", "selecionado_cota", "fatos_extraidos", "descartado"])
+        .in("status", ["novo", "selecionado_cota", "fatos_extraidos", "descartado", "rascunho_gerado"])
         .select("id");
       if (error) throw error;
       setMsg(`Histórico limpo: ${data?.length ?? 0} pauta(s) removida(s).`);
