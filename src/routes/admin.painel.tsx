@@ -113,15 +113,15 @@ function AdminDashboard() {
   async function runPipeline() {
     setPipelineBusy(true);
     setPipelineLog(["Iniciando pipeline…"]);
-    const steps = [
-      { name: "1/3 Scrape de fontes", fn: "scrape-source" },
+    const steps: Array<{ name: string; fn: string; body?: Record<string, unknown> }> = [
+      { name: "1/3 Scrape de fontes (forçado)", fn: "scrape-source", body: { force: true } },
       { name: "2/3 Clustering", fn: "cluster-articles" },
       { name: "3/3 Classificação + cotas", fn: "classify-and-quota" },
     ];
     for (const s of steps) {
       setPipelineLog((l) => [...l, `${s.name}…`]);
       try {
-        const { data, error } = await supabase.functions.invoke(s.fn, { body: {} });
+        const { data, error } = await supabase.functions.invoke(s.fn, { body: s.body ?? {} });
         if (error) throw error;
         const summary = data && typeof data === "object" ? JSON.stringify(data).slice(0, 140) : "ok";
         setPipelineLog((l) => [...l, `  ✓ ${summary}`]);
