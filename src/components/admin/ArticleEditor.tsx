@@ -11,6 +11,8 @@ import {
 type PinScope = "estado" | "regiao" | "cidades";
 
 type Regiao = { slug: string; nome: string };
+type RegiaoOpt = { id: string; slug: string; nome: string };
+type CategoriaOpt = { id: string; slug: string; nome: string };
 
 type Props = {
   articleId: string;
@@ -27,6 +29,8 @@ type Props = {
     fixado_escopo?: PinScope | null;
     fixado_regioes?: string[] | null;
     fixado_cidades?: string[] | null;
+    regiao_id?: string | null;
+    categoria_id?: string | null;
   };
   onSaved: () => void;
   onCancel: () => void;
@@ -42,6 +46,8 @@ export function ArticleEditor({ articleId, initial, onSaved, onCancel }: Props) 
     seo_title: initial.seo_title ?? "",
     seo_description: initial.seo_description ?? "",
     editor_responsavel: initial.editor_responsavel ?? "",
+    regiao_id: initial.regiao_id ?? "",
+    categoria_id: initial.categoria_id ?? "",
     fixado_posicao:
       typeof initial.fixado_posicao === "number" && initial.fixado_posicao !== null
         ? String(initial.fixado_posicao)
@@ -53,6 +59,8 @@ export function ArticleEditor({ articleId, initial, onSaved, onCancel }: Props) 
   const [cityInput, setCityInput] = useState("");
   const [cityMsg, setCityMsg] = useState<string | null>(null);
   const [availableRegions, setAvailableRegions] = useState<Regiao[]>([]);
+  const [regioesFull, setRegioesFull] = useState<RegiaoOpt[]>([]);
+  const [categorias, setCategorias] = useState<CategoriaOpt[]>([]);
   const [saving, setSaving] = useState(false);
   const [msg, setMsg] = useState<string | null>(null);
 
@@ -62,8 +70,17 @@ export function ArticleEditor({ articleId, initial, onSaved, onCancel }: Props) 
     (async () => {
       try {
         const sb = await getExternalBrowser();
-        const { data } = await sb.from("regioes").select("slug, nome").order("nome");
-        if (!cancelled && data) setAvailableRegions(data as Regiao[]);
+        const [{ data: regs }, { data: cats }] = await Promise.all([
+          sb.from("regioes").select("id, slug, nome").order("nome"),
+          sb.from("editorial_categories").select("id, slug, nome").order("nome"),
+        ]);
+        if (!cancelled) {
+          if (regs) {
+            setRegioesFull(regs as RegiaoOpt[]);
+            setAvailableRegions((regs as RegiaoOpt[]).map((r) => ({ slug: r.slug, nome: r.nome })));
+          }
+          if (cats) setCategorias(cats as CategoriaOpt[]);
+        }
       } catch {
         /* silencioso */
       }
@@ -135,11 +152,13 @@ export function ArticleEditor({ articleId, initial, onSaved, onCancel }: Props) 
         seo_title: form.seo_title.trim() || null,
         seo_description: form.seo_description.trim() || null,
         editor_responsavel: form.editor_responsavel.trim() || null,
+        categoria_id: form.categoria_id || null,
         fixado_posicao: selectedPin,
         fixado_escopo: effectiveEscopo,
         fixado_regioes: effectiveRegioes,
         fixado_cidades: effectiveCidades,
       };
+      if (form.regiao_id) patch.regiao_id = form.regiao_id;
       const { data, error } = await sb
         .from("generated_articles")
         .update(patch)
@@ -239,6 +258,43 @@ export function ArticleEditor({ articleId, initial, onSaved, onCancel }: Props) 
       <div>
         <label className={labelCls}>SEO description</label>
         <textarea className={inputCls} rows={2} value={form.seo_description} onChange={(e) => set("seo_description", e.target.value)} />
+      </div>
+      <div className="grid gap-3 sm:grid-cols-2">
+        <div>
+          <label className={labelCls}>Região (taxonomia)</label>
+          <select
+            className={inputCls}
+            value={form.regiao_id}
+            onChange={(e) => set("regiao_id", e.target.value)}
+          >
+            {regioesFull.length === 0 && <option value="">Carregando…</option>}
+            {regioesFull.length > 0 && !form.regiao_id && (
+              <option value="">— Selecione uma região —</option>
+            )}
+            {regioesFull.map((r) => (
+              <option key={r.id} value={r.id}>{r.nome}</option>
+            ))}
+          </select>
+          <p className="mt-1 text-[10px] text-muted-foreground">
+            Corrija aqui se o scraping classificou a matéria na região errada.
+          </p>
+        </div>
+        <div>
+          <label className={labelCls}>Editoria</label>
+          <select
+            className={inputCls}
+            value={form.categoria_id}
+            onChange={(e) => set("categoria_id", e.target.value)}
+          >
+            <option value="">— Sem editoria —</option>
+            {categorias.map((c) => (
+              <option key={c.id} value={c.id}>{c.nome}</option>
+            ))}
+          </select>
+          <p className="mt-1 text-[10px] text-muted-foreground">
+            Ex.: Política, Economia, Esportes, Cultura.
+          </p>
+        </div>
       </div>
       <div>
         <label className={labelCls}>Editor(a) responsável</label>
