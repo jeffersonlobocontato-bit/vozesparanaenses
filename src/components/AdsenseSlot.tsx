@@ -1,4 +1,4 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useSyncExternalStore } from "react";
 
 declare global {
   interface Window {
@@ -6,13 +6,21 @@ declare global {
   }
 }
 
+function useHydrated() {
+  return useSyncExternalStore(
+    () => () => {},
+    () => true,
+    () => false,
+  );
+}
+
 /**
  * Slot do Google AdSense (ca-pub-3867318545397573).
  *
- * Renderiza o <ins> tanto no SSR quanto no cliente para evitar troca de tag
- * durante a hidratação. O push no array adsbygoogle só acontece no cliente,
- * após a montagem, e `suppressHydrationWarning` evita alertas quando o script
- * do AdSense injeta atributos/iframe no elemento antes do React terminar.
+ * O <ins> só é inserido após a hidratação, por meio de useSyncExternalStore,
+ * garantindo que o HTML do servidor e o primeiro render do cliente sejam
+ * idênticos (um <div> placeholder). O push no array adsbygoogle acontece
+ * somente quando o slot real é montado.
  */
 export function AdsenseSlot({
   slot,
@@ -27,17 +35,20 @@ export function AdsenseSlot({
   className?: string;
   style?: React.CSSProperties;
 }) {
+  const hydrated = useHydrated();
   const pushed = useRef(false);
 
   useEffect(() => {
-    if (pushed.current) return;
+    if (!hydrated || pushed.current) return;
     try {
       (window.adsbygoogle = window.adsbygoogle || []).push({});
       pushed.current = true;
     } catch {
       // adsbygoogle ainda não disponível — ignora
     }
-  }, []);
+  }, [hydrated]);
+
+  if (!hydrated) return <div className={className} style={style} aria-hidden />;
 
   return (
     <ins
@@ -47,7 +58,6 @@ export function AdsenseSlot({
       data-ad-slot={slot}
       data-ad-format={format}
       data-full-width-responsive={fullWidthResponsive ? "true" : "false"}
-      suppressHydrationWarning
     />
   );
 }
