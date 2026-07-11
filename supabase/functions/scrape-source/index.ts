@@ -91,8 +91,7 @@ Deno.serve(async (req) => {
     return now - last >= 2 * 3600 * 1000;
   });
 
-  const report: Record<string, unknown>[] = [];
-  for (const fonte of eligible as Fonte[]) {
+  async function processFonte(fonte: Fonte): Promise<Record<string, unknown>> {
     try {
       const items = await scrapeFonte(fonte);
       // 1 notícia por fonte, por ciclo: percorre em ordem de destaque (a ordem
@@ -127,13 +126,40 @@ Deno.serve(async (req) => {
         break;
       }
       await sb.from("fontes").update({ ultimo_scrape_em: new Date().toISOString() }).eq("id", fonte.id);
-      report.push({ fonte: fonte.nome, total: items.length, inserted: insertedItem ? 1 : 0, duplicates });
+      return { fonte: fonte.nome, total: items.length, inserted: insertedItem ? 1 : 0, duplicates };
     } catch (e) {
-      report.push({ fonte: fonte.nome, error: (e as Error).message });
+      return { fonte: fonte.nome, error: (e as Error).message };
     }
   }
 
-  return json({ ok: true, processed: report.length, report });
+  // Se o cliente pediu explicitamente uma única fonte, roda inline e devolve
+  // o relatório. Caso contrário, dispara em background e responde na hora
+  // — o Edge Runtime tem timeout curto do lado do cliente (fetch) e o
+  // pipeline no admin encadeia scrape → cluster → classify; travar aqui
+  // fazia o botão "Rodar pipeline" abortar antes do fim.
+  if (body.fonte_id) {
+    const results = await Promise.all((eligible as Fonte[]).map(processFonte));
+    return json({ ok: true, processed: results.length, report: results });
+  }
+
+  const CONCURRENCY = 6;
+  const queue = [...(eligible as Fonte[])];
+  const task = (async () => {
+    const results: Record<string, unknown>[] = [];
+    const workers = Array.from({ length: Math.min(CONCURRENCY, queue.length) }, async () => {
+      while (queue.length) {
+        const f = queue.shift();
+        if (!f) return;
+        results.push(await processFonte(f));
+      }
+    });
+    await Promise.all(workers);
+    console.log(`[scrape-source] background done: ${results.length} fontes`);
+  })();
+  // deno-lint-ignore no-explicit-any
+  const rt = (globalThis as any).EdgeRuntime;
+  if (rt && typeof rt.waitUntil === "function") rt.waitUntil(task);
+  return json({ ok: true, queued: eligible.length, mode: "background" });
 });
 
 // Detecta a cidade mais mencionada no texto (título + corpo) comparando
