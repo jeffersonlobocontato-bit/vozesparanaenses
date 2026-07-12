@@ -5,6 +5,7 @@ import {
   listRegions,
   listRankedArticles,
   getViewerLocation,
+  listArticlesByCategoryGlobal,
   type ArticleListItem,
   type RankedArticle,
   type Region,
@@ -34,6 +35,22 @@ const rankedQO = (loc: ViewerLocation) =>
       }),
   });
 
+// Módulos por editoria — sequência exibida no scroll da home,
+// no espírito dos grandes portais (G1, UOL, Folha).
+const HOME_EDITORIAS: Array<{ slug: string; name: string }> = [
+  { slug: "seguranca", name: "Segurança" },
+  { slug: "politica", name: "Política" },
+  { slug: "esportes", name: "Esportes" },
+  { slug: "cidades", name: "Cidades" },
+];
+
+const editoriaQO = (slug: string) =>
+  queryOptions({
+    queryKey: ["articles", "cat-global", slug, 7],
+    queryFn: () =>
+      listArticlesByCategoryGlobal({ data: { categorySlug: slug, limit: 7 } }),
+  });
+
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
@@ -57,6 +74,11 @@ export const Route = createFileRoute("/")({
       context.queryClient.ensureQueryData(regionsQO),
     ]);
     await context.queryClient.ensureQueryData(rankedQO(loc));
+    await Promise.all(
+      HOME_EDITORIAS.map((e) =>
+        context.queryClient.ensureQueryData(editoriaQO(e.slug)),
+      ),
+    );
   },
   component: Home,
   errorComponent: ({ error }) => (
