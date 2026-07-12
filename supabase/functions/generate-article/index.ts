@@ -46,9 +46,32 @@ REGRAS INEGOCIÁVEIS:
    fato, cada resposta com 1-3 frases baseadas SOMENTE nos fatos fornecidos.
    Se os fatos não permitirem perguntas úteis, retorne array vazio.
 
+PROMPT MENTAL (responda internamente antes de escrever):
+1. Qual é o fato? 2. Qual é a informação mais relevante? 3. Quem é o leitor?
+4. Qual editoria? 5. Qual estrutura sintática devo usar? 6. Qual interpretação
+editorial devo aplicar? 7. Qual linguagem representa o portal? 8. Existe
+contexto suficiente? 9. Há dados verificáveis? 10. A notícia preserva o
+padrão editorial do veículo?
+
 Retorne APENAS JSON válido, sem markdown, no schema fornecido.`;
 
 type Payload = { cluster_id?: string; extracted_facts_id?: string };
+
+type DnaSintatico = Record<string, string | undefined>;
+type DnaSemantico = Record<string, string | undefined>;
+type DnaLexical = Record<string, string | undefined>;
+type Matriz = Record<string, string | undefined>;
+
+type MemoriaEditorial = {
+  missao?: string | null;
+  valores?: string | null;
+  posicionamento?: string | null;
+  manual_estilo?: string | null;
+  glossario?: Array<{ termo?: string; definicao?: string }> | null;
+  siglas?: Array<{ sigla?: string; significado?: string }> | null;
+  pessoas?: Array<{ nome?: string; cargo?: string; partido?: string; estado?: string }> | null;
+  instituicoes?: Array<{ nome?: string; tipo?: string }> | null;
+};
 
 type ExtractedFactsRow = {
   id: string;
@@ -138,16 +161,21 @@ Deno.serve(async (req) => {
   // padrão, permitindo tom/estilo por editoria (política, esporte, cidades…).
   let systemPrompt = BASE_SYSTEM_PROMPT;
   if (cluster.categoria_id) {
-    const { data: agente } = await sb
-      .from("agentes_redatores")
-      .select("instrucoes_base, exemplo_texto, ativo")
-      .eq("categoria_id", cluster.categoria_id)
-      .maybeSingle();
-    if (agente?.ativo && agente.instrucoes_base?.trim()) {
-      const exemplo = agente.exemplo_texto?.trim()
-        ? `\n\nEXEMPLO DE LIDE PARA ESTA EDITORIA (use como referência de tom, não copie):\n${agente.exemplo_texto.trim()}`
-        : "";
-      systemPrompt = `${agente.instrucoes_base.trim()}${exemplo}\n\n---\n\n${BASE_SYSTEM_PROMPT}`;
+    const [{ data: agente }, { data: memoria }] = await Promise.all([
+      sb.from("agentes_redatores")
+        .select("instrucoes_base, exemplo_texto, ativo, dna_sintatico, dna_semantico, dna_lexical, matriz_editorial")
+        .eq("categoria_id", cluster.categoria_id).maybeSingle(),
+      sb.from("memoria_editorial")
+        .select("missao, valores, posicionamento, manual_estilo, glossario, siglas, pessoas, instituicoes")
+        .eq("singleton", true).maybeSingle(),
+    ]);
+    if (agente?.ativo) {
+      const del = buildDelPrompt(agente as {
+        instrucoes_base?: string; exemplo_texto?: string | null;
+        dna_sintatico?: DnaSintatico; dna_semantico?: DnaSemantico;
+        dna_lexical?: DnaLexical; matriz_editorial?: Matriz;
+      }, memoria as MemoriaEditorial | null);
+      if (del.trim()) systemPrompt = `${del}\n\n---\n\n${BASE_SYSTEM_PROMPT}`;
     }
   }
 
@@ -363,6 +391,83 @@ function slugify(s: string) {
     .replace(/[^a-z0-9]+/g, "-")
     .replace(/(^-|-$)/g, "")
     .slice(0, 80);
+}
+
+// Serializa memória global + as 4 camadas DEL em ordem, omitindo camadas
+// vazias (retrocompatível: se tudo vazio e só houver instrucoes_base, é
+// o único bloco). Assim o custo de tokens escala com o que o editor
+// realmente preencher.
+function buildDelPrompt(
+  agente: { instrucoes_base?: string; exemplo_texto?: string | null;
+    dna_sintatico?: DnaSintatico; dna_semantico?: DnaSemantico;
+    dna_lexical?: DnaLexical; matriz_editorial?: Matriz; },
+  memoria: MemoriaEditorial | null,
+): string {
+  const parts: string[] = [];
+
+  if (memoria) {
+    const mem: string[] = [];
+    if (memoria.missao) mem.push(`Missão: ${memoria.missao}`);
+    if (memoria.valores) mem.push(`Valores: ${memoria.valores}`);
+    if (memoria.posicionamento) mem.push(`Posicionamento: ${memoria.posicionamento}`);
+    if (memoria.manual_estilo) mem.push(`Manual de estilo: ${memoria.manual_estilo}`);
+    const siglas = (memoria.siglas ?? []).filter((s) => s?.sigla && s?.significado)
+      .map((s) => `${s.sigla} = ${s.significado}`).join(" · ");
+    if (siglas) mem.push(`Siglas: ${siglas}`);
+    const glos = (memoria.glossario ?? []).filter((g) => g?.termo && g?.definicao)
+      .map((g) => `${g.termo}: ${g.definicao}`).join(" · ");
+    if (glos) mem.push(`Glossário: ${glos}`);
+    const inst = (memoria.instituicoes ?? []).filter((i) => i?.nome)
+      .map((i) => i.tipo ? `${i.nome} (${i.tipo})` : i.nome).join(", ");
+    if (inst) mem.push(`Instituições recorrentes: ${inst}`);
+    if (mem.length) parts.push(`## MEMÓRIA EDITORIAL (identidade do portal)\n${mem.join("\n")}`);
+  }
+
+  const mat = serializeLayer(agente.matriz_editorial, {
+    objetivo: "Objetivo", publico: "Público", fontes_prioritarias: "Fontes prioritárias",
+    fontes_proibidas: "Fontes proibidas", indicadores: "Indicadores", cta: "CTA",
+  });
+  if (mat) parts.push(`## MATRIZ EDITORIAL DESTA EDITORIA\n${mat}`);
+
+  const sin = serializeLayer(agente.dna_sintatico, {
+    titulo_padrao: "Padrão de título", subtitulo_padrao: "Padrão de subtítulo",
+    ordem_informacoes: "Ordem das informações", tamanho_paragrafos: "Tamanho dos parágrafos",
+    ritmo: "Ritmo", uso_listas: "Uso de listas", uso_intertitulos: "Uso de intertítulos",
+  });
+  if (sin) parts.push(`## D — DNA SINTÁTICO (arquitetura do texto)\n${sin}`);
+
+  const sem = serializeLayer(agente.dna_semantico, {
+    eixo_narrativo: "Eixo narrativo", enfases: "Ênfases",
+    perguntas_obrigatorias: "Perguntas obrigatórias", conflitos_tipicos: "Conflitos típicos",
+  });
+  if (sem) parts.push(`## E — DNA SEMÂNTICO (como interpretar o fato)\n${sem}`);
+
+  const lex = serializeLayer(agente.dna_lexical, {
+    palavras_preferidas: "Palavras preferidas", palavras_proibidas: "Palavras proibidas",
+    verbos_predominantes: "Verbos predominantes", adjetivos_evitados: "Adjetivos evitados",
+    expressoes_recorrentes: "Expressões recorrentes", tom: "Tom",
+    formalidade: "Formalidade", nivel_tecnico: "Nível técnico",
+  });
+  if (lex) parts.push(`## L — DNA LEXICAL (como escrever)\n${lex}`);
+
+  if (agente.instrucoes_base?.trim()) {
+    parts.push(`## INSTRUÇÕES COMPLEMENTARES\n${agente.instrucoes_base.trim()}`);
+  }
+  if (agente.exemplo_texto?.trim()) {
+    parts.push(`## EXEMPLO DE LIDE (referência de tom, NÃO copie)\n${agente.exemplo_texto.trim()}`);
+  }
+
+  return parts.join("\n\n");
+}
+
+function serializeLayer(layer: Record<string, string | undefined> | undefined, labels: Record<string, string>): string {
+  if (!layer) return "";
+  const lines: string[] = [];
+  for (const key of Object.keys(labels)) {
+    const v = layer[key]?.trim();
+    if (v) lines.push(`- ${labels[key]}: ${v}`);
+  }
+  return lines.join("\n");
 }
 
 function json(payload: unknown, status = 200) {
