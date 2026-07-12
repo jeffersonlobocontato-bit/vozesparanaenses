@@ -25,6 +25,13 @@ Deno.serve(async (req) => {
   const key = Deno.env.get("EXTERNAL_SUPABASE_SERVICE_ROLE_KEY");
   if (!url || !key) return json({ error: "missing_external_supabase_env" }, 500);
 
+  // As edge functions rodam no Lovable Cloud (SUPABASE_URL), não no
+  // banco externo (EXTERNAL_SUPABASE_URL). Uso SUPABASE_URL só para
+  // encadear extract-facts + generate-article; as consultas de dados
+  // continuam no externo.
+  const selfUrl = Deno.env.get("SUPABASE_URL") ?? url;
+  const selfKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? key;
+
   let body: { limit?: number; regiao_id?: string } = {};
   try { body = await req.json(); } catch { body = {}; }
   const limit = Math.max(1, Math.min(body.limit ?? 50, 200));
@@ -68,17 +75,17 @@ Deno.serve(async (req) => {
       if (!c) return;
       try {
         if (c.status === "selecionado_cota") {
-          const ef = await fetch(`${url}/functions/v1/extract-facts`, {
+          const ef = await fetch(`${selfUrl}/functions/v1/extract-facts`, {
             method: "POST",
-            headers: { "Content-Type": "application/json", Authorization: `Bearer ${key}` },
+            headers: { "Content-Type": "application/json", Authorization: `Bearer ${selfKey}` },
             body: JSON.stringify({ cluster_id: c.id }),
           });
           if (!ef.ok) { erros.push({ cluster_id: c.id, etapa: "extract-facts", detalhe: (await ef.text()).slice(0, 300) }); continue; }
           extraidas++;
         }
-        const ga = await fetch(`${url}/functions/v1/generate-article`, {
+        const ga = await fetch(`${selfUrl}/functions/v1/generate-article`, {
           method: "POST",
-          headers: { "Content-Type": "application/json", Authorization: `Bearer ${key}` },
+          headers: { "Content-Type": "application/json", Authorization: `Bearer ${selfKey}` },
           body: JSON.stringify({ cluster_id: c.id }),
         });
         if (!ga.ok) { erros.push({ cluster_id: c.id, etapa: "generate-article", detalhe: (await ga.text()).slice(0, 300) }); continue; }
