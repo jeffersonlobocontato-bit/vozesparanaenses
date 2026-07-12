@@ -244,7 +244,15 @@ function useTodayBR() {
   return label;
 }
 
-function PortalHome({ regions, articles }: { regions: Region[]; articles: RankedArticle[] }) {
+function PortalHome({
+  regions,
+  articles,
+  vaptVupt,
+}: {
+  regions: Region[];
+  articles: RankedArticle[];
+  vaptVupt: ArticleListItem[];
+}) {
   const REGIONS_FALLBACK: Region[] = [
     { id: "fb-metropolitana", slug: "metropolitana", name: "Metropolitana" },
     { id: "fb-litoral", slug: "litoral", name: "Litoral" },
@@ -258,9 +266,12 @@ function PortalHome({ regions, articles }: { regions: Region[]; articles: Ranked
     { id: "fb-centro-sul", slug: "centro-sul", name: "Centro-Sul" },
   ] as unknown as Region[];
   if (!regions || regions.length === 0) regions = REGIONS_FALLBACK;
+  // Primeira dobra (hero + laterais + secundárias) só aceita matérias com foto.
+  // Sem imagem, a matéria vai para o módulo VAPT-VUPT ao lado das Mais Lidas.
+  const articlesComFoto = articles.filter((a) => !!a.cover_image_url);
   // Home estadual — só pins de escopo 'estado' aparecem como fixados;
   // pins de região/cidade caem no rest e viram matéria comum.
-  const { hero, side, rest } = arrangePinnedSlots(articles, 4, {});
+  const { hero, side, rest } = arrangePinnedSlots(articlesComFoto, 4, {});
   const secondary = rest.slice(0, 2);
 
   const articleByRegion = new Map<string, ArticleListItem>();
