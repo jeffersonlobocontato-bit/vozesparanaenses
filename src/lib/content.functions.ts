@@ -271,6 +271,7 @@ export const listLatestArticles = createServerFn({ method: "GET" })
         .from("generated_articles")
         .select(cols)
         .eq("status", "publicado")
+        .not("imagem_capa_url", "is", null)
         .order("publicado_em", { ascending: false })
         .limit(data.limit);
     let res = await run(MATERIA_LIST_COLS);
@@ -435,6 +436,7 @@ export const listArticlesByCity = createServerFn({ method: "GET" })
       .select(MATERIA_LIST_COLS_GEO)
       .eq("status", "publicado")
       .eq("regiao_id", (region as { id: string }).id)
+      .not("imagem_capa_url", "is", null)
       .order("publicado_em", { ascending: false })
       .limit(400);
     if (error) {
@@ -532,6 +534,7 @@ export const listRankedArticles = createServerFn({ method: "GET" })
         .from("generated_articles")
         .select(cols)
         .eq("status", "publicado")
+        .not("imagem_capa_url", "is", null)
         .order("publicado_em", { ascending: false })
         .limit(poolSize);
     let rankedRes = await runRanked(MATERIA_LIST_COLS_GEO);
@@ -550,6 +553,7 @@ export const listRankedArticles = createServerFn({ method: "GET" })
           .from("generated_articles")
           .select(MATERIA_LIST_COLS)
           .eq("status", "publicado")
+          .not("imagem_capa_url", "is", null)
           .order("publicado_em", { ascending: false })
           .limit(data.limit);
         if (simple.error) throw new Error(simple.error.message);
@@ -644,6 +648,7 @@ export const listArticlesByRegion = createServerFn({ method: "GET" })
         .select(cols)
         .eq("status", "publicado")
         .eq("regiao_id", (region as { id: string }).id)
+        .not("imagem_capa_url", "is", null)
         .order("publicado_em", { ascending: false })
         .limit(data.limit);
     let res = await runRegion(MATERIA_LIST_COLS);
@@ -662,6 +667,7 @@ export const listArticlesByRegion = createServerFn({ method: "GET" })
       .select(MATERIA_LIST_COLS)
       .eq("status", "publicado")
       .eq("regiao_id", (region as { id: string }).id)
+      .not("imagem_capa_url", "is", null)
       .not("fixado_posicao", "is", null)
       .order("fixado_posicao", { ascending: true })
       .limit(10);
@@ -809,6 +815,7 @@ export const listRelatedArticles = createServerFn({ method: "GET" })
         .eq("status", "publicado")
         .eq("regiao_id", (region as { id: string }).id)
         .neq("id", data.articleId)
+        .not("imagem_capa_url", "is", null)
         .order("publicado_em", { ascending: false })
         .limit(80);
       if (error) {
@@ -820,6 +827,7 @@ export const listRelatedArticles = createServerFn({ method: "GET" })
             .eq("status", "publicado")
             .eq("regiao_id", (region as { id: string }).id)
             .neq("id", data.articleId)
+            .not("imagem_capa_url", "is", null)
             .order("publicado_em", { ascending: false })
             .limit(data.limit);
           if (simple.error) return { mesmaCidade: [], mesmaRegiao: [] };
@@ -868,6 +876,7 @@ export const listArticlesByCategory = createServerFn({ method: "GET" })
       .eq("status", "publicado")
       .eq("regiao_id", (region as { id: string }).id)
       .eq("categoria_id", (category as { id: string }).id)
+      .not("imagem_capa_url", "is", null)
       .order("publicado_em", { ascending: false })
       .limit(data.limit);
     if (error) {
@@ -897,6 +906,7 @@ export const listArticlesByCategoryGlobal = createServerFn({ method: "GET" })
       .select(MATERIA_LIST_COLS)
       .eq("status", "publicado")
       .eq("categoria_id", (category as { id: string }).id)
+      .not("imagem_capa_url", "is", null)
       .order("publicado_em", { ascending: false })
       .limit(data.limit);
     if (error) {
