@@ -270,7 +270,9 @@ function PortalHome({ regions, articles }: { regions: Region[]; articles: Ranked
 
       <main className="mx-auto max-w-7xl px-4 py-6">
         {/* CTA — Comunidade WhatsApp (topo) */}
-        <WhatsAppCTA className="mb-6" />
+        <div className="mb-6 flex justify-start">
+          <WhatsAppCTA variant="button" />
+        </div>
 
         {/* Publicidade — Super Banner topo */}
         <AdSlot size="970x90" className="mb-6" />
@@ -417,7 +419,9 @@ function PortalHome({ regions, articles }: { regions: Region[]; articles: Ranked
         </div>
 
         {/* CTA — Comunidade WhatsApp (rodapé da home) */}
-        <WhatsAppCTA className="mt-10" />
+        <div className="mt-10 flex justify-start">
+          <WhatsAppCTA variant="button" />
+        </div>
       </main>
 
       <SiteFooter />
