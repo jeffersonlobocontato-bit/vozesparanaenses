@@ -14,6 +14,7 @@ type EventoRow = {
   ts: string;
   pagina: string | null;
   origem_trafego: string | null;
+  cidade_leitor: string | null;
   regiao: { nome: string } | { nome: string }[] | null;
 };
 
@@ -40,7 +41,7 @@ function AdminAnalytics() {
       const since = new Date(Date.now() - dias * 24 * 3600 * 1000).toISOString();
       const { data, error } = await sb
         .from("analytics_events")
-        .select("ts, pagina, origem_trafego, regiao:regioes(nome)")
+        .select("ts, pagina, origem_trafego, cidade_leitor, regiao:regioes(nome)")
         .eq("tipo_evento", "pageview")
         .gte("ts", since)
         .order("ts", { ascending: false })
@@ -79,6 +80,15 @@ function AdminAnalytics() {
       m.set(r.pagina, (m.get(r.pagina) ?? 0) + 1);
     }
     return Array.from(m.entries()).map(([pagina, total]) => ({ pagina, total })).sort((a, b) => b.total - a.total).slice(0, 10);
+  }, [rows]);
+
+  const porCidadeLeitor = useMemo(() => {
+    const m = new Map<string, number>();
+    for (const r of rows ?? []) {
+      if (!r.cidade_leitor) continue;
+      m.set(r.cidade_leitor, (m.get(r.cidade_leitor) ?? 0) + 1);
+    }
+    return Array.from(m.entries()).map(([cidade, total]) => ({ cidade, total })).sort((a, b) => b.total - a.total).slice(0, 10);
   }, [rows]);
 
   const porDia = useMemo(() => {
@@ -182,6 +192,22 @@ function AdminAnalytics() {
                   </li>
                 ))}
                 {porPagina.length === 0 && <li className="text-muted-foreground">Sem dados.</li>}
+              </ul>
+            </div>
+
+            <div className="rounded-lg border bg-card p-4">
+              <h2 className="mb-3 text-sm font-semibold">De onde vêm os leitores (cidade)</h2>
+              <p className="mb-3 text-[11px] text-muted-foreground">
+                Aproximado por geolocalização de IP — o IP em si nunca é armazenado, só a cidade resultante.
+              </p>
+              <ul className="space-y-1 text-sm">
+                {porCidadeLeitor.map((c) => (
+                  <li key={c.cidade} className="flex items-center justify-between gap-2 border-b py-1 last:border-0">
+                    <span className="truncate text-muted-foreground">{c.cidade}</span>
+                    <span className="font-semibold">{c.total}</span>
+                  </li>
+                ))}
+                {porCidadeLeitor.length === 0 && <li className="text-muted-foreground">Sem dados ainda.</li>}
               </ul>
             </div>
           </div>
