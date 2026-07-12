@@ -1,6 +1,6 @@
 import { useEffect, useRef } from "react";
 import { useRouterState } from "@tanstack/react-router";
-import { getExternalBrowser } from "@/lib/external-supabase-browser";
+import { supabase } from "@/integrations/supabase/client";
 import { listRegions } from "@/lib/content.functions";
 
 declare global {
@@ -66,14 +66,11 @@ async function trackPageview(pathname: string) {
       typeof window !== "undefined" ? window.location.hostname : "",
     );
 
-    const sb = await getExternalBrowser();
-    await sb.from("analytics_events").insert({
-      regiao_id,
-      categoria,
-      cidade,
-      tipo_evento: "pageview",
-      pagina: pathname,
-      origem_trafego,
+    // A cidade do leitor (por geolocalização de IP) só pode ser resolvida no
+    // servidor — o navegador nunca tem acesso ao IP de quem o está usando.
+    // Por isso isso vai pra uma Edge Function em vez de gravar direto aqui.
+    await supabase.functions.invoke("track-pageview", {
+      body: { regiao_id, categoria, cidade, tipo_evento: "pageview", pagina: pathname, origem_trafego },
     });
   } catch {
     // Analytics nunca deve quebrar a navegação do leitor — falha em silêncio.
