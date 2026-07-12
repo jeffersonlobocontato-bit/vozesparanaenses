@@ -84,6 +84,24 @@ select cron.schedule(
   $$
 );
 
+-- 4. Expiração de rascunhos não publicados — de hora em hora
+--    (fase 1: rascunho > 12h vira 'expirado'; fase 2: expirado > 7 dias é
+--    apagado de vez — ver 022_publicacao_automatica.sql)
+select cron.schedule(
+  'vozes-expire-drafts',
+  '15 * * * *',
+  $$
+  select net.http_post(
+    url := 'https://{PROJECT_URL}/functions/v1/expire-drafts',
+    headers := jsonb_build_object(
+      'Content-Type','application/json',
+      'Authorization','Bearer {ANON_KEY}'
+    ),
+    body := '{}'::jsonb
+  );
+  $$
+);
+
 -- Consultas úteis:
 --   select * from cron.job;
 --   select * from cron.job_run_details order by start_time desc limit 20;
