@@ -187,7 +187,14 @@ async function classify(
   apiKey: string,
 ): Promise<string> {
   const slugs = categorias.map((c) => c.slug).join(", ");
-  const sys = `Você é um editor. Classifique o excerto em UMA categoria dentre: ${slugs}. Responda APENAS com o slug, sem aspas, sem texto extra.`;
+  const sys = `Você é um editor de um portal do Paraná (Brasil). Classifique o excerto em UMA categoria dentre: ${slugs}.
+
+Regras de escopo geográfico (aplicar ANTES de escolher a editoria temática):
+- Se o fato NÃO menciona o Paraná nem cidade/pessoa/instituição do Paraná, e ocorre em outro estado brasileiro ou tem escopo nacional (Brasil, governo federal, Congresso, STF, seleção brasileira, etc.), responda "nacional".
+- Se o fato ocorre fora do Brasil (outro país, órgãos internacionais, esportes/política/economia estrangeiros) e não tem ligação direta com o Paraná, responda "internacional".
+- Caso contrário (fato paranaense OU com impacto direto no Paraná), escolha a editoria temática apropriada (politica, economia, agro, seguranca, educacao, esportes, cultura, saude, cidades, meio-ambiente).
+
+Responda APENAS com o slug, sem aspas, sem texto extra.`;
   try {
     const res = await fetch(AI_URL, {
       method: "POST",
@@ -202,7 +209,10 @@ async function classify(
     if (!res.ok) return categorias[0].slug;
     const j = await res.json();
     const raw = String(j.choices?.[0]?.message?.content ?? "").trim().toLowerCase();
-    const found = categorias.find((c) => raw.includes(c.slug));
+    // Prioriza slugs mais longos primeiro (ex.: "internacional" antes de
+    // "nacional") para não confundir substrings.
+    const ordered = [...categorias].sort((a, b) => b.slug.length - a.slug.length);
+    const found = ordered.find((c) => raw.includes(c.slug));
     return found?.slug ?? categorias[0].slug;
   } catch {
     return categorias[0].slug;
