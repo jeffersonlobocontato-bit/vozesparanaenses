@@ -611,6 +611,61 @@ function EditoriaModule({ slug, name }: { slug: string; name: string }) {
 }
 
 function HeroCard({ article }: { article: RankedArticle | undefined }) {
+  return _HeroCardImpl({ article });
+}
+
+function VaptVuptModule({ articles }: { articles: ArticleListItem[] }) {
+  if (!articles || articles.length === 0) return null;
+  return (
+    <div className="bg-white p-5 rounded-lg border border-slate-200">
+      <div className="flex items-baseline justify-between border-b border-slate-100 pb-2 mb-4">
+        <h5 className="text-sm font-black uppercase text-primary tracking-wider">
+          VAPT-VUPT
+        </h5>
+        <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400">
+          Rápidas
+        </span>
+      </div>
+      <div className="space-y-3">
+        {articles.map((a) => {
+          const catName = a.categoria?.name ?? a.region?.name ?? "Geral";
+          const catSlug = a.categoria?.slug ?? null;
+          const inner = (
+            <>
+              <div className="flex items-center gap-2 flex-wrap">
+                <CategoryTag name={catName} slug={catSlug} className="text-[10px] px-1.5 py-0.5" />
+                {a.region && (
+                  <span className="text-[10px] font-bold uppercase tracking-wider text-slate-500">
+                    {a.region.name}
+                  </span>
+                )}
+              </div>
+              <p className="text-sm font-semibold leading-snug mt-1 group-hover:text-secondary transition-colors">
+                {a.title}
+              </p>
+            </>
+          );
+          return a.region ? (
+            <Link
+              key={a.id}
+              to="/$region/$slug"
+              params={{ region: a.region.slug, slug: a.slug }}
+              className="group block border-l-2 border-slate-200 pl-3 hover:border-secondary"
+            >
+              {inner}
+            </Link>
+          ) : (
+            <div key={a.id} className="group block border-l-2 border-slate-200 pl-3">
+              {inner}
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
+function _HeroCardImpl({ article }: { article: RankedArticle | undefined }) {
   const title = article?.title ?? HERO_FALLBACK.title;
   const summary = article?.summary ?? HERO_FALLBACK.summary;
   const catName = article?.categoria?.name ?? article?.region?.name ?? HERO_FALLBACK.category;
