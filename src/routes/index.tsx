@@ -449,6 +449,7 @@ function PortalHome({
                 ))}
               </div>
             </div>
+            <VaptVuptModule articles={vaptVupt} />
             <AdSlot size="300x250" />
             <AdSlot size="300x600" />
           </aside>
