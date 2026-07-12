@@ -1,6 +1,6 @@
 import { Link } from "@tanstack/react-router";
-import logoPositive from "@/assets/vp-logo-horizontal-positive.svg.asset.json";
-import logoNegative from "@/assets/vp-logo-horizontal-negative.svg.asset.json";
+import logoBlue from "@/assets/vozes-logo-blue.png.asset.json";
+import logoWhite from "@/assets/vozes-logo-white.png.asset.json";
 
 type Size = "sm" | "md" | "lg";
 type Variant = "blue" | "white" | "auto";
@@ -24,7 +24,7 @@ export function Logo({
   className?: string;
   variant?: Variant;
 }) {
-  const src = variant === "white" ? logoNegative.url : logoPositive.url;
+  const src = variant === "white" ? logoWhite.url : logoBlue.url;
   const img = (
     <img
       src={src}
