@@ -14,6 +14,7 @@ import { buildLinkTerms, autoLinkParagraph } from "@/lib/auto-link";
 import { SiteHeader, SiteFooter } from "@/components/SiteHeader";
 import { getCityCoords, formatGeoPosition, formatICBM } from "@/lib/geo-cities";
 import { AdSlot } from "@/components/AdSlot";
+import { AdsenseSlot } from "@/components/AdsenseSlot";
 import { WhatsAppCTA } from "@/components/WhatsAppCTA";
 
 const articleQO = (regionSlug: string, slug: string) =>
