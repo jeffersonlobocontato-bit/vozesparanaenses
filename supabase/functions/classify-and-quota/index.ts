@@ -146,20 +146,22 @@ Deno.serve(async (req) => {
   const CHAIN_CONCURRENCY = 3;
   const fila = [...selecionados];
   let autoEscritas = 0;
+  const selfUrl = Deno.env.get("SUPABASE_URL") ?? url;
+  const selfKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? key;
   const workers = Array.from({ length: Math.min(CHAIN_CONCURRENCY, fila.length) }, async () => {
     while (fila.length) {
       const clusterId = fila.shift();
       if (!clusterId) return;
       try {
-        const ef = await fetch(`${url}/functions/v1/extract-facts`, {
+        const ef = await fetch(`${selfUrl}/functions/v1/extract-facts`, {
           method: "POST",
-          headers: { "Content-Type": "application/json", Authorization: `Bearer ${key}` },
+          headers: { "Content-Type": "application/json", Authorization: `Bearer ${selfKey}` },
           body: JSON.stringify({ cluster_id: clusterId }),
         });
         if (!ef.ok) { console.error(`[auto-write] extract-facts falhou p/ ${clusterId}`, await ef.text()); continue; }
-        const ga = await fetch(`${url}/functions/v1/generate-article`, {
+        const ga = await fetch(`${selfUrl}/functions/v1/generate-article`, {
           method: "POST",
-          headers: { "Content-Type": "application/json", Authorization: `Bearer ${key}` },
+          headers: { "Content-Type": "application/json", Authorization: `Bearer ${selfKey}` },
           body: JSON.stringify({ cluster_id: clusterId }),
         });
         if (!ga.ok) { console.error(`[auto-write] generate-article falhou p/ ${clusterId}`, await ga.text()); continue; }
