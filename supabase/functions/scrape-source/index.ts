@@ -186,9 +186,11 @@ Deno.serve(async (req) => {
     // dispara os próximos passos automaticamente.
     for (const fn of ["cluster-articles", "classify-and-quota"]) {
       try {
-        const res = await fetch(`${url}/functions/v1/${fn}`, {
+        const selfUrl = Deno.env.get("SUPABASE_URL") ?? url;
+        const selfKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? key;
+        const res = await fetch(`${selfUrl}/functions/v1/${fn}`, {
           method: "POST",
-          headers: { "content-type": "application/json", Authorization: `Bearer ${key}`, apikey: key },
+          headers: { "content-type": "application/json", Authorization: `Bearer ${selfKey}`, apikey: selfKey },
           body: "{}",
         });
         console.log(`[scrape-source] chained ${fn} -> ${res.status}`);
