@@ -1,0 +1,101 @@
+// Vozes Paranaenses — process-pending-clusters
+// Ação única (rodada manualmente pelo painel admin) para aplicar as regras
+// novas de escrita automática nas pautas que ficaram paradas em
+// `selecionado_cota` ou `fatos_extraidos` (sem rascunho gerado ainda).
+// Para cada pauta pendente:
+//   - se ainda está em `selecionado_cota`, chama extract-facts
+//   - em seguida chama generate-article (que decide se auto-publica ou
+//     manda pra fila de revisão conforme as regras vigentes)
+//
+// Body opcional: { limit?: number, regiao_id?: string }
+
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
+
+const cors = {
+  "Access-Control-Allow-Origin": "*",
+  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
+  "Access-Control-Allow-Methods": "POST, OPTIONS",
+};
+
+Deno.serve(async (req) => {
+  if (req.method === "OPTIONS") return new Response(null, { headers: cors });
+  if (req.method !== "POST") return json({ error: "method_not_allowed" }, 405);
+
+  const url = Deno.env.get("EXTERNAL_SUPABASE_URL");
+  const key = Deno.env.get("EXTERNAL_SUPABASE_SERVICE_ROLE_KEY");
+  if (!url || !key) return json({ error: "missing_external_supabase_env" }, 500);
+
+  let body: { limit?: number; regiao_id?: string } = {};
+  try { body = await req.json(); } catch { body = {}; }
+  const limit = Math.max(1, Math.min(body.limit ?? 50, 200));
+
+  const sb = createClient(url, key, { auth: { persistSession: false } });
+
+  // Pautas que estavam aguardando o próximo passo do pipeline.
+  let q = sb
+    .from("article_clusters")
+    .select("id, status, interesse_score, criado_em")
+    .in("status", ["selecionado_cota", "fatos_extraidos"])
+    .order("interesse_score", { ascending: false, nullsFirst: false })
+    .order("criado_em", { ascending: false })
+    .limit(limit);
+  if (body.regiao_id) q = q.eq("regiao_id", body.regiao_id);
+
+  const { data: pendentes, error } = await q;
+  if (error) return json({ error: "query_failed", detail: error.message }, 500);
+  if (!pendentes?.length) return json({ ok: true, processadas: 0 });
+
+  // Filtra as que ainda não têm rascunho gerado (defesa extra: o status
+  // 'rascunho_gerado' já cobre isso, mas a checagem evita retrabalho se
+  // algo tiver ficado inconsistente).
+  const ids = pendentes.map((c) => c.id);
+  const { data: jaTem } = await sb
+    .from("generated_articles")
+    .select("cluster_id")
+    .in("cluster_id", ids);
+  const bloqueados = new Set((jaTem ?? []).map((r) => r.cluster_id));
+  const fila = pendentes.filter((c) => !bloqueados.has(c.id));
+
+  const CONCURRENCY = 3;
+  let extraidas = 0;
+  let escritas = 0;
+  const erros: Array<{ cluster_id: string; etapa: string; detalhe: string }> = [];
+
+  const queue = [...fila];
+  const workers = Array.from({ length: Math.min(CONCURRENCY, queue.length) }, async () => {
+    while (queue.length) {
+      const c = queue.shift();
+      if (!c) return;
+      try {
+        if (c.status === "selecionado_cota") {
+          const ef = await fetch(`${url}/functions/v1/extract-facts`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json", Authorization: `Bearer ${key}` },
+            body: JSON.stringify({ cluster_id: c.id }),
+          });
+          if (!ef.ok) { erros.push({ cluster_id: c.id, etapa: "extract-facts", detalhe: (await ef.text()).slice(0, 300) }); continue; }
+          extraidas++;
+        }
+        const ga = await fetch(`${url}/functions/v1/generate-article`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json", Authorization: `Bearer ${key}` },
+          body: JSON.stringify({ cluster_id: c.id }),
+        });
+        if (!ga.ok) { erros.push({ cluster_id: c.id, etapa: "generate-article", detalhe: (await ga.text()).slice(0, 300) }); continue; }
+        escritas++;
+      } catch (e) {
+        erros.push({ cluster_id: c.id, etapa: "exception", detalhe: (e as Error).message });
+      }
+    }
+  });
+  await Promise.all(workers);
+
+  return json({ ok: true, pendentes: fila.length, extraidas, escritas, erros });
+});
+
+function json(body: unknown, status = 200) {
+  return new Response(JSON.stringify(body), {
+    status,
+    headers: { ...cors, "content-type": "application/json" },
+  });
+}
