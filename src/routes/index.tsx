@@ -5,6 +5,7 @@ import {
   listRegions,
   listRankedArticles,
   getViewerLocation,
+  listArticlesByCategoryGlobal,
   type ArticleListItem,
   type RankedArticle,
   type Region,
@@ -34,6 +35,22 @@ const rankedQO = (loc: ViewerLocation) =>
       }),
   });
 
+// Módulos por editoria — sequência exibida no scroll da home,
+// no espírito dos grandes portais (G1, UOL, Folha).
+const HOME_EDITORIAS: Array<{ slug: string; name: string }> = [
+  { slug: "seguranca", name: "Segurança" },
+  { slug: "politica", name: "Política" },
+  { slug: "esportes", name: "Esportes" },
+  { slug: "cidades", name: "Cidades" },
+];
+
+const editoriaQO = (slug: string) =>
+  queryOptions({
+    queryKey: ["articles", "cat-global", slug, 7],
+    queryFn: () =>
+      listArticlesByCategoryGlobal({ data: { categorySlug: slug, limit: 7 } }),
+  });
+
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
@@ -57,6 +74,11 @@ export const Route = createFileRoute("/")({
       context.queryClient.ensureQueryData(regionsQO),
     ]);
     await context.queryClient.ensureQueryData(rankedQO(loc));
+    await Promise.all(
+      HOME_EDITORIAS.map((e) =>
+        context.queryClient.ensureQueryData(editoriaQO(e.slug)),
+      ),
+    );
   },
   component: Home,
   errorComponent: ({ error }) => (
@@ -418,6 +440,13 @@ function PortalHome({ regions, articles }: { regions: Region[]; articles: Ranked
           <AdsenseSlot slot="2880053002" />
         </div>
 
+        {/* Módulos por editoria — sequência estilo grandes portais */}
+        <div className="mt-12 space-y-12">
+          {HOME_EDITORIAS.map((e) => (
+            <EditoriaModule key={e.slug} slug={e.slug} name={e.name} />
+          ))}
+        </div>
+
         {/* CTA — Comunidade WhatsApp (rodapé da home) */}
         <div className="mt-10 flex justify-start">
           <WhatsAppCTA variant="button" />
@@ -426,6 +455,138 @@ function PortalHome({ regions, articles }: { regions: Region[]; articles: Ranked
 
       <SiteFooter />
     </div>
+  );
+}
+
+function EditoriaModule({ slug, name }: { slug: string; name: string }) {
+  const { data: articles } = useSuspenseQuery(editoriaQO(slug));
+  if (!articles || articles.length === 0) return null;
+  const [lead, ...rest] = articles;
+  const secondary = rest.slice(0, 4);
+  const list = rest.slice(4, 7);
+
+  const leadLink = lead.region
+    ? { to: "/$region/$slug" as const, params: { region: lead.region.slug, slug: lead.slug } }
+    : null;
+
+  return (
+    <section aria-labelledby={`editoria-${slug}`}>
+      <div className="flex items-center gap-4 mb-6">
+        <Link
+          to="/editoria/$categoria"
+          params={{ categoria: slug }}
+          id={`editoria-${slug}`}
+          className="font-display text-3xl md:text-4xl text-primary uppercase tracking-tight shrink-0 hover:text-secondary transition-colors"
+        >
+          {name}
+        </Link>
+        <div className="h-1 w-full bg-slate-200 rounded-full">
+          <div className="h-1 w-24 bg-secondary rounded-full" />
+        </div>
+        <Link
+          to="/editoria/$categoria"
+          params={{ categoria: slug }}
+          className="shrink-0 text-[11px] font-bold uppercase tracking-[0.14em] text-secondary hover:underline"
+        >
+          Ver tudo
+        </Link>
+      </div>
+
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        {/* Lead */}
+        {leadLink ? (
+          <Link {...leadLink} className="group block lg:col-span-2">
+            <div className="w-full aspect-[16/9] bg-slate-200 overflow-hidden rounded-lg">
+              {lead.cover_image_url ? (
+                <img
+                  src={lead.cover_image_url}
+                  alt=""
+                  className="h-full w-full object-cover group-hover:scale-[1.02] transition-transform duration-500"
+                  loading="lazy"
+                />
+              ) : (
+                <div className="h-full w-full bg-gradient-to-br from-slate-200 to-slate-300" />
+              )}
+            </div>
+            <div className="pt-3">
+              <div className="flex items-center gap-2 flex-wrap">
+                <CategoryTag name={name} slug={slug} />
+                {lead.region && (
+                  <span className="text-[11px] font-bold uppercase tracking-wider text-slate-500">
+                    {lead.region.name}
+                  </span>
+                )}
+              </div>
+              <h3 className="font-display text-2xl md:text-4xl leading-tight mt-2 group-hover:text-secondary">
+                {lead.title}
+              </h3>
+              {lead.summary && (
+                <p className="mt-2 text-slate-600 line-clamp-2 text-base">{lead.summary}</p>
+              )}
+            </div>
+          </Link>
+        ) : null}
+
+        {/* Secondary grid */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-1 gap-5">
+          {secondary.slice(0, 2).map((a) =>
+            a.region ? (
+              <Link
+                key={a.id}
+                to="/$region/$slug"
+                params={{ region: a.region.slug, slug: a.slug }}
+                className="group flex gap-3"
+              >
+                <div className="w-28 shrink-0 aspect-square bg-slate-200 overflow-hidden rounded">
+                  {a.cover_image_url ? (
+                    <img src={a.cover_image_url} alt="" className="h-full w-full object-cover" loading="lazy" />
+                  ) : (
+                    <div className="h-full w-full bg-gradient-to-br from-slate-200 to-slate-300" />
+                  )}
+                </div>
+                <div className="min-w-0">
+                  <span className="text-[10px] font-bold uppercase tracking-wider text-secondary">
+                    {a.region.name}
+                  </span>
+                  <h4 className="font-display text-base md:text-lg leading-snug group-hover:text-secondary mt-1">
+                    {a.title}
+                  </h4>
+                </div>
+              </Link>
+            ) : null,
+          )}
+        </div>
+      </div>
+
+      {(secondary.slice(2).length > 0 || list.length > 0) && (
+        <div className="mt-6 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 border-t border-slate-200 pt-6">
+          {[...secondary.slice(2), ...list].map((a) =>
+            a.region ? (
+              <Link
+                key={a.id}
+                to="/$region/$slug"
+                params={{ region: a.region.slug, slug: a.slug }}
+                className="group block"
+              >
+                <div className="w-full aspect-[16/10] bg-slate-200 overflow-hidden rounded">
+                  {a.cover_image_url ? (
+                    <img src={a.cover_image_url} alt="" className="h-full w-full object-cover group-hover:scale-[1.02] transition-transform duration-500" loading="lazy" />
+                  ) : (
+                    <div className="h-full w-full bg-gradient-to-br from-slate-200 to-slate-300" />
+                  )}
+                </div>
+                <span className="mt-2 inline-block text-[10px] font-bold uppercase tracking-wider text-secondary">
+                  {a.region.name}
+                </span>
+                <h4 className="font-display text-lg leading-snug group-hover:text-secondary mt-1">
+                  {a.title}
+                </h4>
+              </Link>
+            ) : null,
+          )}
+        </div>
+      )}
+    </section>
   );
 }
 
