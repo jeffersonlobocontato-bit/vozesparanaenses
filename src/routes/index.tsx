@@ -7,6 +7,7 @@ import {
   getViewerLocation,
   listArticlesByCategoryGlobal,
   listArticlesWithoutImage,
+  listMostReadArticles,
   type ArticleListItem,
   type RankedArticle,
   type Region,
@@ -57,6 +58,11 @@ const vaptVuptQO = queryOptions({
   queryFn: () => listArticlesWithoutImage({ data: { limit: 8 } }),
 });
 
+const mostReadQO = queryOptions({
+  queryKey: ["articles", "most-read", 7, 5],
+  queryFn: () => listMostReadArticles({ data: { days: 7, limit: 5 } }),
+});
+
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
@@ -86,6 +92,7 @@ export const Route = createFileRoute("/")({
       ),
     );
     await context.queryClient.ensureQueryData(vaptVuptQO);
+    await context.queryClient.ensureQueryData(mostReadQO);
   },
   component: Home,
   errorComponent: ({ error }) => (
@@ -100,7 +107,15 @@ function Home() {
   const { data: loc } = useSuspenseQuery(viewerLocQO);
   const { data: articles } = useSuspenseQuery(rankedQO(loc));
   const { data: vaptVupt } = useSuspenseQuery(vaptVuptQO);
-  return <PortalHome regions={regions} articles={articles} vaptVupt={vaptVupt} />;
+  const { data: mostRead } = useSuspenseQuery(mostReadQO);
+  return (
+    <PortalHome
+      regions={regions}
+      articles={articles}
+      vaptVupt={vaptVupt}
+      mostRead={mostRead}
+    />
+  );
 }
 
 /* --------------------------- Filler manchetes --------------------------- */
@@ -248,10 +263,12 @@ function PortalHome({
   regions,
   articles,
   vaptVupt,
+  mostRead,
 }: {
   regions: Region[];
   articles: RankedArticle[];
   vaptVupt: ArticleListItem[];
+  mostRead: ArticleListItem[];
 }) {
   const REGIONS_FALLBACK: Region[] = [
     { id: "fb-metropolitana", slug: "metropolitana", name: "Metropolitana" },
@@ -439,14 +456,33 @@ function PortalHome({
                 Mais Lidas
               </h5>
               <div className="space-y-4">
-                {MOST_READ_FALLBACK.map((t, i) => (
-                  <div key={i} className="flex gap-3 group cursor-pointer">
-                    <span className="font-display text-4xl leading-none text-slate-200">{i + 1}</span>
-                    <p className="text-base font-bold leading-snug group-hover:text-secondary transition-colors">
-                      {t}
-                    </p>
-                  </div>
-                ))}
+                {(mostRead.length > 0
+                  ? mostRead.map((a, i) => ({
+                      key: a.id,
+                      title: a.title,
+                      to: a.region
+                        ? { to: "/$region/$slug" as const, params: { region: a.region.slug, slug: a.slug } }
+                        : null,
+                      i,
+                    }))
+                  : MOST_READ_FALLBACK.map((t, i) => ({ key: `fb-${i}`, title: t, to: null, i }))
+                ).map(({ key, title, to, i }) =>
+                  to ? (
+                    <Link key={key} {...to} className="flex gap-3 group cursor-pointer">
+                      <span className="font-display text-4xl leading-none text-slate-200">{i + 1}</span>
+                      <p className="text-base font-bold leading-snug group-hover:text-secondary transition-colors">
+                        {title}
+                      </p>
+                    </Link>
+                  ) : (
+                    <div key={key} className="flex gap-3 group cursor-pointer">
+                      <span className="font-display text-4xl leading-none text-slate-200">{i + 1}</span>
+                      <p className="text-base font-bold leading-snug group-hover:text-secondary transition-colors">
+                        {title}
+                      </p>
+                    </div>
+                  ),
+                )}
               </div>
             </div>
             <VaptVuptModule articles={vaptVupt} />

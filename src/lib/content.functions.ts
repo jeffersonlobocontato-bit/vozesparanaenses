@@ -678,6 +678,71 @@ export const listArticlesByRegion = createServerFn({ method: "GET" })
   });
 
 /**
+ * Matérias mais lidas dos últimos N dias — agregadas a partir dos
+ * pageviews em `analytics_events`. Usa service role no server (agregado
+ * é global, não expõe dados por usuário).
+ */
+export const listMostReadArticles = createServerFn({ method: "GET" })
+  .inputValidator((d: { days?: number; limit?: number }) => ({
+    days: Math.min(Math.max(d.days ?? 7, 1), 30),
+    limit: Math.min(Math.max(d.limit ?? 5, 1), 20),
+  }))
+  .handler(async ({ data }): Promise<ArticleListItem[]> => {
+    const { getExternalServiceRole } = await import("./external-supabase.server");
+    const sb = getExternalServiceRole();
+    const since = new Date(Date.now() - data.days * 24 * 60 * 60 * 1000).toISOString();
+    const { data: events, error } = await sb
+      .from("analytics_events")
+      .select("pagina")
+      .eq("tipo_evento", "pageview")
+      .gte("ts", since)
+      .not("pagina", "is", null)
+      .limit(20000);
+    if (error) {
+      if (isMissingSchema(error)) return [];
+      return [];
+    }
+    // Conta por pagina no formato /{region}/{slug} — descarta home, /admin, editorias.
+    const counts = new Map<string, { region: string; slug: string; n: number }>();
+    for (const row of (events ?? []) as { pagina: string | null }[]) {
+      const p = row.pagina;
+      if (!p) continue;
+      const parts = p.split("?")[0].split("#")[0].split("/").filter(Boolean);
+      if (parts.length !== 2) continue;
+      const [region, slug] = parts;
+      if (!region || !slug) continue;
+      if (region === "admin" || region === "editoria" || region === "autor" || region === "auth" || region === "api") continue;
+      const key = `${region}/${slug}`;
+      const cur = counts.get(key);
+      if (cur) cur.n += 1;
+      else counts.set(key, { region, slug, n: 1 });
+    }
+    const top = [...counts.values()].sort((a, b) => b.n - a.n).slice(0, data.limit * 4);
+    if (top.length === 0) return [];
+    const slugs = top.map((t) => t.slug);
+    const { data: rows, error: artErr } = await sb
+      .from("generated_articles")
+      .select(MATERIA_LIST_COLS)
+      .eq("status", "publicado")
+      .in("slug", slugs);
+    if (artErr) return [];
+    const bySlug = new Map<string, ArticleListItem>();
+    for (const r of (rows ?? []) as unknown as MateriaRow[]) {
+      const item = mapMateria(r);
+      // Só considera se o par region/slug bate — evita colisão de slug entre regiões.
+      const match = top.find((t) => t.slug === item.slug && t.region === item.region?.slug);
+      if (match) bySlug.set(`${match.region}/${match.slug}`, item);
+    }
+    const ordered: ArticleListItem[] = [];
+    for (const t of top) {
+      const it = bySlug.get(`${t.region}/${t.slug}`);
+      if (it) ordered.push(it);
+      if (ordered.length >= data.limit) break;
+    }
+    return ordered;
+  });
+
+/**
  * Notícias publicadas SEM foto de capa — módulo "VAPT-VUPT".
  * Não entram na primeira dobra; ficam no bloco dedicado ao lado das Mais Lidas.
  */
