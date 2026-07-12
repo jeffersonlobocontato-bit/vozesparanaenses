@@ -28,7 +28,7 @@ Deno.serve(async (req) => {
   if (!url || !key) return json({ error: "missing_external_supabase_env" }, 500);
   if (!aiKey) return json({ error: "missing_lovable_api_key" }, 500);
 
-  let body: { regiao_id?: string } = {};
+  let body: { regiao_id?: string; sync?: boolean } = {};
   try { body = await req.json(); } catch { body = {}; }
 
   const sb = createClient(url, key, { auth: { persistSession: false } });
@@ -49,9 +49,40 @@ Deno.serve(async (req) => {
   if (error) return json({ error: "cluster_query_failed", detail: error.message }, 500);
   if (!clusters?.length) return json({ ok: true, classified: 0, selected: 0 });
 
+  // A classificação de 50 clusters + escrita automática leva minutos (LLM
+  // por cluster). O fetch do cliente (browser / curl) estoura antes de
+  // terminar. Roda tudo em background via EdgeRuntime.waitUntil e responde
+  // imediatamente — a fila editorial vai sendo populada aos poucos.
+  const runPipeline = async () => {
+    await processClusters({ clusters, categorias, sb, aiKey, url, key });
+  };
+  if (body.sync) {
+    const result = await processClusters({ clusters, categorias, sb, aiKey, url, key });
+    return json({ ok: true, ...result });
+  }
+  // deno-lint-ignore no-explicit-any
+  const rt = (globalThis as any).EdgeRuntime;
+  const task = runPipeline().catch((e) => console.error("[classify-and-quota] background error", (e as Error).message));
+  if (rt && typeof rt.waitUntil === "function") rt.waitUntil(task);
+  return json({ ok: true, mode: "background", clusters: clusters.length });
+});
+
+async function processClusters(
+  { clusters, categorias, sb, aiKey, url, key }: {
+    clusters: Array<{ id: string; regiao_id: string; prioridade_score: number; criado_em: string }>;
+    categorias: { id: string; slug: string; nome: string; peso_engajamento: number }[];
+    // deno-lint-ignore no-explicit-any
+    sb: any;
+    aiKey: string;
+    url: string;
+    key: string;
+  },
+): Promise<{ classified: number; selected: number; discarded: number; fila: number }> {
+  const _serve = null; // placeholder para manter escopo
+
   // 1. Classificar cada cluster (usa título do primeiro artigo do cluster)
   const classified: { id: string; regiao_id: string; categoria_id: string; score: number }[] = [];
-  for (const c of clusters as { id: string; regiao_id: string; prioridade_score: number; criado_em: string }[]) {
+  for (const c of clusters) {
     const { data: ca } = await sb
       .from("cluster_articles")
       .select("raw_article_id")
@@ -143,47 +174,37 @@ Deno.serve(async (req) => {
   // esperar clique de ninguém. A decisão humana fica só em publicar ou não
   // (ver generate-article: quando não há foto real e o interesse é alto o
   // bastante, a matéria já sai publicada sozinha; senão vai pra fila).
-  // Redação automática roda em BACKGROUND (EdgeRuntime.waitUntil): cada
-  // extract-facts + generate-article leva vários segundos (LLM), e a soma
-  // estoura o timeout do fetch do cliente que chamou classify-and-quota
-  // (browser/pipeline manual). Respondemos rápido com o resultado da cota;
-  // as matérias aparecem na fila conforme cada worker vai concluindo.
+  // Auto-write inline (já estamos em background aqui).
   const CHAIN_CONCURRENCY = 3;
   const fila = [...selecionados];
   const selfUrl = Deno.env.get("SUPABASE_URL") ?? url;
   const selfKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? key;
-  const autoWriteTask = (async () => {
-    const workers = Array.from({ length: Math.min(CHAIN_CONCURRENCY, fila.length) }, async () => {
-      while (fila.length) {
-        const clusterId = fila.shift();
-        if (!clusterId) return;
-        try {
-          const ef = await fetch(`${selfUrl}/functions/v1/extract-facts`, {
-            method: "POST",
-            headers: { "Content-Type": "application/json", Authorization: `Bearer ${selfKey}` },
-            body: JSON.stringify({ cluster_id: clusterId }),
-          });
-          if (!ef.ok) { console.error(`[auto-write] extract-facts falhou p/ ${clusterId}`, await ef.text()); continue; }
-          const ga = await fetch(`${selfUrl}/functions/v1/generate-article`, {
-            method: "POST",
-            headers: { "Content-Type": "application/json", Authorization: `Bearer ${selfKey}` },
-            body: JSON.stringify({ cluster_id: clusterId }),
-          });
-          if (!ga.ok) { console.error(`[auto-write] generate-article falhou p/ ${clusterId}`, await ga.text()); continue; }
-        } catch (e) {
-          console.error(`[auto-write] erro no cluster ${clusterId}`, (e as Error).message);
-        }
+  const workers = Array.from({ length: Math.min(CHAIN_CONCURRENCY, fila.length) }, async () => {
+    while (fila.length) {
+      const clusterId = fila.shift();
+      if (!clusterId) return;
+      try {
+        const ef = await fetch(`${selfUrl}/functions/v1/extract-facts`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json", Authorization: `Bearer ${selfKey}` },
+          body: JSON.stringify({ cluster_id: clusterId }),
+        });
+        if (!ef.ok) { console.error(`[auto-write] extract-facts falhou p/ ${clusterId}`, await ef.text()); continue; }
+        const ga = await fetch(`${selfUrl}/functions/v1/generate-article`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json", Authorization: `Bearer ${selfKey}` },
+          body: JSON.stringify({ cluster_id: clusterId }),
+        });
+        if (!ga.ok) { console.error(`[auto-write] generate-article falhou p/ ${clusterId}`, await ga.text()); continue; }
+      } catch (e) {
+        console.error(`[auto-write] erro no cluster ${clusterId}`, (e as Error).message);
       }
-    });
-    await Promise.all(workers);
-    console.log(`[auto-write] fila concluída (${selecionados.length} clusters)`);
-  })();
-  // deno-lint-ignore no-explicit-any
-  const rt = (globalThis as any).EdgeRuntime;
-  if (rt && typeof rt.waitUntil === "function") rt.waitUntil(autoWriteTask);
-
-  return json({ ok: true, classified: classified.length, selected, discarded, auto_escritas: "background", fila: selecionados.length });
-});
+    }
+  });
+  await Promise.all(workers);
+  console.log(`[classify-and-quota] concluído: classified=${classified.length} selected=${selected} discarded=${discarded} fila=${selecionados.length}`);
+  return { classified: classified.length, selected, discarded, fila: selecionados.length };
+}
 
 function json(body: unknown, status = 200) {
   return new Response(JSON.stringify(body), {
