@@ -12,6 +12,8 @@ const PRIMARY_NAV: { label: string; to: string; params?: Record<string, string> 
   { label: "Campos Gerais", to: "/$region", params: { region: "campos-gerais" } },
   { label: "Litoral", to: "/$region", params: { region: "litoral" } },
   { label: "Sudoeste", to: "/$region", params: { region: "sudoeste" } },
+  { label: "Nacional", to: "/editoria/$categoria", params: { categoria: "nacional" } },
+  { label: "Internacional", to: "/editoria/$categoria", params: { categoria: "internacional" } },
 ];
 
 const SECONDARY_NAV: { label: string; to: string; params?: Record<string, string> }[] = [
