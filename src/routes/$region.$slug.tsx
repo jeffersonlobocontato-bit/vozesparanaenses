@@ -14,6 +14,7 @@ import { buildLinkTerms, autoLinkParagraph } from "@/lib/auto-link";
 import { SiteHeader, SiteFooter } from "@/components/SiteHeader";
 import { getCityCoords, formatGeoPosition, formatICBM } from "@/lib/geo-cities";
 import { AdSlot } from "@/components/AdSlot";
+import { WhatsAppCTA } from "@/components/WhatsAppCTA";
 
 const articleQO = (regionSlug: string, slug: string) =>
   queryOptions({
@@ -437,6 +438,9 @@ function ArticlePage() {
             )}
           </div>
         )}
+
+        {/* CTA — Comunidade WhatsApp (logo abaixo da data de publicação) */}
+        <WhatsAppCTA variant="inline" className="mt-6" />
 
         {/* Lead (subtítulo) */}
         {article.subtitle && (
