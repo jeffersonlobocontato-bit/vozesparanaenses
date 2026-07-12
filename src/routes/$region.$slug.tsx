@@ -538,6 +538,11 @@ function ArticlePage() {
                       <AdSlot size="300x250" className="w-full max-w-[300px]" regiao={region} cidade={cidadeAtualSlug ?? undefined} editoria={categoriaSlug ?? undefined} />
                     </div>
                   )}
+                  {i === adMidIndex && (
+                    <div className="my-8">
+                      <AdsenseSlot slot="7998995238" layout="in-article" format="fluid" />
+                    </div>
+                  )}
                   {i === midpoint && midInsert.length > 0 && (
                     <LeiaTambemInline items={midInsert} region={region} />
                   )}
