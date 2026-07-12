@@ -22,10 +22,11 @@ const cors = {
 const AI_URL = "https://ai.gateway.lovable.dev/v1/chat/completions";
 const MODEL = "google/gemini-2.5-pro";
 
-const SYSTEM_PROMPT = `Você é editor-chefe do portal regional "Vozes Paranaenses".
+const BASE_SYSTEM_PROMPT = `Você é editor-chefe do portal regional "Vozes Paranaenses".
 Sua tarefa: a partir de FATOS JÁ APURADOS (fornecidos como JSON, não como
 texto-fonte bruto), redigir UMA reportagem original em português brasileiro,
-seguindo o Método DEL (Denso, Editorial, Local).
+seguindo o Método DEL (Denso, Editorial, Local) + a regra do lide 5W1H
+(O quê / Quem / Quando / Onde / Como / Por quê) na PRIMEIRA frase.
 
 REGRAS INEGOCIÁVEIS:
 1. Use SOMENTE os fatos fornecidos no JSON de entrada — nunca invente nomes,
@@ -33,6 +34,8 @@ REGRAS INEGOCIÁVEIS:
 2. Se um campo do JSON de fatos vier null ou vazio, não mencione esse ponto
    na matéria em vez de inventar um valor.
 3. Tom editorial: informativo, direto, sem opinião, foco no impacto local.
+   O PRIMEIRO parágrafo (lide) deve responder O QUÊ + QUEM + QUANDO + ONDE em
+   até 30 palavras. COMO e POR QUÊ entram no 2º parágrafo.
 4. Título: até 90 caracteres, sem clickbait, com o fato central.
 5. Subtítulo: contexto complementar, até 160 caracteres.
 6. Resumo: 2-3 frases, autocontido (para redes sociais e SEO).
@@ -130,6 +133,24 @@ Deno.serve(async (req) => {
     .maybeSingle();
   if (cErr || !cluster) return json({ error: "cluster_not_found", detail: cErr?.message }, 404);
 
+  // 1b. Carregar o agente redator especializado da editoria (se existir e
+  // estiver ativo) — o prompt-base do agente é injetado ANTES do system
+  // padrão, permitindo tom/estilo por editoria (política, esporte, cidades…).
+  let systemPrompt = BASE_SYSTEM_PROMPT;
+  if (cluster.categoria_id) {
+    const { data: agente } = await sb
+      .from("agentes_redatores")
+      .select("instrucoes_base, exemplo_texto, ativo")
+      .eq("categoria_id", cluster.categoria_id)
+      .maybeSingle();
+    if (agente?.ativo && agente.instrucoes_base?.trim()) {
+      const exemplo = agente.exemplo_texto?.trim()
+        ? `\n\nEXEMPLO DE LIDE PARA ESTA EDITORIA (use como referência de tom, não copie):\n${agente.exemplo_texto.trim()}`
+        : "";
+      systemPrompt = `${agente.instrucoes_base.trim()}${exemplo}\n\n---\n\n${BASE_SYSTEM_PROMPT}`;
+    }
+  }
+
   // 2. Chamar IA — só para redação (Método DEL), a partir dos fatos já prontos
   const dados = (facts.dados ?? {}) as Record<string, unknown>;
   const userPrompt = buildUserPrompt(facts, dados);
@@ -142,7 +163,7 @@ Deno.serve(async (req) => {
     body: JSON.stringify({
       model: MODEL,
       messages: [
-        { role: "system", content: SYSTEM_PROMPT },
+        { role: "system", content: systemPrompt },
         { role: "user", content: userPrompt },
       ],
       response_format: { type: "json_object" },
