@@ -47,7 +47,7 @@ export function SiteHeader() {
           <img
             src={logoWhite.url}
             alt="Vozes Paranaenses"
-            className="h-8 w-auto select-none md:h-9"
+            className="h-9 w-auto select-none md:h-12"
             draggable={false}
           />
         </Link>
