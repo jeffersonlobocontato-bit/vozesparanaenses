@@ -20,11 +20,12 @@ type Draft = {
   seo_title: string | null;
   seo_description: string | null;
   editor_responsavel: string | null;
-  status: "rascunho" | "aprovado" | "rejeitado" | "publicado";
+  status: "rascunho" | "aprovado" | "rejeitado" | "publicado" | "expirado";
   gerado_em: string;
   imagem_capa_url: string | null;
   imagem_credito: string | null;
   imagem_original_url: string | null;
+  publicado_automaticamente: boolean;
   fixado_posicao: number | null;
   fixado_escopo: "estado" | "regiao" | "cidades" | null;
   fixado_regioes: string[] | null;
@@ -35,7 +36,7 @@ type Draft = {
   categoria: { slug: string; nome: string } | null;
 };
 
-const STATUS_TABS: Draft["status"][] = ["rascunho", "aprovado", "publicado", "rejeitado"];
+const STATUS_TABS: Draft["status"][] = ["rascunho", "aprovado", "publicado", "expirado", "rejeitado"];
 
 function AdminQueue() {
   const [tab, setTab] = useState<Draft["status"]>("rascunho");
@@ -52,9 +53,9 @@ function AdminQueue() {
     setItems(null); setErr(null);
     try {
       const sb = await getExternalBrowser();
-      const fullSelect = "id, slug, titulo, subtitulo, resumo, corpo, seo_title, seo_description, editor_responsavel, status, gerado_em, imagem_capa_url, imagem_credito, imagem_original_url, fixado_posicao, fixado_escopo, fixado_regioes, fixado_cidades, regiao_id, categoria_id, regiao:regioes(slug, nome), categoria:editorial_categories(slug, nome)";
-      const pinBasicSelect = "id, slug, titulo, subtitulo, resumo, corpo, seo_title, seo_description, editor_responsavel, status, gerado_em, imagem_capa_url, imagem_credito, imagem_original_url, fixado_posicao, regiao_id, categoria_id, regiao:regioes(slug, nome), categoria:editorial_categories(slug, nome)";
-      const midSelect = "id, slug, titulo, subtitulo, resumo, corpo, seo_title, seo_description, editor_responsavel, status, gerado_em, imagem_capa_url, imagem_credito, imagem_original_url, regiao_id, categoria_id, regiao:regioes(slug, nome), categoria:editorial_categories(slug, nome)";
+      const fullSelect = "id, slug, titulo, subtitulo, resumo, corpo, seo_title, seo_description, editor_responsavel, status, gerado_em, imagem_capa_url, imagem_credito, imagem_original_url, publicado_automaticamente, fixado_posicao, fixado_escopo, fixado_regioes, fixado_cidades, regiao_id, categoria_id, regiao:regioes(slug, nome), categoria:editorial_categories(slug, nome)";
+      const pinBasicSelect = "id, slug, titulo, subtitulo, resumo, corpo, seo_title, seo_description, editor_responsavel, status, gerado_em, imagem_capa_url, imagem_credito, imagem_original_url, publicado_automaticamente, fixado_posicao, regiao_id, categoria_id, regiao:regioes(slug, nome), categoria:editorial_categories(slug, nome)";
+      const midSelect = "id, slug, titulo, subtitulo, resumo, corpo, seo_title, seo_description, editor_responsavel, status, gerado_em, imagem_capa_url, imagem_credito, imagem_original_url, publicado_automaticamente, regiao_id, categoria_id, regiao:regioes(slug, nome), categoria:editorial_categories(slug, nome)";
       const fallbackSelect = "id, slug, titulo, subtitulo, resumo, corpo, seo_title, seo_description, status, gerado_em, regiao_id, categoria_id, regiao:regioes(slug, nome), categoria:editorial_categories(slug, nome)";
       const run = (sel: string) =>
         sb.from("generated_articles")
@@ -235,6 +236,11 @@ function AdminQueue() {
             <div className="mb-1 flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
               {it.regiao && <span className="rounded bg-[#0A2540] px-2 py-0.5 font-semibold text-white">{displayRegionName(it.regiao.slug, it.regiao.nome)}</span>}
               {it.categoria && <span className="rounded bg-[#0066CC] px-2 py-0.5 font-semibold text-white">{it.categoria.nome}</span>}
+              {it.publicado_automaticamente && (
+                <span className="rounded bg-emerald-600 px-2 py-0.5 font-semibold text-white" title="Sem foto real da fonte e interesse alto o bastante — publicou sozinha, sem espera por decisão">
+                  ⚡ Publicação automática
+                </span>
+              )}
               {typeof it.fixado_posicao === "number" && it.fixado_posicao !== null && (
                 <span className="rounded bg-amber-500 px-2 py-0.5 font-semibold text-white">
                   📌 {it.fixado_posicao === 0 ? "Manchete" : `Lateral ${it.fixado_posicao}`}
