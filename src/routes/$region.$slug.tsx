@@ -440,7 +440,7 @@ function ArticlePage() {
         )}
 
         {/* CTA — Comunidade WhatsApp (logo abaixo da data de publicação) */}
-        <WhatsAppCTA variant="inline" className="mt-6" />
+        <WhatsAppCTA variant="button" className="mt-6" />
 
         {/* Lead (subtítulo) */}
         {article.subtitle && (
