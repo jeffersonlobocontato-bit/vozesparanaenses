@@ -14,6 +14,7 @@ import { buildLinkTerms, autoLinkParagraph } from "@/lib/auto-link";
 import { SiteHeader, SiteFooter } from "@/components/SiteHeader";
 import { getCityCoords, formatGeoPosition, formatICBM } from "@/lib/geo-cities";
 import { AdSlot } from "@/components/AdSlot";
+import { AdsenseSlot } from "@/components/AdsenseSlot";
 import { WhatsAppCTA } from "@/components/WhatsAppCTA";
 
 const articleQO = (regionSlug: string, slug: string) =>
@@ -535,6 +536,11 @@ function ArticlePage() {
                   {i === adMidIndex && (
                     <div className="my-8 flex justify-center">
                       <AdSlot size="300x250" className="w-full max-w-[300px]" regiao={region} cidade={cidadeAtualSlug ?? undefined} editoria={categoriaSlug ?? undefined} />
+                    </div>
+                  )}
+                  {i === adMidIndex && (
+                    <div className="my-8">
+                      <AdsenseSlot slot="7998995238" layout="in-article" format="fluid" />
                     </div>
                   )}
                   {i === midpoint && midInsert.length > 0 && (

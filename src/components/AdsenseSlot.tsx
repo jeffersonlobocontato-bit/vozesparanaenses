@@ -25,12 +25,16 @@ function useHydrated() {
 export function AdsenseSlot({
   slot,
   format = "auto",
+  layout,
+  layoutKey,
   fullWidthResponsive = true,
   className = "",
   style,
 }: {
   slot: string;
   format?: string;
+  layout?: string;
+  layoutKey?: string;
   fullWidthResponsive?: boolean;
   className?: string;
   style?: React.CSSProperties;
@@ -76,10 +80,12 @@ export function AdsenseSlot({
     <ins
       ref={insRef}
       className={`adsbygoogle ${className}`}
-      style={{ display: "block", minHeight: status === "filled" ? undefined : 1, ...style }}
+      style={{ display: "block", textAlign: layout === "in-article" ? "center" : undefined, minHeight: status === "filled" ? undefined : 1, ...style }}
       data-ad-client="ca-pub-3867318545397573"
       data-ad-slot={slot}
       data-ad-format={format}
+      {...(layout ? { "data-ad-layout": layout } : {})}
+      {...(layoutKey ? { "data-ad-layout-key": layoutKey } : {})}
       data-full-width-responsive={fullWidthResponsive ? "true" : "false"}
     />
   );
