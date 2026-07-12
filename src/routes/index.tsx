@@ -7,6 +7,7 @@ import {
   getViewerLocation,
   listArticlesByCategoryGlobal,
   listArticlesWithoutImage,
+  listMostReadArticles,
   type ArticleListItem,
   type RankedArticle,
   type Region,
@@ -57,6 +58,11 @@ const vaptVuptQO = queryOptions({
   queryFn: () => listArticlesWithoutImage({ data: { limit: 8 } }),
 });
 
+const mostReadQO = queryOptions({
+  queryKey: ["articles", "most-read", 7, 5],
+  queryFn: () => listMostReadArticles({ data: { days: 7, limit: 5 } }),
+});
+
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
@@ -86,6 +92,7 @@ export const Route = createFileRoute("/")({
       ),
     );
     await context.queryClient.ensureQueryData(vaptVuptQO);
+    await context.queryClient.ensureQueryData(mostReadQO);
   },
   component: Home,
   errorComponent: ({ error }) => (
@@ -100,7 +107,15 @@ function Home() {
   const { data: loc } = useSuspenseQuery(viewerLocQO);
   const { data: articles } = useSuspenseQuery(rankedQO(loc));
   const { data: vaptVupt } = useSuspenseQuery(vaptVuptQO);
-  return <PortalHome regions={regions} articles={articles} vaptVupt={vaptVupt} />;
+  const { data: mostRead } = useSuspenseQuery(mostReadQO);
+  return (
+    <PortalHome
+      regions={regions}
+      articles={articles}
+      vaptVupt={vaptVupt}
+      mostRead={mostRead}
+    />
+  );
 }
 
 /* --------------------------- Filler manchetes --------------------------- */
@@ -248,10 +263,12 @@ function PortalHome({
   regions,
   articles,
   vaptVupt,
+  mostRead,
 }: {
   regions: Region[];
   articles: RankedArticle[];
   vaptVupt: ArticleListItem[];
+  mostRead: ArticleListItem[];
 }) {
   const REGIONS_FALLBACK: Region[] = [
     { id: "fb-metropolitana", slug: "metropolitana", name: "Metropolitana" },
