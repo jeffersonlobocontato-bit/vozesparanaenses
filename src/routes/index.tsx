@@ -515,27 +515,6 @@ function PortalHome({
           <AdsenseSlot slot="2880053002" />
         </div>
 
-        {/* Módulos por editoria — sequência estilo grandes portais */}
-        <div className="mt-12 space-y-12">
-          {HOME_EDITORIAS.slice(1).map((e, i) => (
-            <div key={e.slug} className="space-y-12">
-              <EditoriaModule slug={e.slug} name={e.name} />
-              {/* AdSense Multiplex entre blocos de editoria */}
-              {i === 0 && (
-                <div className="empty:hidden">
-                  <AdsenseSlot
-                    slot="1638590691"
-                    format="fluid"
-                    layoutKey="-6t+ed+2i-1n-4w"
-                    fullWidthResponsive={false}
-                    className="min-h-[250px]"
-                  />
-                </div>
-              )}
-            </div>
-          ))}
-        </div>
-
         {/* CTA — Comunidade WhatsApp (rodapé da home) */}
         <div className="mt-10 flex justify-start">
           <WhatsAppCTA variant="button" />
