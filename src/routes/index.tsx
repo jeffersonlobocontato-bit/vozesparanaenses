@@ -6,6 +6,7 @@ import {
   listRankedArticles,
   getViewerLocation,
   listArticlesByCategoryGlobal,
+  listArticlesWithoutImage,
   type ArticleListItem,
   type RankedArticle,
   type Region,
@@ -51,6 +52,11 @@ const editoriaQO = (slug: string) =>
       listArticlesByCategoryGlobal({ data: { categorySlug: slug, limit: 7 } }),
   });
 
+const vaptVuptQO = queryOptions({
+  queryKey: ["articles", "vapt-vupt", 8],
+  queryFn: () => listArticlesWithoutImage({ data: { limit: 8 } }),
+});
+
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
@@ -79,6 +85,7 @@ export const Route = createFileRoute("/")({
         context.queryClient.ensureQueryData(editoriaQO(e.slug)),
       ),
     );
+    await context.queryClient.ensureQueryData(vaptVuptQO);
   },
   component: Home,
   errorComponent: ({ error }) => (
@@ -92,7 +99,8 @@ function Home() {
   const { data: regions } = useSuspenseQuery(regionsQO);
   const { data: loc } = useSuspenseQuery(viewerLocQO);
   const { data: articles } = useSuspenseQuery(rankedQO(loc));
-  return <PortalHome regions={regions} articles={articles} />;
+  const { data: vaptVupt } = useSuspenseQuery(vaptVuptQO);
+  return <PortalHome regions={regions} articles={articles} vaptVupt={vaptVupt} />;
 }
 
 /* --------------------------- Filler manchetes --------------------------- */
@@ -236,7 +244,15 @@ function useTodayBR() {
   return label;
 }
 
-function PortalHome({ regions, articles }: { regions: Region[]; articles: RankedArticle[] }) {
+function PortalHome({
+  regions,
+  articles,
+  vaptVupt,
+}: {
+  regions: Region[];
+  articles: RankedArticle[];
+  vaptVupt: ArticleListItem[];
+}) {
   const REGIONS_FALLBACK: Region[] = [
     { id: "fb-metropolitana", slug: "metropolitana", name: "Metropolitana" },
     { id: "fb-litoral", slug: "litoral", name: "Litoral" },
@@ -250,9 +266,12 @@ function PortalHome({ regions, articles }: { regions: Region[]; articles: Ranked
     { id: "fb-centro-sul", slug: "centro-sul", name: "Centro-Sul" },
   ] as unknown as Region[];
   if (!regions || regions.length === 0) regions = REGIONS_FALLBACK;
+  // Primeira dobra (hero + laterais + secundárias) só aceita matérias com foto.
+  // Sem imagem, a matéria vai para o módulo VAPT-VUPT ao lado das Mais Lidas.
+  const articlesComFoto = articles.filter((a) => !!a.cover_image_url);
   // Home estadual — só pins de escopo 'estado' aparecem como fixados;
   // pins de região/cidade caem no rest e viram matéria comum.
-  const { hero, side, rest } = arrangePinnedSlots(articles, 4, {});
+  const { hero, side, rest } = arrangePinnedSlots(articlesComFoto, 4, {});
   const secondary = rest.slice(0, 2);
 
   const articleByRegion = new Map<string, ArticleListItem>();
@@ -430,6 +449,7 @@ function PortalHome({ regions, articles }: { regions: Region[]; articles: Ranked
                 ))}
               </div>
             </div>
+            <VaptVuptModule articles={vaptVupt} />
             <AdSlot size="300x250" />
             <AdSlot size="300x600" />
           </aside>
@@ -591,6 +611,61 @@ function EditoriaModule({ slug, name }: { slug: string; name: string }) {
 }
 
 function HeroCard({ article }: { article: RankedArticle | undefined }) {
+  return _HeroCardImpl({ article });
+}
+
+function VaptVuptModule({ articles }: { articles: ArticleListItem[] }) {
+  if (!articles || articles.length === 0) return null;
+  return (
+    <div className="bg-white p-5 rounded-lg border border-slate-200">
+      <div className="flex items-baseline justify-between border-b border-slate-100 pb-2 mb-4">
+        <h5 className="text-sm font-black uppercase text-primary tracking-wider">
+          VAPT-VUPT
+        </h5>
+        <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400">
+          Rápidas
+        </span>
+      </div>
+      <div className="space-y-3">
+        {articles.map((a) => {
+          const catName = a.categoria?.name ?? a.region?.name ?? "Geral";
+          const catSlug = a.categoria?.slug ?? null;
+          const inner = (
+            <>
+              <div className="flex items-center gap-2 flex-wrap">
+                <CategoryTag name={catName} slug={catSlug} className="text-[10px] px-1.5 py-0.5" />
+                {a.region && (
+                  <span className="text-[10px] font-bold uppercase tracking-wider text-slate-500">
+                    {a.region.name}
+                  </span>
+                )}
+              </div>
+              <p className="text-sm font-semibold leading-snug mt-1 group-hover:text-secondary transition-colors">
+                {a.title}
+              </p>
+            </>
+          );
+          return a.region ? (
+            <Link
+              key={a.id}
+              to="/$region/$slug"
+              params={{ region: a.region.slug, slug: a.slug }}
+              className="group block border-l-2 border-slate-200 pl-3 hover:border-secondary"
+            >
+              {inner}
+            </Link>
+          ) : (
+            <div key={a.id} className="group block border-l-2 border-slate-200 pl-3">
+              {inner}
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
+function _HeroCardImpl({ article }: { article: RankedArticle | undefined }) {
   const title = article?.title ?? HERO_FALLBACK.title;
   const summary = article?.summary ?? HERO_FALLBACK.summary;
   const catName = article?.categoria?.name ?? article?.region?.name ?? HERO_FALLBACK.category;
