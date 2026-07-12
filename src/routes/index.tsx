@@ -99,7 +99,8 @@ function Home() {
   const { data: regions } = useSuspenseQuery(regionsQO);
   const { data: loc } = useSuspenseQuery(viewerLocQO);
   const { data: articles } = useSuspenseQuery(rankedQO(loc));
-  return <PortalHome regions={regions} articles={articles} />;
+  const { data: vaptVupt } = useSuspenseQuery(vaptVuptQO);
+  return <PortalHome regions={regions} articles={articles} vaptVupt={vaptVupt} />;
 }
 
 /* --------------------------- Filler manchetes --------------------------- */
