@@ -12,6 +12,7 @@ import { useEffect, type ReactNode } from "react";
 import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
 import { PageviewTracker } from "../lib/analytics";
+import faviconAsset from "@/assets/favicon.png.asset.json";
 
 function NotFoundComponent() {
   return (
@@ -108,6 +109,8 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
         rel: "stylesheet",
         href: appCss,
       },
+      { rel: "icon", type: "image/png", href: faviconAsset.url },
+      { rel: "apple-touch-icon", href: faviconAsset.url },
       { rel: "preconnect", href: "https://fonts.googleapis.com" },
       { rel: "preconnect", href: "https://fonts.gstatic.com", crossOrigin: "anonymous" },
       {
@@ -132,7 +135,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
           name: "Vozes Paranaenses",
           alternateName: "Vozes Paranaenses",
           url: "/",
-          logo: { "@type": "ImageObject", url: "/favicon.ico" },
+          logo: { "@type": "ImageObject", url: faviconAsset.url },
           description:
             "Portal de notícias das 10 macrorregiões do Paraná — cobertura editorial regional com foco no impacto local.",
           inLanguage: "pt-BR",
