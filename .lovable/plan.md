@@ -1,48 +1,68 @@
+# Método DEL nos agentes redatores — versão ajustada
 
-## Objetivo
+## Impacto (respondendo sua pergunta anterior)
 
-Reformular `src/routes/admin.clusters.tsx` para que a página fique organizada em **quadros por faixa de horário de extração (scraping)**, do mais recente para o mais antigo, com ordenação interna por tendência de leitura, separação por editoria e agrupamento por cidade.
+- **Custo por matéria**: +15% a +25% no `generate-article` (prompt cresce de ~1.500 → ~4.500 tokens de input; output não muda). Camadas vazias não entram no prompt, então enquanto o editor não preencher, o custo fica **igual ao atual**.
+- **Automação**: intocada. Scraping → cluster → extract-facts → generate-article → auto-publica (score ≥ 3.5, sem foto real) → cron / painel / fila / pinagem / RSS: tudo igual. Só muda **como o prompt é montado dentro** do `generate-article`.
 
-## Como a página vai ficar
+## O que será implementado
 
-```text
-┌─ Faixa: Noite (18h–24h)  — extração mais recente ───────────┐
-│  Editoria: Segurança                                        │
-│    Cidade: Cascavel                                         │
-│      • Cluster A  (interesse ●●●●)                          │
-│      • Cluster B  (interesse ●●●○)                          │
-│    Cidade: Toledo                                           │
-│      • Cluster C  (interesse ●●●○)                          │
-│  Editoria: Cidades                                          │
-│    Cidade: Curitiba                                         │
-│      • Cluster D                                            │
-├─ Faixa: Tarde (12h–18h) ────────────────────────────────────┤
-│  ...mesma lógica...                                         │
-├─ Faixa: Manhã (06h–12h) ────────────────────────────────────┤
-│  ...                                                        │
-└─ Faixa: Madrugada (00h–06h) ────────────────────────────────┘
+### 1. `supabase-external/026_agentes_del.sql`
+
+Adiciona em `agentes_redatores` 4 colunas JSONB (nullable, default `{}`):
+
+- `dna_sintatico` — arquitetura (padrão de título, ordem dos blocos, tamanho médio, ritmo, uso de listas/intertítulos)
+- `dna_semantico` — eixo narrativo, 10 perguntas obrigatórias, ênfases
+- `dna_lexical` — palavras preferidas / proibidas, verbos, expressões, tom, formalidade
+- `matriz_editorial` — objetivo, público, fontes prioritárias / proibidas, CTA
+
+Cria tabela `memoria_editorial` (singleton) com missão, valores, manual de estilo, glossário, siglas, pessoas, instituições — em JSONB editáveis. Seeded com identidade do Vozes + 14 siglas do PR (Sesa, Seed-PR, IAT, Deral, Ipardes, Copel, Sanepar, DER-PR, Alep, TCE-PR, MP-PR, TJ-PR, UBS, PSS) + regras do Método DEL.
+
+GRANTs + RLS herdando as policies de `025` (admin gerencia, editor lê).
+
+Retrocompatível: `instrucoes_base` e `exemplo_texto` continuam funcionando como override.
+
+### 2. `src/routes/admin.agentes.tsx` — reescrito com abas
+
+Editor de cada editoria ganha 6 abas:
+- **Sintático** — campos estruturados (padrão de título, textarea de ordem dos blocos, sliders de tamanho, checkboxes de ritmo)
+- **Semântico** — radio de eixo narrativo, textarea das perguntas obrigatórias, chips de ênfases
+- **Lexical** — chips editáveis (preferidas / proibidas / verbos / expressões), radio de tom
+- **Matriz** — objetivo, público, fontes prioritárias, fontes proibidas, CTA
+- **Prompt livre** — o `instrucoes_base` atual (override total quando preenchido)
+- **Exemplo** — mantém `exemplo_texto`
+
+Sem drag-and-drop, sem preview de prompt gerado nesta fase (economiza tempo — dá pra adicionar depois).
+
+### 3. `src/routes/admin.memoria-editorial.tsx` — novo
+
+Editor da memória global (missão, valores, manual, glossário, siglas, pessoas, instituições) — cada JSONB vira uma lista editável com botão "+ adicionar".
+
+### 4. `src/routes/admin.tsx`
+
+Adiciona link **"Memória"** na nav do admin (entre "Agentes IA" e "Senha").
+
+### 5. `supabase/functions/generate-article/index.ts`
+
+Substitui a concatenação atual por `buildDelPrompt(agente, memoria)` que serializa em ordem:
+
+```
+[Memória Editorial global (missão + siglas + glossário)]
+[Matriz Editorial da editoria]
+[DNA Sintático]
+[DNA Semântico]
+[DNA Lexical]
+[Prompt livre / instrucoes_base] ← override
+[Exemplo de lide]
+[BASE_SYSTEM_PROMPT + Prompt Mental (10 perguntas do documento)]
 ```
 
-Regras de ordenação:
+Camadas vazias são omitidas — economiza tokens e mantém o comportamento atual quando o editor ainda não preencheu nada.
 
-1. **Faixas de horário** aparecem da mais recente (contendo o `criado_em` mais novo) para a mais antiga. Faixas sem clusters ficam ocultas.
-2. Dentro de cada faixa, **editorias** aparecem ordenadas pela maior tendência de leitura (soma do `interesse_score` dos clusters daquela editoria naquela faixa).
-3. Dentro de cada editoria, **cidades** aparecem ordenadas pela maior tendência de leitura.
-4. Dentro de cada cidade, **clusters** aparecem ordenados por `interesse_score` desc (fallback: `prioridade_score`).
+## Fora de escopo
 
-## Alterações
+Cadeia multi-agente (Editor-Chefe → Fact Checker → SEO → Títulos → Revisor). Multiplica custo por ~5x — fica registrado como próximo passo.
 
-Arquivo único: `src/routes/admin.clusters.tsx`.
+## Ação manual sua depois do build
 
-1. Ampliar o select para trazer `interesse_score`, `cidade:cidades(slug, nome)` (via `raw_articles.cidade_id` se existir; caso a coluna não exista em `raw_articles`, cair para o campo `regiao.nome` como "cidade" derivada — verificar no schema antes de codar).
-2. Manter a query atual (status = todos, `.order('criado_em', desc)`, limit 80) — só muda a apresentação.
-3. Criar as mesmas 4 faixas usadas em `admin.pauta.tsx` (Madrugada, Manhã, Tarde, Noite) reusando `horaSaoPaulo`/`blocoDoHorario` — extrair para `src/lib/pauta-blocos.ts` para compartilhar entre `admin.clusters.tsx` e `admin.pauta.tsx`.
-4. Agrupar em memória: Faixa → Editoria → Cidade → Clusters, aplicando as ordenações acima.
-5. Renderizar as seções aninhadas mantendo os cards de cluster atuais (badges de região/categoria, botões "Extrair fatos" / "Gerar matéria", lista de artigos).
-6. Cabeçalho de cada faixa mostra rótulo + intervalo + horário do scraping mais recente daquela faixa + contagem de clusters.
-7. Preservar filtros/atualização atuais e o comportamento dos botões — nenhuma mudança de backend.
-
-## Fora do escopo
-
-- Alterações em edge functions, migrations ou no Painel de Pauta.
-- Mudanças no cálculo de `interesse_score` (segue o que já foi definido em `013_painel_pauta.sql`).
+Rodar `supabase-external/026_agentes_del.sql` no SQL editor do backend externo.

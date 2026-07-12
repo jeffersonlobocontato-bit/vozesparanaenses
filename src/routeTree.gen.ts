@@ -28,6 +28,7 @@ import { Route as AdminSenhaRouteImport } from './routes/admin.senha'
 import { Route as AdminResetPasswordRouteImport } from './routes/admin.reset-password'
 import { Route as AdminRegioesRouteImport } from './routes/admin.regioes'
 import { Route as AdminPainelRouteImport } from './routes/admin.painel'
+import { Route as AdminMemoriaEditorialRouteImport } from './routes/admin.memoria-editorial'
 import { Route as AdminLoginRouteImport } from './routes/admin.login'
 import { Route as AdminFontesRouteImport } from './routes/admin.fontes'
 import { Route as AdminClustersRouteImport } from './routes/admin.clusters'
@@ -142,6 +143,11 @@ const AdminRegioesRoute = AdminRegioesRouteImport.update({
 const AdminPainelRoute = AdminPainelRouteImport.update({
   id: '/painel',
   path: '/painel',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminMemoriaEditorialRoute = AdminMemoriaEditorialRouteImport.update({
+  id: '/memoria-editorial',
+  path: '/memoria-editorial',
   getParentRoute: () => AdminRoute,
 } as any)
 const AdminLoginRoute = AdminLoginRouteImport.update({
@@ -269,6 +275,7 @@ export interface FileRoutesByFullPath {
   '/admin/clusters': typeof AdminClustersRoute
   '/admin/fontes': typeof AdminFontesRoute
   '/admin/login': typeof AdminLoginRoute
+  '/admin/memoria-editorial': typeof AdminMemoriaEditorialRoute
   '/admin/painel': typeof AdminPainelRoute
   '/admin/regioes': typeof AdminRegioesRoute
   '/admin/reset-password': typeof AdminResetPasswordRoute
@@ -308,6 +315,7 @@ export interface FileRoutesByTo {
   '/admin/clusters': typeof AdminClustersRoute
   '/admin/fontes': typeof AdminFontesRoute
   '/admin/login': typeof AdminLoginRoute
+  '/admin/memoria-editorial': typeof AdminMemoriaEditorialRoute
   '/admin/painel': typeof AdminPainelRoute
   '/admin/regioes': typeof AdminRegioesRoute
   '/admin/reset-password': typeof AdminResetPasswordRoute
@@ -350,6 +358,7 @@ export interface FileRoutesById {
   '/admin/clusters': typeof AdminClustersRoute
   '/admin/fontes': typeof AdminFontesRoute
   '/admin/login': typeof AdminLoginRoute
+  '/admin/memoria-editorial': typeof AdminMemoriaEditorialRoute
   '/admin/painel': typeof AdminPainelRoute
   '/admin/regioes': typeof AdminRegioesRoute
   '/admin/reset-password': typeof AdminResetPasswordRoute
@@ -393,6 +402,7 @@ export interface FileRouteTypes {
     | '/admin/clusters'
     | '/admin/fontes'
     | '/admin/login'
+    | '/admin/memoria-editorial'
     | '/admin/painel'
     | '/admin/regioes'
     | '/admin/reset-password'
@@ -432,6 +442,7 @@ export interface FileRouteTypes {
     | '/admin/clusters'
     | '/admin/fontes'
     | '/admin/login'
+    | '/admin/memoria-editorial'
     | '/admin/painel'
     | '/admin/regioes'
     | '/admin/reset-password'
@@ -473,6 +484,7 @@ export interface FileRouteTypes {
     | '/admin/clusters'
     | '/admin/fontes'
     | '/admin/login'
+    | '/admin/memoria-editorial'
     | '/admin/painel'
     | '/admin/regioes'
     | '/admin/reset-password'
@@ -657,6 +669,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminPainelRouteImport
       parentRoute: typeof AdminRoute
     }
+    '/admin/memoria-editorial': {
+      id: '/admin/memoria-editorial'
+      path: '/memoria-editorial'
+      fullPath: '/admin/memoria-editorial'
+      preLoaderRoute: typeof AdminMemoriaEditorialRouteImport
+      parentRoute: typeof AdminRoute
+    }
     '/admin/login': {
       id: '/admin/login'
       path: '/login'
@@ -826,6 +845,7 @@ interface AdminRouteChildren {
   AdminClustersRoute: typeof AdminClustersRoute
   AdminFontesRoute: typeof AdminFontesRoute
   AdminLoginRoute: typeof AdminLoginRoute
+  AdminMemoriaEditorialRoute: typeof AdminMemoriaEditorialRoute
   AdminPainelRoute: typeof AdminPainelRoute
   AdminRegioesRoute: typeof AdminRegioesRoute
   AdminResetPasswordRoute: typeof AdminResetPasswordRoute
@@ -840,6 +860,7 @@ const AdminRouteChildren: AdminRouteChildren = {
   AdminClustersRoute: AdminClustersRoute,
   AdminFontesRoute: AdminFontesRoute,
   AdminLoginRoute: AdminLoginRoute,
+  AdminMemoriaEditorialRoute: AdminMemoriaEditorialRoute,
   AdminPainelRoute: AdminPainelRoute,
   AdminRegioesRoute: AdminRegioesRoute,
   AdminResetPasswordRoute: AdminResetPasswordRoute,
