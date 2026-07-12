@@ -1,6 +1,6 @@
 import { Link } from "@tanstack/react-router";
 import { useState } from "react";
-import logoWhite from "@/assets/vozes-logo-white.png.asset.json";
+import logoWhite from "@/assets/vp-logo-horizontal-negative.svg.asset.json";
 
 // Nav principal — regiões prioritárias + acessos rápidos.
 // Estilo CGN: barra escura densa, uppercase, tracking largo, sem ornamentos.
