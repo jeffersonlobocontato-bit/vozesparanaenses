@@ -417,8 +417,9 @@ function PortalHome({
 
         {/* Secondary + Mais lidas */}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8 items-start">
-          <div className="md:col-span-3 grid grid-cols-1 sm:grid-cols-2 gap-8">
-            {[0, 1].map((i) => {
+          <div className="md:col-span-3 space-y-12">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-8">
+              {[0, 1].map((i) => {
               const a = secondary[i];
               const fb = SECONDARY_FALLBACK[i];
               const Wrap: React.ElementType = a?.region ? Link : "div";
@@ -447,7 +448,12 @@ function PortalHome({
                   </p>
                 </Wrap>
               );
-            })}
+              })}
+            </div>
+
+            {HOME_EDITORIAS[0] && (
+              <EditoriaModule slug={HOME_EDITORIAS[0].slug} name={HOME_EDITORIAS[0].name} />
+            )}
           </div>
 
           <aside className="space-y-6">
@@ -498,11 +504,11 @@ function PortalHome({
 
         {/* Módulos por editoria — sequência estilo grandes portais */}
         <div className="mt-12 space-y-12">
-          {HOME_EDITORIAS.map((e, i) => (
+          {HOME_EDITORIAS.slice(1).map((e, i) => (
             <div key={e.slug} className="space-y-12">
               <EditoriaModule slug={e.slug} name={e.name} />
               {/* AdSense Multiplex entre blocos de editoria */}
-              {i === 1 && (
+              {i === 0 && (
                 <div className="empty:hidden">
                   <AdsenseSlot
                     slot="1638590691"
