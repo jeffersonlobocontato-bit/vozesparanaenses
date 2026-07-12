@@ -1,6 +1,6 @@
 import { Link } from "@tanstack/react-router";
 import { useState } from "react";
-import logoWhite from "@/assets/vozes-logo-white.png.asset.json";
+import logoWhite from "@/assets/vp-logo-horizontal-negative.svg.asset.json";
 
 // Nav principal — regiões prioritárias + acessos rápidos.
 // Estilo CGN: barra escura densa, uppercase, tracking largo, sem ornamentos.
@@ -47,7 +47,7 @@ export function SiteHeader() {
           <img
             src={logoWhite.url}
             alt="Vozes Paranaenses"
-            className="h-8 w-auto select-none md:h-9"
+            className="h-9 w-auto select-none md:h-12"
             draggable={false}
           />
         </Link>
@@ -122,7 +122,7 @@ export function SiteFooter() {
           <img
             src={logoWhite.url}
             alt="Vozes Paranaenses"
-            className="mb-3 h-10 w-auto select-none"
+            className="mb-3 h-12 w-auto select-none"
             draggable={false}
           />
           <p className="max-w-md text-xs leading-relaxed text-white/60">
