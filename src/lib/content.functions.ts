@@ -678,6 +678,36 @@ export const listArticlesByRegion = createServerFn({ method: "GET" })
   });
 
 /**
+ * Notícias publicadas SEM foto de capa — módulo "VAPT-VUPT".
+ * Não entram na primeira dobra; ficam no bloco dedicado ao lado das Mais Lidas.
+ */
+export const listArticlesWithoutImage = createServerFn({ method: "GET" })
+  .inputValidator((d: { limit?: number }) => ({ limit: d.limit ?? 8 }))
+  .handler(async ({ data }): Promise<ArticleListItem[]> => {
+    const { getExternalSupabase } = await import("./external-supabase.server");
+    const sb = getExternalSupabase();
+    const run = (cols: string) =>
+      sb
+        .from("generated_articles")
+        .select(cols)
+        .eq("status", "publicado")
+        .is("imagem_capa_url", null)
+        .order("publicado_em", { ascending: false })
+        .limit(data.limit);
+    let res = await run(MATERIA_LIST_COLS);
+    if (res.error && /fixado_(posicao|escopo|regioes|cidades)/i.test(res.error.message)) {
+      res = await run(
+        "id, slug, titulo, subtitulo, resumo, imagem_capa_url, publicado_em, regiao:regioes(slug, nome), categoria:editorial_categories(slug, nome)",
+      );
+    }
+    if (res.error) {
+      if (isMissingSchema(res.error)) return [];
+      throw new Error(res.error.message);
+    }
+    return ((res.data ?? []) as unknown as MateriaRow[]).map(mapMateria);
+  });
+
+/**
  * Matérias relacionadas para cross-linking dentro de uma matéria aberta.
  * Prioriza: mesma cidade (match em cidade_principal OU em cidades_mencionadas)
  * → resto da mesma região. Retorna dois grupos exclusivos entre si.
