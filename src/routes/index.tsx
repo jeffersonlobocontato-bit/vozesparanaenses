@@ -723,8 +723,8 @@ function _HeroCardImpl({ article }: { article: RankedArticle | undefined }) {
     : null;
 
   const Inner = (
-    <div className="group relative overflow-hidden rounded-lg h-full">
-      <div className="w-full aspect-[16/9] bg-slate-200">
+    <div className="group relative overflow-hidden rounded-lg h-full min-h-[420px]">
+      <div className="absolute inset-0 bg-slate-200">
         {article?.cover_image_url ? (
           <img src={article.cover_image_url} alt="" className="h-full w-full object-cover" />
         ) : (
