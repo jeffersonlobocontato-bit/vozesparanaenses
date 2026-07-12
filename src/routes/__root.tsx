@@ -135,7 +135,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
           name: "Vozes Paranaenses",
           alternateName: "Vozes Paranaenses",
           url: "/",
-          logo: { "@type": "ImageObject", url: "/favicon.ico" },
+          logo: { "@type": "ImageObject", url: faviconAsset.url },
           description:
             "Portal de notícias das 10 macrorregiões do Paraná — cobertura editorial regional com foco no impacto local.",
           inLanguage: "pt-BR",
