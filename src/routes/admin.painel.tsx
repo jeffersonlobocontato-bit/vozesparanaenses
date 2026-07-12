@@ -193,7 +193,7 @@ function AdminDashboard() {
         <h2 className="mb-2 text-xs font-bold uppercase tracking-wider text-muted-foreground">Gestão</h2>
         <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
           <Shortcut to="/admin" title="Fila editorial" desc="Revisar, editar e publicar matérias." />
-          <Shortcut to="/admin/clusters" title="Pautas" desc="Clusters de notícias por relevância." />
+          <Shortcut to="/admin/clusters" title="Diagnóstico do pipeline" desc="Clusters coletados, score de interesse e o que foi descartado por cota." />
           <Shortcut to="/admin/fontes" title="Fontes" desc="Cadastrar e ativar veículos monitorados." />
           <Shortcut to="/admin/regioes" title="Regiões e cotas" desc={`${m?.regioesAtivas ?? "—"} regiões ativas.`} />
           <Shortcut to="/admin/anuncios" title="Anúncios" desc="Anunciantes, campanhas, criativos e targeting." />
