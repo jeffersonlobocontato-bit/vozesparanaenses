@@ -14,6 +14,7 @@ import { LocationBar, ProximityBadge } from "@/components/LocationBar";
 import { SiteHeader, SiteFooter } from "@/components/SiteHeader";
 import { AdSlot } from "@/components/AdSlot";
 import { AdsenseSlot } from "@/components/AdsenseSlot";
+import { WhatsAppCTA } from "@/components/WhatsAppCTA";
 import { arrangePinnedSlots } from "@/lib/pinned-layout";
 
 const regionsQO = queryOptions({
@@ -268,6 +269,9 @@ function PortalHome({ regions, articles }: { regions: Region[]; articles: Ranked
       <LocationBar />
 
       <main className="mx-auto max-w-7xl px-4 py-6">
+        {/* CTA — Comunidade WhatsApp (topo) */}
+        <WhatsAppCTA className="mb-6" />
+
         {/* Publicidade — Super Banner topo */}
         <AdSlot size="970x90" className="mb-6" />
 
@@ -411,6 +415,9 @@ function PortalHome({ regions, articles }: { regions: Region[]; articles: Ranked
         <div className="mt-10 empty:hidden">
           <AdsenseSlot slot="2880053002" />
         </div>
+
+        {/* CTA — Comunidade WhatsApp (rodapé da home) */}
+        <WhatsAppCTA className="mt-10" />
       </main>
 
       <SiteFooter />
