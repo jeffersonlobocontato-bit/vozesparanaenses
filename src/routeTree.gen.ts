@@ -22,6 +22,7 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as AdminIndexRouteImport } from './routes/admin.index'
 import { Route as RegionIndexRouteImport } from './routes/$region.index'
 import { Route as RIdRouteImport } from './routes/r.$id'
+import { Route as EditoriaCategoriaRouteImport } from './routes/editoria.$categoria'
 import { Route as AutorSlugRouteImport } from './routes/autor.$slug'
 import { Route as AdminSenhaRouteImport } from './routes/admin.senha'
 import { Route as AdminResetPasswordRouteImport } from './routes/admin.reset-password'
@@ -110,6 +111,11 @@ const RegionIndexRoute = RegionIndexRouteImport.update({
 const RIdRoute = RIdRouteImport.update({
   id: '/r/$id',
   path: '/r/$id',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const EditoriaCategoriaRoute = EditoriaCategoriaRouteImport.update({
+  id: '/editoria/$categoria',
+  path: '/editoria/$categoria',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AutorSlugRoute = AutorSlugRouteImport.update({
@@ -261,6 +267,7 @@ export interface FileRoutesByFullPath {
   '/admin/reset-password': typeof AdminResetPasswordRoute
   '/admin/senha': typeof AdminSenhaRoute
   '/autor/$slug': typeof AutorSlugRoute
+  '/editoria/$categoria': typeof EditoriaCategoriaRoute
   '/r/$id': typeof RIdRoute
   '/$region/': typeof RegionIndexRoute
   '/admin/': typeof AdminIndexRoute
@@ -298,6 +305,7 @@ export interface FileRoutesByTo {
   '/admin/reset-password': typeof AdminResetPasswordRoute
   '/admin/senha': typeof AdminSenhaRoute
   '/autor/$slug': typeof AutorSlugRoute
+  '/editoria/$categoria': typeof EditoriaCategoriaRoute
   '/r/$id': typeof RIdRoute
   '/$region': typeof RegionIndexRoute
   '/admin': typeof AdminIndexRoute
@@ -338,6 +346,7 @@ export interface FileRoutesById {
   '/admin/reset-password': typeof AdminResetPasswordRoute
   '/admin/senha': typeof AdminSenhaRoute
   '/autor/$slug': typeof AutorSlugRoute
+  '/editoria/$categoria': typeof EditoriaCategoriaRoute
   '/r/$id': typeof RIdRoute
   '/$region/': typeof RegionIndexRoute
   '/admin/': typeof AdminIndexRoute
@@ -379,6 +388,7 @@ export interface FileRouteTypes {
     | '/admin/reset-password'
     | '/admin/senha'
     | '/autor/$slug'
+    | '/editoria/$categoria'
     | '/r/$id'
     | '/$region/'
     | '/admin/'
@@ -416,6 +426,7 @@ export interface FileRouteTypes {
     | '/admin/reset-password'
     | '/admin/senha'
     | '/autor/$slug'
+    | '/editoria/$categoria'
     | '/r/$id'
     | '/$region'
     | '/admin'
@@ -455,6 +466,7 @@ export interface FileRouteTypes {
     | '/admin/reset-password'
     | '/admin/senha'
     | '/autor/$slug'
+    | '/editoria/$categoria'
     | '/r/$id'
     | '/$region/'
     | '/admin/'
@@ -484,6 +496,7 @@ export interface RootRouteChildren {
   TermosRoute: typeof TermosRoute
   WhatsappRoute: typeof WhatsappRoute
   AutorSlugRoute: typeof AutorSlugRoute
+  EditoriaCategoriaRoute: typeof EditoriaCategoriaRoute
   RIdRoute: typeof RIdRoute
   ApiPublicLlmsFullDottxtRoute: typeof ApiPublicLlmsFullDottxtRoute
   ApiPublicLlmsDottxtRoute: typeof ApiPublicLlmsDottxtRoute
@@ -588,6 +601,13 @@ declare module '@tanstack/react-router' {
       path: '/r/$id'
       fullPath: '/r/$id'
       preLoaderRoute: typeof RIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/editoria/$categoria': {
+      id: '/editoria/$categoria'
+      path: '/editoria/$categoria'
+      fullPath: '/editoria/$categoria'
+      preLoaderRoute: typeof EditoriaCategoriaRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/autor/$slug': {
@@ -820,6 +840,7 @@ const rootRouteChildren: RootRouteChildren = {
   TermosRoute: TermosRoute,
   WhatsappRoute: WhatsappRoute,
   AutorSlugRoute: AutorSlugRoute,
+  EditoriaCategoriaRoute: EditoriaCategoriaRoute,
   RIdRoute: RIdRoute,
   ApiPublicLlmsFullDottxtRoute: ApiPublicLlmsFullDottxtRoute,
   ApiPublicLlmsDottxtRoute: ApiPublicLlmsDottxtRoute,
