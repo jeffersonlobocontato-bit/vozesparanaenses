@@ -120,6 +120,7 @@ Deno.serve(async (req) => {
 
   let selected = 0;
   let discarded = 0;
+  const selecionados: string[] = [];
   for (const c of classified.sort((a, b) => b.score - a.score)) {
     const rule = quotaMap.get(`${c.regiao_id}:${c.categoria_id}`);
     const total = Math.max(regionTotals.get(c.regiao_id) ?? 0, 10);
@@ -133,10 +134,44 @@ Deno.serve(async (req) => {
       currentCounts.set(`${c.regiao_id}:${c.categoria_id}`, (currentCounts.get(`${c.regiao_id}:${c.categoria_id}`) ?? 0) + 1);
       regionTotals.set(c.regiao_id, (regionTotals.get(c.regiao_id) ?? 0) + 1);
       selected++;
+      selecionados.push(c.id);
     }
   }
 
-  return json({ ok: true, classified: classified.length, selected, discarded });
+  // 3. Redação automática: sem curadoria manual do que escrever — extrai os
+  // fatos e redige a matéria pra cada cluster selecionado pela cota, sem
+  // esperar clique de ninguém. A decisão humana fica só em publicar ou não
+  // (ver generate-article: quando não há foto real e o interesse é alto o
+  // bastante, a matéria já sai publicada sozinha; senão vai pra fila).
+  const CHAIN_CONCURRENCY = 3;
+  const fila = [...selecionados];
+  let autoEscritas = 0;
+  const workers = Array.from({ length: Math.min(CHAIN_CONCURRENCY, fila.length) }, async () => {
+    while (fila.length) {
+      const clusterId = fila.shift();
+      if (!clusterId) return;
+      try {
+        const ef = await fetch(`${url}/functions/v1/extract-facts`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json", Authorization: `Bearer ${key}` },
+          body: JSON.stringify({ cluster_id: clusterId }),
+        });
+        if (!ef.ok) { console.error(`[auto-write] extract-facts falhou p/ ${clusterId}`, await ef.text()); continue; }
+        const ga = await fetch(`${url}/functions/v1/generate-article`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json", Authorization: `Bearer ${key}` },
+          body: JSON.stringify({ cluster_id: clusterId }),
+        });
+        if (!ga.ok) { console.error(`[auto-write] generate-article falhou p/ ${clusterId}`, await ga.text()); continue; }
+        autoEscritas++;
+      } catch (e) {
+        console.error(`[auto-write] erro no cluster ${clusterId}`, (e as Error).message);
+      }
+    }
+  });
+  await Promise.all(workers);
+
+  return json({ ok: true, classified: classified.length, selected, discarded, auto_escritas: autoEscritas });
 });
 
 function json(body: unknown, status = 200) {

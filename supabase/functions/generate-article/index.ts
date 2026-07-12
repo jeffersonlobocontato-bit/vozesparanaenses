@@ -125,7 +125,7 @@ Deno.serve(async (req) => {
   const clusterId = facts.cluster_id;
   const { data: cluster, error: cErr } = await sb
     .from("article_clusters")
-    .select("id, regiao_id, categoria_id")
+    .select("id, regiao_id, categoria_id, interesse_score")
     .eq("id", clusterId)
     .maybeSingle();
   if (cErr || !cluster) return json({ error: "cluster_not_found", detail: cErr?.message }, 404);
@@ -203,6 +203,7 @@ Deno.serve(async (req) => {
   // 3b. Sempre copiar a foto original do scraping para o storage — assim o
   // editor pode escolher, com um clique, entre a foto real e uma variação IA
   // (mesmo se a fonte tirar o arquivo do ar depois).
+  let temFotoReal = false;
   try {
     const { data: ca } = await sb
       .from("cluster_articles")
@@ -221,6 +222,7 @@ Deno.serve(async (req) => {
         | undefined;
       const srcUrl = raw?.imagem_original_url ?? null;
       if (srcUrl) {
+        temFotoReal = true;
         const imgRes = await fetch(srcUrl, {
           headers: { "User-Agent": "VozesParanaensesBot/1.0 (+https://vozesparanaenses.com.br)" },
         });
@@ -260,6 +262,20 @@ Deno.serve(async (req) => {
     // o editor pode gerar/subir a capa manualmente depois.
   }
 
+  // 3c. Publicação automática: só quando NÃO há foto real da fonte (o uso da
+  // foto em si, mesmo com crédito, é uma decisão de risco que fica sempre
+  // com o editor humano) E o interesse de leitura já calculado pelo motor de
+  // cotas está no patamar "muito alto". Todo o resto fica em 'rascunho',
+  // esperando decisão manual de publicar — ou expira em 12h (ver
+  // expire-drafts) se ninguém decidir.
+  const AUTO_PUBLISH_INTERESSE_MINIMO = 3.5;
+  const podeAutoPublicar = !temFotoReal && (cluster.interesse_score ?? 0) >= AUTO_PUBLISH_INTERESSE_MINIMO;
+  if (podeAutoPublicar) {
+    await sb.from("generated_articles")
+      .update({ status: "publicado", publicado_automaticamente: true, publicado_em: new Date().toISOString() })
+      .eq("id", inserted.id);
+  }
+
   // 4. Marcar cluster como "rascunho gerado" para que suma do Painel de Pautas
   const { error: statusErr } = await sb
     .from("article_clusters")
@@ -274,7 +290,14 @@ Deno.serve(async (req) => {
   const rawIds = (ca ?? []).map((r) => r.raw_article_id);
   if (rawIds.length) await sb.from("raw_articles").update({ processado: true }).in("id", rawIds);
 
-  return json({ ok: true, article: inserted, model: MODEL, titulo: parsed.titulo });
+  return json({
+    ok: true,
+    article: inserted,
+    model: MODEL,
+    titulo: parsed.titulo,
+    publicado_automaticamente: podeAutoPublicar,
+    tem_foto_real: temFotoReal,
+  });
 });
 
 function buildUserPrompt(facts: ExtractedFactsRow, dados: Record<string, unknown>) {
