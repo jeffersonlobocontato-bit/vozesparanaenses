@@ -782,6 +782,35 @@ export const listArticlesByCategory = createServerFn({ method: "GET" })
     return ((rows ?? []) as unknown as MateriaRow[]).map(mapMateria);
   });
 
+/** Lista matérias por editoria em TODAS as regiões (usado por Nacional / Internacional). */
+export const listArticlesByCategoryGlobal = createServerFn({ method: "GET" })
+  .inputValidator((d: { categorySlug: string; limit?: number }) => ({
+    categorySlug: d.categorySlug,
+    limit: d.limit ?? 30,
+  }))
+  .handler(async ({ data }): Promise<ArticleListItem[]> => {
+    const { getExternalSupabase } = await import("./external-supabase.server");
+    const sb = getExternalSupabase();
+    const { data: category } = await sb
+      .from("editorial_categories")
+      .select("id")
+      .eq("slug", data.categorySlug)
+      .maybeSingle();
+    if (!category) return [];
+    const { data: rows, error } = await sb
+      .from("generated_articles")
+      .select(MATERIA_LIST_COLS)
+      .eq("status", "publicado")
+      .eq("categoria_id", (category as { id: string }).id)
+      .order("publicado_em", { ascending: false })
+      .limit(data.limit);
+    if (error) {
+      if (isMissingSchema(error)) return [];
+      throw new Error(error.message);
+    }
+    return ((rows ?? []) as unknown as MateriaRow[]).map(mapMateria);
+  });
+
 export const getArticle = createServerFn({ method: "GET" })
   .inputValidator((d: { regionSlug: string; slug: string }) => d)
   .handler(async ({ data }): Promise<ArticleFull> => {
