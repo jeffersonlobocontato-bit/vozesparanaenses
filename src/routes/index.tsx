@@ -52,6 +52,11 @@ const editoriaQO = (slug: string) =>
       listArticlesByCategoryGlobal({ data: { categorySlug: slug, limit: 7 } }),
   });
 
+const vaptVuptQO = queryOptions({
+  queryKey: ["articles", "vapt-vupt", 8],
+  queryFn: () => listArticlesWithoutImage({ data: { limit: 8 } }),
+});
+
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
@@ -80,6 +85,7 @@ export const Route = createFileRoute("/")({
         context.queryClient.ensureQueryData(editoriaQO(e.slug)),
       ),
     );
+    await context.queryClient.ensureQueryData(vaptVuptQO);
   },
   component: Home,
   errorComponent: ({ error }) => (
