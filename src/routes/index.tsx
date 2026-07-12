@@ -456,14 +456,33 @@ function PortalHome({
                 Mais Lidas
               </h5>
               <div className="space-y-4">
-                {MOST_READ_FALLBACK.map((t, i) => (
-                  <div key={i} className="flex gap-3 group cursor-pointer">
-                    <span className="font-display text-4xl leading-none text-slate-200">{i + 1}</span>
-                    <p className="text-base font-bold leading-snug group-hover:text-secondary transition-colors">
-                      {t}
-                    </p>
-                  </div>
-                ))}
+                {(mostRead.length > 0
+                  ? mostRead.map((a, i) => ({
+                      key: a.id,
+                      title: a.title,
+                      to: a.region
+                        ? { to: "/$region/$slug" as const, params: { region: a.region.slug, slug: a.slug } }
+                        : null,
+                      i,
+                    }))
+                  : MOST_READ_FALLBACK.map((t, i) => ({ key: `fb-${i}`, title: t, to: null, i }))
+                ).map(({ key, title, to, i }) =>
+                  to ? (
+                    <Link key={key} {...to} className="flex gap-3 group cursor-pointer">
+                      <span className="font-display text-4xl leading-none text-slate-200">{i + 1}</span>
+                      <p className="text-base font-bold leading-snug group-hover:text-secondary transition-colors">
+                        {title}
+                      </p>
+                    </Link>
+                  ) : (
+                    <div key={key} className="flex gap-3 group cursor-pointer">
+                      <span className="font-display text-4xl leading-none text-slate-200">{i + 1}</span>
+                      <p className="text-base font-bold leading-snug group-hover:text-secondary transition-colors">
+                        {title}
+                      </p>
+                    </div>
+                  ),
+                )}
               </div>
             </div>
             <VaptVuptModule articles={vaptVupt} />
