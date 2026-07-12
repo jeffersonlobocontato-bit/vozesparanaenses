@@ -88,7 +88,15 @@ export const Route = createFileRoute("/$region/cidade/$cidade")({
               { name: "ICBM", content: formatICBM(coords) },
             ]
           : []),
-        { name: "robots", content: "index, follow, max-image-preview:large" },
+        {
+          name: "robots",
+          // Sem matéria publicada ainda pra esta cidade: não indexa (nem serve
+          // de alvo pra anúncio) até ter conteúdo de verdade — página só com
+          // cabeçalho é "conteúdo de baixo valor" pra política do AdSense.
+          content: loaderData.city.articles.length > 0
+            ? "index, follow, max-image-preview:large"
+            : "noindex, follow",
+        },
         { property: "og:title", content: title },
         { property: "og:description", content: description },
         { property: "og:type", content: "website" },
