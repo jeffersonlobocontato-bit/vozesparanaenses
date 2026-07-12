@@ -122,7 +122,7 @@ export function SiteFooter() {
           <img
             src={logoWhite.url}
             alt="Vozes Paranaenses"
-            className="mb-3 h-10 w-auto select-none"
+            className="mb-3 h-12 w-auto select-none"
             draggable={false}
           />
           <p className="max-w-md text-xs leading-relaxed text-white/60">
