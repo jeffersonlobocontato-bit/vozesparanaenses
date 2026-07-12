@@ -31,7 +31,7 @@ export const Route = createFileRoute("/$region/editoria/$categoria")({
       context.queryClient.ensureQueryData(regionQO(params.region)),
       context.queryClient.ensureQueryData(catsQO),
     ]);
-    await context.queryClient.ensureQueryData(
+    const articles = await context.queryClient.ensureQueryData(
       listQO(params.region, params.categoria),
     );
     const categoria = cats.find((c) => c.slug === params.categoria) ?? {
@@ -40,7 +40,7 @@ export const Route = createFileRoute("/$region/editoria/$categoria")({
       name:
         params.categoria.charAt(0).toUpperCase() + params.categoria.slice(1),
     };
-    return { region, categoria };
+    return { region, categoria, hasArticles: (articles?.length ?? 0) > 0 };
   },
   head: ({ loaderData, params }) =>
     loaderData
@@ -61,6 +61,13 @@ export const Route = createFileRoute("/$region/editoria/$categoria")({
               property: "og:description",
               content: `Cobertura de ${loaderData.categoria.name.toLowerCase()} em ${loaderData.region.name}.`,
             },
+            // Sem matéria publicada ainda nesta combinação região×categoria:
+            // pede pra não indexar (nem exibir anúncio) até ter conteúdo de
+            // verdade — evita violação de "conteúdo de baixo valor" do AdSense
+            // e também não compete por crawl budget de SEO à toa.
+            ...(loaderData.hasArticles
+              ? []
+              : [{ name: "robots", content: "noindex, follow" }]),
           ],
           links: [
             {
