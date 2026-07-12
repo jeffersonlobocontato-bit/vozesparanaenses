@@ -83,6 +83,7 @@ function AdminLayout() {
               <Link to="/admin/regioes" className="hover:underline [&.active]:font-bold">Regiões</Link>
               <Link to="/admin/anuncios" className="hover:underline [&.active]:font-bold">Anúncios</Link>
               <Link to="/admin/agentes" className="hover:underline [&.active]:font-bold">Agentes IA</Link>
+              <Link to="/admin/memoria-editorial" className="hover:underline [&.active]:font-bold">Memória</Link>
             </nav>
           </div>
           <div className="flex items-center gap-3 text-xs">
