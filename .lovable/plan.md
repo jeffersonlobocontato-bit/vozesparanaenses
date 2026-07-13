@@ -1,35 +1,45 @@
-# Redator manual na Fila editorial
+## Diagnóstico
 
-Adicionar, no topo de `/admin` (módulo Fila), uma caixa "Redator manual" com:
-- Seletor de **agente redator** (carregado de `agentes_redatores` + `editorial_categories`).
-- Seletor de **região** (padrão: Estado / Paraná).
-- Campo **URL da notícia-fonte**.
-- Campo opcional **observações para o redator** (ex.: "focar no impacto em Maringá").
-- Botão **Gerar rascunho**.
+Consultei o banco e confirmei a causa raiz: **a migration `030_ad_creatives_formato.sql` nunca foi aplicada**.
 
-Ao enviar, o sistema busca o conteúdo da URL, extrai os fatos e gera a matéria usando o agente escolhido — sem depender de scraping agendado, clusters ou pipeline. O rascunho aparece na própria Fila logo abaixo, pronto para editar/publicar como qualquer outra matéria.
+- A tabela `ad_creatives` **não tem** a coluna `formato`.
+- A view `ads_eligible` também **não expõe** `formato`.
+- O `pickAd` (`src/lib/ads.functions.ts`) faz `select("...,formato")` — como a coluna não existe, o PostgREST retorna erro, `creatives` vira `null` e o slot cai no **mock house-ad** (Sicredi, Copel, Unimed, Renault, Sesc) — que é justamente o que aparece hoje em todos os espaços do site.
 
-## Como funciona por baixo
+Ou seja: os 2 criativos reais da campanha "Consultoria em IA" **não estão sequer sendo servidos**; o que você vê são os placeholders internos, que ignoram tamanho e giram por hash em qualquer slot.
 
-1. **Nova edge function `manual-article`** (`supabase/functions/manual-article/index.ts`):
-   - Recebe `{ url, categoria_id, regiao_id, observacoes? }`.
-   - Faz scrape da URL via **Firecrawl** (`FIRECRAWL_API_KEY` já configurado — mesma chamada usada em `scrape-source`), pegando `markdown`, `title`, `ogImage` e `author`.
-   - Cria uma linha em `raw_articles` marcada como `origem = 'manual'` e um `article_clusters` de 1 item com `categoria_id` + `regiao_id` escolhidos e status `fatos_extraidos`.
-   - Chama a lógica de `extract-facts` e depois `generate-article` reutilizando o pipeline atual (mesmos prompts DEL + 5W1H, mesmo agente por categoria). Se `observacoes` for preenchido, é anexado como bloco `INSTRUÇÕES ADICIONAIS DO EDITOR` ao prompt do redator.
-   - Copia a imagem original (og:image) para `imagem_original_url` — o editor decide depois se usa a original ou gera com IA (fluxo já existente).
-   - Retorna `{ generated_article_id }`.
+## Plano de correção
 
-2. **UI em `src/routes/admin.index.tsx`**:
-   - Componente `ManualWriterBox` acima da lista da fila.
-   - `useQuery` carrega agentes ativos agrupados por editoria + lista de regiões.
-   - Ao submeter, mostra spinner "Lendo fonte…" → "Extraindo fatos…" → "Redigindo com [Agente]…" e, ao concluir, invalida a query da fila (rascunho aparece automaticamente) e abre o editor da matéria criada.
-   - Validação: URL http(s) obrigatória, agente obrigatório.
+### 1. Aplicar a migration pendente
+Rodar `supabase-external/030_ad_creatives_formato.sql` (já existe no repo, com o `drop view if exists` que ajustamos). Isso:
+- adiciona `ad_creatives.formato text`
+- recria `ads_eligible` incluindo a coluna `formato`
 
-3. **Segurança / limites**:
-   - Rate-limit simples: bloquear a mesma URL em menos de 60s (evita duplo clique).
-   - Marcar `raw_articles.origem = 'manual'` para o painel de analytics distinguir matérias manuais das do pipeline.
+### 2. Definir o formato dos 2 criativos existentes
+Depois da migration, os dois criativos ficam com `formato = NULL` (servem em qualquer slot). Vou atualizar direto no banco para os tamanhos reais das peças entregues pelo Jefferson Lobo:
+- criativo 1 → `300x250` (quadrado da sidebar)
+- criativo 2 → `970x90` (leaderboard do header)
 
-## Observações
-- Reaproveita 100% dos prompts DEL + memória editorial + agentes por categoria já existentes; nenhum novo prompt de IA.
-- Não altera o pipeline automático nem o painel de clusters.
-- Não requer nova migration (usa tabelas atuais). Se quisermos rastrear "origem manual" formalmente, posso adicionar depois uma coluna `origem text default 'pipeline'` em `raw_articles` — avise se quer já incluir.
+*(se você me disser outro mapeamento eu ajusto; o importante é vincular cada criativo a um formato para parar a exibição indiscriminada)*
+
+### 3. Ajuste defensivo no `AdSlot`
+Enquanto o `pickAd` não devolve criativo real, o fallback é o mock. Vou adicionar uma flag `VITE_ADS_HOUSE_FALLBACK` (default `false` em produção) para que, quando não houver campanha elegível para aquele formato, o slot **colapse** em vez de exibir Sicredi/Copel/etc — que hoje passam a impressão de "anúncios fictícios" no site em produção.
+
+### 4. Validação
+Depois de aplicar (1) e (2), abrir a home e conferir:
+- header (970x90) exibe apenas o criativo `970x90`
+- sidebar (300x250) exibe apenas o `300x250`
+- slot `300x600` fica vazio (não tem criativo desse formato ainda) — sem mock
+
+## Detalhes técnicos
+
+Arquivos envolvidos:
+- `supabase-external/030_ad_creatives_formato.sql` (aplicar)
+- `src/components/AdSlot.tsx` (fallback opt-in via env)
+- `src/lib/ads.functions.ts` (nenhuma mudança — já filtra por `data.size`)
+
+Update SQL após a migration:
+```sql
+update ad_creatives set formato = '300x250' where id = '6da91a6b-...';
+update ad_creatives set formato = '970x90'  where id = '673ca6b7-...';
+```
