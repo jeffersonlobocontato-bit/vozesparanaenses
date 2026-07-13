@@ -396,7 +396,8 @@ function TargetingTab({ targets, campaigns, reload, onToast }: {
   });
   async function submit(e: React.FormEvent) {
     e.preventDefault();
-    if (!form.campaign_id || !form.valor) return onToast("Preencha campanha e valor.");
+    if (!form.campaign_id) return onToast("Selecione uma campanha.");
+    if (form.escopo !== "estado" && !form.valor) return onToast("Preencha o valor (cidade ou região).");
     const sb = await getExternalBrowser();
     const valor = form.escopo === "cidade" ? slugify(form.valor)
       : form.escopo === "estado" ? "pr" : slugify(form.valor);
