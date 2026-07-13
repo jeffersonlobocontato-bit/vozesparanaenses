@@ -124,20 +124,29 @@ function AdminQueue() {
   async function runPipeline() {
     setPipelineBusy(true);
     setPipelineLog([
-      "Disparando pipeline em background…",
-      "  · scrape-source → cluster-articles → classify-and-quota",
+      "Rodando pipeline completo…",
+      "  · scrape-source → cluster-articles → classify-and-quota → process-pending-clusters",
     ]);
-    try {
-      const { data, error } = await supabase.functions.invoke("scrape-source", { body: { force: true } });
-      if (error) throw error;
-      const summary = data && typeof data === "object" ? JSON.stringify(data).slice(0, 200) : "ok";
-      setPipelineLog((l) => [...l, `  ✓ ${summary}`]);
-      setPipelineLog((l) => [...l, "Rodando em background (2–4 min). Recarregue a fila em alguns minutos."]);
-    } catch (e: unknown) {
-      setPipelineLog((l) => [...l, `  ✗ ${e instanceof Error ? e.message : "erro"}`]);
+    const steps: Array<{ name: string; body?: Record<string, unknown> }> = [
+      { name: "scrape-source", body: { force: true } },
+      { name: "cluster-articles" },
+      { name: "classify-and-quota" },
+      { name: "process-pending-clusters", body: { limit: 50 } },
+    ];
+    for (const step of steps) {
+      setPipelineLog((l) => [...l, `→ ${step.name}…`]);
+      try {
+        const { data, error } = await supabase.functions.invoke(step.name, { body: step.body ?? {} });
+        if (error) throw error;
+        const summary = data && typeof data === "object" ? JSON.stringify(data).slice(0, 240) : "ok";
+        setPipelineLog((l) => [...l, `  ✓ ${summary}`]);
+      } catch (e: unknown) {
+        setPipelineLog((l) => [...l, `  ✗ ${e instanceof Error ? e.message : "erro"}`]);
+        break;
+      }
     }
     setPipelineBusy(false);
-    setTimeout(load, 4000);
+    await load();
   }
 
   async function updateStatus(id: string, next: Draft["status"]) {

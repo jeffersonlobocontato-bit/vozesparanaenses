@@ -32,7 +32,7 @@ Deno.serve(async (req) => {
   const selfUrl = Deno.env.get("SUPABASE_URL") ?? url;
   const selfKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? key;
 
-  let body: { limit?: number; regiao_id?: string } = {};
+  let body: { limit?: number; regiao_id?: string; sync?: boolean } = {};
   try { body = await req.json(); } catch { body = {}; }
   const limit = Math.max(1, Math.min(body.limit ?? 50, 200));
 
@@ -63,41 +63,51 @@ Deno.serve(async (req) => {
   const bloqueados = new Set((jaTem ?? []).map((r) => r.cluster_id));
   const fila = pendentes.filter((c) => !bloqueados.has(c.id));
 
-  const CONCURRENCY = 3;
-  let extraidas = 0;
-  let escritas = 0;
-  const erros: Array<{ cluster_id: string; etapa: string; detalhe: string }> = [];
-
-  const queue = [...fila];
-  const workers = Array.from({ length: Math.min(CONCURRENCY, queue.length) }, async () => {
-    while (queue.length) {
-      const c = queue.shift();
-      if (!c) return;
-      try {
-        if (c.status === "selecionado_cota") {
-          const ef = await fetch(`${selfUrl}/functions/v1/extract-facts`, {
+  const runAll = async () => {
+    const CONCURRENCY = 3;
+    let extraidas = 0;
+    let escritas = 0;
+    const erros: Array<{ cluster_id: string; etapa: string; detalhe: string }> = [];
+    const queue = [...fila];
+    const workers = Array.from({ length: Math.min(CONCURRENCY, queue.length) }, async () => {
+      while (queue.length) {
+        const c = queue.shift();
+        if (!c) return;
+        try {
+          if (c.status === "selecionado_cota") {
+            const ef = await fetch(`${selfUrl}/functions/v1/extract-facts`, {
+              method: "POST",
+              headers: { "Content-Type": "application/json", Authorization: `Bearer ${selfKey}` },
+              body: JSON.stringify({ cluster_id: c.id }),
+            });
+            if (!ef.ok) { erros.push({ cluster_id: c.id, etapa: "extract-facts", detalhe: (await ef.text()).slice(0, 300) }); continue; }
+            extraidas++;
+          }
+          const ga = await fetch(`${selfUrl}/functions/v1/generate-article`, {
             method: "POST",
             headers: { "Content-Type": "application/json", Authorization: `Bearer ${selfKey}` },
             body: JSON.stringify({ cluster_id: c.id }),
           });
-          if (!ef.ok) { erros.push({ cluster_id: c.id, etapa: "extract-facts", detalhe: (await ef.text()).slice(0, 300) }); continue; }
-          extraidas++;
+          if (!ga.ok) { erros.push({ cluster_id: c.id, etapa: "generate-article", detalhe: (await ga.text()).slice(0, 300) }); continue; }
+          escritas++;
+        } catch (e) {
+          erros.push({ cluster_id: c.id, etapa: "exception", detalhe: (e as Error).message });
         }
-        const ga = await fetch(`${selfUrl}/functions/v1/generate-article`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json", Authorization: `Bearer ${selfKey}` },
-          body: JSON.stringify({ cluster_id: c.id }),
-        });
-        if (!ga.ok) { erros.push({ cluster_id: c.id, etapa: "generate-article", detalhe: (await ga.text()).slice(0, 300) }); continue; }
-        escritas++;
-      } catch (e) {
-        erros.push({ cluster_id: c.id, etapa: "exception", detalhe: (e as Error).message });
       }
-    }
-  });
-  await Promise.all(workers);
+    });
+    await Promise.all(workers);
+    console.log(`[process-pending-clusters] concluído: pendentes=${fila.length} extraidas=${extraidas} escritas=${escritas} erros=${erros.length}`);
+  };
 
-  return json({ ok: true, pendentes: fila.length, extraidas, escritas, erros });
+  if (body.sync) {
+    await runAll();
+    return json({ ok: true, pendentes: fila.length, mode: "sync" });
+  }
+  // deno-lint-ignore no-explicit-any
+  const rt = (globalThis as any).EdgeRuntime;
+  const task = runAll().catch((e) => console.error("[process-pending-clusters] background error", (e as Error).message));
+  if (rt && typeof rt.waitUntil === "function") rt.waitUntil(task);
+  return json({ ok: true, pendentes: fila.length, mode: "background" });
 });
 
 function json(body: unknown, status = 200) {
