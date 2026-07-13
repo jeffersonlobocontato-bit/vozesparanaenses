@@ -58,6 +58,10 @@ export function AdSlot({
   const [tried, setTried] = useState(false);
   const [gamFilled, setGamFilled] = useState(false);
 
+  // House ad fallback (Sicredi/Copel/etc). Só liga se explicitamente
+  // habilitado — em produção o slot vazio colapsa em vez de exibir mock.
+  const houseFallback = import.meta.env.VITE_ADS_HOUSE_FALLBACK === "true";
+
   useEffect(() => {
     let alive = true;
     pickAd({
@@ -111,6 +115,19 @@ export function AdSlot({
         style={{ aspectRatio: `${dim.w} / ${dim.h}` }}
         aria-hidden
       />
+    );
+  }
+
+  if (!houseFallback) {
+    // Sem venda direta e sem GAM configurado: tenta GAM, se falhar colapsa.
+    return (
+      <div
+        className={`relative overflow-hidden ${className}`}
+        style={{ aspectRatio: `${dim.w} / ${dim.h}`, display: gamFilled ? undefined : "none" }}
+        aria-label={`Publicidade ${size}`}
+      >
+        <GamSlot size={size} regiao={regiao} cidade={cidade} editoria={editoria} onFillChange={setGamFilled} />
+      </div>
     );
   }
 
