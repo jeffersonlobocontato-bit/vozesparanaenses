@@ -22,6 +22,57 @@ function escapeRegex(s: string): string {
   return s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 }
 
+/**
+ * Converte um trecho de texto em nós, transformando:
+ *  - Markdown links `[label](url)` em <a>
+ *  - URLs "cruas" (http/https/www) em <a>
+ * Retorna array de string | ReactNode.
+ */
+function parseInlineLinks(text: string, keyPrefix: string): ReactNode[] {
+  const cls =
+    "text-[#0A2540] underline decoration-[#0A2540]/30 underline-offset-2 hover:decoration-[#0A2540]";
+  // Regex combinado: markdown [label](url) OU URL crua
+  const combined =
+    /\[([^\]]+)\]\((https?:\/\/[^\s)]+)\)|(https?:\/\/[^\s<)\]]+|www\.[^\s<)\]]+)/gi;
+  const out: ReactNode[] = [];
+  let last = 0;
+  let m: RegExpExecArray | null;
+  let i = 0;
+  while ((m = combined.exec(text)) !== null) {
+    if (m.index > last) out.push(text.slice(last, m.index));
+    if (m[1] && m[2]) {
+      out.push(
+        <a
+          key={`${keyPrefix}-ml-${i++}`}
+          href={m[2]}
+          target="_blank"
+          rel="noopener noreferrer"
+          className={cls}
+        >
+          {m[1]}
+        </a>,
+      );
+    } else if (m[3]) {
+      const raw = m[3];
+      const href = raw.startsWith("http") ? raw : `https://${raw}`;
+      out.push(
+        <a
+          key={`${keyPrefix}-ul-${i++}`}
+          href={href}
+          target="_blank"
+          rel="noopener noreferrer"
+          className={cls}
+        >
+          {raw}
+        </a>,
+      );
+    }
+    last = m.index + m[0].length;
+  }
+  if (last < text.length) out.push(text.slice(last));
+  return out.length ? out : [text];
+}
+
 export function buildLinkTerms(opts: {
   regions: { slug: string; name: string }[];
   cities: { regionSlug: string; citySlug: string; name: string }[];
@@ -99,7 +150,8 @@ export function autoLinkParagraph(
   paragraphIdx: number,
 ): ReactNode[] {
   if (!text) return [text];
-  let nodes: ReactNode[] = [text];
+  // Primeiro: converte markdown links e URLs cruas em <a>.
+  let nodes: ReactNode[] = parseInlineLinks(text, `p${paragraphIdx}`);
   let linksInParagraph = 0;
   const MAX_PER_PARAGRAPH = 3;
 
