@@ -18,7 +18,7 @@ const cors = {
 };
 
 const AI_URL = "https://ai.gateway.lovable.dev/v1/chat/completions";
-const MODEL = "google/gemini-2.5-pro";
+const MODEL = "google/gemini-2.5-flash";
 
 const SYSTEM_PROMPT = `Você é um apurador de fatos do portal regional "Vozes Paranaenses".
 Sua ÚNICA tarefa: ler matérias-fonte sobre o MESMO fato e extrair os fatos
@@ -118,6 +118,8 @@ Deno.serve(async (req) => {
     },
     body: JSON.stringify({
       model: MODEL,
+      temperature: 0,
+      max_tokens: 1200,
       messages: [
         { role: "system", content: SYSTEM_PROMPT },
         { role: "user", content: userPrompt },
@@ -134,6 +136,10 @@ Deno.serve(async (req) => {
   }
 
   const aiJson = await aiRes.json();
+  const choiceError = aiJson?.choices?.[0]?.error;
+  if (choiceError) {
+    return json({ error: "ai_choice_error", detail: choiceError?.message ?? "Modelo encerrou sem JSON." }, 502);
+  }
   const content = aiJson?.choices?.[0]?.message?.content;
   if (!content) return json({ error: "ai_empty_response" }, 502);
 
@@ -186,7 +192,7 @@ function buildUserPrompt(raws: Array<{ url: string; titulo: string | null; corpo
   const sources = raws
     .map((r, i) => {
       const veiculo = r.fontes?.nome ?? r.fontes?.url_base ?? "fonte";
-      return `--- FONTE ${i + 1} (${veiculo}) ---\nURL: ${r.url}\nTítulo: ${r.titulo ?? ""}\n\n${(r.corpo_limpo ?? "").slice(0, 8000)}`;
+      return `--- FONTE ${i + 1} (${veiculo}) ---\nURL: ${r.url}\nTítulo: ${r.titulo ?? ""}\n\n${(r.corpo_limpo ?? "").slice(0, 4500)}`;
     })
     .join("\n\n");
 
