@@ -143,6 +143,29 @@ function AdminDashboard() {
     load();
   }
 
+  async function runPrefeituras() {
+    setPipelineBusy(true);
+    setPipelineLog(["Coletando releases oficiais de prefeituras…"]);
+    try {
+      const { data, error } = await supabase.functions.invoke("scrape-prefeitura", { body: { force: true, sync: true } });
+      if (error) throw error;
+      const summary = data && typeof data === "object" ? JSON.stringify(data).slice(0, 240) : "ok";
+      setPipelineLog((l) => [...l, `  ✓ ${summary}`]);
+      // Encadeia clustering + classificação pra as matérias oficiais entrarem na fila.
+      for (const fn of ["cluster-articles", "classify-and-quota"] as const) {
+        setPipelineLog((l) => [...l, `${fn}…`]);
+        const r = await supabase.functions.invoke(fn, { body: {} });
+        if (r.error) throw r.error;
+        setPipelineLog((l) => [...l, `  ✓ ${fn} ok`]);
+      }
+    } catch (e: unknown) {
+      setPipelineLog((l) => [...l, `  ✗ ${e instanceof Error ? e.message : "erro"}`]);
+    }
+    setPipelineLog((l) => [...l, "Scraping de prefeituras finalizado."]);
+    setPipelineBusy(false);
+    load();
+  }
+
   return (
     <div className="space-y-6">
       <div className="flex flex-wrap items-end justify-between gap-4 border-b border-slate-200 pb-5">
@@ -154,6 +177,10 @@ function AdminDashboard() {
         <div className="flex flex-wrap items-center gap-2">
           <button onClick={load} className="inline-flex items-center gap-1.5 rounded-full border border-slate-200 bg-white px-3.5 py-2 text-xs font-medium text-slate-700 shadow-sm transition hover:border-[#0066CC] hover:text-[#0066CC]">
             <RefreshCw className="h-3.5 w-3.5" /> Atualizar
+          </button>
+          <button onClick={runPrefeituras} disabled={pipelineBusy}
+            className="inline-flex items-center gap-1.5 rounded-full border border-emerald-200 bg-emerald-50 px-4 py-2 text-xs font-semibold text-emerald-800 shadow-sm transition hover:border-emerald-400 hover:bg-emerald-100 disabled:opacity-60">
+            {pipelineBusy ? <><Activity className="h-3.5 w-3.5 animate-pulse" /> Coletando…</> : <><Radio className="h-3.5 w-3.5" /> Scrape prefeituras</>}
           </button>
           <button onClick={runPipeline} disabled={pipelineBusy}
             className="inline-flex items-center gap-1.5 rounded-full bg-gradient-to-r from-[#0A2540] to-[#0d3a6e] px-4 py-2 text-xs font-semibold text-white shadow-sm transition hover:shadow-md disabled:opacity-60">
