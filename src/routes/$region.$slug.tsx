@@ -16,6 +16,7 @@ import { getCityCoords, formatGeoPosition, formatICBM } from "@/lib/geo-cities";
 import { AdSlot } from "@/components/AdSlot";
 import { AdsenseSlot } from "@/components/AdsenseSlot";
 import { WhatsAppCTA } from "@/components/WhatsAppCTA";
+import { ShareButtons } from "@/components/ShareButtons";
 
 const articleQO = (regionSlug: string, slug: string) =>
   queryOptions({
@@ -450,6 +451,15 @@ function ArticlePage() {
           </p>
         )}
 
+        {/* Compartilhar — compacto, logo abaixo do lead */}
+        <div className="mt-4 max-w-3xl">
+          <ShareButtons
+            url={`https://vozesparanaenses.com.br/${region}/${article.slug}`}
+            title={article.title}
+            compact
+          />
+        </div>
+
         {/* Anúncio — topo da matéria, abaixo do lead */}
         <div className="mx-auto mt-8 flex max-w-3xl justify-center">
           <AdSlot size="728x90" className="w-full" regiao={region} cidade={cidadeAtualSlug ?? undefined} editoria={categoriaSlug ?? undefined} />
@@ -651,6 +661,14 @@ function ArticlePage() {
             </div>
           </div>
         )}
+
+        {/* Compartilhar — bloco completo no fim da matéria */}
+        <div className="mx-auto mt-8 max-w-3xl">
+          <ShareButtons
+            url={`https://vozesparanaenses.com.br/${region}/${article.slug}`}
+            title={article.title}
+          />
+        </div>
 
         {/* Anúncio — rodapé da matéria */}
         <div className="mx-auto mt-10 flex max-w-3xl justify-center">

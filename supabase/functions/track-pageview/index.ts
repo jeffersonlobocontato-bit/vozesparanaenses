@@ -20,6 +20,7 @@ type Payload = {
   cidade?: string | null;
   pagina?: string | null;
   origem_trafego?: string | null;
+  tipo_evento?: string | null;
 };
 
 Deno.serve(async (req) => {
@@ -49,7 +50,7 @@ Deno.serve(async (req) => {
     cidade: body.cidade ?? null,
     cidade_leitor: cidadeLeitor,
     uf_leitor: ufLeitor,
-    tipo_evento: "pageview",
+    tipo_evento: body.tipo_evento ?? "pageview",
     pagina: body.pagina ?? null,
     origem_trafego: body.origem_trafego ?? null,
   });
