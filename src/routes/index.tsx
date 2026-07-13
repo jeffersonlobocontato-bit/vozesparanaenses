@@ -446,7 +446,7 @@ function PortalHome({
                 <Wrap key={i} {...wrapProps} className="flex flex-col gap-3 group cursor-pointer">
                   <div className="w-full aspect-video bg-slate-200 rounded-lg overflow-hidden">
                     {a?.cover_image_url ? (
-                      <img src={a.cover_image_url} alt="" className="h-full w-full object-cover group-hover:scale-105 transition-transform duration-500" loading="lazy" />
+                      <img src={a.cover_image_url} alt={a?.title ?? fb.title} className="h-full w-full object-cover group-hover:scale-105 transition-transform duration-500" loading="lazy" />
                     ) : (
                       <div className="h-full w-full bg-gradient-to-br from-slate-200 to-slate-300" />
                     )}
@@ -584,7 +584,7 @@ function EditoriaModule({ slug, name }: { slug: string; name: string }) {
               {lead.cover_image_url ? (
                 <img
                   src={lead.cover_image_url}
-                  alt=""
+                  alt={lead.title}
                   className="h-full w-full object-cover group-hover:scale-[1.02] transition-transform duration-500"
                   loading="lazy"
                 />
@@ -623,7 +623,7 @@ function EditoriaModule({ slug, name }: { slug: string; name: string }) {
               >
                 <div className="w-28 shrink-0 aspect-square bg-slate-200 overflow-hidden rounded">
                   {a.cover_image_url ? (
-                    <img src={a.cover_image_url} alt="" className="h-full w-full object-cover" loading="lazy" />
+                    <img src={a.cover_image_url} alt={a.title} className="h-full w-full object-cover" loading="lazy" />
                   ) : (
                     <div className="h-full w-full bg-gradient-to-br from-slate-200 to-slate-300" />
                   )}
@@ -654,7 +654,7 @@ function EditoriaModule({ slug, name }: { slug: string; name: string }) {
               >
                 <div className="w-full aspect-[16/10] bg-slate-200 overflow-hidden rounded">
                   {a.cover_image_url ? (
-                    <img src={a.cover_image_url} alt="" className="h-full w-full object-cover group-hover:scale-[1.02] transition-transform duration-500" loading="lazy" />
+                    <img src={a.cover_image_url} alt={a.title} className="h-full w-full object-cover group-hover:scale-[1.02] transition-transform duration-500" loading="lazy" />
                   ) : (
                     <div className="h-full w-full bg-gradient-to-br from-slate-200 to-slate-300" />
                   )}
@@ -690,7 +690,7 @@ function Eleicoes2026Card({ article }: { article?: ArticleListItem }) {
         {article?.cover_image_url ? (
           <img
             src={article.cover_image_url}
-            alt=""
+            alt={article.title}
             className="h-full w-full object-cover opacity-90 transition-transform duration-500 group-hover:scale-105"
             loading="lazy"
           />
@@ -793,7 +793,7 @@ function _HeroCardImpl({ article }: { article: RankedArticle | undefined }) {
     <div className="group relative overflow-hidden rounded-lg h-full min-h-[420px]">
       <div className="absolute inset-0 bg-slate-200">
         {article?.cover_image_url ? (
-          <img src={article.cover_image_url} alt="" className="h-full w-full object-cover" />
+          <img src={article.cover_image_url} alt={title} className="h-full w-full object-cover" />
         ) : (
           <div className="h-full w-full bg-gradient-to-br from-primary/80 via-primary to-secondary/60" />
         )}
@@ -804,9 +804,9 @@ function _HeroCardImpl({ article }: { article: RankedArticle | undefined }) {
           <CategoryTag name={catName} slug={catSlug} className="text-xs px-3 py-1.5" />
           {article && <ProximityBadge proximidade={article.proximidade} />}
         </div>
-        <h2 className="font-display text-3xl md:text-5xl text-white leading-tight group-hover:underline">
+        <h1 className="font-display text-3xl md:text-5xl text-white leading-tight group-hover:underline">
           {title}
-        </h2>
+        </h1>
         <p className="mt-3 text-slate-200 text-sm md:text-base max-w-2xl line-clamp-2">
           {summary}
         </p>
