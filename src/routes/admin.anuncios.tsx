@@ -39,6 +39,7 @@ type Creative = {
   destino_url: string;
   peso: number;
   aprovado: boolean;
+  formato: string | null;
 };
 
 type Target = {
@@ -357,7 +358,7 @@ function CreativesTab({ creatives, campaigns, reload, onToast }: {
   creatives: Creative[]; campaigns: Campaign[]; reload: () => void; onToast: (s: string) => void;
 }) {
   const [form, setForm] = useState({
-    campaign_id: "", headline: "", cta_texto: "Saiba mais", destino_url: "", peso: 1,
+    campaign_id: "", headline: "", cta_texto: "Saiba mais", destino_url: "", peso: 1, formato: "",
   });
   const [file, setFile] = useState<File | null>(null);
   const [uploading, setUploading] = useState(false);
@@ -381,10 +382,11 @@ function CreativesTab({ creatives, campaigns, reload, onToast }: {
         cta_texto: form.cta_texto,
         destino_url: form.destino_url,
         peso: form.peso,
+        formato: form.formato || null,
       });
       if (error) throw error;
       onToast("Criativo enviado. Aguarda aprovação.");
-      setForm({ campaign_id: "", headline: "", cta_texto: "Saiba mais", destino_url: "", peso: 1 });
+      setForm({ campaign_id: "", headline: "", cta_texto: "Saiba mais", destino_url: "", peso: 1, formato: "" });
       setFile(null); reload();
     } catch (e: unknown) {
       onToast("Erro: " + (e instanceof Error ? e.message : "upload falhou"));
@@ -423,6 +425,14 @@ function CreativesTab({ creatives, campaigns, reload, onToast }: {
         <input placeholder="CTA" value={form.cta_texto} onChange={(e)=>setForm({...form,cta_texto:e.target.value})} className="rounded border px-2 py-1 text-sm" />
         <input required type="url" placeholder="URL destino*" value={form.destino_url} onChange={(e)=>setForm({...form,destino_url:e.target.value})} className="col-span-3 rounded border px-2 py-1 text-sm" />
         <input type="number" min={1} max={10} placeholder="Peso" value={form.peso} onChange={(e)=>setForm({...form,peso:Number(e.target.value)})} className="rounded border px-2 py-1 text-sm" />
+        <select value={form.formato} onChange={(e)=>setForm({...form,formato:e.target.value})} className="col-span-2 rounded border px-2 py-1 text-sm" title="Formato do slot">
+          <option value="">Formato: todos</option>
+          <option value="970x90">970x90 (leaderboard)</option>
+          <option value="728x90">728x90 (leaderboard)</option>
+          <option value="300x250">300x250 (medium rectangle)</option>
+          <option value="300x600">300x600 (half page)</option>
+          <option value="320x50">320x50 (mobile banner)</option>
+        </select>
         <input required type="file" accept="image/*" onChange={(e)=>setFile(e.target.files?.[0] ?? null)} className="col-span-4 rounded border px-2 py-1 text-sm" />
         <button disabled={uploading} className="col-span-2 rounded bg-[#0066CC] px-3 py-1.5 text-sm font-semibold text-white disabled:opacity-50">{uploading?"Enviando…":"Enviar criativo"}</button>
       </form>
@@ -436,7 +446,7 @@ function CreativesTab({ creatives, campaigns, reload, onToast }: {
                 <img src={cr.imagem_url} alt={cr.headline} className="h-full w-full object-cover" />
               </div>
               <div className="space-y-1 p-3 text-sm">
-                <p className="text-xs text-muted-foreground">{camp?.nome ?? "—"} · peso {cr.peso}</p>
+                <p className="text-xs text-muted-foreground">{camp?.nome ?? "—"} · peso {cr.peso} · <span className="font-semibold">{cr.formato ?? "todos formatos"}</span></p>
                 <p className="font-semibold leading-tight">{cr.headline}</p>
                 <p className="truncate text-xs text-muted-foreground">{cr.destino_url}</p>
                 <div className="flex items-center justify-between pt-2">

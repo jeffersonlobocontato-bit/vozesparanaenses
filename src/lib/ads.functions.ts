@@ -58,12 +58,21 @@ export const pickAd = createServerFn({ method: "POST" })
       const campaignIds = Array.from(new Set(targets.map((t) => t.campaign_id)));
       const { data: creatives } = await sb
         .from("ads_eligible")
-        .select("creative_id, campaign_id, imagem_url, headline, cta_texto, destino_url, peso, editorias")
+        .select("creative_id, campaign_id, imagem_url, headline, cta_texto, destino_url, peso, editorias, formato")
         .in("campaign_id", campaignIds);
       if (!creatives || creatives.length === 0) continue;
 
+      // Filtro por formato do slot (null/undefined no criativo = serve em qualquer formato)
+      const byFormat = creatives.filter((c) => {
+        const f = (c as { formato?: string | null }).formato ?? null;
+        if (!f) return true;
+        if (!data.size) return true;
+        return f === data.size;
+      });
+      if (!byFormat.length) continue;
+
       // Filtro por editoria (vazio = todas)
-      const eligible = creatives.filter((c) => {
+      const eligible = byFormat.filter((c) => {
         const eds = (c.editorias ?? []) as string[];
         if (!eds.length) return true;
         if (!data.editoria) return false;
