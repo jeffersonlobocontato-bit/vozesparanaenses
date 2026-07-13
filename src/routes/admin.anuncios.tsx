@@ -283,7 +283,10 @@ function CampaignsTab({ campaigns, advertisers, reload, onToast }: {
         <input required placeholder="Nome campanha*" value={form.nome} onChange={(e)=>setForm({...form,nome:e.target.value})} className="col-span-2 rounded border px-2 py-1 text-sm" />
         <input type="date" value={form.data_inicio} onChange={(e)=>setForm({...form,data_inicio:e.target.value})} className="rounded border px-2 py-1 text-sm" />
         <input type="date" value={form.data_fim} onChange={(e)=>setForm({...form,data_fim:e.target.value})} className="rounded border px-2 py-1 text-sm" />
-        <input placeholder="Editorias (slugs, vírgula)" value={form.editorias} onChange={(e)=>setForm({...form,editorias:e.target.value})} className="col-span-4 rounded border px-2 py-1 text-sm" />
+        <input placeholder="Editorias (slugs, vírgula) — vazio = todas" value={form.editorias} onChange={(e)=>setForm({...form,editorias:e.target.value})} className="col-span-4 rounded border px-2 py-1 text-sm" />
+        <p className="col-span-4 -mt-1 text-[11px] text-muted-foreground">
+          Deixe vazio para servir em qualquer página. Slugs válidos: <code>geral, politica, policia, esporte, economia, cultura, eleicoes-2026</code>. Valores fora dessa lista fazem o anúncio nunca ser servido.
+        </p>
         <input placeholder="Observações" value={form.observacoes} onChange={(e)=>setForm({...form,observacoes:e.target.value})} className="col-span-4 rounded border px-2 py-1 text-sm" />
         <button className="col-span-2 rounded bg-[#0066CC] px-3 py-1.5 text-sm font-semibold text-white">Criar campanha</button>
       </form>
