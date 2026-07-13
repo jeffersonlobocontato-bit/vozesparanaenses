@@ -362,6 +362,64 @@ function CampaignsTab({ campaigns, advertisers, reload, onToast }: {
 }
 
 /* --------------------------- Criativos -------------------------- */
+function parseFormato(formato: string): { w: number; h: number } {
+  const [w, h] = formato.split("x").map(Number);
+  return { w, h };
+}
+
+/** Mostra a imagem escolhida já encaixada na proporção real do espaço,
+ * exatamente como o `AdSlot` renderiza em produção (object-contain — a
+ * imagem inteira aparece, sem cortar; se a proporção não bater, sobra
+ * tarja em cima/embaixo ou nas laterais, e é isso que queremos que o
+ * operador veja ANTES de confirmar o upload). */
+function CreativeFitPreview({ file, formato }: { file: File | null; formato: string }) {
+  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+  const [naturalDims, setNaturalDims] = useState<{ w: number; h: number } | null>(null);
+
+  useEffect(() => {
+    if (!file) { setPreviewUrl(null); setNaturalDims(null); return; }
+    const url = URL.createObjectURL(file);
+    setPreviewUrl(url);
+    const img = new Image();
+    img.onload = () => setNaturalDims({ w: img.naturalWidth, h: img.naturalHeight });
+    img.src = url;
+    return () => URL.revokeObjectURL(url);
+  }, [file]);
+
+  if (!file || !previewUrl) return null;
+
+  const target = parseFormato(formato);
+  const targetRatio = target.w / target.h;
+  const realRatio = naturalDims ? naturalDims.w / naturalDims.h : targetRatio;
+  const diffPct = Math.abs(realRatio - targetRatio) / targetRatio;
+  const proporcaoOk = diffPct <= 0.08;
+
+  return (
+    <div className="mt-2 space-y-1">
+      <p className="text-[10px] font-semibold uppercase tracking-wide text-slate-500">
+        Simulação no espaço ({formato})
+      </p>
+      <div
+        className="mx-auto flex items-center justify-center overflow-hidden rounded border border-slate-300 bg-[repeating-conic-gradient(#e2e8f0_0%_25%,white_0%_50%)] bg-[length:16px_16px]"
+        style={{ aspectRatio: `${target.w} / ${target.h}`, maxWidth: "100%" }}
+      >
+        <img src={previewUrl} alt="Pré-visualização do criativo" className="h-full w-full object-contain" />
+      </div>
+      {naturalDims && (
+        proporcaoOk ? (
+          <p className="text-[11px] text-emerald-700">
+            ✓ {naturalDims.w}×{naturalDims.h}px — proporção compatível com {formato}.
+          </p>
+        ) : (
+          <p className="text-[11px] text-amber-700">
+            ⚠ {naturalDims.w}×{naturalDims.h}px não tem a mesma proporção de {formato} — vai sobrar espaço em branco nas laterais ou em cima/embaixo, como visto acima. Considere recortar a imagem antes de enviar.
+          </p>
+        )
+      )}
+    </div>
+  );
+}
+
 function CreativesTab({ creatives, campaigns, reload, onToast }: {
   creatives: Creative[]; campaigns: Campaign[]; reload: () => void; onToast: (s: string) => void;
 }) {
@@ -519,6 +577,7 @@ function CreativesTab({ creatives, campaigns, reload, onToast }: {
             </div>
             <input required type="file" accept="image/*" onChange={(e)=>setFileDesktop(e.target.files?.[0] ?? null)} className="w-full text-sm" />
             {fileDesktop && <p className="mt-1 truncate text-[11px] text-slate-500">{fileDesktop.name}</p>}
+            {slotDef && <CreativeFitPreview file={fileDesktop} formato={slotDef.desktop} />}
           </label>
           {requiresMobile && (
             <label className="rounded border border-dashed border-slate-300 p-3 text-xs">
@@ -527,6 +586,7 @@ function CreativesTab({ creatives, campaigns, reload, onToast }: {
               </div>
               <input required type="file" accept="image/*" onChange={(e)=>setFileMobile(e.target.files?.[0] ?? null)} className="w-full text-sm" />
               {fileMobile && <p className="mt-1 truncate text-[11px] text-slate-500">{fileMobile.name}</p>}
+              {slotDef && <CreativeFitPreview file={fileMobile} formato={slotDef.mobile} />}
             </label>
           )}
         </div>
