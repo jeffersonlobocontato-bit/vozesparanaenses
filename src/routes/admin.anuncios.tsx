@@ -39,6 +39,7 @@ type Creative = {
   destino_url: string;
   peso: number;
   aprovado: boolean;
+  formato: string | null;
 };
 
 type Target = {
@@ -357,7 +358,7 @@ function CreativesTab({ creatives, campaigns, reload, onToast }: {
   creatives: Creative[]; campaigns: Campaign[]; reload: () => void; onToast: (s: string) => void;
 }) {
   const [form, setForm] = useState({
-    campaign_id: "", headline: "", cta_texto: "Saiba mais", destino_url: "", peso: 1,
+    campaign_id: "", headline: "", cta_texto: "Saiba mais", destino_url: "", peso: 1, formato: "",
   });
   const [file, setFile] = useState<File | null>(null);
   const [uploading, setUploading] = useState(false);
@@ -381,10 +382,11 @@ function CreativesTab({ creatives, campaigns, reload, onToast }: {
         cta_texto: form.cta_texto,
         destino_url: form.destino_url,
         peso: form.peso,
+        formato: form.formato || null,
       });
       if (error) throw error;
       onToast("Criativo enviado. Aguarda aprovação.");
-      setForm({ campaign_id: "", headline: "", cta_texto: "Saiba mais", destino_url: "", peso: 1 });
+      setForm({ campaign_id: "", headline: "", cta_texto: "Saiba mais", destino_url: "", peso: 1, formato: "" });
       setFile(null); reload();
     } catch (e: unknown) {
       onToast("Erro: " + (e instanceof Error ? e.message : "upload falhou"));
