@@ -151,10 +151,11 @@ Deno.serve(async (req) => {
   const clusterId = facts.cluster_id;
   const { data: cluster, error: cErr } = await sb
     .from("article_clusters")
-    .select("id, regiao_id, categoria_id, interesse_score")
+    .select("id, regiao_id, categoria_id, interesse_score, categoria:editorial_categories(slug)")
     .eq("id", clusterId)
     .maybeSingle();
   if (cErr || !cluster) return json({ error: "cluster_not_found", detail: cErr?.message }, 404);
+  const categoriaSlug = Array.isArray(cluster.categoria) ? cluster.categoria[0]?.slug : cluster.categoria?.slug;
 
   // 1b. Carregar o agente redator especializado da editoria (se existir e
   // estiver ativo) — o prompt-base do agente é injetado ANTES do system
@@ -325,12 +326,15 @@ Deno.serve(async (req) => {
 
   // 3c. Publicação automática: só quando NÃO há foto real da fonte (o uso da
   // foto em si, mesmo com crédito, é uma decisão de risco que fica sempre
-  // com o editor humano) E o interesse de leitura já calculado pelo motor de
-  // cotas está no patamar "muito alto". Todo o resto fica em 'rascunho',
-  // esperando decisão manual de publicar — ou expira em 12h (ver
-  // expire-drafts) se ninguém decidir.
+  // com o editor humano), o interesse de leitura está no patamar "muito
+  // alto" E a categoria não é Segurança/Policial — matéria sobre pessoa
+  // identificável em contexto criminal carrega risco real de difamação/
+  // exposição mesmo sem foto, então fica sempre na fila manual, sem exceção.
   const AUTO_PUBLISH_INTERESSE_MINIMO = 3.5;
-  const podeAutoPublicar = !temFotoReal && (cluster.interesse_score ?? 0) >= AUTO_PUBLISH_INTERESSE_MINIMO;
+  const CATEGORIAS_SEMPRE_MANUAIS = ["seguranca"];
+  const categoriaSensivel = categoriaSlug ? CATEGORIAS_SEMPRE_MANUAIS.includes(categoriaSlug) : false;
+  const podeAutoPublicar =
+    !temFotoReal && !categoriaSensivel && (cluster.interesse_score ?? 0) >= AUTO_PUBLISH_INTERESSE_MINIMO;
   if (podeAutoPublicar) {
     await sb.from("generated_articles")
       .update({ status: "publicado", publicado_automaticamente: true, publicado_em: new Date().toISOString() })
@@ -358,6 +362,7 @@ Deno.serve(async (req) => {
     titulo: parsed.titulo,
     publicado_automaticamente: podeAutoPublicar,
     tem_foto_real: temFotoReal,
+    categoria_sensivel: categoriaSensivel,
   });
 });
 
