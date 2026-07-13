@@ -680,6 +680,57 @@ function HeroCard({ article }: { article: RankedArticle | undefined }) {
   return _HeroCardImpl({ article });
 }
 
+function Eleicoes2026Card({ article }: { article?: ArticleListItem }) {
+  const badge = (
+    <span className="inline-flex items-center gap-1 rounded-sm bg-amber-400 px-2 py-0.5 text-[10px] font-black uppercase tracking-widest text-[#002147]">
+      <span aria-hidden>🗳️</span> Eleições 2026
+    </span>
+  );
+  const inner = (
+    <div className="group relative flex h-full items-stretch overflow-hidden rounded-lg border border-amber-400/40 bg-gradient-to-r from-[#002147] to-[#0D3D6C] text-white">
+      <div className="hidden w-40 shrink-0 overflow-hidden bg-[#001529] sm:block">
+        {article?.cover_image_url ? (
+          <img
+            src={article.cover_image_url}
+            alt=""
+            className="h-full w-full object-cover opacity-90 transition-transform duration-500 group-hover:scale-105"
+            loading="lazy"
+          />
+        ) : (
+          <div className="h-full w-full bg-gradient-to-br from-[#0D3D6C] to-[#002147]" />
+        )}
+      </div>
+      <div className="flex min-w-0 flex-1 flex-col justify-center gap-2 px-4 py-3">
+        <div className="flex items-center gap-2">
+          {badge}
+          <span className="text-[10px] font-bold uppercase tracking-wider text-amber-200/80">
+            Última atualização
+          </span>
+        </div>
+        <h3 className="font-display text-base leading-snug text-white line-clamp-2 md:text-lg group-hover:underline">
+          {article?.title ?? "Cobertura completa das Eleições 2026 no Paraná"}
+        </h3>
+      </div>
+    </div>
+  );
+  if (article?.region) {
+    return (
+      <Link
+        to="/$region/$slug"
+        params={{ region: article.region.slug, slug: article.slug }}
+        className="block h-full"
+      >
+        {inner}
+      </Link>
+    );
+  }
+  return (
+    <Link to="/editoria/$categoria" params={{ categoria: "eleicoes-2026" }} className="block h-full">
+      {inner}
+    </Link>
+  );
+}
+
 function VaptVuptModule({ articles }: { articles: ArticleListItem[] }) {
   if (!articles || articles.length === 0) return null;
   return (
