@@ -4,6 +4,7 @@ import {
   Link,
   createRootRouteWithContext,
   useRouter,
+  useRouterState,
   HeadContent,
   Scripts,
 } from "@tanstack/react-router";
@@ -200,8 +201,14 @@ function RootShell({ children }: { children: ReactNode }) {
 
 function RootComponent() {
   const { queryClient } = Route.useRouteContext();
+  const pathname = useRouterState({ select: (s) => s.location.pathname });
+  const isAdmin = pathname.startsWith("/admin");
 
   useEffect(() => {
+    // O AdSense nunca deve carregar em telas administrativas — são páginas
+    // sem conteúdo editorial nenhum, exatamente o que a política do Google
+    // proíbe ("anúncios em telas sem conteúdo do editor").
+    if (isAdmin) return;
     if (document.getElementById("adsbygoogle-js")) return;
     const s = document.createElement("script");
     s.id = "adsbygoogle-js";
@@ -210,7 +217,7 @@ function RootComponent() {
     s.src =
       "https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-3867318545397573";
     document.head.appendChild(s);
-  }, []);
+  }, [isAdmin]);
 
   return (
     <QueryClientProvider client={queryClient}>
