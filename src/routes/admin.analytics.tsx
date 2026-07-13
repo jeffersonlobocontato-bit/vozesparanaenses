@@ -5,6 +5,7 @@ import {
   ResponsiveContainer, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip,
   LineChart, Line, PieChart, Pie, Cell, Legend,
 } from "recharts";
+import { PageHeader } from "@/components/admin/ui";
 
 export const Route = createFileRoute("/admin/analytics")({
   component: AdminAnalytics,
@@ -105,31 +106,33 @@ function AdminAnalytics() {
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-wrap items-center justify-between gap-3">
-        <div>
-          <h1 className="text-2xl font-bold">Painel de Analytics</h1>
-          <p className="text-sm text-muted-foreground">Tráfego cruzado das 10 regiões — página, origem e tendência.</p>
-        </div>
-        <select value={periodo} onChange={(e) => setPeriodo(Number(e.target.value))} className="rounded border px-2 py-1 text-sm">
-          {PERIODOS.map((p) => <option key={p.dias} value={p.dias}>{p.label}</option>)}
-        </select>
-      </div>
+      <PageHeader
+        eyebrow="Analytics"
+        title="Painel de Analytics"
+        subtitle="Tráfego cruzado das 10 regiões — página, origem e tendência."
+        actions={
+          <select value={periodo} onChange={(e) => setPeriodo(Number(e.target.value))}
+            className="rounded-full border border-slate-200 bg-white px-3.5 py-2 text-xs font-medium text-slate-700 shadow-sm">
+            {PERIODOS.map((p) => <option key={p.dias} value={p.dias}>{p.label}</option>)}
+          </select>
+        }
+      />
 
-      {err && <p className="rounded border border-red-200 bg-red-50 p-3 text-sm text-red-700">{err}</p>}
-      {!rows && !err && <p className="text-sm text-muted-foreground">Carregando…</p>}
+      {err && <p className="rounded-xl border border-red-200 bg-red-50 p-3 text-sm text-red-700">{err}</p>}
+      {!rows && !err && <p className="text-sm text-slate-500">Carregando…</p>}
 
       {rows && (
         <>
           <div className="grid gap-4 sm:grid-cols-3">
-            <div className="rounded-lg border bg-card p-4">
+            <div className="rounded-2xl border border-slate-200 bg-white shadow-sm p-4">
               <p className="text-xs text-muted-foreground">Pageviews no período</p>
               <p className="text-3xl font-bold text-[#0A2540]">{total}</p>
             </div>
-            <div className="rounded-lg border bg-card p-4">
+            <div className="rounded-2xl border border-slate-200 bg-white shadow-sm p-4">
               <p className="text-xs text-muted-foreground">Regiões com tráfego</p>
               <p className="text-3xl font-bold text-[#0A2540]">{porRegiao.length}</p>
             </div>
-            <div className="rounded-lg border bg-card p-4">
+            <div className="rounded-2xl border border-slate-200 bg-white shadow-sm p-4">
               <p className="text-xs text-muted-foreground">Vindos de IA (ChatGPT/Perplexity/Gemini)</p>
               <p className="text-3xl font-bold text-[#5B2A86]">{totalIA} <span className="text-sm font-normal text-muted-foreground">({total ? Math.round((totalIA / total) * 100) : 0}%)</span></p>
             </div>
@@ -143,7 +146,7 @@ function AdminAnalytics() {
           )}
 
           <div className="grid gap-6 lg:grid-cols-2">
-            <div className="rounded-lg border bg-card p-4">
+            <div className="rounded-2xl border border-slate-200 bg-white shadow-sm p-4">
               <h2 className="mb-3 text-sm font-semibold">Pageviews por dia</h2>
               <ResponsiveContainer width="100%" height={220}>
                 <LineChart data={porDia}>
@@ -156,7 +159,7 @@ function AdminAnalytics() {
               </ResponsiveContainer>
             </div>
 
-            <div className="rounded-lg border bg-card p-4">
+            <div className="rounded-2xl border border-slate-200 bg-white shadow-sm p-4">
               <h2 className="mb-3 text-sm font-semibold">Pageviews por região</h2>
               <ResponsiveContainer width="100%" height={220}>
                 <BarChart data={porRegiao} layout="vertical" margin={{ left: 24 }}>
@@ -169,7 +172,7 @@ function AdminAnalytics() {
               </ResponsiveContainer>
             </div>
 
-            <div className="rounded-lg border bg-card p-4">
+            <div className="rounded-2xl border border-slate-200 bg-white shadow-sm p-4">
               <h2 className="mb-3 text-sm font-semibold">Origem do tráfego</h2>
               <ResponsiveContainer width="100%" height={220}>
                 <PieChart>
@@ -182,7 +185,7 @@ function AdminAnalytics() {
               </ResponsiveContainer>
             </div>
 
-            <div className="rounded-lg border bg-card p-4">
+            <div className="rounded-2xl border border-slate-200 bg-white shadow-sm p-4">
               <h2 className="mb-3 text-sm font-semibold">Páginas mais vistas</h2>
               <ul className="space-y-1 text-sm">
                 {porPagina.map((p) => (
@@ -195,7 +198,7 @@ function AdminAnalytics() {
               </ul>
             </div>
 
-            <div className="rounded-lg border bg-card p-4">
+            <div className="rounded-2xl border border-slate-200 bg-white shadow-sm p-4">
               <h2 className="mb-3 text-sm font-semibold">De onde vêm os leitores (cidade)</h2>
               <p className="mb-3 text-[11px] text-muted-foreground">
                 Aproximado por geolocalização de IP — o IP em si nunca é armazenado, só a cidade resultante.

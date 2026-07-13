@@ -1,6 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useCallback, useEffect, useState } from "react";
 import { getExternalBrowser } from "@/lib/external-supabase-browser";
+import { PageHeader, refreshBtnClass, tabPillsWrapClass, tabPillClass } from "@/components/admin/ui";
 
 export const Route = createFileRoute("/admin/anuncios")({
   component: AdminAnuncios,
@@ -108,16 +109,17 @@ function AdminAnuncios() {
   const toast = (m: string) => { setMsg(m); setTimeout(() => setMsg(null), 3000); };
 
   return (
-    <div className="space-y-4">
-      <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold">Anúncios</h1>
-        <button onClick={load} className="rounded border px-3 py-1 text-xs hover:bg-accent">Atualizar</button>
-      </div>
+    <div className="space-y-6">
+      <PageHeader
+        eyebrow="Monetização"
+        title="Anúncios"
+        subtitle="Anunciantes, campanhas, criativos, targeting e performance."
+        actions={<button onClick={load} className={refreshBtnClass()}>Atualizar</button>}
+      />
 
-      <div className="flex gap-1 border-b text-sm">
+      <div className={tabPillsWrapClass() + " w-fit"}>
         {(["campanhas","anunciantes","criativos","targeting","relatorio"] as Tab[]).map((t) => (
-          <button key={t} onClick={() => setTab(t)}
-            className={`px-3 py-2 capitalize ${tab===t?"border-b-2 border-[#0066CC] font-semibold text-[#0066CC]":"text-muted-foreground hover:text-foreground"}`}>
+          <button key={t} onClick={() => setTab(t)} className={`capitalize ${tabPillClass(tab===t)}`}>
             {t}
           </button>
         ))}
@@ -172,7 +174,7 @@ function AdvertisersTab({ advertisers, reload, onToast }: {
   }
   return (
     <div className="space-y-4">
-      <form onSubmit={submit} className="grid grid-cols-2 gap-2 rounded-lg border bg-card p-3 md:grid-cols-6">
+      <form onSubmit={submit} className="grid grid-cols-2 gap-2 rounded-2xl border border-slate-200 bg-white shadow-sm p-3 md:grid-cols-6">
         <input required placeholder="Nome*" value={form.nome} onChange={(e)=>setForm({...form,nome:e.target.value})} className="col-span-2 rounded border px-2 py-1 text-sm" />
         <input placeholder="CNPJ" value={form.cnpj} onChange={(e)=>setForm({...form,cnpj:e.target.value})} className="rounded border px-2 py-1 text-sm" />
         <input placeholder="E-mail" value={form.email} onChange={(e)=>setForm({...form,email:e.target.value})} className="rounded border px-2 py-1 text-sm" />
@@ -239,7 +241,7 @@ function CampaignsTab({ campaigns, advertisers, reload, onToast }: {
   }
   return (
     <div className="space-y-4">
-      <form onSubmit={submit} className="grid grid-cols-2 gap-2 rounded-lg border bg-card p-3 md:grid-cols-6">
+      <form onSubmit={submit} className="grid grid-cols-2 gap-2 rounded-2xl border border-slate-200 bg-white shadow-sm p-3 md:grid-cols-6">
         <select required value={form.advertiser_id} onChange={(e)=>setForm({...form,advertiser_id:e.target.value})} className="col-span-2 rounded border px-2 py-1 text-sm">
           <option value="">Anunciante*</option>
           {advertisers.map((a) => <option key={a.id} value={a.id}>{a.nome}</option>)}
@@ -343,7 +345,7 @@ function CreativesTab({ creatives, campaigns, reload, onToast }: {
 
   return (
     <div className="space-y-4">
-      <form onSubmit={submit} className="grid grid-cols-2 gap-2 rounded-lg border bg-card p-3 md:grid-cols-6">
+      <form onSubmit={submit} className="grid grid-cols-2 gap-2 rounded-2xl border border-slate-200 bg-white shadow-sm p-3 md:grid-cols-6">
         <select required value={form.campaign_id} onChange={(e)=>setForm({...form,campaign_id:e.target.value})} className="col-span-2 rounded border px-2 py-1 text-sm">
           <option value="">Campanha*</option>
           {campaigns.map((c) => <option key={c.id} value={c.id}>{c.nome}</option>)}
@@ -360,7 +362,7 @@ function CreativesTab({ creatives, campaigns, reload, onToast }: {
         {creatives.map((cr) => {
           const camp = campaigns.find((c) => c.id === cr.campaign_id);
           return (
-            <li key={cr.id} className="overflow-hidden rounded-lg border bg-card">
+            <li key={cr.id} className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
               <div className="aspect-[16/9] bg-slate-100">
                 <img src={cr.imagem_url} alt={cr.headline} className="h-full w-full object-cover" />
               </div>
@@ -417,7 +419,7 @@ function TargetingTab({ targets, campaigns, reload, onToast }: {
   }
   return (
     <div className="space-y-4">
-      <form onSubmit={submit} className="grid grid-cols-2 gap-2 rounded-lg border bg-card p-3 md:grid-cols-6">
+      <form onSubmit={submit} className="grid grid-cols-2 gap-2 rounded-2xl border border-slate-200 bg-white shadow-sm p-3 md:grid-cols-6">
         <select required value={form.campaign_id} onChange={(e)=>setForm({...form,campaign_id:e.target.value})} className="col-span-2 rounded border px-2 py-1 text-sm">
           <option value="">Campanha*</option>
           {campaigns.map((c) => <option key={c.id} value={c.id}>{c.nome}</option>)}
@@ -473,9 +475,9 @@ function ReportTab({ metrics, creatives, campaigns }: {
   return (
     <div className="space-y-4">
       <div className="grid grid-cols-3 gap-3 text-center">
-        <div className="rounded-lg border bg-card p-3"><p className="text-xs uppercase text-muted-foreground">Impressões</p><p className="text-2xl font-bold">{totalImp}</p></div>
-        <div className="rounded-lg border bg-card p-3"><p className="text-xs uppercase text-muted-foreground">Cliques</p><p className="text-2xl font-bold">{totalClk}</p></div>
-        <div className="rounded-lg border bg-card p-3"><p className="text-xs uppercase text-muted-foreground">CTR</p><p className="text-2xl font-bold">{totalImp?((totalClk/totalImp)*100).toFixed(2):"0.00"}%</p></div>
+        <div className="rounded-2xl border border-slate-200 bg-white shadow-sm p-3"><p className="text-xs uppercase text-muted-foreground">Impressões</p><p className="text-2xl font-bold">{totalImp}</p></div>
+        <div className="rounded-2xl border border-slate-200 bg-white shadow-sm p-3"><p className="text-xs uppercase text-muted-foreground">Cliques</p><p className="text-2xl font-bold">{totalClk}</p></div>
+        <div className="rounded-2xl border border-slate-200 bg-white shadow-sm p-3"><p className="text-xs uppercase text-muted-foreground">CTR</p><p className="text-2xl font-bold">{totalImp?((totalClk/totalImp)*100).toFixed(2):"0.00"}%</p></div>
       </div>
       <table className="w-full text-sm">
         <thead className="bg-muted text-xs uppercase text-muted-foreground">

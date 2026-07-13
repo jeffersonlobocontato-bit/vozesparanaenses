@@ -6,6 +6,7 @@ import { ArticleImageEditor } from "@/components/admin/ArticleImageEditor";
 import { ArticleEditor } from "@/components/admin/ArticleEditor";
 import { displayRegionName } from "@/lib/region-labels";
 import { ManualWriterBox } from "@/components/admin/ManualWriterBox";
+import { PageHeader, primaryBtnClass, tabPillsWrapClass, tabPillClass } from "@/components/admin/ui";
 
 export const Route = createFileRoute("/admin/")({
   component: AdminQueue,
@@ -167,34 +168,39 @@ function AdminQueue() {
   }
 
   return (
-    <div className="space-y-4">
-      <div className="flex flex-wrap items-center justify-between gap-2">
-        <h1 className="text-2xl font-bold">Fila editorial</h1>
-        <div className="flex flex-wrap items-center gap-2">
-          <button onClick={runPipeline} disabled={pipelineBusy}
-            className="rounded bg-[#0A2540] px-3 py-1.5 text-xs font-semibold text-white hover:bg-[#0d2f52] disabled:opacity-60">
-            {pipelineBusy ? "Rodando pipeline…" : "▶ Rodar pipeline agora"}
-          </button>
-          <div className="flex gap-1 rounded-md border bg-muted p-1 text-sm">
-          {STATUS_TABS.map((s) => (
-            <button key={s} onClick={() => setTab(s)}
-              className={`rounded px-3 py-1 capitalize ${tab === s ? "bg-white shadow-sm font-semibold" : "text-muted-foreground hover:text-foreground"}`}>
-              {s}
+    <div className="space-y-6">
+      <PageHeader
+        eyebrow="Fila"
+        title="Fila editorial"
+        subtitle="Rascunhos, aprovações e matérias publicadas."
+        actions={
+          <>
+            <button onClick={runPipeline} disabled={pipelineBusy} className={primaryBtnClass()}>
+              {pipelineBusy ? "Rodando pipeline…" : "▶ Rodar pipeline agora"}
             </button>
-          ))}
-          </div>
-        </div>
-      </div>
+            <div className={tabPillsWrapClass()}>
+              {STATUS_TABS.map((s) => (
+                <button key={s} onClick={() => setTab(s)} className={`capitalize ${tabPillClass(tab === s)}`}>
+                  {s}
+                </button>
+              ))}
+            </div>
+          </>
+        }
+      />
 
       {pipelineLog.length > 0 && (
-        <pre className="max-h-48 overflow-auto rounded border bg-muted p-2 text-[11px] leading-tight">
-          {pipelineLog.join("\n")}
-        </pre>
+        <div className="rounded-2xl border border-slate-200 bg-slate-950 p-4 shadow-sm">
+          <div className="mb-2 text-xs font-semibold text-emerald-400">Log do pipeline</div>
+          <pre className="max-h-48 overflow-auto text-[11px] leading-tight text-emerald-200/90">
+{pipelineLog.join("\n")}
+          </pre>
+        </div>
       )}
 
       <ManualWriterBox onCreated={load} />
 
-      <section className="rounded-lg border-2 border-amber-400 bg-amber-50/70 p-4">
+      <section className="rounded-2xl border-2 border-amber-300 bg-amber-50/70 p-4 shadow-sm">
         <div className="mb-2 flex items-center justify-between">
           <h2 className="text-sm font-bold text-amber-900">📌 Matérias fixadas ({pinned?.length ?? 0})</h2>
           <span className="text-[11px] text-amber-800">Publicadas em destaque na home</span>
@@ -238,13 +244,13 @@ function AdminQueue() {
         )}
       </section>
 
-      {err && <p className="rounded border border-red-200 bg-red-50 p-3 text-sm text-red-700">{err}</p>}
-      {!items && !err && <p className="text-sm text-muted-foreground">Carregando…</p>}
-      {items && items.length === 0 && <p className="text-sm text-muted-foreground">Nada em «{tab}».</p>}
+      {err && <p className="rounded-xl border border-red-200 bg-red-50 p-3 text-sm text-red-700">{err}</p>}
+      {!items && !err && <p className="text-sm text-slate-500">Carregando…</p>}
+      {items && items.length === 0 && <p className="text-sm text-slate-500">Nada em «{tab}».</p>}
 
       <ul className="space-y-3">
         {items?.map((it) => (
-          <li key={it.id} className="rounded-lg border bg-card p-4">
+          <li key={it.id} className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
             <div className="mb-1 flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
               {it.regiao && <span className="rounded bg-[#0A2540] px-2 py-0.5 font-semibold text-white">{displayRegionName(it.regiao.slug, it.regiao.nome)}</span>}
               {it.categoria && <span className="rounded bg-[#0066CC] px-2 py-0.5 font-semibold text-white">{it.categoria.nome}</span>}
