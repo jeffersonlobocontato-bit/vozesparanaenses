@@ -356,6 +356,7 @@ function PortalHome({
             <HeroCard article={hero} />
           </div>
           <div className="col-span-12 lg:col-span-4 flex flex-col gap-6">
+            <Eleicoes2026Card article={eleicoes2026Top} />
             {[0, 1, 2, 3].map((i) => {
               const a = side[i];
               const fb = SIDE_FALLBACK[i];
