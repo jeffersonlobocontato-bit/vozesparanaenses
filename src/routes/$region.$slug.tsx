@@ -86,7 +86,8 @@ export const Route = createFileRoute("/$region/$slug")({
     const cidade = a.cidade_principal ?? null;
     const cidadeSlugStr = cidade ? cidadeSlug(cidade) : null;
     const coords = getCityCoords(cidadeSlugStr);
-    const url = `/${regionSlug}/${a.slug}`;
+    const SITE_URL = "https://vozesparanaenses.com.br";
+    const url = `${SITE_URL}/${regionSlug}/${a.slug}`;
     const keywords = [
       cidade,
       regionName,
@@ -228,9 +229,9 @@ export const Route = createFileRoute("/$region/$slug")({
       contentLocation,
       spatialCoverage: spatialCoverage.length > 0 ? spatialCoverage : undefined,
       about: contentLocation ? [contentLocation] : undefined,
-      correctionsPolicy: "/correcoes",
-      diversityPolicy: "/politica-editorial",
-      ethicsPolicy: "/politica-editorial",
+      correctionsPolicy: `${SITE_URL}/correcoes`,
+      diversityPolicy: `${SITE_URL}/politica-editorial`,
+      ethicsPolicy: `${SITE_URL}/politica-editorial`,
       speakable: {
         "@type": "SpeakableSpecification",
         cssSelector: ["h1", ".article-lead", ".article-tldr"],
@@ -241,9 +242,9 @@ export const Route = createFileRoute("/$region/$slug")({
       "@context": "https://schema.org",
       "@type": "BreadcrumbList",
       itemListElement: [
-        { "@type": "ListItem", position: 1, name: "Vozes Paranaenses", item: "/" },
+        { "@type": "ListItem", position: 1, name: "Vozes Paranaenses", item: SITE_URL },
         ...(regionName
-          ? [{ "@type": "ListItem", position: 2, name: regionName, item: `/${regionSlug}` }]
+          ? [{ "@type": "ListItem", position: 2, name: regionName, item: `${SITE_URL}/${regionSlug}` }]
           : []),
         ...(cidade
           ? [
@@ -251,7 +252,7 @@ export const Route = createFileRoute("/$region/$slug")({
                 "@type": "ListItem",
                 position: 3,
                 name: cidade,
-                item: `/${regionSlug}/cidade/${cidadeSlug(cidade)}`,
+                item: `${SITE_URL}/${regionSlug}/cidade/${cidadeSlug(cidade)}`,
               },
               { "@type": "ListItem", position: 4, name: a.title, item: url },
             ]
