@@ -212,6 +212,40 @@ function CampaignsTab({ campaigns, advertisers, reload, onToast }: {
   const [form, setForm] = useState({
     advertiser_id: "", nome: "", data_inicio: today, data_fim: in30, editorias: "", observacoes: "",
   });
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [edit, setEdit] = useState<{
+    advertiser_id: string; nome: string; data_inicio: string; data_fim: string;
+    editorias: string; observacoes: string;
+  }>({ advertiser_id: "", nome: "", data_inicio: "", data_fim: "", editorias: "", observacoes: "" });
+
+  function startEdit(c: Campaign) {
+    setEditingId(c.id);
+    setEdit({
+      advertiser_id: c.advertiser_id,
+      nome: c.nome,
+      data_inicio: c.data_inicio,
+      data_fim: c.data_fim,
+      editorias: (c.editorias ?? []).join(", "),
+      observacoes: c.observacoes ?? "",
+    });
+  }
+  async function saveEdit(c: Campaign) {
+    if (!edit.nome.trim() || !edit.advertiser_id) return onToast("Preencha anunciante e nome.");
+    const sb = await getExternalBrowser();
+    const { error } = await sb.from("ad_campaigns").update({
+      advertiser_id: edit.advertiser_id,
+      nome: edit.nome.trim(),
+      data_inicio: edit.data_inicio,
+      data_fim: edit.data_fim,
+      editorias: edit.editorias.split(",").map((s) => s.trim()).filter(Boolean),
+      observacoes: edit.observacoes || null,
+    }).eq("id", c.id);
+    if (error) return onToast("Erro: " + error.message);
+    setEditingId(null);
+    onToast("Campanha atualizada.");
+    reload();
+  }
+
   async function submit(e: React.FormEvent) {
     e.preventDefault();
     if (!form.advertiser_id) return onToast("Selecione um anunciante.");
@@ -260,6 +294,35 @@ function CampaignsTab({ campaigns, advertisers, reload, onToast }: {
         <tbody>
           {campaigns.map((c) => {
             const adv = advertisers.find((a) => a.id === c.advertiser_id);
+            if (editingId === c.id) {
+              return (
+                <tr key={c.id} className="border-t bg-slate-50">
+                  <td className="px-2 py-1">
+                    <input value={edit.nome} onChange={(e)=>setEdit({...edit,nome:e.target.value})} className="w-full rounded border px-2 py-1 text-sm" />
+                  </td>
+                  <td className="px-2 py-1">
+                    <select value={edit.advertiser_id} onChange={(e)=>setEdit({...edit,advertiser_id:e.target.value})} className="w-full rounded border px-1 py-0.5 text-xs">
+                      {advertisers.map((a) => <option key={a.id} value={a.id}>{a.nome}</option>)}
+                    </select>
+                  </td>
+                  <td className="px-2 py-1">
+                    <div className="flex flex-col gap-1">
+                      <input type="date" value={edit.data_inicio} onChange={(e)=>setEdit({...edit,data_inicio:e.target.value})} className="rounded border px-1 py-0.5 text-xs" />
+                      <input type="date" value={edit.data_fim} onChange={(e)=>setEdit({...edit,data_fim:e.target.value})} className="rounded border px-1 py-0.5 text-xs" />
+                    </div>
+                  </td>
+                  <td className="px-2 py-1">
+                    <input value={edit.editorias} onChange={(e)=>setEdit({...edit,editorias:e.target.value})} placeholder="slugs, vírgula" className="w-full rounded border px-1 py-0.5 text-xs" />
+                    <input value={edit.observacoes} onChange={(e)=>setEdit({...edit,observacoes:e.target.value})} placeholder="observações" className="mt-1 w-full rounded border px-1 py-0.5 text-xs" />
+                  </td>
+                  <td className="px-2 py-1 text-xs text-muted-foreground">{c.status}</td>
+                  <td className="px-2 py-1 text-right">
+                    <button onClick={()=>saveEdit(c)} className="mr-2 text-xs font-semibold text-emerald-700 hover:underline">salvar</button>
+                    <button onClick={()=>setEditingId(null)} className="text-xs text-slate-500 hover:underline">cancelar</button>
+                  </td>
+                </tr>
+              );
+            }
             return (
               <tr key={c.id} className="border-t">
                 <td className="px-2 py-1">{c.nome}</td>
@@ -272,7 +335,10 @@ function CampaignsTab({ campaigns, advertisers, reload, onToast }: {
                     <option value="pausada">pausada</option><option value="encerrada">encerrada</option>
                   </select>
                 </td>
-                <td className="px-2 py-1 text-right"><button onClick={()=>remove(c)} className="text-xs text-red-600 hover:underline">excluir</button></td>
+                <td className="px-2 py-1 text-right">
+                  <button onClick={()=>startEdit(c)} className="mr-2 text-xs text-[#0066CC] hover:underline">editar</button>
+                  <button onClick={()=>remove(c)} className="text-xs text-red-600 hover:underline">excluir</button>
+                </td>
               </tr>
             );
           })}
