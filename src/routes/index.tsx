@@ -342,12 +342,9 @@ function PortalHome({
       <LocationBar />
 
       <main className="mx-auto max-w-7xl px-4 py-6">
-        {/* Topo — CTA WhatsApp + Card fixo Eleições 2026 */}
-        <div className="mb-6 grid gap-4 md:grid-cols-[auto,1fr] md:items-stretch">
-          <div className="flex items-center">
-            <WhatsAppCTA variant="button" />
-          </div>
-          <Eleicoes2026Card article={eleicoes2026Top} />
+        {/* CTA WhatsApp no topo */}
+        <div className="mb-6 flex justify-start">
+          <WhatsAppCTA variant="button" />
         </div>
 
         {/* Publicidade — Super Banner topo */}
