@@ -73,33 +73,29 @@ Deno.serve(async (req) => {
   }
 
   // 2. Garantir uma "fonte manual" (uma linha por editor humano — reusada)
-  const fonteSlug = "manual-editor";
   let fonteId: string | null = null;
   {
-    const { data: existing } = await sb.from("fontes").select("id").eq("slug", fonteSlug).maybeSingle();
+    const { data: existing } = await sb
+      .from("fontes")
+      .select("id")
+      .eq("nome", "Redator manual")
+      .maybeSingle();
     if (existing?.id) {
       fonteId = existing.id as string;
     } else {
-      const { data: created, error: fErr } = await sb.from("fontes").insert({
-        slug: fonteSlug,
-        nome: "Redator manual",
-        url_base: "manual://editor",
-        regiao_id: body.regiao_id,
-        ativa: false,
-      }).select("id").single();
-      if (fErr) {
-        // Tenta sem "ativa" (coluna pode não existir em ambientes antigos)
-        const { data: created2, error: fErr2 } = await sb.from("fontes").insert({
-          slug: fonteSlug,
+      const { data: created, error: fErr } = await sb
+        .from("fontes")
+        .insert({
           nome: "Redator manual",
           url_base: "manual://editor",
           regiao_id: body.regiao_id,
-        }).select("id").single();
-        if (fErr2) return json({ error: "fonte_manual_failed", detail: fErr2.message }, 500);
-        fonteId = created2!.id as string;
-      } else {
-        fonteId = created!.id as string;
-      }
+          ativo: false,
+          frequencia_horas: 9999,
+        })
+        .select("id")
+        .single();
+      if (fErr) return json({ error: "fonte_manual_failed", detail: fErr.message }, 500);
+      fonteId = created!.id as string;
     }
   }
 
