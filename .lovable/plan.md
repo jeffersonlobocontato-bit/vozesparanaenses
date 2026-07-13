@@ -1,68 +1,35 @@
-# Método DEL nos agentes redatores — versão ajustada
+# Redator manual na Fila editorial
 
-## Impacto (respondendo sua pergunta anterior)
+Adicionar, no topo de `/admin` (módulo Fila), uma caixa "Redator manual" com:
+- Seletor de **agente redator** (carregado de `agentes_redatores` + `editorial_categories`).
+- Seletor de **região** (padrão: Estado / Paraná).
+- Campo **URL da notícia-fonte**.
+- Campo opcional **observações para o redator** (ex.: "focar no impacto em Maringá").
+- Botão **Gerar rascunho**.
 
-- **Custo por matéria**: +15% a +25% no `generate-article` (prompt cresce de ~1.500 → ~4.500 tokens de input; output não muda). Camadas vazias não entram no prompt, então enquanto o editor não preencher, o custo fica **igual ao atual**.
-- **Automação**: intocada. Scraping → cluster → extract-facts → generate-article → auto-publica (score ≥ 3.5, sem foto real) → cron / painel / fila / pinagem / RSS: tudo igual. Só muda **como o prompt é montado dentro** do `generate-article`.
+Ao enviar, o sistema busca o conteúdo da URL, extrai os fatos e gera a matéria usando o agente escolhido — sem depender de scraping agendado, clusters ou pipeline. O rascunho aparece na própria Fila logo abaixo, pronto para editar/publicar como qualquer outra matéria.
 
-## O que será implementado
+## Como funciona por baixo
 
-### 1. `supabase-external/026_agentes_del.sql`
+1. **Nova edge function `manual-article`** (`supabase/functions/manual-article/index.ts`):
+   - Recebe `{ url, categoria_id, regiao_id, observacoes? }`.
+   - Faz scrape da URL via **Firecrawl** (`FIRECRAWL_API_KEY` já configurado — mesma chamada usada em `scrape-source`), pegando `markdown`, `title`, `ogImage` e `author`.
+   - Cria uma linha em `raw_articles` marcada como `origem = 'manual'` e um `article_clusters` de 1 item com `categoria_id` + `regiao_id` escolhidos e status `fatos_extraidos`.
+   - Chama a lógica de `extract-facts` e depois `generate-article` reutilizando o pipeline atual (mesmos prompts DEL + 5W1H, mesmo agente por categoria). Se `observacoes` for preenchido, é anexado como bloco `INSTRUÇÕES ADICIONAIS DO EDITOR` ao prompt do redator.
+   - Copia a imagem original (og:image) para `imagem_original_url` — o editor decide depois se usa a original ou gera com IA (fluxo já existente).
+   - Retorna `{ generated_article_id }`.
 
-Adiciona em `agentes_redatores` 4 colunas JSONB (nullable, default `{}`):
+2. **UI em `src/routes/admin.index.tsx`**:
+   - Componente `ManualWriterBox` acima da lista da fila.
+   - `useQuery` carrega agentes ativos agrupados por editoria + lista de regiões.
+   - Ao submeter, mostra spinner "Lendo fonte…" → "Extraindo fatos…" → "Redigindo com [Agente]…" e, ao concluir, invalida a query da fila (rascunho aparece automaticamente) e abre o editor da matéria criada.
+   - Validação: URL http(s) obrigatória, agente obrigatório.
 
-- `dna_sintatico` — arquitetura (padrão de título, ordem dos blocos, tamanho médio, ritmo, uso de listas/intertítulos)
-- `dna_semantico` — eixo narrativo, 10 perguntas obrigatórias, ênfases
-- `dna_lexical` — palavras preferidas / proibidas, verbos, expressões, tom, formalidade
-- `matriz_editorial` — objetivo, público, fontes prioritárias / proibidas, CTA
+3. **Segurança / limites**:
+   - Rate-limit simples: bloquear a mesma URL em menos de 60s (evita duplo clique).
+   - Marcar `raw_articles.origem = 'manual'` para o painel de analytics distinguir matérias manuais das do pipeline.
 
-Cria tabela `memoria_editorial` (singleton) com missão, valores, manual de estilo, glossário, siglas, pessoas, instituições — em JSONB editáveis. Seeded com identidade do Vozes + 14 siglas do PR (Sesa, Seed-PR, IAT, Deral, Ipardes, Copel, Sanepar, DER-PR, Alep, TCE-PR, MP-PR, TJ-PR, UBS, PSS) + regras do Método DEL.
-
-GRANTs + RLS herdando as policies de `025` (admin gerencia, editor lê).
-
-Retrocompatível: `instrucoes_base` e `exemplo_texto` continuam funcionando como override.
-
-### 2. `src/routes/admin.agentes.tsx` — reescrito com abas
-
-Editor de cada editoria ganha 6 abas:
-- **Sintático** — campos estruturados (padrão de título, textarea de ordem dos blocos, sliders de tamanho, checkboxes de ritmo)
-- **Semântico** — radio de eixo narrativo, textarea das perguntas obrigatórias, chips de ênfases
-- **Lexical** — chips editáveis (preferidas / proibidas / verbos / expressões), radio de tom
-- **Matriz** — objetivo, público, fontes prioritárias, fontes proibidas, CTA
-- **Prompt livre** — o `instrucoes_base` atual (override total quando preenchido)
-- **Exemplo** — mantém `exemplo_texto`
-
-Sem drag-and-drop, sem preview de prompt gerado nesta fase (economiza tempo — dá pra adicionar depois).
-
-### 3. `src/routes/admin.memoria-editorial.tsx` — novo
-
-Editor da memória global (missão, valores, manual, glossário, siglas, pessoas, instituições) — cada JSONB vira uma lista editável com botão "+ adicionar".
-
-### 4. `src/routes/admin.tsx`
-
-Adiciona link **"Memória"** na nav do admin (entre "Agentes IA" e "Senha").
-
-### 5. `supabase/functions/generate-article/index.ts`
-
-Substitui a concatenação atual por `buildDelPrompt(agente, memoria)` que serializa em ordem:
-
-```
-[Memória Editorial global (missão + siglas + glossário)]
-[Matriz Editorial da editoria]
-[DNA Sintático]
-[DNA Semântico]
-[DNA Lexical]
-[Prompt livre / instrucoes_base] ← override
-[Exemplo de lide]
-[BASE_SYSTEM_PROMPT + Prompt Mental (10 perguntas do documento)]
-```
-
-Camadas vazias são omitidas — economiza tokens e mantém o comportamento atual quando o editor ainda não preencheu nada.
-
-## Fora de escopo
-
-Cadeia multi-agente (Editor-Chefe → Fact Checker → SEO → Títulos → Revisor). Multiplica custo por ~5x — fica registrado como próximo passo.
-
-## Ação manual sua depois do build
-
-Rodar `supabase-external/026_agentes_del.sql` no SQL editor do backend externo.
+## Observações
+- Reaproveita 100% dos prompts DEL + memória editorial + agentes por categoria já existentes; nenhum novo prompt de IA.
+- Não altera o pipeline automático nem o painel de clusters.
+- Não requer nova migration (usa tabelas atuais). Se quisermos rastrear "origem manual" formalmente, posso adicionar depois uma coluna `origem text default 'pipeline'` em `raw_articles` — avise se quer já incluir.
