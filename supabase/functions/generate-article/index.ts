@@ -20,7 +20,7 @@ const cors = {
 };
 
 const AI_URL = "https://ai.gateway.lovable.dev/v1/chat/completions";
-const MODEL = "google/gemini-2.5-pro";
+const MODEL = "google/gemini-2.5-flash";
 
 const BASE_SYSTEM_PROMPT = `Você é editor-chefe do portal regional "Vozes Paranaenses".
 Sua tarefa: a partir de FATOS JÁ APURADOS (fornecidos como JSON, não como
@@ -196,6 +196,8 @@ Deno.serve(async (req) => {
     },
     body: JSON.stringify({
       model: MODEL,
+      temperature: 0.2,
+      max_tokens: 2200,
       messages: [
         { role: "system", content: systemPrompt },
         { role: "user", content: userPrompt },
@@ -212,6 +214,10 @@ Deno.serve(async (req) => {
   }
 
   const aiJson = await aiRes.json();
+  const choiceError = aiJson?.choices?.[0]?.error;
+  if (choiceError) {
+    return json({ error: "ai_choice_error", detail: choiceError?.message ?? "Modelo encerrou sem JSON." }, 502);
+  }
   const content = aiJson?.choices?.[0]?.message?.content;
   if (!content) return json({ error: "ai_empty_response" }, 502);
 
