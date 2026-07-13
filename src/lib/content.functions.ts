@@ -371,6 +371,38 @@ export const listAllCityLandings = createServerFn({ method: "GET" }).handler(
   },
 );
 
+/** Combinações região×categoria com pelo menos 1 matéria publicada — usado
+ * pelo sitemap.xml, pra não listar (nem faltar) página de editoria vazia. */
+export const listActiveRegionCategoryPairs = createServerFn({ method: "GET" }).handler(
+  async (): Promise<{ regionSlug: string; categoriaSlug: string; lastmod: string | null }[]> => {
+    const { getExternalSupabase } = await import("./external-supabase.server");
+    const sb = getExternalSupabase();
+    const { data, error } = await sb
+      .from("generated_articles")
+      .select("publicado_em, regiao:regioes(slug), categoria:editorial_categories(slug)")
+      .eq("status", "publicado")
+      .order("publicado_em", { ascending: false })
+      .limit(2000);
+    if (error) {
+      if (isMissingSchema(error)) return [];
+      throw new Error(error.message);
+    }
+    const acc = new Map<string, { regionSlug: string; categoriaSlug: string; lastmod: string | null }>();
+    for (const r of (data ?? []) as unknown as {
+      publicado_em: string | null;
+      regiao: { slug: string } | { slug: string }[] | null;
+      categoria: { slug: string } | { slug: string }[] | null;
+    }[]) {
+      const regionSlug = Array.isArray(r.regiao) ? r.regiao[0]?.slug : r.regiao?.slug;
+      const categoriaSlug = Array.isArray(r.categoria) ? r.categoria[0]?.slug : r.categoria?.slug;
+      if (!regionSlug || !categoriaSlug) continue;
+      const key = `${regionSlug}/${categoriaSlug}`;
+      if (!acc.has(key)) acc.set(key, { regionSlug, categoriaSlug, lastmod: r.publicado_em });
+    }
+    return [...acc.values()];
+  },
+);
+
 /** Lista as cidades cobertas em uma região com contagem de matérias publicadas. */
 export const listCitiesInRegion = createServerFn({ method: "GET" })
   .inputValidator((d: { regionSlug: string; limit?: number }) => ({

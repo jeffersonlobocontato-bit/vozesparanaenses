@@ -151,12 +151,12 @@ function RegionPage() {
                     >
                       {region.name}
                     </div>
-                    <h2
+                    <h1
                       className="mt-2 text-4xl font-black leading-[1.05] md:text-5xl lg:text-6xl"
                       style={{ color: primary }}
                     >
                       {hero.title}
-                    </h2>
+                    </h1>
                     {hero.summary && (
                       <p className="mt-3 max-w-3xl text-base leading-relaxed text-slate-600 md:text-lg">
                         {hero.summary}

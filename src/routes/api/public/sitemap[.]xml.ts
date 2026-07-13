@@ -4,6 +4,7 @@ import {
   listLatestArticles,
   listAllCityLandings,
   listAuthors,
+  listActiveRegionCategoryPairs,
 } from "@/lib/content.functions";
 
 export const Route = createFileRoute("/api/public/sitemap.xml")({
@@ -11,11 +12,12 @@ export const Route = createFileRoute("/api/public/sitemap.xml")({
     handlers: {
       GET: async ({ request }) => {
         const origin = new URL(request.url).origin;
-        const [regions, articles, cities, authors] = await Promise.all([
+        const [regions, articles, cities, authors, categoryPairs] = await Promise.all([
           listRegions().catch(() => []),
           listLatestArticles({ data: { limit: 1000 } }).catch(() => []),
           listAllCityLandings().catch(() => []),
           listAuthors().catch(() => []),
+          listActiveRegionCategoryPairs().catch(() => []),
         ]);
 
         const urls: { loc: string; lastmod?: string; priority?: string }[] = [
@@ -38,6 +40,14 @@ export const Route = createFileRoute("/api/public/sitemap.xml")({
             loc: `${origin}/${c.regionSlug}/cidade/${c.citySlug}`,
             lastmod: c.lastmod ?? undefined,
             priority: "0.7",
+          });
+        }
+
+        for (const cp of categoryPairs) {
+          urls.push({
+            loc: `${origin}/${cp.regionSlug}/editoria/${cp.categoriaSlug}`,
+            lastmod: cp.lastmod ?? undefined,
+            priority: "0.6",
           });
         }
 
