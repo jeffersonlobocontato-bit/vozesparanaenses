@@ -8,6 +8,7 @@ import {
   listArticlesByCategoryGlobal,
   listArticlesWithoutImage,
   listMostReadArticles,
+  cidadeSlug,
   type ArticleListItem,
   type RankedArticle,
   type Region,
@@ -18,6 +19,7 @@ import { SiteHeader, SiteFooter } from "@/components/SiteHeader";
 import { AdSlot } from "@/components/AdSlot";
 import { AdsenseSlot } from "@/components/AdsenseSlot";
 import { WhatsAppCTA } from "@/components/WhatsAppCTA";
+import { WeatherWidget } from "@/components/WeatherWidget";
 import { arrangePinnedSlots } from "@/lib/pinned-layout";
 
 const regionsQO = queryOptions({
@@ -127,6 +129,7 @@ function Home() {
       vaptVupt={vaptVupt}
       mostRead={mostRead}
       eleicoes2026Top={eleicoes2026Top[0]}
+      loc={loc}
     />
   );
 }
@@ -278,12 +281,14 @@ function PortalHome({
   vaptVupt,
   mostRead,
   eleicoes2026Top,
+  loc,
 }: {
   regions: Region[];
   articles: RankedArticle[];
   vaptVupt: ArticleListItem[];
   mostRead: ArticleListItem[];
   eleicoes2026Top?: ArticleListItem;
+  loc?: { cidade: string | null; regiaoSlug: string | null };
 }) {
   const REGIONS_FALLBACK: Region[] = [
     { id: "fb-metropolitana", slug: "metropolitana", name: "Metropolitana" },
@@ -486,6 +491,10 @@ function PortalHome({
           </div>
 
           <aside className="space-y-6">
+            <WeatherWidget
+              citySlug={loc?.cidade ? cidadeSlug(loc.cidade) : undefined}
+              cidadeNome={loc?.cidade ?? undefined}
+            />
             <div className="bg-white p-5 rounded-lg border border-slate-200">
               <h5 className="text-sm font-black uppercase text-primary border-b border-slate-100 pb-2 mb-4 tracking-wider">
                 Mais Lidas

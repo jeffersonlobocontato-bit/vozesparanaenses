@@ -3,8 +3,10 @@ import { queryOptions, useSuspenseQuery } from "@tanstack/react-query";
 import {
   getRegionBySlug,
   listArticlesByRegion,
+  cidadeSlug,
 } from "@/lib/content.functions";
 import { SiteHeader, SiteFooter } from "@/components/SiteHeader";
+import { WeatherWidget } from "@/components/WeatherWidget";
 import { arrangePinnedSlots } from "@/lib/pinned-layout";
 
 const regionQO = (slug: string) =>
@@ -110,6 +112,10 @@ function RegionPage() {
             {region.description ?? `${region.main_city} e cidades vizinhas`}
           </span>
         </div>
+      </div>
+
+      <div className="mx-auto max-w-7xl px-4 pt-6">
+        <WeatherWidget citySlug={cidadeSlug(region.main_city)} cidadeNome={region.main_city} />
       </div>
 
       {articles.length === 0 ? (
