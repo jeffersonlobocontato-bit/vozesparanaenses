@@ -55,7 +55,7 @@ padrão editorial do veículo?
 
 Retorne APENAS JSON válido, sem markdown, no schema fornecido.`;
 
-type Payload = { cluster_id?: string; extracted_facts_id?: string };
+type Payload = { cluster_id?: string; extracted_facts_id?: string; extra_instructions?: string };
 
 type DnaSintatico = Record<string, string | undefined>;
 type DnaSemantico = Record<string, string | undefined>;
@@ -177,6 +177,12 @@ Deno.serve(async (req) => {
       }, memoria as MemoriaEditorial | null);
       if (del.trim()) systemPrompt = `${del}\n\n---\n\n${BASE_SYSTEM_PROMPT}`;
     }
+  }
+
+  // Instruções extras do editor (usado pelo fluxo manual-article — ex.: "focar no impacto em Maringá")
+  const extra = (body.extra_instructions ?? "").trim();
+  if (extra) {
+    systemPrompt = `${systemPrompt}\n\n---\n\n## INSTRUÇÕES ADICIONAIS DO EDITOR (prioridade máxima sobre estilo, sem inventar fatos)\n${extra}`;
   }
 
   // 2. Chamar IA — só para redação (Método DEL), a partir dos fatos já prontos
