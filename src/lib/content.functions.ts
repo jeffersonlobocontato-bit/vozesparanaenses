@@ -888,9 +888,10 @@ export const listArticlesByCategory = createServerFn({ method: "GET" })
 
 /** Lista matérias por editoria em TODAS as regiões (usado por Nacional / Internacional). */
 export const listArticlesByCategoryGlobal = createServerFn({ method: "GET" })
-  .inputValidator((d: { categorySlug: string; limit?: number }) => ({
+  .inputValidator((d: { categorySlug: string; limit?: number; requireImage?: boolean }) => ({
     categorySlug: d.categorySlug,
     limit: d.limit ?? 30,
+    requireImage: d.requireImage ?? true,
   }))
   .handler(async ({ data }): Promise<ArticleListItem[]> => {
     const { getExternalSupabase } = await import("./external-supabase.server");
@@ -901,12 +902,13 @@ export const listArticlesByCategoryGlobal = createServerFn({ method: "GET" })
       .eq("slug", data.categorySlug)
       .maybeSingle();
     if (!category) return [];
-    const { data: rows, error } = await sb
+    let q = sb
       .from("generated_articles")
       .select(MATERIA_LIST_COLS)
       .eq("status", "publicado")
-      .eq("categoria_id", (category as { id: string }).id)
-      .not("imagem_capa_url", "is", null)
+      .eq("categoria_id", (category as { id: string }).id);
+    if (data.requireImage) q = q.not("imagem_capa_url", "is", null);
+    const { data: rows, error } = await q
       .order("publicado_em", { ascending: false })
       .limit(data.limit);
     if (error) {
