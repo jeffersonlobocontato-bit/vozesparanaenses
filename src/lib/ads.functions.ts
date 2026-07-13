@@ -62,11 +62,13 @@ export const pickAd = createServerFn({ method: "POST" })
         .in("campaign_id", campaignIds);
       if (!creatives || creatives.length === 0) continue;
 
-      // Filtro por formato do slot (null/undefined no criativo = serve em qualquer formato)
+      // Filtro por formato do slot: quando o slot informa tamanho, o criativo
+      // precisa estar vinculado exatamente ao mesmo formato. Isso evita que
+      // uma peça 300x250 apareça em leaderboard, ou vice-versa.
       const byFormat = creatives.filter((c) => {
         const f = (c as { formato?: string | null }).formato ?? null;
-        if (!f) return true;
-        if (!data.size) return true;
+        if (!data.size) return !f;
+        if (!f) return false;
         return f === data.size;
       });
       if (!byFormat.length) continue;
