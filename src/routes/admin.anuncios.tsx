@@ -2,6 +2,12 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useCallback, useEffect, useState } from "react";
 import { getExternalBrowser } from "@/lib/external-supabase-browser";
 import { PageHeader, refreshBtnClass, tabPillsWrapClass, tabPillClass } from "@/components/admin/ui";
+import {
+  AD_SLOTS,
+  AD_SLOT_LIST,
+  needsMobileVariant,
+  type AdSlotName,
+} from "@/lib/ad-slots";
 
 export const Route = createFileRoute("/admin/anuncios")({
   component: AdminAnuncios,
@@ -40,6 +46,8 @@ type Creative = {
   peso: number;
   aprovado: boolean;
   formato: string | null;
+  slot: string | null;
+  variante: string | null;
 };
 
 type Target = {
@@ -357,37 +365,79 @@ function CampaignsTab({ campaigns, advertisers, reload, onToast }: {
 function CreativesTab({ creatives, campaigns, reload, onToast }: {
   creatives: Creative[]; campaigns: Campaign[]; reload: () => void; onToast: (s: string) => void;
 }) {
+  // Formulário unificado: o operador escolhe UM espaço do portal e sobe
+  // uma peça pra desktop e (se o espaço exigir formato diferente) outra
+  // pra mobile. As duas viram registros distintos em ad_creatives, cada
+  // um com (slot, variante) próprios — o pickAd escolhe pela viewport.
   const [form, setForm] = useState({
-    campaign_id: "", headline: "", cta_texto: "Saiba mais", destino_url: "", peso: 1, formato: "",
+    campaign_id: "",
+    slot: "" as "" | AdSlotName,
+    headline: "",
+    cta_texto: "Saiba mais",
+    destino_url: "",
+    peso: 1,
   });
-  const [file, setFile] = useState<File | null>(null);
+  const [fileDesktop, setFileDesktop] = useState<File | null>(null);
+  const [fileMobile, setFileMobile] = useState<File | null>(null);
   const [uploading, setUploading] = useState(false);
+
+  const slotDef = form.slot ? AD_SLOTS[form.slot] : null;
+  const requiresMobile = form.slot ? needsMobileVariant(form.slot) : false;
+
+  async function uploadOne(
+    sb: Awaited<ReturnType<typeof getExternalBrowser>>,
+    file: File,
+    variante: "desktop" | "mobile",
+    slot: AdSlotName,
+    formato: string,
+  ) {
+    const ext = file.name.split(".").pop()?.toLowerCase() || "jpg";
+    const path = `${form.campaign_id}/${crypto.randomUUID()}.${ext}`;
+    const up = await sb.storage
+      .from("ad-creatives")
+      .upload(path, file, { upsert: false, contentType: file.type });
+    if (up.error) throw up.error;
+    const { data: pub } = sb.storage.from("ad-creatives").getPublicUrl(path);
+    const { error } = await sb.from("ad_creatives").insert({
+      campaign_id: form.campaign_id,
+      imagem_url: pub.publicUrl,
+      imagem_storage_path: path,
+      headline: form.headline,
+      cta_texto: form.cta_texto,
+      destino_url: form.destino_url,
+      peso: form.peso,
+      formato,
+      slot,
+      variante,
+    });
+    if (error) throw error;
+  }
 
   async function submit(e: React.FormEvent) {
     e.preventDefault();
-    if (!form.campaign_id || !file || !form.formato) return onToast("Selecione campanha, formato e imagem.");
+    if (!form.campaign_id || !form.slot) return onToast("Selecione campanha e espaço.");
+    if (!fileDesktop) return onToast("Envie a arte desktop.");
+    if (requiresMobile && !fileMobile) {
+      return onToast(`Este espaço exige também a arte mobile (${slotDef!.mobile}).`);
+    }
     setUploading(true);
     try {
       const sb = await getExternalBrowser();
-      const ext = file.name.split(".").pop()?.toLowerCase() || "jpg";
-      const path = `${form.campaign_id}/${crypto.randomUUID()}.${ext}`;
-      const up = await sb.storage.from("ad-creatives").upload(path, file, { upsert: false, contentType: file.type });
-      if (up.error) throw up.error;
-      const { data: pub } = sb.storage.from("ad-creatives").getPublicUrl(path);
-      const { error } = await sb.from("ad_creatives").insert({
-        campaign_id: form.campaign_id,
-        imagem_url: pub.publicUrl,
-        imagem_storage_path: path,
-        headline: form.headline,
-        cta_texto: form.cta_texto,
-        destino_url: form.destino_url,
-        peso: form.peso,
-        formato: form.formato,
-      });
-      if (error) throw error;
+      const slot = form.slot as AdSlotName;
+      await uploadOne(sb, fileDesktop, "desktop", slot, AD_SLOTS[slot].desktop);
+      if (requiresMobile && fileMobile) {
+        await uploadOne(sb, fileMobile, "mobile", slot, AD_SLOTS[slot].mobile);
+      } else if (!requiresMobile) {
+        // Espaços com formato único (ex.: 300x250) atendem desktop e mobile
+        // com a mesma peça — subimos um segundo registro com variante 'mobile'
+        // apontando pra mesma imagem, pra pickAd casar em qualquer viewport.
+        await uploadOne(sb, fileDesktop, "mobile", slot, AD_SLOTS[slot].mobile);
+      }
       onToast("Criativo enviado. Aguarda aprovação.");
-      setForm({ campaign_id: "", headline: "", cta_texto: "Saiba mais", destino_url: "", peso: 1, formato: "" });
-      setFile(null); reload();
+      setForm({ campaign_id: "", slot: "", headline: "", cta_texto: "Saiba mais", destino_url: "", peso: 1 });
+      setFileDesktop(null);
+      setFileMobile(null);
+      reload();
     } catch (e: unknown) {
       onToast("Erro: " + (e instanceof Error ? e.message : "upload falhou"));
     } finally { setUploading(false); }
@@ -416,37 +466,100 @@ function CreativesTab({ creatives, campaigns, reload, onToast }: {
 
   return (
     <div className="space-y-4">
-      <form onSubmit={submit} className="grid grid-cols-2 gap-2 rounded-2xl border border-slate-200 bg-white shadow-sm p-3 md:grid-cols-6">
-        <select required value={form.campaign_id} onChange={(e)=>setForm({...form,campaign_id:e.target.value})} className="col-span-2 rounded border px-2 py-1 text-sm">
-          <option value="">Campanha*</option>
-          {campaigns.map((c) => <option key={c.id} value={c.id}>{c.nome}</option>)}
-        </select>
-        <input required placeholder="Headline*" value={form.headline} onChange={(e)=>setForm({...form,headline:e.target.value})} className="col-span-4 rounded border px-2 py-1 text-sm" />
-        <input placeholder="CTA" value={form.cta_texto} onChange={(e)=>setForm({...form,cta_texto:e.target.value})} className="rounded border px-2 py-1 text-sm" />
-        <input required type="url" placeholder="URL destino*" value={form.destino_url} onChange={(e)=>setForm({...form,destino_url:e.target.value})} className="col-span-3 rounded border px-2 py-1 text-sm" />
-        <input type="number" min={1} max={10} placeholder="Peso" value={form.peso} onChange={(e)=>setForm({...form,peso:Number(e.target.value)})} className="rounded border px-2 py-1 text-sm" />
-        <select required value={form.formato} onChange={(e)=>setForm({...form,formato:e.target.value})} className="col-span-2 rounded border px-2 py-1 text-sm" title="Formato do slot">
-          <option value="">Formato*</option>
-          <option value="970x90">970x90 (leaderboard)</option>
-          <option value="728x90">728x90 (leaderboard)</option>
-          <option value="300x250">300x250 (medium rectangle)</option>
-          <option value="300x600">300x600 (half page)</option>
-          <option value="320x50">320x50 (mobile banner)</option>
-        </select>
-        <input required type="file" accept="image/*" onChange={(e)=>setFile(e.target.files?.[0] ?? null)} className="col-span-4 rounded border px-2 py-1 text-sm" />
-        <button disabled={uploading} className="col-span-2 rounded bg-[#0066CC] px-3 py-1.5 text-sm font-semibold text-white disabled:opacity-50">{uploading?"Enviando…":"Enviar criativo"}</button>
+      <form onSubmit={submit} className="space-y-3 rounded-2xl border border-slate-200 bg-white shadow-sm p-4">
+        <div className="grid grid-cols-1 gap-2 md:grid-cols-2">
+          <label className="text-xs font-semibold uppercase tracking-wide text-slate-600">
+            Campanha
+            <select required value={form.campaign_id} onChange={(e)=>setForm({...form,campaign_id:e.target.value})} className="mt-1 w-full rounded border px-2 py-1.5 text-sm font-normal normal-case">
+              <option value="">Selecione…</option>
+              {campaigns.map((c) => <option key={c.id} value={c.id}>{c.nome}</option>)}
+            </select>
+          </label>
+          <label className="text-xs font-semibold uppercase tracking-wide text-slate-600">
+            Espaço no portal
+            <select
+              required
+              value={form.slot}
+              onChange={(e)=>{ setForm({...form, slot: e.target.value as AdSlotName | ""}); setFileMobile(null); }}
+              className="mt-1 w-full rounded border px-2 py-1.5 text-sm font-normal normal-case"
+            >
+              <option value="">Selecione o espaço…</option>
+              {AD_SLOT_LIST.map((s) => (
+                <option key={s.slot} value={s.slot}>
+                  {s.label} — {s.desktop}{s.desktop !== s.mobile ? ` / ${s.mobile}` : ""}
+                </option>
+              ))}
+            </select>
+          </label>
+        </div>
+
+        {slotDef && (
+          <p className="rounded bg-slate-50 p-2 text-xs text-slate-600">
+            <strong>{slotDef.label}.</strong> {slotDef.descricao}{" "}
+            {requiresMobile
+              ? <>Este espaço usa formatos diferentes em desktop (<strong>{slotDef.desktop}</strong>) e mobile (<strong>{slotDef.mobile}</strong>) — envie as duas artes.</>
+              : <>Formato único: <strong>{slotDef.desktop}</strong>. Uma única arte atende desktop e mobile.</>}
+          </p>
+        )}
+
+        <div className="grid grid-cols-1 gap-2 md:grid-cols-2">
+          <input required placeholder="Headline*" value={form.headline} onChange={(e)=>setForm({...form,headline:e.target.value})} className="rounded border px-2 py-1.5 text-sm" />
+          <input placeholder="Texto do botão (CTA)" value={form.cta_texto} onChange={(e)=>setForm({...form,cta_texto:e.target.value})} className="rounded border px-2 py-1.5 text-sm" />
+          <input required type="url" placeholder="URL destino*" value={form.destino_url} onChange={(e)=>setForm({...form,destino_url:e.target.value})} className="rounded border px-2 py-1.5 text-sm md:col-span-2" />
+          <label className="text-xs text-slate-600">
+            Peso (1-10)
+            <input type="number" min={1} max={10} value={form.peso} onChange={(e)=>setForm({...form,peso:Number(e.target.value)})} className="mt-1 w-full rounded border px-2 py-1.5 text-sm" />
+          </label>
+        </div>
+
+        <div className={`grid grid-cols-1 gap-3 ${requiresMobile ? "md:grid-cols-2" : ""}`}>
+          <label className="rounded border border-dashed border-slate-300 p-3 text-xs">
+            <div className="mb-1 font-semibold uppercase tracking-wide text-slate-600">
+              Arte desktop {slotDef ? `(${slotDef.desktop})` : ""}
+            </div>
+            <input required type="file" accept="image/*" onChange={(e)=>setFileDesktop(e.target.files?.[0] ?? null)} className="w-full text-sm" />
+            {fileDesktop && <p className="mt-1 truncate text-[11px] text-slate-500">{fileDesktop.name}</p>}
+          </label>
+          {requiresMobile && (
+            <label className="rounded border border-dashed border-slate-300 p-3 text-xs">
+              <div className="mb-1 font-semibold uppercase tracking-wide text-slate-600">
+                Arte mobile {slotDef ? `(${slotDef.mobile})` : ""}
+              </div>
+              <input required type="file" accept="image/*" onChange={(e)=>setFileMobile(e.target.files?.[0] ?? null)} className="w-full text-sm" />
+              {fileMobile && <p className="mt-1 truncate text-[11px] text-slate-500">{fileMobile.name}</p>}
+            </label>
+          )}
+        </div>
+
+        <button disabled={uploading || !form.slot} className="rounded bg-[#0066CC] px-4 py-2 text-sm font-semibold text-white disabled:opacity-50">
+          {uploading ? "Enviando…" : requiresMobile ? "Enviar par de criativos (desktop + mobile)" : "Enviar criativo"}
+        </button>
       </form>
 
       <ul className="grid gap-3 md:grid-cols-2 lg:grid-cols-3">
         {creatives.map((cr) => {
           const camp = campaigns.find((c) => c.id === cr.campaign_id);
+          const slotLabel = cr.slot && (cr.slot in AD_SLOTS)
+            ? AD_SLOTS[cr.slot as AdSlotName].label
+            : (cr.slot ?? "sem espaço");
           return (
             <li key={cr.id} className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
               <div className="aspect-[16/9] bg-slate-100">
                 <img src={cr.imagem_url} alt={cr.headline} className="h-full w-full object-cover" />
               </div>
               <div className="space-y-1 p-3 text-sm">
-                <p className="text-xs text-muted-foreground">{camp?.nome ?? "—"} · peso {cr.peso} · <span className="font-semibold">{cr.formato ?? "sem formato"}</span></p>
+                <p className="text-xs text-muted-foreground">
+                  {camp?.nome ?? "—"} · peso {cr.peso}
+                </p>
+                <p className="text-xs text-slate-700">
+                  <span className="font-semibold">{slotLabel}</span>
+                  {" · "}
+                  <span className="rounded bg-slate-100 px-1.5 py-0.5 text-[10px] font-bold uppercase">
+                    {cr.variante ?? "—"}
+                  </span>
+                  {" · "}
+                  {cr.formato ?? "—"}
+                </p>
                 <p className="font-semibold leading-tight">{cr.headline}</p>
                 <p className="truncate text-xs text-muted-foreground">{cr.destino_url}</p>
                 <div className="flex items-center justify-between pt-2">

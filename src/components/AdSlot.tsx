@@ -1,6 +1,12 @@
 import { useEffect, useMemo, useState } from "react";
 import { pickAd, type PickedAd } from "@/lib/ads.functions";
 import { GamSlot } from "@/components/GamSlot";
+import { useIsMobile } from "@/hooks/use-mobile";
+import {
+  type AdFormato,
+  type AdSlotName,
+  formatoForViewport,
+} from "@/lib/ad-slots";
 
 /**
  * Hierarquia de preenchimento do slot, do mais valioso pro mais genérico:
@@ -14,7 +20,7 @@ import { GamSlot } from "@/components/GamSlot";
  * um anúncio falso — hoje ele existe só para visualizar o layout.
  */
 
-type AdSize = "970x90" | "728x90" | "300x250" | "300x600" | "320x50";
+type AdSize = AdFormato;
 
 type Creative = {
   brand: string;
@@ -42,18 +48,24 @@ const DIMS: Record<AdSize, { w: number; h: number; layout: "wide" | "square" | "
 
 export function AdSlot({
   size,
+  slot,
   className = "",
   regiao,
   cidade,
   editoria,
 }: {
-  size: AdSize;
+  size?: AdSize;
+  slot?: AdSlotName;
   className?: string;
   regiao?: string;
   cidade?: string;
   editoria?: string;
 }) {
-  const dim = DIMS[size];
+  const isMobile = useIsMobile();
+  // Preferimos `slot` (novo modelo). Se só vier `size`, mantemos backward-compat.
+  const resolvedSize: AdSize = slot ? formatoForViewport(slot, isMobile) : (size ?? "300x250");
+  const variante = isMobile ? "mobile" : "desktop";
+  const dim = DIMS[resolvedSize];
   const [real, setReal] = useState<PickedAd | null>(null);
   const [tried, setTried] = useState(false);
   const [gamFilled, setGamFilled] = useState(false);
@@ -69,18 +81,20 @@ export function AdSlot({
         regiao,
         cidade,
         editoria,
-        size,
+        size: resolvedSize,
+        slot,
+        variante,
         userAgent: typeof navigator !== "undefined" ? navigator.userAgent : undefined,
       },
     })
       .then((r) => { if (alive) { setReal(r); setTried(true); } })
       .catch(() => { if (alive) setTried(true); });
     return () => { alive = false; };
-  }, [regiao, cidade, editoria, size]);
+  }, [regiao, cidade, editoria, resolvedSize, slot, variante]);
 
   const creative = useMemo(
-    () => CREATIVES[Math.floor(Math.abs(hash(size + dim.w)) % CREATIVES.length)],
-    [size, dim.w],
+    () => CREATIVES[Math.floor(Math.abs(hash(resolvedSize + dim.w)) % CREATIVES.length)],
+    [resolvedSize, dim.w],
   );
   const img = `https://picsum.photos/seed/vozes-${creative.seed}/${dim.w}/${dim.h}`;
 
@@ -92,7 +106,7 @@ export function AdSlot({
         rel="sponsored noopener"
         className={`relative block overflow-hidden rounded border border-slate-200 bg-white ${className}`}
         style={{ aspectRatio: `${dim.w} / ${dim.h}` }}
-        aria-label={`Publicidade ${size}: ${real.headline}`}
+        aria-label={`Publicidade ${resolvedSize}: ${real.headline}`}
       >
         <img src={real.imagem_url} alt={real.headline} className="absolute inset-0 h-full w-full object-contain" loading="lazy" />
         <span className="absolute left-2 top-2 rounded bg-black/60 px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-widest text-white">
@@ -119,9 +133,9 @@ export function AdSlot({
       <div
         className={className}
         style={gamFilled ? { aspectRatio: `${dim.w} / ${dim.h}` } : undefined}
-        aria-label={`Publicidade ${size}`}
+        aria-label={`Publicidade ${resolvedSize}`}
       >
-        <GamSlot size={size} regiao={regiao} cidade={cidade} editoria={editoria} onFillChange={setGamFilled} />
+        <GamSlot size={resolvedSize} regiao={regiao} cidade={cidade} editoria={editoria} onFillChange={setGamFilled} />
       </div>
     );
   }
@@ -130,11 +144,11 @@ export function AdSlot({
     <div
       className={`relative overflow-hidden rounded border border-slate-200 bg-slate-100 ${className}`}
       style={{ aspectRatio: `${dim.w} / ${dim.h}` }}
-      aria-label={`Publicidade ${size}`}
+      aria-label={`Publicidade ${resolvedSize}`}
     >
       {!gamFilled && (
         <div className="absolute inset-0 flex items-center justify-center">
-          <GamSlot size={size} regiao={regiao} cidade={cidade} editoria={editoria} onFillChange={setGamFilled} />
+          <GamSlot size={resolvedSize} regiao={regiao} cidade={cidade} editoria={editoria} onFillChange={setGamFilled} />
         </div>
       )}
       {gamFilled ? null : (
@@ -175,7 +189,7 @@ export function AdSlot({
                   {creative.cta}
                 </button>
               </div>
-              <p className="text-[9px] uppercase tracking-widest opacity-80">{size}</p>
+              <p className="text-[9px] uppercase tracking-widest opacity-80">{resolvedSize}</p>
             </div>
           )}
         </>

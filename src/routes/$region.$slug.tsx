@@ -463,7 +463,7 @@ function ArticlePage() {
 
         {/* Anúncio — topo da matéria, abaixo do lead */}
         <div className="mx-auto mt-8 flex max-w-3xl justify-center">
-          <AdSlot size="728x90" className="w-full" regiao={region} cidade={cidadeAtualSlug ?? undefined} editoria={categoriaSlug ?? undefined} />
+          <AdSlot slot="materia_topo" className="w-full" regiao={region} cidade={cidadeAtualSlug ?? undefined} editoria={categoriaSlug ?? undefined} />
         </div>
 
         {/* TL;DR — resposta direta (answer-first para motores de IA) */}
@@ -546,7 +546,7 @@ function ArticlePage() {
                   </p>
                   {i === adMidIndex && (
                     <div className="my-8 flex justify-center">
-                      <AdSlot size="300x250" className="w-full max-w-[300px]" regiao={region} cidade={cidadeAtualSlug ?? undefined} editoria={categoriaSlug ?? undefined} />
+                      <AdSlot slot="materia_meio" className="w-full max-w-[300px]" regiao={region} cidade={cidadeAtualSlug ?? undefined} editoria={categoriaSlug ?? undefined} />
                     </div>
                   )}
                   {i === adMidIndex && (
@@ -673,7 +673,7 @@ function ArticlePage() {
 
         {/* Anúncio — rodapé da matéria */}
         <div className="mx-auto mt-10 flex max-w-3xl justify-center">
-          <AdSlot size="970x90" className="w-full" regiao={region} cidade={cidadeAtualSlug ?? undefined} editoria={categoriaSlug ?? undefined} />
+          <AdSlot slot="materia_rodape" className="w-full" regiao={region} cidade={cidadeAtualSlug ?? undefined} editoria={categoriaSlug ?? undefined} />
         </div>
 
       </article>

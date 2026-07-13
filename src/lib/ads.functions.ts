@@ -6,6 +6,8 @@ const PickAdInput = z.object({
   cidade: z.string().optional(),
   editoria: z.string().optional(),
   size: z.string().optional(),
+  slot: z.string().optional(),
+  variante: z.enum(["desktop", "mobile"]).optional(),
   userAgent: z.string().optional(),
 });
 
@@ -58,18 +60,29 @@ export const pickAd = createServerFn({ method: "POST" })
       const campaignIds = Array.from(new Set(targets.map((t) => t.campaign_id)));
       const { data: creatives } = await sb
         .from("ads_eligible")
-        .select("creative_id, campaign_id, imagem_url, headline, cta_texto, destino_url, peso, editorias, formato")
+        .select("creative_id, campaign_id, imagem_url, headline, cta_texto, destino_url, peso, editorias, formato, slot, variante")
         .in("campaign_id", campaignIds);
       if (!creatives || creatives.length === 0) continue;
 
-      // Filtro por formato do slot: quando o slot informa tamanho, o criativo
-      // precisa estar vinculado exatamente ao mesmo formato. Isso evita que
-      // uma peça 300x250 apareça em leaderboard, ou vice-versa.
+      // Novo modelo: filtro por (slot, variante). O criativo tem que estar
+      // vinculado exatamente ao espaço + variante que o AdSlot pediu. Isso
+      // impede que uma peça de "matéria — meio" apareça na sidebar da home
+      // ou que a arte desktop entre num viewport mobile.
+      //
+      // Fallback legado (sem `slot`): filtra por formato — mantém rodando
+      // qualquer criativo antigo que ainda não foi migrado.
       const byFormat = creatives.filter((c) => {
-        const f = (c as { formato?: string | null }).formato ?? null;
-        if (!data.size) return !f;
-        if (!f) return false;
-        return f === data.size;
+        const cSlot = (c as { slot?: string | null }).slot ?? null;
+        const cVar = (c as { variante?: string | null }).variante ?? null;
+        const cFmt = (c as { formato?: string | null }).formato ?? null;
+        if (data.slot) {
+          if (cSlot !== data.slot) return false;
+          if (data.variante && cVar && cVar !== data.variante) return false;
+          return true;
+        }
+        if (!data.size) return !cFmt && !cSlot;
+        if (!cFmt) return false;
+        return cFmt === data.size;
       });
       if (!byFormat.length) continue;
 
