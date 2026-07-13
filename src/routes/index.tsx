@@ -69,7 +69,7 @@ const eleicoes2026TopQO = queryOptions({
   queryKey: ["articles", "eleicoes-2026-top", 1],
   queryFn: () =>
     listArticlesByCategoryGlobal({
-      data: { categorySlug: "eleicoes-2026", limit: 1 },
+      data: { categorySlug: "eleicoes-2026", limit: 1, requireImage: false },
     }),
 });
 
