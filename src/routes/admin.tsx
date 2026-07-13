@@ -70,33 +70,51 @@ function AdminLayout() {
   if (state !== "ok") return null;
 
   return (
-    <div className="min-h-screen bg-background">
-      <header className="border-b bg-[#0A2540] text-white">
-        <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-3">
-          <div className="flex items-center gap-6">
-            <Logo size="sm" variant="white" withLink={false} />
-            <nav className="flex gap-4 text-sm">
-              <Link to="/admin/painel" className="hover:underline [&.active]:font-bold">Painel</Link>
-              <Link to="/admin" activeOptions={{ exact: true }} className="hover:underline [&.active]:font-bold">Fila</Link>
-              <Link to="/admin/analytics" className="hover:underline [&.active]:font-bold">Analytics</Link>
-              <Link to="/admin/fontes" className="hover:underline [&.active]:font-bold">Fontes</Link>
-              <Link to="/admin/regioes" className="hover:underline [&.active]:font-bold">Regiões</Link>
-              <Link to="/admin/anuncios" className="hover:underline [&.active]:font-bold">Anúncios</Link>
-              <Link to="/admin/agentes" className="hover:underline [&.active]:font-bold">Agentes IA</Link>
-              <Link to="/admin/memoria-editorial" className="hover:underline [&.active]:font-bold">Memória</Link>
+    <div className="min-h-screen bg-[#F4F7FB]">
+      <header className="sticky top-0 z-30 border-b border-slate-200/70 bg-white/90 backdrop-blur">
+        <div className="mx-auto flex max-w-7xl items-center justify-between gap-4 px-6 py-3">
+          <div className="flex items-center gap-8">
+            <div className="flex items-center gap-2">
+              <div className="rounded-lg bg-[#0A2540] px-2 py-1.5">
+                <Logo size="sm" variant="white" withLink={false} />
+              </div>
+            </div>
+            <nav className="hidden items-center gap-1 rounded-full bg-slate-100/80 p-1 text-sm md:flex">
+              {[
+                { to: "/admin/painel", label: "Painel" },
+                { to: "/admin", label: "Fila", exact: true },
+                { to: "/admin/analytics", label: "Analytics" },
+                { to: "/admin/fontes", label: "Fontes" },
+                { to: "/admin/regioes", label: "Regiões" },
+                { to: "/admin/anuncios", label: "Anúncios" },
+                { to: "/admin/agentes", label: "Agentes IA" },
+                { to: "/admin/memoria-editorial", label: "Memória" },
+              ].map((it) => (
+                <Link
+                  key={it.to}
+                  to={it.to}
+                  activeOptions={it.exact ? { exact: true } : undefined}
+                  className="rounded-full px-3 py-1.5 text-slate-600 transition hover:text-[#0A2540] [&.active]:bg-white [&.active]:font-semibold [&.active]:text-[#0A2540] [&.active]:shadow-sm"
+                >
+                  {it.label}
+                </Link>
+              ))}
             </nav>
           </div>
-          <div className="flex items-center gap-3 text-xs">
-            <span className="opacity-80">{email}</span>
-            <Link to="/admin/senha" className="rounded border border-white/30 px-2 py-1 hover:bg-white/10">Senha</Link>
+          <div className="flex items-center gap-2 text-xs">
+            <div className="hidden items-center gap-2 rounded-full bg-slate-100 px-3 py-1.5 text-slate-600 sm:flex">
+              <span className="h-2 w-2 rounded-full bg-emerald-500" />
+              <span className="max-w-[180px] truncate">{email}</span>
+            </div>
+            <Link to="/admin/senha" className="rounded-full border border-slate-200 bg-white px-3 py-1.5 text-slate-700 hover:border-[#0A2540] hover:text-[#0A2540]">Senha</Link>
             <button
               onClick={async () => { const sb = await getExternalBrowser(); await sb.auth.signOut(); nav({ to: "/admin/login", replace: true }); }}
-              className="rounded border border-white/30 px-2 py-1 hover:bg-white/10"
+              className="rounded-full bg-[#0A2540] px-3 py-1.5 font-semibold text-white transition hover:bg-[#0d2f52]"
             >Sair</button>
           </div>
         </div>
       </header>
-      <main className="mx-auto max-w-7xl px-4 py-6"><Outlet /></main>
+      <main className="mx-auto max-w-7xl px-6 py-8"><Outlet /></main>
     </div>
   );
 }
