@@ -111,7 +111,7 @@ function AdminMemoria() {
       {err && <p className="rounded border border-red-200 bg-red-50 p-3 text-sm text-red-700">{err}</p>}
       {msg && <p className="rounded border bg-muted p-2 text-xs">{msg}</p>}
 
-      <section className="space-y-3 rounded-lg border bg-card p-4">
+      <section className="space-y-3 rounded-2xl border border-slate-200 bg-white shadow-sm p-4">
         <h2 className="text-sm font-semibold">Identidade</h2>
         <TextField label="Missão" rows={2} value={m.missao} onChange={(v) => setM({ ...m, missao: v })} />
         <TextField label="Valores" rows={2} value={m.valores} onChange={(v) => setM({ ...m, valores: v })} />
@@ -174,7 +174,7 @@ function ListEditor<T extends Record<string, string>>({
   title, items, fields, onChange, blank,
 }: { title: string; items: T[]; fields: (keyof T & string)[]; onChange: (items: T[]) => void; blank: T }) {
   return (
-    <section className="space-y-2 rounded-lg border bg-card p-4">
+    <section className="space-y-2 rounded-2xl border border-slate-200 bg-white shadow-sm p-4">
       <div className="flex items-center justify-between">
         <h2 className="text-sm font-semibold">{title} <span className="ml-2 text-xs text-muted-foreground">({items.length})</span></h2>
         <button onClick={() => onChange([...items, { ...blank }])} className="rounded border px-2 py-1 text-xs hover:bg-accent">+ adicionar</button>

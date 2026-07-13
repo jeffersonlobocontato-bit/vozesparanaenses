@@ -2,6 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useState, useCallback } from "react";
 import { getExternalBrowser } from "@/lib/external-supabase-browser";
 import { displayRegionName } from "@/lib/region-labels";
+import { PageHeader, refreshBtnClass, tabPillsWrapClass, tabPillClass } from "@/components/admin/ui";
 
 export const Route = createFileRoute("/admin/fontes")({
   component: AdminFontes,
@@ -136,26 +137,22 @@ function AdminFontes() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold">Fontes monitoradas</h1>
-        <button onClick={load} className="rounded border px-3 py-1 text-xs hover:bg-accent">Atualizar</button>
-      </div>
+      <PageHeader
+        eyebrow="Fontes"
+        title="Fontes monitoradas"
+        subtitle="Veículos de imprensa e assessorias oficiais das prefeituras."
+        actions={<button onClick={load} className={refreshBtnClass()}>Atualizar</button>}
+      />
 
       {/* Módulos separados de propósito — scraping, cadastro e critério de
           relevância são diferentes entre veículo de imprensa e assessoria
           de prefeitura (ver 024_fontes_prefeitura.sql). */}
-      <div className="flex gap-2 border-b">
-        <button
-          onClick={() => { setTab("veiculo"); resetForm(); }}
-          className={`px-4 py-2 text-sm font-semibold ${tab === "veiculo" ? "border-b-2 border-[#0066CC] text-[#0066CC]" : "text-muted-foreground"}`}
-        >
+      <div className={tabPillsWrapClass() + " w-fit"}>
+        <button onClick={() => { setTab("veiculo"); resetForm(); }} className={tabPillClass(tab === "veiculo")}>
           Veículos de imprensa
         </button>
-        <button
-          onClick={() => { setTab("prefeitura"); resetForm(); }}
-          className={`px-4 py-2 text-sm font-semibold ${tab === "prefeitura" ? "border-b-2 border-[#0066CC] text-[#0066CC]" : "text-muted-foreground"}`}
-        >
-          🏛️ Prefeituras (assessoria de imprensa)
+        <button onClick={() => { setTab("prefeitura"); resetForm(); }} className={tabPillClass(tab === "prefeitura")}>
+          🏛️ Prefeituras
         </button>
       </div>
       {tab === "prefeitura" && (
@@ -164,7 +161,7 @@ function AdminFontes() {
         </p>
       )}
 
-      <form onSubmit={save} className="grid gap-3 rounded-lg border bg-card p-4 md:grid-cols-2">
+      <form onSubmit={save} className="grid gap-3 rounded-2xl border border-slate-200 bg-white shadow-sm p-4 md:grid-cols-2">
         <div className="md:col-span-2 flex items-center justify-between">
           <h2 className="font-semibold">
             {editingId ? "Editar fonte" : tab === "prefeitura" ? "Nova prefeitura" : "Nova fonte"}

@@ -1,6 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useState, useCallback } from "react";
 import { getExternalBrowser } from "@/lib/external-supabase-browser";
+import { PageHeader, refreshBtnClass } from "@/components/admin/ui";
 
 export const Route = createFileRoute("/admin/agentes")({
   component: AdminAgentes,
@@ -123,16 +124,13 @@ function AdminAgentes() {
   }
 
   return (
-    <div className="space-y-4">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-bold">Agentes redatores por editoria (Método DEL)</h1>
-          <p className="text-sm text-muted-foreground">
-            Cada editoria tem um redator de IA especializado, treinado por camadas: <b>Sintática</b> (arquitetura do texto), <b>Semântica</b> (como interpretar o fato) e <b>Lexical</b> (linguagem). Camadas vazias caem no "Prompt livre".
-          </p>
-        </div>
-        <button onClick={load} className="rounded border px-3 py-1 text-xs hover:bg-accent">Atualizar</button>
-      </div>
+    <div className="space-y-6">
+      <PageHeader
+        eyebrow="Agentes IA"
+        title="Agentes redatores por editoria (Método DEL)"
+        subtitle='Cada editoria tem um redator especializado, treinado por camadas: Sintática, Semântica e Lexical. Camadas vazias caem no "Prompt livre".'
+        actions={<button onClick={load} className={refreshBtnClass()}>Atualizar</button>}
+      />
       {msg && <p className="rounded border bg-muted p-2 text-xs">{msg}</p>}
       {err && <p className="rounded border border-red-200 bg-red-50 p-3 text-sm text-red-700">{err}</p>}
 
@@ -151,7 +149,7 @@ function AdminAgentes() {
             Object.keys(a.matriz_editorial ?? {}).length,
           ].filter((n) => n > 0).length;
           return (
-            <li key={c.id} className="rounded-lg border bg-card">
+            <li key={c.id} className="rounded-2xl border border-slate-200 bg-white shadow-sm">
               <button onClick={() => setOpenId(open ? null : c.id)}
                 className="flex w-full items-center justify-between px-4 py-3 text-left hover:bg-accent/40">
                 <div className="flex items-center gap-3">
