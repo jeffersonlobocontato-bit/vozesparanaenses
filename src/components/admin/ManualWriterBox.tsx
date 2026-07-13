@@ -68,7 +68,16 @@ export function ManualWriterBox({ onCreated }: Props) {
         },
       });
       clearTimeout(progressTimer);
-      if (error) throw error;
+      if (error) {
+        // Extrai o corpo do erro (supabase-js só dá "non-2xx" genérico)
+        let detail = "";
+        try {
+          const errWithCtx = error as { context?: { response?: Response } };
+          const resp = errWithCtx.context?.response;
+          if (resp) detail = await resp.clone().text();
+        } catch { /* ignore */ }
+        throw new Error(detail || error.message);
+      }
       const payload = data as { ok?: boolean; error?: string; hint?: string; titulo?: string };
       if (!payload?.ok) throw new Error(payload?.hint ?? payload?.error ?? "Falha desconhecida");
       setOk(`Rascunho criado: "${payload.titulo ?? "sem título"}". Aparece abaixo na fila.`);
