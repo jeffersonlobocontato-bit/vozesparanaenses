@@ -365,7 +365,7 @@ function CreativesTab({ creatives, campaigns, reload, onToast }: {
 
   async function submit(e: React.FormEvent) {
     e.preventDefault();
-    if (!form.campaign_id || !file) return onToast("Selecione campanha e imagem.");
+    if (!form.campaign_id || !file || !form.formato) return onToast("Selecione campanha, formato e imagem.");
     setUploading(true);
     try {
       const sb = await getExternalBrowser();
@@ -382,7 +382,7 @@ function CreativesTab({ creatives, campaigns, reload, onToast }: {
         cta_texto: form.cta_texto,
         destino_url: form.destino_url,
         peso: form.peso,
-        formato: form.formato || null,
+        formato: form.formato,
       });
       if (error) throw error;
       onToast("Criativo enviado. Aguarda aprovação.");
@@ -425,8 +425,8 @@ function CreativesTab({ creatives, campaigns, reload, onToast }: {
         <input placeholder="CTA" value={form.cta_texto} onChange={(e)=>setForm({...form,cta_texto:e.target.value})} className="rounded border px-2 py-1 text-sm" />
         <input required type="url" placeholder="URL destino*" value={form.destino_url} onChange={(e)=>setForm({...form,destino_url:e.target.value})} className="col-span-3 rounded border px-2 py-1 text-sm" />
         <input type="number" min={1} max={10} placeholder="Peso" value={form.peso} onChange={(e)=>setForm({...form,peso:Number(e.target.value)})} className="rounded border px-2 py-1 text-sm" />
-        <select value={form.formato} onChange={(e)=>setForm({...form,formato:e.target.value})} className="col-span-2 rounded border px-2 py-1 text-sm" title="Formato do slot">
-          <option value="">Formato: todos</option>
+        <select required value={form.formato} onChange={(e)=>setForm({...form,formato:e.target.value})} className="col-span-2 rounded border px-2 py-1 text-sm" title="Formato do slot">
+          <option value="">Formato*</option>
           <option value="970x90">970x90 (leaderboard)</option>
           <option value="728x90">728x90 (leaderboard)</option>
           <option value="300x250">300x250 (medium rectangle)</option>
@@ -446,7 +446,7 @@ function CreativesTab({ creatives, campaigns, reload, onToast }: {
                 <img src={cr.imagem_url} alt={cr.headline} className="h-full w-full object-cover" />
               </div>
               <div className="space-y-1 p-3 text-sm">
-                <p className="text-xs text-muted-foreground">{camp?.nome ?? "—"} · peso {cr.peso} · <span className="font-semibold">{cr.formato ?? "todos formatos"}</span></p>
+                <p className="text-xs text-muted-foreground">{camp?.nome ?? "—"} · peso {cr.peso} · <span className="font-semibold">{cr.formato ?? "sem formato"}</span></p>
                 <p className="font-semibold leading-tight">{cr.headline}</p>
                 <p className="truncate text-xs text-muted-foreground">{cr.destino_url}</p>
                 <div className="flex items-center justify-between pt-2">

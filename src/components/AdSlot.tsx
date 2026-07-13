@@ -90,20 +90,14 @@ export function AdSlot({
         href={real.redirect_url}
         target="_blank"
         rel="sponsored noopener"
-        className={`relative block overflow-hidden rounded border border-slate-200 bg-slate-100 ${className}`}
+        className={`relative block overflow-hidden rounded border border-slate-200 bg-white ${className}`}
         style={{ aspectRatio: `${dim.w} / ${dim.h}` }}
         aria-label={`Publicidade ${size}: ${real.headline}`}
       >
-        <img src={real.imagem_url} alt={real.headline} className="absolute inset-0 h-full w-full object-cover" loading="lazy" />
+        <img src={real.imagem_url} alt={real.headline} className="absolute inset-0 h-full w-full object-contain" loading="lazy" />
         <span className="absolute left-2 top-2 rounded bg-black/60 px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-widest text-white">
           Publicidade
         </span>
-        {(dim.layout === "square" || dim.layout === "tall") && (
-          <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent p-3 text-white">
-            <p className="text-sm font-bold leading-tight">{real.headline}</p>
-            <span className="mt-1 inline-block rounded bg-white px-2 py-0.5 text-[10px] font-bold text-slate-900">{real.cta_texto}</span>
-          </div>
-        )}
       </a>
     );
   }
