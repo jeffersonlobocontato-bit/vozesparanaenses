@@ -19,6 +19,8 @@ type Fonte = {
   ultimo_scrape_em: string | null;
   regiao_id: string | null;
   regiao: { slug: string; nome: string } | null;
+  tipo: "veiculo" | "prefeitura";
+  email_imprensa: string | null;
 };
 
 const empty: {
@@ -29,6 +31,7 @@ const empty: {
   protecao_antibot: boolean;
   frequencia_horas: number;
   ativo: boolean;
+  email_imprensa: string;
 } = {
   nome: "",
   url_base: "",
@@ -37,6 +40,7 @@ const empty: {
   protecao_antibot: false,
   frequencia_horas: 6,
   ativo: true,
+  email_imprensa: "",
 };
 
 function AdminFontes() {
@@ -47,13 +51,14 @@ function AdminFontes() {
   const [form, setForm] = useState(empty);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
+  const [tab, setTab] = useState<"veiculo" | "prefeitura">("veiculo");
 
   const load = useCallback(async () => {
     setItems(null); setErr(null);
     try {
       const sb = await getExternalBrowser();
       const [{ data: fontes, error: e1 }, { data: regs, error: e2 }] = await Promise.all([
-        sb.from("fontes").select("id, nome, url_base, tipo_renderizacao, protecao_antibot, frequencia_horas, ativo, ultimo_scrape_em, regiao_id, regiao:regioes(slug, nome)").order("nome"),
+        sb.from("fontes").select("id, nome, url_base, tipo_renderizacao, protecao_antibot, frequencia_horas, ativo, ultimo_scrape_em, regiao_id, regiao:regioes(slug, nome), tipo, email_imprensa").order("nome"),
         sb.from("regioes").select("id, slug, nome").order("nome"),
       ]);
       if (e1) throw e1;
@@ -69,6 +74,7 @@ function AdminFontes() {
 
   function startEdit(f: Fonte) {
     setEditingId(f.id);
+    setTab(f.tipo ?? "veiculo");
     setForm({
       nome: f.nome,
       url_base: f.url_base,
@@ -77,6 +83,7 @@ function AdminFontes() {
       protecao_antibot: f.protecao_antibot,
       frequencia_horas: f.frequencia_horas,
       ativo: f.ativo,
+      email_imprensa: f.email_imprensa ?? "",
     });
     window.scrollTo({ top: 0, behavior: "smooth" });
   }
@@ -96,6 +103,8 @@ function AdminFontes() {
         protecao_antibot: form.protecao_antibot,
         frequencia_horas: Math.max(1, Number(form.frequencia_horas) || 6),
         ativo: form.ativo,
+        tipo: tab,
+        email_imprensa: tab === "prefeitura" ? (form.email_imprensa.trim() || null) : null,
       };
       const { error } = editingId
         ? await sb.from("fontes").update(payload).eq("id", editingId)
@@ -132,20 +141,45 @@ function AdminFontes() {
         <button onClick={load} className="rounded border px-3 py-1 text-xs hover:bg-accent">Atualizar</button>
       </div>
 
+      {/* Módulos separados de propósito — scraping, cadastro e critério de
+          relevância são diferentes entre veículo de imprensa e assessoria
+          de prefeitura (ver 024_fontes_prefeitura.sql). */}
+      <div className="flex gap-2 border-b">
+        <button
+          onClick={() => { setTab("veiculo"); resetForm(); }}
+          className={`px-4 py-2 text-sm font-semibold ${tab === "veiculo" ? "border-b-2 border-[#0066CC] text-[#0066CC]" : "text-muted-foreground"}`}
+        >
+          Veículos de imprensa
+        </button>
+        <button
+          onClick={() => { setTab("prefeitura"); resetForm(); }}
+          className={`px-4 py-2 text-sm font-semibold ${tab === "prefeitura" ? "border-b-2 border-[#0066CC] text-[#0066CC]" : "text-muted-foreground"}`}
+        >
+          🏛️ Prefeituras (assessoria de imprensa)
+        </button>
+      </div>
+      {tab === "prefeitura" && (
+        <p className="rounded border bg-muted p-3 text-xs text-muted-foreground">
+          Fonte oficial: o scraping roda numa função separada (<code>scrape-prefeitura</code>) e a matéria não precisa de outro veículo cobrindo o mesmo fato pra ser relevante — é elegível sozinha, por ser primária.
+        </p>
+      )}
+
       <form onSubmit={save} className="grid gap-3 rounded-lg border bg-card p-4 md:grid-cols-2">
         <div className="md:col-span-2 flex items-center justify-between">
-          <h2 className="font-semibold">{editingId ? "Editar fonte" : "Nova fonte"}</h2>
+          <h2 className="font-semibold">
+            {editingId ? "Editar fonte" : tab === "prefeitura" ? "Nova prefeitura" : "Nova fonte"}
+          </h2>
           {editingId && <button type="button" onClick={resetForm} className="text-xs text-muted-foreground hover:underline">cancelar edição</button>}
         </div>
         <label className="text-sm">
           <span className="mb-1 block text-xs font-medium">Nome</span>
           <input required value={form.nome} onChange={(e) => setForm({ ...form, nome: e.target.value })}
-            className="w-full rounded border px-2 py-1.5" placeholder="Ex: Catve" />
+            className="w-full rounded border px-2 py-1.5" placeholder={tab === "prefeitura" ? "Ex: Prefeitura de Cascavel" : "Ex: Catve"} />
         </label>
         <label className="text-sm">
-          <span className="mb-1 block text-xs font-medium">URL base (RSS ou home)</span>
+          <span className="mb-1 block text-xs font-medium">URL base (RSS ou home de notícias)</span>
           <input required type="url" value={form.url_base} onChange={(e) => setForm({ ...form, url_base: e.target.value })}
-            className="w-full rounded border px-2 py-1.5" placeholder="https://catve.com/rss" />
+            className="w-full rounded border px-2 py-1.5" placeholder={tab === "prefeitura" ? "https://cidade.pr.gov.br/noticias/" : "https://catve.com/rss"} />
         </label>
         <label className="text-sm">
           <span className="mb-1 block text-xs font-medium">Região</span>
@@ -164,11 +198,18 @@ function AdminFontes() {
           </select>
         </label>
         <label className="text-sm">
-          <span className="mb-1 block text-xs font-medium">Frequência (horas)</span>
+          <span className="mb-1 block text-xs font-medium">Frequência (horas) — exceção ao ciclo fixo</span>
           <input type="number" min={1} value={form.frequencia_horas}
             onChange={(e) => setForm({ ...form, frequencia_horas: Number(e.target.value) })}
             className="w-full rounded border px-2 py-1.5" />
         </label>
+        {tab === "prefeitura" && (
+          <label className="text-sm">
+            <span className="mb-1 block text-xs font-medium">E-mail da assessoria de imprensa</span>
+            <input type="email" value={form.email_imprensa} onChange={(e) => setForm({ ...form, email_imprensa: e.target.value })}
+              className="w-full rounded border px-2 py-1.5" placeholder="imprensa@cidade.pr.gov.br" />
+          </label>
+        )}
         <div className="flex items-center gap-6 pt-4 md:pt-6">
           <label className="flex items-center gap-2 text-sm">
             <input type="checkbox" checked={form.ativo} onChange={(e) => setForm({ ...form, ativo: e.target.checked })} />
@@ -181,7 +222,7 @@ function AdminFontes() {
         </div>
         <div className="md:col-span-2">
           <button disabled={busy} className="rounded bg-[#0066CC] px-4 py-2 text-sm font-semibold text-white hover:bg-[#0055aa] disabled:opacity-60">
-            {busy ? "Salvando…" : editingId ? "Salvar alterações" : "Adicionar fonte"}
+            {busy ? "Salvando…" : editingId ? "Salvar alterações" : tab === "prefeitura" ? "Adicionar prefeitura" : "Adicionar fonte"}
           </button>
           {msg && <span className="ml-3 text-xs text-muted-foreground">{msg}</span>}
         </div>
@@ -189,47 +230,60 @@ function AdminFontes() {
 
       {err && <p className="rounded border border-red-200 bg-red-50 p-3 text-sm text-red-700">{err}</p>}
       {!items && !err && <p className="text-sm text-muted-foreground">Carregando…</p>}
-      {items && items.length === 0 && <p className="text-sm text-muted-foreground">Nenhuma fonte cadastrada.</p>}
 
-      <div className="overflow-x-auto rounded-lg border">
-        <table className="w-full text-sm">
-          <thead className="bg-muted text-xs uppercase text-muted-foreground">
-            <tr>
-              <th className="px-3 py-2 text-left">Fonte</th>
-              <th className="px-3 py-2 text-left">Região</th>
-              <th className="px-3 py-2 text-left">Tipo</th>
-              <th className="px-3 py-2 text-left">Freq.</th>
-              <th className="px-3 py-2 text-left">Último scrape</th>
-              <th className="px-3 py-2 text-left">Status</th>
-              <th className="px-3 py-2"></th>
-            </tr>
-          </thead>
-          <tbody>
-            {items?.map((f) => (
-              <tr key={f.id} className="border-t">
-                <td className="px-3 py-2">
-                  <div className="font-medium">{f.nome}</div>
-                  <a href={f.url_base} target="_blank" rel="noreferrer" className="text-xs text-muted-foreground hover:underline">{f.url_base}</a>
-                </td>
-                <td className="px-3 py-2 text-xs">{f.regiao ? displayRegionName(f.regiao.slug, f.regiao.nome) : "—"}</td>
-                <td className="px-3 py-2 text-xs">{f.tipo_renderizacao === "spa_js" ? "SPA" : "Estático"}{f.protecao_antibot ? " · antibot" : ""}</td>
-                <td className="px-3 py-2 text-xs">{f.frequencia_horas}h</td>
-                <td className="px-3 py-2 text-xs">{f.ultimo_scrape_em ? new Date(f.ultimo_scrape_em).toLocaleString("pt-BR") : "nunca"}</td>
-                <td className="px-3 py-2">
-                  <button onClick={() => toggleAtivo(f)}
-                    className={`rounded px-2 py-0.5 text-xs font-semibold ${f.ativo ? "bg-green-100 text-green-800" : "bg-gray-200 text-gray-700"}`}>
-                    {f.ativo ? "ativa" : "inativa"}
-                  </button>
-                </td>
-                <td className="px-3 py-2 text-right">
-                  <button onClick={() => startEdit(f)} className="mr-2 text-xs text-[#0066CC] hover:underline">editar</button>
-                  <button onClick={() => remove(f)} className="text-xs text-red-600 hover:underline">excluir</button>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
+      {(() => {
+        const filtered = items?.filter((f) => (f.tipo ?? "veiculo") === tab) ?? null;
+        return (
+          <>
+            {filtered && filtered.length === 0 && (
+              <p className="text-sm text-muted-foreground">
+                {tab === "prefeitura" ? "Nenhuma prefeitura cadastrada ainda." : "Nenhuma fonte cadastrada."}
+              </p>
+            )}
+            <div className="overflow-x-auto rounded-lg border">
+              <table className="w-full text-sm">
+                <thead className="bg-muted text-xs uppercase text-muted-foreground">
+                  <tr>
+                    <th className="px-3 py-2 text-left">Fonte</th>
+                    <th className="px-3 py-2 text-left">Região</th>
+                    <th className="px-3 py-2 text-left">Tipo</th>
+                    <th className="px-3 py-2 text-left">Freq.</th>
+                    <th className="px-3 py-2 text-left">Último scrape</th>
+                    {tab === "prefeitura" && <th className="px-3 py-2 text-left">E-mail imprensa</th>}
+                    <th className="px-3 py-2 text-left">Status</th>
+                    <th className="px-3 py-2"></th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {filtered?.map((f) => (
+                    <tr key={f.id} className="border-t">
+                      <td className="px-3 py-2">
+                        <div className="font-medium">{f.nome}</div>
+                        <a href={f.url_base} target="_blank" rel="noreferrer" className="text-xs text-muted-foreground hover:underline">{f.url_base}</a>
+                      </td>
+                      <td className="px-3 py-2 text-xs">{f.regiao ? displayRegionName(f.regiao.slug, f.regiao.nome) : "—"}</td>
+                      <td className="px-3 py-2 text-xs">{f.tipo_renderizacao === "spa_js" ? "SPA" : "Estático"}{f.protecao_antibot ? " · antibot" : ""}</td>
+                      <td className="px-3 py-2 text-xs">{f.frequencia_horas}h</td>
+                      <td className="px-3 py-2 text-xs">{f.ultimo_scrape_em ? new Date(f.ultimo_scrape_em).toLocaleString("pt-BR") : "nunca"}</td>
+                      {tab === "prefeitura" && <td className="px-3 py-2 text-xs">{f.email_imprensa ?? "—"}</td>}
+                      <td className="px-3 py-2">
+                        <button onClick={() => toggleAtivo(f)}
+                          className={`rounded px-2 py-0.5 text-xs font-semibold ${f.ativo ? "bg-green-100 text-green-800" : "bg-gray-200 text-gray-700"}`}>
+                          {f.ativo ? "ativa" : "inativa"}
+                        </button>
+                      </td>
+                      <td className="px-3 py-2 text-right">
+                        <button onClick={() => startEdit(f)} className="mr-2 text-xs text-[#0066CC] hover:underline">editar</button>
+                        <button onClick={() => remove(f)} className="text-xs text-red-600 hover:underline">excluir</button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </>
+        );
+      })()}
     </div>
   );
 }
