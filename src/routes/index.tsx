@@ -42,6 +42,7 @@ const rankedQO = (loc: ViewerLocation) =>
 const HOME_EDITORIAS: Array<{ slug: string; name: string }> = [
   { slug: "seguranca", name: "Segurança" },
   { slug: "politica", name: "Política" },
+  { slug: "eleicoes-2026", name: "Eleições 2026" },
   { slug: "esportes", name: "Esportes" },
   { slug: "cidades", name: "Cidades" },
 ];
@@ -61,6 +62,15 @@ const vaptVuptQO = queryOptions({
 const mostReadQO = queryOptions({
   queryKey: ["articles", "most-read", 7, 5],
   queryFn: () => listMostReadArticles({ data: { days: 7, limit: 5 } }),
+});
+
+// Card fixo no topo — última matéria publicada em Eleições 2026.
+const eleicoes2026TopQO = queryOptions({
+  queryKey: ["articles", "eleicoes-2026-top", 1],
+  queryFn: () =>
+    listArticlesByCategoryGlobal({
+      data: { categorySlug: "eleicoes-2026", limit: 1 },
+    }),
 });
 
 export const Route = createFileRoute("/")({
@@ -93,6 +103,7 @@ export const Route = createFileRoute("/")({
     );
     await context.queryClient.ensureQueryData(vaptVuptQO);
     await context.queryClient.ensureQueryData(mostReadQO);
+    await context.queryClient.ensureQueryData(eleicoes2026TopQO);
   },
   component: Home,
   errorComponent: ({ error }) => (
@@ -108,12 +119,14 @@ function Home() {
   const { data: articles } = useSuspenseQuery(rankedQO(loc));
   const { data: vaptVupt } = useSuspenseQuery(vaptVuptQO);
   const { data: mostRead } = useSuspenseQuery(mostReadQO);
+  const { data: eleicoes2026Top } = useSuspenseQuery(eleicoes2026TopQO);
   return (
     <PortalHome
       regions={regions}
       articles={articles}
       vaptVupt={vaptVupt}
       mostRead={mostRead}
+      eleicoes2026Top={eleicoes2026Top[0]}
     />
   );
 }
@@ -264,11 +277,13 @@ function PortalHome({
   articles,
   vaptVupt,
   mostRead,
+  eleicoes2026Top,
 }: {
   regions: Region[];
   articles: RankedArticle[];
   vaptVupt: ArticleListItem[];
   mostRead: ArticleListItem[];
+  eleicoes2026Top?: ArticleListItem;
 }) {
   const REGIONS_FALLBACK: Region[] = [
     { id: "fb-metropolitana", slug: "metropolitana", name: "Metropolitana" },
@@ -327,9 +342,12 @@ function PortalHome({
       <LocationBar />
 
       <main className="mx-auto max-w-7xl px-4 py-6">
-        {/* CTA — Comunidade WhatsApp (topo) */}
-        <div className="mb-6 flex justify-start">
-          <WhatsAppCTA variant="button" />
+        {/* Topo — CTA WhatsApp + Card fixo Eleições 2026 */}
+        <div className="mb-6 grid gap-4 md:grid-cols-[auto,1fr] md:items-stretch">
+          <div className="flex items-center">
+            <WhatsAppCTA variant="button" />
+          </div>
+          <Eleicoes2026Card article={eleicoes2026Top} />
         </div>
 
         {/* Publicidade — Super Banner topo */}
