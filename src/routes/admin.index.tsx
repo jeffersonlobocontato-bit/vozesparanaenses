@@ -130,7 +130,7 @@ function AdminQueue() {
     const steps: Array<{ name: string; body?: Record<string, unknown> }> = [
       { name: "scrape-source", body: { force: true } },
       { name: "cluster-articles" },
-      { name: "classify-and-quota", body: { sync: true } },
+      { name: "classify-and-quota" },
       { name: "process-pending-clusters", body: { limit: 50 } },
     ];
     for (const step of steps) {
