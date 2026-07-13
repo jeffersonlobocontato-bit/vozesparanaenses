@@ -119,11 +119,12 @@ export function AdSlot({
   }
 
   if (!houseFallback) {
-    // Sem venda direta e sem GAM configurado: tenta GAM, se falhar colapsa.
+    // Sem venda direta e sem house-ad: renderiza só o GAM. Se o GAM não
+    // preencher, o container colapsa (min-height 0) em vez de exibir mock.
     return (
       <div
-        className={`relative overflow-hidden ${className}`}
-        style={{ aspectRatio: `${dim.w} / ${dim.h}`, display: gamFilled ? undefined : "none" }}
+        className={className}
+        style={gamFilled ? { aspectRatio: `${dim.w} / ${dim.h}` } : undefined}
         aria-label={`Publicidade ${size}`}
       >
         <GamSlot size={size} regiao={regiao} cidade={cidade} editoria={editoria} onFillChange={setGamFilled} />
