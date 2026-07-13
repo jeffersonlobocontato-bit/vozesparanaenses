@@ -353,7 +353,7 @@ function PortalHome({
         </div>
 
         {/* Publicidade — Super Banner topo */}
-        <AdSlot size="970x90" className="mb-6" />
+        <AdSlot slot="home_topo" className="mb-6" />
 
         {/* Hero */}
         <div className="grid grid-cols-12 gap-6 mb-8">
@@ -388,7 +388,7 @@ function PortalHome({
                 <div key={i} className={`border-l-4 pl-4 py-1 ${borderCls} cursor-pointer`}>{inner}</div>
               );
             })}
-            <AdSlot size="300x250" className="mt-auto" />
+            <AdSlot slot="home_sidebar_hero" className="mt-auto" />
           </div>
         </div>
 
@@ -530,8 +530,8 @@ function PortalHome({
               </div>
             </div>
             <VaptVuptModule articles={vaptVupt} />
-            <AdSlot size="300x250" />
-            <AdSlot size="300x600" />
+            <AdSlot slot="home_sidebar_quadrado" />
+            <AdSlot slot="home_sidebar_alto" />
           </aside>
         </div>
 

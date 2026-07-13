@@ -2,6 +2,12 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useCallback, useEffect, useState } from "react";
 import { getExternalBrowser } from "@/lib/external-supabase-browser";
 import { PageHeader, refreshBtnClass, tabPillsWrapClass, tabPillClass } from "@/components/admin/ui";
+import {
+  AD_SLOTS,
+  AD_SLOT_LIST,
+  needsMobileVariant,
+  type AdSlotName,
+} from "@/lib/ad-slots";
 
 export const Route = createFileRoute("/admin/anuncios")({
   component: AdminAnuncios,
@@ -40,6 +46,8 @@ type Creative = {
   peso: number;
   aprovado: boolean;
   formato: string | null;
+  slot: string | null;
+  variante: string | null;
 };
 
 type Target = {
