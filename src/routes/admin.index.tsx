@@ -5,6 +5,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { ArticleImageEditor } from "@/components/admin/ArticleImageEditor";
 import { ArticleEditor } from "@/components/admin/ArticleEditor";
 import { displayRegionName } from "@/lib/region-labels";
+import { ManualWriterBox } from "@/components/admin/ManualWriterBox";
 
 export const Route = createFileRoute("/admin/")({
   component: AdminQueue,
@@ -190,6 +191,8 @@ function AdminQueue() {
           {pipelineLog.join("\n")}
         </pre>
       )}
+
+      <ManualWriterBox onCreated={load} />
 
       <section className="rounded-lg border-2 border-amber-400 bg-amber-50/70 p-4">
         <div className="mb-2 flex items-center justify-between">
