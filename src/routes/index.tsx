@@ -66,7 +66,7 @@ const mostReadQO = queryOptions({
 
 // Card fixo no topo — última matéria publicada em Eleições 2026.
 const eleicoes2026TopQO = queryOptions({
-  queryKey: ["articles", "eleicoes-2026-top", 1],
+  queryKey: ["articles", "eleicoes-2026-top", 1, "any"],
   queryFn: () =>
     listArticlesByCategoryGlobal({
       data: { categorySlug: "eleicoes-2026", limit: 1, requireImage: false },
