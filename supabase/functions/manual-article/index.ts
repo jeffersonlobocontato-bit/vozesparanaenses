@@ -99,8 +99,10 @@ Deno.serve(async (req) => {
     }
   }
 
-  // 3. Inserir raw_article (dedup por hash — se o editor colar a mesma URL 2x, retorna erro amigável)
+  // 3. Inserir/reaproveitar raw_article. Se uma tentativa anterior travou na
+  // extração/geração, NÃO bloqueia como duplicado: retomamos do ponto salvo.
   const hash = await sha256(url + "|" + titulo);
+  let rawId: string | null = null;
   const rawInsert = await sb.from("raw_articles").insert({
     fonte_id: fonteId,
     regiao_id: body.regiao_id,
@@ -114,36 +116,90 @@ Deno.serve(async (req) => {
     processado: false,
   }).select("id").single();
   if (rawInsert.error) {
-    if (rawInsert.error.code === "23505") {
-      return json({ error: "url_duplicada", hint: "Essa URL já foi processada antes." }, 409);
+    if (rawInsert.error.code !== "23505") {
+      return json({ error: "raw_insert_failed", detail: rawInsert.error.message }, 500);
     }
-    return json({ error: "raw_insert_failed", detail: rawInsert.error.message }, 500);
+
+    const { data: existingRaw, error: existingRawErr } = await sb
+      .from("raw_articles")
+      .select("id")
+      .eq("hash_conteudo", hash)
+      .maybeSingle();
+    if (existingRawErr || !existingRaw?.id) {
+      return json({ error: "raw_duplicate_lookup_failed", detail: existingRawErr?.message ?? "Matéria bruta duplicada não encontrada." }, 500);
+    }
+    rawId = existingRaw.id as string;
+  } else {
+    rawId = rawInsert.data!.id as string;
   }
-  const rawId = rawInsert.data!.id as string;
 
-  // 4. Criar cluster de 1 item já com regiao_id + categoria_id definidos pelo editor
-  const clusterInsert = await sb.from("article_clusters").insert({
-    regiao_id: body.regiao_id,
-    categoria_id: body.categoria_id,
-    prioridade_score: 1,
-    interesse_score: 3.5, // alto o suficiente para o gerador; publicação continua manual
-    status: "novo",
-  }).select("id").single();
-  if (clusterInsert.error) return json({ error: "cluster_insert_failed", detail: clusterInsert.error.message }, 500);
-  const clusterId = clusterInsert.data!.id as string;
+  // 4. Criar ou retomar cluster de 1 item já com regiao_id + categoria_id do editor
+  const { data: existingLinks, error: linkLookupErr } = await sb
+    .from("cluster_articles")
+    .select("cluster_id, cluster:article_clusters(id, status, criado_em)")
+    .eq("raw_article_id", rawId)
+    .order("cluster_id", { ascending: false })
+    .limit(1);
+  if (linkLookupErr) return json({ error: "cluster_lookup_failed", detail: linkLookupErr.message }, 500);
 
-  const linkInsert = await sb.from("cluster_articles").insert({ cluster_id: clusterId, raw_article_id: rawId });
-  if (linkInsert.error) return json({ error: "cluster_link_failed", detail: linkInsert.error.message }, 500);
+  let clusterId = (existingLinks?.[0]?.cluster_id as string | undefined) ?? null;
+  if (clusterId) {
+    await sb.from("article_clusters").update({
+      regiao_id: body.regiao_id,
+      categoria_id: body.categoria_id,
+      prioridade_score: 1,
+      interesse_score: 3.5,
+    }).eq("id", clusterId);
+  } else {
+    const clusterInsert = await sb.from("article_clusters").insert({
+      regiao_id: body.regiao_id,
+      categoria_id: body.categoria_id,
+      prioridade_score: 1,
+      interesse_score: 3.5, // alto o suficiente para o gerador; publicação continua manual
+      status: "novo",
+    }).select("id").single();
+    if (clusterInsert.error) return json({ error: "cluster_insert_failed", detail: clusterInsert.error.message }, 500);
+    clusterId = clusterInsert.data!.id as string;
 
-  // 5. Chamar extract-facts
-  const ef = await fetch(`${selfUrl}/functions/v1/extract-facts`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json", Authorization: `Bearer ${selfKey}` },
-    body: JSON.stringify({ cluster_id: clusterId }),
-  });
-  if (!ef.ok) {
-    const t = await ef.text();
-    return json({ error: "extract_facts_failed", status: ef.status, detail: t.slice(0, 400), cluster_id: clusterId }, 502);
+    const linkInsert = await sb.from("cluster_articles").insert({ cluster_id: clusterId, raw_article_id: rawId });
+    if (linkInsert.error) return json({ error: "cluster_link_failed", detail: linkInsert.error.message }, 500);
+  }
+
+  const { data: existingArticle } = await sb
+    .from("generated_articles")
+    .select("id, titulo, slug, status")
+    .eq("cluster_id", clusterId)
+    .order("gerado_em", { ascending: false })
+    .limit(1)
+    .maybeSingle();
+  if (existingArticle?.id) {
+    return json({
+      ok: true,
+      resumed: true,
+      cluster_id: clusterId,
+      raw_article_id: rawId,
+      article: existingArticle,
+      titulo: existingArticle.titulo ?? titulo,
+    });
+  }
+
+  // 5. Chamar extract-facts só se ainda não há fatos salvos para este cluster
+  const { data: existingFacts } = await sb
+    .from("extracted_facts")
+    .select("id")
+    .eq("cluster_id", clusterId)
+    .limit(1)
+    .maybeSingle();
+  if (!existingFacts?.id) {
+    const ef = await fetch(`${selfUrl}/functions/v1/extract-facts`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json", Authorization: `Bearer ${selfKey}` },
+      body: JSON.stringify({ cluster_id: clusterId }),
+    });
+    if (!ef.ok) {
+      const t = await ef.text();
+      return json({ error: "extract_facts_failed", status: ef.status, detail: t.slice(0, 800), cluster_id: clusterId }, 502);
+    }
   }
 
   // 6. Chamar generate-article (com observações opcionais do editor)
@@ -157,7 +213,7 @@ Deno.serve(async (req) => {
   });
   if (!ga.ok) {
     const t = await ga.text();
-    return json({ error: "generate_article_failed", status: ga.status, detail: t.slice(0, 400), cluster_id: clusterId }, 502);
+    return json({ error: "generate_article_failed", status: ga.status, detail: t.slice(0, 800), cluster_id: clusterId }, 502);
   }
   const gaJson = await ga.json();
 
