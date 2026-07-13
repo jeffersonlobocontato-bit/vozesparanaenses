@@ -27,10 +27,7 @@ type Creative = {
 const CREATIVES: Creative[] = [
   { brand: "Sicredi", headline: "Crédito rural com taxas exclusivas para produtores do Paraná", cta: "Simule agora", bg: "from-emerald-700 to-emerald-900", seed: 12 },
   { brand: "Copel", headline: "Energia solar residencial: economize até 95% na conta de luz", cta: "Peça orçamento", bg: "from-sky-700 to-sky-900", seed: 24 },
-  { brand: "Havan", headline: "Semana do Cliente: até 70% OFF em toda a loja", cta: "Ver ofertas", bg: "from-rose-700 to-rose-900", seed: 33 },
-  { brand: "Sanepar", headline: "Consumo consciente de água: dicas para reduzir sua conta", cta: "Saiba mais", bg: "from-cyan-700 to-cyan-900", seed: 47 },
   { brand: "Unimed", headline: "Plano de saúde regional com a maior rede do Paraná", cta: "Contrate online", bg: "from-emerald-800 to-teal-900", seed: 58 },
-  { brand: "Boticário", headline: "Nova coleção Nativa SPA — presenteie com cuidado", cta: "Compre agora", bg: "from-fuchsia-700 to-purple-900", seed: 66 },
   { brand: "Renault Paraná", headline: "Kwid 2026 com taxa zero em até 24x. Vem test-drive.", cta: "Agende teste", bg: "from-amber-600 to-orange-800", seed: 71 },
   { brand: "Sesc PR", headline: "Programação cultural gratuita nas unidades de todo o estado", cta: "Ver agenda", bg: "from-indigo-700 to-indigo-900", seed: 82 },
 ];
