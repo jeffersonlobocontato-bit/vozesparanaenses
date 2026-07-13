@@ -23,6 +23,7 @@ type Raw = {
   titulo: string | null;
   corpo_limpo: string | null;
   embedding: number[] | null;
+  fonte: { tipo: string } | { tipo: string }[] | null;
 };
 
 Deno.serve(async (req) => {
@@ -44,7 +45,7 @@ Deno.serve(async (req) => {
 
   let q = sb
     .from("raw_articles")
-    .select("id, regiao_id, titulo, corpo_limpo, embedding")
+    .select("id, regiao_id, titulo, corpo_limpo, embedding, fonte:fonte_id(tipo)")
     .eq("processado", false)
     .order("coletado_em", { ascending: false })
     .limit(limit);
@@ -53,8 +54,33 @@ Deno.serve(async (req) => {
   if (error) return json({ error: "raw_query_failed", detail: error.message }, 500);
   if (!raws?.length) return json({ ok: true, processed: 0, clusters: 0 });
 
-  // 1. Gerar embeddings faltantes
-  const items = raws as Raw[];
+  // 1. Fontes oficiais (prefeitura) não precisam de embedding nem de
+  //    cruzamento com outra fonte — cada release já é, por natureza,
+  //    elegível sozinho. Viram cluster de 1 item na hora, sem entrar no
+  //    laço de similaridade abaixo (que é só para veículos de imprensa).
+  const isOficial = (r: Raw) => {
+    const f = Array.isArray(r.fonte) ? r.fonte[0] : r.fonte;
+    return f?.tipo === "prefeitura";
+  };
+  const rawsOficiais = (raws as Raw[]).filter(isOficial);
+  const rawsVeiculo = (raws as Raw[]).filter((r) => !isOficial(r));
+
+  let createdOficiais = 0;
+  for (const r of rawsOficiais) {
+    if (!r.regiao_id) continue;
+    const { data: cluster, error: cErr } = await sb
+      .from("article_clusters")
+      .insert({ regiao_id: r.regiao_id, prioridade_score: 1, status: "novo", fonte_oficial: true })
+      .select("id")
+      .single();
+    if (cErr || !cluster) { console.error("cluster oficial insert failed", cErr?.message); continue; }
+    await sb.from("cluster_articles").insert({ cluster_id: cluster.id, raw_article_id: r.id });
+    await sb.from("raw_articles").update({ processado: true }).eq("id", r.id);
+    createdOficiais++;
+  }
+
+  // 2. Veículos de imprensa seguem o fluxo normal (embedding + similaridade).
+  const items = rawsVeiculo;
   const needEmbed = items.filter((r) => !r.embedding);
   for (const r of needEmbed) {
     const text = `${r.titulo ?? ""}\n\n${r.corpo_limpo ?? ""}`.slice(0, 4000);
@@ -145,7 +171,13 @@ Deno.serve(async (req) => {
     }
   }
 
-  return json({ ok: true, processed: items.length, clusters: created, linked_cross_regiao: linked });
+  return json({
+    ok: true,
+    processed: items.length + rawsOficiais.length,
+    clusters: created + createdOficiais,
+    clusters_oficiais: createdOficiais,
+    linked_cross_regiao: linked,
+  });
 });
 
 function json(body: unknown, status = 200) {

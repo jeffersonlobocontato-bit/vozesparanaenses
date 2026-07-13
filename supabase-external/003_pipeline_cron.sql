@@ -102,6 +102,24 @@ select cron.schedule(
   $$
 );
 
+-- 5. Scraping de prefeituras (assessoria de imprensa oficial) — INDEPENDENTE
+--    do scrape-source (veículos). Cron próprio, mesmo raciocínio de ciclos
+--    fixos (7h/12h/15h/19h) aplicado só sobre fontes tipo='prefeitura'.
+select cron.schedule(
+  'vozes-scrape-prefeitura',
+  '20,50 * * * *',
+  $$
+  select net.http_post(
+    url := 'https://{PROJECT_URL}/functions/v1/scrape-prefeitura',
+    headers := jsonb_build_object(
+      'Content-Type','application/json',
+      'Authorization','Bearer {ANON_KEY}'
+    ),
+    body := '{}'::jsonb
+  );
+  $$
+);
+
 -- Consultas úteis:
 --   select * from cron.job;
 --   select * from cron.job_run_details order by start_time desc limit 20;

@@ -39,7 +39,7 @@ Deno.serve(async (req) => {
 
   let cq = sb
     .from("article_clusters")
-    .select("id, regiao_id, categoria_id, prioridade_score, criado_em")
+    .select("id, regiao_id, categoria_id, prioridade_score, criado_em, fonte_oficial")
     .eq("status", "novo")
     .is("categoria_id", null)
     .order("prioridade_score", { ascending: false })
@@ -120,7 +120,13 @@ async function processClusters(
     // + bônus por cobertura em múltiplas regiões.
     const horasDesdeCriacao = (Date.now() - new Date(c.criado_em).getTime()) / 3_600_000;
     const fatorRecencia = Math.max(0.3, 1 - horasDesdeCriacao / 48);
-    const interesseScore = Number((c.prioridade_score * cat.peso_engajamento * fatorRecencia + bonusEstadual).toFixed(2));
+    // Fonte oficial (prefeitura) não depende de nº de fontes pra ser
+    // relevante — usa um piso próprio em vez de prioridade_score (que,
+    // pra essas, é sempre 1, já que nunca precisam de outra fonte
+    // corroborando o mesmo fato).
+    const OFICIAL_SCORE_BASE = 2.0;
+    const scoreBase = c.fonte_oficial ? OFICIAL_SCORE_BASE : c.prioridade_score;
+    const interesseScore = Number((scoreBase * cat.peso_engajamento * fatorRecencia + bonusEstadual).toFixed(2));
 
     await sb.from("article_clusters").update({ categoria_id: cat.id, interesse_score: interesseScore }).eq("id", c.id);
     classified.push({ id: c.id, regiao_id: c.regiao_id, categoria_id: cat.id, score: c.prioridade_score });
