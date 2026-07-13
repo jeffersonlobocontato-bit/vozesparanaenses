@@ -11,7 +11,9 @@ alter table public.ad_creatives
 create index if not exists ad_creatives_formato_idx on public.ad_creatives(formato);
 
 -- Recria a view expondo o formato para o ad server
-create or replace view public.ads_eligible as
+-- (drop antes do create para permitir reordenar colunas)
+drop view if exists public.ads_eligible;
+create view public.ads_eligible as
 select
   cr.id            as creative_id,
   cr.campaign_id,
