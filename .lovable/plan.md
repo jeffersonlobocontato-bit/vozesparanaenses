@@ -1,45 +1,67 @@
-## Diagnóstico
+## Panorama das frentes de monetização
 
-Consultei o banco e confirmei a causa raiz: **a migration `030_ad_creatives_formato.sql` nunca foi aplicada**.
+Hoje o portal tem **3 caminhos de receita** previstos no código. Abaixo o estado real de cada um e o que falta para começar a faturar.
 
-- A tabela `ad_creatives` **não tem** a coluna `formato`.
-- A view `ads_eligible` também **não expõe** `formato`.
-- O `pickAd` (`src/lib/ads.functions.ts`) faz `select("...,formato")` — como a coluna não existe, o PostgREST retorna erro, `creatives` vira `null` e o slot cai no **mock house-ad** (Sicredi, Copel, Unimed, Renault, Sesc) — que é justamente o que aparece hoje em todos os espaços do site.
+---
 
-Ou seja: os 2 criativos reais da campanha "Consultoria em IA" **não estão sequer sendo servidos**; o que você vê são os placeholders internos, que ignoram tamanho e giram por hash em qualquer slot.
+### 1. Venda direta (patrocínio / anunciantes locais) — 🟡 Parcial
+**Pronto:**
+- Painel `/admin/anuncios` com campanhas, criativos por slot (desktop/mobile), targeting geo (estado/região/cidade) e por editoria.
+- Ad server próprio (`pickAd`) com cap diário, contagem de impressões e cliques, redirecionador `/r/:id`.
+- Preview do encaixe do criativo no espaço.
 
-## Plano de correção
+**Pendente:**
+1. **Relatório para o anunciante** — hoje impressões/cliques ficam só no banco. Falta uma tela (ou export CSV/PDF) por campanha com: impressões/dia, cliques, CTR, cidades que mais impactaram. Sem isso não dá pra prestar contas de plano vendido.
+2. **Planos / pacotes comerciais** — não existe noção de "plano" (ex.: 30 dias, 10k impressões/dia em Curitiba). Hoje é tudo manual no cadastro. Precisa: campo `plano` na campanha + limitador de impressões total (não só diário).
+3. **Onboarding do anunciante** — não há fluxo público de "quero anunciar". Página `/anuncie` com formulário + tabela de preços + envio pro admin. 
+4. **Faturamento** — nenhum. Decidir: cobrar fora (boleto/PIX manual) ou plugar Stripe/Paddle? Hoje volume não justifica automação.
 
-### 1. Aplicar a migration pendente
-Rodar `supabase-external/030_ad_creatives_formato.sql` (já existe no repo, com o `drop view if exists` que ajustamos). Isso:
-- adiciona `ad_creatives.formato text`
-- recria `ads_eligible` incluindo a coluna `formato`
+---
 
-### 2. Definir o formato dos 2 criativos existentes
-Depois da migration, os dois criativos ficam com `formato = NULL` (servem em qualquer slot). Vou atualizar direto no banco para os tamanhos reais das peças entregues pelo Jefferson Lobo:
-- criativo 1 → `300x250` (quadrado da sidebar)
-- criativo 2 → `970x90` (leaderboard do header)
+### 2. Programática (Google Ad Manager) — 🔴 Não ativa
+**Pronto:**
+- `GamSlot` implementado, integra com GPT quando `VITE_GAM_NETWORK_CODE` está setado.
+- Fallback já correto: se não tem GAM, slot colapsa em vez de mostrar mock.
 
-*(se você me disser outro mapeamento eu ajusto; o importante é vincular cada criativo a um formato para parar a exibição indiscriminada)*
+**Pendente:**
+1. Criar conta Google Ad Manager (grátis até 90M imp/mês).
+2. Criar ad unit `vozesparanaenses` com os 5 tamanhos usados no site.
+3. Setar `VITE_GAM_NETWORK_CODE` no `.env`.
+4. **Decisão comercial:** ativar GAM canibaliza AdSense? Normalmente não — GAM vira o "leilão" e AdSense entra como uma das demandas. Mas exige configurar as *ad sources* dentro do GAM. Sem isso, GAM ativo e vazio = slot colapsado, pior que só AdSense.
 
-### 3. Ajuste defensivo no `AdSlot`
-Enquanto o `pickAd` não devolve criativo real, o fallback é o mock. Vou adicionar uma flag `VITE_ADS_HOUSE_FALLBACK` (default `false` em produção) para que, quando não houver campanha elegível para aquele formato, o slot **colapse** em vez de exibir Sicredi/Copel/etc — que hoje passam a impressão de "anúncios fictícios" no site em produção.
+---
 
-### 4. Validação
-Depois de aplicar (1) e (2), abrir a home e conferir:
-- header (970x90) exibe apenas o criativo `970x90`
-- sidebar (300x250) exibe apenas o `300x250`
-- slot `300x600` fica vazio (não tem criativo desse formato ainda) — sem mock
+### 3. Google AdSense (`ca-pub-3867318545397573`) — 🟢 Ativo, mas subutilizado
+**Pronto:**
+- Script global carregado, desligado em `/admin`.
+- Componente `AdsenseSlot` com auto-collapse quando `unfilled`.
+- Multiplex já colocado em algumas páginas.
+
+**Pendente:**
+1. **Mapear onde o AdSense aparece hoje vs. onde poderia aparecer.** Preciso auditar — hoje `AdSlot` (venda direta) e `AdsenseSlot` vivem em rotas separadas; não há hierarquia "tenta direta → tenta GAM → cai em AdSense". Deveria haver.
+2. **Ads in-article no corpo da matéria** — meio da matéria hoje é slot próprio, não AdSense in-article (que rende mais em conteúdo longo).
+3. **Aprovação de conteúdo do AdSense** — confirmar que a conta está aprovada pra veicular (às vezes fica em "limited ads" até bater X pageviews).
+
+---
+
+### 4. Frentes que **existem no produto** mas ainda não viraram receita
+- **Classificados** (`/:region/classificados`) — rota existe mas não vi modelo de cobrança. Pode virar receita (anúncio de imóvel/emprego cobrado por publicação).
+- **Comunidade WhatsApp** — CTA em todo lugar, mas não há monetização (poderia ser: mensagem patrocinada no grupo, cobrada como mídia).
+- **Newsletter / feed regional** — RSS existe, newsletter não. Newsletter regional é o produto mais vendável hoje em jornalismo local.
+
+---
+
+## Recomendação de ordem (por esforço × receita)
+
+1. **Auditar AdSense** e adicionar in-article no corpo da matéria — ganho rápido, zero venda.
+2. **Relatório do anunciante + página `/anuncie`** — destrava venda direta, que já está 80% pronta.
+3. **Ativar GAM** só depois que houver volume de pageviews que justifique (senão vira trabalho sem retorno).
+4. **Newsletter regional** — produto novo, mas é o de maior ticket em mídia local.
 
 ## Detalhes técnicos
 
-Arquivos envolvidos:
-- `supabase-external/030_ad_creatives_formato.sql` (aplicar)
-- `src/components/AdSlot.tsx` (fallback opt-in via env)
-- `src/lib/ads.functions.ts` (nenhuma mudança — já filtra por `data.size`)
+- Auditoria de AdSense = ler `src/routes/*.tsx` e mapear onde há `AdsenseSlot` vs `AdSlot`.
+- Relatório do anunciante = nova rota `/admin/anuncios/:id/relatorio` consumindo `ad_impressions` / `ad_clicks` já existentes.
+- Página `/anuncie` = rota pública + tabela `ad_leads` + envio pro admin (email via edge function).
 
-Update SQL após a migration:
-```sql
-update ad_creatives set formato = '300x250' where id = '6da91a6b-...';
-update ad_creatives set formato = '970x90'  where id = '673ca6b7-...';
-```
+Quer que eu detalhe um plano de execução pra qual desses itens primeiro?
