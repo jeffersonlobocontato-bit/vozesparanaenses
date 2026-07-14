@@ -2,6 +2,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { queryOptions, useSuspenseQuery } from "@tanstack/react-query";
 import { getRegionBySlug, listArticlesByCity } from "@/lib/content.functions";
 import { SiteHeader, SiteFooter } from "@/components/SiteHeader";
+import { AdsenseSlot } from "@/components/AdsenseSlot";
 import {
   getCityCoords,
   formatGeoPosition,
@@ -171,8 +172,14 @@ function CityPage() {
             .
           </p>
         ) : (
-          <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
-            {city.articles.map((a) => (
+          <>
+            {/* AdSense responsivo — só quando há artigos (página com noindex
+                se estiver vazia; não faz sentido servir anúncio ali). */}
+            <div className="mb-8">
+              <AdsenseSlot slot="9449330789" />
+            </div>
+            <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
+              {city.articles.map((a) => (
               <Link
                 key={a.id}
                 to="/$region/$slug"
@@ -205,8 +212,14 @@ function CityPage() {
                   <p className="mt-1 text-sm text-slate-600 line-clamp-2">{a.subtitle}</p>
                 )}
               </Link>
-            ))}
-          </div>
+              ))}
+            </div>
+            {/* AdSense multiplex após o feed — matched content, alto CTR quando
+                o leitor terminou de escanear a grade. */}
+            <div className="mt-10">
+              <AdsenseSlot slot="2880053002" format="autorelaxed" />
+            </div>
+          </>
         )}
 
         {neighbors.length > 0 && (
