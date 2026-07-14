@@ -6,6 +6,7 @@ import {
   listCategorias,
 } from "@/lib/content.functions";
 import { SiteHeader, SiteFooter } from "@/components/SiteHeader";
+import { AdsenseSlot } from "@/components/AdsenseSlot";
 
 const regionQO = (slug: string) =>
   queryOptions({
@@ -131,7 +132,13 @@ function CategoryPage() {
             Ainda não há matérias publicadas nesta editoria para {region.name}.
           </div>
         ) : (
-          <div className="grid gap-6 md:grid-cols-3">
+          <>
+            {/* AdSense responsivo — só quando há artigos (a página é
+                noindex quando vazia; não serve anúncio ali). */}
+            <div className="mb-8">
+              <AdsenseSlot slot="9449330789" />
+            </div>
+            <div className="grid gap-6 md:grid-cols-3">
             {articles.map((a) => (
               <Link
                 key={a.id}
@@ -160,7 +167,12 @@ function CategoryPage() {
                 </div>
               </Link>
             ))}
-          </div>
+            </div>
+            {/* Multiplex ao final da grade da editoria. */}
+            <div className="mt-10">
+              <AdsenseSlot slot="2880053002" format="autorelaxed" />
+            </div>
+          </>
         )}
       </section>
 
