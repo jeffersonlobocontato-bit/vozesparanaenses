@@ -116,7 +116,7 @@ export function SalesChatWidget() {
                 <div className={`max-w-[85%] rounded-2xl px-3 py-2 text-sm leading-snug ${
                   m.role === "user" ? "bg-[#0066CC] text-white" : "bg-slate-100 text-slate-800"
                 }`}>
-                  {m.content}
+                  {m.role === "assistant" ? renderMessageContent(m.content) : m.content}
                 </div>
               </div>
             ))}
