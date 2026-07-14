@@ -133,11 +133,6 @@ function CategoryPage() {
           </div>
         ) : (
           <>
-            {/* AdSense responsivo — só quando há artigos (a página é
-                noindex quando vazia; não serve anúncio ali). */}
-            <div className="mb-8">
-              <AdsenseSlot slot="9449330789" />
-            </div>
             <div className="grid gap-6 md:grid-cols-3">
             {articles.map((a) => (
               <Link
@@ -168,9 +163,9 @@ function CategoryPage() {
               </Link>
             ))}
             </div>
-            {/* Multiplex ao final da grade da editoria. */}
+            {/* Multiplex dedicado da editoria regional, ao final da grade. */}
             <div className="mt-10">
-              <AdsenseSlot slot="2880053002" format="autorelaxed" />
+              <AdsenseSlot slot="9322457839" format="autorelaxed" />
             </div>
           </>
         )}

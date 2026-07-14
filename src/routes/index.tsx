@@ -537,7 +537,7 @@ function PortalHome({
 
         {/* AdSense — Grupo 3 (rodapé) */}
         <div className="mt-10 empty:hidden">
-          <AdsenseSlot slot="2880053002" />
+          <AdsenseSlot slot="4261702843" format="autorelaxed" />
         </div>
 
         {/* CTA — Comunidade WhatsApp (rodapé da home) */}
