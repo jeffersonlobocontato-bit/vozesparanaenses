@@ -223,6 +223,7 @@ function RootComponent() {
   return (
     <QueryClientProvider client={queryClient}>
       <PageviewTracker />
+      {!isAdmin && <SalesChatWidget />}
       {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
       <Outlet />
     </QueryClientProvider>
