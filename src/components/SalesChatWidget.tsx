@@ -5,6 +5,8 @@ import { supabase } from "@/integrations/supabase/client";
 // espaços/símbolos (ex.: 5544999998888 para +55 44 99999-8888).
 const WHATSAPP_COMERCIAL = "5500000000000";
 
+const URL_REGEX = /(https?:\/\/[^\s]+)/g;
+
 type Msg = { role: "user" | "assistant"; content: string };
 type Pix = { chave: string; titular: string } | null;
 
@@ -12,6 +14,38 @@ function novaSessaoId(): string {
   return typeof crypto !== "undefined" && "randomUUID" in crypto
     ? crypto.randomUUID()
     : `sessao-${Date.now()}-${Math.random().toString(36).slice(2)}`;
+}
+
+function isFormUrl(url: string): boolean {
+  return url.includes("/vitrine-pessoal/novo");
+}
+
+function renderMessageContent(content: string) {
+  const parts = content.split(URL_REGEX);
+  const matches = content.match(URL_REGEX) ?? [];
+
+  return (
+    <>
+      {parts.map((part, idx) => {
+        const url = matches[idx];
+        return (
+          <span key={idx}>
+            {part}
+            {url && (
+              <a
+                href={url}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="mt-2 inline-block rounded-full bg-[#0066CC] px-4 py-2 text-sm font-bold text-white shadow-sm transition-transform hover:scale-105 hover:bg-[#0052a3]"
+              >
+                {isFormUrl(url) ? "RESPONDER FORMULÁRIO" : "ABRIR LINK"}
+              </a>
+            )}
+          </span>
+        );
+      })}
+    </>
+  );
 }
 
 export function SalesChatWidget() {
