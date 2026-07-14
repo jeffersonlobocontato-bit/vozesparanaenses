@@ -136,6 +136,24 @@ function AdminVitrinePessoal() {
                 <p className="mt-2 rounded bg-red-50 p-2 text-xs text-red-700">Motivo da recusa: {p.motivo_recusa}</p>
               )}
 
+              {p.imagens && p.imagens.length > 0 && (
+                <div className="mt-3">
+                  <p className="mb-1 text-xs font-semibold text-slate-600">Fotos enviadas ({p.imagens.length})</p>
+                  <ul className="flex flex-wrap gap-2">
+                    {p.imagens.map((f, i) => (
+                      <li key={f.path} className="relative">
+                        <a href={f.url} target="_blank" rel="noreferrer">
+                          <img src={f.url} alt={f.name} className="h-16 w-16 rounded border border-slate-200 object-cover" />
+                        </a>
+                        {i === 0 && (
+                          <span className="absolute left-0 top-0 rounded bg-emerald-600 px-1 py-0.5 text-[9px] font-bold uppercase text-white">Capa</span>
+                        )}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+
               <div className="mt-3 flex gap-2">
                 {p.status === "enviado_para_aprovacao" && (
                   <>
