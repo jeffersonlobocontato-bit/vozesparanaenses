@@ -24,8 +24,11 @@ type ArtigoRef = {
 type Pedido = {
   id: string; status: Status; nome_cliente: string; profissao: string; valor: number;
   motivo_recusa: string | null;
+  imagens: Foto[] | null;
   generated_article: ArtigoRef | ArtigoRef[] | null;
 };
+
+type Foto = { url: string; name: string; path: string };
 
 type Pix = { chave: string; titular: string } | null;
 
@@ -42,6 +45,8 @@ function VitrinePessoalEditor() {
   const [publicando, setPublicando] = useState(false);
   const [linkPublicado, setLinkPublicado] = useState<string | null>(null);
   const [msg, setMsg] = useState<string | null>(null);
+  const [fotos, setFotos] = useState<Foto[]>([]);
+  const [enviandoFoto, setEnviandoFoto] = useState(false);
 
   async function carregar() {
     setCarregando(true);
@@ -53,6 +58,7 @@ function VitrinePessoalEditor() {
       if (!p) throw new Error("Link inválido ou pedido não encontrado.");
       setPedido(p);
       setPix((data as { pix?: Pix })?.pix ?? null);
+      setFotos(Array.isArray(p.imagens) ? p.imagens : []);
       const art = Array.isArray(p.generated_article) ? p.generated_article[0] : p.generated_article;
       if (art) {
         setCampos({ titulo: art.titulo, subtitulo: art.subtitulo ?? "", resumo: art.resumo ?? "", corpo: art.corpo });
@@ -91,6 +97,47 @@ function VitrinePessoalEditor() {
       setMsg("Erro ao publicar: " + (e instanceof Error ? e.message : "tente novamente"));
     } finally {
       setPublicando(false);
+    }
+  }
+
+  async function fileToBase64(f: File): Promise<string> {
+    return new Promise((resolve, reject) => {
+      const r = new FileReader();
+      r.onload = () => resolve(String(r.result).split(",")[1] ?? "");
+      r.onerror = () => reject(r.error);
+      r.readAsDataURL(f);
+    });
+  }
+
+  async function adicionarFotos(files: FileList | null) {
+    if (!files || files.length === 0) return;
+    setEnviandoFoto(true);
+    setMsg(null);
+    try {
+      const add = await Promise.all(Array.from(files).slice(0, 6).map(async (f) => ({
+        name: f.name, contentType: f.type || "image/jpeg", base64: await fileToBase64(f),
+      })));
+      const { data, error } = await supabase.functions.invoke("vitrine-pessoal-upload", { body: { token, add } });
+      if (error) throw error;
+      const list = (data as { imagens?: Foto[] })?.imagens ?? [];
+      setFotos(list);
+    } catch (e: unknown) {
+      setMsg("Erro ao enviar foto: " + (e instanceof Error ? e.message : "tente novamente"));
+    } finally {
+      setEnviandoFoto(false);
+    }
+  }
+
+  async function removerFoto(path: string) {
+    setEnviandoFoto(true);
+    try {
+      const { data, error } = await supabase.functions.invoke("vitrine-pessoal-upload", { body: { token, remove: [path] } });
+      if (error) throw error;
+      setFotos((data as { imagens?: Foto[] })?.imagens ?? []);
+    } catch (e: unknown) {
+      setMsg("Erro ao remover foto: " + (e instanceof Error ? e.message : "tente novamente"));
+    } finally {
+      setEnviandoFoto(false);
     }
   }
 
@@ -218,6 +265,44 @@ function VitrinePessoalEditor() {
             <textarea disabled={!editavel} rows={14} value={campos.corpo} onChange={(e) => setCampos({ ...campos, corpo: e.target.value })}
               className="w-full rounded-lg border border-slate-300 px-3 py-2 font-mono text-sm disabled:bg-slate-100" />
           </label>
+
+          <div className="border-t border-slate-200 pt-4">
+            <div className="mb-2 flex items-center justify-between">
+              <span className="text-sm font-medium text-slate-700">Fotos ({fotos.length}/6)</span>
+              {editavel && (
+                <label className="cursor-pointer rounded-lg border border-slate-300 px-3 py-1.5 text-xs font-semibold text-slate-700 hover:bg-slate-50">
+                  {enviandoFoto ? "Enviando…" : "Adicionar fotos"}
+                  <input type="file" accept="image/*" multiple hidden disabled={enviandoFoto || fotos.length >= 6}
+                    onChange={(e) => { adicionarFotos(e.target.files); e.target.value = ""; }} />
+                </label>
+              )}
+            </div>
+            <p className="mb-3 text-xs text-slate-500">
+              A primeira foto vira a capa da matéria. Máximo 6 fotos, até 6MB cada (jpg, png, webp).
+            </p>
+            {fotos.length === 0 ? (
+              <p className="rounded border border-dashed border-slate-300 bg-slate-50 p-4 text-center text-xs text-slate-500">
+                Nenhuma foto enviada ainda.
+              </p>
+            ) : (
+              <ul className="grid grid-cols-2 gap-3 sm:grid-cols-3">
+                {fotos.map((f, i) => (
+                  <li key={f.path} className="relative overflow-hidden rounded-lg border border-slate-200 bg-slate-100">
+                    <img src={f.url} alt={f.name} className="h-32 w-full object-cover" loading="lazy" />
+                    {i === 0 && (
+                      <span className="absolute left-1 top-1 rounded bg-emerald-600 px-1.5 py-0.5 text-[10px] font-bold uppercase text-white">Capa</span>
+                    )}
+                    {editavel && (
+                      <button type="button" onClick={() => removerFoto(f.path)} disabled={enviandoFoto}
+                        className="absolute right-1 top-1 rounded bg-black/60 px-1.5 py-0.5 text-[10px] font-bold text-white hover:bg-red-600">
+                        Remover
+                      </button>
+                    )}
+                  </li>
+                ))}
+              </ul>
+            )}
+          </div>
 
           {msg && <p className="text-xs text-muted-foreground">{msg}</p>}
 

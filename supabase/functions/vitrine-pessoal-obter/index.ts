@@ -30,7 +30,7 @@ Deno.serve(async (req) => {
   const { data: pedido, error } = await sb
     .from("vitrine_pessoal_pedidos")
     .select(
-      "id, status, nome_cliente, profissao, valor, metodo_pagamento, motivo_recusa, " +
+      "id, status, nome_cliente, profissao, valor, metodo_pagamento, motivo_recusa, imagens, " +
       "generated_article:generated_article_id(id, slug, titulo, subtitulo, resumo, corpo, regiao:regioes(slug))",
     )
     .eq("token", body.token)
