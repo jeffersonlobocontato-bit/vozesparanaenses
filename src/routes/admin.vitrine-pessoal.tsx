@@ -8,8 +8,9 @@ export const Route = createFileRoute("/admin/vitrine-pessoal")({
 });
 
 type Pedido = {
-  id: string; nome_cliente: string; contato: string; profissao: string; valor: number;
+  id: string; token: string; nome_cliente: string; contato: string; profissao: string; valor: number;
   status: string; motivo_recusa: string | null; criado_em: string;
+  imagens: Array<{ url: string; name: string; path: string }> | null;
   generated_article: { titulo: string; corpo: string; slug: string } | { titulo: string; corpo: string; slug: string }[] | null;
 };
 
@@ -29,7 +30,7 @@ function AdminVitrinePessoal() {
       const sb = await getExternalBrowser();
       const { data, error } = await sb
         .from("vitrine_pessoal_pedidos")
-        .select("id, nome_cliente, contato, profissao, valor, status, motivo_recusa, criado_em, generated_article:generated_article_id(titulo, corpo, slug)")
+        .select("id, token, nome_cliente, contato, profissao, valor, status, motivo_recusa, criado_em, imagens, generated_article:generated_article_id(titulo, corpo, slug)")
         .order("criado_em", { ascending: false });
       if (error) throw error;
       setPedidos((data ?? []) as unknown as Pedido[]);
@@ -67,6 +68,29 @@ function AdminVitrinePessoal() {
     }).eq("id", id);
     setBusy(null);
     load();
+  }
+
+  function waLink(p: Pedido, texto: string) {
+    const digitos = (p.contato || "").replace(/\D/g, "");
+    if (!digitos) return null;
+    const numero = digitos.startsWith("55") ? digitos : `55${digitos}`;
+    return `https://wa.me/${numero}?text=${encodeURIComponent(texto)}`;
+  }
+
+  function linkVitrine(p: Pedido) {
+    return `${window.location.origin}/vitrine/${p.token}`;
+  }
+
+  function msgAprovado(p: Pedido) {
+    return `Olá, ${p.nome_cliente}! Sua matéria da Vitrine Pessoal foi aprovada 🎉\n\n`
+      + `Para publicarmos, falta apenas o pagamento de R$ ${p.valor.toFixed(2).replace(".", ",")} via Pix.\n\n`
+      + `Os dados do Pix e o botão de publicação estão nesta página:\n${linkVitrine(p)}\n\n`
+      + `Depois de pagar, é só nos avisar por aqui que confirmamos e liberamos a publicação.`;
+  }
+
+  function msgPago(p: Pedido) {
+    return `Olá, ${p.nome_cliente}! Recebemos seu Pix, obrigado 🙌\n\n`
+      + `Sua matéria já pode ser publicada. Basta clicar em "Publicar minha matéria" nesta página:\n${linkVitrine(p)}`;
   }
 
   return (
@@ -122,10 +146,24 @@ function AdminVitrinePessoal() {
                   </>
                 )}
                 {p.status === "aprovado" && (
-                  <button disabled={busy === p.id} onClick={() => confirmarPagamento(p.id)}
-                    className="rounded bg-[#0066CC] px-3 py-1.5 text-xs font-semibold text-white disabled:opacity-60">
-                    Confirmar Pix recebido
-                  </button>
+                  <>
+                    {waLink(p, msgAprovado(p)) && (
+                      <a href={waLink(p, msgAprovado(p))!} target="_blank" rel="noreferrer"
+                        className="rounded bg-[#25D366] px-3 py-1.5 text-xs font-semibold text-white hover:brightness-95">
+                        Avisar cliente (WhatsApp)
+                      </a>
+                    )}
+                    <button disabled={busy === p.id} onClick={() => confirmarPagamento(p.id)}
+                      className="rounded bg-[#0066CC] px-3 py-1.5 text-xs font-semibold text-white disabled:opacity-60">
+                      Confirmar Pix recebido
+                    </button>
+                  </>
+                )}
+                {p.status === "pago" && waLink(p, msgPago(p)) && (
+                  <a href={waLink(p, msgPago(p))!} target="_blank" rel="noreferrer"
+                    className="rounded bg-[#25D366] px-3 py-1.5 text-xs font-semibold text-white hover:brightness-95">
+                    Avisar cliente (WhatsApp)
+                  </a>
                 )}
               </div>
             </li>
