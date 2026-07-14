@@ -13,6 +13,7 @@ import { useEffect, type ReactNode } from "react";
 import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
 import { PageviewTracker } from "../lib/analytics";
+import { SalesChatWidget } from "../components/SalesChatWidget";
 import faviconAsset from "@/assets/favicon.png.asset.json";
 
 function NotFoundComponent() {

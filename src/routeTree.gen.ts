@@ -21,12 +21,16 @@ import { Route as RegionRouteImport } from './routes/$region'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AdminIndexRouteImport } from './routes/admin.index'
 import { Route as RegionIndexRouteImport } from './routes/$region.index'
+import { Route as VitrineTokenRouteImport } from './routes/vitrine.$token'
+import { Route as VitrinePessoalNovoRouteImport } from './routes/vitrine-pessoal.novo'
 import { Route as RIdRouteImport } from './routes/r.$id'
 import { Route as EditoriaCategoriaRouteImport } from './routes/editoria.$categoria'
 import { Route as AutorSlugRouteImport } from './routes/autor.$slug'
+import { Route as AdminVitrinePessoalRouteImport } from './routes/admin.vitrine-pessoal'
 import { Route as AdminSenhaRouteImport } from './routes/admin.senha'
 import { Route as AdminResetPasswordRouteImport } from './routes/admin.reset-password'
 import { Route as AdminRegioesRouteImport } from './routes/admin.regioes'
+import { Route as AdminPedidosChatRouteImport } from './routes/admin.pedidos-chat'
 import { Route as AdminPainelRouteImport } from './routes/admin.painel'
 import { Route as AdminMemoriaEditorialRouteImport } from './routes/admin.memoria-editorial'
 import { Route as AdminLoginRouteImport } from './routes/admin.login'
@@ -110,6 +114,16 @@ const RegionIndexRoute = RegionIndexRouteImport.update({
   path: '/',
   getParentRoute: () => RegionRoute,
 } as any)
+const VitrineTokenRoute = VitrineTokenRouteImport.update({
+  id: '/vitrine/$token',
+  path: '/vitrine/$token',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const VitrinePessoalNovoRoute = VitrinePessoalNovoRouteImport.update({
+  id: '/vitrine-pessoal/novo',
+  path: '/vitrine-pessoal/novo',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const RIdRoute = RIdRouteImport.update({
   id: '/r/$id',
   path: '/r/$id',
@@ -125,6 +139,11 @@ const AutorSlugRoute = AutorSlugRouteImport.update({
   path: '/autor/$slug',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AdminVitrinePessoalRoute = AdminVitrinePessoalRouteImport.update({
+  id: '/vitrine-pessoal',
+  path: '/vitrine-pessoal',
+  getParentRoute: () => AdminRoute,
+} as any)
 const AdminSenhaRoute = AdminSenhaRouteImport.update({
   id: '/senha',
   path: '/senha',
@@ -138,6 +157,11 @@ const AdminResetPasswordRoute = AdminResetPasswordRouteImport.update({
 const AdminRegioesRoute = AdminRegioesRouteImport.update({
   id: '/regioes',
   path: '/regioes',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminPedidosChatRoute = AdminPedidosChatRouteImport.update({
+  id: '/pedidos-chat',
+  path: '/pedidos-chat',
   getParentRoute: () => AdminRoute,
 } as any)
 const AdminPainelRoute = AdminPainelRouteImport.update({
@@ -277,12 +301,16 @@ export interface FileRoutesByFullPath {
   '/admin/login': typeof AdminLoginRoute
   '/admin/memoria-editorial': typeof AdminMemoriaEditorialRoute
   '/admin/painel': typeof AdminPainelRoute
+  '/admin/pedidos-chat': typeof AdminPedidosChatRoute
   '/admin/regioes': typeof AdminRegioesRoute
   '/admin/reset-password': typeof AdminResetPasswordRoute
   '/admin/senha': typeof AdminSenhaRoute
+  '/admin/vitrine-pessoal': typeof AdminVitrinePessoalRoute
   '/autor/$slug': typeof AutorSlugRoute
   '/editoria/$categoria': typeof EditoriaCategoriaRoute
   '/r/$id': typeof RIdRoute
+  '/vitrine-pessoal/novo': typeof VitrinePessoalNovoRoute
+  '/vitrine/$token': typeof VitrineTokenRoute
   '/$region/': typeof RegionIndexRoute
   '/admin/': typeof AdminIndexRoute
   '/$region/cidade/$cidade': typeof RegionCidadeCidadeRoute
@@ -317,12 +345,16 @@ export interface FileRoutesByTo {
   '/admin/login': typeof AdminLoginRoute
   '/admin/memoria-editorial': typeof AdminMemoriaEditorialRoute
   '/admin/painel': typeof AdminPainelRoute
+  '/admin/pedidos-chat': typeof AdminPedidosChatRoute
   '/admin/regioes': typeof AdminRegioesRoute
   '/admin/reset-password': typeof AdminResetPasswordRoute
   '/admin/senha': typeof AdminSenhaRoute
+  '/admin/vitrine-pessoal': typeof AdminVitrinePessoalRoute
   '/autor/$slug': typeof AutorSlugRoute
   '/editoria/$categoria': typeof EditoriaCategoriaRoute
   '/r/$id': typeof RIdRoute
+  '/vitrine-pessoal/novo': typeof VitrinePessoalNovoRoute
+  '/vitrine/$token': typeof VitrineTokenRoute
   '/$region': typeof RegionIndexRoute
   '/admin': typeof AdminIndexRoute
   '/$region/cidade/$cidade': typeof RegionCidadeCidadeRoute
@@ -360,12 +392,16 @@ export interface FileRoutesById {
   '/admin/login': typeof AdminLoginRoute
   '/admin/memoria-editorial': typeof AdminMemoriaEditorialRoute
   '/admin/painel': typeof AdminPainelRoute
+  '/admin/pedidos-chat': typeof AdminPedidosChatRoute
   '/admin/regioes': typeof AdminRegioesRoute
   '/admin/reset-password': typeof AdminResetPasswordRoute
   '/admin/senha': typeof AdminSenhaRoute
+  '/admin/vitrine-pessoal': typeof AdminVitrinePessoalRoute
   '/autor/$slug': typeof AutorSlugRoute
   '/editoria/$categoria': typeof EditoriaCategoriaRoute
   '/r/$id': typeof RIdRoute
+  '/vitrine-pessoal/novo': typeof VitrinePessoalNovoRoute
+  '/vitrine/$token': typeof VitrineTokenRoute
   '/$region/': typeof RegionIndexRoute
   '/admin/': typeof AdminIndexRoute
   '/$region/cidade/$cidade': typeof RegionCidadeCidadeRoute
@@ -404,12 +440,16 @@ export interface FileRouteTypes {
     | '/admin/login'
     | '/admin/memoria-editorial'
     | '/admin/painel'
+    | '/admin/pedidos-chat'
     | '/admin/regioes'
     | '/admin/reset-password'
     | '/admin/senha'
+    | '/admin/vitrine-pessoal'
     | '/autor/$slug'
     | '/editoria/$categoria'
     | '/r/$id'
+    | '/vitrine-pessoal/novo'
+    | '/vitrine/$token'
     | '/$region/'
     | '/admin/'
     | '/$region/cidade/$cidade'
@@ -444,12 +484,16 @@ export interface FileRouteTypes {
     | '/admin/login'
     | '/admin/memoria-editorial'
     | '/admin/painel'
+    | '/admin/pedidos-chat'
     | '/admin/regioes'
     | '/admin/reset-password'
     | '/admin/senha'
+    | '/admin/vitrine-pessoal'
     | '/autor/$slug'
     | '/editoria/$categoria'
     | '/r/$id'
+    | '/vitrine-pessoal/novo'
+    | '/vitrine/$token'
     | '/$region'
     | '/admin'
     | '/$region/cidade/$cidade'
@@ -486,12 +530,16 @@ export interface FileRouteTypes {
     | '/admin/login'
     | '/admin/memoria-editorial'
     | '/admin/painel'
+    | '/admin/pedidos-chat'
     | '/admin/regioes'
     | '/admin/reset-password'
     | '/admin/senha'
+    | '/admin/vitrine-pessoal'
     | '/autor/$slug'
     | '/editoria/$categoria'
     | '/r/$id'
+    | '/vitrine-pessoal/novo'
+    | '/vitrine/$token'
     | '/$region/'
     | '/admin/'
     | '/$region/cidade/$cidade'
@@ -522,6 +570,8 @@ export interface RootRouteChildren {
   AutorSlugRoute: typeof AutorSlugRoute
   EditoriaCategoriaRoute: typeof EditoriaCategoriaRoute
   RIdRoute: typeof RIdRoute
+  VitrinePessoalNovoRoute: typeof VitrinePessoalNovoRoute
+  VitrineTokenRoute: typeof VitrineTokenRoute
   ApiPublicLlmsFullDottxtRoute: typeof ApiPublicLlmsFullDottxtRoute
   ApiPublicLlmsDottxtRoute: typeof ApiPublicLlmsDottxtRoute
   ApiPublicRssDotxmlRoute: typeof ApiPublicRssDotxmlRoute
@@ -620,6 +670,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof RegionIndexRouteImport
       parentRoute: typeof RegionRoute
     }
+    '/vitrine/$token': {
+      id: '/vitrine/$token'
+      path: '/vitrine/$token'
+      fullPath: '/vitrine/$token'
+      preLoaderRoute: typeof VitrineTokenRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/vitrine-pessoal/novo': {
+      id: '/vitrine-pessoal/novo'
+      path: '/vitrine-pessoal/novo'
+      fullPath: '/vitrine-pessoal/novo'
+      preLoaderRoute: typeof VitrinePessoalNovoRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/r/$id': {
       id: '/r/$id'
       path: '/r/$id'
@@ -641,6 +705,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AutorSlugRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/admin/vitrine-pessoal': {
+      id: '/admin/vitrine-pessoal'
+      path: '/vitrine-pessoal'
+      fullPath: '/admin/vitrine-pessoal'
+      preLoaderRoute: typeof AdminVitrinePessoalRouteImport
+      parentRoute: typeof AdminRoute
+    }
     '/admin/senha': {
       id: '/admin/senha'
       path: '/senha'
@@ -660,6 +731,13 @@ declare module '@tanstack/react-router' {
       path: '/regioes'
       fullPath: '/admin/regioes'
       preLoaderRoute: typeof AdminRegioesRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/pedidos-chat': {
+      id: '/admin/pedidos-chat'
+      path: '/pedidos-chat'
+      fullPath: '/admin/pedidos-chat'
+      preLoaderRoute: typeof AdminPedidosChatRouteImport
       parentRoute: typeof AdminRoute
     }
     '/admin/painel': {
@@ -847,9 +925,11 @@ interface AdminRouteChildren {
   AdminLoginRoute: typeof AdminLoginRoute
   AdminMemoriaEditorialRoute: typeof AdminMemoriaEditorialRoute
   AdminPainelRoute: typeof AdminPainelRoute
+  AdminPedidosChatRoute: typeof AdminPedidosChatRoute
   AdminRegioesRoute: typeof AdminRegioesRoute
   AdminResetPasswordRoute: typeof AdminResetPasswordRoute
   AdminSenhaRoute: typeof AdminSenhaRoute
+  AdminVitrinePessoalRoute: typeof AdminVitrinePessoalRoute
   AdminIndexRoute: typeof AdminIndexRoute
 }
 
@@ -862,9 +942,11 @@ const AdminRouteChildren: AdminRouteChildren = {
   AdminLoginRoute: AdminLoginRoute,
   AdminMemoriaEditorialRoute: AdminMemoriaEditorialRoute,
   AdminPainelRoute: AdminPainelRoute,
+  AdminPedidosChatRoute: AdminPedidosChatRoute,
   AdminRegioesRoute: AdminRegioesRoute,
   AdminResetPasswordRoute: AdminResetPasswordRoute,
   AdminSenhaRoute: AdminSenhaRoute,
+  AdminVitrinePessoalRoute: AdminVitrinePessoalRoute,
   AdminIndexRoute: AdminIndexRoute,
 }
 
@@ -884,6 +966,8 @@ const rootRouteChildren: RootRouteChildren = {
   AutorSlugRoute: AutorSlugRoute,
   EditoriaCategoriaRoute: EditoriaCategoriaRoute,
   RIdRoute: RIdRoute,
+  VitrinePessoalNovoRoute: VitrinePessoalNovoRoute,
+  VitrineTokenRoute: VitrineTokenRoute,
   ApiPublicLlmsFullDottxtRoute: ApiPublicLlmsFullDottxtRoute,
   ApiPublicLlmsDottxtRoute: ApiPublicLlmsDottxtRoute,
   ApiPublicRssDotxmlRoute: ApiPublicRssDotxmlRoute,
