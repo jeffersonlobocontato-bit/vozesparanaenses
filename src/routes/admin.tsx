@@ -87,6 +87,8 @@ function AdminLayout() {
                 { to: "/admin/fontes", label: "Fontes" },
                 { to: "/admin/regioes", label: "Regiões" },
                 { to: "/admin/anuncios", label: "Anúncios" },
+                { to: "/admin/vitrine-pessoal", label: "Vitrine Pessoal" },
+                { to: "/admin/pedidos-chat", label: "Pedidos (chat)" },
                 { to: "/admin/agentes", label: "Agentes IA" },
                 { to: "/admin/memoria-editorial", label: "Memória" },
               ].map((it) => (
