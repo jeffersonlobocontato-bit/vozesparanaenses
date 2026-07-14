@@ -220,7 +220,7 @@ function RegionPage() {
               responsivo — TODO: criar um slot dedicado no painel do AdSense
               para separar métricas por página. */}
           <div className="mx-auto max-w-7xl px-4 py-2">
-            <AdsenseSlot slot="9449330789" />
+            <AdsenseSlot slot="2384001620" format="autorelaxed" />
           </div>
 
           {rest.length > 0 && (

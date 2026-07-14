@@ -173,11 +173,6 @@ function CityPage() {
           </p>
         ) : (
           <>
-            {/* AdSense responsivo — só quando há artigos (página com noindex
-                se estiver vazia; não faz sentido servir anúncio ali). */}
-            <div className="mb-8">
-              <AdsenseSlot slot="9449330789" />
-            </div>
             <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
               {city.articles.map((a) => (
               <Link
@@ -214,10 +209,12 @@ function CityPage() {
               </Link>
               ))}
             </div>
-            {/* AdSense multiplex após o feed — matched content, alto CTR quando
-                o leitor terminou de escanear a grade. */}
+            {/* AdSense multiplex dedicado da página de cidade — matched
+                content ao final do feed, quando o leitor terminou de
+                escanear a grade. Só renderiza com artigos (páginas vazias
+                ficam noindex). */}
             <div className="mt-10">
-              <AdsenseSlot slot="2880053002" format="autorelaxed" />
+              <AdsenseSlot slot="1955103709" format="autorelaxed" />
             </div>
           </>
         )}
