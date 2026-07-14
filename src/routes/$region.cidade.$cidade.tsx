@@ -33,7 +33,9 @@ export const Route = createFileRoute("/$region/cidade/$cidade")({
     if (!loaderData) return { meta: [{ title: "Cidade — Vozes Paranaenses" }] };
     const cityName = loaderData.city.cityName;
     const regionName = loaderData.region.name;
-    const url = `/${params.region}/cidade/${params.cidade}`;
+    const SITE_URL = "https://vozesparanaenses.com.br";
+    const path = `/${params.region}/cidade/${params.cidade}`;
+    const url = `${SITE_URL}${path}`;
     const coords = getCityCoords(params.cidade);
     const title = `Notícias de ${cityName} — ${regionName} | Vozes Paranaenses`;
     const description = `Últimas notícias, política, economia, esporte e cultura de ${cityName} e cidades vizinhas no ${regionName}, Paraná.`;
@@ -69,8 +71,8 @@ export const Route = createFileRoute("/$region/cidade/$cidade")({
       "@context": "https://schema.org",
       "@type": "BreadcrumbList",
       itemListElement: [
-        { "@type": "ListItem", position: 1, name: "Vozes Paranaenses", item: "/" },
-        { "@type": "ListItem", position: 2, name: regionName, item: `/${params.region}` },
+        { "@type": "ListItem", position: 1, name: "Vozes Paranaenses", item: SITE_URL },
+        { "@type": "ListItem", position: 2, name: regionName, item: `${SITE_URL}/${params.region}` },
         { "@type": "ListItem", position: 3, name: cityName, item: url },
       ],
     };
