@@ -266,6 +266,44 @@ function VitrinePessoalEditor() {
               className="w-full rounded-lg border border-slate-300 px-3 py-2 font-mono text-sm disabled:bg-slate-100" />
           </label>
 
+          <div className="border-t border-slate-200 pt-4">
+            <div className="mb-2 flex items-center justify-between">
+              <span className="text-sm font-medium text-slate-700">Fotos ({fotos.length}/6)</span>
+              {editavel && (
+                <label className="cursor-pointer rounded-lg border border-slate-300 px-3 py-1.5 text-xs font-semibold text-slate-700 hover:bg-slate-50">
+                  {enviandoFoto ? "Enviando…" : "Adicionar fotos"}
+                  <input type="file" accept="image/*" multiple hidden disabled={enviandoFoto || fotos.length >= 6}
+                    onChange={(e) => { adicionarFotos(e.target.files); e.target.value = ""; }} />
+                </label>
+              )}
+            </div>
+            <p className="mb-3 text-xs text-slate-500">
+              A primeira foto vira a capa da matéria. Máximo 6 fotos, até 6MB cada (jpg, png, webp).
+            </p>
+            {fotos.length === 0 ? (
+              <p className="rounded border border-dashed border-slate-300 bg-slate-50 p-4 text-center text-xs text-slate-500">
+                Nenhuma foto enviada ainda.
+              </p>
+            ) : (
+              <ul className="grid grid-cols-2 gap-3 sm:grid-cols-3">
+                {fotos.map((f, i) => (
+                  <li key={f.path} className="relative overflow-hidden rounded-lg border border-slate-200 bg-slate-100">
+                    <img src={f.url} alt={f.name} className="h-32 w-full object-cover" loading="lazy" />
+                    {i === 0 && (
+                      <span className="absolute left-1 top-1 rounded bg-emerald-600 px-1.5 py-0.5 text-[10px] font-bold uppercase text-white">Capa</span>
+                    )}
+                    {editavel && (
+                      <button type="button" onClick={() => removerFoto(f.path)} disabled={enviandoFoto}
+                        className="absolute right-1 top-1 rounded bg-black/60 px-1.5 py-0.5 text-[10px] font-bold text-white hover:bg-red-600">
+                        Remover
+                      </button>
+                    )}
+                  </li>
+                ))}
+              </ul>
+            )}
+          </div>
+
           {msg && <p className="text-xs text-muted-foreground">{msg}</p>}
 
           {editavel && (
