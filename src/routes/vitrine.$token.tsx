@@ -24,8 +24,11 @@ type ArtigoRef = {
 type Pedido = {
   id: string; status: Status; nome_cliente: string; profissao: string; valor: number;
   motivo_recusa: string | null;
+  imagens: Foto[] | null;
   generated_article: ArtigoRef | ArtigoRef[] | null;
 };
+
+type Foto = { url: string; name: string; path: string };
 
 type Pix = { chave: string; titular: string } | null;
 
@@ -42,6 +45,8 @@ function VitrinePessoalEditor() {
   const [publicando, setPublicando] = useState(false);
   const [linkPublicado, setLinkPublicado] = useState<string | null>(null);
   const [msg, setMsg] = useState<string | null>(null);
+  const [fotos, setFotos] = useState<Foto[]>([]);
+  const [enviandoFoto, setEnviandoFoto] = useState(false);
 
   async function carregar() {
     setCarregando(true);
@@ -53,6 +58,7 @@ function VitrinePessoalEditor() {
       if (!p) throw new Error("Link inválido ou pedido não encontrado.");
       setPedido(p);
       setPix((data as { pix?: Pix })?.pix ?? null);
+      setFotos(Array.isArray(p.imagens) ? p.imagens : []);
       const art = Array.isArray(p.generated_article) ? p.generated_article[0] : p.generated_article;
       if (art) {
         setCampos({ titulo: art.titulo, subtitulo: art.subtitulo ?? "", resumo: art.resumo ?? "", corpo: art.corpo });
@@ -91,6 +97,47 @@ function VitrinePessoalEditor() {
       setMsg("Erro ao publicar: " + (e instanceof Error ? e.message : "tente novamente"));
     } finally {
       setPublicando(false);
+    }
+  }
+
+  async function fileToBase64(f: File): Promise<string> {
+    return new Promise((resolve, reject) => {
+      const r = new FileReader();
+      r.onload = () => resolve(String(r.result).split(",")[1] ?? "");
+      r.onerror = () => reject(r.error);
+      r.readAsDataURL(f);
+    });
+  }
+
+  async function adicionarFotos(files: FileList | null) {
+    if (!files || files.length === 0) return;
+    setEnviandoFoto(true);
+    setMsg(null);
+    try {
+      const add = await Promise.all(Array.from(files).slice(0, 6).map(async (f) => ({
+        name: f.name, contentType: f.type || "image/jpeg", base64: await fileToBase64(f),
+      })));
+      const { data, error } = await supabase.functions.invoke("vitrine-pessoal-upload", { body: { token, add } });
+      if (error) throw error;
+      const list = (data as { imagens?: Foto[] })?.imagens ?? [];
+      setFotos(list);
+    } catch (e: unknown) {
+      setMsg("Erro ao enviar foto: " + (e instanceof Error ? e.message : "tente novamente"));
+    } finally {
+      setEnviandoFoto(false);
+    }
+  }
+
+  async function removerFoto(path: string) {
+    setEnviandoFoto(true);
+    try {
+      const { data, error } = await supabase.functions.invoke("vitrine-pessoal-upload", { body: { token, remove: [path] } });
+      if (error) throw error;
+      setFotos((data as { imagens?: Foto[] })?.imagens ?? []);
+    } catch (e: unknown) {
+      setMsg("Erro ao remover foto: " + (e instanceof Error ? e.message : "tente novamente"));
+    } finally {
+      setEnviandoFoto(false);
     }
   }
 

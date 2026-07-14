@@ -28,7 +28,7 @@ Deno.serve(async (req) => {
 
   const { data: pedido, error: pErr } = await sb
     .from("vitrine_pessoal_pedidos")
-    .select("id, status, generated_article_id, generated_article:generated_article_id(slug, regiao:regioes(slug))")
+    .select("id, status, generated_article_id, imagens, generated_article:generated_article_id(slug, imagem_capa_url, regiao:regioes(slug))")
     .eq("token", body.token)
     .maybeSingle();
   if (pErr || !pedido) return json({ error: "token_invalido" }, 404);
@@ -37,9 +37,14 @@ Deno.serve(async (req) => {
   }
 
   const now = new Date().toISOString();
+  const artAtual = Array.isArray(pedido.generated_article) ? pedido.generated_article[0] : pedido.generated_article;
+  const imgs = Array.isArray(pedido.imagens) ? pedido.imagens as Array<{ url: string }> : [];
+  const capaAtual = artAtual?.imagem_capa_url ?? null;
+  const update: Record<string, unknown> = { status: "publicado", publicado_em: now };
+  if (!capaAtual && imgs[0]?.url) update.imagem_capa_url = imgs[0].url;
   const { error: aErr } = await sb
     .from("generated_articles")
-    .update({ status: "publicado", publicado_em: now })
+    .update(update)
     .eq("id", pedido.generated_article_id);
   if (aErr) return json({ error: "publish_failed", detail: aErr.message }, 500);
 
