@@ -5,6 +5,7 @@ import {
   listCategorias,
 } from "@/lib/content.functions";
 import { SiteHeader, SiteFooter } from "@/components/SiteHeader";
+import { AdsenseSlot } from "@/components/AdsenseSlot";
 
 const catsQO = queryOptions({
   queryKey: ["categorias"],
@@ -112,7 +113,12 @@ function CategoryGlobalPage() {
             Ainda não há matérias publicadas nesta editoria.
           </div>
         ) : (
-          <div className="grid gap-6 md:grid-cols-3">
+          <>
+            {/* AdSense responsivo — no topo do feed global da editoria. */}
+            <div className="mb-8">
+              <AdsenseSlot slot="9449330789" />
+            </div>
+            <div className="grid gap-6 md:grid-cols-3">
             {articles.map((a) => (
               a.region ? (
                 <Link
@@ -140,7 +146,12 @@ function CategoryGlobalPage() {
                 </Link>
               ) : null
             ))}
-          </div>
+            </div>
+            {/* Multiplex ao final da grade global da editoria. */}
+            <div className="mt-10">
+              <AdsenseSlot slot="2880053002" format="autorelaxed" />
+            </div>
+          </>
         )}
       </section>
 

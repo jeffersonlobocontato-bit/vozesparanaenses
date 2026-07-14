@@ -7,6 +7,7 @@ import {
 } from "@/lib/content.functions";
 import { SiteHeader, SiteFooter } from "@/components/SiteHeader";
 import { WeatherWidget } from "@/components/WeatherWidget";
+import { AdsenseSlot } from "@/components/AdsenseSlot";
 import { arrangePinnedSlots } from "@/lib/pinned-layout";
 
 const regionQO = (slug: string) =>
@@ -212,6 +213,15 @@ function RegionPage() {
               </div>
             </div>
           </section>
+
+          {/* AdSense — responsivo entre o hero regional e a lista "Mais de X".
+              Só renderiza quando há artigos publicados (evita anúncio em página
+              vazia, que viola política do AdSense). Reutiliza o slot auto
+              responsivo — TODO: criar um slot dedicado no painel do AdSense
+              para separar métricas por página. */}
+          <div className="mx-auto max-w-7xl px-4 py-2">
+            <AdsenseSlot slot="9449330789" />
+          </div>
 
           {rest.length > 0 && (
             <section className="mx-auto max-w-7xl px-4 py-8">
