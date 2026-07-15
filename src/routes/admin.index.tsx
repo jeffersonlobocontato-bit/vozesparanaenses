@@ -132,10 +132,14 @@ function AdminQueue() {
       "  · scrape-source → cluster-articles → classify-and-quota → process-pending-clusters",
     ]);
     const steps: Array<{ name: string; body?: Record<string, unknown> }> = [
-      { name: "scrape-source", body: { force: true } },
-      { name: "cluster-articles" },
-      { name: "classify-and-quota" },
-      { name: "process-pending-clusters", body: { limit: 50 } },
+      // sync:true força cada função a rodar até o fim antes de devolver a
+      // resposta — sem isso o scrape-source volta na hora (background) e os
+      // passos seguintes rodam em cima de raw_articles ainda vazia, então
+      // nenhuma matéria é redigida e tudo fica parado em "pautas / clusters".
+      { name: "scrape-source", body: { force: true, sync: true } },
+      { name: "cluster-articles", body: { sync: true } },
+      { name: "classify-and-quota", body: { sync: true } },
+      { name: "process-pending-clusters", body: { limit: 50, sync: true } },
     ];
     for (const step of steps) {
       setPipelineLog((l) => [...l, `→ ${step.name}…`]);
