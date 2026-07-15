@@ -39,7 +39,11 @@ REGRAS INEGOCIÁVEIS:
 4. Título: até 90 caracteres, sem clickbait, com o fato central.
 5. Subtítulo: contexto complementar, até 160 caracteres.
 6. Resumo: 2-3 frases, autocontido (para redes sociais e SEO).
-7. Corpo: 4-8 parágrafos curtos, lead na primeira frase.
+7. Corpo: profundidade condicionada ao que foi apurado — se os fatos são
+   ricos (dados, citações, contexto), escreva 6-10 parágrafos cobrindo tudo
+   isso; se os fatos são escassos, escreva só o essencial (lide + como/por
+   quê) e pare — nunca infle parágrafo com repetição ou generalidade só para
+   alcançar um número maior.
 8. TL;DR (answer-first): 2 a 3 frases curtas com a resposta direta ao "o que
    aconteceu?", otimizado para AI Overviews / ChatGPT / Perplexity.
 9. FAQ: 3 a 5 perguntas frequentes que uma pessoa da região faria sobre esse
@@ -162,13 +166,15 @@ Deno.serve(async (req) => {
   // padrão, permitindo tom/estilo por editoria (política, esporte, cidades…).
   let systemPrompt = BASE_SYSTEM_PROMPT;
   if (cluster.categoria_id) {
-    const [{ data: agente }, { data: memoria }] = await Promise.all([
+    const [{ data: agente }, { data: memoria }, { data: profundidade }] = await Promise.all([
       sb.from("agentes_redatores")
         .select("instrucoes_base, exemplo_texto, ativo, dna_sintatico, dna_semantico, dna_lexical, matriz_editorial")
         .eq("categoria_id", cluster.categoria_id).maybeSingle(),
       sb.from("memoria_editorial")
         .select("missao, valores, posicionamento, manual_estilo, glossario, siglas, pessoas, instituicoes")
         .eq("singleton", true).maybeSingle(),
+      sb.from("reforco_profundidade_editorial")
+        .select("instrucoes").eq("ativo", true).limit(1).maybeSingle(),
     ]);
     if (agente?.ativo) {
       const del = buildDelPrompt(agente as {
@@ -177,6 +183,9 @@ Deno.serve(async (req) => {
         dna_lexical?: DnaLexical; matriz_editorial?: Matriz;
       }, memoria as MemoriaEditorial | null);
       if (del.trim()) systemPrompt = `${del}\n\n---\n\n${BASE_SYSTEM_PROMPT}`;
+    }
+    if (profundidade?.instrucoes?.trim()) {
+      systemPrompt = `${systemPrompt}\n\n---\n\n${profundidade.instrucoes.trim()}`;
     }
   }
 
@@ -198,7 +207,7 @@ Deno.serve(async (req) => {
     body: JSON.stringify({
       model: MODEL,
       temperature: 0.2,
-      max_tokens: 2200,
+      max_tokens: 3200,
       messages: [
         { role: "system", content: systemPrompt },
         { role: "user", content: userPrompt },
@@ -393,7 +402,7 @@ Redija a reportagem no schema JSON:
   "subtitulo": "string até 160 chars",
   "resumo": "2-3 frases autocontidas",
   "tldr": "2-3 frases curtas com a resposta direta (answer-first p/ IA)",
-  "corpo": "texto em markdown, 4-8 parágrafos curtos",
+  "corpo": "texto em markdown — 6-10 parágrafos SE os fatos apurados forem ricos (use todos os dados/citações); só o essencial (lide + como/por quê) SE os fatos forem escassos — nunca infle pra alcançar um número de parágrafos",
   "seo_title": "string até 60 chars",
   "seo_description": "string até 155 chars",
   "faq": [ { "pergunta": "string", "resposta": "1-3 frases baseadas SOMENTE nos fatos acima" } ]
