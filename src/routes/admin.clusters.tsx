@@ -147,6 +147,30 @@ function AdminClusters() {
     }
   }
 
+  async function apagarTodas() {
+    const total = items?.length ?? 0;
+    const ok = window.confirm(
+      `Apagar TODAS as ${total} pauta(s) listadas (rascunho, selecionadas, fatos extraídos e descartadas)? Matérias já publicadas não são afetadas. Esta ação não pode ser desfeita.`,
+    );
+    if (!ok) return;
+    setCleaning(true); setMsg(null);
+    try {
+      const sb = await getExternalBrowser();
+      const { data, error } = await sb
+        .from("article_clusters")
+        .delete()
+        .in("status", ["novo", "selecionado_cota", "fatos_extraidos", "descartado"])
+        .select("id");
+      if (error) throw error;
+      setMsg(`${data?.length ?? 0} pauta(s) removida(s).`);
+      await load();
+    } catch (e: unknown) {
+      setMsg("Falha ao apagar pautas: " + (e instanceof Error ? e.message : "erro"));
+    } finally {
+      setCleaning(false);
+    }
+  }
+
   async function extractFacts(id: string) {
     markBusy(id, true); setMsg(null);
     try {
@@ -267,6 +291,14 @@ function AdminClusters() {
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-bold">Pautas (clusters)</h1>
         <div className="flex gap-2">
+          <button
+            onClick={apagarTodas}
+            disabled={cleaning || !items?.length}
+            className="rounded border border-red-400 bg-red-600 px-3 py-1 text-xs font-semibold text-white hover:bg-red-700 disabled:opacity-60"
+            title="Apaga todas as pautas listadas, independente da idade"
+          >
+            🗑 Apagar todas ({items?.length ?? 0})
+          </button>
           <button
             onClick={limparHistorico}
             disabled={cleaning}
