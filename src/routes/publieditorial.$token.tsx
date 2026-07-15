@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { SiteHeader, SiteFooter } from "@/components/SiteHeader";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -21,87 +21,96 @@ type Briefing = {
   generated_article: { slug: string; regiao: { slug: string } | { slug: string }[] | null } | { slug: string; regiao: { slug: string } | { slug: string }[] | null }[] | null;
 };
 
+type ChatMsg = { role: "user" | "assistant"; content: string };
+
 function first<T>(v: T | T[] | null): T | null {
   return Array.isArray(v) ? (v[0] ?? null) : v;
 }
-
-const PERGUNTAS = [
-  {
-    campo: "o_que_faz" as const,
-    etapa: "1. Quem vocês são",
-    pergunta: "Em poucas frases: o que a empresa faz, e há quanto tempo atua?",
-    placeholder: "Ex.: Somos uma clínica de fisioterapia em Cascavel, fundada em 2015, especializada em reabilitação esportiva.",
-  },
-  {
-    campo: "contexto_mercado" as const,
-    etapa: "2. O cenário",
-    pergunta: "Como está o mercado/cenário em que vocês atuam hoje? O que motivou divulgar isso agora?",
-    placeholder: "Ex.: A procura por fisioterapia esportiva cresceu na região depois da chegada de novas academias no bairro.",
-  },
-  {
-    campo: "diferenciais" as const,
-    etapa: "3. Diferenciais",
-    pergunta: "O que diferencia vocês da concorrência? Cite de 2 a 4 pontos reais.",
-    placeholder: "Ex.: Equipamento X exclusivo na região, atendimento em até 24h, equipe com pós-graduação em Y.",
-  },
-  {
-    campo: "evidencias" as const,
-    etapa: "4. Evidências",
-    pergunta: "Tem algum dado concreto? (nº de clientes atendidos, anos de mercado, prêmio, certificação, case). Só cite o que puder comprovar — não inventamos números.",
-    placeholder: "Ex.: Mais de 3 mil pacientes atendidos desde 2015; certificação X; parceria com o time Y.",
-  },
-  {
-    campo: "impacto_leitor" as const,
-    etapa: "5. Impacto",
-    pergunta: "Qual é o principal benefício prático que quem ler vai entender que ganha ao te procurar?",
-    placeholder: "Ex.: Volta a treinar sem dor em menos tempo, com acompanhamento de perto.",
-  },
-  {
-    campo: "cta_texto" as const,
-    etapa: "6. Fechamento",
-    pergunta: "O que você quer que o leitor faça depois de ler? (agendar, visitar, ligar, seguir nas redes)",
-    placeholder: "Ex.: Agendar uma avaliação gratuita.",
-  },
-] as const;
 
 function PublieditorialEntrevista() {
   const { token } = Route.useParams();
   const [briefing, setBriefing] = useState<Briefing | null>(null);
   const [carregando, setCarregando] = useState(true);
   const [erro, setErro] = useState<string | null>(null);
-  const [form, setForm] = useState({
-    nome_anunciante: "", o_que_faz: "", contexto_mercado: "", diferenciais: "",
-    evidencias: "", impacto_leitor: "", cta_texto: "", link_destino: "",
-  });
+  const [mensagens, setMensagens] = useState<ChatMsg[]>([]);
+  const [rascunho, setRascunho] = useState("");
   const [enviando, setEnviando] = useState(false);
-  const [enviado, setEnviado] = useState<{ gerado: boolean; aviso?: string } | null>(null);
+  const [finalizado, setFinalizado] = useState<{ aviso?: string } | null>(null);
+  const scrollRef = useRef<HTMLDivElement>(null);
+  const inputRef = useRef<HTMLTextAreaElement>(null);
 
   useEffect(() => {
-    supabase.functions.invoke("publieditorial-obter", { body: { token } })
-      .then(({ data, error }) => {
+    (async () => {
+      try {
+        const { data, error } = await supabase.functions.invoke("publieditorial-obter", { body: { token } });
         if (error) throw error;
-        const b = (data as { briefing?: Briefing })?.briefing;
+        const payload = data as { briefing?: Briefing; chat?: ChatMsg[] };
+        const b = payload?.briefing;
         if (!b) throw new Error("Link inválido ou briefing não encontrado.");
         setBriefing(b);
-        if (b.nome_anunciante) setForm((f) => ({ ...f, nome_anunciante: b.nome_anunciante ?? "" }));
-      })
-      .catch((e: unknown) => setErro(e instanceof Error ? e.message : "Não foi possível carregar."))
-      .finally(() => setCarregando(false));
+        const histInicial = (payload.chat ?? []).filter((m) => m.role === "user" || m.role === "assistant");
+        setMensagens(histInicial);
+
+        // Se está aguardando preenchimento e ainda não tem nenhuma mensagem, pede a saudação inicial do agente
+        if (b.status === "aguardando_preenchimento" && histInicial.length === 0) {
+          const { data: initData, error: initErr } = await supabase.functions.invoke("publieditorial-chat", {
+            body: { token, init: true },
+          });
+          if (initErr) throw initErr;
+          const primeira = (initData as { mensagem?: string }).mensagem;
+          if (primeira) setMensagens([{ role: "assistant", content: primeira }]);
+        }
+      } catch (e: unknown) {
+        setErro(e instanceof Error ? e.message : "Não foi possível carregar.");
+      } finally {
+        setCarregando(false);
+      }
+    })();
   }, [token]);
 
-  async function enviar(e: React.FormEvent) {
-    e.preventDefault();
+  useEffect(() => {
+    scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight, behavior: "smooth" });
+  }, [mensagens, enviando]);
+
+  useEffect(() => {
+    if (!carregando && !finalizado && briefing?.status === "aguardando_preenchimento") {
+      inputRef.current?.focus();
+    }
+  }, [carregando, finalizado, briefing?.status, mensagens.length]);
+
+  async function enviar(e?: React.FormEvent) {
+    e?.preventDefault();
+    const texto = rascunho.trim();
+    if (!texto || enviando) return;
     setEnviando(true);
+    setMensagens((m) => [...m, { role: "user", content: texto }]);
+    setRascunho("");
     try {
       const { data, error } = await supabase.functions.invoke("publieditorial-preencher", {
-        body: { token, ...form },
+        // (mantido por compat, não é chamado — o fluxo vive em publieditorial-chat)
+        body: { token, __noop: true },
       });
-      if (error) throw error;
-      setEnviado(data as { gerado: boolean; aviso?: string });
+      // no-op — chamada real logo abaixo
+      void data; void error;
+
+      const { data: chatData, error: chatErr } = await supabase.functions.invoke("publieditorial-chat", {
+        body: { token, mensagem: texto },
+      });
+      if (chatErr) throw chatErr;
+      const res = chatData as { mensagem: string; finalizado: boolean; aviso?: string };
+      setMensagens((m) => [...m, { role: "assistant", content: res.mensagem }]);
+      if (res.finalizado) setFinalizado({ aviso: res.aviso });
     } catch (e: unknown) {
-      setErro(e instanceof Error ? e.message : "Não foi possível enviar suas respostas. Tente novamente.");
+      setErro(e instanceof Error ? e.message : "Não foi possível enviar sua mensagem. Tente novamente.");
     } finally {
       setEnviando(false);
+    }
+  }
+
+  function onKeyDown(e: React.KeyboardEvent<HTMLTextAreaElement>) {
+    if (e.key === "Enter" && !e.shiftKey) {
+      e.preventDefault();
+      enviar();
     }
   }
 
@@ -127,7 +136,9 @@ function PublieditorialEntrevista() {
     );
   }
 
-  if (enviado || briefing?.status === "preenchido" || briefing?.status === "gerado") {
+  const encerrado = finalizado || briefing?.status === "preenchido" || briefing?.status === "gerado";
+
+  if (encerrado && mensagens.length === 0) {
     return (
       <div className="min-h-screen bg-slate-50">
         <SiteHeader />
@@ -139,7 +150,7 @@ function PublieditorialEntrevista() {
               Nossa equipe já está com o rascunho da sua matéria em produção. Assim que for aprovada,
               entraremos em contato pra combinar a publicação.
             </p>
-            {enviado?.aviso && <p className="mt-3 text-xs text-amber-700">{enviado.aviso}</p>}
+            {finalizado?.aviso && <p className="mt-3 text-xs text-amber-700">{finalizado.aviso}</p>}
           </div>
         </main>
         <SiteFooter />
@@ -152,54 +163,77 @@ function PublieditorialEntrevista() {
   return (
     <div className="min-h-screen bg-slate-50">
       <SiteHeader />
-      <main className="mx-auto max-w-2xl px-4 py-12">
-        <div className="mb-8 text-center">
+      <main className="mx-auto flex min-h-[calc(100vh-200px)] max-w-2xl flex-col px-4 py-8">
+        <div className="mb-4 text-center">
           <span className="rounded-full bg-[#0066CC]/10 px-3 py-1 text-xs font-bold uppercase tracking-wider text-[#0066CC]">
             Publieditorial{campanha ? ` — ${campanha.nome}` : ""}
           </span>
-          <h1 className="font-display mt-3 text-3xl font-black text-[#0A2540] md:text-4xl">
-            Vamos escrever a sua matéria
+          <h1 className="font-display mt-3 text-2xl font-black text-[#0A2540] md:text-3xl">
+            Entrevista pra sua matéria
           </h1>
-          <p className="mt-3 text-slate-600">
-            Responda as perguntas abaixo com o máximo de detalhe que puder — é isso que vira o texto.
-            Quanto mais completa a resposta, mais completa sai a matéria.
+          <p className="mt-2 text-sm text-slate-600">
+            Nosso redator vai te fazer algumas perguntas por aqui. Responda com naturalidade — quanto
+            mais detalhe, melhor sai a matéria.
           </p>
         </div>
 
-        <form onSubmit={enviar} className="space-y-6 rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
-          <label className="block text-sm">
-            <span className="mb-1 block font-medium text-slate-700">Nome da empresa/marca*</span>
-            <input required value={form.nome_anunciante} onChange={(e) => setForm({ ...form, nome_anunciante: e.target.value })}
-              className="w-full rounded-lg border border-slate-300 px-3 py-2" />
-          </label>
+        <div className="flex flex-1 flex-col overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
+          <div ref={scrollRef} className="flex-1 space-y-4 overflow-y-auto p-4 md:p-6">
+            {mensagens.map((m, i) => (
+              <div key={i} className={`flex ${m.role === "user" ? "justify-end" : "justify-start"}`}>
+                <div
+                  className={
+                    m.role === "user"
+                      ? "max-w-[85%] whitespace-pre-wrap rounded-2xl rounded-br-sm bg-[#0066CC] px-4 py-2.5 text-sm text-white"
+                      : "max-w-[85%] whitespace-pre-wrap rounded-2xl rounded-bl-sm bg-slate-100 px-4 py-2.5 text-sm text-slate-800"
+                  }
+                >
+                  {m.content}
+                </div>
+              </div>
+            ))}
+            {enviando && (
+              <div className="flex justify-start">
+                <div className="rounded-2xl rounded-bl-sm bg-slate-100 px-4 py-2.5 text-sm text-slate-500">
+                  <span className="inline-flex gap-1">
+                    <span className="h-1.5 w-1.5 animate-bounce rounded-full bg-slate-400" style={{ animationDelay: "0ms" }} />
+                    <span className="h-1.5 w-1.5 animate-bounce rounded-full bg-slate-400" style={{ animationDelay: "120ms" }} />
+                    <span className="h-1.5 w-1.5 animate-bounce rounded-full bg-slate-400" style={{ animationDelay: "240ms" }} />
+                  </span>
+                </div>
+              </div>
+            )}
+            {encerrado && (
+              <div className="rounded-xl border border-emerald-200 bg-emerald-50 p-4 text-center text-sm text-emerald-800">
+                ✅ Entrevista encerrada — sua matéria já entrou em produção.
+                {finalizado?.aviso && <p className="mt-2 text-xs text-amber-700">{finalizado.aviso}</p>}
+              </div>
+            )}
+          </div>
 
-          {PERGUNTAS.map((p) => (
-            <label key={p.campo} className="block text-sm">
-              <span className="mb-1 block text-xs font-bold uppercase tracking-wide text-[#0066CC]">{p.etapa}</span>
-              <span className="mb-1 block font-medium text-slate-700">{p.pergunta}</span>
+          <form onSubmit={enviar} className="border-t border-slate-200 bg-slate-50 p-3">
+            {erro && <p className="mb-2 rounded border border-red-200 bg-red-50 px-3 py-2 text-xs text-red-700">{erro}</p>}
+            <div className="flex items-end gap-2">
               <textarea
-                rows={3}
-                placeholder={p.placeholder}
-                value={form[p.campo]}
-                onChange={(e) => setForm({ ...form, [p.campo]: e.target.value })}
-                className="w-full rounded-lg border border-slate-300 px-3 py-2"
+                ref={inputRef}
+                rows={2}
+                value={rascunho}
+                onChange={(e) => setRascunho(e.target.value)}
+                onKeyDown={onKeyDown}
+                disabled={enviando || Boolean(encerrado)}
+                placeholder={encerrado ? "Entrevista encerrada." : "Escreva sua resposta e aperte Enter…"}
+                className="min-h-[44px] flex-1 resize-none rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm outline-none focus:border-[#0066CC] disabled:bg-slate-100"
               />
-            </label>
-          ))}
-
-          <label className="block text-sm">
-            <span className="mb-1 block font-medium text-slate-700">Link ou contato pro fechamento (opcional)</span>
-            <input value={form.link_destino} onChange={(e) => setForm({ ...form, link_destino: e.target.value })}
-              placeholder="Ex.: www.seusite.com.br ou (44) 99999-9999"
-              className="w-full rounded-lg border border-slate-300 px-3 py-2" />
-          </label>
-
-          {erro && <p className="rounded border border-red-200 bg-red-50 p-3 text-sm text-red-700">{erro}</p>}
-
-          <button disabled={enviando} className="w-full rounded-lg bg-[#0066CC] px-4 py-3 text-sm font-bold text-white disabled:opacity-60">
-            {enviando ? "Enviando…" : "Enviar respostas e gerar minha matéria"}
-          </button>
-        </form>
+              <button
+                type="submit"
+                disabled={enviando || Boolean(encerrado) || !rascunho.trim()}
+                className="shrink-0 rounded-xl bg-[#0066CC] px-4 py-2.5 text-sm font-bold text-white disabled:opacity-50"
+              >
+                Enviar
+              </button>
+            </div>
+          </form>
+        </div>
       </main>
       <SiteFooter />
     </div>
