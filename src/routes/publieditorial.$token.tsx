@@ -86,13 +86,6 @@ function PublieditorialEntrevista() {
     setMensagens((m) => [...m, { role: "user", content: texto }]);
     setRascunho("");
     try {
-      const { data, error } = await supabase.functions.invoke("publieditorial-preencher", {
-        // (mantido por compat, não é chamado — o fluxo vive em publieditorial-chat)
-        body: { token, __noop: true },
-      });
-      // no-op — chamada real logo abaixo
-      void data; void error;
-
       const { data: chatData, error: chatErr } = await supabase.functions.invoke("publieditorial-chat", {
         body: { token, mensagem: texto },
       });
