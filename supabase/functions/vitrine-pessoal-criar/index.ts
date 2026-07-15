@@ -46,13 +46,13 @@ Deno.serve(async (req) => {
 
   const sb = createClient(url, key, { auth: { persistSession: false } });
 
-  const { data: agente } = await sb
-    .from("agente_vitrine_pessoal")
-    .select("instrucoes_base")
-    .eq("ativo", true)
-    .limit(1)
-    .maybeSingle();
-  const systemPrompt = agente?.instrucoes_base ??
+  const [{ data: nucleo }, { data: agente }] = await Promise.all([
+    sb.from("nucleo_conteudo_pago").select("instrucoes").eq("ativo", true).limit(1).maybeSingle(),
+    sb.from("agente_vitrine_pessoal").select("instrucoes_base").eq("ativo", true).limit(1).maybeSingle(),
+  ]);
+  const systemPrompt = [nucleo?.instrucoes, agente?.instrucoes_base]
+    .filter((s) => s?.trim())
+    .join("\n\n---\n\n") ||
     "Você é o redator da Vitrine Pessoal do Vozes Paranaenses. Use somente o briefing, tom pessoal e caloroso. Retorne APENAS JSON.";
 
   const userPrompt = `Profissional: ${body.nome_cliente} — ${body.profissao}
@@ -67,7 +67,7 @@ Redija a Vitrine Pessoal no schema JSON:
   "titulo": "string até 90 chars",
   "subtitulo": "string até 160 chars",
   "resumo": "2-3 frases autocontidas",
-  "corpo": "texto em markdown, 4-6 parágrafos curtos",
+  "corpo": "texto em markdown — mais completo se o briefing for rico em detalhes; só o essencial se o briefing for breve — nunca invente pra alcançar um número de parágrafos",
   "seo_title": "string até 60 chars",
   "seo_description": "string até 155 chars"
 }`;
