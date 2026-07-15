@@ -41,7 +41,7 @@ Deno.serve(async (req) => {
 
   const { data: briefing, error: bErr } = await sb
     .from("publieditorial_briefings")
-    .select("id, campaign_id, regiao_id, categoria_id, briefing_texto, status")
+    .select("id, campaign_id, regiao_id, categoria_id, status, nome_anunciante, o_que_faz, contexto_mercado, diferenciais, evidencias, impacto_leitor, cta_texto, link_destino")
     .eq("id", body.briefing_id)
     .maybeSingle();
   if (bErr || !briefing) return json({ error: "briefing_not_found", detail: bErr?.message }, 404);
@@ -66,20 +66,35 @@ Deno.serve(async (req) => {
     .join("\n\n---\n\n") ||
     "Você é o redator de Publieditorial do Vozes Paranaenses. Use somente o briefing fornecido, tom jornalístico, sem apelo comercial exagerado. Retorne APENAS JSON.";
 
-  const userPrompt = `Anunciante: ${advertiserNome ?? "não informado"}
+  const userPrompt = `Anunciante: ${briefing.nome_anunciante ?? advertiserNome ?? "não informado"}
 Campanha: ${campaign?.nome ?? "não informada"}
 
-Briefing fornecido pelo anunciante (use SOMENTE isto — não invente nada além):
-"""
-${briefing.briefing_texto}
-"""
+Entrevista estruturada respondida pelo anunciante (use SOMENTE isto — não invente nada além):
 
-Redija o publieditorial no schema JSON:
+1. TESE — o que faz / quem é:
+"""${briefing.o_que_faz ?? "não informado"}"""
+
+2. CONTEXTO — mercado/cenário em que atua:
+"""${briefing.contexto_mercado ?? "não informado"}"""
+
+3. EXPANSÃO — diferenciais:
+"""${briefing.diferenciais ?? "não informado"}"""
+
+4. EVIDÊNCIAS — dados, prêmios, cases (só o que for comprovável):
+"""${briefing.evidencias ?? "não informado"}"""
+
+5. IMPACTO — benefício prático pro leitor:
+"""${briefing.impacto_leitor ?? "não informado"}"""
+
+6. FECHAMENTO — chamada para ação e link/contato:
+"""${briefing.cta_texto ?? "não informado"}${briefing.link_destino ? ` — ${briefing.link_destino}` : ""}"""
+
+Redija o publieditorial seguindo essa mesma progressão (Tese → Contexto → Expansão → Evidências → Impacto → Fechamento), no schema JSON:
 {
   "titulo": "string até 90 chars, sem soar como propaganda óbvia",
   "subtitulo": "string até 160 chars",
   "resumo": "2-3 frases autocontidas",
-  "corpo": "texto em markdown — mais completo (6-9 parágrafos) se o briefing for rico em detalhes; só o essencial se o briefing for breve — nunca invente pra alcançar um número de parágrafos",
+  "corpo": "texto em markdown — mais completo (6-9 parágrafos) se as respostas forem ricas em detalhes; só o essencial se as respostas forem breves — nunca invente pra alcançar um número de parágrafos",
   "seo_title": "string até 60 chars",
   "seo_description": "string até 155 chars"
 }`;
