@@ -24,6 +24,7 @@ import { Route as RegionIndexRouteImport } from './routes/$region.index'
 import { Route as VitrineTokenRouteImport } from './routes/vitrine.$token'
 import { Route as VitrinePessoalNovoRouteImport } from './routes/vitrine-pessoal.novo'
 import { Route as RIdRouteImport } from './routes/r.$id'
+import { Route as PublieditorialTokenRouteImport } from './routes/publieditorial.$token'
 import { Route as EditoriaCategoriaRouteImport } from './routes/editoria.$categoria'
 import { Route as AutorSlugRouteImport } from './routes/autor.$slug'
 import { Route as AdminVitrinePessoalRouteImport } from './routes/admin.vitrine-pessoal'
@@ -127,6 +128,11 @@ const VitrinePessoalNovoRoute = VitrinePessoalNovoRouteImport.update({
 const RIdRoute = RIdRouteImport.update({
   id: '/r/$id',
   path: '/r/$id',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PublieditorialTokenRoute = PublieditorialTokenRouteImport.update({
+  id: '/publieditorial/$token',
+  path: '/publieditorial/$token',
   getParentRoute: () => rootRouteImport,
 } as any)
 const EditoriaCategoriaRoute = EditoriaCategoriaRouteImport.update({
@@ -308,6 +314,7 @@ export interface FileRoutesByFullPath {
   '/admin/vitrine-pessoal': typeof AdminVitrinePessoalRoute
   '/autor/$slug': typeof AutorSlugRoute
   '/editoria/$categoria': typeof EditoriaCategoriaRoute
+  '/publieditorial/$token': typeof PublieditorialTokenRoute
   '/r/$id': typeof RIdRoute
   '/vitrine-pessoal/novo': typeof VitrinePessoalNovoRoute
   '/vitrine/$token': typeof VitrineTokenRoute
@@ -352,6 +359,7 @@ export interface FileRoutesByTo {
   '/admin/vitrine-pessoal': typeof AdminVitrinePessoalRoute
   '/autor/$slug': typeof AutorSlugRoute
   '/editoria/$categoria': typeof EditoriaCategoriaRoute
+  '/publieditorial/$token': typeof PublieditorialTokenRoute
   '/r/$id': typeof RIdRoute
   '/vitrine-pessoal/novo': typeof VitrinePessoalNovoRoute
   '/vitrine/$token': typeof VitrineTokenRoute
@@ -399,6 +407,7 @@ export interface FileRoutesById {
   '/admin/vitrine-pessoal': typeof AdminVitrinePessoalRoute
   '/autor/$slug': typeof AutorSlugRoute
   '/editoria/$categoria': typeof EditoriaCategoriaRoute
+  '/publieditorial/$token': typeof PublieditorialTokenRoute
   '/r/$id': typeof RIdRoute
   '/vitrine-pessoal/novo': typeof VitrinePessoalNovoRoute
   '/vitrine/$token': typeof VitrineTokenRoute
@@ -447,6 +456,7 @@ export interface FileRouteTypes {
     | '/admin/vitrine-pessoal'
     | '/autor/$slug'
     | '/editoria/$categoria'
+    | '/publieditorial/$token'
     | '/r/$id'
     | '/vitrine-pessoal/novo'
     | '/vitrine/$token'
@@ -491,6 +501,7 @@ export interface FileRouteTypes {
     | '/admin/vitrine-pessoal'
     | '/autor/$slug'
     | '/editoria/$categoria'
+    | '/publieditorial/$token'
     | '/r/$id'
     | '/vitrine-pessoal/novo'
     | '/vitrine/$token'
@@ -537,6 +548,7 @@ export interface FileRouteTypes {
     | '/admin/vitrine-pessoal'
     | '/autor/$slug'
     | '/editoria/$categoria'
+    | '/publieditorial/$token'
     | '/r/$id'
     | '/vitrine-pessoal/novo'
     | '/vitrine/$token'
@@ -569,6 +581,7 @@ export interface RootRouteChildren {
   WhatsappRoute: typeof WhatsappRoute
   AutorSlugRoute: typeof AutorSlugRoute
   EditoriaCategoriaRoute: typeof EditoriaCategoriaRoute
+  PublieditorialTokenRoute: typeof PublieditorialTokenRoute
   RIdRoute: typeof RIdRoute
   VitrinePessoalNovoRoute: typeof VitrinePessoalNovoRoute
   VitrineTokenRoute: typeof VitrineTokenRoute
@@ -689,6 +702,13 @@ declare module '@tanstack/react-router' {
       path: '/r/$id'
       fullPath: '/r/$id'
       preLoaderRoute: typeof RIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/publieditorial/$token': {
+      id: '/publieditorial/$token'
+      path: '/publieditorial/$token'
+      fullPath: '/publieditorial/$token'
+      preLoaderRoute: typeof PublieditorialTokenRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/editoria/$categoria': {
@@ -965,6 +985,7 @@ const rootRouteChildren: RootRouteChildren = {
   WhatsappRoute: WhatsappRoute,
   AutorSlugRoute: AutorSlugRoute,
   EditoriaCategoriaRoute: EditoriaCategoriaRoute,
+  PublieditorialTokenRoute: PublieditorialTokenRoute,
   RIdRoute: RIdRoute,
   VitrinePessoalNovoRoute: VitrinePessoalNovoRoute,
   VitrineTokenRoute: VitrineTokenRoute,

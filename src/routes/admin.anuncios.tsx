@@ -61,7 +61,7 @@ type Target = {
 
 type Metric = { creative_id: string; impressoes: number; cliques: number };
 
-type Tab = "anunciantes" | "campanhas" | "criativos" | "targeting" | "relatorio";
+type Tab = "anunciantes" | "campanhas" | "criativos" | "publieditorial" | "targeting" | "relatorio";
 
 function slugify(s: string) {
   return s.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase()
@@ -127,7 +127,7 @@ function AdminAnuncios() {
       />
 
       <div className={tabPillsWrapClass() + " w-fit"}>
-        {(["campanhas","anunciantes","criativos","targeting","relatorio"] as Tab[]).map((t) => (
+        {(["campanhas","anunciantes","criativos","publieditorial","targeting","relatorio"] as Tab[]).map((t) => (
           <button key={t} onClick={() => setTab(t)} className={`capitalize ${tabPillClass(tab===t)}`}>
             {t}
           </button>
@@ -145,6 +145,9 @@ function AdminAnuncios() {
       )}
       {tab === "criativos" && (
         <CreativesTab creatives={creatives} campaigns={campaigns} reload={load} onToast={toast} />
+      )}
+      {tab === "publieditorial" && (
+        <PublieditorialTab campaigns={campaigns} onToast={toast} />
       )}
       {tab === "targeting" && (
         <TargetingTab targets={targets} campaigns={campaigns} reload={load} onToast={toast} />
@@ -640,6 +643,128 @@ function CreativesTab({ creatives, campaigns, reload, onToast }: {
 }
 
 /* --------------------------- Targeting -------------------------- */
+function PublieditorialTab({ campaigns, onToast }: { campaigns: Campaign[]; onToast: (s: string) => void }) {
+  type Regiao = { id: string; nome: string };
+  type Categoria = { id: string; nome: string };
+  type BriefingRow = {
+    id: string; token: string; status: string; nome_anunciante: string | null;
+    campaign_id: string; criado_em: string;
+  };
+
+  const [regioes, setRegioes] = useState<Regiao[]>([]);
+  const [categorias, setCategorias] = useState<Categoria[]>([]);
+  const [briefings, setBriefings] = useState<BriefingRow[]>([]);
+  const [form, setForm] = useState({ campaign_id: "", regiao_id: "", categoria_id: "" });
+  const [criando, setCriando] = useState(false);
+  const [carregando, setCarregando] = useState(true);
+
+  const carregar = useCallback(async () => {
+    setCarregando(true);
+    try {
+      const sb = await getExternalBrowser();
+      const [r, c, b] = await Promise.all([
+        sb.from("regioes").select("id, nome").eq("ativa", true).order("nome"),
+        sb.from("editorial_categories").select("id, nome").order("nome"),
+        sb.from("publieditorial_briefings").select("id, token, status, nome_anunciante, campaign_id, criado_em").order("criado_em", { ascending: false }),
+      ]);
+      setRegioes((r.data ?? []) as Regiao[]);
+      setCategorias((c.data ?? []) as Categoria[]);
+      setBriefings((b.data ?? []) as BriefingRow[]);
+    } finally {
+      setCarregando(false);
+    }
+  }, []);
+
+  useEffect(() => { carregar(); }, [carregar]);
+
+  async function criarLink(e: React.FormEvent) {
+    e.preventDefault();
+    if (!form.campaign_id || !form.regiao_id) return onToast("Selecione campanha e região.");
+    setCriando(true);
+    try {
+      const sb = await getExternalBrowser();
+      const { data: sess } = await sb.auth.getSession();
+      const { data, error } = await sb.from("publieditorial_briefings").insert({
+        campaign_id: form.campaign_id,
+        regiao_id: form.regiao_id,
+        categoria_id: form.categoria_id || null,
+        criado_por: sess.session?.user.id,
+      }).select("token").single();
+      if (error) throw error;
+      onToast(`Link criado: /publieditorial/${data.token} — copie e envie pro cliente preencher.`);
+      setForm({ campaign_id: "", regiao_id: "", categoria_id: "" });
+      carregar();
+    } catch (e: unknown) {
+      onToast("Erro: " + (e instanceof Error ? e.message : "falha ao criar link"));
+    } finally {
+      setCriando(false);
+    }
+  }
+
+  function copiarLink(token: string) {
+    const link = `${window.location.origin}/publieditorial/${token}`;
+    navigator.clipboard?.writeText(link);
+    onToast("Link copiado: " + link);
+  }
+
+  return (
+    <div className="space-y-4">
+      <p className="rounded border bg-muted p-3 text-xs text-muted-foreground">
+        Aqui você só cria o link — quem responde a entrevista estruturada (Tese, Contexto, Diferenciais,
+        Evidências, Impacto, Fechamento) é o próprio cliente, pelo link único. A geração acontece sozinha
+        assim que ele enviar; o rascunho cai na fila de aprovação normal (<code>/admin</code>).
+      </p>
+
+      <form onSubmit={criarLink} className="grid grid-cols-1 gap-2 rounded-2xl border border-slate-200 bg-white shadow-sm p-4 md:grid-cols-3">
+        <select required value={form.campaign_id} onChange={(e)=>setForm({...form,campaign_id:e.target.value})} className="rounded border px-2 py-1.5 text-sm">
+          <option value="">Campanha*</option>
+          {campaigns.map((c) => <option key={c.id} value={c.id}>{c.nome}</option>)}
+        </select>
+        <select required value={form.regiao_id} onChange={(e)=>setForm({...form,regiao_id:e.target.value})} className="rounded border px-2 py-1.5 text-sm">
+          <option value="">Região*</option>
+          {regioes.map((r) => <option key={r.id} value={r.id}>{r.nome}</option>)}
+        </select>
+        <select value={form.categoria_id} onChange={(e)=>setForm({...form,categoria_id:e.target.value})} className="rounded border px-2 py-1.5 text-sm">
+          <option value="">Editoria (opcional)</option>
+          {categorias.map((c) => <option key={c.id} value={c.id}>{c.nome}</option>)}
+        </select>
+        <button disabled={criando} className="md:col-span-3 rounded bg-[#0066CC] px-4 py-2 text-sm font-semibold text-white disabled:opacity-60">
+          {criando ? "Criando…" : "Gerar link pro cliente preencher"}
+        </button>
+      </form>
+
+      <div className="space-y-2">
+        {carregando && <p className="text-sm text-muted-foreground">Carregando…</p>}
+        {!carregando && briefings.length === 0 && <p className="text-sm text-muted-foreground">Nenhum link criado ainda.</p>}
+        {briefings.map((b) => {
+          const camp = campaigns.find((c) => c.id === b.campaign_id);
+          return (
+            <div key={b.id} className="flex items-center justify-between gap-3 rounded-xl border border-slate-200 bg-white p-3 text-sm">
+              <div className="min-w-0">
+                <p className="font-semibold">{camp?.nome ?? "—"}{b.nome_anunciante ? ` — ${b.nome_anunciante}` : ""}</p>
+                <p className="truncate text-xs text-muted-foreground">/publieditorial/{b.token}</p>
+              </div>
+              <div className="flex shrink-0 items-center gap-2">
+                <span className={`rounded px-2 py-0.5 text-[10px] font-bold uppercase ${
+                  b.status === "gerado" ? "bg-emerald-100 text-emerald-800"
+                  : b.status === "erro" ? "bg-red-100 text-red-800"
+                  : b.status === "preenchido" ? "bg-blue-100 text-blue-800"
+                  : "bg-amber-100 text-amber-800"
+                }`}>{b.status.replace(/_/g, " ")}</span>
+                {b.status === "aguardando_preenchimento" && (
+                  <button onClick={() => copiarLink(b.token)} className="rounded bg-[#0A2540] px-3 py-1.5 text-xs font-semibold text-white">
+                    Copiar link
+                  </button>
+                )}
+              </div>
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
 function TargetingTab({ targets, campaigns, reload, onToast }: {
   targets: Target[]; campaigns: Campaign[]; reload: () => void; onToast: (s: string) => void;
 }) {
