@@ -37,7 +37,13 @@ Deno.serve(async (req) => {
   if (error) return json({ error: "query_failed", detail: error.message }, 500);
   if (!briefing) return json({ error: "token_invalido" }, 404);
 
-  return json({ ok: true, briefing });
+  const { data: chat } = await sb
+    .from("publieditorial_chat_messages")
+    .select("role, content, criado_em")
+    .eq("briefing_id", briefing.id)
+    .order("criado_em", { ascending: true });
+
+  return json({ ok: true, briefing, chat: chat ?? [] });
 });
 
 function json(payload: unknown, status = 200) {
