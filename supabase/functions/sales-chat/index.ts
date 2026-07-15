@@ -1,8 +1,8 @@
 // Vozes Paranaenses — sales-chat
 // Chatbot de vendas: conversa com o visitante usando SOMENTE o catálogo de
-// preços real do banco (nunca inventa valor). Pagamento é MANUAL por
-// enquanto (Pix) — quando o Mercado Pago for configurado, o mesmo pedido
-// passa a ser confirmado por webhook em vez de clique do admin.
+// preços real do banco (nunca inventa valor). Pode discutir valores e
+// pacotes livremente, mas NUNCA fecha a venda sozinho — toda negociação de
+// empresa/agência é sempre encaminhada pro WhatsApp do time comercial.
 
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
 
@@ -15,9 +15,7 @@ const cors = {
 const AI_URL = "https://ai.gateway.lovable.dev/v1/chat/completions";
 const MODEL = "google/gemini-2.5-pro";
 
-// TODO: trocar pela chave Pix real da conta que vai receber.
-const PIX_CHAVE = "financeiro@vozesparanaenses.com.br";
-const PIX_TITULAR = "Vozes Paranaenses (titular a confirmar)";
+const WHATSAPP_COMERCIAL_DISPLAY = "(45) 99986-4213";
 
 type Msg = { role: "user" | "assistant"; content: string };
 type Payload = { sessao_id: string; mensagens: Msg[]; contexto?: { regiao_slug?: string; pagina?: string } };
@@ -73,46 +71,40 @@ ${(combosMistos.data ?? []).map((c) => `- ${c.nome} (${c.descricao}): R$ ${c.pre
 
 PRODUTO À PARTE — Vitrine Pessoal (R$ 199, avulso): matéria sobre a trajetória de UM profissional
 liberal (não empresa). Se o visitante for claramente um profissional liberal falando de si mesmo
-(não uma empresa/marca), NÃO tente vender os pacotes comerciais abaixo — diga que existe esse
-produto específico e mais barato pra esse caso, e direcione pro formulário:
-"https://vozesparanaenses.com.br/vitrine-pessoal/novo". Não crie "pedido" pra esse produto.
+(não uma empresa/marca), direcione pro chat próprio desse produto:
+"https://vozesparanaenses.com.br/vitrine-pessoal/novo" — lá ele mesmo fecha e gera a matéria, sem
+precisar do time comercial.
 
 CATÁLOGO REAL DE PREÇOS — use SOMENTE estes valores, nunca invente ou calcule fora daqui:
 ${catalogoTexto}
 
-ESTRATÉGIA DE VENDA (escada A/B/C):
-- Plano A (abra sempre com isso primeiro): combo misto "Presença Completa".
-- Plano B (se hesitar): "Combo Básico" (só anúncio) ou "Publieditorial avulso" (só conteúdo).
-- Plano C (nunca deixe a conversa terminar sem oferecer): 1 espaço avulso, periodicidade quinzenal.
+ESTRATÉGIA DE VENDA (escada A/B/C) — use isso pra CONVERSAR sobre valor, nunca pra fechar sozinho:
+- Plano A (apresente sempre primeiro): combo misto "Presença Completa".
+- Plano B (se o cliente hesitar): "Combo Básico" (só anúncio) ou "Publieditorial avulso" (só conteúdo).
+- Plano C (sempre tenha isso como alternativa de entrada): 1 espaço avulso, periodicidade quinzenal.
 - Nunca desconte o preço de um plano — troque de produto ou periodicidade, nunca o valor unitário.
 
-PAGAMENTO — hoje é manual, via Pix:
-- Chave Pix: ${PIX_CHAVE} (titular: ${PIX_TITULAR})
-- Depois de criar o pedido, sempre informe essa chave e explique: "assim que recebermos a confirmação
-  do pagamento, seu anúncio entra no ar em até 12 horas".
+REGRA MAIS IMPORTANTE — LEIA COM ATENÇÃO:
+Sempre que o visitante for uma AGÊNCIA ou um EMPRESÁRIO/EMPRESA querendo divulgar um negócio (ou
+seja, qualquer cliente que não seja o profissional liberal da Vitrine Pessoal), você PODE e DEVE
+conversar sobre valores, planos e pacotes com liberdade, usando a escada A/B/C — mas NUNCA finalize
+a venda você mesmo, nunca colete pagamento, nunca crie pedido nenhum. Assim que o cliente demonstrar
+interesse real em fechar (perguntar "como eu contrato", "vamos fechar", "pode confirmar" ou
+similar), encerre a conversa dessa forma:
+1. Resuma em 1 frase o que foi combinado (produto e valor discutidos).
+2. Diga que o time comercial finaliza tudo por lá.
+3. Sempre informe o WhatsApp: ${WHATSAPP_COMERCIAL_DISPLAY}.
+Nessas respostas de fechamento, defina "mostrar_whatsapp": true.
 
 REGRAS DE CONVERSA:
-1. Seja consultivo, não insistente.
-2. Se o visitante mencionar que é agência ou quer contratar "pela agência" — defina
-   "mostrar_whatsapp": true, não tente fechar você mesmo.
-3. Se quiser fechar diretamente, colete nome e contato ANTES de criar o pedido. Só preencha "pedido"
-   quando já tiver produto, valor exato do catálogo, nome e contato.
-4. Respostas curtas e diretas, em português do Brasil.
+1. Seja consultivo, não insistente — explore o que o negócio do cliente precisa antes de recomendar.
+2. Respostas curtas e diretas, em português do Brasil.
+3. Nunca prometa prazo, desconto ou condição que não esteja no catálogo acima.
 
 Responda SEMPRE em JSON válido, neste schema exato:
 {
   "resposta": "texto da sua resposta pro visitante",
-  "mostrar_whatsapp": boolean,
-  "pedido": null ou {
-    "tipo_produto": "espaco_individual" | "combo_anuncio" | "publieditorial" | "combo_misto",
-    "descricao_produto": "nome do produto escolhido, como está no catálogo",
-    "regiao_slug": "slug da região (se souber) ou null",
-    "abrangencia": "cidade" | "regiao" | "estado" | null,
-    "periodicidade": "semanal" | "quinzenal" | "mensal" | "semestral" | "anual" | null,
-    "valor_total": número exato calculado a partir do catálogo,
-    "nome_cliente": "nome informado",
-    "contato": "telefone ou e-mail informado"
-  }
+  "mostrar_whatsapp": boolean
 }`;
 
   const messages = [
@@ -137,47 +129,16 @@ Responda SEMPRE em JSON válido, neste schema exato:
   const content = aiJson?.choices?.[0]?.message?.content;
   if (!content) return json({ error: "ai_empty_response" }, 502);
 
-  let parsed: {
-    resposta: string; mostrar_whatsapp?: boolean;
-    pedido?: {
-      tipo_produto: string; descricao_produto: string; regiao_slug?: string | null;
-      abrangencia?: string | null; periodicidade?: string | null;
-      valor_total: number; nome_cliente: string; contato: string;
-    } | null;
-  };
+  let parsed: { resposta: string; mostrar_whatsapp?: boolean };
   try {
     parsed = JSON.parse(content);
   } catch {
     return json({ error: "ai_invalid_json", raw: content.slice(0, 500) }, 502);
   }
 
-  let pedidoCriado: { id: string } | null = null;
-  if (parsed.pedido && parsed.pedido.nome_cliente && parsed.pedido.contato && parsed.pedido.valor_total > 0) {
-    const { data: inserted, error: insErr } = await sb
-      .from("pedidos_chatbot")
-      .insert({
-        sessao_id: body.sessao_id,
-        tipo_produto: parsed.pedido.tipo_produto,
-        descricao_produto: parsed.pedido.descricao_produto,
-        regiao_slug: parsed.pedido.regiao_slug ?? null,
-        abrangencia: parsed.pedido.abrangencia ?? null,
-        periodicidade: parsed.pedido.periodicidade ?? null,
-        valor_total: parsed.pedido.valor_total,
-        nome_cliente: parsed.pedido.nome_cliente,
-        contato: parsed.pedido.contato,
-        origem: "direto",
-        metodo_pagamento: "pix_manual",
-      })
-      .select("id")
-      .single();
-    if (!insErr) pedidoCriado = inserted;
-  }
-
   return json({
     resposta: parsed.resposta,
     mostrar_whatsapp: parsed.mostrar_whatsapp ?? false,
-    pedido_criado: pedidoCriado,
-    pix: pedidoCriado ? { chave: PIX_CHAVE, titular: PIX_TITULAR } : null,
   });
 });
 
