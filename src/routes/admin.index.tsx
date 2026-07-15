@@ -47,6 +47,8 @@ function AdminQueue() {
   const [err, setErr] = useState<string | null>(null);
   const [busyId, setBusyId] = useState<string | null>(null);
   const [unpinBusyId, setUnpinBusyId] = useState<string | null>(null);
+  const [deleteBusyId, setDeleteBusyId] = useState<string | null>(null);
+  const [bulkBusy, setBulkBusy] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [pipelineBusy, setPipelineBusy] = useState(false);
   const [pipelineLog, setPipelineLog] = useState<string[]>([]);
@@ -167,6 +169,42 @@ function AdminQueue() {
     }
   }
 
+  async function deleteOne(id: string) {
+    if (!confirm("Apagar esta matéria definitivamente? Esta ação não pode ser desfeita.")) return;
+    setDeleteBusyId(id);
+    try {
+      const sb = await getExternalBrowser();
+      const { error } = await sb.from("generated_articles").delete().eq("id", id);
+      if (error) throw error;
+      await Promise.all([load(), loadPinned()]);
+    } catch (e: unknown) {
+      alert(e instanceof Error ? e.message : "Falha ao apagar");
+    } finally {
+      setDeleteBusyId(null);
+    }
+  }
+
+  async function deleteAllInTab() {
+    if (!items || items.length === 0) return;
+    if (tab === "publicado") {
+      alert("Não é possível apagar em massa matérias publicadas. Despublique antes.");
+      return;
+    }
+    if (!confirm(`Apagar TODAS as ${items.length} matérias em «${tab}»? Esta ação não pode ser desfeita.`)) return;
+    setBulkBusy(true);
+    try {
+      const sb = await getExternalBrowser();
+      const ids = items.map((i) => i.id);
+      const { error } = await sb.from("generated_articles").delete().in("id", ids);
+      if (error) throw error;
+      await load();
+    } catch (e: unknown) {
+      alert(e instanceof Error ? e.message : "Falha ao apagar em massa");
+    } finally {
+      setBulkBusy(false);
+    }
+  }
+
   return (
     <div className="space-y-6">
       <PageHeader
@@ -247,6 +285,18 @@ function AdminQueue() {
       {err && <p className="rounded-xl border border-red-200 bg-red-50 p-3 text-sm text-red-700">{err}</p>}
       {!items && !err && <p className="text-sm text-slate-500">Carregando…</p>}
       {items && items.length === 0 && <p className="text-sm text-slate-500">Nada em «{tab}».</p>}
+
+      {items && items.length > 0 && tab !== "publicado" && (
+        <div className="flex justify-end">
+          <button
+            onClick={deleteAllInTab}
+            disabled={bulkBusy}
+            className="rounded-full border border-red-300 bg-red-50 px-3.5 py-1.5 text-xs font-semibold text-red-700 hover:bg-red-100 disabled:opacity-60"
+          >
+            {bulkBusy ? "Apagando…" : `🗑 Apagar todas as ${items.length} em «${tab}»`}
+          </button>
+        </div>
+      )}
 
       <ul className="space-y-3">
         {items?.map((it) => (
@@ -347,6 +397,16 @@ function AdminQueue() {
                 <button disabled={busyId === it.id} onClick={() => updateStatus(it.id, "rascunho")}
                   className="rounded border px-3 py-1 text-xs hover:bg-accent disabled:opacity-60">
                   Despublicar
+                </button>
+              )}
+              {it.status !== "publicado" && (
+                <button
+                  disabled={deleteBusyId === it.id}
+                  onClick={() => deleteOne(it.id)}
+                  className="ml-auto rounded border border-red-300 px-3 py-1 text-xs font-semibold text-red-700 hover:bg-red-50 disabled:opacity-60"
+                  title="Apagar definitivamente"
+                >
+                  {deleteBusyId === it.id ? "Apagando…" : "🗑 Apagar"}
                 </button>
               )}
             </div>
