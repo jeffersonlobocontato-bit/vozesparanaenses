@@ -314,18 +314,65 @@ function PublieditorialEntrevista() {
                 value={rascunho}
                 onChange={(e) => setRascunho(e.target.value)}
                 onKeyDown={onKeyDown}
-                disabled={enviando || Boolean(encerrado)}
-                placeholder={encerrado ? "Entrevista encerrada." : "Escreva sua resposta e aperte Enter…"}
+                disabled={enviando || transcrevendo || gravando || Boolean(encerrado)}
+                placeholder={
+                  encerrado
+                    ? "Entrevista encerrada."
+                    : gravando
+                      ? "🎤 Gravando… fale sua resposta."
+                      : transcrevendo
+                        ? "Transcrevendo seu áudio…"
+                        : "Escreva ou grave sua resposta. Depois clique em Enviar."
+                }
                 className="min-h-[44px] flex-1 resize-none rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm outline-none focus:border-[#0066CC] disabled:bg-slate-100"
               />
+              {!encerrado && (
+                gravando ? (
+                  <>
+                    <button
+                      type="button"
+                      onClick={cancelarGravacao}
+                      title="Cancelar gravação"
+                      className="shrink-0 rounded-xl border border-slate-300 bg-white px-3 py-2.5 text-sm font-bold text-slate-600"
+                    >
+                      ✕
+                    </button>
+                    <button
+                      type="button"
+                      onClick={pararGravacao}
+                      title="Parar e transcrever"
+                      className="shrink-0 rounded-xl bg-red-600 px-3 py-2.5 text-sm font-bold text-white"
+                    >
+                      ⏹ {formatTempo(tempoGrav)}
+                    </button>
+                  </>
+                ) : (
+                  <button
+                    type="button"
+                    onClick={iniciarGravacao}
+                    disabled={enviando || transcrevendo}
+                    title="Responder por voz"
+                    className="shrink-0 rounded-xl border border-slate-300 bg-white px-3 py-2.5 text-sm font-bold text-slate-700 disabled:opacity-50"
+                  >
+                    {transcrevendo ? "…" : "🎤"}
+                  </button>
+                )
+              )}
               <button
                 type="submit"
-                disabled={enviando || Boolean(encerrado) || !rascunho.trim()}
+                disabled={enviando || transcrevendo || gravando || Boolean(encerrado) || !rascunho.trim()}
                 className="shrink-0 rounded-xl bg-[#0066CC] px-4 py-2.5 text-sm font-bold text-white disabled:opacity-50"
               >
                 Enviar
               </button>
             </div>
+            {(gravando || transcrevendo) && (
+              <p className="mt-2 text-xs text-slate-500">
+                {gravando
+                  ? "Fale com calma. Clique em ⏹ pra parar e transcrever, ou ✕ pra cancelar."
+                  : "Transcrevendo… revise o texto antes de enviar."}
+              </p>
+            )}
           </form>
         </div>
       </main>
