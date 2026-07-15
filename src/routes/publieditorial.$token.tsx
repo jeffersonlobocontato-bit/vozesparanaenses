@@ -38,6 +38,13 @@ function PublieditorialEntrevista() {
   const [finalizado, setFinalizado] = useState<{ aviso?: string } | null>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
+  const [gravando, setGravando] = useState(false);
+  const [transcrevendo, setTranscrevendo] = useState(false);
+  const [tempoGrav, setTempoGrav] = useState(0);
+  const recorderRef = useRef<MediaRecorder | null>(null);
+  const chunksRef = useRef<Blob[]>([]);
+  const streamRef = useRef<MediaStream | null>(null);
+  const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   useEffect(() => {
     (async () => {
@@ -105,6 +112,100 @@ function PublieditorialEntrevista() {
       e.preventDefault();
       enviar();
     }
+  }
+
+  function pickMime(): string {
+    const candidatos = ["audio/webm;codecs=opus", "audio/webm", "audio/mp4"];
+    for (const m of candidatos) {
+      if (typeof MediaRecorder !== "undefined" && MediaRecorder.isTypeSupported(m)) return m;
+    }
+    return "";
+  }
+
+  async function iniciarGravacao() {
+    if (gravando || transcrevendo || enviando || encerrado) return;
+    setErro(null);
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      streamRef.current = stream;
+      const mime = pickMime();
+      const rec = mime ? new MediaRecorder(stream, { mimeType: mime }) : new MediaRecorder(stream);
+      chunksRef.current = [];
+      rec.ondataavailable = (ev) => { if (ev.data.size > 0) chunksRef.current.push(ev.data); };
+      rec.onstop = async () => {
+        const tipo = rec.mimeType || mime || "audio/webm";
+        const blob = new Blob(chunksRef.current, { type: tipo });
+        streamRef.current?.getTracks().forEach((t) => t.stop());
+        streamRef.current = null;
+        if (timerRef.current) { clearInterval(timerRef.current); timerRef.current = null; }
+        setTempoGrav(0);
+        if (blob.size < 2048) {
+          setErro("Gravação muito curta. Fale por pelo menos 1 segundo.");
+          return;
+        }
+        await transcrever(blob);
+      };
+      rec.start();
+      recorderRef.current = rec;
+      setGravando(true);
+      setTempoGrav(0);
+      timerRef.current = setInterval(() => setTempoGrav((s) => s + 1), 1000);
+    } catch {
+      setErro("Não consegui acessar seu microfone. Verifique as permissões do navegador.");
+    }
+  }
+
+  function pararGravacao() {
+    const rec = recorderRef.current;
+    if (!rec) return;
+    setGravando(false);
+    if (rec.state !== "inactive") rec.stop();
+    recorderRef.current = null;
+  }
+
+  function cancelarGravacao() {
+    const rec = recorderRef.current;
+    if (rec && rec.state !== "inactive") {
+      rec.ondataavailable = null;
+      rec.onstop = null;
+      rec.stop();
+    }
+    recorderRef.current = null;
+    streamRef.current?.getTracks().forEach((t) => t.stop());
+    streamRef.current = null;
+    if (timerRef.current) { clearInterval(timerRef.current); timerRef.current = null; }
+    chunksRef.current = [];
+    setGravando(false);
+    setTempoGrav(0);
+  }
+
+  async function transcrever(blob: Blob) {
+    setTranscrevendo(true);
+    try {
+      const form = new FormData();
+      const ext = blob.type.includes("mp4") ? "mp4" : blob.type.includes("wav") ? "wav" : "webm";
+      form.append("file", blob, `resposta.${ext}`);
+      const { data, error } = await supabase.functions.invoke("publieditorial-transcrever", { body: form });
+      if (error) throw error;
+      const texto = (data as { text?: string })?.text?.trim();
+      if (!texto) { setErro("Não entendi o áudio. Tente falar mais claro."); return; }
+      setRascunho((r) => (r ? r + " " + texto : texto));
+      setTimeout(() => inputRef.current?.focus(), 0);
+    } catch (e: unknown) {
+      setErro(e instanceof Error ? e.message : "Falha ao transcrever o áudio.");
+    } finally {
+      setTranscrevendo(false);
+    }
+  }
+
+  useEffect(() => () => {
+    streamRef.current?.getTracks().forEach((t) => t.stop());
+    if (timerRef.current) clearInterval(timerRef.current);
+  }, []);
+
+  function formatTempo(s: number) {
+    const m = Math.floor(s / 60); const r = s % 60;
+    return `${m}:${r.toString().padStart(2, "0")}`;
   }
 
   if (carregando) {
@@ -213,18 +314,65 @@ function PublieditorialEntrevista() {
                 value={rascunho}
                 onChange={(e) => setRascunho(e.target.value)}
                 onKeyDown={onKeyDown}
-                disabled={enviando || Boolean(encerrado)}
-                placeholder={encerrado ? "Entrevista encerrada." : "Escreva sua resposta e aperte Enter…"}
+                disabled={enviando || transcrevendo || gravando || Boolean(encerrado)}
+                placeholder={
+                  encerrado
+                    ? "Entrevista encerrada."
+                    : gravando
+                      ? "🎤 Gravando… fale sua resposta."
+                      : transcrevendo
+                        ? "Transcrevendo seu áudio…"
+                        : "Escreva ou grave sua resposta. Depois clique em Enviar."
+                }
                 className="min-h-[44px] flex-1 resize-none rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm outline-none focus:border-[#0066CC] disabled:bg-slate-100"
               />
+              {!encerrado && (
+                gravando ? (
+                  <>
+                    <button
+                      type="button"
+                      onClick={cancelarGravacao}
+                      title="Cancelar gravação"
+                      className="shrink-0 rounded-xl border border-slate-300 bg-white px-3 py-2.5 text-sm font-bold text-slate-600"
+                    >
+                      ✕
+                    </button>
+                    <button
+                      type="button"
+                      onClick={pararGravacao}
+                      title="Parar e transcrever"
+                      className="shrink-0 rounded-xl bg-red-600 px-3 py-2.5 text-sm font-bold text-white"
+                    >
+                      ⏹ {formatTempo(tempoGrav)}
+                    </button>
+                  </>
+                ) : (
+                  <button
+                    type="button"
+                    onClick={iniciarGravacao}
+                    disabled={enviando || transcrevendo}
+                    title="Responder por voz"
+                    className="shrink-0 rounded-xl border border-slate-300 bg-white px-3 py-2.5 text-sm font-bold text-slate-700 disabled:opacity-50"
+                  >
+                    {transcrevendo ? "…" : "🎤"}
+                  </button>
+                )
+              )}
               <button
                 type="submit"
-                disabled={enviando || Boolean(encerrado) || !rascunho.trim()}
+                disabled={enviando || transcrevendo || gravando || Boolean(encerrado) || !rascunho.trim()}
                 className="shrink-0 rounded-xl bg-[#0066CC] px-4 py-2.5 text-sm font-bold text-white disabled:opacity-50"
               >
                 Enviar
               </button>
             </div>
+            {(gravando || transcrevendo) && (
+              <p className="mt-2 text-xs text-slate-500">
+                {gravando
+                  ? "Fale com calma. Clique em ⏹ pra parar e transcrever, ou ✕ pra cancelar."
+                  : "Transcrevendo… revise o texto antes de enviar."}
+              </p>
+            )}
           </form>
         </div>
       </main>
