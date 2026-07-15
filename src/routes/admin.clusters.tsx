@@ -155,14 +155,14 @@ function AdminClusters() {
     if (!ok) return;
     setCleaning(true); setMsg(null);
     try {
-      const sb = await getExternalBrowser();
-      const { data, error } = await sb
-        .from("article_clusters")
-        .delete()
-        .in("status", ["novo", "selecionado_cota", "fatos_extraidos", "descartado"])
-        .select("id");
+      // Usa edge function com service role — a tabela article_clusters não
+      // tem policy de DELETE para o usuário autenticado, então via cliente
+      // browser a exclusão volta 0 linhas em silêncio.
+      const { data, error } = await supabase.functions.invoke("delete-clusters", {
+        body: { statuses: ["novo", "selecionado_cota", "fatos_extraidos", "descartado"] },
+      });
       if (error) throw error;
-      setMsg(`${data?.length ?? 0} pauta(s) removida(s).`);
+      setMsg(`${(data as { deleted?: number })?.deleted ?? 0} pauta(s) removida(s).`);
       await load();
     } catch (e: unknown) {
       setMsg("Falha ao apagar pautas: " + (e instanceof Error ? e.message : "erro"));
