@@ -15,6 +15,7 @@ const AI_URL = "https://ai.gateway.lovable.dev/v1/chat/completions";
 const MODEL = "google/gemini-2.5-pro";
 
 type Payload = {
+  pedido_id?: string;
   nome_cliente: string; contato: string; profissao: string;
   sobre_pessoa_ou_empresa: "pessoa" | "empresa";
   regiao_id: string; categoria_id?: string | null; briefing_texto: string;
@@ -128,22 +129,22 @@ Redija a Vitrine Pessoal no schema JSON:
 
   if (insErr || !article) return json({ error: "article_insert_failed", detail: insErr?.message }, 500);
 
-  const { data: pedido, error: pedErr } = await sb
-    .from("vitrine_pessoal_pedidos")
-    .insert({
-      nome_cliente: body.nome_cliente,
-      contato: body.contato,
-      profissao: body.profissao,
-      sobre_pessoa_ou_empresa: "pessoa",
-      regiao_id: body.regiao_id,
-      categoria_id: body.categoria_id ?? null,
-      briefing_texto: body.briefing_texto,
-      generated_article_id: article.id,
-      status: "aguardando_edicao",
-      metodo_pagamento: "pix_manual",
-    })
-    .select("token")
-    .single();
+  const pedidoFields = {
+    nome_cliente: body.nome_cliente,
+    contato: body.contato,
+    profissao: body.profissao,
+    sobre_pessoa_ou_empresa: "pessoa" as const,
+    regiao_id: body.regiao_id,
+    categoria_id: body.categoria_id ?? null,
+    briefing_texto: body.briefing_texto,
+    generated_article_id: article.id,
+    status: "aguardando_edicao",
+    metodo_pagamento: "pix_manual" as const,
+  };
+
+  const { data: pedido, error: pedErr } = body.pedido_id
+    ? await sb.from("vitrine_pessoal_pedidos").update(pedidoFields).eq("id", body.pedido_id).select("token").single()
+    : await sb.from("vitrine_pessoal_pedidos").insert(pedidoFields).select("token").single();
 
   if (pedErr || !pedido) return json({ error: "pedido_insert_failed", detail: pedErr?.message }, 500);
 
