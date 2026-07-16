@@ -28,8 +28,9 @@ Deno.serve(async (req) => {
   if (!url || !key) return json({ error: "missing_external_supabase_env" }, 500);
   if (!aiKey) return json({ error: "missing_lovable_api_key" }, 500);
 
-  let body: { regiao_id?: string; sync?: boolean } = {};
+  let body: { regiao_id?: string; sync?: boolean; limit?: number } = {};
   try { body = await req.json(); } catch { body = {}; }
+  const limit = Math.max(1, Math.min(body.limit ?? 15, 50));
 
   const sb = createClient(url, key, { auth: { persistSession: false } });
 
@@ -43,7 +44,7 @@ Deno.serve(async (req) => {
     .eq("status", "novo")
     .is("categoria_id", null)
     .order("prioridade_score", { ascending: false })
-    .limit(50);
+    .limit(limit);
   if (body.regiao_id) cq = cq.eq("regiao_id", body.regiao_id);
   const { data: clusters, error } = await cq;
   if (error) return json({ error: "cluster_query_failed", detail: error.message }, 500);

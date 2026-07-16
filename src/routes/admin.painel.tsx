@@ -149,16 +149,21 @@ function AdminDashboard() {
         if (!d.processed) break;
       }
 
-      // 3/4 Classificação + cotas
-      setPipelineLog((l) => [...l, "3/4 Classificação + cotas…"]);
-      const cq = await supabase.functions.invoke("classify-and-quota", { body: { sync: true } });
-      if (cq.error) throw cq.error;
-      setPipelineLog((l) => [...l, `  ✓ ${JSON.stringify(cq.data).slice(0, 160)}`]);
+      // 3/4 Classificação + cotas em lotes (sync=true num único shot dá 502
+      // no gateway quando são 50 clusters — LLM por cluster estoura o timeout)
+      setPipelineLog((l) => [...l, "3/4 Classificação + cotas (em lotes)…"]);
+      for (let i = 1; i <= 30; i++) {
+        const r = await supabase.functions.invoke("classify-and-quota", { body: { sync: true, limit: 15 } });
+        if (r.error) throw r.error;
+        const d = (r.data ?? {}) as { classified?: number; selected?: number };
+        setPipelineLog((l) => [...l, `  lote ${i}: classificados=${d.classified ?? 0} selecionados=${d.selected ?? 0}`]);
+        if (!d.classified) break;
+      }
 
-      // 4/4 Processar pendentes em lotes de 15 (extrair+escrever é caro)
+      // 4/4 Processar pendentes em lotes pequenos (extrair+escrever é caro)
       setPipelineLog((l) => [...l, "4/4 Extrair fatos + escrever (em lotes)…"]);
-      for (let i = 1; i <= 20; i++) {
-        const r = await supabase.functions.invoke("process-pending-clusters", { body: { limit: 15, sync: true } });
+      for (let i = 1; i <= 30; i++) {
+        const r = await supabase.functions.invoke("process-pending-clusters", { body: { limit: 8, sync: true } });
         if (r.error) throw r.error;
         const d = (r.data ?? {}) as { pendentes?: number; escritas?: number };
         setPipelineLog((l) => [...l, `  lote ${i}: pendentes=${d.pendentes ?? 0} escritas=${d.escritas ?? 0}`]);
@@ -190,17 +195,21 @@ function AdminDashboard() {
         setPipelineLog((l) => [...l, `  lote ${i}: processado=${d.processed ?? 0} clusters=${d.clusters ?? 0}`]);
         if (!d.processed) break;
       }
-      setPipelineLog((l) => [...l, "classify-and-quota…"]);
-      const cq = await supabase.functions.invoke("classify-and-quota", { body: { sync: true } });
-      if (cq.error) throw cq.error;
-      setPipelineLog((l) => [...l, `  ✓ ${JSON.stringify(cq.data).slice(0, 160)}`]);
+      setPipelineLog((l) => [...l, "classify-and-quota (em lotes)…"]);
+      for (let i = 1; i <= 30; i++) {
+        const r = await supabase.functions.invoke("classify-and-quota", { body: { sync: true, limit: 15 } });
+        if (r.error) throw r.error;
+        const d = (r.data ?? {}) as { classified?: number; selected?: number };
+        setPipelineLog((l) => [...l, `  lote ${i}: classificados=${d.classified ?? 0} selecionados=${d.selected ?? 0}`]);
+        if (!d.classified) break;
+      }
       // Faltava esta etapa — sem ela, os clusters ficavam "selecionado_cota"
       // pra sempre e nunca viravam matéria de verdade (classify-and-quota
       // só classifica e aplica cota desde a última correção; quem escreve
       // é só esta função).
       setPipelineLog((l) => [...l, "extrair fatos + escrever (em lotes)…"]);
-      for (let i = 1; i <= 20; i++) {
-        const r = await supabase.functions.invoke("process-pending-clusters", { body: { limit: 15, sync: true } });
+      for (let i = 1; i <= 30; i++) {
+        const r = await supabase.functions.invoke("process-pending-clusters", { body: { limit: 8, sync: true } });
         if (r.error) throw r.error;
         const d = (r.data ?? {}) as { pendentes?: number; escritas?: number };
         setPipelineLog((l) => [...l, `  lote ${i}: pendentes=${d.pendentes ?? 0} escritas=${d.escritas ?? 0}`]);
@@ -229,10 +238,14 @@ function AdminDashboard() {
         setPipelineLog((l) => [...l, `  lote ${i}: processado=${d.processed ?? 0} clusters=${d.clusters ?? 0}`]);
         if (!d.processed) break;
       }
-      setPipelineLog((l) => [...l, "classify-and-quota (classifica sem escrever sozinho)…"]);
-      const cq = await supabase.functions.invoke("classify-and-quota", { body: { sync: true } });
-      if (cq.error) throw cq.error;
-      setPipelineLog((l) => [...l, `  ✓ ${JSON.stringify(cq.data).slice(0, 160)}`]);
+      setPipelineLog((l) => [...l, "classify-and-quota (em lotes, sem escrever sozinho)…"]);
+      for (let i = 1; i <= 30; i++) {
+        const r = await supabase.functions.invoke("classify-and-quota", { body: { sync: true, limit: 15 } });
+        if (r.error) throw r.error;
+        const d = (r.data ?? {}) as { classified?: number; selected?: number };
+        setPipelineLog((l) => [...l, `  lote ${i}: classificados=${d.classified ?? 0} selecionados=${d.selected ?? 0}`]);
+        if (!d.classified) break;
+      }
     } catch (e: unknown) {
       setPipelineLog((l) => [...l, `  ✗ ${e instanceof Error ? e.message : "erro"}`]);
     }
