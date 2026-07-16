@@ -5,7 +5,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { displayRegionName } from "@/lib/region-labels";
 import {
   FileText, CheckCircle2, Send, XCircle, CalendarClock,
-  Radar, Layers, ListChecks, Radio, Megaphone, Sparkles,
+  Radar, Layers, ListChecks, Radio, Megaphone,
   Clock3, MousePointerClick, Eye, Users, Newspaper, Map,
   Bot, BookOpen, KeyRound, Activity, RefreshCw, Play,
 } from "lucide-react";
@@ -195,6 +195,29 @@ function AdminDashboard() {
     load();
   }
 
+  async function runCuradoriaNacional() {
+    setPipelineBusy(true);
+    setPipelineLog(["Coletando fontes de curadoria nacional (Segurança/Esporte/Geral)…"]);
+    try {
+      const scrape = await supabase.functions.invoke("scrape-source", { body: { force: true, sync: true, apenas_curadoria: true } });
+      if (scrape.error) throw scrape.error;
+      setPipelineLog((l) => [...l, `  ✓ ${JSON.stringify(scrape.data).slice(0, 200)}`]);
+      setPipelineLog((l) => [...l, "cluster-articles…"]);
+      const cl = await supabase.functions.invoke("cluster-articles", { body: { sync: true } });
+      if (cl.error) throw cl.error;
+      setPipelineLog((l) => [...l, `  ✓ ${JSON.stringify(cl.data).slice(0, 200)}`]);
+      setPipelineLog((l) => [...l, "classify-and-quota (classifica sem escrever sozinho)…"]);
+      const cq = await supabase.functions.invoke("classify-and-quota", { body: { sync: true } });
+      if (cq.error) throw cq.error;
+      setPipelineLog((l) => [...l, `  ✓ ${JSON.stringify(cq.data).slice(0, 200)}`]);
+    } catch (e: unknown) {
+      setPipelineLog((l) => [...l, `  ✗ ${e instanceof Error ? e.message : "erro"}`]);
+    }
+    setPipelineLog((l) => [...l, "Coleta de curadoria finalizada — vá em Curadoria pra decidir o que escrever."]);
+    setPipelineBusy(false);
+    load();
+  }
+
   return (
     <div className="space-y-6">
       <div className="flex flex-wrap items-end justify-between gap-4 border-b border-slate-200 pb-5">
@@ -231,9 +254,47 @@ function AdminDashboard() {
         </div>
       </Section>
 
-      {/* Pipeline */}
-      <Section title="Pipeline" subtitle="Coleta, curadoria e geração automática">
+      {/* Pipeline — 4 cards, cada um com scraping próprio e destino claro */}
+      <Section title="Pipeline" subtitle="Coleta, curadoria e geração automática — 1 botão por origem">
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          <PipelineCard
+            tone="teal"
+            titulo="Prefeituras (Paraná)"
+            desc="Releases oficiais das cidades cadastradas. Escreve sozinho — cai direto na Fila pra revisar."
+            to="/admin"
+            actionLabel="▶ Rodar prefeituras"
+            onAction={runPrefeituras}
+            busy={pipelineBusy}
+          />
+          <PipelineCard
+            tone="blue"
+            titulo="Portais (Paraná)"
+            desc="Veículos de imprensa regionais. Escreve sozinho — cai direto na Fila pra revisar."
+            to="/admin"
+            actionLabel="▶ Rodar portais"
+            onAction={runPipeline}
+            busy={pipelineBusy}
+          />
+          <PipelineCard
+            tone="amber"
+            titulo="Segurança & Esporte (Nacional)"
+            desc="G1, Metrópoles, R7, CNN, ge, Lance!, ESPN, Gazeta. Nunca escreve sozinho — você decide na Curadoria."
+            to="/admin/clusters"
+            actionLabel="▶ Rodar coleta"
+            onAction={runCuradoriaNacional}
+            busy={pipelineBusy}
+          />
+          <PipelineCard
+            tone="violet"
+            titulo="Nacional — Geral"
+            desc="Mesmas fontes gerais, classificadas pela IA fora de Segurança/Esporte. Nunca escreve sozinho."
+            to="/admin/clusters"
+            actionLabel="▶ Rodar coleta"
+            onAction={runCuradoriaNacional}
+            busy={pipelineBusy}
+          />
+        </div>
+        <div className="mt-4 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
           <Kpi label="Coletado (24h)" value={m?.rawLast24h} tone="slate" icon={Radar} />
           <Kpi label="Pautas novas" value={m?.clustersNovos} tone="amber" icon={Layers} to="/admin/clusters" />
           <Kpi label="Selecionadas por cota" value={m?.clustersSelecionados} tone="blue" icon={ListChecks} to="/admin/clusters" />
@@ -261,7 +322,6 @@ function AdminDashboard() {
       <Section title="Gestão" subtitle="Atalhos das áreas de trabalho">
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
           <Shortcut to="/admin" icon={Newspaper} tone="blue" title="Fila editorial" desc={m ? `${m.drafts} rascunho${m.drafts === 1 ? "" : "s"} aguardando revisão.` : "Revisar, editar e publicar matérias."} />
-          <Shortcut to="/admin/clusters" icon={Sparkles} tone="amber" title="Curadoria — Segurança & Esportes" desc="Ranking nacional/internacional por nº de portais, com escrita sob demanda." />
           <Shortcut to="/admin/fontes" icon={Radio} tone="teal" title="Fontes" desc="Cadastrar e ativar veículos monitorados." />
           <Shortcut to="/admin/regioes" icon={Map} tone="violet" title="Regiões e cotas" desc={`${m?.regioesAtivas ?? "—"} regiões ativas no portal.`} />
           <Shortcut to="/admin/anuncios" icon={Megaphone} tone="rose" title="Anúncios" desc="Anunciantes, campanhas, criativos e targeting." />
@@ -376,5 +436,34 @@ function Shortcut({ to, title, desc, icon: Icon, tone }: {
       <div className="font-semibold text-[#0A2540] group-hover:text-[#0066CC]">{title}</div>
       <p className="mt-1 text-xs leading-relaxed text-slate-500">{desc}</p>
     </Link>
+  );
+}
+
+function PipelineCard({ tone, titulo, desc, to, actionLabel, onAction, busy }: {
+  tone: Tone; titulo: string; desc: string; to: string;
+  actionLabel: string; onAction: () => void; busy: boolean;
+}) {
+  return (
+    <div className="flex flex-col justify-between rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
+      <div>
+        <div className={`mb-3 flex h-9 w-9 items-center justify-center rounded-xl ${ICON_TONE[tone]}`}>
+          <Play className="h-4 w-4" />
+        </div>
+        <div className="font-semibold text-[#0A2540]">{titulo}</div>
+        <p className="mt-1 text-xs leading-relaxed text-slate-500">{desc}</p>
+      </div>
+      <div className="mt-3 flex items-center justify-between gap-2">
+        <button
+          onClick={onAction}
+          disabled={busy}
+          className="rounded-full bg-[#0A2540] px-3 py-1.5 text-xs font-semibold text-white disabled:opacity-60"
+        >
+          {busy ? "Rodando…" : actionLabel}
+        </button>
+        <Link to={to} className="text-xs font-semibold text-[#0066CC] hover:underline">
+          Ver →
+        </Link>
+      </div>
+    </div>
   );
 }
