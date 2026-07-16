@@ -136,7 +136,7 @@ function AdminDashboard() {
       // 2/4 Clustering em lotes de 25 (~25s cada) até drenar
       setPipelineLog((l) => [...l, "2/4 Clustering (em lotes)…"]);
       for (let i = 1; i <= 20; i++) {
-        const r = await supabase.functions.invoke("cluster-articles", { body: { limit: 25 } });
+        const r = await supabase.functions.invoke("cluster-articles", { body: { limit: 25, fonte_tipo: "veiculo", apenas_curadoria: false } });
         if (r.error) throw r.error;
         const d = (r.data ?? {}) as { processed?: number; clusters?: number };
         setPipelineLog((l) => [...l, `  lote ${i}: processado=${d.processed ?? 0} clusters=${d.clusters ?? 0}`]);
@@ -215,14 +215,18 @@ function AdminDashboard() {
       const scrape = await supabase.functions.invoke("scrape-source", { body: { force: true, sync: true, apenas_curadoria: true } });
       if (scrape.error) throw scrape.error;
       setPipelineLog((l) => [...l, `  ✓ ${JSON.stringify(scrape.data).slice(0, 200)}`]);
-      setPipelineLog((l) => [...l, "cluster-articles…"]);
-      const cl = await supabase.functions.invoke("cluster-articles", { body: { sync: true } });
-      if (cl.error) throw cl.error;
-      setPipelineLog((l) => [...l, `  ✓ ${JSON.stringify(cl.data).slice(0, 200)}`]);
+      setPipelineLog((l) => [...l, "cluster-articles (em lotes, só curadoria)…"]);
+      for (let i = 1; i <= 20; i++) {
+        const r = await supabase.functions.invoke("cluster-articles", { body: { limit: 25, apenas_curadoria: true } });
+        if (r.error) throw r.error;
+        const d = (r.data ?? {}) as { processed?: number; clusters?: number };
+        setPipelineLog((l) => [...l, `  lote ${i}: processado=${d.processed ?? 0} clusters=${d.clusters ?? 0}`]);
+        if (!d.processed) break;
+      }
       setPipelineLog((l) => [...l, "classify-and-quota (classifica sem escrever sozinho)…"]);
-      const cq = await supabase.functions.invoke("classify-and-quota", { body: { sync: true } });
+      const cq = await supabase.functions.invoke("classify-and-quota", { body: {} });
       if (cq.error) throw cq.error;
-      setPipelineLog((l) => [...l, `  ✓ ${JSON.stringify(cq.data).slice(0, 200)}`]);
+      setPipelineLog((l) => [...l, `  ✓ classify-and-quota ok`]);
     } catch (e: unknown) {
       setPipelineLog((l) => [...l, `  ✗ ${e instanceof Error ? e.message : "erro"}`]);
     }
