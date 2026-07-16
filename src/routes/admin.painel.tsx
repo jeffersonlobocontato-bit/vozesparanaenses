@@ -120,23 +120,45 @@ function AdminDashboard() {
   async function runPipeline() {
     setPipelineBusy(true);
     setPipelineLog(["Iniciando pipeline…"]);
-    const steps: Array<{ name: string; fn: string; body?: Record<string, unknown> }> = [
-      { name: "1/4 Scrape de fontes (forçado)", fn: "scrape-source", body: { force: true, sync: true } },
-      { name: "2/4 Clustering", fn: "cluster-articles" },
-      { name: "3/4 Classificação + cotas", fn: "classify-and-quota" },
-      { name: "4/4 Processar pendentes (extrair + escrever)", fn: "process-pending-clusters", body: { limit: 50, sync: true } },
-    ];
-    for (const s of steps) {
-      setPipelineLog((l) => [...l, `${s.name}…`]);
-      try {
-        const { data, error } = await supabase.functions.invoke(s.fn, { body: s.body ?? {} });
-        if (error) throw error;
-        const summary = data && typeof data === "object" ? JSON.stringify(data).slice(0, 140) : "ok";
-        setPipelineLog((l) => [...l, `  ✓ ${summary}`]);
-      } catch (e: unknown) {
-        setPipelineLog((l) => [...l, `  ✗ ${e instanceof Error ? e.message : "erro"}`]);
-        break;
+    // Cada etapa é chamada em lotes pequenos porque o `supabase.functions.invoke`
+    // do browser fecha a conexão em ~60s. Antes rodávamos `cluster-articles`
+    // sem limite (limite padrão 100) e a chamada estourava o timeout — a função
+    // continuava rodando no servidor, mas o front-end via erro e abortava o
+    // pipeline. Agora fatiamos em lotes de 25 e loopamos até esvaziar a fila.
+    try {
+      // 1/4 Scrape (mantém sync=true; scrape em geral é rápido o suficiente)
+      setPipelineLog((l) => [...l, "1/4 Scrape de fontes (forçado)…"]);
+      const scrape = await supabase.functions.invoke("scrape-source", { body: { force: true, sync: true } });
+      if (scrape.error) throw scrape.error;
+      setPipelineLog((l) => [...l, `  ✓ ${JSON.stringify(scrape.data).slice(0, 160)}`]);
+
+      // 2/4 Clustering em lotes de 25 (~25s cada) até drenar
+      setPipelineLog((l) => [...l, "2/4 Clustering (em lotes)…"]);
+      for (let i = 1; i <= 20; i++) {
+        const r = await supabase.functions.invoke("cluster-articles", { body: { limit: 25 } });
+        if (r.error) throw r.error;
+        const d = (r.data ?? {}) as { processed?: number; clusters?: number };
+        setPipelineLog((l) => [...l, `  lote ${i}: processado=${d.processed ?? 0} clusters=${d.clusters ?? 0}`]);
+        if (!d.processed) break;
       }
+
+      // 3/4 Classificação + cotas
+      setPipelineLog((l) => [...l, "3/4 Classificação + cotas…"]);
+      const cq = await supabase.functions.invoke("classify-and-quota", { body: {} });
+      if (cq.error) throw cq.error;
+      setPipelineLog((l) => [...l, `  ✓ ${JSON.stringify(cq.data).slice(0, 160)}`]);
+
+      // 4/4 Processar pendentes em lotes de 15 (extrair+escrever é caro)
+      setPipelineLog((l) => [...l, "4/4 Extrair fatos + escrever (em lotes)…"]);
+      for (let i = 1; i <= 20; i++) {
+        const r = await supabase.functions.invoke("process-pending-clusters", { body: { limit: 15, sync: true } });
+        if (r.error) throw r.error;
+        const d = (r.data ?? {}) as { pendentes?: number; escritas?: number };
+        setPipelineLog((l) => [...l, `  lote ${i}: pendentes=${d.pendentes ?? 0} escritas=${d.escritas ?? 0}`]);
+        if (!d.pendentes) break;
+      }
+    } catch (e: unknown) {
+      setPipelineLog((l) => [...l, `  ✗ ${e instanceof Error ? e.message : "erro"}`]);
     }
     setPipelineLog((l) => [...l, "Pipeline finalizado."]);
     setPipelineBusy(false);
@@ -151,13 +173,20 @@ function AdminDashboard() {
       if (error) throw error;
       const summary = data && typeof data === "object" ? JSON.stringify(data).slice(0, 240) : "ok";
       setPipelineLog((l) => [...l, `  ✓ ${summary}`]);
-      // Encadeia clustering + classificação pra as matérias oficiais entrarem na fila.
-      for (const fn of ["cluster-articles", "classify-and-quota"] as const) {
-        setPipelineLog((l) => [...l, `${fn}…`]);
-        const r = await supabase.functions.invoke(fn, { body: {} });
+      // Encadeia clustering (em lotes, pra não estourar o timeout do
+      // browser) + classificação pra as matérias oficiais entrarem na fila.
+      setPipelineLog((l) => [...l, "cluster-articles (em lotes)…"]);
+      for (let i = 1; i <= 20; i++) {
+        const r = await supabase.functions.invoke("cluster-articles", { body: { limit: 25 } });
         if (r.error) throw r.error;
-        setPipelineLog((l) => [...l, `  ✓ ${fn} ok`]);
+        const d = (r.data ?? {}) as { processed?: number; clusters?: number };
+        setPipelineLog((l) => [...l, `  lote ${i}: processado=${d.processed ?? 0} clusters=${d.clusters ?? 0}`]);
+        if (!d.processed) break;
       }
+      setPipelineLog((l) => [...l, "classify-and-quota…"]);
+      const cq = await supabase.functions.invoke("classify-and-quota", { body: {} });
+      if (cq.error) throw cq.error;
+      setPipelineLog((l) => [...l, `  ✓ classify-and-quota ok`]);
     } catch (e: unknown) {
       setPipelineLog((l) => [...l, `  ✗ ${e instanceof Error ? e.message : "erro"}`]);
     }
