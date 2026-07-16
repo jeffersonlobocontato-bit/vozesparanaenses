@@ -14,6 +14,7 @@ type Cluster = {
   status: "novo" | "selecionado_cota" | "fatos_extraidos" | "descartado" | "rascunho_gerado";
   prioridade_score: number;
   interesse_score: number | null;
+  curadoria_nacional: boolean;
   criado_em: string;
   fatos_extraidos_em: string | null;
   grupo_estadual_id: string | null;
@@ -68,13 +69,14 @@ function AdminClusters() {
       const sb = await getExternalBrowser();
       const { data, error } = await sb
         .from("article_clusters")
-        .select("id, status, prioridade_score, interesse_score, criado_em, fatos_extraidos_em, grupo_estadual_id, regiao:regioes(slug, nome), categoria:editorial_categories(slug, nome), cluster_articles(raw_article:raw_articles(titulo, url, fonte:fontes(nome))), extracted_facts(onde, quem, o_que)")
+        .select("id, status, prioridade_score, interesse_score, curadoria_nacional, criado_em, fatos_extraidos_em, grupo_estadual_id, regiao:regioes(slug, nome), categoria:editorial_categories!inner(slug, nome), cluster_articles(raw_article:raw_articles(titulo, url, fonte:fontes(nome))), extracted_facts(onde, quem, o_que)")
         .in("status", ["novo", "selecionado_cota", "fatos_extraidos", "descartado"])
+        .in("categoria.slug", ["seguranca", "esportes"])
         .order("criado_em", { ascending: false })
-        .limit(80);
+        .limit(120);
       if (error) throw error;
       type Row = {
-        id: string; status: Cluster["status"]; prioridade_score: number; interesse_score: number | null; criado_em: string;
+        id: string; status: Cluster["status"]; prioridade_score: number; interesse_score: number | null; curadoria_nacional: boolean; criado_em: string;
         fatos_extraidos_em: string | null; grupo_estadual_id: string | null;
         regiao: { slug: string; nome: string } | { slug: string; nome: string }[] | null;
         categoria: { slug: string; nome: string } | { slug: string; nome: string }[] | null;
@@ -104,7 +106,7 @@ function AdminClusters() {
         const fontesNomes = Array.from(new Set(artigos.map((a) => a.fonte).filter((n): n is string => !!n)));
         return {
           id: r.id, status: r.status, prioridade_score: r.prioridade_score,
-          interesse_score: r.interesse_score, criado_em: r.criado_em,
+          interesse_score: r.interesse_score, curadoria_nacional: r.curadoria_nacional, criado_em: r.criado_em,
           fatos_extraidos_em: r.fatos_extraidos_em, grupo_estadual_id: r.grupo_estadual_id,
           regiao, categoria: first(r.categoria), cidade,
           fontes: artigos.length,
@@ -232,6 +234,12 @@ function AdminClusters() {
     [items, fRegiao, fCategoria, fFonte],
   );
 
+  const nacionais = useMemo(
+    () => filtrados.filter((i) => i.curadoria_nacional).sort((a, b) => b.prioridade_score - a.prioridade_score),
+    [filtrados],
+  );
+  const paranaenses = useMemo(() => filtrados.filter((i) => !i.curadoria_nacional), [filtrados]);
+
   const agrupado = useMemo(() => {
     if (!items) return [];
     // Faixa → Editoria → Cidade → clusters[]
@@ -248,7 +256,7 @@ function AdminClusters() {
     };
     const porBloco = new Map<string, Cluster[]>();
     for (const b of BLOCOS) porBloco.set(b.label, []);
-    for (const c of filtrados) porBloco.get(blocoDoHorario(c.criado_em).label)!.push(c);
+    for (const c of paranaenses) porBloco.get(blocoDoHorario(c.criado_em).label)!.push(c);
 
     const grupos: Grupo[] = BLOCOS.map((b) => {
       const clusters = porBloco.get(b.label) ?? [];
@@ -289,7 +297,7 @@ function AdminClusters() {
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold">Pautas (clusters)</h1>
+        <h1 className="text-2xl font-bold">Curadoria — Segurança &amp; Esportes</h1>
         <div className="flex gap-2">
           <button
             onClick={apagarTodas}
@@ -334,6 +342,41 @@ function AdminClusters() {
             </button>
           )}
         </div>
+      )}
+
+      {nacionais.length > 0 && (
+        <section className="rounded-2xl border border-amber-300 bg-amber-50 p-4">
+          <h2 className="mb-1 text-sm font-bold uppercase tracking-wide text-amber-900">
+            🌎 Nacional &amp; Internacional — rankeado por nº de portais
+          </h2>
+          <p className="mb-3 text-xs text-amber-800">
+            Formado só quando 2 ou mais fontes nacionais abertas (G1, Metrópoles, R7, CNN Brasil, ge,
+            Lance!, ESPN, Gazeta Esportiva) cobriram o mesmo fato. Nunca escreve sozinho — decisão sua.
+          </p>
+          <div className="space-y-2">
+            {nacionais.map((c) => (
+              <div key={c.id} className="flex items-center justify-between gap-3 rounded-xl border border-amber-200 bg-white p-3 text-sm">
+                <div className="min-w-0">
+                  <div className="mb-1 flex items-center gap-2">
+                    <span className="rounded-full bg-amber-100 px-2 py-0.5 text-[10px] font-bold uppercase text-amber-800">
+                      {c.categoria?.nome ?? "—"}
+                    </span>
+                    <span className="text-xs font-semibold text-slate-600">{c.fontes} portal(is) cobrindo</span>
+                  </div>
+                  <p className="truncate font-medium">{c.artigos[0]?.titulo ?? c.o_que ?? "Sem título ainda"}</p>
+                  <p className="truncate text-xs text-muted-foreground">{c.fontesNomes.join(" · ")}</p>
+                </div>
+                <button
+                  onClick={() => extractFacts(c.id)}
+                  disabled={busyIds.has(c.id)}
+                  className="shrink-0 rounded bg-[#0066CC] px-3 py-1.5 text-xs font-semibold text-white disabled:opacity-60"
+                >
+                  {busyIds.has(c.id) ? "Escrevendo…" : "✎ Escrever agora"}
+                </button>
+              </div>
+            ))}
+          </div>
+        </section>
       )}
 
       {agrupado.map((g, idx) => {

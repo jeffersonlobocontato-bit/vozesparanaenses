@@ -105,18 +105,25 @@ Deno.serve(async (req) => {
       for (const it of items) {
         const hash = await sha256(it.url + "|" + it.titulo);
         const deteccao = detectarCidade(`${it.titulo}\n${it.corpo}`, cidades);
-        // Se o RSS/HTML de listagem não trouxe imagem, busca a página da
-        // matéria e extrai og:image / twitter:image / primeiro <img> do corpo.
+        // Se o RSS/HTML de listagem não trouxe imagem, OU o corpo veio raso
+        // (teaser de RSS de 1-3 frases, ou vazio no fallback de HTML), busca
+        // a página da matéria pra pegar imagem/crédito E o texto completo —
+        // sem isso, a matéria final sai curta mesmo com o agente de redação
+        // instruído a aprofundar, porque o material bruto já chega raso.
         let imagem = it.imagem ?? null;
         let credito = it.credito ?? null;
-        if (!imagem || !credito) {
+        let corpo = it.corpo ?? "";
+        const CORPO_RASO = 400; // abaixo disso, vale a pena buscar a página inteira
+        if (!imagem || !credito || corpo.length < CORPO_RASO) {
           try {
             const meta = await fetchArticleImageMeta(it.url);
             if (!imagem && meta.imagem) imagem = meta.imagem;
             if (!credito && meta.credito) credito = meta.credito;
+            if (meta.corpoCompleto.length > corpo.length) corpo = meta.corpoCompleto;
             if (imagem) console.log(`[${fonte.nome}] og:image ${it.url} -> ${imagem}${credito ? ` (${credito})` : ""}`);
+            console.log(`[${fonte.nome}] corpo ${it.url}: teaser=${it.corpo.length} completo=${corpo.length}`);
           } catch (e) {
-            console.warn(`[${fonte.nome}] og:image fetch failed`, (e as Error).message);
+            console.warn(`[${fonte.nome}] fetch full article failed`, (e as Error).message);
           }
         }
         const { error: insErr } = await sb.from("raw_articles").insert({
@@ -126,7 +133,7 @@ Deno.serve(async (req) => {
           regiao_detectada_id: deteccao?.regiao_id ?? null,
           url: it.url,
           titulo: it.titulo,
-          corpo_limpo: it.corpo,
+          corpo_limpo: corpo,
           hash_conteudo: hash,
           data_publicacao_original: it.data,
           imagem_original_url: imagem,
@@ -418,7 +425,7 @@ function match(s: string, re: RegExp): string {
 // 2) twitter:image / twitter:image:src
 // 3) <link rel="image_src">
 // 4) primeiro <img src=""> do corpo (fallback)
-async function fetchArticleImageMeta(url: string): Promise<{ imagem: string | null; credito: string | null }> {
+async function fetchArticleImageMeta(url: string): Promise<{ imagem: string | null; credito: string | null; corpoCompleto: string }> {
   const ctrl = new AbortController();
   const t = setTimeout(() => ctrl.abort(), 8000);
   try {
@@ -429,7 +436,7 @@ async function fetchArticleImageMeta(url: string): Promise<{ imagem: string | nu
         accept: "text/html,application/xhtml+xml",
       },
     });
-    if (!res.ok) return { imagem: null, credito: null };
+    if (!res.ok) return { imagem: null, credito: null, corpoCompleto: "" };
     const html = await res.text();
     const head = html.slice(0, 200_000); // og/twitter costumam estar no <head>
     const patterns: RegExp[] = [
@@ -457,10 +464,41 @@ async function fetchArticleImageMeta(url: string): Promise<{ imagem: string | nu
       }
     }
     const credito = extractCredit(html, head);
-    return { imagem, credito };
+    const corpoCompleto = extractArticleBody(html);
+    return { imagem, credito, corpoCompleto };
   } finally {
     clearTimeout(t);
   }
+}
+
+// A descrição do RSS costuma ser só um teaser de 1-3 frases, e o fallback
+// por links de HTML nem isso tem (corpo vem vazio) — sem o texto completo
+// da matéria-fonte, nenhuma instrução de "escreva mais profundo" no agente
+// de redação tem o que aprofundar, porque o material bruto já chega raso.
+// Isto extrai o corpo de verdade da página da matéria, reaproveitando o
+// mesmo HTML já baixado pra imagem (sem fetch extra).
+function extractArticleBody(html: string): string {
+  // 1) Tenta um contêiner de conteúdo comum (cobre a maioria dos CMS de
+  //    portal de notícia brasileiro: WordPress, sistemas próprios, etc.)
+  const containerPatterns = [
+    /<article[^>]*>([\s\S]*?)<\/article>/i,
+    /<div[^>]+class=["'][^"']*(?:post-content|entry-content|article-body|article-content|materia-conteudo|conteudo-materia|corpo-noticia|texto-noticia|content-text|single-content)[^"']*["'][^>]*>([\s\S]*?)<\/div>/i,
+  ];
+  let container = "";
+  for (const re of containerPatterns) {
+    const m = html.match(re);
+    if (m?.[1] && m[1].length > 200) { container = m[1]; break; }
+  }
+  const source = container || html;
+
+  // 2) Extrai todos os <p> razoavelmente longos (descarta legenda/menu/ads
+  //    que geralmente são frases curtas soltas).
+  const paragraphs = (source.match(/<p[^>]*>([\s\S]*?)<\/p>/gi) ?? [])
+    .map((p) => stripTags(p).trim())
+    .filter((p) => p.length >= 40 && !/^(leia também|publicidade|veja também|compartilhe|assine)/i.test(p));
+
+  const texto = paragraphs.join("\n\n");
+  return texto.slice(0, 8000);
 }
 
 // Extrai crédito/legenda da foto. Ordem de preferência:

@@ -23,7 +23,7 @@ type Raw = {
   titulo: string | null;
   corpo_limpo: string | null;
   embedding: number[] | null;
-  fonte: { tipo: string } | { tipo: string }[] | null;
+  fonte: { tipo: string; curadoria_editoria: string | null } | { tipo: string; curadoria_editoria: string | null }[] | null;
 };
 
 Deno.serve(async (req) => {
@@ -45,7 +45,7 @@ Deno.serve(async (req) => {
 
   let q = sb
     .from("raw_articles")
-    .select("id, regiao_id, titulo, corpo_limpo, embedding, fonte:fonte_id(tipo)")
+    .select("id, regiao_id, titulo, corpo_limpo, embedding, fonte:fonte_id(tipo, curadoria_editoria)")
     .eq("processado", false)
     .order("coletado_em", { ascending: false })
     .limit(limit);
@@ -62,8 +62,13 @@ Deno.serve(async (req) => {
     const f = Array.isArray(r.fonte) ? r.fonte[0] : r.fonte;
     return f?.tipo === "prefeitura";
   };
+  const curadoriaTag = (r: Raw): string | null => {
+    const f = Array.isArray(r.fonte) ? r.fonte[0] : r.fonte;
+    return f?.curadoria_editoria ?? null;
+  };
   const rawsOficiais = (raws as Raw[]).filter(isOficial);
-  const rawsVeiculo = (raws as Raw[]).filter((r) => !isOficial(r));
+  const rawsCuradoria = (raws as Raw[]).filter((r) => !isOficial(r) && curadoriaTag(r));
+  const rawsVeiculo = (raws as Raw[]).filter((r) => !isOficial(r) && !curadoriaTag(r));
 
   let createdOficiais = 0;
   for (const r of rawsOficiais) {
@@ -141,6 +146,78 @@ Deno.serve(async (req) => {
     created++;
   }
 
+  // 3b. Curadoria nacional (Segurança/Esportes) — mesmo princípio de
+  //     embedding + similaridade, mas SEM exigir região de detecção de
+  //     cidade (são fontes nacionais/internacionais) e SEM misturar as
+  //     duas editorias entre si. A categoria já é conhecida de antemão
+  //     (vem da própria fonte), então o cluster nasce classificado, sem
+  //     precisar do classify-and-quota. curadoria_nacional=true impede a
+  //     seleção automática por cota — só escreve quando o admin clicar
+  //     "Escrever agora" no painel de curadoria.
+  //     Aponta pra região "Nacional" (já existe na taxonomia) — isso é o
+  //     que faz essas matérias aparecerem também na home/nav de região,
+  //     não só na editoria. Simplificação atual: tudo cai em "Nacional",
+  //     mesmo quando o fato é internacional — distinguir os dois exigiria
+  //     detecção de país no texto, o que não faz parte deste escopo ainda.
+  let createdCuradoria = 0;
+  if (rawsCuradoria.length) {
+    const needEmbedCur = rawsCuradoria.filter((r) => !r.embedding);
+    for (const r of needEmbedCur) {
+      const text = `${r.titulo ?? ""}\n\n${r.corpo_limpo ?? ""}`.slice(0, 4000);
+      if (!text.trim()) continue;
+      const { vetor } = await embed(text, aiKey);
+      if (vetor) {
+        r.embedding = vetor;
+        await sb.from("raw_articles").update({ embedding: vetor }).eq("id", r.id);
+      }
+    }
+
+    const [{ data: cats }, { data: regiaoNacional }] = await Promise.all([
+      sb.from("editorial_categories").select("id, slug").in("slug", ["seguranca", "esportes"]),
+      sb.from("regioes").select("id").eq("slug", "nacional").maybeSingle(),
+    ]);
+    const catIdBySlug = new Map((cats ?? []).map((c) => [c.slug, c.id]));
+    const regiaoNacionalId = regiaoNacional?.id ?? null;
+
+    const withEmbCur = rawsCuradoria.filter((r) => r.embedding);
+    for (const tag of ["seguranca", "esportes"] as const) {
+      const categoriaId = catIdBySlug.get(tag);
+      if (!categoriaId) continue;
+      const doTag = withEmbCur.filter((r) => curadoriaTag(r) === tag);
+      const usedCur = new Set<string>();
+      const gruposCur: Raw[][] = [];
+      for (const r of doTag) {
+        if (usedCur.has(r.id)) continue;
+        const g: Raw[] = [r];
+        usedCur.add(r.id);
+        for (const o of doTag) {
+          if (usedCur.has(o.id)) continue;
+          const sim = cosine(r.embedding!, o.embedding!);
+          if (sim >= threshold) { g.push(o); usedCur.add(o.id); }
+        }
+        gruposCur.push(g);
+      }
+      for (const g of gruposCur) {
+        const { data: cluster, error: cErr } = await sb
+          .from("article_clusters")
+          .insert({
+            regiao_id: regiaoNacionalId,
+            categoria_id: categoriaId,
+            prioridade_score: g.length,
+            status: "novo",
+            curadoria_nacional: true,
+          })
+          .select("id")
+          .single();
+        if (cErr || !cluster) { console.error("cluster curadoria insert failed", cErr?.message); continue; }
+        const links = g.map((r) => ({ cluster_id: cluster.id, raw_article_id: r.id }));
+        await sb.from("cluster_articles").insert(links);
+        await sb.from("raw_articles").update({ processado: true }).in("id", g.map((r) => r.id));
+        createdCuradoria++;
+      }
+    }
+  }
+
   // 4. Vincular entre regiões: mesma notícia coberta por regiões diferentes
   //    vira o mesmo grupo_estadual_id — sem fundir a publicação, só para
   //    qualificar o interesse de leitura (ver classify-and-quota).
@@ -178,9 +255,10 @@ Deno.serve(async (req) => {
 
   return json({
     ok: true,
-    processed: items.length + rawsOficiais.length,
-    clusters: created + createdOficiais,
+    processed: items.length + rawsOficiais.length + rawsCuradoria.length,
+    clusters: created + createdOficiais + createdCuradoria,
     clusters_oficiais: createdOficiais,
+    clusters_curadoria_nacional: createdCuradoria,
     linked_cross_regiao: linked,
     embeddings_falharam: embedFalhas,
     embeddings_tentados: needEmbed.length,

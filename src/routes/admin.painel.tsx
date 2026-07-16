@@ -232,7 +232,7 @@ function AdminDashboard() {
       <Section title="Gestão" subtitle="Atalhos das áreas de trabalho">
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
           <Shortcut to="/admin" icon={Newspaper} tone="blue" title="Fila editorial" desc={m ? `${m.drafts} rascunho${m.drafts === 1 ? "" : "s"} aguardando revisão.` : "Revisar, editar e publicar matérias."} />
-          <Shortcut to="/admin/clusters" icon={Sparkles} tone="amber" title="Diagnóstico do pipeline" desc={m ? `${m.clustersNovos + m.clustersSelecionados} pauta${(m.clustersNovos + m.clustersSelecionados) === 1 ? "" : "s"} na fila (${m.clustersNovos} novas, ${m.clustersSelecionados} selecionadas).` : "Clusters, score de interesse e o que foi descartado por cota."} />
+          <Shortcut to="/admin/clusters" icon={Sparkles} tone="amber" title="Curadoria — Segurança & Esportes" desc="Ranking nacional/internacional por nº de portais, com escrita sob demanda." />
           <Shortcut to="/admin/fontes" icon={Radio} tone="teal" title="Fontes" desc="Cadastrar e ativar veículos monitorados." />
           <Shortcut to="/admin/regioes" icon={Map} tone="violet" title="Regiões e cotas" desc={`${m?.regioesAtivas ?? "—"} regiões ativas no portal.`} />
           <Shortcut to="/admin/anuncios" icon={Megaphone} tone="rose" title="Anúncios" desc="Anunciantes, campanhas, criativos e targeting." />
