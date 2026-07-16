@@ -64,9 +64,16 @@ Deno.serve(async (req) => {
 
   let query = sb
     .from("fontes")
-    .select("id, regiao_id, nome, url_base, tipo_renderizacao, protecao_antibot, frequencia_horas, ultimo_scrape_em")
+    .select("id, regiao_id, nome, url_base, tipo_renderizacao, protecao_antibot, frequencia_horas, ultimo_scrape_em, curadoria_editoria")
     .eq("ativo", true);
   if (body.fonte_id) query = query.eq("id", body.fonte_id);
+  // Fontes nacionais de curadoria (G1, Metrópoles, ge, ESPN, Lance, CNN…)
+  // NÃO entram no pipeline principal do Paraná — elas só devem ser
+  // coletadas quando o admin abrir o painel de curadoria (Segurança &
+  // Esportes). Isso evita que uma enxurrada de matérias nacionais/
+  // internacionais domine o feed regional e faça o classificador jogar
+  // muita coisa em "nacional/internacional".
+  if (!body.fonte_id) query = query.is("curadoria_editoria", null);
 
   const { data: fontes, error } = await query;
   if (error) return json({ error: "fontes_query_failed", detail: error.message }, 500);

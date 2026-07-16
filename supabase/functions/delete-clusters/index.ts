@@ -13,6 +13,7 @@ const cors = {
 type Body = {
   ids?: string[];
   statuses?: string[];
+  reset_orphan_raws?: boolean;
 };
 
 Deno.serve(async (req) => {
@@ -28,18 +29,60 @@ Deno.serve(async (req) => {
 
   const sb = createClient(url, key, { auth: { persistSession: false } });
 
-  let q = sb.from("article_clusters").delete({ count: "exact" });
+  // Modo utilitário: raws marcadas processado=true mas sem cluster
+  // vinculado (órfãs — restaram de um "apagar todas" anterior que só
+  // apagava clusters). Reseta pra que o próximo pipeline as processe.
+  if (body.reset_orphan_raws) {
+    const { data: linked } = await sb.from("cluster_articles").select("raw_article_id");
+    const linkedIds = new Set((linked ?? []).map((l: { raw_article_id: string }) => l.raw_article_id));
+    const { data: processados } = await sb.from("raw_articles").select("id").eq("processado", true).limit(5000);
+    const orfaos = ((processados ?? []) as { id: string }[]).filter((r) => !linkedIds.has(r.id)).map((r) => r.id);
+    let reset = 0;
+    const CHUNK = 500;
+    for (let i = 0; i < orfaos.length; i += CHUNK) {
+      const slice = orfaos.slice(i, i + CHUNK);
+      const { error: upErr } = await sb.from("raw_articles").update({ processado: false }).in("id", slice);
+      if (!upErr) reset += slice.length;
+    }
+    return json({ ok: true, orphan_raws_reset: reset });
+  }
+
+  // 1. Descobrir quais clusters serão apagados (precisamos dos ids pra
+  //    também resetar processado=false nas raw_articles vinculadas —
+  //    sem isso, uma nova rodada de pipeline ignora o backlog inteiro
+  //    porque as raws já estão marcadas processado=true).
+  let sel = sb.from("article_clusters").select("id");
   if (body.ids?.length) {
-    q = q.in("id", body.ids);
+    sel = sel.in("id", body.ids);
   } else {
     const statuses = body.statuses?.length
       ? body.statuses
       : ["novo", "selecionado_cota", "fatos_extraidos", "descartado"];
-    q = q.in("status", statuses);
+    sel = sel.in("status", statuses);
   }
-  const { error, count } = await q.select("id");
+  const { data: alvos, error: selErr } = await sel;
+  if (selErr) return json({ error: "select_failed", detail: selErr.message }, 500);
+  const clusterIds = (alvos ?? []).map((r: { id: string }) => r.id);
+  if (!clusterIds.length) return json({ ok: true, deleted: 0, raws_reset: 0 });
+
+  // 2. Raws vinculados → reset processado=false pra voltarem à fila
+  const { data: links } = await sb.from("cluster_articles").select("raw_article_id").in("cluster_id", clusterIds);
+  const rawIds = Array.from(new Set((links ?? []).map((l: { raw_article_id: string }) => l.raw_article_id)));
+  let rawsReset = 0;
+  if (rawIds.length) {
+    const CHUNK = 500;
+    for (let i = 0; i < rawIds.length; i += CHUNK) {
+      const slice = rawIds.slice(i, i + CHUNK);
+      const { error: upErr } = await sb.from("raw_articles").update({ processado: false }).in("id", slice);
+      if (upErr) console.error("[delete-clusters] reset processado falhou", upErr.message);
+      else rawsReset += slice.length;
+    }
+  }
+
+  // 3. Apaga os clusters (cascade em cluster_articles)
+  const { error, count } = await sb.from("article_clusters").delete({ count: "exact" }).in("id", clusterIds).select("id");
   if (error) return json({ error: "delete_failed", detail: error.message }, 500);
-  return json({ ok: true, deleted: count ?? 0 });
+  return json({ ok: true, deleted: count ?? 0, raws_reset: rawsReset });
 });
 
 function json(payload: unknown, status = 200) {
