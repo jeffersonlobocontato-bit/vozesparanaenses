@@ -198,45 +198,9 @@ Deno.serve(async (req) => {
   // 2. Chamar IA — só para redação (Método DEL), a partir dos fatos já prontos
   const dados = (facts.dados ?? {}) as Record<string, unknown>;
   const userPrompt = buildUserPrompt(facts, dados);
-  const aiRes = await fetch(AI_URL, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${aiKey}`,
-    },
-    body: JSON.stringify({
-      model: MODEL,
-      temperature: 0.2,
-      max_tokens: 3200,
-      messages: [
-        { role: "system", content: systemPrompt },
-        { role: "user", content: userPrompt },
-      ],
-      response_format: { type: "json_object" },
-    }),
-  });
-
-  if (aiRes.status === 429) return json({ error: "rate_limited" }, 429);
-  if (aiRes.status === 402) return json({ error: "ai_credits_exhausted" }, 402);
-  if (!aiRes.ok) {
-    const t = await aiRes.text();
-    return json({ error: "ai_gateway_error", status: aiRes.status, detail: t.slice(0, 500) }, 502);
-  }
-
-  const aiJson = await aiRes.json();
-  const choiceError = aiJson?.choices?.[0]?.error;
-  if (choiceError) {
-    return json({ error: "ai_choice_error", detail: choiceError?.message ?? "Modelo encerrou sem JSON." }, 502);
-  }
-  const content = aiJson?.choices?.[0]?.message?.content;
-  if (!content) return json({ error: "ai_empty_response" }, 502);
-
-  let parsed: GeneratedPayload;
-  try {
-    parsed = JSON.parse(content);
-  } catch {
-    return json({ error: "ai_invalid_json", raw: content.slice(0, 500) }, 502);
-  }
+  const aiResult = await generateArticleJson(systemPrompt, userPrompt, aiKey);
+  if ("error" in aiResult) return json(aiResult, aiResult.httpStatus ?? 502);
+  const parsed = aiResult.parsed;
 
   const slug = slugify(parsed.titulo);
   const cidadePrincipal = (dados.cidade_principal as string | null) ?? null;
@@ -271,6 +235,11 @@ Deno.serve(async (req) => {
 
   if (insErr) return json({ error: "insert_failed", detail: insErr.message }, 500);
 
+  // A partir daqui a matéria já existe. Marca o cluster como concluído ANTES
+  // de qualquer tarefa auxiliar (ex.: copiar foto externa), para uma demora de
+  // rede não deixar a pauta presa em `selecionado_cota`/`fatos_extraidos`.
+  await markClusterDone(sb, clusterId);
+
   // 3b. Sempre copiar a foto original do scraping para o storage — assim o
   // editor pode escolher, com um clique, entre a foto real e uma variação IA
   // (mesmo se a fonte tirar o arquivo do ar depois).
@@ -294,10 +263,20 @@ Deno.serve(async (req) => {
       const srcUrl = raw?.imagem_original_url ?? null;
       if (srcUrl) {
         temFotoReal = true;
-        const imgRes = await fetch(srcUrl, {
-          headers: { "User-Agent": "VozesParanaensesBot/1.0 (+https://vozesparanaenses.com.br)" },
-        });
-        if (imgRes.ok) {
+        const controller = new AbortController();
+        const timeout = setTimeout(() => controller.abort(), 6_000);
+        let imgRes: Response | null = null;
+        try {
+          imgRes = await fetch(srcUrl, {
+            headers: { "User-Agent": "VozesParanaensesBot/1.0 (+https://vozesparanaenses.com.br)" },
+            signal: controller.signal,
+          });
+        } catch (_) {
+          imgRes = null;
+        } finally {
+          clearTimeout(timeout);
+        }
+        if (imgRes?.ok) {
           const buf = new Uint8Array(await imgRes.arrayBuffer());
           const mime = imgRes.headers.get("content-type")?.split(";")[0].trim() || "image/jpeg";
           if (/^image\//.test(mime) && buf.byteLength > 1024) {
@@ -350,15 +329,6 @@ Deno.serve(async (req) => {
       .eq("id", inserted.id);
   }
 
-  // 4. Marcar cluster como "rascunho gerado" para que suma do Painel de Pautas
-  const { error: statusErr } = await sb
-    .from("article_clusters")
-    .update({ status: "rascunho_gerado" })
-    .eq("id", clusterId);
-  if (statusErr) {
-    console.error("Erro ao atualizar status do cluster:", statusErr);
-  }
-
   // 5. Marcar raws desse cluster como processados
   const { data: ca } = await sb.from("cluster_articles").select("raw_article_id").eq("cluster_id", clusterId);
   const rawIds = (ca ?? []).map((r) => r.raw_article_id);
@@ -374,6 +344,112 @@ Deno.serve(async (req) => {
     categoria_sensivel: categoriaSensivel,
   });
 });
+
+async function generateArticleJson(
+  systemPrompt: string,
+  userPrompt: string,
+  apiKey: string,
+): Promise<
+  | { parsed: GeneratedPayload }
+  | { error: string; detail?: string; status?: number; raw?: string; httpStatus?: number }
+> {
+  const basePayload = {
+    model: MODEL,
+    temperature: 0.15,
+    max_tokens: 2600,
+    messages: [
+      { role: "system", content: systemPrompt },
+      { role: "user", content: userPrompt },
+    ],
+    response_format: { type: "json_object" },
+  };
+
+  for (let attempt = 1; attempt <= 2; attempt++) {
+    const res = await fetch(AI_URL, {
+      method: "POST",
+      headers: { "Content-Type": "application/json", Authorization: `Bearer ${apiKey}` },
+      body: JSON.stringify(attempt === 1
+        ? basePayload
+        : {
+            ...basePayload,
+            max_tokens: 1800,
+            temperature: 0,
+            messages: [
+              { role: "system", content: `${systemPrompt}\n\nSe houver qualquer risco de JSON inválido, reduza o texto e retorne APENAS JSON compacto válido.` },
+              { role: "user", content: userPrompt },
+            ],
+          }),
+    });
+
+    if (res.status === 429) return { error: "rate_limited", httpStatus: 429 };
+    if (res.status === 402) return { error: "ai_credits_exhausted", httpStatus: 402 };
+    if (!res.ok) {
+      const t = await res.text();
+      if (attempt === 2) return { error: "ai_gateway_error", status: res.status, detail: t.slice(0, 500), httpStatus: 502 };
+      continue;
+    }
+
+    const aiJson = await res.json();
+    const choiceError = aiJson?.choices?.[0]?.error;
+    if (choiceError) {
+      if (attempt === 2) {
+        return { error: "ai_choice_error", detail: choiceError?.message ?? "Modelo encerrou sem JSON.", httpStatus: 502 };
+      }
+      continue;
+    }
+
+    const content = aiJson?.choices?.[0]?.message?.content;
+    if (!content) {
+      if (attempt === 2) return { error: "ai_empty_response", httpStatus: 502 };
+      continue;
+    }
+
+    const parsed = parseGeneratedPayload(content);
+    if (parsed) return { parsed };
+    if (attempt === 2) return { error: "ai_invalid_json", raw: String(content).slice(0, 500), httpStatus: 502 };
+  }
+
+  return { error: "ai_generation_failed", httpStatus: 502 };
+}
+
+function parseGeneratedPayload(content: string): GeneratedPayload | null {
+  const raw = content.trim();
+  const candidates = [
+    raw,
+    raw.replace(/^```(?:json)?\s*/i, "").replace(/\s*```$/i, ""),
+    raw.slice(Math.max(0, raw.indexOf("{")), raw.lastIndexOf("}") + 1),
+  ].filter(Boolean);
+
+  for (const candidate of candidates) {
+    try {
+      const parsed = JSON.parse(candidate) as GeneratedPayload;
+      if (parsed?.titulo && parsed?.corpo) return parsed;
+    } catch (_) {
+      // tenta a próxima forma
+    }
+  }
+  return null;
+}
+
+// deno-lint-ignore no-explicit-any
+async function markClusterDone(sb: any, clusterId: string) {
+  const { error: statusErr } = await sb
+    .from("article_clusters")
+    .update({ status: "rascunho_gerado" })
+    .eq("id", clusterId);
+  if (!statusErr) return;
+
+  const invalidEnum = statusErr.code === "22P02" || /rascunho_gerado|cluster_status/i.test(statusErr.message ?? "");
+  if (invalidEnum) {
+    const { error: fallbackErr } = await sb
+      .from("article_clusters")
+      .update({ status: "descartado" })
+      .eq("id", clusterId);
+    if (fallbackErr) console.error("Erro ao aplicar fallback de status do cluster:", fallbackErr);
+    return;
+  }
+  console.error("Erro ao atualizar status do cluster:", statusErr);
+}
 
 function buildUserPrompt(facts: ExtractedFactsRow, dados: Record<string, unknown>) {
   const fontesTxt = (facts.fontes ?? [])
