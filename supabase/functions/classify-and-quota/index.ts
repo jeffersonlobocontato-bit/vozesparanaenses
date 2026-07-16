@@ -39,7 +39,7 @@ Deno.serve(async (req) => {
 
   let cq = sb
     .from("article_clusters")
-    .select("id, regiao_id, categoria_id, prioridade_score, criado_em, fonte_oficial")
+    .select("id, regiao_id, categoria_id, prioridade_score, criado_em, fonte_oficial, regiao:regioes(slug)")
     .eq("status", "novo")
     .is("categoria_id", null)
     .order("prioridade_score", { ascending: false })
@@ -83,6 +83,17 @@ async function processClusters(
   // 1. Classificar cada cluster (usa título do primeiro artigo do cluster)
   const classified: { id: string; regiao_id: string; categoria_id: string; score: number }[] = [];
   for (const c of clusters) {
+    // Se o cluster já está fincado em uma região do Paraná (pela detecção
+    // de cidade no scrape-source), NUNCA classifica como nacional/
+    // internacional — essas duas tags são exclusivas de clusters cuja
+    // região é "nacional" ou "internacional". Sem essa trava, o LLM
+    // manda muita notícia local pra nacional só porque o texto não cita
+    // literalmente a palavra "Paraná".
+    const regiaoSlug = (c as unknown as { regiao?: { slug?: string } }).regiao?.slug ?? "";
+    const ehParanaense = !!regiaoSlug && regiaoSlug !== "nacional" && regiaoSlug !== "internacional";
+    const categoriasElegiveis = ehParanaense
+      ? categorias.filter((k) => k.slug !== "nacional" && k.slug !== "internacional")
+      : categorias;
     const { data: ca } = await sb
       .from("cluster_articles")
       .select("raw_article_id")
@@ -97,8 +108,8 @@ async function processClusters(
       .map((r) => `${r.titulo ?? ""}\n${(r.corpo_limpo ?? "").slice(0, 400)}`)
       .join("\n\n---\n\n")
       .slice(0, 3000);
-    const catSlug = await classify(excerpt, categorias, aiKey);
-    const cat = categorias.find((k) => k.slug === catSlug) ?? categorias[0];
+    const catSlug = await classify(excerpt, categoriasElegiveis, aiKey);
+    const cat = categoriasElegiveis.find((k) => k.slug === catSlug) ?? categoriasElegiveis[0];
 
     // Bônus por cobertura estadual: se este cluster está vinculado (mesma
     // notícia detectada em outra região — ver cluster-articles), soma um
