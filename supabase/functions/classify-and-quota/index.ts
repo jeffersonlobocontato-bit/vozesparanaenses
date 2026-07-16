@@ -175,41 +175,17 @@ async function processClusters(
     }
   }
 
-  // 3. Redação automática: sem curadoria manual do que escrever — extrai os
-  // fatos e redige a matéria pra cada cluster selecionado pela cota, sem
-  // esperar clique de ninguém. A decisão humana fica só em publicar ou não
-  // (ver generate-article: quando não há foto real e o interesse é alto o
-  // bastante, a matéria já sai publicada sozinha; senão vai pra fila).
-  // Auto-write inline (já estamos em background aqui).
-  const CHAIN_CONCURRENCY = 3;
-  const fila = [...selecionados];
-  const selfUrl = Deno.env.get("SUPABASE_URL") ?? url;
-  const selfKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? key;
-  const workers = Array.from({ length: Math.min(CHAIN_CONCURRENCY, fila.length) }, async () => {
-    while (fila.length) {
-      const clusterId = fila.shift();
-      if (!clusterId) return;
-      try {
-        const ef = await fetch(`${selfUrl}/functions/v1/extract-facts`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json", Authorization: `Bearer ${selfKey}` },
-          body: JSON.stringify({ cluster_id: clusterId }),
-        });
-        if (!ef.ok) { console.error(`[auto-write] extract-facts falhou p/ ${clusterId}`, await ef.text()); continue; }
-        const ga = await fetch(`${selfUrl}/functions/v1/generate-article`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json", Authorization: `Bearer ${selfKey}` },
-          body: JSON.stringify({ cluster_id: clusterId }),
-        });
-        if (!ga.ok) { console.error(`[auto-write] generate-article falhou p/ ${clusterId}`, await ga.text()); continue; }
-      } catch (e) {
-        console.error(`[auto-write] erro no cluster ${clusterId}`, (e as Error).message);
-      }
-    }
-  });
-  await Promise.all(workers);
-  console.log(`[classify-and-quota] concluído: classified=${classified.length} selected=${selected} discarded=${discarded} fila=${selecionados.length}`);
-  return { classified: classified.length, selected, discarded, fila: selecionados.length };
+  // A redação (extrair fatos + escrever) NÃO acontece mais aqui — fica
+  // inteiramente a cargo do `process-pending-clusters`, chamado logo em
+  // seguida no pipeline. Antes havia uma cadeia de escrita duplicada aqui
+  // dentro que falhava em silêncio (só console.error, sem aparecer em
+  // lugar nenhum) — se ela falhasse, o process-pending-clusters não
+  // encontrava mais nada pendente pra processar, e parecia que "rodou
+  // tudo" sem nenhuma matéria sair e sem erro visível em canto nenhum.
+  // Ter um único lugar escrevendo evita essa corrida e concentra o erro
+  // num só ponto, já com retorno detalhado.
+  console.log(`[classify-and-quota] concluído: classified=${classified.length} selected=${selected} discarded=${discarded} pendentes_para_escrita=${selecionados.length}`);
+  return { classified: classified.length, selected, discarded, pendentes_para_escrita: selecionados.length };
 }
 
 function json(body: unknown, status = 200) {
