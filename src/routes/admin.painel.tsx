@@ -161,12 +161,22 @@ function AdminDashboard() {
         setPipelineLog((l) => [...l, `  lote ${i}: classificados=${d.classified ?? 0} selecionados=${d.selected ?? 0}`]);
         if (!d.classified) break;
         if ((d.selected ?? 0) > 0) {
-          const w = await supabase.functions.invoke("process-pending-clusters", { body: { limit: 2, sync: true } });
+          const w = await supabase.functions.invoke("process-pending-clusters", { body: { limit: 1, sync: true } });
           if (w.error) throw w.error;
           const wd = (w.data ?? {}) as { pendentes?: number; escritas?: number; erros?: Array<{ etapa?: string; detalhe?: string }> };
           setPipelineLog((l) => [...l, `    escrita: pendentes=${wd.pendentes ?? 0} escritas=${wd.escritas ?? 0} erros=${wd.erros?.length ?? 0}`]);
           if (wd.erros?.length) throw new Error(`${wd.erros[0]?.etapa ?? "escrita"}: ${wd.erros[0]?.detalhe ?? "erro ao gerar matéria"}`);
         }
+      }
+
+      setPipelineLog((l) => [...l, "Drenando pautas já selecionadas que ficaram pendentes…"]);
+      for (let i = 1; i <= 30; i++) {
+        const r = await supabase.functions.invoke("process-pending-clusters", { body: { limit: 1, sync: true } });
+        if (r.error) throw r.error;
+        const d = (r.data ?? {}) as { pendentes?: number; escritas?: number; erros?: Array<{ etapa?: string; detalhe?: string }> };
+        setPipelineLog((l) => [...l, `  pendente ${i}: pendentes=${d.pendentes ?? 0} escritas=${d.escritas ?? 0} erros=${d.erros?.length ?? 0}`]);
+        if (d.erros?.length) throw new Error(`${d.erros[0]?.etapa ?? "escrita"}: ${d.erros[0]?.detalhe ?? "erro ao gerar matéria"}`);
+        if (!d.pendentes) break;
       }
     } catch (e: unknown) {
       setPipelineLog((l) => [...l, `  ✗ ${e instanceof Error ? e.message : "erro"}`]);
@@ -202,12 +212,21 @@ function AdminDashboard() {
         setPipelineLog((l) => [...l, `  lote ${i}: classificados=${d.classified ?? 0} selecionados=${d.selected ?? 0}`]);
         if (!d.classified) break;
         if ((d.selected ?? 0) > 0) {
-          const w = await supabase.functions.invoke("process-pending-clusters", { body: { limit: 2, sync: true } });
+          const w = await supabase.functions.invoke("process-pending-clusters", { body: { limit: 1, sync: true } });
           if (w.error) throw w.error;
           const wd = (w.data ?? {}) as { pendentes?: number; escritas?: number; erros?: Array<{ etapa?: string; detalhe?: string }> };
           setPipelineLog((l) => [...l, `    escrita: pendentes=${wd.pendentes ?? 0} escritas=${wd.escritas ?? 0} erros=${wd.erros?.length ?? 0}`]);
           if (wd.erros?.length) throw new Error(`${wd.erros[0]?.etapa ?? "escrita"}: ${wd.erros[0]?.detalhe ?? "erro ao gerar matéria"}`);
         }
+      }
+      setPipelineLog((l) => [...l, "Drenando pautas já selecionadas que ficaram pendentes…"]);
+      for (let i = 1; i <= 30; i++) {
+        const r = await supabase.functions.invoke("process-pending-clusters", { body: { limit: 1, sync: true } });
+        if (r.error) throw r.error;
+        const d = (r.data ?? {}) as { pendentes?: number; escritas?: number; erros?: Array<{ etapa?: string; detalhe?: string }> };
+        setPipelineLog((l) => [...l, `  pendente ${i}: pendentes=${d.pendentes ?? 0} escritas=${d.escritas ?? 0} erros=${d.erros?.length ?? 0}`]);
+        if (d.erros?.length) throw new Error(`${d.erros[0]?.etapa ?? "escrita"}: ${d.erros[0]?.detalhe ?? "erro ao gerar matéria"}`);
+        if (!d.pendentes) break;
       }
     } catch (e: unknown) {
       setPipelineLog((l) => [...l, `  ✗ ${e instanceof Error ? e.message : "erro"}`]);
