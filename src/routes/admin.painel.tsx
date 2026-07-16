@@ -151,7 +151,7 @@ function AdminDashboard() {
 
       // 3/4 Classificação + cotas
       setPipelineLog((l) => [...l, "3/4 Classificação + cotas…"]);
-      const cq = await supabase.functions.invoke("classify-and-quota", { body: {} });
+      const cq = await supabase.functions.invoke("classify-and-quota", { body: { sync: true } });
       if (cq.error) throw cq.error;
       setPipelineLog((l) => [...l, `  ✓ ${JSON.stringify(cq.data).slice(0, 160)}`]);
 
@@ -191,9 +191,9 @@ function AdminDashboard() {
         if (!d.processed) break;
       }
       setPipelineLog((l) => [...l, "classify-and-quota…"]);
-      const cq = await supabase.functions.invoke("classify-and-quota", { body: {} });
+      const cq = await supabase.functions.invoke("classify-and-quota", { body: { sync: true } });
       if (cq.error) throw cq.error;
-      setPipelineLog((l) => [...l, `  ✓ classify-and-quota ok`]);
+      setPipelineLog((l) => [...l, `  ✓ ${JSON.stringify(cq.data).slice(0, 160)}`]);
       // Faltava esta etapa — sem ela, os clusters ficavam "selecionado_cota"
       // pra sempre e nunca viravam matéria de verdade (classify-and-quota
       // só classifica e aplica cota desde a última correção; quem escreve
@@ -230,9 +230,9 @@ function AdminDashboard() {
         if (!d.processed) break;
       }
       setPipelineLog((l) => [...l, "classify-and-quota (classifica sem escrever sozinho)…"]);
-      const cq = await supabase.functions.invoke("classify-and-quota", { body: {} });
+      const cq = await supabase.functions.invoke("classify-and-quota", { body: { sync: true } });
       if (cq.error) throw cq.error;
-      setPipelineLog((l) => [...l, `  ✓ classify-and-quota ok`]);
+      setPipelineLog((l) => [...l, `  ✓ ${JSON.stringify(cq.data).slice(0, 160)}`]);
     } catch (e: unknown) {
       setPipelineLog((l) => [...l, `  ✗ ${e instanceof Error ? e.message : "erro"}`]);
     }
