@@ -34,7 +34,10 @@ Deno.serve(async (req) => {
 
   let body: { limit?: number; regiao_id?: string; sync?: boolean } = {};
   try { body = await req.json(); } catch { body = {}; }
-  const limit = Math.max(1, Math.min(body.limit ?? 50, 200));
+  // Cada pauta faz 2 chamadas de IA (extrair fatos + escrever). Em modo
+  // síncrono, lotes grandes estouram o gateway antes de devolver resposta ao
+  // painel. Mantemos lotes pequenos por padrão para garantir retorno visível.
+  const limit = Math.max(1, Math.min(body.limit ?? 2, body.sync ? 5 : 50));
 
   const sb = createClient(url, key, { auth: { persistSession: false } });
 
@@ -64,7 +67,7 @@ Deno.serve(async (req) => {
   const fila = pendentes.filter((c) => !bloqueados.has(c.id));
 
   const runAll = async () => {
-    const CONCURRENCY = 3;
+    const CONCURRENCY = body.sync ? 2 : 3;
     let extraidas = 0;
     let escritas = 0;
     const erros: Array<{ cluster_id: string; etapa: string; detalhe: string }> = [];

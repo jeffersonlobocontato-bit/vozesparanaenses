@@ -149,25 +149,24 @@ function AdminDashboard() {
         if (!d.processed) break;
       }
 
-      // 3/4 Classificação + cotas em lotes (sync=true num único shot dá 502
-      // no gateway quando são 50 clusters — LLM por cluster estoura o timeout)
-      setPipelineLog((l) => [...l, "3/4 Classificação + cotas (em lotes)…"]);
+      // 3/4 + 4/4 em ciclos: classifica um lote e já escreve o que foi
+      // selecionado. Antes o painel tentava drenar TODA a classificação antes
+      // de começar a escrita; se a aba/HTTP caísse no meio, parecia
+      // "finalizado", mas nenhuma matéria nova era gerada.
+      setPipelineLog((l) => [...l, "3/4 Classificação + cotas e 4/4 escrita (em ciclos seguros)…"]);
       for (let i = 1; i <= 30; i++) {
         const r = await supabase.functions.invoke("classify-and-quota", { body: { sync: true, limit: 15 } });
         if (r.error) throw r.error;
         const d = (r.data ?? {}) as { classified?: number; selected?: number };
         setPipelineLog((l) => [...l, `  lote ${i}: classificados=${d.classified ?? 0} selecionados=${d.selected ?? 0}`]);
         if (!d.classified) break;
-      }
-
-      // 4/4 Processar pendentes em lotes pequenos (extrair+escrever é caro)
-      setPipelineLog((l) => [...l, "4/4 Extrair fatos + escrever (em lotes)…"]);
-      for (let i = 1; i <= 30; i++) {
-        const r = await supabase.functions.invoke("process-pending-clusters", { body: { limit: 8, sync: true } });
-        if (r.error) throw r.error;
-        const d = (r.data ?? {}) as { pendentes?: number; escritas?: number };
-        setPipelineLog((l) => [...l, `  lote ${i}: pendentes=${d.pendentes ?? 0} escritas=${d.escritas ?? 0}`]);
-        if (!d.pendentes) break;
+        if ((d.selected ?? 0) > 0) {
+          const w = await supabase.functions.invoke("process-pending-clusters", { body: { limit: 2, sync: true } });
+          if (w.error) throw w.error;
+          const wd = (w.data ?? {}) as { pendentes?: number; escritas?: number; erros?: Array<{ etapa?: string; detalhe?: string }> };
+          setPipelineLog((l) => [...l, `    escrita: pendentes=${wd.pendentes ?? 0} escritas=${wd.escritas ?? 0} erros=${wd.erros?.length ?? 0}`]);
+          if (wd.erros?.length) throw new Error(`${wd.erros[0]?.etapa ?? "escrita"}: ${wd.erros[0]?.detalhe ?? "erro ao gerar matéria"}`);
+        }
       }
     } catch (e: unknown) {
       setPipelineLog((l) => [...l, `  ✗ ${e instanceof Error ? e.message : "erro"}`]);
@@ -195,25 +194,20 @@ function AdminDashboard() {
         setPipelineLog((l) => [...l, `  lote ${i}: processado=${d.processed ?? 0} clusters=${d.clusters ?? 0}`]);
         if (!d.processed) break;
       }
-      setPipelineLog((l) => [...l, "classify-and-quota (em lotes)…"]);
+      setPipelineLog((l) => [...l, "classificação + escrita (em ciclos seguros)…"]);
       for (let i = 1; i <= 30; i++) {
         const r = await supabase.functions.invoke("classify-and-quota", { body: { sync: true, limit: 15 } });
         if (r.error) throw r.error;
         const d = (r.data ?? {}) as { classified?: number; selected?: number };
         setPipelineLog((l) => [...l, `  lote ${i}: classificados=${d.classified ?? 0} selecionados=${d.selected ?? 0}`]);
         if (!d.classified) break;
-      }
-      // Faltava esta etapa — sem ela, os clusters ficavam "selecionado_cota"
-      // pra sempre e nunca viravam matéria de verdade (classify-and-quota
-      // só classifica e aplica cota desde a última correção; quem escreve
-      // é só esta função).
-      setPipelineLog((l) => [...l, "extrair fatos + escrever (em lotes)…"]);
-      for (let i = 1; i <= 30; i++) {
-        const r = await supabase.functions.invoke("process-pending-clusters", { body: { limit: 8, sync: true } });
-        if (r.error) throw r.error;
-        const d = (r.data ?? {}) as { pendentes?: number; escritas?: number };
-        setPipelineLog((l) => [...l, `  lote ${i}: pendentes=${d.pendentes ?? 0} escritas=${d.escritas ?? 0}`]);
-        if (!d.pendentes) break;
+        if ((d.selected ?? 0) > 0) {
+          const w = await supabase.functions.invoke("process-pending-clusters", { body: { limit: 2, sync: true } });
+          if (w.error) throw w.error;
+          const wd = (w.data ?? {}) as { pendentes?: number; escritas?: number; erros?: Array<{ etapa?: string; detalhe?: string }> };
+          setPipelineLog((l) => [...l, `    escrita: pendentes=${wd.pendentes ?? 0} escritas=${wd.escritas ?? 0} erros=${wd.erros?.length ?? 0}`]);
+          if (wd.erros?.length) throw new Error(`${wd.erros[0]?.etapa ?? "escrita"}: ${wd.erros[0]?.detalhe ?? "erro ao gerar matéria"}`);
+        }
       }
     } catch (e: unknown) {
       setPipelineLog((l) => [...l, `  ✗ ${e instanceof Error ? e.message : "erro"}`]);
