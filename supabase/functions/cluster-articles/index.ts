@@ -82,13 +82,18 @@ Deno.serve(async (req) => {
   // 2. Veículos de imprensa seguem o fluxo normal (embedding + similaridade).
   const items = rawsVeiculo;
   const needEmbed = items.filter((r) => !r.embedding);
+  let embedFalhas = 0;
+  let ultimoErroEmbed: string | undefined;
   for (const r of needEmbed) {
     const text = `${r.titulo ?? ""}\n\n${r.corpo_limpo ?? ""}`.slice(0, 4000);
     if (!text.trim()) continue;
-    const embedding = await embed(text, aiKey);
-    if (embedding) {
-      r.embedding = embedding;
-      await sb.from("raw_articles").update({ embedding }).eq("id", r.id);
+    const { vetor, erro } = await embed(text, aiKey);
+    if (vetor) {
+      r.embedding = vetor;
+      await sb.from("raw_articles").update({ embedding: vetor }).eq("id", r.id);
+    } else {
+      embedFalhas++;
+      ultimoErroEmbed = erro;
     }
   }
 
@@ -177,6 +182,13 @@ Deno.serve(async (req) => {
     clusters: created + createdOficiais,
     clusters_oficiais: createdOficiais,
     linked_cross_regiao: linked,
+    embeddings_falharam: embedFalhas,
+    embeddings_tentados: needEmbed.length,
+    aviso: embedFalhas > 0 && embedFalhas === needEmbed.length
+      ? `TODOS os ${embedFalhas} embeddings falharam — nenhum cluster novo pôde ser formado. Último erro: ${ultimoErroEmbed}`
+      : embedFalhas > 0
+        ? `${embedFalhas}/${needEmbed.length} embeddings falharam. Último erro: ${ultimoErroEmbed}`
+        : undefined,
   });
 });
 
@@ -187,7 +199,7 @@ function json(body: unknown, status = 200) {
   });
 }
 
-async function embed(text: string, apiKey: string): Promise<number[] | null> {
+async function embed(text: string, apiKey: string): Promise<{ vetor: number[] | null; erro?: string }> {
   try {
     const res = await fetch(AI_URL, {
       method: "POST",
@@ -198,14 +210,21 @@ async function embed(text: string, apiKey: string): Promise<number[] | null> {
       body: JSON.stringify({ model: EMBED_MODEL, input: text }),
     });
     if (!res.ok) {
-      console.error("embed failed", res.status, await res.text());
-      return null;
+      const detalhe = await res.text();
+      console.error("embed failed", res.status, detalhe);
+      const motivo = res.status === 402
+        ? "saldo de IA esgotado (402)"
+        : res.status === 401 || res.status === 403
+          ? "chave de IA inválida/sem permissão"
+          : `erro ${res.status}`;
+      return { vetor: null, erro: `${motivo}: ${detalhe.slice(0, 200)}` };
     }
     const j = await res.json();
-    return j.data?.[0]?.embedding ?? null;
+    const vetor = j.data?.[0]?.embedding ?? null;
+    return { vetor, erro: vetor ? undefined : "resposta sem embedding" };
   } catch (e) {
     console.error("embed error", (e as Error).message);
-    return null;
+    return { vetor: null, erro: `exceção: ${(e as Error).message}` };
   }
 }
 
