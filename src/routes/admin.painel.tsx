@@ -124,7 +124,7 @@ function AdminDashboard() {
       { name: "1/4 Scrape de fontes (forçado)", fn: "scrape-source", body: { force: true, sync: true } },
       { name: "2/4 Clustering", fn: "cluster-articles" },
       { name: "3/4 Classificação + cotas", fn: "classify-and-quota" },
-      { name: "4/4 Processar pendentes (extrair + escrever)", fn: "process-pending-clusters", body: { limit: 50 } },
+      { name: "4/4 Processar pendentes (extrair + escrever)", fn: "process-pending-clusters", body: { limit: 20, sync: true } },
     ];
     for (const s of steps) {
       setPipelineLog((l) => [...l, `${s.name}…`]);
