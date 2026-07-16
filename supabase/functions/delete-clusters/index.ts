@@ -13,6 +13,7 @@ const cors = {
 type Body = {
   ids?: string[];
   statuses?: string[];
+  reset_orphan_raws?: boolean;
 };
 
 Deno.serve(async (req) => {
@@ -27,6 +28,24 @@ Deno.serve(async (req) => {
   try { body = await req.json(); } catch { /* body vazio = todas as pendentes */ }
 
   const sb = createClient(url, key, { auth: { persistSession: false } });
+
+  // Modo utilitário: raws marcadas processado=true mas sem cluster
+  // vinculado (órfãs — restaram de um "apagar todas" anterior que só
+  // apagava clusters). Reseta pra que o próximo pipeline as processe.
+  if (body.reset_orphan_raws) {
+    const { data: linked } = await sb.from("cluster_articles").select("raw_article_id");
+    const linkedIds = new Set((linked ?? []).map((l: { raw_article_id: string }) => l.raw_article_id));
+    const { data: processados } = await sb.from("raw_articles").select("id").eq("processado", true).limit(5000);
+    const orfaos = ((processados ?? []) as { id: string }[]).filter((r) => !linkedIds.has(r.id)).map((r) => r.id);
+    let reset = 0;
+    const CHUNK = 500;
+    for (let i = 0; i < orfaos.length; i += CHUNK) {
+      const slice = orfaos.slice(i, i + CHUNK);
+      const { error: upErr } = await sb.from("raw_articles").update({ processado: false }).in("id", slice);
+      if (!upErr) reset += slice.length;
+    }
+    return json({ ok: true, orphan_raws_reset: reset });
+  }
 
   // 1. Descobrir quais clusters serão apagados (precisamos dos ids pra
   //    também resetar processado=false nas raw_articles vinculadas —
