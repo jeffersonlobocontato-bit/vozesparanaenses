@@ -173,13 +173,20 @@ function AdminDashboard() {
       if (error) throw error;
       const summary = data && typeof data === "object" ? JSON.stringify(data).slice(0, 240) : "ok";
       setPipelineLog((l) => [...l, `  ✓ ${summary}`]);
-      // Encadeia clustering + classificação pra as matérias oficiais entrarem na fila.
-      for (const fn of ["cluster-articles", "classify-and-quota"] as const) {
-        setPipelineLog((l) => [...l, `${fn}…`]);
-        const r = await supabase.functions.invoke(fn, { body: {} });
+      // Encadeia clustering (em lotes, pra não estourar o timeout do
+      // browser) + classificação pra as matérias oficiais entrarem na fila.
+      setPipelineLog((l) => [...l, "cluster-articles (em lotes)…"]);
+      for (let i = 1; i <= 20; i++) {
+        const r = await supabase.functions.invoke("cluster-articles", { body: { limit: 25 } });
         if (r.error) throw r.error;
-        setPipelineLog((l) => [...l, `  ✓ ${fn} ok`]);
+        const d = (r.data ?? {}) as { processed?: number; clusters?: number };
+        setPipelineLog((l) => [...l, `  lote ${i}: processado=${d.processed ?? 0} clusters=${d.clusters ?? 0}`]);
+        if (!d.processed) break;
       }
+      setPipelineLog((l) => [...l, "classify-and-quota…"]);
+      const cq = await supabase.functions.invoke("classify-and-quota", { body: {} });
+      if (cq.error) throw cq.error;
+      setPipelineLog((l) => [...l, `  ✓ classify-and-quota ok`]);
     } catch (e: unknown) {
       setPipelineLog((l) => [...l, `  ✗ ${e instanceof Error ? e.message : "erro"}`]);
     }
