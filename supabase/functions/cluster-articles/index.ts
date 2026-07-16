@@ -43,14 +43,33 @@ Deno.serve(async (req) => {
 
   const sb = createClient(url, key, { auth: { persistSession: false } });
 
-  let q = sb
-    .from("raw_articles")
-    .select("id, regiao_id, titulo, corpo_limpo, embedding, fonte:fonte_id(tipo, curadoria_editoria)")
-    .eq("processado", false)
-    .order("coletado_em", { ascending: false })
-    .limit(limit);
-  if (body.regiao_id) q = q.eq("regiao_id", body.regiao_id);
-  const { data: raws, error } = await q;
+  // Tenta com a coluna nova de curadoria (migration 041). Se ela ainda não
+  // foi rodada no banco, a consulta falha por coluna inexistente — nesse
+  // caso, refaz sem essa coluna, em vez de derrubar o pipeline inteiro
+  // (clustering normal do Paraná não pode depender de uma feature opcional
+  // ainda não instalada).
+  async function buscarRaws(comCuradoria: boolean) {
+    let q = sb
+      .from("raw_articles")
+      .select(
+        comCuradoria
+          ? "id, regiao_id, titulo, corpo_limpo, embedding, fonte:fonte_id(tipo, curadoria_editoria)"
+          : "id, regiao_id, titulo, corpo_limpo, embedding, fonte:fonte_id(tipo)",
+      )
+      .eq("processado", false)
+      .order("coletado_em", { ascending: false })
+      .limit(limit);
+    if (body.regiao_id) q = q.eq("regiao_id", body.regiao_id);
+    return q;
+  }
+
+  let { data: raws, error } = await buscarRaws(true);
+  let curadoriaDisponivel = true;
+  if (error) {
+    console.warn("[cluster-articles] coluna de curadoria indisponível (migration 041 pendente?), seguindo sem ela:", error.message);
+    curadoriaDisponivel = false;
+    ({ data: raws, error } = await buscarRaws(false));
+  }
   if (error) return json({ error: "raw_query_failed", detail: error.message }, 500);
   if (!raws?.length) return json({ ok: true, processed: 0, clusters: 0 });
 
@@ -172,12 +191,13 @@ Deno.serve(async (req) => {
       }
     }
 
-    const [{ data: cats }, { data: regiaoNacional }] = await Promise.all([
+    const [{ data: cats }, { data: regioesNacInt }] = await Promise.all([
       sb.from("editorial_categories").select("id, slug").in("slug", ["seguranca", "esportes"]),
-      sb.from("regioes").select("id").eq("slug", "nacional").maybeSingle(),
+      sb.from("regioes").select("id, slug").in("slug", ["nacional", "internacional"]),
     ]);
     const catIdBySlug = new Map((cats ?? []).map((c) => [c.slug, c.id]));
-    const regiaoNacionalId = regiaoNacional?.id ?? null;
+    const regiaoNacionalId = (regioesNacInt ?? []).find((r) => r.slug === "nacional")?.id ?? null;
+    const regiaoInternacionalId = (regioesNacInt ?? []).find((r) => r.slug === "internacional")?.id ?? null;
 
     const withEmbCur = rawsCuradoria.filter((r) => r.embedding);
     for (const tag of ["seguranca", "esportes"] as const) {
@@ -198,10 +218,13 @@ Deno.serve(async (req) => {
         gruposCur.push(g);
       }
       for (const g of gruposCur) {
+        const textoGrupo = g.map((r) => `${r.titulo ?? ""} ${r.corpo_limpo ?? ""}`).join(" ");
+        const ehInternacional = pareceInternacional(textoGrupo);
+        const regiaoDoCluster = ehInternacional ? (regiaoInternacionalId ?? regiaoNacionalId) : regiaoNacionalId;
         const { data: cluster, error: cErr } = await sb
           .from("article_clusters")
           .insert({
-            regiao_id: regiaoNacionalId,
+            regiao_id: regiaoDoCluster,
             categoria_id: categoriaId,
             prioridade_score: g.length,
             status: "novo",
@@ -304,6 +327,29 @@ async function embed(text: string, apiKey: string): Promise<{ vetor: number[] | 
     console.error("embed error", (e as Error).message);
     return { vetor: null, erro: `exceção: ${(e as Error).message}` };
   }
+}
+
+// Heurística simples pra separar Nacional de Internacional na curadoria:
+// se o texto menciona o Brasil (ou "brasileir@"), é NACIONAL mesmo que cite
+// um país estrangeiro junto (ex.: "Brasil vence a Argentina" — é sobre a
+// seleção brasileira, não um fato estrangeiro). Só vira Internacional
+// quando um país estrangeiro aparece e o Brasil não aparece em lugar
+// nenhum. Na dúvida (nenhum dos dois aparece — comum em nota só de placar),
+// cai em Nacional por padrão, já que a maioria das fontes é brasileira.
+const PAIS_ESTRANGEIRO_RE = new RegExp(
+  "\\b(argentina|estados unidos|eua|frança|alemanha|espanha|itália|portugal|inglaterra|" +
+  "reino unido|londres|paris|china|japão|coreia do sul|rússia|ucrânia|israel|palestina|gaza|" +
+  "méxico|colômbia|chile|uruguai|paraguai|bolívia|peru|equador|venezuela|canadá|austrália|" +
+  "áfrica do sul|nigéria|egito|marrocos|catar|arábia saudita|irã|iraque|síria|afeganistão|" +
+  "índia|paquistão|turquia|grécia|holanda|bélgica|suíça|áustria|polônia|suécia|noruega|" +
+  "dinamarca|finlândia)\\b",
+  "i",
+);
+const BRASIL_RE = /\b(brasil|brasileir[oa]s?)\b/i;
+
+function pareceInternacional(texto: string): boolean {
+  if (BRASIL_RE.test(texto)) return false;
+  return PAIS_ESTRANGEIRO_RE.test(texto);
 }
 
 function cosine(a: number[], b: number[]): number {
