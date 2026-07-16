@@ -47,7 +47,8 @@ function AdminDashboard() {
   const [m, setM] = useState<Metrics | null>(null);
   const [recent, setRecent] = useState<RecentDraft[]>([]);
   const [err, setErr] = useState<string | null>(null);
-  const [pipelineBusy, setPipelineBusy] = useState(false);
+  const [pipelineRunning, setPipelineRunning] = useState<"prefeituras" | "portais" | "curadoria" | null>(null);
+  const pipelineBusy = pipelineRunning !== null;
   const [pipelineLog, setPipelineLog] = useState<string[]>([]);
 
   const load = useCallback(async () => {
@@ -118,7 +119,7 @@ function AdminDashboard() {
   useEffect(() => { load(); }, [load]);
 
   async function runPipeline() {
-    setPipelineBusy(true);
+    setPipelineRunning("portais");
     setPipelineLog(["Iniciando pipeline…"]);
     // Cada etapa é chamada em lotes pequenos porque o `supabase.functions.invoke`
     // do browser fecha a conexão em ~60s. Antes rodávamos `cluster-articles`
@@ -161,12 +162,12 @@ function AdminDashboard() {
       setPipelineLog((l) => [...l, `  ✗ ${e instanceof Error ? e.message : "erro"}`]);
     }
     setPipelineLog((l) => [...l, "Pipeline finalizado."]);
-    setPipelineBusy(false);
+    setPipelineRunning(null);
     load();
   }
 
   async function runPrefeituras() {
-    setPipelineBusy(true);
+    setPipelineRunning("prefeituras");
     setPipelineLog(["Coletando releases oficiais de prefeituras…"]);
     try {
       const { data, error } = await supabase.functions.invoke("scrape-prefeitura", { body: { force: true, sync: true } });
@@ -187,16 +188,28 @@ function AdminDashboard() {
       const cq = await supabase.functions.invoke("classify-and-quota", { body: {} });
       if (cq.error) throw cq.error;
       setPipelineLog((l) => [...l, `  ✓ classify-and-quota ok`]);
+      // Faltava esta etapa — sem ela, os clusters ficavam "selecionado_cota"
+      // pra sempre e nunca viravam matéria de verdade (classify-and-quota
+      // só classifica e aplica cota desde a última correção; quem escreve
+      // é só esta função).
+      setPipelineLog((l) => [...l, "extrair fatos + escrever (em lotes)…"]);
+      for (let i = 1; i <= 20; i++) {
+        const r = await supabase.functions.invoke("process-pending-clusters", { body: { limit: 15, sync: true } });
+        if (r.error) throw r.error;
+        const d = (r.data ?? {}) as { pendentes?: number; escritas?: number };
+        setPipelineLog((l) => [...l, `  lote ${i}: pendentes=${d.pendentes ?? 0} escritas=${d.escritas ?? 0}`]);
+        if (!d.pendentes) break;
+      }
     } catch (e: unknown) {
       setPipelineLog((l) => [...l, `  ✗ ${e instanceof Error ? e.message : "erro"}`]);
     }
     setPipelineLog((l) => [...l, "Scraping de prefeituras finalizado."]);
-    setPipelineBusy(false);
+    setPipelineRunning(null);
     load();
   }
 
   async function runCuradoriaNacional() {
-    setPipelineBusy(true);
+    setPipelineRunning("curadoria");
     setPipelineLog(["Coletando fontes de curadoria nacional (Segurança/Esporte/Geral)…"]);
     try {
       const scrape = await supabase.functions.invoke("scrape-source", { body: { force: true, sync: true, apenas_curadoria: true } });
@@ -214,7 +227,7 @@ function AdminDashboard() {
       setPipelineLog((l) => [...l, `  ✗ ${e instanceof Error ? e.message : "erro"}`]);
     }
     setPipelineLog((l) => [...l, "Coleta de curadoria finalizada — vá em Curadoria pra decidir o que escrever."]);
-    setPipelineBusy(false);
+    setPipelineRunning(null);
     load();
   }
 
@@ -232,11 +245,11 @@ function AdminDashboard() {
           </button>
           <button onClick={runPrefeituras} disabled={pipelineBusy}
             className="inline-flex items-center gap-1.5 rounded-full border border-emerald-200 bg-emerald-50 px-4 py-2 text-xs font-semibold text-emerald-800 shadow-sm transition hover:border-emerald-400 hover:bg-emerald-100 disabled:opacity-60">
-            {pipelineBusy ? <><Activity className="h-3.5 w-3.5 animate-pulse" /> Coletando…</> : <><Radio className="h-3.5 w-3.5" /> Scrape prefeituras</>}
+            {pipelineRunning === "prefeituras" ? <><Activity className="h-3.5 w-3.5 animate-pulse" /> Coletando…</> : <><Radio className="h-3.5 w-3.5" /> Scrape prefeituras</>}
           </button>
           <button onClick={runPipeline} disabled={pipelineBusy}
             className="inline-flex items-center gap-1.5 rounded-full bg-gradient-to-r from-[#0A2540] to-[#0d3a6e] px-4 py-2 text-xs font-semibold text-white shadow-sm transition hover:shadow-md disabled:opacity-60">
-            {pipelineBusy ? <><Activity className="h-3.5 w-3.5 animate-pulse" /> Rodando pipeline…</> : <><Play className="h-3.5 w-3.5" /> Rodar pipeline agora</>}
+            {pipelineRunning === "portais" ? <><Activity className="h-3.5 w-3.5 animate-pulse" /> Rodando pipeline…</> : <><Play className="h-3.5 w-3.5" /> Rodar pipeline agora</>}
           </button>
         </div>
       </div>
@@ -264,7 +277,8 @@ function AdminDashboard() {
             to="/admin"
             actionLabel="▶ Rodar prefeituras"
             onAction={runPrefeituras}
-            busy={pipelineBusy}
+            running={pipelineRunning === "prefeituras"}
+            blocked={pipelineBusy && pipelineRunning !== "prefeituras"}
           />
           <PipelineCard
             tone="blue"
@@ -273,7 +287,8 @@ function AdminDashboard() {
             to="/admin"
             actionLabel="▶ Rodar portais"
             onAction={runPipeline}
-            busy={pipelineBusy}
+            running={pipelineRunning === "portais"}
+            blocked={pipelineBusy && pipelineRunning !== "portais"}
           />
           <PipelineCard
             tone="amber"
@@ -282,7 +297,8 @@ function AdminDashboard() {
             to="/admin/clusters"
             actionLabel="▶ Rodar coleta"
             onAction={runCuradoriaNacional}
-            busy={pipelineBusy}
+            running={pipelineRunning === "curadoria"}
+            blocked={pipelineBusy && pipelineRunning !== "curadoria"}
           />
           <PipelineCard
             tone="violet"
@@ -291,7 +307,8 @@ function AdminDashboard() {
             to="/admin/clusters"
             actionLabel="▶ Rodar coleta"
             onAction={runCuradoriaNacional}
-            busy={pipelineBusy}
+            running={pipelineRunning === "curadoria"}
+            blocked={pipelineBusy && pipelineRunning !== "curadoria"}
           />
         </div>
         <div className="mt-4 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
@@ -439,9 +456,9 @@ function Shortcut({ to, title, desc, icon: Icon, tone }: {
   );
 }
 
-function PipelineCard({ tone, titulo, desc, to, actionLabel, onAction, busy }: {
+function PipelineCard({ tone, titulo, desc, to, actionLabel, onAction, running, blocked }: {
   tone: Tone; titulo: string; desc: string; to: string;
-  actionLabel: string; onAction: () => void; busy: boolean;
+  actionLabel: string; onAction: () => void; running: boolean; blocked: boolean;
 }) {
   return (
     <div className="flex flex-col justify-between rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
@@ -455,10 +472,10 @@ function PipelineCard({ tone, titulo, desc, to, actionLabel, onAction, busy }: {
       <div className="mt-3 flex items-center justify-between gap-2">
         <button
           onClick={onAction}
-          disabled={busy}
+          disabled={running || blocked}
           className="rounded-full bg-[#0A2540] px-3 py-1.5 text-xs font-semibold text-white disabled:opacity-60"
         >
-          {busy ? "Rodando…" : actionLabel}
+          {running ? "Rodando…" : actionLabel}
         </button>
         <Link to={to} className="text-xs font-semibold text-[#0066CC] hover:underline">
           Ver →
