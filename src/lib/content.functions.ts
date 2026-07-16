@@ -199,6 +199,7 @@ export const listRegions = createServerFn({ method: "GET" }).handler(
       .from("regioes")
       .select("id, slug, nome, cidade_principal, descricao, hero_image_url, tema_config")
       .eq("ativa", true)
+      .not("slug", "in", "(nacional,internacional)")
       .order("nome");
     if (error) {
       if (isMissingSchema(error)) return [];
