@@ -68,8 +68,14 @@ function AdminDashboard() {
         sb.from("generated_articles").select("*", { count: "exact", head: true }).eq("status", "publicado"),
         sb.from("generated_articles").select("*", { count: "exact", head: true }).eq("status", "rejeitado"),
         sb.from("generated_articles").select("*", { count: "exact", head: true }).eq("status", "publicado").gte("publicado_em", startOfDay.toISOString()),
-        sb.from("article_clusters").select("*", { count: "exact", head: true }).eq("status", "novo"),
-        sb.from("article_clusters").select("*", { count: "exact", head: true }).eq("status", "selecionado_cota"),
+        // Contamos só os clusters de curadoria nacional porque é o
+        // único conjunto que a página /admin/clusters exibe. Os
+        // paranaenses fluem automaticamente pelo pipeline até virar
+        // rascunho em generated_articles (visto em /admin), então
+        // contar todos aqui deixava o KPI mostrando 166/28 mas o card
+        // abria uma tela vazia.
+        sb.from("article_clusters").select("*", { count: "exact", head: true }).eq("status", "novo").eq("curadoria_nacional", true),
+        sb.from("article_clusters").select("*", { count: "exact", head: true }).eq("status", "selecionado_cota").eq("curadoria_nacional", true),
         sb.from("raw_articles").select("*", { count: "exact", head: true }).gte("coletado_em", since24h),
         sb.from("fontes").select("*", { count: "exact", head: true }).eq("ativo", true),
         sb.from("fontes").select("*", { count: "exact", head: true }),
