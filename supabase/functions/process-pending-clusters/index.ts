@@ -48,7 +48,11 @@ Deno.serve(async (req) => {
     .in("status", ["selecionado_cota", "fatos_extraidos"])
     .order("interesse_score", { ascending: false, nullsFirst: false })
     .order("criado_em", { ascending: false })
-    .limit(limit);
+    // Busca uma janela maior que o lote porque alguns clusters antigos podem
+    // já ter generated_articles, mas continuar com status pendente por migração
+    // incompleta. Se limitarmos antes de filtrar, a função devolve pendentes=0
+    // e o painel para sem escrever nada.
+    .limit(limit * 10);
   if (body.regiao_id) q = q.eq("regiao_id", body.regiao_id);
 
   const { data: pendentes, error } = await q;
@@ -64,7 +68,10 @@ Deno.serve(async (req) => {
     .select("cluster_id")
     .in("cluster_id", ids);
   const bloqueados = new Set((jaTem ?? []).map((r) => r.cluster_id));
-  const fila = pendentes.filter((c) => !bloqueados.has(c.id));
+  if (bloqueados.size) {
+    await markClustersDone(sb, [...bloqueados]);
+  }
+  const fila = pendentes.filter((c) => !bloqueados.has(c.id)).slice(0, limit);
 
   const runAll = async () => {
     const CONCURRENCY = body.sync ? 2 : 3;
@@ -119,4 +126,15 @@ function json(body: unknown, status = 200) {
     status,
     headers: { ...cors, "content-type": "application/json" },
   });
+}
+
+// deno-lint-ignore no-explicit-any
+async function markClustersDone(sb: any, ids: string[]) {
+  if (!ids.length) return;
+  const { error } = await sb.from("article_clusters").update({ status: "rascunho_gerado" }).in("id", ids);
+  if (!error) return;
+  const invalidEnum = error.code === "22P02" || /rascunho_gerado|cluster_status/i.test(error.message ?? "");
+  if (invalidEnum) {
+    await sb.from("article_clusters").update({ status: "descartado" }).in("id", ids);
+  }
 }
