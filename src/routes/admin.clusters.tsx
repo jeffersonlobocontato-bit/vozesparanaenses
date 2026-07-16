@@ -59,6 +59,8 @@ function AdminClusters() {
     });
   }, []);
   const [cleaning, setCleaning] = useState(false);
+  const [coletando, setColetando] = useState(false);
+  const [coletaLog, setColetaLog] = useState<string[]>([]);
   const [fRegiao, setFRegiao] = useState<string>("");
   const [fCategoria, setFCategoria] = useState<string>("");
   const [fFonte, setFFonte] = useState<string>("");
@@ -69,9 +71,9 @@ function AdminClusters() {
       const sb = await getExternalBrowser();
       const { data, error } = await sb
         .from("article_clusters")
-        .select("id, status, prioridade_score, interesse_score, curadoria_nacional, criado_em, fatos_extraidos_em, grupo_estadual_id, regiao:regioes(slug, nome), categoria:editorial_categories!inner(slug, nome), cluster_articles(raw_article:raw_articles(titulo, url, fonte:fontes(nome))), extracted_facts(onde, quem, o_que)")
+        .select("id, status, prioridade_score, interesse_score, curadoria_nacional, criado_em, fatos_extraidos_em, grupo_estadual_id, regiao:regioes(slug, nome), categoria:editorial_categories(slug, nome), cluster_articles(raw_article:raw_articles(titulo, url, fonte:fontes(nome))), extracted_facts(onde, quem, o_que)")
+        .eq("curadoria_nacional", true)
         .in("status", ["novo", "selecionado_cota", "fatos_extraidos", "descartado"])
-        .in("categoria.slug", ["seguranca", "esportes"])
         .order("criado_em", { ascending: false })
         .limit(120);
       if (error) throw error;
@@ -173,6 +175,29 @@ function AdminClusters() {
     }
   }
 
+  async function rodarColetaCuradoria() {
+    setColetando(true);
+    setColetaLog(["Coletando fontes de curadoria (Segurança/Esporte/Geral nacional)…"]);
+    const steps: Array<{ name: string; body?: Record<string, unknown> }> = [
+      { name: "scrape-source", body: { force: true, sync: true, apenas_curadoria: true } },
+      { name: "cluster-articles", body: { sync: true } },
+      { name: "classify-and-quota", body: { sync: true } },
+    ];
+    for (const step of steps) {
+      setColetaLog((l) => [...l, `→ ${step.name}…`]);
+      try {
+        const { data, error } = await supabase.functions.invoke(step.name, { body: step.body ?? {} });
+        if (error) throw error;
+        setColetaLog((l) => [...l, `  ✓ ${JSON.stringify(data).slice(0, 240)}`]);
+      } catch (e: unknown) {
+        setColetaLog((l) => [...l, `  ✗ ${e instanceof Error ? e.message : "erro"}`]);
+        break;
+      }
+    }
+    setColetando(false);
+    await load();
+  }
+
   async function extractFacts(id: string) {
     markBusy(id, true); setMsg(null);
     try {
@@ -234,8 +259,14 @@ function AdminClusters() {
     [items, fRegiao, fCategoria, fFonte],
   );
 
-  const nacionais = useMemo(
-    () => filtrados.filter((i) => i.curadoria_nacional).sort((a, b) => b.prioridade_score - a.prioridade_score),
+  const nacionaisSegurancaEsporte = useMemo(
+    () => filtrados.filter((i) => i.curadoria_nacional && (i.categoria?.slug === "seguranca" || i.categoria?.slug === "esportes"))
+      .sort((a, b) => b.prioridade_score - a.prioridade_score),
+    [filtrados],
+  );
+  const nacionaisGeral = useMemo(
+    () => filtrados.filter((i) => i.curadoria_nacional && i.categoria?.slug !== "seguranca" && i.categoria?.slug !== "esportes")
+      .sort((a, b) => b.prioridade_score - a.prioridade_score),
     [filtrados],
   );
   const paranaenses = useMemo(() => filtrados.filter((i) => !i.curadoria_nacional), [filtrados]);
@@ -297,8 +328,15 @@ function AdminClusters() {
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold">Curadoria — Segurança &amp; Esportes</h1>
+        <h1 className="text-2xl font-bold">Curadoria Nacional — Segurança &amp; Esporte / Geral</h1>
         <div className="flex gap-2">
+          <button
+            onClick={rodarColetaCuradoria}
+            disabled={coletando}
+            className="rounded bg-[#0066CC] px-3 py-1 text-xs font-semibold text-white disabled:opacity-60"
+          >
+            {coletando ? "Coletando…" : "▶ Rodar coleta (curadoria)"}
+          </button>
           <button
             onClick={apagarTodas}
             disabled={cleaning || !items?.length}
@@ -318,6 +356,9 @@ function AdminClusters() {
           <button onClick={load} className="rounded border px-3 py-1 text-xs hover:bg-accent">Atualizar</button>
         </div>
       </div>
+      {coletaLog.length > 0 && (
+        <pre className="rounded-xl bg-slate-900 p-3 text-xs text-emerald-300 overflow-x-auto">{coletaLog.join("\n")}</pre>
+      )}
       {msg && <p className="rounded border bg-muted p-2 text-xs">{msg}</p>}
       {err && <p className="rounded border border-red-200 bg-red-50 p-3 text-sm text-red-700">{err}</p>}
       {!items && !err && <p className="text-sm text-muted-foreground">Carregando…</p>}
@@ -344,22 +385,57 @@ function AdminClusters() {
         </div>
       )}
 
-      {nacionais.length > 0 && (
+      {nacionaisSegurancaEsporte.length > 0 && (
         <section className="rounded-2xl border border-amber-300 bg-amber-50 p-4">
           <h2 className="mb-1 text-sm font-bold uppercase tracking-wide text-amber-900">
-            🌎 Nacional &amp; Internacional — rankeado por nº de portais
+            🚨⚽ Segurança &amp; Esporte — Nacional/Internacional
           </h2>
           <p className="mb-3 text-xs text-amber-800">
             Formado só quando 2 ou mais fontes nacionais abertas (G1, Metrópoles, R7, CNN Brasil, ge,
             Lance!, ESPN, Gazeta Esportiva) cobriram o mesmo fato. Nunca escreve sozinho — decisão sua.
           </p>
           <div className="space-y-2">
-            {nacionais.map((c) => (
+            {nacionaisSegurancaEsporte.map((c) => (
               <div key={c.id} className="flex items-center justify-between gap-3 rounded-xl border border-amber-200 bg-white p-3 text-sm">
                 <div className="min-w-0">
                   <div className="mb-1 flex items-center gap-2">
                     <span className="rounded-full bg-amber-100 px-2 py-0.5 text-[10px] font-bold uppercase text-amber-800">
                       {c.categoria?.nome ?? "—"}
+                    </span>
+                    <span className="text-xs font-semibold text-slate-600">{c.fontes} portal(is) cobrindo</span>
+                  </div>
+                  <p className="truncate font-medium">{c.artigos[0]?.titulo ?? c.o_que ?? "Sem título ainda"}</p>
+                  <p className="truncate text-xs text-muted-foreground">{c.fontesNomes.join(" · ")}</p>
+                </div>
+                <button
+                  onClick={() => extractFacts(c.id)}
+                  disabled={busyIds.has(c.id)}
+                  className="shrink-0 rounded bg-[#0066CC] px-3 py-1.5 text-xs font-semibold text-white disabled:opacity-60"
+                >
+                  {busyIds.has(c.id) ? "Escrevendo…" : "✎ Escrever agora"}
+                </button>
+              </div>
+            ))}
+          </div>
+        </section>
+      )}
+
+      {nacionaisGeral.length > 0 && (
+        <section className="rounded-2xl border border-sky-300 bg-sky-50 p-4">
+          <h2 className="mb-1 text-sm font-bold uppercase tracking-wide text-sky-900">
+            🌎 Nacional — Geral (política, economia, o que não for Segurança/Esporte)
+          </h2>
+          <p className="mb-3 text-xs text-sky-800">
+            De G1, Metrópoles, R7 e CNN Brasil — classificado pela mesma IA que classifica o Paraná.
+            Nunca escreve sozinho — decisão sua.
+          </p>
+          <div className="space-y-2">
+            {nacionaisGeral.map((c) => (
+              <div key={c.id} className="flex items-center justify-between gap-3 rounded-xl border border-sky-200 bg-white p-3 text-sm">
+                <div className="min-w-0">
+                  <div className="mb-1 flex items-center gap-2">
+                    <span className="rounded-full bg-sky-100 px-2 py-0.5 text-[10px] font-bold uppercase text-sky-800">
+                      {c.categoria?.nome ?? "classificando…"}
                     </span>
                     <span className="text-xs font-semibold text-slate-600">{c.fontes} portal(is) cobrindo</span>
                   </div>
