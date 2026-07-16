@@ -37,6 +37,7 @@ const rankedQO = (loc: ViewerLocation) =>
       listRankedArticles({
         data: { cidade: loc.cidade, regiaoSlug: loc.regiaoSlug, limit: 12 },
       }),
+    staleTime: 5 * 60 * 1000,
   });
 
 // Módulos por editoria — sequência exibida no scroll da home,
@@ -59,11 +60,13 @@ const editoriaQO = (slug: string) =>
 const vaptVuptQO = queryOptions({
   queryKey: ["articles", "vapt-vupt", 8],
   queryFn: () => listArticlesWithoutImage({ data: { limit: 8 } }),
+  staleTime: 5 * 60 * 1000,
 });
 
 const mostReadQO = queryOptions({
   queryKey: ["articles", "most-read", 7, 5],
   queryFn: () => listMostReadArticles({ data: { days: 7, limit: 5 } }),
+  staleTime: 5 * 60 * 1000,
 });
 
 // Card fixo no topo — última matéria publicada em Eleições 2026.
@@ -73,6 +76,7 @@ const eleicoes2026TopQO = queryOptions({
     listArticlesByCategoryGlobal({
       data: { categorySlug: "eleicoes-2026", limit: 1, requireImage: false },
     }),
+  staleTime: 5 * 60 * 1000,
 });
 
 export const Route = createFileRoute("/")({
