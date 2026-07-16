@@ -431,6 +431,26 @@ function parseGeneratedPayload(content: string): GeneratedPayload | null {
   return null;
 }
 
+// deno-lint-ignore no-explicit-any
+async function markClusterDone(sb: any, clusterId: string) {
+  const { error: statusErr } = await sb
+    .from("article_clusters")
+    .update({ status: "rascunho_gerado" })
+    .eq("id", clusterId);
+  if (!statusErr) return;
+
+  const invalidEnum = statusErr.code === "22P02" || /rascunho_gerado|cluster_status/i.test(statusErr.message ?? "");
+  if (invalidEnum) {
+    const { error: fallbackErr } = await sb
+      .from("article_clusters")
+      .update({ status: "descartado" })
+      .eq("id", clusterId);
+    if (fallbackErr) console.error("Erro ao aplicar fallback de status do cluster:", fallbackErr);
+    return;
+  }
+  console.error("Erro ao atualizar status do cluster:", statusErr);
+}
+
 function buildUserPrompt(facts: ExtractedFactsRow, dados: Record<string, unknown>) {
   const fontesTxt = (facts.fontes ?? [])
     .map((f, i) => `${i + 1}. ${f.veiculo ?? "fonte"} — ${f.url ?? ""}`)
