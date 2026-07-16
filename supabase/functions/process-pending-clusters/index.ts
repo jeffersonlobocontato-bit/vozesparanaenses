@@ -97,11 +97,12 @@ Deno.serve(async (req) => {
     });
     await Promise.all(workers);
     console.log(`[process-pending-clusters] concluído: pendentes=${fila.length} extraidas=${extraidas} escritas=${escritas} erros=${erros.length}`);
+    return { extraidas, escritas, erros };
   };
 
   if (body.sync) {
-    await runAll();
-    return json({ ok: true, pendentes: fila.length, mode: "sync" });
+    const resultado = await runAll();
+    return json({ ok: true, pendentes: fila.length, mode: "sync", ...resultado });
   }
   // deno-lint-ignore no-explicit-any
   const rt = (globalThis as any).EdgeRuntime;
