@@ -180,6 +180,10 @@ function AdminDashboard() {
       }
     } catch (e: unknown) {
       setPipelineLog((l) => [...l, `  ✗ ${e instanceof Error ? e.message : "erro"}`]);
+      setPipelineLog((l) => [...l, "Pipeline interrompido — nenhuma etapa seguinte foi mascarada como concluída."]);
+      setPipelineRunning(null);
+      load();
+      return;
     }
     setPipelineLog((l) => [...l, "Pipeline finalizado."]);
     setPipelineRunning(null);
@@ -230,6 +234,10 @@ function AdminDashboard() {
       }
     } catch (e: unknown) {
       setPipelineLog((l) => [...l, `  ✗ ${e instanceof Error ? e.message : "erro"}`]);
+      setPipelineLog((l) => [...l, "Scraping interrompido — nenhuma etapa seguinte foi mascarada como concluída."]);
+      setPipelineRunning(null);
+      load();
+      return;
     }
     setPipelineLog((l) => [...l, "Scraping de prefeituras finalizado."]);
     setPipelineRunning(null);
@@ -261,6 +269,10 @@ function AdminDashboard() {
       }
     } catch (e: unknown) {
       setPipelineLog((l) => [...l, `  ✗ ${e instanceof Error ? e.message : "erro"}`]);
+      setPipelineLog((l) => [...l, "Coleta interrompida — nenhuma etapa seguinte foi mascarada como concluída."]);
+      setPipelineRunning(null);
+      load();
+      return;
     }
     setPipelineLog((l) => [...l, "Coleta de curadoria finalizada — vá em Curadoria pra decidir o que escrever."]);
     setPipelineRunning(null);
