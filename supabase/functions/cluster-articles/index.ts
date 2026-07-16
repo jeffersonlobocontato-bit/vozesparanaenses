@@ -36,12 +36,36 @@ Deno.serve(async (req) => {
   if (!url || !key) return json({ error: "missing_external_supabase_env" }, 500);
   if (!aiKey) return json({ error: "missing_lovable_api_key" }, 500);
 
-  let body: { regiao_id?: string; limit?: number; threshold?: number; fonte_tipo?: "veiculo" | "prefeitura" } = {};
+  let body: {
+    regiao_id?: string;
+    limit?: number;
+    threshold?: number;
+    fonte_tipo?: "veiculo" | "prefeitura";
+    apenas_curadoria?: boolean;
+  } = {};
   try { body = await req.json(); } catch { body = {}; }
   const limit = Math.min(body.limit ?? 100, 200);
   const threshold = body.threshold ?? 0.82;
 
   const sb = createClient(url, key, { auth: { persistSession: false } });
+
+  // Pré-filtra a lista de fonte_id ANTES de bater na raw_articles. Antes
+  // fazíamos o filtro em memória depois do .limit(25), então quando o
+  // backlog tinha muitas raws de veículos com processado=false, os 25
+  // mais novos eram todos veículos e o filtro (fonte_tipo=prefeitura ou
+  // apenas_curadoria) esvaziava tudo — a função retornava processed:0 e
+  // o loop do painel saía no primeiro lote sem criar nenhum cluster.
+  let fonteIdsFiltrados: string[] | null = null;
+  if (body.fonte_tipo || body.apenas_curadoria !== undefined) {
+    let fq = sb.from("fontes").select("id");
+    if (body.fonte_tipo) fq = fq.eq("tipo", body.fonte_tipo);
+    if (body.apenas_curadoria === true) fq = fq.not("curadoria_editoria", "is", null);
+    if (body.apenas_curadoria === false) fq = fq.is("curadoria_editoria", null);
+    const { data: fontesFiltro, error: fErr } = await fq;
+    if (fErr) return json({ error: "fontes_filter_failed", detail: fErr.message }, 500);
+    fonteIdsFiltrados = (fontesFiltro ?? []).map((f) => f.id);
+    if (!fonteIdsFiltrados.length) return json({ ok: true, processed: 0, clusters: 0 });
+  }
 
   // Tenta com a coluna nova de curadoria (migration 041). Se ela ainda não
   // foi rodada no banco, a consulta falha por coluna inexistente — nesse
@@ -60,6 +84,7 @@ Deno.serve(async (req) => {
       .order("coletado_em", { ascending: false })
       .limit(limit);
     if (body.regiao_id) q = q.eq("regiao_id", body.regiao_id);
+    if (fonteIdsFiltrados) q = q.in("fonte_id", fonteIdsFiltrados);
     return q;
   }
 
@@ -73,16 +98,7 @@ Deno.serve(async (req) => {
   if (error) return json({ error: "raw_query_failed", detail: error.message }, 500);
   if (!raws?.length) return json({ ok: true, processed: 0, clusters: 0 });
 
-  // Filtro opcional por tipo de fonte — usado pelo botão "Scrape prefeituras"
-  // do painel, que quer clusterizar SÓ as raws oficiais recém-coletadas,
-  // sem varrer o backlog de veículos/curadoria que ainda esteja pendente.
-  if (body.fonte_tipo) {
-    raws = (raws as Raw[]).filter((r) => {
-      const f = Array.isArray(r.fonte) ? r.fonte[0] : r.fonte;
-      return f?.tipo === body.fonte_tipo;
-    });
-    if (!raws.length) return json({ ok: true, processed: 0, clusters: 0 });
-  }
+  // (o filtro por tipo de fonte / curadoria já foi aplicado na SQL acima)
 
   // 1. Fontes oficiais (prefeitura) não precisam de embedding nem de
   //    cruzamento com outra fonte — cada release já é, por natureza,
