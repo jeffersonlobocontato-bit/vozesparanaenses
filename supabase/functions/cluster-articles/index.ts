@@ -36,7 +36,7 @@ Deno.serve(async (req) => {
   if (!url || !key) return json({ error: "missing_external_supabase_env" }, 500);
   if (!aiKey) return json({ error: "missing_lovable_api_key" }, 500);
 
-  let body: { regiao_id?: string; limit?: number; threshold?: number } = {};
+  let body: { regiao_id?: string; limit?: number; threshold?: number; fonte_tipo?: "veiculo" | "prefeitura" } = {};
   try { body = await req.json(); } catch { body = {}; }
   const limit = Math.min(body.limit ?? 100, 200);
   const threshold = body.threshold ?? 0.82;
@@ -72,6 +72,17 @@ Deno.serve(async (req) => {
   }
   if (error) return json({ error: "raw_query_failed", detail: error.message }, 500);
   if (!raws?.length) return json({ ok: true, processed: 0, clusters: 0 });
+
+  // Filtro opcional por tipo de fonte — usado pelo botão "Scrape prefeituras"
+  // do painel, que quer clusterizar SÓ as raws oficiais recém-coletadas,
+  // sem varrer o backlog de veículos/curadoria que ainda esteja pendente.
+  if (body.fonte_tipo) {
+    raws = (raws as Raw[]).filter((r) => {
+      const f = Array.isArray(r.fonte) ? r.fonte[0] : r.fonte;
+      return f?.tipo === body.fonte_tipo;
+    });
+    if (!raws.length) return json({ ok: true, processed: 0, clusters: 0 });
+  }
 
   // 1. Fontes oficiais (prefeitura) não precisam de embedding nem de
   //    cruzamento com outra fonte — cada release já é, por natureza,
