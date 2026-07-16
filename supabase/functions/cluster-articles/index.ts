@@ -211,9 +211,14 @@ Deno.serve(async (req) => {
     const regiaoInternacionalId = (regioesNacInt ?? []).find((r) => r.slug === "internacional")?.id ?? null;
 
     const withEmbCur = rawsCuradoria.filter((r) => r.embedding);
-    for (const tag of ["seguranca", "esportes"] as const) {
-      const categoriaId = catIdBySlug.get(tag);
-      if (!categoriaId) continue;
+    for (const tag of ["seguranca", "esportes", "geral"] as const) {
+      // "geral" (G1, Metrópoles, R7, CNN Brasil) cobre qualquer assunto —
+      // não pré-classifica; deixa null pra IA do classify-and-quota decidir
+      // a editoria de verdade (mesma classificadora do Paraná). "esportes"
+      // (e o "seguranca" legado, se ainda houver fonte com essa tag) já sai
+      // pré-classificado, sem precisar de IA — não há ambiguidade.
+      const categoriaId = tag === "geral" ? null : catIdBySlug.get(tag);
+      if (tag !== "geral" && !categoriaId) continue;
       const doTag = withEmbCur.filter((r) => curadoriaTag(r) === tag);
       const usedCur = new Set<string>();
       const gruposCur: Raw[][] = [];

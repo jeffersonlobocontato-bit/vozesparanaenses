@@ -53,7 +53,7 @@ Deno.serve(async (req) => {
   const key = Deno.env.get("EXTERNAL_SUPABASE_SERVICE_ROLE_KEY");
   if (!url || !key) return json({ error: "missing_external_supabase_env" }, 500);
 
-  let body: { fonte_id?: string; force?: boolean; sync?: boolean } = {};
+  let body: { fonte_id?: string; force?: boolean; sync?: boolean; apenas_curadoria?: boolean } = {};
   try {
     body = await req.json();
   } catch {
@@ -68,12 +68,16 @@ Deno.serve(async (req) => {
     .eq("ativo", true);
   if (body.fonte_id) query = query.eq("id", body.fonte_id);
   // Fontes nacionais de curadoria (G1, Metrópoles, ge, ESPN, Lance, CNN…)
-  // NÃO entram no pipeline principal do Paraná — elas só devem ser
-  // coletadas quando o admin abrir o painel de curadoria (Segurança &
-  // Esportes). Isso evita que uma enxurrada de matérias nacionais/
-  // internacionais domine o feed regional e faça o classificador jogar
-  // muita coisa em "nacional/internacional".
-  if (!body.fonte_id) query = query.is("curadoria_editoria", null);
+  // NÃO entram no pipeline principal do Paraná por padrão — evita que uma
+  // enxurrada de matérias nacionais/internacionais domine o feed regional.
+  // Elas só são coletadas quando chamado explicitamente com
+  // apenas_curadoria:true (botão próprio dos cards de curadoria) ou por
+  // fonte_id específico.
+  if (body.apenas_curadoria) {
+    query = query.not("curadoria_editoria", "is", null);
+  } else if (!body.fonte_id) {
+    query = query.is("curadoria_editoria", null);
+  }
 
   const { data: fontes, error } = await query;
   if (error) return json({ error: "fontes_query_failed", detail: error.message }, 500);

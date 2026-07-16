@@ -39,7 +39,7 @@ Deno.serve(async (req) => {
 
   let cq = sb
     .from("article_clusters")
-    .select("id, regiao_id, categoria_id, prioridade_score, criado_em, fonte_oficial, regiao:regioes(slug)")
+    .select("id, regiao_id, categoria_id, prioridade_score, criado_em, fonte_oficial, curadoria_nacional, regiao:regioes(slug)")
     .eq("status", "novo")
     .is("categoria_id", null)
     .order("prioridade_score", { ascending: false })
@@ -69,7 +69,7 @@ Deno.serve(async (req) => {
 
 async function processClusters(
   { clusters, categorias, sb, aiKey, url, key }: {
-    clusters: Array<{ id: string; regiao_id: string; prioridade_score: number; criado_em: string }>;
+    clusters: Array<{ id: string; regiao_id: string; prioridade_score: number; criado_em: string; curadoria_nacional?: boolean }>;
     categorias: { id: string; slug: string; nome: string; peso_engajamento: number }[];
     // deno-lint-ignore no-explicit-any
     sb: any;
@@ -81,7 +81,7 @@ async function processClusters(
   const _serve = null; // placeholder para manter escopo
 
   // 1. Classificar cada cluster (usa título do primeiro artigo do cluster)
-  const classified: { id: string; regiao_id: string; categoria_id: string; score: number }[] = [];
+  const classified: { id: string; regiao_id: string; categoria_id: string; score: number; curadoria_nacional: boolean }[] = [];
   for (const c of clusters) {
     // Se o cluster já está fincado em uma região do Paraná (pela detecção
     // de cidade no scrape-source), NUNCA classifica como nacional/
@@ -140,7 +140,7 @@ async function processClusters(
     const interesseScore = Number((scoreBase * cat.peso_engajamento * fatorRecencia + bonusEstadual).toFixed(2));
 
     await sb.from("article_clusters").update({ categoria_id: cat.id, interesse_score: interesseScore }).eq("id", c.id);
-    classified.push({ id: c.id, regiao_id: c.regiao_id, categoria_id: cat.id, score: c.prioridade_score });
+    classified.push({ id: c.id, regiao_id: c.regiao_id, categoria_id: cat.id, score: c.prioridade_score, curadoria_nacional: !!c.curadoria_nacional });
   }
 
   // 2. Aplicar quotas — janela 7 dias, agrupando por região × categoria
@@ -170,6 +170,13 @@ async function processClusters(
   let discarded = 0;
   const selecionados: string[] = [];
   for (const c of classified.sort((a, b) => b.score - a.score)) {
+    // Curadoria nacional (cards 3 e 4 do painel) é classificada pra saber
+    // em qual editoria exibir na tela de curadoria, mas NUNCA entra na
+    // seleção automática por cota — fica em "novo" pra sempre, esperando
+    // o admin decidir manualmente (botão "Escrever agora"). Sem isso, o
+    // card 4 (Nacional geral) escreveria sozinho, que é exatamente o que
+    // não queremos.
+    if (c.curadoria_nacional) continue;
     const rule = quotaMap.get(`${c.regiao_id}:${c.categoria_id}`);
     const total = Math.max(regionTotals.get(c.regiao_id) ?? 0, 10);
     const currentPct = ((currentCounts.get(`${c.regiao_id}:${c.categoria_id}`) ?? 0) / total) * 100;
