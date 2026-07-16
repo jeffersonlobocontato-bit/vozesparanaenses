@@ -1,35 +1,41 @@
 ## Diagnóstico
 
-O botão "Scrape prefeituras" (e por tabela os cards de Curadoria) diz que terminou, mas grava zero clusters. Causa raiz está em `supabase/functions/cluster-articles/index.ts`:
+Rodei os endpoints direto para isolar o culpado:
 
-1. A query busca `raw_articles` com `.limit(limit)` (25) **antes** de aplicar o filtro `fonte_tipo`.
-2. O filtro `fonte_tipo === "prefeitura"` é aplicado em memória, **depois** do limite.
-3. Como existe um backlog gigante de raws de veículos com `processado=false` (foi resetado nas últimas correções), os 25 mais recentes quase sempre são de veículos → o filtro esvazia o array → retorna `processed:0` → o loop no `admin.painel.tsx` sai no primeiro lote e nenhum cluster é criado.
+- `cluster-articles` com `{limit:5, fonte_tipo:"veiculo"}` → **OK** (processou 5, criou 5 clusters).
+- `classify-and-quota` com `{sync:true}` → **502 Bad Gateway** (gateway derruba a conexão antes de terminar).
 
-Efeito colateral igual nos outros 3 módulos:
+É esse 502 que quebra o pipeline dos portais. Como no último ajuste eu passei o `sync:true` obrigatório no `classify-and-quota` (pra esperar a classificação antes de chamar o writer), agora o pipeline sempre aborta no passo 3/4 com erro de gateway → o passo 4/4 (`process-pending-clusters`) nem roda → nenhuma matéria é escrita.
 
-- **Portais (Paraná)**: funciona por sorte — como não há filtro, drena o backlog. Mas está drenando raws antigas de veículos junto com as recém-coletadas.
-- **Curadoria (Segurança/Esporte)** e **Nacional Geral**: ambos chamam `cluster-articles` **sem filtro** e **sem lote** (`{ sync: true }` só). Se o backlog é grande, estoura o timeout do browser (60s) → o log mostra "erro" ou fica pendurado. Mesmo quando conclui, mistura raws de curadoria com o backlog do PR.
+A causa raiz é `classify-and-quota` pegar `.limit(50)` num único lote e fazer, para cada cluster: 1 chamada de LLM + várias leituras/escritas no banco + lookup de grupo estadual. Sequencial, isso passa dos ~60 s do gateway. Não dá pra segurar 50 sync numa chamada só.
 
-## Correções
+## Correção
 
-### 1. `supabase/functions/cluster-articles/index.ts`
-Aplicar o filtro `fonte_tipo` **na query SQL**, não em memória:
+### 1. `supabase/functions/classify-and-quota/index.ts`
+- Aceitar `limit` no body (default 15, teto 50) e substituir o `.limit(50)` hardcoded por esse valor.
+- Sem outras mudanças de lógica — a função continua idempotente (`.is("categoria_id", null)`), então dá pra chamar em loop sem duplicar.
 
-- Se `body.fonte_tipo === "prefeitura"`: usar `.eq("fontes.tipo", "prefeitura")` via join filtrado ou pré-buscar os `fonte_id` do tipo pedido e usar `.in("fonte_id", ids)`.
-- Se `body.fonte_tipo === "veiculo"`: mesma coisa, mas ainda separando `curadoria_editoria IS NULL` vs `NOT NULL` (para os cards de curadoria).
-- Aceitar também `apenas_curadoria: boolean` (novo) para os botões de curadoria filtrarem só as fontes de curadoria na SQL.
+### 2. `src/routes/admin.painel.tsx`
+Trocar cada chamada de `classify-and-quota` de "1 shot sync" para "loop de lotes até drenar", igualzinho ao que já fazemos com `cluster-articles`:
 
-Remover o `raws.filter(...)` em memória (fica só como defesa).
+```ts
+setPipelineLog((l) => [...l, "3/4 Classificação + cotas (em lotes)…"]);
+for (let i = 1; i <= 20; i++) {
+  const r = await supabase.functions.invoke("classify-and-quota", { body: { sync: true, limit: 15 } });
+  if (r.error) throw r.error;
+  const d = (r.data ?? {}) as { classified?: number; selected?: number };
+  setPipelineLog((l) => [...l, `  lote ${i}: classificados=${d.classified ?? 0} selecionados=${d.selected ?? 0}`]);
+  if (!d.classified) break;
+}
+```
 
-### 2. `src/routes/admin.painel.tsx` — `runCuradoriaNacional`
-Passar a rodar em lotes iguais ao `runPipeline`, com `{ limit: 25, apenas_curadoria: true }`, para não estourar 60s. Sem escrever automaticamente (mantém o comportamento atual: só coleta + classifica).
+Aplicar a mesma coisa nas 3 funções que chamam `classify-and-quota`: `runPipeline` (Portais), `runPrefeituras` e `runCuradoriaNacional`.
 
-### 3. `runPipeline` (portais)
-Adicionar `fonte_tipo: "veiculo"` + `apenas_curadoria: false` (Paraná) no `cluster-articles` para não misturar backlog de curadoria nesse fluxo.
+### 3. Reduzir lote do `process-pending-clusters` (defensivo)
+`process-pending-clusters` com `limit:15, sync:true` também faz LLM por cluster (extract-facts + generate-article) e pode encostar no timeout. Baixar para `limit:8` em `runPipeline` e `runPrefeituras`. Sem mudança no edge function.
 
 ## Como validar
-Depois de aplicar, clicar em "Scrape prefeituras" e observar no log:
-- lote 1: `processado=N clusters=M` com N > 0 quando há releases novos;
-- ao final, KPI "Pautas novas" e "Selecionadas por cota" sobem;
-- em `/admin` aparecem rascunhos das prefeituras.
+Clicar em **Rodar portais** e no log deve aparecer:
+- `3/4 Classificação + cotas (em lotes)… lote 1: classificados=15 selecionados=N` (sem 502)
+- `4/4 Extrair fatos + escrever… lote 1: pendentes=8 escritas=8`
+- KPI "Rascunhos" sobe e `/admin` mostra as pautas novas.
