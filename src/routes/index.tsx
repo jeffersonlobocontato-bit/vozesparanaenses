@@ -55,6 +55,7 @@ const editoriaQO = (slug: string) =>
     queryKey: ["articles", "cat-global", slug, 7],
     queryFn: () =>
       listArticlesByCategoryGlobal({ data: { categorySlug: slug, limit: 7 } }),
+    staleTime: 5 * 60 * 1000,
   });
 
 const vaptVuptQO = queryOptions({
