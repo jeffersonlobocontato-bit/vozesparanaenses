@@ -177,7 +177,7 @@ function AdminDashboard() {
       // browser) + classificação pra as matérias oficiais entrarem na fila.
       setPipelineLog((l) => [...l, "cluster-articles (em lotes)…"]);
       for (let i = 1; i <= 20; i++) {
-        const r = await supabase.functions.invoke("cluster-articles", { body: { limit: 25 } });
+        const r = await supabase.functions.invoke("cluster-articles", { body: { limit: 25, fonte_tipo: "prefeitura" } });
         if (r.error) throw r.error;
         const d = (r.data ?? {}) as { processed?: number; clusters?: number };
         setPipelineLog((l) => [...l, `  lote ${i}: processado=${d.processed ?? 0} clusters=${d.clusters ?? 0}`]);
