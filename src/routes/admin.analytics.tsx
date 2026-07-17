@@ -209,8 +209,8 @@ function AdminAnalytics() {
   }, [rowsFiltradas]);
 
   const totalIA = porOrigem.find((o) => o.origem === "ia")?.total ?? 0;
-  const total = rows?.length ?? 0;
-  const totalAnterior = rowsAnterior?.length ?? 0;
+  const total = rowsFiltradas?.length ?? 0;
+  const totalAnterior = rowsAnteriorFiltradas?.length ?? 0;
   const variacaoTotal = pct(total, totalAnterior);
   const regioesComTrafego = porRegiao.length;
 
@@ -219,7 +219,7 @@ function AdminAnalytics() {
   // leitura de tendência, sem o usuário precisar cruzar os gráficos na mão.
   const insights = useMemo(() => {
     const lista: string[] = [];
-    if (!rows || total === 0) return lista;
+    if (!rowsFiltradas || total === 0) return lista;
 
     let melhorEditoria: { nome: string; variacao: ReturnType<typeof pct> } | null = null;
     for (const e of porEditoria) {
@@ -254,7 +254,7 @@ function AdminAnalytics() {
     }
 
     return lista;
-  }, [rows, total, porEditoria, porEditoriaAnterior, porRegiao, totalIA, porCidadeLeitor]);
+  }, [rowsFiltradas, total, porEditoria, porEditoriaAnterior, porRegiao, totalIA, porCidadeLeitor]);
 
   return (
     <div className="space-y-6">
