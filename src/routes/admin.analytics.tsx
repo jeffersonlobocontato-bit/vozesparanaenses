@@ -62,22 +62,40 @@ function AdminAnalytics() {
       const since = new Date(agora - dias * 24 * 3600 * 1000).toISOString();
       const sincePrev = new Date(agora - dias * 2 * 24 * 3600 * 1000).toISOString();
 
-      const [atualRes, anteriorRes, artigosRes] = await Promise.all([
-        sb.from("analytics_events")
-          .select("ts, pagina, origem_trafego, cidade_leitor, categoria, regiao:regioes(nome, slug)")
-          .eq("tipo_evento", "pageview").gte("ts", since).order("ts", { ascending: false }).limit(5000),
-        sb.from("analytics_events")
-          .select("ts, pagina, origem_trafego, cidade_leitor, categoria, regiao:regioes(nome, slug)")
-          .eq("tipo_evento", "pageview").gte("ts", sincePrev).lt("ts", since).limit(5000),
+      // PostgREST corta em 1000 linhas por request independentemente do
+      // .limit() — precisamos paginar com .range() pra não subcontar
+      // pageviews depois que o site passa dos mil acessos no período.
+      const PAGE = 1000;
+      const MAX_PAGES = 50; // teto de segurança: 50k eventos por janela
+      async function fetchAllPageviews(gte: string, lt?: string) {
+        const acc: EventoRow[] = [];
+        for (let i = 0; i < MAX_PAGES; i++) {
+          let q = sb.from("analytics_events")
+            .select("ts, pagina, origem_trafego, cidade_leitor, categoria, regiao:regioes(nome, slug)")
+            .eq("tipo_evento", "pageview")
+            .gte("ts", gte)
+            .order("ts", { ascending: false })
+            .range(i * PAGE, i * PAGE + PAGE - 1);
+          if (lt) q = q.lt("ts", lt);
+          const { data, error } = await q;
+          if (error) throw error;
+          const batch = (data ?? []) as unknown as EventoRow[];
+          acc.push(...batch);
+          if (batch.length < PAGE) break;
+        }
+        return acc;
+      }
+
+      const [atual, anterior, artigosRes] = await Promise.all([
+        fetchAllPageviews(since),
+        fetchAllPageviews(sincePrev, since),
         sb.from("generated_articles")
           .select("slug, titulo, regiao:regioes(slug), categoria:editorial_categories(nome)")
           .eq("status", "publicado").order("publicado_em", { ascending: false }).limit(1000),
       ]);
-      if (atualRes.error) throw atualRes.error;
-      if (anteriorRes.error) throw anteriorRes.error;
       if (artigosRes.error) throw artigosRes.error;
-      setRows((atualRes.data ?? []) as unknown as EventoRow[]);
-      setRowsAnterior((anteriorRes.data ?? []) as unknown as EventoRow[]);
+      setRows(atual);
+      setRowsAnterior(anterior);
       setArtigos((artigosRes.data ?? []) as unknown as ArtigoRow[]);
     } catch (e: unknown) {
       setErr(e instanceof Error ? e.message : "Erro ao carregar analytics");
