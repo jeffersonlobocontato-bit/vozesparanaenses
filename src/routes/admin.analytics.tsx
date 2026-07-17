@@ -49,6 +49,11 @@ function pct(atual: number, anterior: number): { valor: number; texto: string; p
 
 function AdminAnalytics() {
   const [periodo, setPeriodo] = useState<number>(7);
+  // "publico" = acessos de leitores nas páginas do site; "admin" = acessos
+  // internos dentro do /admin (nós mesmos usando o painel); "tudo" = soma
+  // dos dois. Sem essa separação, o volume de uso interno inflava o total
+  // de "pageviews" e distorcia todos os cruzamentos (região, editoria etc.).
+  const [segmento, setSegmento] = useState<"publico" | "admin" | "tudo">("publico");
   const [rows, setRows] = useState<EventoRow[] | null>(null);
   const [rowsAnterior, setRowsAnterior] = useState<EventoRow[] | null>(null);
   const [artigos, setArtigos] = useState<ArtigoRow[]>([]);
@@ -104,6 +109,26 @@ function AdminAnalytics() {
 
   useEffect(() => { load(periodo); }, [load, periodo]);
 
+  // Filtra por segmento em memória — a coleta do tracker cobre tudo, então
+  // basta separar aqui pelo prefixo /admin da URL registrada em `pagina`.
+  function ehAdmin(p: string | null): boolean {
+    return !!p && p.startsWith("/admin");
+  }
+  const rowsFiltradas = useMemo(() => {
+    if (!rows) return null;
+    if (segmento === "tudo") return rows;
+    if (segmento === "admin") return rows.filter((r) => ehAdmin(r.pagina));
+    return rows.filter((r) => !ehAdmin(r.pagina));
+  }, [rows, segmento]);
+  const rowsAnteriorFiltradas = useMemo(() => {
+    if (!rowsAnterior) return null;
+    if (segmento === "tudo") return rowsAnterior;
+    if (segmento === "admin") return rowsAnterior.filter((r) => ehAdmin(r.pagina));
+    return rowsAnterior.filter((r) => !ehAdmin(r.pagina));
+  }, [rowsAnterior, segmento]);
+  const totalAdmin = useMemo(() => (rows ?? []).filter((r) => ehAdmin(r.pagina)).length, [rows]);
+  const totalPublico = useMemo(() => (rows ?? []).filter((r) => !ehAdmin(r.pagina)).length, [rows]);
+
   // Mapa pagina ("/regiao/slug") -> {titulo, categoria} pra virar ranking
   // de matéria de verdade, não só a URL crua — é a diferença entre uma
   // lista de links e um "top conteúdo" de verdade, como no GA.
@@ -119,43 +144,43 @@ function AdminAnalytics() {
 
   const porRegiao = useMemo(() => {
     const m = new Map<string, number>();
-    for (const r of rows ?? []) {
+    for (const r of rowsFiltradas ?? []) {
       const nome = first(r.regiao)?.nome ?? "Sem região";
       m.set(nome, (m.get(nome) ?? 0) + 1);
     }
     return Array.from(m.entries()).map(([nome, total]) => ({ nome, total })).sort((a, b) => b.total - a.total);
-  }, [rows]);
+  }, [rowsFiltradas]);
 
   const porOrigem = useMemo(() => {
     const m = new Map<string, number>();
-    for (const r of rows ?? []) {
+    for (const r of rowsFiltradas ?? []) {
       const o = r.origem_trafego ?? "outro";
       m.set(o, (m.get(o) ?? 0) + 1);
     }
     return Array.from(m.entries()).map(([origem, total]) => ({ origem, total })).sort((a, b) => b.total - a.total);
-  }, [rows]);
+  }, [rowsFiltradas]);
 
   const porEditoria = useMemo(() => {
     const m = new Map<string, number>();
-    for (const r of rows ?? []) {
+    for (const r of rowsFiltradas ?? []) {
       const c = r.categoria ?? "sem editoria";
       m.set(c, (m.get(c) ?? 0) + 1);
     }
     return Array.from(m.entries()).map(([categoria, total]) => ({ categoria, total })).sort((a, b) => b.total - a.total);
-  }, [rows]);
+  }, [rowsFiltradas]);
 
   const porEditoriaAnterior = useMemo(() => {
     const m = new Map<string, number>();
-    for (const r of rowsAnterior ?? []) {
+    for (const r of rowsAnteriorFiltradas ?? []) {
       const c = r.categoria ?? "sem editoria";
       m.set(c, (m.get(c) ?? 0) + 1);
     }
     return m;
-  }, [rowsAnterior]);
+  }, [rowsAnteriorFiltradas]);
 
   const porPagina = useMemo(() => {
     const m = new Map<string, number>();
-    for (const r of rows ?? []) {
+    for (const r of rowsFiltradas ?? []) {
       if (!r.pagina) continue;
       m.set(r.pagina, (m.get(r.pagina) ?? 0) + 1);
     }
@@ -163,29 +188,29 @@ function AdminAnalytics() {
       .map(([pagina, total]) => ({ pagina, total, meta: tituloPorPagina.get(pagina) }))
       .sort((a, b) => b.total - a.total)
       .slice(0, 12);
-  }, [rows, tituloPorPagina]);
+  }, [rowsFiltradas, tituloPorPagina]);
 
   const porCidadeLeitor = useMemo(() => {
     const m = new Map<string, number>();
-    for (const r of rows ?? []) {
+    for (const r of rowsFiltradas ?? []) {
       if (!r.cidade_leitor) continue;
       m.set(r.cidade_leitor, (m.get(r.cidade_leitor) ?? 0) + 1);
     }
     return Array.from(m.entries()).map(([cidade, total]) => ({ cidade, total })).sort((a, b) => b.total - a.total).slice(0, 10);
-  }, [rows]);
+  }, [rowsFiltradas]);
 
   const porDia = useMemo(() => {
     const m = new Map<string, number>();
-    for (const r of rows ?? []) {
+    for (const r of rowsFiltradas ?? []) {
       const dia = new Intl.DateTimeFormat("pt-BR", { timeZone: "America/Sao_Paulo", day: "2-digit", month: "2-digit" }).format(new Date(r.ts));
       m.set(dia, (m.get(dia) ?? 0) + 1);
     }
     return Array.from(m.entries()).map(([dia, total]) => ({ dia, total })).reverse();
-  }, [rows]);
+  }, [rowsFiltradas]);
 
   const totalIA = porOrigem.find((o) => o.origem === "ia")?.total ?? 0;
-  const total = rows?.length ?? 0;
-  const totalAnterior = rowsAnterior?.length ?? 0;
+  const total = rowsFiltradas?.length ?? 0;
+  const totalAnterior = rowsAnteriorFiltradas?.length ?? 0;
   const variacaoTotal = pct(total, totalAnterior);
   const regioesComTrafego = porRegiao.length;
 
@@ -194,7 +219,7 @@ function AdminAnalytics() {
   // leitura de tendência, sem o usuário precisar cruzar os gráficos na mão.
   const insights = useMemo(() => {
     const lista: string[] = [];
-    if (!rows || total === 0) return lista;
+    if (!rowsFiltradas || total === 0) return lista;
 
     let melhorEditoria: { nome: string; variacao: ReturnType<typeof pct> } | null = null;
     for (const e of porEditoria) {
@@ -229,7 +254,7 @@ function AdminAnalytics() {
     }
 
     return lista;
-  }, [rows, total, porEditoria, porEditoriaAnterior, porRegiao, totalIA, porCidadeLeitor]);
+  }, [rowsFiltradas, total, porEditoria, porEditoriaAnterior, porRegiao, totalIA, porCidadeLeitor]);
 
   return (
     <div className="space-y-6">
@@ -238,10 +263,29 @@ function AdminAnalytics() {
         title="Painel de Analytics"
         subtitle="Tráfego cruzado das 10 regiões — página, editoria, origem e tendência, com comparação ao período anterior."
         actions={
-          <select value={periodo} onChange={(e) => setPeriodo(Number(e.target.value))}
-            className="rounded-full border border-slate-200 bg-white px-3.5 py-2 text-xs font-medium text-slate-700 shadow-sm">
-            {PERIODOS.map((p) => <option key={p.dias} value={p.dias}>{p.label}</option>)}
-          </select>
+          <div className="flex flex-wrap items-center gap-2">
+            <div className="inline-flex rounded-full border border-slate-200 bg-white p-0.5 text-xs font-medium shadow-sm">
+              {([
+                { v: "publico", label: "Leitores" },
+                { v: "admin", label: "Admin (eu)" },
+                { v: "tudo", label: "Tudo" },
+              ] as const).map((s) => (
+                <button
+                  key={s.v}
+                  onClick={() => setSegmento(s.v)}
+                  className={`rounded-full px-3 py-1.5 transition-colors ${
+                    segmento === s.v ? "bg-[#0A2540] text-white" : "text-slate-600 hover:text-slate-900"
+                  }`}
+                >
+                  {s.label}
+                </button>
+              ))}
+            </div>
+            <select value={periodo} onChange={(e) => setPeriodo(Number(e.target.value))}
+              className="rounded-full border border-slate-200 bg-white px-3.5 py-2 text-xs font-medium text-slate-700 shadow-sm">
+              {PERIODOS.map((p) => <option key={p.dias} value={p.dias}>{p.label}</option>)}
+            </select>
+          </div>
         }
       />
 
@@ -250,9 +294,18 @@ function AdminAnalytics() {
 
       {rows && (
         <>
+          <div className="rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-xs text-slate-600 shadow-sm">
+            No período: <strong className="text-slate-900">{totalPublico}</strong> acessos de leitores no site
+            {" · "}<strong className="text-slate-900">{totalAdmin}</strong> acessos internos dentro do /admin
+            {" · "}total <strong className="text-slate-900">{totalPublico + totalAdmin}</strong>.
+            {segmento !== "tudo" && (
+              <> Mostrando apenas <strong>{segmento === "admin" ? "acessos internos" : "acessos de leitores"}</strong>.</>
+            )}
+          </div>
+
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
             <KpiCard label="Pageviews no período" valor={total} variacao={variacaoTotal} />
-            <KpiCard label="Regiões com tráfego" valor={regioesComTrafego} variacao={pct(regioesComTrafego, porRegiaoAnteriorCount(rowsAnterior))} />
+            <KpiCard label="Regiões com tráfego" valor={regioesComTrafego} variacao={pct(regioesComTrafego, porRegiaoAnteriorCount(rowsAnteriorFiltradas))} />
             <KpiCard label="Editorias com tráfego" valor={porEditoria.length} variacao={{ valor: 0, texto: "", positivo: true }} semComparacao />
             <div className="rounded-2xl border border-slate-200 bg-white shadow-sm p-4">
               <p className="text-xs text-muted-foreground">Vindos de IA (ChatGPT/Perplexity/Gemini)</p>
