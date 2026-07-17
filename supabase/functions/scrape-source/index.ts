@@ -68,6 +68,12 @@ Deno.serve(async (req) => {
     .eq("ativo", true)
     .order("nome", { ascending: true });
   if (body.fonte_id) query = query.eq("id", body.fonte_id);
+  // Este scraper é só de veículo de imprensa — prefeitura tem função própria
+  // (scrape-prefeitura). Sem este filtro, "Rodar portais" também raspava
+  // prefeitura junto (e podia até raspar SÓ prefeitura, dependendo de qual
+  // fonte estava elegível no ciclo), porque não havia nenhum filtro de tipo
+  // aqui — só o de curadoria nacional, abaixo.
+  if (!body.fonte_id) query = query.eq("tipo", "veiculo");
   // Fontes nacionais de curadoria (G1, Metrópoles, ge, ESPN, Lance, CNN…)
   // NÃO entram no pipeline principal do Paraná por padrão — evita que uma
   // enxurrada de matérias nacionais/internacionais domine o feed regional.
