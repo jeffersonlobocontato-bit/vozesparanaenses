@@ -144,43 +144,43 @@ function AdminAnalytics() {
 
   const porRegiao = useMemo(() => {
     const m = new Map<string, number>();
-    for (const r of rows ?? []) {
+    for (const r of rowsFiltradas ?? []) {
       const nome = first(r.regiao)?.nome ?? "Sem região";
       m.set(nome, (m.get(nome) ?? 0) + 1);
     }
     return Array.from(m.entries()).map(([nome, total]) => ({ nome, total })).sort((a, b) => b.total - a.total);
-  }, [rows]);
+  }, [rowsFiltradas]);
 
   const porOrigem = useMemo(() => {
     const m = new Map<string, number>();
-    for (const r of rows ?? []) {
+    for (const r of rowsFiltradas ?? []) {
       const o = r.origem_trafego ?? "outro";
       m.set(o, (m.get(o) ?? 0) + 1);
     }
     return Array.from(m.entries()).map(([origem, total]) => ({ origem, total })).sort((a, b) => b.total - a.total);
-  }, [rows]);
+  }, [rowsFiltradas]);
 
   const porEditoria = useMemo(() => {
     const m = new Map<string, number>();
-    for (const r of rows ?? []) {
+    for (const r of rowsFiltradas ?? []) {
       const c = r.categoria ?? "sem editoria";
       m.set(c, (m.get(c) ?? 0) + 1);
     }
     return Array.from(m.entries()).map(([categoria, total]) => ({ categoria, total })).sort((a, b) => b.total - a.total);
-  }, [rows]);
+  }, [rowsFiltradas]);
 
   const porEditoriaAnterior = useMemo(() => {
     const m = new Map<string, number>();
-    for (const r of rowsAnterior ?? []) {
+    for (const r of rowsAnteriorFiltradas ?? []) {
       const c = r.categoria ?? "sem editoria";
       m.set(c, (m.get(c) ?? 0) + 1);
     }
     return m;
-  }, [rowsAnterior]);
+  }, [rowsAnteriorFiltradas]);
 
   const porPagina = useMemo(() => {
     const m = new Map<string, number>();
-    for (const r of rows ?? []) {
+    for (const r of rowsFiltradas ?? []) {
       if (!r.pagina) continue;
       m.set(r.pagina, (m.get(r.pagina) ?? 0) + 1);
     }
@@ -188,25 +188,25 @@ function AdminAnalytics() {
       .map(([pagina, total]) => ({ pagina, total, meta: tituloPorPagina.get(pagina) }))
       .sort((a, b) => b.total - a.total)
       .slice(0, 12);
-  }, [rows, tituloPorPagina]);
+  }, [rowsFiltradas, tituloPorPagina]);
 
   const porCidadeLeitor = useMemo(() => {
     const m = new Map<string, number>();
-    for (const r of rows ?? []) {
+    for (const r of rowsFiltradas ?? []) {
       if (!r.cidade_leitor) continue;
       m.set(r.cidade_leitor, (m.get(r.cidade_leitor) ?? 0) + 1);
     }
     return Array.from(m.entries()).map(([cidade, total]) => ({ cidade, total })).sort((a, b) => b.total - a.total).slice(0, 10);
-  }, [rows]);
+  }, [rowsFiltradas]);
 
   const porDia = useMemo(() => {
     const m = new Map<string, number>();
-    for (const r of rows ?? []) {
+    for (const r of rowsFiltradas ?? []) {
       const dia = new Intl.DateTimeFormat("pt-BR", { timeZone: "America/Sao_Paulo", day: "2-digit", month: "2-digit" }).format(new Date(r.ts));
       m.set(dia, (m.get(dia) ?? 0) + 1);
     }
     return Array.from(m.entries()).map(([dia, total]) => ({ dia, total })).reverse();
-  }, [rows]);
+  }, [rowsFiltradas]);
 
   const totalIA = porOrigem.find((o) => o.origem === "ia")?.total ?? 0;
   const total = rows?.length ?? 0;
@@ -421,7 +421,7 @@ function AdminAnalytics() {
 
 function porRegiaoAnteriorCount(rowsAnterior: EventoRow[] | null): number {
   const s = new Set<string>();
-  for (const r of rowsAnterior ?? []) {
+  for (const r of rowsAnteriorFiltradas ?? []) {
     const nome = first(r.regiao)?.nome;
     if (nome) s.add(nome);
   }
