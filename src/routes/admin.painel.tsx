@@ -133,11 +133,24 @@ function AdminDashboard() {
     // continuava rodando no servidor, mas o front-end via erro e abortava o
     // pipeline. Agora fatiamos em lotes de 25 e loopamos até esvaziar a fila.
     try {
-      // 1/4 Scrape (mantém sync=true; scrape em geral é rápido o suficiente)
-      setPipelineLog((l) => [...l, "1/4 Scrape de fontes (forçado)…"]);
-      const scrape = await supabase.functions.invoke("scrape-source", { body: { force: true, sync: true } });
-      if (scrape.error) throw scrape.error;
-      setPipelineLog((l) => [...l, `  ✓ ${JSON.stringify(scrape.data).slice(0, 160)}`]);
+      // 1/4 Scrape em lotes pequenos. Rodar todos os portais em uma única
+      // chamada síncrona pode passar do limite do gateway e abortar o pipeline
+      // antes de chegar na escrita, mesmo já havendo matérias coletadas.
+      setPipelineLog((l) => [...l, "1/4 Scrape de fontes (em lotes)…"]);
+      const scrapeBatchSize = 6;
+      for (let i = 0; i < 12; i++) {
+        const scrape = await supabase.functions.invoke("scrape-source", {
+          body: { force: true, sync: true, apenas_curadoria: false, limit: scrapeBatchSize, offset: i * scrapeBatchSize },
+        });
+        if (scrape.error) {
+          setPipelineLog((l) => [...l, `  ⚠ scrape lote ${i + 1} falhou (${scrape.error.message}); seguindo para clusterizar o que já foi coletado.`]);
+          break;
+        }
+        const sd = (scrape.data ?? {}) as { processed?: number; total_eligible?: number; report?: Array<{ inserted?: number }> };
+        const inseridos = sd.report?.reduce((sum, row) => sum + (row.inserted ?? 0), 0) ?? 0;
+        setPipelineLog((l) => [...l, `  lote ${i + 1}: fontes=${sd.processed ?? 0}/${sd.total_eligible ?? "?"} novas=${inseridos}`]);
+        if (!sd.processed || sd.processed < scrapeBatchSize) break;
+      }
 
       // 2/4 Clustering em lotes de 25 (~25s cada) até drenar
       setPipelineLog((l) => [...l, "2/4 Clustering (em lotes)…"]);

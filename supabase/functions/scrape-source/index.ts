@@ -53,7 +53,7 @@ Deno.serve(async (req) => {
   const key = Deno.env.get("EXTERNAL_SUPABASE_SERVICE_ROLE_KEY");
   if (!url || !key) return json({ error: "missing_external_supabase_env" }, 500);
 
-  let body: { fonte_id?: string; force?: boolean; sync?: boolean; apenas_curadoria?: boolean } = {};
+  let body: { fonte_id?: string; force?: boolean; sync?: boolean; apenas_curadoria?: boolean; limit?: number; offset?: number } = {};
   try {
     body = await req.json();
   } catch {
@@ -65,7 +65,8 @@ Deno.serve(async (req) => {
   let query = sb
     .from("fontes")
     .select("id, regiao_id, nome, url_base, tipo_renderizacao, protecao_antibot, frequencia_horas, ultimo_scrape_em, curadoria_editoria")
-    .eq("ativo", true);
+    .eq("ativo", true)
+    .order("nome", { ascending: true });
   if (body.fonte_id) query = query.eq("id", body.fonte_id);
   // Fontes nacionais de curadoria (G1, Metrópoles, ge, ESPN, Lance, CNN…)
   // NÃO entram no pipeline principal do Paraná por padrão — evita que uma
@@ -102,6 +103,11 @@ Deno.serve(async (req) => {
     const last = new Date(f.ultimo_scrape_em).getTime();
     return now - last >= 2 * 3600 * 1000;
   });
+  const fonteLimit = body.limit ? Math.max(1, Math.min(body.limit, 30)) : null;
+  const fonteOffset = Math.max(0, body.offset ?? 0);
+  const selectedEligible = fonteLimit
+    ? eligible.slice(fonteOffset, fonteOffset + fonteLimit)
+    : eligible;
 
   async function processFonte(fonte: Fonte): Promise<Record<string, unknown>> {
     try {
@@ -191,11 +197,11 @@ Deno.serve(async (req) => {
   // verdade antes da próxima). Sem isso, os passos seguintes rodam sobre
   // uma raw_articles ainda vazia, porque o scraping real ainda não terminou.
   if (body.fonte_id || body.sync) {
-    const results = await runAll(eligible as Fonte[]);
-    return json({ ok: true, processed: results.length, report: results });
+    const results = await runAll(selectedEligible as Fonte[]);
+    return json({ ok: true, processed: results.length, total_eligible: eligible.length, offset: fonteOffset, limit: fonteLimit, report: results });
   }
 
-  const queue = [...(eligible as Fonte[])];
+  const queue = [...(selectedEligible as Fonte[])];
   const task = (async () => {
     const results = await runAll(queue);
     console.log(`[scrape-source] background done: ${results.length} fontes`);
@@ -220,7 +226,7 @@ Deno.serve(async (req) => {
   // deno-lint-ignore no-explicit-any
   const rt = (globalThis as any).EdgeRuntime;
   if (rt && typeof rt.waitUntil === "function") rt.waitUntil(task);
-  return json({ ok: true, queued: eligible.length, mode: "background" });
+  return json({ ok: true, queued: queue.length, total_eligible: eligible.length, offset: fonteOffset, limit: fonteLimit, mode: "background" });
 });
 
 // Detecta a cidade mais mencionada no texto (título + corpo) comparando
