@@ -263,10 +263,29 @@ function AdminAnalytics() {
         title="Painel de Analytics"
         subtitle="Tráfego cruzado das 10 regiões — página, editoria, origem e tendência, com comparação ao período anterior."
         actions={
-          <select value={periodo} onChange={(e) => setPeriodo(Number(e.target.value))}
-            className="rounded-full border border-slate-200 bg-white px-3.5 py-2 text-xs font-medium text-slate-700 shadow-sm">
-            {PERIODOS.map((p) => <option key={p.dias} value={p.dias}>{p.label}</option>)}
-          </select>
+          <div className="flex flex-wrap items-center gap-2">
+            <div className="inline-flex rounded-full border border-slate-200 bg-white p-0.5 text-xs font-medium shadow-sm">
+              {([
+                { v: "publico", label: "Leitores" },
+                { v: "admin", label: "Admin (eu)" },
+                { v: "tudo", label: "Tudo" },
+              ] as const).map((s) => (
+                <button
+                  key={s.v}
+                  onClick={() => setSegmento(s.v)}
+                  className={`rounded-full px-3 py-1.5 transition-colors ${
+                    segmento === s.v ? "bg-[#0A2540] text-white" : "text-slate-600 hover:text-slate-900"
+                  }`}
+                >
+                  {s.label}
+                </button>
+              ))}
+            </div>
+            <select value={periodo} onChange={(e) => setPeriodo(Number(e.target.value))}
+              className="rounded-full border border-slate-200 bg-white px-3.5 py-2 text-xs font-medium text-slate-700 shadow-sm">
+              {PERIODOS.map((p) => <option key={p.dias} value={p.dias}>{p.label}</option>)}
+            </select>
+          </div>
         }
       />
 
@@ -275,6 +294,15 @@ function AdminAnalytics() {
 
       {rows && (
         <>
+          <div className="rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-xs text-slate-600 shadow-sm">
+            No período: <strong className="text-slate-900">{totalPublico}</strong> acessos de leitores no site
+            {" · "}<strong className="text-slate-900">{totalAdmin}</strong> acessos internos dentro do /admin
+            {" · "}total <strong className="text-slate-900">{totalPublico + totalAdmin}</strong>.
+            {segmento !== "tudo" && (
+              <> Mostrando apenas <strong>{segmento === "admin" ? "acessos internos" : "acessos de leitores"}</strong>.</>
+            )}
+          </div>
+
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
             <KpiCard label="Pageviews no período" valor={total} variacao={variacaoTotal} />
             <KpiCard label="Regiões com tráfego" valor={regioesComTrafego} variacao={pct(regioesComTrafego, porRegiaoAnteriorCount(rowsAnteriorFiltradas))} />
