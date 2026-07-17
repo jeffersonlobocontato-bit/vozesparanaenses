@@ -277,7 +277,7 @@ function AdminAnalytics() {
         <>
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
             <KpiCard label="Pageviews no período" valor={total} variacao={variacaoTotal} />
-            <KpiCard label="Regiões com tráfego" valor={regioesComTrafego} variacao={pct(regioesComTrafego, porRegiaoAnteriorCount(rowsAnterior))} />
+            <KpiCard label="Regiões com tráfego" valor={regioesComTrafego} variacao={pct(regioesComTrafego, porRegiaoAnteriorCount(rowsAnteriorFiltradas))} />
             <KpiCard label="Editorias com tráfego" valor={porEditoria.length} variacao={{ valor: 0, texto: "", positivo: true }} semComparacao />
             <div className="rounded-2xl border border-slate-200 bg-white shadow-sm p-4">
               <p className="text-xs text-muted-foreground">Vindos de IA (ChatGPT/Perplexity/Gemini)</p>
@@ -421,7 +421,7 @@ function AdminAnalytics() {
 
 function porRegiaoAnteriorCount(rowsAnterior: EventoRow[] | null): number {
   const s = new Set<string>();
-  for (const r of rowsAnteriorFiltradas ?? []) {
+  for (const r of rowsAnterior ?? []) {
     const nome = first(r.regiao)?.nome;
     if (nome) s.add(nome);
   }
