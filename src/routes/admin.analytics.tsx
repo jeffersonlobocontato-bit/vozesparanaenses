@@ -49,6 +49,11 @@ function pct(atual: number, anterior: number): { valor: number; texto: string; p
 
 function AdminAnalytics() {
   const [periodo, setPeriodo] = useState<number>(7);
+  // "publico" = acessos de leitores nas páginas do site; "admin" = acessos
+  // internos dentro do /admin (nós mesmos usando o painel); "tudo" = soma
+  // dos dois. Sem essa separação, o volume de uso interno inflava o total
+  // de "pageviews" e distorcia todos os cruzamentos (região, editoria etc.).
+  const [segmento, setSegmento] = useState<"publico" | "admin" | "tudo">("publico");
   const [rows, setRows] = useState<EventoRow[] | null>(null);
   const [rowsAnterior, setRowsAnterior] = useState<EventoRow[] | null>(null);
   const [artigos, setArtigos] = useState<ArtigoRow[]>([]);
@@ -103,6 +108,26 @@ function AdminAnalytics() {
   }, []);
 
   useEffect(() => { load(periodo); }, [load, periodo]);
+
+  // Filtra por segmento em memória — a coleta do tracker cobre tudo, então
+  // basta separar aqui pelo prefixo /admin da URL registrada em `pagina`.
+  function ehAdmin(p: string | null): boolean {
+    return !!p && p.startsWith("/admin");
+  }
+  const rowsFiltradas = useMemo(() => {
+    if (!rows) return null;
+    if (segmento === "tudo") return rows;
+    if (segmento === "admin") return rows.filter((r) => ehAdmin(r.pagina));
+    return rows.filter((r) => !ehAdmin(r.pagina));
+  }, [rows, segmento]);
+  const rowsAnteriorFiltradas = useMemo(() => {
+    if (!rowsAnterior) return null;
+    if (segmento === "tudo") return rowsAnterior;
+    if (segmento === "admin") return rowsAnterior.filter((r) => ehAdmin(r.pagina));
+    return rowsAnterior.filter((r) => !ehAdmin(r.pagina));
+  }, [rowsAnterior, segmento]);
+  const totalAdmin = useMemo(() => (rows ?? []).filter((r) => ehAdmin(r.pagina)).length, [rows]);
+  const totalPublico = useMemo(() => (rows ?? []).filter((r) => !ehAdmin(r.pagina)).length, [rows]);
 
   // Mapa pagina ("/regiao/slug") -> {titulo, categoria} pra virar ranking
   // de matéria de verdade, não só a URL crua — é a diferença entre uma
