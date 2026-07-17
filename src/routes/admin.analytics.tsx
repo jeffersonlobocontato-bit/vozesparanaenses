@@ -391,7 +391,7 @@ function cap(s: string): string {
 }
 
 function KpiCard({ label, valor, variacao, semComparacao }: {
-  label: string; valor: number; variacao: { texto: string; positivo: boolean }; semComparacao?: boolean;
+  label: string; valor: number; variacao: { valor: number; texto: string; positivo: boolean }; semComparacao?: boolean;
 }) {
   return (
     <div className="rounded-2xl border border-slate-200 bg-white shadow-sm p-4">
