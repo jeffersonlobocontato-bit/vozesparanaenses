@@ -273,16 +273,20 @@ function AdminDashboard() {
     load();
   }
 
-  async function runCuradoriaNacional() {
+  async function runCuradoria(editorias: string[], rotulo: string) {
     setPipelineRunning("curadoria");
-    setPipelineLog(["Coletando fontes de curadoria nacional (Segurança/Esporte/Geral)…"]);
+    setPipelineLog([`Coletando fontes de curadoria — ${rotulo}…`]);
     try {
-      const scrape = await supabase.functions.invoke("scrape-source", { body: { force: true, sync: true, apenas_curadoria: true } });
+      const scrape = await supabase.functions.invoke("scrape-source", {
+        body: { force: true, sync: true, curadoria_editorias: editorias },
+      });
       if (scrape.error) throw scrape.error;
       setPipelineLog((l) => [...l, `  ✓ ${JSON.stringify(scrape.data).slice(0, 200)}`]);
-      setPipelineLog((l) => [...l, "cluster-articles (em lotes, só curadoria)…"]);
+      setPipelineLog((l) => [...l, `cluster-articles (em lotes, só ${rotulo})…`]);
       for (let i = 1; i <= 20; i++) {
-        const r = await supabase.functions.invoke("cluster-articles", { body: { limit: 25, apenas_curadoria: true } });
+        const r = await supabase.functions.invoke("cluster-articles", {
+          body: { limit: 25, curadoria_editorias: editorias },
+        });
         if (r.error) throw r.error;
         const d = (r.data ?? {}) as { processed?: number; clusters?: number };
         setPipelineLog((l) => [...l, `  lote ${i}: processado=${d.processed ?? 0} clusters=${d.clusters ?? 0}`]);
@@ -303,10 +307,13 @@ function AdminDashboard() {
       load();
       return;
     }
-    setPipelineLog((l) => [...l, "Coleta de curadoria finalizada — vá em Curadoria pra decidir o que escrever."]);
+    setPipelineLog((l) => [...l, `Coleta de ${rotulo} finalizada — vá em Curadoria pra decidir o que escrever.`]);
     setPipelineRunning(null);
     load();
   }
+
+  const runCuradoriaSegurancaEsporte = () => runCuradoria(["seguranca", "esportes"], "Segurança & Esporte");
+  const runCuradoriaGeral = () => runCuradoria(["geral"], "Nacional Geral");
 
   return (
     <div className="space-y-6">
@@ -373,7 +380,7 @@ function AdminDashboard() {
             desc="G1, Metrópoles, R7, CNN, ge, Lance!, ESPN, Gazeta. Nunca escreve sozinho — você decide na Curadoria."
             to="/admin/clusters"
             actionLabel="▶ Rodar coleta"
-            onAction={runCuradoriaNacional}
+            onAction={runCuradoriaSegurancaEsporte}
             running={pipelineRunning === "curadoria"}
             blocked={pipelineBusy && pipelineRunning !== "curadoria"}
           />
@@ -383,7 +390,7 @@ function AdminDashboard() {
             desc="Mesmas fontes gerais, classificadas pela IA fora de Segurança/Esporte. Nunca escreve sozinho."
             to="/admin/clusters"
             actionLabel="▶ Rodar coleta"
-            onAction={runCuradoriaNacional}
+            onAction={runCuradoriaGeral}
             running={pipelineRunning === "curadoria"}
             blocked={pipelineBusy && pipelineRunning !== "curadoria"}
           />

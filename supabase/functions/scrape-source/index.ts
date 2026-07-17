@@ -53,7 +53,7 @@ Deno.serve(async (req) => {
   const key = Deno.env.get("EXTERNAL_SUPABASE_SERVICE_ROLE_KEY");
   if (!url || !key) return json({ error: "missing_external_supabase_env" }, 500);
 
-  let body: { fonte_id?: string; force?: boolean; sync?: boolean; apenas_curadoria?: boolean; limit?: number; offset?: number } = {};
+  let body: { fonte_id?: string; force?: boolean; sync?: boolean; apenas_curadoria?: boolean; curadoria_editorias?: string[]; limit?: number; offset?: number } = {};
   try {
     body = await req.json();
   } catch {
@@ -80,7 +80,13 @@ Deno.serve(async (req) => {
   // Elas só são coletadas quando chamado explicitamente com
   // apenas_curadoria:true (botão próprio dos cards de curadoria) ou por
   // fonte_id específico.
-  if (body.apenas_curadoria) {
+  if (body.curadoria_editorias && body.curadoria_editorias.length) {
+    // Filtro mais fino: só as editorias de curadoria informadas (ex.:
+    // ["seguranca","esportes"] pro card Segurança/Esporte, ["geral"] pro
+    // card Nacional Geral). Sem isso, os dois botões chamavam
+    // apenas_curadoria:true e traziam exatamente as mesmas matérias.
+    query = query.in("curadoria_editoria", body.curadoria_editorias);
+  } else if (body.apenas_curadoria) {
     query = query.not("curadoria_editoria", "is", null);
   } else if (!body.fonte_id) {
     query = query.is("curadoria_editoria", null);
