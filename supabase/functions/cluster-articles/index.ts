@@ -42,6 +42,7 @@ Deno.serve(async (req) => {
     threshold?: number;
     fonte_tipo?: "veiculo" | "prefeitura";
     apenas_curadoria?: boolean;
+    curadoria_editorias?: string[];
   } = {};
   try { body = await req.json(); } catch { body = {}; }
   const limit = Math.min(body.limit ?? 100, 200);
@@ -56,10 +57,12 @@ Deno.serve(async (req) => {
   // apenas_curadoria) esvaziava tudo — a função retornava processed:0 e
   // o loop do painel saía no primeiro lote sem criar nenhum cluster.
   let fonteIdsFiltrados: string[] | null = null;
-  if (body.fonte_tipo || body.apenas_curadoria !== undefined) {
+  if (body.fonte_tipo || body.apenas_curadoria !== undefined || (body.curadoria_editorias && body.curadoria_editorias.length)) {
     let fq = sb.from("fontes").select("id");
     if (body.fonte_tipo) fq = fq.eq("tipo", body.fonte_tipo);
-    if (body.apenas_curadoria === true) fq = fq.not("curadoria_editoria", "is", null);
+    if (body.curadoria_editorias && body.curadoria_editorias.length) {
+      fq = fq.in("curadoria_editoria", body.curadoria_editorias);
+    } else if (body.apenas_curadoria === true) fq = fq.not("curadoria_editoria", "is", null);
     if (body.apenas_curadoria === false) fq = fq.is("curadoria_editoria", null);
     const { data: fontesFiltro, error: fErr } = await fq;
     if (fErr) return json({ error: "fontes_filter_failed", detail: fErr.message }, 500);
