@@ -194,9 +194,15 @@ function AdminClusters() {
       setColetaLog((l) => [...l, "→ cluster-articles…"]);
       const cluster = await supabase.functions.invoke("cluster-articles", { body: { sync: true, curadoria_editorias: editorias, raw_article_ids: insertedIds } });
       if (cluster.error) throw cluster.error;
+      const cd = (cluster.data ?? {}) as { cluster_ids?: string[] };
+      const createdClusterIds = cd.cluster_ids ?? [];
       setColetaLog((l) => [...l, `  ✓ ${JSON.stringify(cluster.data).slice(0, 240)}`]);
+      if (!createdClusterIds.length) {
+        setColetaLog((l) => [...l, "  • Nenhum cluster novo foi criado neste ciclo; classificação antiga não será reaproveitada."]);
+        return;
+      }
       setColetaLog((l) => [...l, "→ classify-and-quota…"]);
-      const classify = await supabase.functions.invoke("classify-and-quota", { body: { sync: true } });
+      const classify = await supabase.functions.invoke("classify-and-quota", { body: { sync: true, cluster_ids: createdClusterIds } });
       if (classify.error) throw classify.error;
       setColetaLog((l) => [...l, `  ✓ ${JSON.stringify(classify.data).slice(0, 240)}`]);
     } catch (e: unknown) {

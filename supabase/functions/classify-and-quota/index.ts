@@ -28,9 +28,12 @@ Deno.serve(async (req) => {
   if (!url || !key) return json({ error: "missing_external_supabase_env" }, 500);
   if (!aiKey) return json({ error: "missing_lovable_api_key" }, 500);
 
-  let body: { regiao_id?: string; sync?: boolean; limit?: number } = {};
+  let body: { regiao_id?: string; sync?: boolean; limit?: number; cluster_ids?: string[] } = {};
   try { body = await req.json(); } catch { body = {}; }
   const limit = Math.max(1, Math.min(body.limit ?? 15, 50));
+  const clusterIds = Array.isArray(body.cluster_ids)
+    ? Array.from(new Set(body.cluster_ids.filter((id) => typeof id === "string" && id.length > 0))).slice(0, 200)
+    : [];
 
   const sb = createClient(url, key, { auth: { persistSession: false } });
 
@@ -46,6 +49,7 @@ Deno.serve(async (req) => {
     .order("prioridade_score", { ascending: false })
     .limit(limit);
   if (body.regiao_id) cq = cq.eq("regiao_id", body.regiao_id);
+  if (clusterIds.length) cq = cq.in("id", clusterIds);
   const { data: clusters, error } = await cq;
   if (error) return json({ error: "cluster_query_failed", detail: error.message }, 500);
   if (!clusters?.length) return json({ ok: true, classified: 0, selected: 0 });
