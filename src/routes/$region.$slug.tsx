@@ -495,6 +495,35 @@ function ArticlePage() {
           </figure>
         )}
 
+        {/* Vídeo — YouTube/Vimeo (iframe) ou arquivo direto (<video>) */}
+        {(() => {
+          const v = parseVideoEmbed(article.video_embed_url);
+          if (!v) return null;
+          return (
+            <figure className="mt-8">
+              {v.kind === "file" ? (
+                <video
+                  controls
+                  playsInline
+                  className="w-full rounded-sm bg-black shadow-[0_20px_60px_-20px_rgba(10,37,64,0.35)]"
+                  src={v.src}
+                />
+              ) : (
+                <div className="aspect-video w-full overflow-hidden rounded-sm bg-black shadow-[0_20px_60px_-20px_rgba(10,37,64,0.35)]">
+                  <iframe
+                    src={v.embedUrl}
+                    title={article.title}
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                    allowFullScreen
+                    loading="lazy"
+                    className="h-full w-full"
+                  />
+                </div>
+              )}
+            </figure>
+          );
+        })()}
+
         {/* 5W1H — os fatos essenciais */}
         {article.fatos_5w1h && (
           <section className="mx-auto mt-10 max-w-3xl border border-slate-200 bg-white p-5">
