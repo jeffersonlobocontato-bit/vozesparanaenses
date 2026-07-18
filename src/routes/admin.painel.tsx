@@ -281,11 +281,22 @@ function AdminDashboard() {
         body: { force: true, sync: true, curadoria_editorias: editorias },
       });
       if (scrape.error) throw scrape.error;
+      const sd = (scrape.data ?? {}) as { report?: Array<{ inserted?: number; inserted_id?: string | null }> };
+      const insertedIds = (sd.report ?? [])
+        .filter((row) => (row.inserted ?? 0) > 0 && row.inserted_id)
+        .map((row) => row.inserted_id as string);
       setPipelineLog((l) => [...l, `  ✓ ${JSON.stringify(scrape.data).slice(0, 200)}`]);
+      if (!insertedIds.length) {
+        setPipelineLog((l) => [...l, "  • Nenhuma matéria nova foi coletada neste ciclo; não vou reaproveitar pauta antiga/backlog."]);
+        setPipelineLog((l) => [...l, `Coleta de ${rotulo} finalizada sem novidades.`]);
+        setPipelineRunning(null);
+        load();
+        return;
+      }
       setPipelineLog((l) => [...l, `cluster-articles (em lotes, só ${rotulo})…`]);
       for (let i = 1; i <= 20; i++) {
         const r = await supabase.functions.invoke("cluster-articles", {
-          body: { limit: 25, curadoria_editorias: editorias },
+          body: { limit: 25, curadoria_editorias: editorias, raw_article_ids: insertedIds },
         });
         if (r.error) throw r.error;
         const d = (r.data ?? {}) as { processed?: number; clusters?: number };

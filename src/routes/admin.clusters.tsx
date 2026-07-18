@@ -175,27 +175,36 @@ function AdminClusters() {
     }
   }
 
-  async function rodarColetaCuradoria() {
+  async function rodarColetaCuradoria(editorias: string[], rotulo: string) {
     setColetando(true);
-    setColetaLog(["Coletando fontes de curadoria (Segurança/Esporte/Geral nacional)…"]);
-    const steps: Array<{ name: string; body?: Record<string, unknown> }> = [
-      { name: "scrape-source", body: { force: true, sync: true, apenas_curadoria: true } },
-      { name: "cluster-articles", body: { sync: true } },
-      { name: "classify-and-quota", body: { sync: true } },
-    ];
-    for (const step of steps) {
-      setColetaLog((l) => [...l, `→ ${step.name}…`]);
-      try {
-        const { data, error } = await supabase.functions.invoke(step.name, { body: step.body ?? {} });
-        if (error) throw error;
-        setColetaLog((l) => [...l, `  ✓ ${JSON.stringify(data).slice(0, 240)}`]);
-      } catch (e: unknown) {
-        setColetaLog((l) => [...l, `  ✗ ${e instanceof Error ? e.message : "erro"}`]);
-        break;
+    setColetaLog([`Coletando fontes de curadoria (${rotulo})…`]);
+    try {
+      setColetaLog((l) => [...l, "→ scrape-source…"]);
+      const scrape = await supabase.functions.invoke("scrape-source", { body: { force: true, sync: true, curadoria_editorias: editorias } });
+      if (scrape.error) throw scrape.error;
+      const sd = (scrape.data ?? {}) as { report?: Array<{ inserted?: number; inserted_id?: string | null }> };
+      const insertedIds = (sd.report ?? [])
+        .filter((row) => (row.inserted ?? 0) > 0 && row.inserted_id)
+        .map((row) => row.inserted_id as string);
+      setColetaLog((l) => [...l, `  ✓ ${JSON.stringify(scrape.data).slice(0, 240)}`]);
+      if (!insertedIds.length) {
+        setColetaLog((l) => [...l, "  • Nenhuma matéria nova foi coletada neste ciclo; não vou reaproveitar pauta antiga/backlog."]);
+        return;
       }
+      setColetaLog((l) => [...l, "→ cluster-articles…"]);
+      const cluster = await supabase.functions.invoke("cluster-articles", { body: { sync: true, curadoria_editorias: editorias, raw_article_ids: insertedIds } });
+      if (cluster.error) throw cluster.error;
+      setColetaLog((l) => [...l, `  ✓ ${JSON.stringify(cluster.data).slice(0, 240)}`]);
+      setColetaLog((l) => [...l, "→ classify-and-quota…"]);
+      const classify = await supabase.functions.invoke("classify-and-quota", { body: { sync: true } });
+      if (classify.error) throw classify.error;
+      setColetaLog((l) => [...l, `  ✓ ${JSON.stringify(classify.data).slice(0, 240)}`]);
+    } catch (e: unknown) {
+      setColetaLog((l) => [...l, `  ✗ ${e instanceof Error ? e.message : "erro"}`]);
+    } finally {
+      setColetando(false);
+      await load();
     }
-    setColetando(false);
-    await load();
   }
 
   async function extractFacts(id: string) {

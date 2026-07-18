@@ -43,10 +43,14 @@ Deno.serve(async (req) => {
     fonte_tipo?: "veiculo" | "prefeitura";
     apenas_curadoria?: boolean;
     curadoria_editorias?: string[];
+    raw_article_ids?: string[];
   } = {};
   try { body = await req.json(); } catch { body = {}; }
   const limit = Math.min(body.limit ?? 100, 200);
   const threshold = body.threshold ?? 0.82;
+  const rawArticleIds = Array.isArray(body.raw_article_ids)
+    ? Array.from(new Set(body.raw_article_ids.filter((id) => typeof id === "string" && id.length > 0))).slice(0, 200)
+    : [];
 
   const sb = createClient(url, key, { auth: { persistSession: false } });
 
@@ -88,6 +92,7 @@ Deno.serve(async (req) => {
       .limit(limit);
     if (body.regiao_id) q = q.eq("regiao_id", body.regiao_id);
     if (fonteIdsFiltrados) q = q.in("fonte_id", fonteIdsFiltrados);
+    if (rawArticleIds.length) q = q.in("id", rawArticleIds);
     return q;
   }
 
