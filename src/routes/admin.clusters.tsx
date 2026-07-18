@@ -340,11 +340,18 @@ function AdminClusters() {
         <h1 className="text-2xl font-bold">Curadoria Nacional — Segurança &amp; Esporte / Geral</h1>
         <div className="flex gap-2">
           <button
-            onClick={rodarColetaCuradoria}
+            onClick={() => rodarColetaCuradoria(["seguranca", "esportes"], "Segurança & Esporte")}
             disabled={coletando}
             className="rounded bg-[#0066CC] px-3 py-1 text-xs font-semibold text-white disabled:opacity-60"
           >
-            {coletando ? "Coletando…" : "▶ Rodar coleta (curadoria)"}
+            {coletando ? "Coletando…" : "▶ Rodar Seg./Esporte"}
+          </button>
+          <button
+            onClick={() => rodarColetaCuradoria(["geral"], "Nacional Geral")}
+            disabled={coletando}
+            className="rounded bg-violet-700 px-3 py-1 text-xs font-semibold text-white disabled:opacity-60"
+          >
+            {coletando ? "Coletando…" : "▶ Rodar Nacional Geral"}
           </button>
           <button
             onClick={apagarTodas}
