@@ -4,6 +4,7 @@ import { getExternalBrowser } from "@/lib/external-supabase-browser";
 import { supabase } from "@/integrations/supabase/client";
 import { ArticleImageEditor } from "@/components/admin/ArticleImageEditor";
 import { ArticleEditor } from "@/components/admin/ArticleEditor";
+import { ArticleVideoEditor } from "@/components/admin/ArticleVideoEditor";
 import { displayRegionName } from "@/lib/region-labels";
 import { ManualWriterBox } from "@/components/admin/ManualWriterBox";
 import { PageHeader, primaryBtnClass, tabPillsWrapClass, tabPillClass } from "@/components/admin/ui";
@@ -27,6 +28,7 @@ type Draft = {
   imagem_capa_url: string | null;
   imagem_credito: string | null;
   imagem_original_url: string | null;
+  video_embed_url: string | null;
   publicado_automaticamente: boolean;
   fixado_posicao: number | null;
   fixado_escopo: "estado" | "regiao" | "cidades" | null;
@@ -57,7 +59,7 @@ function AdminQueue() {
     setItems(null); setErr(null);
     try {
       const sb = await getExternalBrowser();
-      const fullSelect = "id, slug, titulo, subtitulo, resumo, corpo, seo_title, seo_description, editor_responsavel, status, gerado_em, imagem_capa_url, imagem_credito, imagem_original_url, publicado_automaticamente, fixado_posicao, fixado_escopo, fixado_regioes, fixado_cidades, regiao_id, categoria_id, regiao:regioes(slug, nome), categoria:editorial_categories(slug, nome)";
+      const fullSelect = "id, slug, titulo, subtitulo, resumo, corpo, seo_title, seo_description, editor_responsavel, status, gerado_em, imagem_capa_url, imagem_credito, imagem_original_url, video_embed_url, publicado_automaticamente, fixado_posicao, fixado_escopo, fixado_regioes, fixado_cidades, regiao_id, categoria_id, regiao:regioes(slug, nome), categoria:editorial_categories(slug, nome)";
       const pinBasicSelect = "id, slug, titulo, subtitulo, resumo, corpo, seo_title, seo_description, editor_responsavel, status, gerado_em, imagem_capa_url, imagem_credito, imagem_original_url, publicado_automaticamente, fixado_posicao, regiao_id, categoria_id, regiao:regioes(slug, nome), categoria:editorial_categories(slug, nome)";
       const midSelect = "id, slug, titulo, subtitulo, resumo, corpo, seo_title, seo_description, editor_responsavel, status, gerado_em, imagem_capa_url, imagem_credito, imagem_original_url, publicado_automaticamente, regiao_id, categoria_id, regiao:regioes(slug, nome), categoria:editorial_categories(slug, nome)";
       const fallbackSelect = "id, slug, titulo, subtitulo, resumo, corpo, seo_title, seo_description, status, gerado_em, regiao_id, categoria_id, regiao:regioes(slug, nome), categoria:editorial_categories(slug, nome)";
@@ -68,13 +70,13 @@ function AdminQueue() {
           .order("gerado_em", { ascending: false })
           .limit(50);
       let res = await run(fullSelect);
-      if (res.error && /fixado_(escopo|regioes|cidades)/i.test(res.error.message)) {
+      if (res.error && /fixado_(escopo|regioes|cidades)|video_embed_url/i.test(res.error.message)) {
         res = await run(pinBasicSelect);
       }
       if (res.error && /fixado_posicao/i.test(res.error.message)) {
         res = await run(midSelect);
       }
-      if (res.error && /column .* does not exist|imagem_|editor_responsavel/i.test(res.error.message)) {
+      if (res.error && /column .* does not exist|imagem_|editor_responsavel|video_embed_url/i.test(res.error.message)) {
         res = await run(fallbackSelect);
       }
       if (res.error) throw res.error;
@@ -345,6 +347,11 @@ function AdminQueue() {
               currentUrl={it.imagem_capa_url}
               originalUrl={it.imagem_original_url}
               currentCredito={it.imagem_credito}
+              onUpdated={load}
+            />
+            <ArticleVideoEditor
+              articleId={it.id}
+              currentUrl={it.video_embed_url}
               onUpdated={load}
             />
             {editingId === it.id ? (

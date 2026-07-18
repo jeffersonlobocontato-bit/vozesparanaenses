@@ -71,6 +71,7 @@ export type ArticleFull = ArticleListItem & {
   fatos_5w1h: FiveWOneH | null;
   faq: FaqItem[] | null;
   editor_responsavel: string | null;
+  video_embed_url: string | null;
 };
 
 export type FiveWOneH = {
@@ -980,7 +981,7 @@ export const getArticle = createServerFn({ method: "GET" })
     const { data: row, error } = await sb
       .from("generated_articles")
       .select(
-        "id, slug, titulo, subtitulo, resumo, corpo, imagem_capa_url, publicado_em, updated_at, cidade_principal, cidades_mencionadas, tldr, fatos_5w1h, faq, editor_responsavel, seo_title, seo_description, og_image_url, regiao:regioes(slug, nome), categoria:editorial_categories(slug, nome)",
+        "id, slug, titulo, subtitulo, resumo, corpo, imagem_capa_url, publicado_em, updated_at, cidade_principal, cidades_mencionadas, tldr, fatos_5w1h, faq, editor_responsavel, seo_title, seo_description, og_image_url, video_embed_url, regiao:regioes(slug, nome), categoria:editorial_categories(slug, nome)",
       )
       .eq("regiao_id", (region as { id: string }).id)
       .eq("slug", data.slug)
@@ -988,7 +989,7 @@ export const getArticle = createServerFn({ method: "GET" })
       .maybeSingle();
     if (error) {
       // Fallback quando as colunas geo/updated_at ainda não existirem no schema.
-      if (/column .* does not exist|cidade_|updated_at|tldr|fatos_5w1h|faq|editor_responsavel/i.test(error.message)) {
+      if (/column .* does not exist|cidade_|updated_at|tldr|fatos_5w1h|faq|editor_responsavel|video_embed_url/i.test(error.message)) {
         const { data: legacy, error: legacyErr } = await sb
           .from("generated_articles")
           .select(
@@ -1019,6 +1020,7 @@ export const getArticle = createServerFn({ method: "GET" })
           fatos_5w1h: null,
           faq: null,
           editor_responsavel: null,
+          video_embed_url: null,
         };
       }
       throw new Error(error.message);
@@ -1036,6 +1038,7 @@ export const getArticle = createServerFn({ method: "GET" })
       fatos_5w1h: unknown;
       faq: unknown;
       editor_responsavel: string | null;
+      video_embed_url: string | null;
     };
     return {
       ...mapMateria(r),
@@ -1050,6 +1053,7 @@ export const getArticle = createServerFn({ method: "GET" })
       fatos_5w1h: coerce5W1H(r.fatos_5w1h),
       faq: coerceFaq(r.faq),
       editor_responsavel: r.editor_responsavel && r.editor_responsavel.trim() ? r.editor_responsavel.trim() : null,
+      video_embed_url: r.video_embed_url && r.video_embed_url.trim() ? r.video_embed_url.trim() : null,
     };
   });
 
