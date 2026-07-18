@@ -44,6 +44,14 @@ Deno.serve(async (req) => {
 
   // 2. Grava só o resultado (cidade/UF) — o IP já saiu de escopo aqui.
   const sb = createClient(url, key, { auth: { persistSession: false } });
+  // Tráfego dentro do painel administrativo é marcado como "interno" para
+  // que agregações públicas (ex.: Mais Lidas) possam excluí-lo. O cliente
+  // pode até enviar outra classificação, mas se a URL começa com /admin,
+  // a fonte é sempre navegação interna do editor.
+  const paginaStr = body.pagina ?? "";
+  const origemFinal = paginaStr.startsWith("/admin")
+    ? "interno"
+    : body.origem_trafego ?? null;
   const { error } = await sb.from("analytics_events").insert({
     regiao_id: body.regiao_id ?? null,
     categoria: body.categoria ?? null,
@@ -52,7 +60,7 @@ Deno.serve(async (req) => {
     uf_leitor: ufLeitor,
     tipo_evento: body.tipo_evento ?? "pageview",
     pagina: body.pagina ?? null,
-    origem_trafego: body.origem_trafego ?? null,
+    origem_trafego: origemFinal,
   });
 
   if (error) return json({ error: "insert_failed", detail: error.message }, 500);
