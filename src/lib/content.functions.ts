@@ -72,6 +72,9 @@ export type ArticleFull = ArticleListItem & {
   faq: FaqItem[] | null;
   editor_responsavel: string | null;
   video_embed_url: string | null;
+  imagem_legenda: string | null;
+  video_legenda: string | null;
+  video_credito: string | null;
 };
 
 export type FiveWOneH = {
