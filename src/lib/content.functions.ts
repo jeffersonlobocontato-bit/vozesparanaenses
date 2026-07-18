@@ -71,6 +71,7 @@ export type ArticleFull = ArticleListItem & {
   fatos_5w1h: FiveWOneH | null;
   faq: FaqItem[] | null;
   editor_responsavel: string | null;
+  video_embed_url: string | null;
 };
 
 export type FiveWOneH = {
