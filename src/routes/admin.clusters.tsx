@@ -175,27 +175,42 @@ function AdminClusters() {
     }
   }
 
-  async function rodarColetaCuradoria() {
+  async function rodarColetaCuradoria(editorias: string[], rotulo: string) {
     setColetando(true);
-    setColetaLog(["Coletando fontes de curadoria (Segurança/Esporte/Geral nacional)…"]);
-    const steps: Array<{ name: string; body?: Record<string, unknown> }> = [
-      { name: "scrape-source", body: { force: true, sync: true, apenas_curadoria: true } },
-      { name: "cluster-articles", body: { sync: true } },
-      { name: "classify-and-quota", body: { sync: true } },
-    ];
-    for (const step of steps) {
-      setColetaLog((l) => [...l, `→ ${step.name}…`]);
-      try {
-        const { data, error } = await supabase.functions.invoke(step.name, { body: step.body ?? {} });
-        if (error) throw error;
-        setColetaLog((l) => [...l, `  ✓ ${JSON.stringify(data).slice(0, 240)}`]);
-      } catch (e: unknown) {
-        setColetaLog((l) => [...l, `  ✗ ${e instanceof Error ? e.message : "erro"}`]);
-        break;
+    setColetaLog([`Coletando fontes de curadoria (${rotulo})…`]);
+    try {
+      setColetaLog((l) => [...l, "→ scrape-source…"]);
+      const scrape = await supabase.functions.invoke("scrape-source", { body: { force: true, sync: true, curadoria_editorias: editorias } });
+      if (scrape.error) throw scrape.error;
+      const sd = (scrape.data ?? {}) as { report?: Array<{ inserted?: number; inserted_id?: string | null }> };
+      const insertedIds = (sd.report ?? [])
+        .filter((row) => (row.inserted ?? 0) > 0 && row.inserted_id)
+        .map((row) => row.inserted_id as string);
+      setColetaLog((l) => [...l, `  ✓ ${JSON.stringify(scrape.data).slice(0, 240)}`]);
+      if (!insertedIds.length) {
+        setColetaLog((l) => [...l, "  • Nenhuma matéria nova foi coletada neste ciclo; não vou reaproveitar pauta antiga/backlog."]);
+        return;
       }
+      setColetaLog((l) => [...l, "→ cluster-articles…"]);
+      const cluster = await supabase.functions.invoke("cluster-articles", { body: { sync: true, curadoria_editorias: editorias, raw_article_ids: insertedIds } });
+      if (cluster.error) throw cluster.error;
+      const cd = (cluster.data ?? {}) as { cluster_ids?: string[] };
+      const createdClusterIds = cd.cluster_ids ?? [];
+      setColetaLog((l) => [...l, `  ✓ ${JSON.stringify(cluster.data).slice(0, 240)}`]);
+      if (!createdClusterIds.length) {
+        setColetaLog((l) => [...l, "  • Nenhum cluster novo foi criado neste ciclo; classificação antiga não será reaproveitada."]);
+        return;
+      }
+      setColetaLog((l) => [...l, "→ classify-and-quota…"]);
+      const classify = await supabase.functions.invoke("classify-and-quota", { body: { sync: true, cluster_ids: createdClusterIds } });
+      if (classify.error) throw classify.error;
+      setColetaLog((l) => [...l, `  ✓ ${JSON.stringify(classify.data).slice(0, 240)}`]);
+    } catch (e: unknown) {
+      setColetaLog((l) => [...l, `  ✗ ${e instanceof Error ? e.message : "erro"}`]);
+    } finally {
+      setColetando(false);
+      await load();
     }
-    setColetando(false);
-    await load();
   }
 
   async function extractFacts(id: string) {
@@ -331,11 +346,18 @@ function AdminClusters() {
         <h1 className="text-2xl font-bold">Curadoria Nacional — Segurança &amp; Esporte / Geral</h1>
         <div className="flex gap-2">
           <button
-            onClick={rodarColetaCuradoria}
+            onClick={() => rodarColetaCuradoria(["seguranca", "esportes"], "Segurança & Esporte")}
             disabled={coletando}
             className="rounded bg-[#0066CC] px-3 py-1 text-xs font-semibold text-white disabled:opacity-60"
           >
-            {coletando ? "Coletando…" : "▶ Rodar coleta (curadoria)"}
+            {coletando ? "Coletando…" : "▶ Rodar Seg./Esporte"}
+          </button>
+          <button
+            onClick={() => rodarColetaCuradoria(["geral"], "Nacional Geral")}
+            disabled={coletando}
+            className="rounded bg-violet-700 px-3 py-1 text-xs font-semibold text-white disabled:opacity-60"
+          >
+            {coletando ? "Coletando…" : "▶ Rodar Nacional Geral"}
           </button>
           <button
             onClick={apagarTodas}

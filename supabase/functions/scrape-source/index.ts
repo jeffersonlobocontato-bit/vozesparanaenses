@@ -130,6 +130,7 @@ Deno.serve(async (req) => {
       // inserção der certo, para. Isso limita o volume por ciclo e ainda
       // captura a manchete mais recente que a fonte considerou relevante.
       let insertedItem: Item | null = null;
+      let insertedId: string | null = null;
       let duplicates = 0;
       for (const it of items) {
         const hash = await sha256(it.url + "|" + it.titulo);
@@ -155,7 +156,7 @@ Deno.serve(async (req) => {
             console.warn(`[${fonte.nome}] fetch full article failed`, (e as Error).message);
           }
         }
-        const { error: insErr } = await sb.from("raw_articles").insert({
+        const { data: inserted, error: insErr } = await sb.from("raw_articles").insert({
           fonte_id: fonte.id,
           regiao_id: deteccao?.regiao_id ?? fonte.regiao_id,
           cidade_detectada_slug: deteccao?.slug ?? null,
@@ -168,17 +169,18 @@ Deno.serve(async (req) => {
           imagem_original_url: imagem,
           imagem_credito: credito,
           processado: false,
-        });
+        }).select("id").single();
         if (insErr) {
           if (insErr.code === "23505") { duplicates++; continue; }
           console.error(`[${fonte.nome}] insert error`, insErr.message);
           continue;
         }
         insertedItem = it;
+        insertedId = inserted?.id ?? null;
         break;
       }
       await sb.from("fontes").update({ ultimo_scrape_em: new Date().toISOString() }).eq("id", fonte.id);
-      return { fonte: fonte.nome, total: items.length, inserted: insertedItem ? 1 : 0, duplicates };
+      return { fonte: fonte.nome, total: items.length, inserted: insertedItem ? 1 : 0, inserted_id: insertedId, inserted_url: insertedItem?.url ?? null, duplicates };
     } catch (e) {
       return { fonte: fonte.nome, error: (e as Error).message };
     }

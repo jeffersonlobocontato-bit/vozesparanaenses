@@ -43,10 +43,14 @@ Deno.serve(async (req) => {
     fonte_tipo?: "veiculo" | "prefeitura";
     apenas_curadoria?: boolean;
     curadoria_editorias?: string[];
+    raw_article_ids?: string[];
   } = {};
   try { body = await req.json(); } catch { body = {}; }
   const limit = Math.min(body.limit ?? 100, 200);
   const threshold = body.threshold ?? 0.82;
+  const rawArticleIds = Array.isArray(body.raw_article_ids)
+    ? Array.from(new Set(body.raw_article_ids.filter((id) => typeof id === "string" && id.length > 0))).slice(0, 200)
+    : [];
 
   const sb = createClient(url, key, { auth: { persistSession: false } });
 
@@ -88,6 +92,7 @@ Deno.serve(async (req) => {
       .limit(limit);
     if (body.regiao_id) q = q.eq("regiao_id", body.regiao_id);
     if (fonteIdsFiltrados) q = q.in("fonte_id", fonteIdsFiltrados);
+    if (rawArticleIds.length) q = q.in("id", rawArticleIds);
     return q;
   }
 
@@ -118,6 +123,7 @@ Deno.serve(async (req) => {
   const rawsOficiais = (raws as Raw[]).filter(isOficial);
   const rawsCuradoria = (raws as Raw[]).filter((r) => !isOficial(r) && curadoriaTag(r));
   const rawsVeiculo = (raws as Raw[]).filter((r) => !isOficial(r) && !curadoriaTag(r));
+  const clusterIdsCriados: string[] = [];
 
   let createdOficiais = 0;
   for (const r of rawsOficiais) {
@@ -130,6 +136,7 @@ Deno.serve(async (req) => {
     if (cErr || !cluster) { console.error("cluster oficial insert failed", cErr?.message); continue; }
     await sb.from("cluster_articles").insert({ cluster_id: cluster.id, raw_article_id: r.id });
     await sb.from("raw_articles").update({ processado: true }).eq("id", r.id);
+    clusterIdsCriados.push(cluster.id);
     createdOficiais++;
   }
 
@@ -192,6 +199,7 @@ Deno.serve(async (req) => {
     await sb.from("cluster_articles").insert(links);
     await sb.from("raw_articles").update({ processado: true }).in("id", g.map((r) => r.id));
     novosClusters.push({ id: cluster.id, regiao_id, embedding: centroide });
+    clusterIdsCriados.push(cluster.id);
     created++;
   }
 
@@ -271,6 +279,7 @@ Deno.serve(async (req) => {
         const links = g.map((r) => ({ cluster_id: cluster.id, raw_article_id: r.id }));
         await sb.from("cluster_articles").insert(links);
         await sb.from("raw_articles").update({ processado: true }).in("id", g.map((r) => r.id));
+        clusterIdsCriados.push(cluster.id);
         createdCuradoria++;
       }
     }
@@ -315,6 +324,7 @@ Deno.serve(async (req) => {
     ok: true,
     processed: items.length + rawsOficiais.length + rawsCuradoria.length,
     clusters: created + createdOficiais + createdCuradoria,
+    cluster_ids: clusterIdsCriados,
     clusters_oficiais: createdOficiais,
     clusters_curadoria_nacional: createdCuradoria,
     linked_cross_regiao: linked,
