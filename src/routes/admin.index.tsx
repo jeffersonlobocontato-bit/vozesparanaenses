@@ -349,6 +349,11 @@ function AdminQueue() {
               currentCredito={it.imagem_credito}
               onUpdated={load}
             />
+            <ArticleVideoEditor
+              articleId={it.id}
+              currentUrl={it.video_embed_url}
+              onUpdated={load}
+            />
             {editingId === it.id ? (
               <ArticleEditor
                 articleId={it.id}
