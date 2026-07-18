@@ -730,20 +730,35 @@ export const listMostReadArticles = createServerFn({ method: "GET" })
     const { getExternalServiceRole } = await import("./external-supabase.server");
     const sb = getExternalServiceRole();
     const since = new Date(Date.now() - data.days * 24 * 60 * 60 * 1000).toISOString();
-    const { data: events, error } = await sb
-      .from("analytics_events")
-      .select("pagina")
-      .eq("tipo_evento", "pageview")
-      .gte("ts", since)
-      .not("pagina", "is", null)
-      .limit(20000);
-    if (error) {
-      if (isMissingSchema(error)) return [];
-      return [];
+    // Pagina em lotes de 1000 (limite silencioso do PostgREST) para não
+    // depender de amostra arbitrária quando o volume ultrapassa o cap.
+    // Ordena por ts desc: se cortarmos no teto, cortamos pelo mais antigo.
+    // Ignora eventos marcados como "interno" (admin navegando no painel).
+    const PAGE = 1000;
+    const HARD_CAP = 50000;
+    const events: { pagina: string | null }[] = [];
+    for (let offset = 0; offset < HARD_CAP; offset += PAGE) {
+      const { data: chunk, error } = await sb
+        .from("analytics_events")
+        .select("pagina")
+        .eq("tipo_evento", "pageview")
+        .gte("ts", since)
+        .not("pagina", "is", null)
+        .neq("origem_trafego", "interno")
+        .order("ts", { ascending: false })
+        .range(offset, offset + PAGE - 1);
+      if (error) {
+        if (isMissingSchema(error)) return [];
+        console.error("[listMostReadArticles] leitura de analytics_events falhou:", error.message);
+        return [];
+      }
+      if (!chunk || chunk.length === 0) break;
+      events.push(...(chunk as { pagina: string | null }[]));
+      if (chunk.length < PAGE) break;
     }
     // Conta por pagina no formato /{region}/{slug} — descarta home, /admin, editorias.
     const counts = new Map<string, { region: string; slug: string; n: number }>();
-    for (const row of (events ?? []) as { pagina: string | null }[]) {
+    for (const row of events) {
       const p = row.pagina;
       if (!p) continue;
       const parts = p.split("?")[0].split("#")[0].split("/").filter(Boolean);
