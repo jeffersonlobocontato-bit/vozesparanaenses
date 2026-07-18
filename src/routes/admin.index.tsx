@@ -70,13 +70,13 @@ function AdminQueue() {
           .order("gerado_em", { ascending: false })
           .limit(50);
       let res = await run(fullSelect);
-      if (res.error && /fixado_(escopo|regioes|cidades)/i.test(res.error.message)) {
+      if (res.error && /fixado_(escopo|regioes|cidades)|video_embed_url/i.test(res.error.message)) {
         res = await run(pinBasicSelect);
       }
       if (res.error && /fixado_posicao/i.test(res.error.message)) {
         res = await run(midSelect);
       }
-      if (res.error && /column .* does not exist|imagem_|editor_responsavel/i.test(res.error.message)) {
+      if (res.error && /column .* does not exist|imagem_|editor_responsavel|video_embed_url/i.test(res.error.message)) {
         res = await run(fallbackSelect);
       }
       if (res.error) throw res.error;
