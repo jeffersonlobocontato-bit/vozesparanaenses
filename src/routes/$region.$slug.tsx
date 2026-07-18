@@ -17,6 +17,7 @@ import { AdSlot } from "@/components/AdSlot";
 import { AdsenseSlot } from "@/components/AdsenseSlot";
 import { WhatsAppCTA } from "@/components/WhatsAppCTA";
 import { ShareButtons } from "@/components/ShareButtons";
+import { parseVideoEmbed } from "@/lib/video-embed";
 
 const articleQO = (regionSlug: string, slug: string) =>
   queryOptions({
