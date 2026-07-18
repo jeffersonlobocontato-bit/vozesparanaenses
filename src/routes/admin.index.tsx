@@ -4,6 +4,7 @@ import { getExternalBrowser } from "@/lib/external-supabase-browser";
 import { supabase } from "@/integrations/supabase/client";
 import { ArticleImageEditor } from "@/components/admin/ArticleImageEditor";
 import { ArticleEditor } from "@/components/admin/ArticleEditor";
+import { ArticleVideoEditor } from "@/components/admin/ArticleVideoEditor";
 import { displayRegionName } from "@/lib/region-labels";
 import { ManualWriterBox } from "@/components/admin/ManualWriterBox";
 import { PageHeader, primaryBtnClass, tabPillsWrapClass, tabPillClass } from "@/components/admin/ui";
@@ -27,6 +28,7 @@ type Draft = {
   imagem_capa_url: string | null;
   imagem_credito: string | null;
   imagem_original_url: string | null;
+  video_embed_url: string | null;
   publicado_automaticamente: boolean;
   fixado_posicao: number | null;
   fixado_escopo: "estado" | "regiao" | "cidades" | null;
