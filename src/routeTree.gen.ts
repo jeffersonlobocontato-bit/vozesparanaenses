@@ -49,6 +49,7 @@ import { Route as ApiPublicLlmsDottxtRouteImport } from './routes/api/public/llm
 import { Route as ApiPublicLlmsFullDottxtRouteImport } from './routes/api/public/llms-full[.]txt'
 import { Route as RegionEditoriaCategoriaRouteImport } from './routes/$region.editoria.$categoria'
 import { Route as RegionCidadeCidadeRouteImport } from './routes/$region.cidade.$cidade'
+import { Route as LovableEmailQueueProcessRouteImport } from './routes/lovable/email/queue/process'
 import { Route as ApiPublicIndexnowKeyRouteImport } from './routes/api/public/indexnow.$key'
 import { Route as ApiPublicHooksIndexnowPingRouteImport } from './routes/api/public/hooks.indexnow-ping'
 import { Route as ApiPublicRssRegiaoRegionRouteImport } from './routes/api/public/rss.regiao.$region'
@@ -256,6 +257,12 @@ const RegionCidadeCidadeRoute = RegionCidadeCidadeRouteImport.update({
   path: '/cidade/$cidade',
   getParentRoute: () => RegionRoute,
 } as any)
+const LovableEmailQueueProcessRoute =
+  LovableEmailQueueProcessRouteImport.update({
+    id: '/lovable/email/queue/process',
+    path: '/lovable/email/queue/process',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const ApiPublicIndexnowKeyRoute = ApiPublicIndexnowKeyRouteImport.update({
   id: '/api/public/indexnow/$key',
   path: '/api/public/indexnow/$key',
@@ -329,6 +336,7 @@ export interface FileRoutesByFullPath {
   '/api/public/sitemap.xml': typeof ApiPublicSitemapDotxmlRoute
   '/api/public/hooks/indexnow-ping': typeof ApiPublicHooksIndexnowPingRoute
   '/api/public/indexnow/$key': typeof ApiPublicIndexnowKeyRoute
+  '/lovable/email/queue/process': typeof LovableEmailQueueProcessRoute
   '/api/public/rss/categoria/$slug': typeof ApiPublicRssCategoriaSlugRoute
   '/api/public/rss/regiao/$region': typeof ApiPublicRssRegiaoRegionRoute
   '/api/public/rss/cidade/$region/$cidade': typeof ApiPublicRssCidadeRegionCidadeRoute
@@ -374,6 +382,7 @@ export interface FileRoutesByTo {
   '/api/public/sitemap.xml': typeof ApiPublicSitemapDotxmlRoute
   '/api/public/hooks/indexnow-ping': typeof ApiPublicHooksIndexnowPingRoute
   '/api/public/indexnow/$key': typeof ApiPublicIndexnowKeyRoute
+  '/lovable/email/queue/process': typeof LovableEmailQueueProcessRoute
   '/api/public/rss/categoria/$slug': typeof ApiPublicRssCategoriaSlugRoute
   '/api/public/rss/regiao/$region': typeof ApiPublicRssRegiaoRegionRoute
   '/api/public/rss/cidade/$region/$cidade': typeof ApiPublicRssCidadeRegionCidadeRoute
@@ -422,6 +431,7 @@ export interface FileRoutesById {
   '/api/public/sitemap.xml': typeof ApiPublicSitemapDotxmlRoute
   '/api/public/hooks/indexnow-ping': typeof ApiPublicHooksIndexnowPingRoute
   '/api/public/indexnow/$key': typeof ApiPublicIndexnowKeyRoute
+  '/lovable/email/queue/process': typeof LovableEmailQueueProcessRoute
   '/api/public/rss/categoria/$slug': typeof ApiPublicRssCategoriaSlugRoute
   '/api/public/rss/regiao/$region': typeof ApiPublicRssRegiaoRegionRoute
   '/api/public/rss/cidade/$region/$cidade': typeof ApiPublicRssCidadeRegionCidadeRoute
@@ -471,6 +481,7 @@ export interface FileRouteTypes {
     | '/api/public/sitemap.xml'
     | '/api/public/hooks/indexnow-ping'
     | '/api/public/indexnow/$key'
+    | '/lovable/email/queue/process'
     | '/api/public/rss/categoria/$slug'
     | '/api/public/rss/regiao/$region'
     | '/api/public/rss/cidade/$region/$cidade'
@@ -516,6 +527,7 @@ export interface FileRouteTypes {
     | '/api/public/sitemap.xml'
     | '/api/public/hooks/indexnow-ping'
     | '/api/public/indexnow/$key'
+    | '/lovable/email/queue/process'
     | '/api/public/rss/categoria/$slug'
     | '/api/public/rss/regiao/$region'
     | '/api/public/rss/cidade/$region/$cidade'
@@ -563,6 +575,7 @@ export interface FileRouteTypes {
     | '/api/public/sitemap.xml'
     | '/api/public/hooks/indexnow-ping'
     | '/api/public/indexnow/$key'
+    | '/lovable/email/queue/process'
     | '/api/public/rss/categoria/$slug'
     | '/api/public/rss/regiao/$region'
     | '/api/public/rss/cidade/$region/$cidade'
@@ -592,6 +605,7 @@ export interface RootRouteChildren {
   ApiPublicSitemapDotxmlRoute: typeof ApiPublicSitemapDotxmlRoute
   ApiPublicHooksIndexnowPingRoute: typeof ApiPublicHooksIndexnowPingRoute
   ApiPublicIndexnowKeyRoute: typeof ApiPublicIndexnowKeyRoute
+  LovableEmailQueueProcessRoute: typeof LovableEmailQueueProcessRoute
   ApiPublicRssCategoriaSlugRoute: typeof ApiPublicRssCategoriaSlugRoute
   ApiPublicRssRegiaoRegionRoute: typeof ApiPublicRssRegiaoRegionRoute
   ApiPublicRssCidadeRegionCidadeRoute: typeof ApiPublicRssCidadeRegionCidadeRoute
@@ -879,6 +893,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof RegionCidadeCidadeRouteImport
       parentRoute: typeof RegionRoute
     }
+    '/lovable/email/queue/process': {
+      id: '/lovable/email/queue/process'
+      path: '/lovable/email/queue/process'
+      fullPath: '/lovable/email/queue/process'
+      preLoaderRoute: typeof LovableEmailQueueProcessRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/public/indexnow/$key': {
       id: '/api/public/indexnow/$key'
       path: '/api/public/indexnow/$key'
@@ -996,6 +1017,7 @@ const rootRouteChildren: RootRouteChildren = {
   ApiPublicSitemapDotxmlRoute: ApiPublicSitemapDotxmlRoute,
   ApiPublicHooksIndexnowPingRoute: ApiPublicHooksIndexnowPingRoute,
   ApiPublicIndexnowKeyRoute: ApiPublicIndexnowKeyRoute,
+  LovableEmailQueueProcessRoute: LovableEmailQueueProcessRoute,
   ApiPublicRssCategoriaSlugRoute: ApiPublicRssCategoriaSlugRoute,
   ApiPublicRssRegiaoRegionRoute: ApiPublicRssRegiaoRegionRoute,
   ApiPublicRssCidadeRegionCidadeRoute: ApiPublicRssCidadeRegionCidadeRoute,
