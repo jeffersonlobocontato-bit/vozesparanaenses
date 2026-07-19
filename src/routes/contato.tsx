@@ -1,5 +1,17 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { useState } from "react";
 import { SiteHeader, SiteFooter } from "@/components/SiteHeader";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 export const Route = createFileRoute("/contato")({
   head: () => ({
@@ -69,6 +81,41 @@ function Card({ title, email, desc }: { title: string; email: string; desc: stri
 }
 
 function Contato() {
+  const [form, setForm] = useState({
+    name: "",
+    email: "",
+    subject: "",
+    department: "redacao",
+    message: "",
+  });
+  const [status, setStatus] = useState<"idle" | "submitting" | "success" | "error">("idle");
+  const [errorMessage, setErrorMessage] = useState("");
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setStatus("submitting");
+    setErrorMessage("");
+
+    try {
+      const res = await fetch("/api/public/contact", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(form),
+      });
+      const data = await res.json();
+      if (res.ok && data.success) {
+        setStatus("success");
+        setForm({ name: "", email: "", subject: "", department: "redacao", message: "" });
+      } else {
+        setStatus("error");
+        setErrorMessage(data.error || "Não foi possível enviar a mensagem.");
+      }
+    } catch {
+      setStatus("error");
+      setErrorMessage("Erro de conexão. Tente novamente.");
+    }
+  };
+
   return (
     <div className="min-h-screen bg-white text-slate-900">
       <SiteHeader />
@@ -98,6 +145,103 @@ function Contato() {
             desc="Solicitações de acesso, correção ou exclusão de dados pessoais."
           />
         </div>
+
+        <form
+          onSubmit={handleSubmit}
+          className="mt-10 grid grid-cols-1 gap-5 rounded-xl border border-slate-200 bg-white p-6 md:grid-cols-2"
+        >
+          <div className="space-y-2">
+            <Label htmlFor="name">Nome</Label>
+            <Input
+              id="name"
+              value={form.name}
+              onChange={(e) => setForm((f) => ({ ...f, name: e.target.value }))}
+              required
+              minLength={2}
+              maxLength={120}
+              placeholder="Seu nome completo"
+            />
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="email">E-mail</Label>
+            <Input
+              id="email"
+              type="email"
+              value={form.email}
+              onChange={(e) => setForm((f) => ({ ...f, email: e.target.value }))}
+              required
+              maxLength={120}
+              placeholder="seu@email.com"
+            />
+          </div>
+
+          <div className="space-y-2 md:col-span-2">
+            <Label htmlFor="subject">Assunto</Label>
+            <Input
+              id="subject"
+              value={form.subject}
+              onChange={(e) => setForm((f) => ({ ...f, subject: e.target.value }))}
+              required
+              minLength={3}
+              maxLength={200}
+              placeholder="Resumo do contato"
+            />
+          </div>
+
+          <div className="space-y-2 md:col-span-2">
+            <Label htmlFor="department">Departamento</Label>
+            <Select
+              value={form.department}
+              onValueChange={(value) => setForm((f) => ({ ...f, department: value }))}
+            >
+              <SelectTrigger id="department">
+                <SelectValue placeholder="Selecione o departamento" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="redacao">Redação</SelectItem>
+                <SelectItem value="publicidade">Publicidade</SelectItem>
+                <SelectItem value="privacidade">Privacidade / LGPD</SelectItem>
+                <SelectItem value="geral">Geral</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+
+          <div className="space-y-2 md:col-span-2">
+            <Label htmlFor="message">Mensagem</Label>
+            <Textarea
+              id="message"
+              value={form.message}
+              onChange={(e) => setForm((f) => ({ ...f, message: e.target.value }))}
+              required
+              minLength={10}
+              maxLength={5000}
+              rows={6}
+              placeholder="Escreva sua mensagem com detalhes..."
+            />
+          </div>
+
+          <div className="md:col-span-2">
+            {status === "success" ? (
+              <p className="rounded-lg bg-green-50 p-4 text-green-700">
+                Mensagem enviada com sucesso. Retornaremos em até dois dias úteis.
+              </p>
+            ) : (
+              <>
+                <Button
+                  type="submit"
+                  disabled={status === "submitting"}
+                  className="bg-[#0A2540] text-white hover:bg-[#0A2540]/90"
+                >
+                  {status === "submitting" ? "Enviando..." : "Enviar mensagem"}
+                </Button>
+                {status === "error" && (
+                  <p className="mt-3 text-sm text-red-600">{errorMessage}</p>
+                )}
+              </>
+            )}
+          </div>
+        </form>
 
         <div className="mt-10 rounded-lg border-l-4 border-[#0A2540] bg-slate-50 p-5">
           <div className="text-[10px] font-bold uppercase tracking-[0.2em] text-[#0A2540]">

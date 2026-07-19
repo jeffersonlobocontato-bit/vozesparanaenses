@@ -1,61 +1,66 @@
-# Plano: E-mail contato@vozesparanaenses.com.br + envio transacional
+# Status atual do DNS — o que já está feito e o que falta
 
-## Objetivo
-- Criar a caixa de entrada `contato@vozesparanaenses.com.br` usando Microsoft 365/Outlook.
-- Configurar o portal para enviar e-mails transacionais (notificações, confirmações, etc.) com o domínio do portal.
+## ✅ Já está configurado no Registro.br
 
----
+| Tipo | Nome | Valor | Status |
+|------|------|-------|--------|
+| TXT  | @.vozesparanaenses.com.br | `v=spf1 include:zoho.com ~all` | SPF do Zoho ok |
+| MX   | @.vozesparanaenses.com.br | `10 mx.zoho.com` | Recebimento ok |
+| MX   | @.vozesparanaenses.com.br | `20 mx.zoho.com` | Recebimento ok |
+| MX   | @.vozesparanaenses.com.br | `50 mx.zoho.com` | Recebimento ok |
+| TXT  | @.vozesparanaenses.com.br | `zoho-verification=zb33728644.zmverify.zoho.com` | Domínio verificado no Zoho |
+| A    | vozesparanaenses.com.br | `185.158.133.1` | Site no Lovable ok |
+| A    | www.vozesparanaenses.com.br | `185.158.133.1` | Site no Lovable ok |
+| TXT  | _lovable.vozesparanaenses.com.br | `lovable_verify=...` | Lovable ok |
+| TXT  | _lovable.www.vozesparanaenses.com.br | `lovable_verify=...` | Lovable ok |
 
-## 1. Caixa de entrada no Outlook/Microsoft 365
-
-### O que você precisa fazer (fora do Lovable):
-1. Acessar [admin.microsoft.com](https://admin.microsoft.com) ou [outlook.com](https://outlook.com) e contratar um plano Microsoft 365 que permita domínio personalizado.
-   - Recomendado para portais/empresas: **Microsoft 365 Business Basic** (ou superior).
-   - O plano **Microsoft 365 Family/Personal** também aceita domínio personalizado, mas é voltado para uso pessoal.
-2. No painel da Microsoft, adicionar o domínio `vozesparanaenses.com.br`.
-3. Seguir o assistente de verificação de domínio da Microsoft, que pedirá para você criar um registro **TXT** nas configurações de DNS do seu provedor de domínio.
-4. Após verificar o domínio, criar a caixa de correio `contato@vozesparanaenses.com.br`.
-5. (Opcional) Criar caixas adicionais como `redacao@`, `comercial@`, `suporte@`.
-
-### Observação importante sobre DNS
-- O Outlook/Microsoft 365 exige registros **MX**, **SPF**, **DKIM** e **DMARC** no domínio raiz (`vozesparanaenses.com.br`).
-- O Lovable Emails, por sua vez, delega um **subdomínio** (ex: `notify.vozesparanaenses.com.br`) para os servidores da Lovable via registros **NS**.
-- Essas duas configurações **não entram em conflito**, desde que o subdomínio de envio seja separado do domínio de recebimento.
+> O básico obrigatório para receber e-mails no Zoho já está no ar: verificação, MX e SPF.
 
 ---
 
-## 2. Envio transacional pelo Lovable
+## ❌ Ainda falta adicionar
 
-### O que configuraremos no projeto:
-1. Configurar o domínio de envio no Lovable Cloud usando um subdomínio dedicado, por exemplo:
-   - `notify.vozesparanaenses.com.br` (recomendado)
-   - ou `mail.vozesparanaenses.com.br`
-2. O Lovable fornecerá os registros **NS** para delegar esse subdomínio.
-3. Você adicionará esses registros NS nas configurações de DNS do seu provedor de domínio (onde comprou o domínio, não no Microsoft 365).
-4. Após a delegação, o Lovable gerencia automaticamente SPF, DKIM e DMARC para o subdomínio de envio.
-5. No código do projeto, instalaremos:
-   - infraestrutura de fila de e-mails (`email_domain--setup_email_infra`)
-   - templates e rotas de envio transacional (`email_domain--scaffold_transactional_email`)
-6. Criaremos templates de e-mail iniciais, como:
-   - confirmação de contato do formulário `/contato`
-   - notificação de publicação de pauta/vitrine
-7. Criaremos a página de cancelamento de inscrição (unsubscribe) no caminho que o Lovable indicar.
+| Tipo | Nome | Onde pegar o valor | Por que é importante |
+|------|------|--------------------|---------------------|
+| TXT  | `zoho._domainkey.vozesparanaenses.com.br` | Painel Zoho → Email Configuration → DKIM | Assinatura DKIM: evita spam e spoofing |
+| TXT  | `_dmarc.vozesparanaenses.com.br` | Você mesmo cria o valor | Política de proteção contra spoofing |
 
 ---
 
-## 3. Página de contato no site
+## Valores sugeridos para adicionar agora
 
-1. Ajustar o formulário da página `/contato` para, além de salvar no banco, enviar uma cópia para `contato@vozesparanaenses.com.br` (ou outro e-mail interno) via Lovable Emails.
-2. Adicionar mensagem de confirmação ao usuário: "Recebemos sua mensagem".
+### 1. DKIM (copie o valor exato do Zoho)
+
+No painel do Zoho Mail, vá em **Configuração → Email Configuration → DKIM** e gere a chave para `vozesparanaenses.com.br`. O Zoho vai te dar um registro parecido com:
+
+```
+v=DKIM1; k=rsa; p=MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKB...
+```
+
+Adicione no Registro.br:
+
+| Tipo | Nome | Valor |
+|------|------|-------|
+| TXT  | `zoho._domainkey` | (chave completa que o Zoho gerar) |
+
+> No Registro.br, quando o nome é `zoho._domainkey`, o sistema completa para `zoho._domainkey.vozesparanaenses.com.br`.
 
 ---
 
-## Próximos passos
+### 2. DMARC
 
-Para seguir, você precisa:
+Adicione no Registro.br:
 
-1. **Escolher o plano Microsoft 365** e começar a configuração do domínio no painel da Microsoft.
-2. **Me informar quando tiver acesso ao painel de DNS do domínio** (onde comprou o domínio `vozesparanaenses.com.br`), pois precisaremos adicionar tanto os registros do Outlook quanto os registros NS do Lovable.
-3. **Confirmar qual subdomínio quer usar para envio**: `notify.vozesparanaenses.com.br` é o mais comum e recomendado.
+| Tipo | Nome | Valor |
+|------|------|-------|
+| TXT  | `_dmarc` | `v=DMARC1; p=quarantine; rua=mailto:contato@vozesparanaenses.com.br` |
 
-Assim que você confirmar, eu inicio a configuração do lado do Lovable e do projeto.
+---
+
+## Resumo
+
+- **Já funciona para receber**: sim, os MX e a verificação Zoho estão corretos.
+- **Falta para entregabilidade completa**: DKIM + DMARC.
+- **Envio transacional do portal**: já está no subdomínio `notify.vozesparanaenses.com.br` — não mexa nos registros dele.
+
+Quer que eu já implemente o formulário de contato do site enviando para `contato@vozesparanaenses.com.br` via Lovable Emails?
