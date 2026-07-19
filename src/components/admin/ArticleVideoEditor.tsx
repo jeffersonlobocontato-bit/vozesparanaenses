@@ -5,17 +5,51 @@ import { parseVideoEmbed } from "@/lib/video-embed";
 type Props = {
   articleId: string;
   currentUrl: string | null;
+  currentLegenda: string | null;
+  currentCredito: string | null;
   onUpdated: () => void;
 };
 
-export function ArticleVideoEditor({ articleId, currentUrl, onUpdated }: Props) {
+export function ArticleVideoEditor({ articleId, currentUrl, currentLegenda, currentCredito, onUpdated }: Props) {
   const [url, setUrl] = useState(currentUrl ?? "");
-  const [busy, setBusy] = useState<"save" | "upload" | "clear" | null>(null);
+  const [legenda, setLegenda] = useState(currentLegenda ?? "");
+  const [credito, setCredito] = useState(currentCredito ?? "");
+  const [busy, setBusy] = useState<"save" | "upload" | "clear" | "meta" | null>(null);
   const [msg, setMsg] = useState<string | null>(null);
 
   useEffect(() => {
     setUrl(currentUrl ?? "");
   }, [currentUrl]);
+  useEffect(() => { setLegenda(currentLegenda ?? ""); }, [currentLegenda]);
+  useEffect(() => { setCredito(currentCredito ?? ""); }, [currentCredito]);
+
+  const metaDirty =
+    (legenda.trim() || null) !== (currentLegenda?.trim() || null) ||
+    (credito.trim() || null) !== (currentCredito?.trim() || null);
+
+  async function saveMeta() {
+    setBusy("meta"); setMsg(null);
+    try {
+      const sb = await getExternalBrowser();
+      const { error } = await sb
+        .from("generated_articles")
+        .update({
+          video_legenda: legenda.trim() || null,
+          video_credito: credito.trim() || null,
+        })
+        .eq("id", articleId);
+      if (error) {
+        if (/column .* (video_legenda|video_credito) .* does not exist/i.test(error.message)) {
+          throw new Error("Colunas video_legenda/video_credito ainda não existem — rode a migração 044_legendas_creditos.sql.");
+        }
+        throw error;
+      }
+      setMsg("Legenda/crédito do vídeo salvos.");
+      onUpdated();
+    } catch (e: unknown) {
+      setMsg("Falha: " + (e instanceof Error ? e.message : "erro"));
+    } finally { setBusy(null); }
+  }
 
   const preview = parseVideoEmbed(url);
 
@@ -146,6 +180,38 @@ export function ArticleVideoEditor({ articleId, currentUrl, onUpdated }: Props) 
           URL não reconhecida. Use YouTube, Vimeo ou um arquivo .mp4/.webm/.ogg/.mov.
         </p>
       )}
+      <div className="grid gap-2 sm:grid-cols-[1fr_auto] sm:items-end">
+        <div className="flex flex-col gap-1">
+          <label className="text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">
+            Legenda do vídeo
+          </label>
+          <input
+            value={legenda}
+            onChange={(e) => setLegenda(e.target.value)}
+            placeholder="Ex.: Momento em que a equipe da PRF aborda o veículo suspeito."
+            className="rounded border bg-background px-2 py-1 text-xs"
+            disabled={busy !== null}
+          />
+          <label className="mt-1 text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">
+            Crédito do vídeo
+          </label>
+          <input
+            value={credito}
+            onChange={(e) => setCredito(e.target.value)}
+            placeholder="Ex.: Vídeo: PRF / Divulgação"
+            className="rounded border bg-background px-2 py-1 text-xs"
+            disabled={busy !== null}
+          />
+        </div>
+        <button
+          type="button"
+          onClick={saveMeta}
+          disabled={busy !== null || !metaDirty}
+          className="rounded bg-[#0A2540] px-3 py-1.5 text-[11px] font-semibold text-white hover:bg-[#0d2f52] disabled:opacity-60"
+        >
+          {busy === "meta" ? "Salvando…" : "💾 Salvar legenda/crédito"}
+        </button>
+      </div>
       <p className="text-[10px] text-muted-foreground">
         Recomendado: hospede vídeos longos no YouTube/Vimeo e cole a URL. Upload direto só para clipes curtos (até 200MB).
       </p>

@@ -488,11 +488,19 @@ function ArticlePage() {
               alt={article.title}
               className="w-full rounded-sm object-cover shadow-[0_20px_60px_-20px_rgba(10,37,64,0.35)]"
             />
-            {"imagem_credito" in article && (article as { imagem_credito?: string }).imagem_credito && (
-              <figcaption className="mt-2 text-xs italic text-slate-500">
-                {(article as { imagem_credito?: string }).imagem_credito}
-              </figcaption>
-            )}
+            {(() => {
+              const a = article as { imagem_legenda?: string | null; imagem_credito?: string | null };
+              const leg = a.imagem_legenda?.trim();
+              const cred = a.imagem_credito?.trim();
+              if (!leg && !cred) return null;
+              return (
+                <figcaption className="mt-2 text-xs text-slate-600">
+                  {leg && <span className="text-slate-700">{leg}</span>}
+                  {leg && cred && " "}
+                  {cred && <span className="italic text-slate-500">{cred}</span>}
+                </figcaption>
+              );
+            })()}
           </figure>
         )}
 
@@ -500,6 +508,8 @@ function ArticlePage() {
         {(() => {
           const v = parseVideoEmbed(article.video_embed_url);
           if (!v) return null;
+          const leg = article.video_legenda?.trim();
+          const cred = article.video_credito?.trim();
           return (
             <figure className="mt-8">
               {v.kind === "file" ? (
@@ -520,6 +530,13 @@ function ArticlePage() {
                     className="h-full w-full"
                   />
                 </div>
+              )}
+              {(leg || cred) && (
+                <figcaption className="mt-2 text-xs text-slate-600">
+                  {leg && <span className="text-slate-700">{leg}</span>}
+                  {leg && cred && " "}
+                  {cred && <span className="italic text-slate-500">{cred}</span>}
+                </figcaption>
               )}
             </figure>
           );

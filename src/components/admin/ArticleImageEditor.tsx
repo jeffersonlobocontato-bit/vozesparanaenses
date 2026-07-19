@@ -1,18 +1,53 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { getExternalBrowser } from "@/lib/external-supabase-browser";
 
 type Props = {
   articleId: string;
   currentUrl: string | null;
   originalUrl: string | null;
   currentCredito: string | null;
+  currentLegenda: string | null;
   onUpdated: () => void;
 };
 
-export function ArticleImageEditor({ articleId, currentUrl, originalUrl, currentCredito, onUpdated }: Props) {
-  const [busy, setBusy] = useState<"ai" | "upload" | "original" | null>(null);
+export function ArticleImageEditor({ articleId, currentUrl, originalUrl, currentCredito, currentLegenda, onUpdated }: Props) {
+  const [busy, setBusy] = useState<"ai" | "upload" | "original" | "meta" | null>(null);
   const [msg, setMsg] = useState<string | null>(null);
+  const [legenda, setLegenda] = useState(currentLegenda ?? "");
+  const [credito, setCredito] = useState(currentCredito ?? "");
   const usingOriginal = !!originalUrl && currentUrl === originalUrl;
+
+  useEffect(() => { setLegenda(currentLegenda ?? ""); }, [currentLegenda]);
+  useEffect(() => { setCredito(currentCredito ?? ""); }, [currentCredito]);
+
+  const metaDirty =
+    (legenda.trim() || null) !== (currentLegenda?.trim() || null) ||
+    (credito.trim() || null) !== (currentCredito?.trim() || null);
+
+  async function saveMeta() {
+    setBusy("meta"); setMsg(null);
+    try {
+      const sb = await getExternalBrowser();
+      const { error } = await sb
+        .from("generated_articles")
+        .update({
+          imagem_legenda: legenda.trim() || null,
+          imagem_credito: credito.trim() || null,
+        })
+        .eq("id", articleId);
+      if (error) {
+        if (/column .* imagem_legenda .* does not exist/i.test(error.message)) {
+          throw new Error("Coluna imagem_legenda ainda não existe — rode a migração 044_legendas_creditos.sql.");
+        }
+        throw error;
+      }
+      setMsg("Legenda/crédito salvos.");
+      onUpdated();
+    } catch (e: unknown) {
+      setMsg("Falha: " + (e instanceof Error ? e.message : "erro"));
+    } finally { setBusy(null); }
+  }
 
   async function useOriginal() {
     setBusy("original"); setMsg("Restaurando foto original…");
@@ -129,7 +164,40 @@ export function ArticleImageEditor({ articleId, currentUrl, originalUrl, current
             />
           </label>
         </div>
-        {currentCredito && <span className="text-muted-foreground">{currentCredito}</span>}
+        <div className="mt-2 grid gap-2 sm:grid-cols-[1fr_auto]">
+          <div className="flex flex-col gap-1">
+            <label className="text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">
+              Legenda da foto
+            </label>
+            <input
+              value={legenda}
+              onChange={(e) => setLegenda(e.target.value)}
+              placeholder="Ex.: Bombeiros combatem incêndio em Cascavel na manhã desta segunda-feira."
+              className="rounded border bg-background px-2 py-1 text-xs"
+              disabled={busy !== null}
+            />
+            <label className="mt-1 text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">
+              Crédito da foto
+            </label>
+            <input
+              value={credito}
+              onChange={(e) => setCredito(e.target.value)}
+              placeholder="Ex.: Foto: João Silva / Prefeitura de Cascavel"
+              className="rounded border bg-background px-2 py-1 text-xs"
+              disabled={busy !== null}
+            />
+          </div>
+          <div className="flex items-end">
+            <button
+              type="button"
+              onClick={saveMeta}
+              disabled={busy !== null || !metaDirty}
+              className="rounded bg-[#0A2540] px-3 py-1.5 text-[11px] font-semibold text-white hover:bg-[#0d2f52] disabled:opacity-60"
+            >
+              {busy === "meta" ? "Salvando…" : "💾 Salvar legenda/crédito"}
+            </button>
+          </div>
+        </div>
         {!originalUrl && (
           <span className="text-[10px] italic text-muted-foreground">
             Sem foto original — a fonte não trouxe imagem no scraping.
