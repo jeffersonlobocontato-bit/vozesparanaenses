@@ -49,6 +49,7 @@ import { Route as ApiPublicSitemapNewsDotxmlRouteImport } from './routes/api/pub
 import { Route as ApiPublicRssDotxmlRouteImport } from './routes/api/public/rss[.]xml'
 import { Route as ApiPublicLlmsDottxtRouteImport } from './routes/api/public/llms[.]txt'
 import { Route as ApiPublicLlmsFullDottxtRouteImport } from './routes/api/public/llms-full[.]txt'
+import { Route as ApiPublicContactRouteImport } from './routes/api/public/contact'
 import { Route as RegionEditoriaCategoriaRouteImport } from './routes/$region.editoria.$categoria'
 import { Route as RegionCidadeCidadeRouteImport } from './routes/$region.cidade.$cidade'
 import { Route as LovableEmailTransactionalSendRouteImport } from './routes/lovable/email/transactional/send'
@@ -261,6 +262,11 @@ const ApiPublicLlmsFullDottxtRoute = ApiPublicLlmsFullDottxtRouteImport.update({
   path: '/api/public/llms-full.txt',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiPublicContactRoute = ApiPublicContactRouteImport.update({
+  id: '/api/public/contact',
+  path: '/api/public/contact',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const RegionEditoriaCategoriaRoute = RegionEditoriaCategoriaRouteImport.update({
   id: '/editoria/$categoria',
   path: '/editoria/$categoria',
@@ -356,6 +362,7 @@ export interface FileRoutesByFullPath {
   '/admin/': typeof AdminIndexRoute
   '/$region/cidade/$cidade': typeof RegionCidadeCidadeRoute
   '/$region/editoria/$categoria': typeof RegionEditoriaCategoriaRoute
+  '/api/public/contact': typeof ApiPublicContactRoute
   '/api/public/llms-full.txt': typeof ApiPublicLlmsFullDottxtRoute
   '/api/public/llms.txt': typeof ApiPublicLlmsDottxtRoute
   '/api/public/rss.xml': typeof ApiPublicRssDotxmlRoute
@@ -406,6 +413,7 @@ export interface FileRoutesByTo {
   '/admin': typeof AdminIndexRoute
   '/$region/cidade/$cidade': typeof RegionCidadeCidadeRoute
   '/$region/editoria/$categoria': typeof RegionEditoriaCategoriaRoute
+  '/api/public/contact': typeof ApiPublicContactRoute
   '/api/public/llms-full.txt': typeof ApiPublicLlmsFullDottxtRoute
   '/api/public/llms.txt': typeof ApiPublicLlmsDottxtRoute
   '/api/public/rss.xml': typeof ApiPublicRssDotxmlRoute
@@ -459,6 +467,7 @@ export interface FileRoutesById {
   '/admin/': typeof AdminIndexRoute
   '/$region/cidade/$cidade': typeof RegionCidadeCidadeRoute
   '/$region/editoria/$categoria': typeof RegionEditoriaCategoriaRoute
+  '/api/public/contact': typeof ApiPublicContactRoute
   '/api/public/llms-full.txt': typeof ApiPublicLlmsFullDottxtRoute
   '/api/public/llms.txt': typeof ApiPublicLlmsDottxtRoute
   '/api/public/rss.xml': typeof ApiPublicRssDotxmlRoute
@@ -513,6 +522,7 @@ export interface FileRouteTypes {
     | '/admin/'
     | '/$region/cidade/$cidade'
     | '/$region/editoria/$categoria'
+    | '/api/public/contact'
     | '/api/public/llms-full.txt'
     | '/api/public/llms.txt'
     | '/api/public/rss.xml'
@@ -563,6 +573,7 @@ export interface FileRouteTypes {
     | '/admin'
     | '/$region/cidade/$cidade'
     | '/$region/editoria/$categoria'
+    | '/api/public/contact'
     | '/api/public/llms-full.txt'
     | '/api/public/llms.txt'
     | '/api/public/rss.xml'
@@ -615,6 +626,7 @@ export interface FileRouteTypes {
     | '/admin/'
     | '/$region/cidade/$cidade'
     | '/$region/editoria/$categoria'
+    | '/api/public/contact'
     | '/api/public/llms-full.txt'
     | '/api/public/llms.txt'
     | '/api/public/rss.xml'
@@ -649,6 +661,7 @@ export interface RootRouteChildren {
   RIdRoute: typeof RIdRoute
   VitrinePessoalNovoRoute: typeof VitrinePessoalNovoRoute
   VitrineTokenRoute: typeof VitrineTokenRoute
+  ApiPublicContactRoute: typeof ApiPublicContactRoute
   ApiPublicLlmsFullDottxtRoute: typeof ApiPublicLlmsFullDottxtRoute
   ApiPublicLlmsDottxtRoute: typeof ApiPublicLlmsDottxtRoute
   ApiPublicRssDotxmlRoute: typeof ApiPublicRssDotxmlRoute
@@ -947,6 +960,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicLlmsFullDottxtRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/contact': {
+      id: '/api/public/contact'
+      path: '/api/public/contact'
+      fullPath: '/api/public/contact'
+      preLoaderRoute: typeof ApiPublicContactRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/$region/editoria/$categoria': {
       id: '/$region/editoria/$categoria'
       path: '/editoria/$categoria'
@@ -1093,6 +1113,7 @@ const rootRouteChildren: RootRouteChildren = {
   RIdRoute: RIdRoute,
   VitrinePessoalNovoRoute: VitrinePessoalNovoRoute,
   VitrineTokenRoute: VitrineTokenRoute,
+  ApiPublicContactRoute: ApiPublicContactRoute,
   ApiPublicLlmsFullDottxtRoute: ApiPublicLlmsFullDottxtRoute,
   ApiPublicLlmsDottxtRoute: ApiPublicLlmsDottxtRoute,
   ApiPublicRssDotxmlRoute: ApiPublicRssDotxmlRoute,
