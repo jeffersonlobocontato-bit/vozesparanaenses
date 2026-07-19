@@ -255,6 +255,87 @@ export function ArticleEditor({ articleId, initial, onSaved, onCancel }: Props) 
         <label className={labelCls}>Resumo</label>
         <textarea className={inputCls} rows={2} value={form.resumo} onChange={(e) => set("resumo", e.target.value)} />
       </div>
+      <div className="rounded-md border border-sky-200 bg-sky-50/60 p-3 dark:border-sky-500/40 dark:bg-sky-500/10">
+        <label className={labelCls}>TL;DR (resumo curto exibido no topo da matéria)</label>
+        <textarea
+          className={inputCls}
+          rows={3}
+          value={form.tldr}
+          onChange={(e) => set("tldr", e.target.value)}
+          placeholder="2–3 frases resumindo o essencial (aparece na caixa azul acima do corpo)."
+        />
+      </div>
+      <div className="rounded-md border bg-background p-3">
+        <label className={labelCls}>Fatos (5W1H) — bloco estruturado exibido na matéria</label>
+        <div className="mt-2 grid gap-2 sm:grid-cols-2">
+          {([
+            ["quem", "Quem"],
+            ["o_que", "O quê"],
+            ["quando", "Quando"],
+            ["onde", "Onde"],
+            ["por_que", "Por quê"],
+            ["como", "Como"],
+          ] as const).map(([k, label]) => (
+            <div key={k}>
+              <label className={labelCls}>{label}</label>
+              <textarea
+                className={inputCls}
+                rows={2}
+                value={form[k]}
+                onChange={(e) => set(k, e.target.value)}
+              />
+            </div>
+          ))}
+        </div>
+      </div>
+      <div className="rounded-md border bg-background p-3">
+        <div className="flex items-center justify-between">
+          <label className={labelCls}>FAQ (perguntas frequentes)</label>
+          <button
+            type="button"
+            onClick={() => setFaq((prev) => [...prev, { pergunta: "", resposta: "" }])}
+            className="rounded border px-2 py-0.5 text-xs hover:bg-accent"
+          >
+            + Adicionar
+          </button>
+        </div>
+        {faq.length === 0 && (
+          <p className="mt-1 text-[10px] text-muted-foreground">Nenhuma pergunta cadastrada.</p>
+        )}
+        <div className="mt-2 space-y-2">
+          {faq.map((f, i) => (
+            <div key={i} className="rounded border bg-muted/30 p-2">
+              <div className="flex items-center justify-between">
+                <span className="text-[10px] font-semibold text-muted-foreground">#{i + 1}</span>
+                <button
+                  type="button"
+                  onClick={() => setFaq((prev) => prev.filter((_, j) => j !== i))}
+                  className="text-[10px] text-red-600 hover:underline"
+                >
+                  Remover
+                </button>
+              </div>
+              <input
+                className={inputCls}
+                placeholder="Pergunta"
+                value={f.pergunta}
+                onChange={(e) =>
+                  setFaq((prev) => prev.map((x, j) => (j === i ? { ...x, pergunta: e.target.value } : x)))
+                }
+              />
+              <textarea
+                className={`${inputCls} mt-1`}
+                rows={2}
+                placeholder="Resposta"
+                value={f.resposta}
+                onChange={(e) =>
+                  setFaq((prev) => prev.map((x, j) => (j === i ? { ...x, resposta: e.target.value } : x)))
+                }
+              />
+            </div>
+          ))}
+        </div>
+      </div>
       <div>
         <div className="flex items-center justify-between">
           <label className={labelCls}>Corpo da matéria</label>
