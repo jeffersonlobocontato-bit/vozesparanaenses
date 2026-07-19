@@ -388,6 +388,9 @@ function AdminQueue() {
                   fixado_cidades: it.fixado_cidades ?? null,
                   regiao_id: it.regiao_id ?? null,
                   categoria_id: it.categoria_id ?? null,
+                  tldr: it.tldr ?? null,
+                  fatos_5w1h: it.fatos_5w1h ?? null,
+                  faq: it.faq ?? null,
                 }}
                 onSaved={() => { setEditingId(null); load(); }}
                 onCancel={() => setEditingId(null)}
