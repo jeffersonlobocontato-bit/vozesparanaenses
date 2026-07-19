@@ -14,6 +14,16 @@ type Regiao = { slug: string; nome: string };
 type RegiaoOpt = { id: string; slug: string; nome: string };
 type CategoriaOpt = { id: string; slug: string; nome: string };
 
+type FiveW = {
+  quem?: string | null;
+  o_que?: string | null;
+  quando?: string | null;
+  onde?: string | null;
+  por_que?: string | null;
+  como?: string | null;
+};
+type FaqItem = { pergunta: string; resposta: string };
+
 type Props = {
   articleId: string;
   initial: {
@@ -31,6 +41,9 @@ type Props = {
     fixado_cidades?: string[] | null;
     regiao_id?: string | null;
     categoria_id?: string | null;
+    tldr?: string | null;
+    fatos_5w1h?: FiveW | null;
+    faq?: FaqItem[] | null;
   };
   onSaved: () => void;
   onCancel: () => void;
@@ -52,7 +65,15 @@ export function ArticleEditor({ articleId, initial, onSaved, onCancel }: Props) 
       typeof initial.fixado_posicao === "number" && initial.fixado_posicao !== null
         ? String(initial.fixado_posicao)
         : "",
+    tldr: initial.tldr ?? "",
+    quem: initial.fatos_5w1h?.quem ?? "",
+    o_que: initial.fatos_5w1h?.o_que ?? "",
+    quando: initial.fatos_5w1h?.quando ?? "",
+    onde: initial.fatos_5w1h?.onde ?? "",
+    por_que: initial.fatos_5w1h?.por_que ?? "",
+    como: initial.fatos_5w1h?.como ?? "",
   });
+  const [faq, setFaq] = useState<FaqItem[]>(initial.faq ?? []);
   const [escopo, setEscopo] = useState<PinScope>(initial.fixado_escopo ?? "estado");
   const [regioes, setRegioes] = useState<string[]>(initial.fixado_regioes ?? []);
   const [cidades, setCidades] = useState<string[]>(initial.fixado_cidades ?? []);
@@ -157,6 +178,24 @@ export function ArticleEditor({ articleId, initial, onSaved, onCancel }: Props) 
         fixado_escopo: effectiveEscopo,
         fixado_regioes: effectiveRegioes,
         fixado_cidades: effectiveCidades,
+        tldr: form.tldr.trim() || null,
+        fatos_5w1h: (() => {
+          const f: FiveW = {
+            quem: form.quem.trim() || null,
+            o_que: form.o_que.trim() || null,
+            quando: form.quando.trim() || null,
+            onde: form.onde.trim() || null,
+            por_que: form.por_que.trim() || null,
+            como: form.como.trim() || null,
+          };
+          return Object.values(f).some((v) => v) ? f : null;
+        })(),
+        faq: (() => {
+          const cleaned = faq
+            .map((f) => ({ pergunta: f.pergunta.trim(), resposta: f.resposta.trim() }))
+            .filter((f) => f.pergunta && f.resposta);
+          return cleaned.length ? cleaned : null;
+        })(),
       };
       if (form.regiao_id) patch.regiao_id = form.regiao_id;
       const { data, error } = await sb
