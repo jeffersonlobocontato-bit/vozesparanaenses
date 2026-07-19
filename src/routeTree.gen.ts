@@ -25,6 +25,7 @@ import { Route as VitrineTokenRouteImport } from './routes/vitrine.$token'
 import { Route as VitrinePessoalNovoRouteImport } from './routes/vitrine-pessoal.novo'
 import { Route as RIdRouteImport } from './routes/r.$id'
 import { Route as PublieditorialTokenRouteImport } from './routes/publieditorial.$token'
+import { Route as EmailUnsubscribeRouteImport } from './routes/email/unsubscribe'
 import { Route as EditoriaCategoriaRouteImport } from './routes/editoria.$categoria'
 import { Route as AutorSlugRouteImport } from './routes/autor.$slug'
 import { Route as AdminVitrinePessoalRouteImport } from './routes/admin.vitrine-pessoal'
@@ -42,6 +43,7 @@ import { Route as AdminAnalyticsRouteImport } from './routes/admin.analytics'
 import { Route as AdminAgentesRouteImport } from './routes/admin.agentes'
 import { Route as RegionClassificadosRouteImport } from './routes/$region.classificados'
 import { Route as RegionSlugRouteImport } from './routes/$region.$slug'
+import { Route as LovableEmailSuppressionRouteImport } from './routes/lovable/email/suppression'
 import { Route as ApiPublicSitemapDotxmlRouteImport } from './routes/api/public/sitemap[.]xml'
 import { Route as ApiPublicSitemapNewsDotxmlRouteImport } from './routes/api/public/sitemap-news[.]xml'
 import { Route as ApiPublicRssDotxmlRouteImport } from './routes/api/public/rss[.]xml'
@@ -49,6 +51,8 @@ import { Route as ApiPublicLlmsDottxtRouteImport } from './routes/api/public/llm
 import { Route as ApiPublicLlmsFullDottxtRouteImport } from './routes/api/public/llms-full[.]txt'
 import { Route as RegionEditoriaCategoriaRouteImport } from './routes/$region.editoria.$categoria'
 import { Route as RegionCidadeCidadeRouteImport } from './routes/$region.cidade.$cidade'
+import { Route as LovableEmailTransactionalSendRouteImport } from './routes/lovable/email/transactional/send'
+import { Route as LovableEmailTransactionalPreviewRouteImport } from './routes/lovable/email/transactional/preview'
 import { Route as LovableEmailQueueProcessRouteImport } from './routes/lovable/email/queue/process'
 import { Route as ApiPublicIndexnowKeyRouteImport } from './routes/api/public/indexnow.$key'
 import { Route as ApiPublicHooksIndexnowPingRouteImport } from './routes/api/public/hooks.indexnow-ping'
@@ -136,6 +140,11 @@ const PublieditorialTokenRoute = PublieditorialTokenRouteImport.update({
   path: '/publieditorial/$token',
   getParentRoute: () => rootRouteImport,
 } as any)
+const EmailUnsubscribeRoute = EmailUnsubscribeRouteImport.update({
+  id: '/email/unsubscribe',
+  path: '/email/unsubscribe',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const EditoriaCategoriaRoute = EditoriaCategoriaRouteImport.update({
   id: '/editoria/$categoria',
   path: '/editoria/$categoria',
@@ -221,6 +230,11 @@ const RegionSlugRoute = RegionSlugRouteImport.update({
   path: '/$slug',
   getParentRoute: () => RegionRoute,
 } as any)
+const LovableEmailSuppressionRoute = LovableEmailSuppressionRouteImport.update({
+  id: '/lovable/email/suppression',
+  path: '/lovable/email/suppression',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiPublicSitemapDotxmlRoute = ApiPublicSitemapDotxmlRouteImport.update({
   id: '/api/public/sitemap.xml',
   path: '/api/public/sitemap.xml',
@@ -257,6 +271,18 @@ const RegionCidadeCidadeRoute = RegionCidadeCidadeRouteImport.update({
   path: '/cidade/$cidade',
   getParentRoute: () => RegionRoute,
 } as any)
+const LovableEmailTransactionalSendRoute =
+  LovableEmailTransactionalSendRouteImport.update({
+    id: '/lovable/email/transactional/send',
+    path: '/lovable/email/transactional/send',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const LovableEmailTransactionalPreviewRoute =
+  LovableEmailTransactionalPreviewRouteImport.update({
+    id: '/lovable/email/transactional/preview',
+    path: '/lovable/email/transactional/preview',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const LovableEmailQueueProcessRoute =
   LovableEmailQueueProcessRouteImport.update({
     id: '/lovable/email/queue/process',
@@ -321,6 +347,7 @@ export interface FileRoutesByFullPath {
   '/admin/vitrine-pessoal': typeof AdminVitrinePessoalRoute
   '/autor/$slug': typeof AutorSlugRoute
   '/editoria/$categoria': typeof EditoriaCategoriaRoute
+  '/email/unsubscribe': typeof EmailUnsubscribeRoute
   '/publieditorial/$token': typeof PublieditorialTokenRoute
   '/r/$id': typeof RIdRoute
   '/vitrine-pessoal/novo': typeof VitrinePessoalNovoRoute
@@ -334,9 +361,12 @@ export interface FileRoutesByFullPath {
   '/api/public/rss.xml': typeof ApiPublicRssDotxmlRoute
   '/api/public/sitemap-news.xml': typeof ApiPublicSitemapNewsDotxmlRoute
   '/api/public/sitemap.xml': typeof ApiPublicSitemapDotxmlRoute
+  '/lovable/email/suppression': typeof LovableEmailSuppressionRoute
   '/api/public/hooks/indexnow-ping': typeof ApiPublicHooksIndexnowPingRoute
   '/api/public/indexnow/$key': typeof ApiPublicIndexnowKeyRoute
   '/lovable/email/queue/process': typeof LovableEmailQueueProcessRoute
+  '/lovable/email/transactional/preview': typeof LovableEmailTransactionalPreviewRoute
+  '/lovable/email/transactional/send': typeof LovableEmailTransactionalSendRoute
   '/api/public/rss/categoria/$slug': typeof ApiPublicRssCategoriaSlugRoute
   '/api/public/rss/regiao/$region': typeof ApiPublicRssRegiaoRegionRoute
   '/api/public/rss/cidade/$region/$cidade': typeof ApiPublicRssCidadeRegionCidadeRoute
@@ -367,6 +397,7 @@ export interface FileRoutesByTo {
   '/admin/vitrine-pessoal': typeof AdminVitrinePessoalRoute
   '/autor/$slug': typeof AutorSlugRoute
   '/editoria/$categoria': typeof EditoriaCategoriaRoute
+  '/email/unsubscribe': typeof EmailUnsubscribeRoute
   '/publieditorial/$token': typeof PublieditorialTokenRoute
   '/r/$id': typeof RIdRoute
   '/vitrine-pessoal/novo': typeof VitrinePessoalNovoRoute
@@ -380,9 +411,12 @@ export interface FileRoutesByTo {
   '/api/public/rss.xml': typeof ApiPublicRssDotxmlRoute
   '/api/public/sitemap-news.xml': typeof ApiPublicSitemapNewsDotxmlRoute
   '/api/public/sitemap.xml': typeof ApiPublicSitemapDotxmlRoute
+  '/lovable/email/suppression': typeof LovableEmailSuppressionRoute
   '/api/public/hooks/indexnow-ping': typeof ApiPublicHooksIndexnowPingRoute
   '/api/public/indexnow/$key': typeof ApiPublicIndexnowKeyRoute
   '/lovable/email/queue/process': typeof LovableEmailQueueProcessRoute
+  '/lovable/email/transactional/preview': typeof LovableEmailTransactionalPreviewRoute
+  '/lovable/email/transactional/send': typeof LovableEmailTransactionalSendRoute
   '/api/public/rss/categoria/$slug': typeof ApiPublicRssCategoriaSlugRoute
   '/api/public/rss/regiao/$region': typeof ApiPublicRssRegiaoRegionRoute
   '/api/public/rss/cidade/$region/$cidade': typeof ApiPublicRssCidadeRegionCidadeRoute
@@ -416,6 +450,7 @@ export interface FileRoutesById {
   '/admin/vitrine-pessoal': typeof AdminVitrinePessoalRoute
   '/autor/$slug': typeof AutorSlugRoute
   '/editoria/$categoria': typeof EditoriaCategoriaRoute
+  '/email/unsubscribe': typeof EmailUnsubscribeRoute
   '/publieditorial/$token': typeof PublieditorialTokenRoute
   '/r/$id': typeof RIdRoute
   '/vitrine-pessoal/novo': typeof VitrinePessoalNovoRoute
@@ -429,9 +464,12 @@ export interface FileRoutesById {
   '/api/public/rss.xml': typeof ApiPublicRssDotxmlRoute
   '/api/public/sitemap-news.xml': typeof ApiPublicSitemapNewsDotxmlRoute
   '/api/public/sitemap.xml': typeof ApiPublicSitemapDotxmlRoute
+  '/lovable/email/suppression': typeof LovableEmailSuppressionRoute
   '/api/public/hooks/indexnow-ping': typeof ApiPublicHooksIndexnowPingRoute
   '/api/public/indexnow/$key': typeof ApiPublicIndexnowKeyRoute
   '/lovable/email/queue/process': typeof LovableEmailQueueProcessRoute
+  '/lovable/email/transactional/preview': typeof LovableEmailTransactionalPreviewRoute
+  '/lovable/email/transactional/send': typeof LovableEmailTransactionalSendRoute
   '/api/public/rss/categoria/$slug': typeof ApiPublicRssCategoriaSlugRoute
   '/api/public/rss/regiao/$region': typeof ApiPublicRssRegiaoRegionRoute
   '/api/public/rss/cidade/$region/$cidade': typeof ApiPublicRssCidadeRegionCidadeRoute
@@ -466,6 +504,7 @@ export interface FileRouteTypes {
     | '/admin/vitrine-pessoal'
     | '/autor/$slug'
     | '/editoria/$categoria'
+    | '/email/unsubscribe'
     | '/publieditorial/$token'
     | '/r/$id'
     | '/vitrine-pessoal/novo'
@@ -479,9 +518,12 @@ export interface FileRouteTypes {
     | '/api/public/rss.xml'
     | '/api/public/sitemap-news.xml'
     | '/api/public/sitemap.xml'
+    | '/lovable/email/suppression'
     | '/api/public/hooks/indexnow-ping'
     | '/api/public/indexnow/$key'
     | '/lovable/email/queue/process'
+    | '/lovable/email/transactional/preview'
+    | '/lovable/email/transactional/send'
     | '/api/public/rss/categoria/$slug'
     | '/api/public/rss/regiao/$region'
     | '/api/public/rss/cidade/$region/$cidade'
@@ -512,6 +554,7 @@ export interface FileRouteTypes {
     | '/admin/vitrine-pessoal'
     | '/autor/$slug'
     | '/editoria/$categoria'
+    | '/email/unsubscribe'
     | '/publieditorial/$token'
     | '/r/$id'
     | '/vitrine-pessoal/novo'
@@ -525,9 +568,12 @@ export interface FileRouteTypes {
     | '/api/public/rss.xml'
     | '/api/public/sitemap-news.xml'
     | '/api/public/sitemap.xml'
+    | '/lovable/email/suppression'
     | '/api/public/hooks/indexnow-ping'
     | '/api/public/indexnow/$key'
     | '/lovable/email/queue/process'
+    | '/lovable/email/transactional/preview'
+    | '/lovable/email/transactional/send'
     | '/api/public/rss/categoria/$slug'
     | '/api/public/rss/regiao/$region'
     | '/api/public/rss/cidade/$region/$cidade'
@@ -560,6 +606,7 @@ export interface FileRouteTypes {
     | '/admin/vitrine-pessoal'
     | '/autor/$slug'
     | '/editoria/$categoria'
+    | '/email/unsubscribe'
     | '/publieditorial/$token'
     | '/r/$id'
     | '/vitrine-pessoal/novo'
@@ -573,9 +620,12 @@ export interface FileRouteTypes {
     | '/api/public/rss.xml'
     | '/api/public/sitemap-news.xml'
     | '/api/public/sitemap.xml'
+    | '/lovable/email/suppression'
     | '/api/public/hooks/indexnow-ping'
     | '/api/public/indexnow/$key'
     | '/lovable/email/queue/process'
+    | '/lovable/email/transactional/preview'
+    | '/lovable/email/transactional/send'
     | '/api/public/rss/categoria/$slug'
     | '/api/public/rss/regiao/$region'
     | '/api/public/rss/cidade/$region/$cidade'
@@ -594,6 +644,7 @@ export interface RootRouteChildren {
   WhatsappRoute: typeof WhatsappRoute
   AutorSlugRoute: typeof AutorSlugRoute
   EditoriaCategoriaRoute: typeof EditoriaCategoriaRoute
+  EmailUnsubscribeRoute: typeof EmailUnsubscribeRoute
   PublieditorialTokenRoute: typeof PublieditorialTokenRoute
   RIdRoute: typeof RIdRoute
   VitrinePessoalNovoRoute: typeof VitrinePessoalNovoRoute
@@ -603,9 +654,12 @@ export interface RootRouteChildren {
   ApiPublicRssDotxmlRoute: typeof ApiPublicRssDotxmlRoute
   ApiPublicSitemapNewsDotxmlRoute: typeof ApiPublicSitemapNewsDotxmlRoute
   ApiPublicSitemapDotxmlRoute: typeof ApiPublicSitemapDotxmlRoute
+  LovableEmailSuppressionRoute: typeof LovableEmailSuppressionRoute
   ApiPublicHooksIndexnowPingRoute: typeof ApiPublicHooksIndexnowPingRoute
   ApiPublicIndexnowKeyRoute: typeof ApiPublicIndexnowKeyRoute
   LovableEmailQueueProcessRoute: typeof LovableEmailQueueProcessRoute
+  LovableEmailTransactionalPreviewRoute: typeof LovableEmailTransactionalPreviewRoute
+  LovableEmailTransactionalSendRoute: typeof LovableEmailTransactionalSendRoute
   ApiPublicRssCategoriaSlugRoute: typeof ApiPublicRssCategoriaSlugRoute
   ApiPublicRssRegiaoRegionRoute: typeof ApiPublicRssRegiaoRegionRoute
   ApiPublicRssCidadeRegionCidadeRoute: typeof ApiPublicRssCidadeRegionCidadeRoute
@@ -723,6 +777,13 @@ declare module '@tanstack/react-router' {
       path: '/publieditorial/$token'
       fullPath: '/publieditorial/$token'
       preLoaderRoute: typeof PublieditorialTokenRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/email/unsubscribe': {
+      id: '/email/unsubscribe'
+      path: '/email/unsubscribe'
+      fullPath: '/email/unsubscribe'
+      preLoaderRoute: typeof EmailUnsubscribeRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/editoria/$categoria': {
@@ -844,6 +905,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof RegionSlugRouteImport
       parentRoute: typeof RegionRoute
     }
+    '/lovable/email/suppression': {
+      id: '/lovable/email/suppression'
+      path: '/lovable/email/suppression'
+      fullPath: '/lovable/email/suppression'
+      preLoaderRoute: typeof LovableEmailSuppressionRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/public/sitemap.xml': {
       id: '/api/public/sitemap.xml'
       path: '/api/public/sitemap.xml'
@@ -892,6 +960,20 @@ declare module '@tanstack/react-router' {
       fullPath: '/$region/cidade/$cidade'
       preLoaderRoute: typeof RegionCidadeCidadeRouteImport
       parentRoute: typeof RegionRoute
+    }
+    '/lovable/email/transactional/send': {
+      id: '/lovable/email/transactional/send'
+      path: '/lovable/email/transactional/send'
+      fullPath: '/lovable/email/transactional/send'
+      preLoaderRoute: typeof LovableEmailTransactionalSendRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/lovable/email/transactional/preview': {
+      id: '/lovable/email/transactional/preview'
+      path: '/lovable/email/transactional/preview'
+      fullPath: '/lovable/email/transactional/preview'
+      preLoaderRoute: typeof LovableEmailTransactionalPreviewRouteImport
+      parentRoute: typeof rootRouteImport
     }
     '/lovable/email/queue/process': {
       id: '/lovable/email/queue/process'
@@ -1006,6 +1088,7 @@ const rootRouteChildren: RootRouteChildren = {
   WhatsappRoute: WhatsappRoute,
   AutorSlugRoute: AutorSlugRoute,
   EditoriaCategoriaRoute: EditoriaCategoriaRoute,
+  EmailUnsubscribeRoute: EmailUnsubscribeRoute,
   PublieditorialTokenRoute: PublieditorialTokenRoute,
   RIdRoute: RIdRoute,
   VitrinePessoalNovoRoute: VitrinePessoalNovoRoute,
@@ -1015,9 +1098,12 @@ const rootRouteChildren: RootRouteChildren = {
   ApiPublicRssDotxmlRoute: ApiPublicRssDotxmlRoute,
   ApiPublicSitemapNewsDotxmlRoute: ApiPublicSitemapNewsDotxmlRoute,
   ApiPublicSitemapDotxmlRoute: ApiPublicSitemapDotxmlRoute,
+  LovableEmailSuppressionRoute: LovableEmailSuppressionRoute,
   ApiPublicHooksIndexnowPingRoute: ApiPublicHooksIndexnowPingRoute,
   ApiPublicIndexnowKeyRoute: ApiPublicIndexnowKeyRoute,
   LovableEmailQueueProcessRoute: LovableEmailQueueProcessRoute,
+  LovableEmailTransactionalPreviewRoute: LovableEmailTransactionalPreviewRoute,
+  LovableEmailTransactionalSendRoute: LovableEmailTransactionalSendRoute,
   ApiPublicRssCategoriaSlugRoute: ApiPublicRssCategoriaSlugRoute,
   ApiPublicRssRegiaoRegionRoute: ApiPublicRssRegiaoRegionRoute,
   ApiPublicRssCidadeRegionCidadeRoute: ApiPublicRssCidadeRegionCidadeRoute,
