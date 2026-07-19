@@ -41,6 +41,16 @@ type Draft = {
   categoria_id: string | null;
   regiao: { slug: string; nome: string } | null;
   categoria: { slug: string; nome: string } | null;
+  tldr: string | null;
+  fatos_5w1h: {
+    quem?: string | null;
+    o_que?: string | null;
+    quando?: string | null;
+    onde?: string | null;
+    por_que?: string | null;
+    como?: string | null;
+  } | null;
+  faq: Array<{ pergunta: string; resposta: string }> | null;
 };
 
 const STATUS_TABS: Draft["status"][] = ["rascunho", "aprovado", "publicado", "expirado", "rejeitado"];
@@ -62,7 +72,7 @@ function AdminQueue() {
     setItems(null); setErr(null);
     try {
       const sb = await getExternalBrowser();
-      const fullSelect = "id, slug, titulo, subtitulo, resumo, corpo, seo_title, seo_description, editor_responsavel, status, gerado_em, imagem_capa_url, imagem_credito, imagem_legenda, imagem_original_url, video_embed_url, video_legenda, video_credito, publicado_automaticamente, fixado_posicao, fixado_escopo, fixado_regioes, fixado_cidades, regiao_id, categoria_id, regiao:regioes(slug, nome), categoria:editorial_categories(slug, nome)";
+      const fullSelect = "id, slug, titulo, subtitulo, resumo, corpo, seo_title, seo_description, editor_responsavel, status, gerado_em, imagem_capa_url, imagem_credito, imagem_legenda, imagem_original_url, video_embed_url, video_legenda, video_credito, publicado_automaticamente, fixado_posicao, fixado_escopo, fixado_regioes, fixado_cidades, regiao_id, categoria_id, tldr, fatos_5w1h, faq, regiao:regioes(slug, nome), categoria:editorial_categories(slug, nome)";
       const pinBasicSelect = "id, slug, titulo, subtitulo, resumo, corpo, seo_title, seo_description, editor_responsavel, status, gerado_em, imagem_capa_url, imagem_credito, imagem_legenda, imagem_original_url, publicado_automaticamente, fixado_posicao, regiao_id, categoria_id, regiao:regioes(slug, nome), categoria:editorial_categories(slug, nome)";
       const midSelect = "id, slug, titulo, subtitulo, resumo, corpo, seo_title, seo_description, editor_responsavel, status, gerado_em, imagem_capa_url, imagem_credito, imagem_legenda, imagem_original_url, publicado_automaticamente, regiao_id, categoria_id, regiao:regioes(slug, nome), categoria:editorial_categories(slug, nome)";
       const fallbackSelect = "id, slug, titulo, subtitulo, resumo, corpo, seo_title, seo_description, status, gerado_em, regiao_id, categoria_id, regiao:regioes(slug, nome), categoria:editorial_categories(slug, nome)";
@@ -73,7 +83,7 @@ function AdminQueue() {
           .order("gerado_em", { ascending: false })
           .limit(50);
       let res = await run(fullSelect);
-      if (res.error && /fixado_(escopo|regioes|cidades)|video_embed_url|video_legenda|video_credito|imagem_legenda/i.test(res.error.message)) {
+      if (res.error && /fixado_(escopo|regioes|cidades)|video_embed_url|video_legenda|video_credito|imagem_legenda|tldr|fatos_5w1h|faq/i.test(res.error.message)) {
         res = await run(pinBasicSelect);
       }
       if (res.error && /fixado_posicao/i.test(res.error.message)) {
