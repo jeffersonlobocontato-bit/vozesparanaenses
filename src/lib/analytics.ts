@@ -89,6 +89,12 @@ export function PageviewTracker() {
   useEffect(() => {
     if (last.current === pathname) return;
     last.current = pathname;
+    // Nunca rastrear /admin — é uso interno da equipe, não audiência do
+    // portal. Sem isso, cada matéria revisada, cada tela do painel aberta
+    // virava "pageview" no Analytics, inflando o número real de leitores
+    // (chegou a 1317 visualizações só do painel editorial numa semana,
+    // quase toda a atividade registrada no período).
+    if (pathname.startsWith("/admin")) return;
     // Não bloqueia: dispara e esquece.
     void trackPageview(pathname);
   }, [pathname]);
