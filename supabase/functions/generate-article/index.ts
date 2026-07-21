@@ -222,7 +222,8 @@ Deno.serve(async (req) => {
   const cidadesMencionadas = (dados.cidades_mencionadas as string[] | undefined) ?? [];
 
   // 3. Persistir generated_articles (rascunho) — extracted_facts já existe, não regrava
-  const { data: inserted, error: insErr } = await sb
+  // deno-lint-ignore prefer-const
+  let { data: inserted, error: insErr } = await sb
     .from("generated_articles")
     .insert({
       cluster_id: clusterId,
@@ -281,7 +282,7 @@ Deno.serve(async (req) => {
         .single();
       if (retryErr) return json({ error: "insert_failed", detail: retryErr.message }, 500);
       // reatribui para o fluxo seguinte
-      (inserted as unknown) = retry;
+      inserted = retry;
     } else {
       return json({ error: "insert_failed", detail: insErr.message }, 500);
     }
