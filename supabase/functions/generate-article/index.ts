@@ -202,12 +202,28 @@ Deno.serve(async (req) => {
   if ("error" in aiResult) return json(aiResult, aiResult.httpStatus ?? 502);
   const parsed = aiResult.parsed;
 
-  const slug = slugify(parsed.titulo);
+  const baseSlug = slugify(parsed.titulo);
+  // Garante unicidade por (regiao_id, slug). Se colidir com uma matéria já
+  // existente na mesma região, adiciona sufixo curto do cluster_id.
+  let slug = baseSlug;
+  {
+    const { data: existing } = await sb
+      .from("generated_articles")
+      .select("id")
+      .eq("regiao_id", cluster.regiao_id)
+      .eq("slug", baseSlug)
+      .maybeSingle();
+    if (existing) {
+      const suffix = String(clusterId).replace(/-/g, "").slice(0, 6);
+      slug = `${baseSlug}-${suffix}`;
+    }
+  }
   const cidadePrincipal = (dados.cidade_principal as string | null) ?? null;
   const cidadesMencionadas = (dados.cidades_mencionadas as string[] | undefined) ?? [];
 
   // 3. Persistir generated_articles (rascunho) — extracted_facts já existe, não regrava
-  const { data: inserted, error: insErr } = await sb
+  // deno-lint-ignore prefer-const
+  let { data: inserted, error: insErr } = await sb
     .from("generated_articles")
     .insert({
       cluster_id: clusterId,
@@ -233,7 +249,44 @@ Deno.serve(async (req) => {
     .select("id, slug")
     .single();
 
-  if (insErr) return json({ error: "insert_failed", detail: insErr.message }, 500);
+  if (insErr) {
+    // Corrida: mesmo com a checagem acima, dois clusters podem tentar o mesmo
+    // slug ao mesmo tempo. Tenta de novo com sufixo do cluster_id.
+    if (/generated_articles_regiao_id_slug_key|duplicate key/i.test(insErr.message)) {
+      const suffix = String(clusterId).replace(/-/g, "").slice(0, 8);
+      const retrySlug = `${baseSlug}-${suffix}`;
+      const { data: retry, error: retryErr } = await sb
+        .from("generated_articles")
+        .insert({
+          cluster_id: clusterId,
+          regiao_id: cluster.regiao_id,
+          categoria_id: cluster.categoria_id,
+          slug: retrySlug,
+          titulo: parsed.titulo,
+          subtitulo: parsed.subtitulo ?? null,
+          resumo: parsed.resumo ?? null,
+          corpo: parsed.corpo,
+          seo_title: parsed.seo_title ?? parsed.titulo,
+          seo_description: parsed.seo_description ?? parsed.resumo ?? null,
+          cidade_principal: cidadePrincipal,
+          cidades_mencionadas: cidadesMencionadas,
+          tldr: parsed.tldr ?? null,
+          fatos_5w1h: {
+            quem: facts.quem, o_que: facts.o_que, quando: facts.quando, onde: facts.onde,
+            por_que: facts.por_que, como: dados.como ?? null,
+          },
+          faq: Array.isArray(parsed.faq) ? parsed.faq : [],
+          status: "rascunho",
+        })
+        .select("id, slug")
+        .single();
+      if (retryErr) return json({ error: "insert_failed", detail: retryErr.message }, 500);
+      // reatribui para o fluxo seguinte
+      inserted = retry;
+    } else {
+      return json({ error: "insert_failed", detail: insErr.message }, 500);
+    }
+  }
 
   // A partir daqui a matéria já existe. Marca o cluster como concluído ANTES
   // de qualquer tarefa auxiliar (ex.: copiar foto externa), para uma demora de
