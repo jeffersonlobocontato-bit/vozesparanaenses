@@ -262,6 +262,17 @@ export function ArticleImageEditor({ articleId, currentUrl, originalUrl, current
               }}
             />
           </label>
+          {currentUrl && (
+            <button
+              type="button"
+              onClick={removeCover}
+              disabled={busy !== null}
+              className="rounded border border-red-600 px-3 py-1 font-semibold text-red-600 hover:bg-red-50 disabled:opacity-60"
+              title="Publica a matéria sem foto de capa"
+            >
+              {busy === "remove" ? "Removendo…" : "🗑 Publicar sem foto"}
+            </button>
+          )}
         </div>
         <div className="mt-2 grid gap-2 sm:grid-cols-[1fr_auto]">
           <div className="flex flex-col gap-1">
@@ -303,6 +314,101 @@ export function ArticleImageEditor({ articleId, currentUrl, originalUrl, current
           </span>
         )}
         {msg && <span className="text-muted-foreground">{msg}</span>}
+      </div>
+
+      {/* Galeria de fotos */}
+      <div className="mt-3 rounded border border-[#0A2540]/20 bg-white p-2">
+        <div className="mb-2 flex items-center justify-between">
+          <span className="text-[11px] font-bold uppercase tracking-wide text-[#0A2540]">
+            Galeria ({galeria.length})
+          </span>
+          <label className="cursor-pointer rounded bg-[#0A2540] px-2 py-1 text-[10px] font-semibold text-white hover:bg-[#0d2f52]">
+            {busy === "gal-add" ? "Enviando…" : "+ Adicionar fotos"}
+            <input
+              type="file"
+              accept="image/*"
+              multiple
+              className="hidden"
+              disabled={busy !== null}
+              onChange={(e) => {
+                const fs = e.target.files;
+                if (fs && fs.length) addGaleriaFiles(fs);
+                e.target.value = "";
+              }}
+            />
+          </label>
+        </div>
+        {galeria.length === 0 ? (
+          <p className="text-[10px] italic text-muted-foreground">
+            Nenhuma foto na galeria. A foto #1 sempre será o destaque (capa da matéria).
+          </p>
+        ) : (
+          <div className="grid gap-2 sm:grid-cols-2 md:grid-cols-3">
+            {galeria.map((g, i) => (
+              <div key={g.url + i} className="flex flex-col gap-1 rounded border bg-muted/30 p-1">
+                <div className="relative h-24 w-full overflow-hidden rounded bg-muted">
+                  <img src={g.url} alt={g.legenda ?? `Foto ${i + 1}`} className="h-full w-full object-cover" />
+                  <span className="absolute left-1 top-1 rounded bg-[#0A2540] px-1.5 py-0.5 text-[9px] font-bold text-white">
+                    #{i + 1}{i === 0 ? " (destaque)" : ""}
+                  </span>
+                </div>
+                <input
+                  value={g.legenda ?? ""}
+                  onChange={(e) => {
+                    const next = [...galeria];
+                    next[i] = { ...next[i], legenda: e.target.value };
+                    setGaleria(next);
+                  }}
+                  onBlur={() => saveGaleria(galeria)}
+                  placeholder="Legenda"
+                  className="rounded border bg-white px-1.5 py-1 text-[10px]"
+                  disabled={busy !== null}
+                />
+                <input
+                  value={g.credito ?? ""}
+                  onChange={(e) => {
+                    const next = [...galeria];
+                    next[i] = { ...next[i], credito: e.target.value };
+                    setGaleria(next);
+                  }}
+                  onBlur={() => saveGaleria(galeria)}
+                  placeholder="Crédito"
+                  className="rounded border bg-white px-1.5 py-1 text-[10px]"
+                  disabled={busy !== null}
+                />
+                <div className="flex flex-wrap gap-1">
+                  <button
+                    type="button"
+                    onClick={() => moveGaleria(i, -1)}
+                    disabled={busy !== null || i === 0}
+                    className="rounded border px-1.5 py-0.5 text-[10px] disabled:opacity-40"
+                    title="Mover para cima"
+                  >↑</button>
+                  <button
+                    type="button"
+                    onClick={() => moveGaleria(i, 1)}
+                    disabled={busy !== null || i === galeria.length - 1}
+                    className="rounded border px-1.5 py-0.5 text-[10px] disabled:opacity-40"
+                    title="Mover para baixo"
+                  >↓</button>
+                  <button
+                    type="button"
+                    onClick={() => setAsCover(i)}
+                    disabled={busy !== null}
+                    className="rounded border border-[#0A2540] px-1.5 py-0.5 text-[10px] font-semibold text-[#0A2540] disabled:opacity-40"
+                    title="Definir esta foto como capa"
+                  >★ Capa</button>
+                  <button
+                    type="button"
+                    onClick={() => removeGaleriaItem(i)}
+                    disabled={busy !== null}
+                    className="rounded border border-red-600 px-1.5 py-0.5 text-[10px] font-semibold text-red-600 disabled:opacity-40"
+                  >🗑</button>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
       </div>
     </div>
   );
