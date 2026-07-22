@@ -172,14 +172,14 @@ Deno.serve(async (req) => {
       regiao_id: body.regiao_id,
       categoria_id: body.categoria_id,
       prioridade_score: 1,
-      interesse_score: 3.5,
+      interesse_score: 3.0,
     }).eq("id", clusterId);
   } else {
     const clusterInsert = await sb.from("article_clusters").insert({
       regiao_id: body.regiao_id,
       categoria_id: body.categoria_id,
       prioridade_score: 1,
-      interesse_score: 3.5, // alto o suficiente para o gerador; publicação continua manual
+      interesse_score: 3.0, // abaixo do limiar de auto-publicação: fica sempre na fila para o editor decidir
       status: "novo",
     }).select("id").single();
     if (clusterInsert.error) return json({ error: "cluster_insert_failed", detail: clusterInsert.error.message }, 500);
