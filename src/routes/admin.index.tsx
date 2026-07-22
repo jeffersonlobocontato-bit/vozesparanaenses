@@ -29,6 +29,7 @@ type Draft = {
   imagem_credito: string | null;
   imagem_legenda: string | null;
   imagem_original_url: string | null;
+ imagem_galeria: { url: string; legenda?: string | null; credito?: string | null }[] | null;
   video_embed_url: string | null;
   video_legenda: string | null;
   video_credito: string | null;
