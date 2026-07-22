@@ -29,6 +29,10 @@ export const Route = createFileRoute("/sobre")({
             "@type": "NewsMediaOrganization",
             name: "Vozes Paranaenses",
             areaServed: { "@type": "State", name: "Paraná" },
+            founder: { "@type": "Person", name: "Jefferson Lobo" },
+            // foundingDate: ainda não informado — adicionar quando o
+            // Jefferson confirmar a data (e o CNPJ/razão social, quando
+            // definidos).
           },
         }),
       },
@@ -50,6 +54,15 @@ function AboutPage() {
           foco no impacto local. Cada matéria é organizada por região e por cidade principal, de
           forma que o leitor encontre primeiro o que acontece perto de casa.
         </p>
+
+        <section className="mt-10">
+          <h2 className="font-display text-3xl font-bold text-[#0A2540]">Quem somos</h2>
+          <p className="mt-3 text-base leading-relaxed text-slate-700">
+            O Vozes Paranaenses foi fundado por <strong>Jefferson Lobo</strong>, responsável
+            editorial pelo projeto. A formalização da empresa (razão social e CNPJ) está em
+            andamento — atualizaremos esta seção assim que estiver concluída.
+          </p>
+        </section>
 
         <section className="mt-10">
           <h2 className="font-display text-3xl font-bold text-[#0A2540]">Missão</h2>
