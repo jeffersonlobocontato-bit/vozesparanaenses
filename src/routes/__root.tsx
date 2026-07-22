@@ -14,6 +14,7 @@ import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
 import { PageviewTracker } from "../lib/analytics";
 import { SalesChatWidget } from "../components/SalesChatWidget";
+import { AdminFloatingEditor } from "../components/AdminFloatingEditor";
 import faviconAsset from "@/assets/favicon.png.asset.json";
 
 function NotFoundComponent() {
@@ -224,6 +225,7 @@ function RootComponent() {
     <QueryClientProvider client={queryClient}>
       <PageviewTracker />
       {!isAdmin && <SalesChatWidget />}
+      {!isAdmin && <AdminFloatingEditor />}
       {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
       <Outlet />
     </QueryClientProvider>
