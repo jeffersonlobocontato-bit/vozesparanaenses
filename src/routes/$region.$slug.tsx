@@ -610,7 +610,10 @@ function ArticlePage() {
         {paragraphs.length > 0 && (
           <div className="mx-auto mt-10 max-w-3xl font-body text-lg leading-[1.75] text-slate-800">
             {paragraphs.map((p, i) => {
-              const nodes = autoLinkParagraph(p, linkTerms, usedTerms, i);
+              const nodes = withLineBreaks(
+                autoLinkParagraph(p, linkTerms, usedTerms, i),
+                `p${i}`,
+              );
               const isFirst = i === 0;
               return (
                 <div key={`p-${i}`}>
