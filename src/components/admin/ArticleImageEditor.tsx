@@ -12,6 +12,60 @@ type Props = {
   onUpdated: () => void;
 };
 
+const MAX_UPLOAD_BYTES = 2.8 * 1024 * 1024;
+const MAX_IMAGE_SIDE = 1800;
+const MIN_JPEG_QUALITY = 0.58;
+
+function formatBytes(bytes: number) {
+  if (bytes < 1024 * 1024) return `${Math.round(bytes / 1024)}KB`;
+  return `${(bytes / (1024 * 1024)).toFixed(1)}MB`;
+}
+
+function readImage(file: File): Promise<HTMLImageElement> {
+  return new Promise((resolve, reject) => {
+    const url = URL.createObjectURL(file);
+    const img = new Image();
+    img.onload = () => {
+      URL.revokeObjectURL(url);
+      resolve(img);
+    };
+    img.onerror = () => {
+      URL.revokeObjectURL(url);
+      reject(new Error("Não consegui ler esta imagem. Se for HEIC/HEIF, converta para JPG ou PNG."));
+    };
+    img.src = url;
+  });
+}
+
+async function compressImageForUpload(file: File): Promise<File> {
+  if (!file.type.startsWith("image/")) throw new Error("Arquivo inválido — selecione uma imagem.");
+  if (/heic|heif/i.test(file.type) || /\.hei[cf]$/i.test(file.name)) {
+    throw new Error("Fotos HEIC/HEIF do iPhone não são suportadas pelo navegador. Envie em JPG ou PNG.");
+  }
+
+  const img = await readImage(file);
+  const scale = Math.min(1, MAX_IMAGE_SIDE / Math.max(img.naturalWidth, img.naturalHeight));
+  const width = Math.max(1, Math.round(img.naturalWidth * scale));
+  const height = Math.max(1, Math.round(img.naturalHeight * scale));
+  const canvas = document.createElement("canvas");
+  canvas.width = width;
+  canvas.height = height;
+  const ctx = canvas.getContext("2d");
+  if (!ctx) throw new Error("Seu navegador não permitiu comprimir a imagem.");
+  ctx.drawImage(img, 0, 0, width, height);
+
+  let quality = file.size > MAX_UPLOAD_BYTES || scale < 1 ? 0.82 : 0.9;
+  let blob = await new Promise<Blob | null>((resolve) => canvas.toBlob(resolve, "image/jpeg", quality));
+  while (blob && blob.size > MAX_UPLOAD_BYTES && quality > MIN_JPEG_QUALITY) {
+    quality = Math.max(MIN_JPEG_QUALITY, quality - 0.08);
+    blob = await new Promise<Blob | null>((resolve) => canvas.toBlob(resolve, "image/jpeg", quality));
+  }
+  if (!blob) throw new Error("Falha ao comprimir a imagem.");
+
+  const baseName = file.name.replace(/\.[^.]+$/, "").replace(/[^a-z0-9-_]+/gi, "-") || "foto";
+  return new File([blob], `${baseName}.jpg`, { type: "image/jpeg", lastModified: Date.now() });
+}
+
 export function ArticleImageEditor({ articleId, currentUrl, originalUrl, currentCredito, currentLegenda, currentGaleria, onUpdated }: Props) {
   const [busy, setBusy] = useState<"ai" | "upload" | "original" | "meta" | "remove" | "gal-add" | "gal-save" | null>(null);
   const [msg, setMsg] = useState<string | null>(null);
@@ -43,10 +97,11 @@ export function ArticleImageEditor({ articleId, currentUrl, originalUrl, current
 
   async function uploadToStorage(file: File): Promise<string> {
     const sb = await getExternalBrowser();
-    const ext = (file.name.split(".").pop() || "jpg").toLowerCase().replace(/[^a-z0-9]/g, "");
+    const prepared = await compressImageForUpload(file);
+    const ext = (prepared.name.split(".").pop() || "jpg").toLowerCase().replace(/[^a-z0-9]/g, "");
     const path = `galeria/${articleId}/${Date.now()}-${Math.random().toString(36).slice(2, 8)}.${ext}`;
-    const { error: upErr } = await sb.storage.from("article-covers").upload(path, file, {
-      contentType: file.type || "image/jpeg",
+    const { error: upErr } = await sb.storage.from("article-covers").upload(path, prepared, {
+      contentType: prepared.type || "image/jpeg",
       upsert: false,
     });
     if (upErr) throw upErr;
@@ -60,13 +115,14 @@ export function ArticleImageEditor({ articleId, currentUrl, originalUrl, current
       const sb = await getExternalBrowser();
       const novas = [...galeria];
       let enviadas = 0;
-      for (const f of Array.from(files)) {
-        if (f.size > 8 * 1024 * 1024) { setMsg(`"${f.name}" acima de 8MB — pulando.`); continue; }
+      const selected = Array.from(files);
+      for (const f of selected) {
         try {
+          setMsg(`Preparando e comprimindo "${f.name}" (${formatBytes(f.size)})…`);
           const url = await uploadToStorage(f);
           novas.push({ url, legenda: null, credito: null });
           enviadas++;
-          setMsg(`Enviando fotos para a galeria… (${enviadas}/${files.length})`);
+          setMsg(`Enviando fotos para a galeria… (${enviadas}/${selected.length})`);
         } catch (upErr: unknown) {
           const msgErr = upErr instanceof Error ? upErr.message : String(upErr);
           console.error("[galeria] upload falhou para", f.name, upErr);
@@ -74,7 +130,7 @@ export function ArticleImageEditor({ articleId, currentUrl, originalUrl, current
         }
       }
       if (enviadas === 0) {
-        setMsg("Nenhuma foto foi enviada (todas acima de 8MB ou erro).");
+        setMsg("Nenhuma foto foi enviada. Confira se os arquivos são JPG/PNG/WebP válidos.");
         return;
       }
       const { error } = await sb.from("generated_articles").update({ imagem_galeria: novas }).eq("id", articleId);
@@ -203,17 +259,18 @@ export function ArticleImageEditor({ articleId, currentUrl, originalUrl, current
   }
 
   async function handleUpload(file: File) {
-    if (file.size > 8 * 1024 * 1024) { setMsg("Arquivo acima de 8MB."); return; }
-    setBusy("upload"); setMsg("Enviando imagem…");
+    setBusy("upload"); setMsg(`Preparando e comprimindo imagem (${formatBytes(file.size)})…`);
     try {
+      const prepared = await compressImageForUpload(file);
+      setMsg(`Enviando imagem comprimida (${formatBytes(prepared.size)})…`);
       const b64 = await new Promise<string>((resolve, reject) => {
         const r = new FileReader();
         r.onload = () => resolve(String(r.result));
         r.onerror = () => reject(r.error);
-        r.readAsDataURL(file);
+        r.readAsDataURL(prepared);
       });
       const { data, error } = await supabase.functions.invoke("generate-article-image", {
-        body: { article_id: articleId, mode: "upload", base64: b64, mime: file.type },
+        body: { article_id: articleId, mode: "upload", base64: b64, mime: prepared.type },
       });
       if (error) throw error;
       const d = data as { error?: string; detail?: string };
