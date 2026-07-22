@@ -26,8 +26,8 @@ export const Route = createFileRoute("/$region/")({
     const region = await context.queryClient.ensureQueryData(
       regionQO(params.region),
     );
-    await context.queryClient.ensureQueryData(articlesQO(params.region));
-    return { region };
+    const articles = await context.queryClient.ensureQueryData(articlesQO(params.region));
+    return { region, articles };
   },
   head: ({ loaderData, params }) =>
     loaderData
@@ -58,6 +58,14 @@ export const Route = createFileRoute("/$region/")({
                   },
                 ]
               : []),
+            // Região sem matéria publicada ainda (comum logo após cadastrar
+            // uma região nova, ex.: Nacional/Internacional): não indexa até
+            // ter conteúdo de verdade — mesmo motivo já aplicado em
+            // cidade/editoria/classificados.
+            {
+              name: "robots",
+              content: (loaderData.articles?.length ?? 0) > 0 ? "index, follow" : "noindex, follow",
+            },
           ],
           links: [
             {

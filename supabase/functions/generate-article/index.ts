@@ -374,12 +374,42 @@ Deno.serve(async (req) => {
   const AUTO_PUBLISH_INTERESSE_MINIMO = 3.5;
   const CATEGORIAS_SEMPRE_MANUAIS = ["seguranca"];
   const categoriaSensivel = categoriaSlug ? CATEGORIAS_SEMPRE_MANUAIS.includes(categoriaSlug) : false;
+
+  // Trava contra duplicidade: se o clustering não juntou duas fontes que
+  // cobriram o MESMO fato (pode acontecer quando o texto de origem é
+  // redigido de forma diferente o bastante pra ficar abaixo do limiar de
+  // similaridade do embedding), o resultado são duas matérias quase
+  // idênticas publicadas separadamente — isso é exatamente "conteúdo
+  // duplicado" pra política de baixo valor do AdSense. Sem um segundo
+  // cluster pra comparar, o jeito mais barato de pegar isso aqui é
+  // comparar o TÍTULO contra o que já foi publicado na mesma
+  // categoria+região nas últimas 48h — se a sobreposição de palavras
+  // relevantes for alta, força fila manual mesmo que o interesse desse
+  // cluster sozinho justificasse publicação automática.
+  let possivelDuplicata = false;
+  if (cluster.categoria_id && cluster.regiao_id) {
+    const desde48h = new Date(Date.now() - 48 * 3600 * 1000).toISOString();
+    const { data: recentes } = await sb
+      .from("generated_articles")
+      .select("titulo")
+      .eq("categoria_id", cluster.categoria_id)
+      .eq("regiao_id", cluster.regiao_id)
+      .gte("gerado_em", desde48h)
+      .neq("id", inserted.id);
+    if (recentes?.length) {
+      possivelDuplicata = recentes.some((r) => tituloMuitoParecido(parsed.titulo, r.titulo));
+    }
+  }
+
   const podeAutoPublicar =
-    !temFotoReal && !categoriaSensivel && (cluster.interesse_score ?? 0) >= AUTO_PUBLISH_INTERESSE_MINIMO;
+    !temFotoReal && !categoriaSensivel && !possivelDuplicata &&
+    (cluster.interesse_score ?? 0) >= AUTO_PUBLISH_INTERESSE_MINIMO;
   if (podeAutoPublicar) {
     await sb.from("generated_articles")
       .update({ status: "publicado", publicado_automaticamente: true, publicado_em: new Date().toISOString() })
       .eq("id", inserted.id);
+  } else if (possivelDuplicata) {
+    console.warn(`[generate-article] possível duplicata detectada, mandando pra revisão manual: "${parsed.titulo}"`);
   }
 
   // 5. Marcar raws desse cluster como processados
@@ -536,6 +566,40 @@ Redija a reportagem no schema JSON:
   "seo_description": "string até 155 chars",
   "faq": [ { "pergunta": "string", "resposta": "1-3 frases baseadas SOMENTE nos fatos acima" } ]
 }`;
+}
+
+// Palavras muito comuns em manchete não contam pra semelhança (senão duas
+// matérias totalmente diferentes que só compartilham "homem", "preso" ou o
+// nome da cidade já dariam falso positivo).
+const STOPWORDS_TITULO = new Set([
+  "de","da","do","das","dos","em","no","na","nos","nas","com","por","para",
+  "e","o","a","os","as","um","uma","que","se","é","após","apos","sobre",
+]);
+
+function palavrasRelevantes(titulo: string): Set<string> {
+  return new Set(
+    titulo
+      .toLowerCase()
+      .normalize("NFD").replace(/[\u0300-\u036f]/g, "")
+      .replace(/[^a-z0-9\s]/g, " ")
+      .split(/\s+/)
+      .filter((w) => w.length >= 4 && !STOPWORDS_TITULO.has(w)),
+  );
+}
+
+// Similaridade de Jaccard sobre palavras relevantes do título — barata (sem
+// chamada de IA extra) e suficiente pra pegar duas manchetes sobre o mesmo
+// fato mesmo com fraseado diferente. Limiar 0.5 é deliberadamente permissivo
+// (prefere mandar um falso positivo pra revisão manual a deixar passar uma
+// duplicata publicada sozinha).
+function tituloMuitoParecido(a: string, b: string): boolean {
+  const wa = palavrasRelevantes(a);
+  const wb = palavrasRelevantes(b);
+  if (wa.size === 0 || wb.size === 0) return false;
+  let intersecao = 0;
+  for (const w of wa) if (wb.has(w)) intersecao++;
+  const uniao = new Set([...wa, ...wb]).size;
+  return intersecao / uniao >= 0.5;
 }
 
 function slugify(s: string) {
