@@ -362,6 +362,7 @@ function AdminQueue() {
               originalUrl={it.imagem_original_url}
               currentCredito={it.imagem_credito}
               currentLegenda={it.imagem_legenda}
+              currentGaleria={it.imagem_galeria}
               onUpdated={load}
             />
             <ArticleVideoEditor
