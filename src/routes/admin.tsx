@@ -101,6 +101,15 @@ function AdminLayout() {
                   {it.label}
                 </Link>
               ))}
+              <a
+                href="/"
+                target="_blank"
+                rel="noreferrer"
+                className="rounded-full px-3 py-1.5 text-slate-600 transition hover:text-[#0A2540]"
+                title="Abrir o site em outra aba (modo editor: mostra atalho «Editar matéria» em cada notícia)"
+              >
+                🏠 Ver site
+              </a>
             </nav>
           </div>
           <div className="flex items-center gap-2 text-xs">
