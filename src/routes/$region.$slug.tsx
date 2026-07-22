@@ -10,7 +10,7 @@ import {
   cidadeSlug,
   type ArticleListItem,
 } from "@/lib/content.functions";
-import { buildLinkTerms, autoLinkParagraph, withLineBreaks } from "@/lib/auto-link";
+import { buildLinkTerms, autoLinkParagraph, withLineBreaks, withInlineMarkdown } from "@/lib/auto-link";
 import { SiteHeader, SiteFooter } from "@/components/SiteHeader";
 import { getCityCoords, formatGeoPosition, formatICBM } from "@/lib/geo-cities";
 import { AdSlot } from "@/components/AdSlot";
@@ -610,8 +610,11 @@ function ArticlePage() {
         {paragraphs.length > 0 && (
           <div className="mx-auto mt-10 max-w-3xl font-body text-lg leading-[1.75] text-slate-800">
             {paragraphs.map((p, i) => {
-              const nodes = withLineBreaks(
-                autoLinkParagraph(p, linkTerms, usedTerms, i),
+              const nodes = withInlineMarkdown(
+                withLineBreaks(
+                  autoLinkParagraph(p, linkTerms, usedTerms, i),
+                  `p${i}`,
+                ),
                 `p${i}`,
               );
               const isFirst = i === 0;
