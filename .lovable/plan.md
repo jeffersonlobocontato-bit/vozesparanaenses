@@ -1,66 +1,48 @@
-# Status atual do DNS — o que já está feito e o que falta
+## O que confirmei olhando seu painel Registro.br + status Lovable
 
-## ✅ Já está configurado no Registro.br
+### ✅ Já está pronto no DNS
+| Tipo | Nome | Finalidade |
+|------|------|------------|
+| TXT | `@.vozesparanaenses.com.br` — `v=spf1 include:zoho.com ~all` | SPF do email Zoho (contato@) |
+| MX (10/20/50) | `@.vozesparanaenses.com.br` — `mx.zoho.com` | Recebimento Zoho |
+| TXT | `@.vozesparanaenses.com.br` — `zoho-verification=...` | Verificação Zoho |
+| A | `vozesparanaenses.com.br` — `185.158.133.1` | Site (raiz) apontando para Lovable |
+| A | `www.vozesparanaenses.com.br` — `185.158.133.1` | Site (www) apontando para Lovable |
+| TXT | `_lovable.vozesparanaenses.com.br` | Verificação do domínio do site |
+| TXT | `_lovable.www.vozesparanaenses.com.br` | Verificação do www |
+| TXT | `google-site-verification=...` | Search Console |
 
-| Tipo | Nome | Valor | Status |
-|------|------|-------|--------|
-| TXT  | @.vozesparanaenses.com.br | `v=spf1 include:zoho.com ~all` | SPF do Zoho ok |
-| MX   | @.vozesparanaenses.com.br | `10 mx.zoho.com` | Recebimento ok |
-| MX   | @.vozesparanaenses.com.br | `20 mx.zoho.com` | Recebimento ok |
-| MX   | @.vozesparanaenses.com.br | `50 mx.zoho.com` | Recebimento ok |
-| TXT  | @.vozesparanaenses.com.br | `zoho-verification=zb33728644.zmverify.zoho.com` | Domínio verificado no Zoho |
-| A    | vozesparanaenses.com.br | `185.158.133.1` | Site no Lovable ok |
-| A    | www.vozesparanaenses.com.br | `185.158.133.1` | Site no Lovable ok |
-| TXT  | _lovable.vozesparanaenses.com.br | `lovable_verify=...` | Lovable ok |
-| TXT  | _lovable.www.vozesparanaenses.com.br | `lovable_verify=...` | Lovable ok |
+**Resultado:** site publicado ok, email do Zoho (contato@vozesparanaenses.com.br) ok.
 
-> O básico obrigatório para receber e-mails no Zoho já está no ar: verificação, MX e SPF.
+### ⏳ O que ainda falta para o envio automático do portal (notify.vozesparanaenses.com.br)
 
----
+Status Lovable: **"Setting up — Verifying your domain"** — o domínio foi adicionado mas o DNS não foi propagado ainda. Faltam **3 registros** no Registro.br:
 
-## ❌ Ainda falta adicionar
+| # | Tipo | Nome (campo "Nome") | Dados |
+|---|------|---------------------|-------|
+| 1 | TXT | `_lovable-email` | `lovable_email_verify=f475d27260f8bc3193b70854b6498e1dd263190263c03a4162dd3d71a49c6109` |
+| 2 | NS | `notify` | `ns5.lovable.cloud` |
+| 3 | NS | `notify` | `ns6.lovable.cloud` |
 
-| Tipo | Nome | Onde pegar o valor | Por que é importante |
-|------|------|--------------------|---------------------|
-| TXT  | `zoho._domainkey.vozesparanaenses.com.br` | Painel Zoho → Email Configuration → DKIM | Assinatura DKIM: evita spam e spoofing |
-| TXT  | `_dmarc.vozesparanaenses.com.br` | Você mesmo cria o valor | Política de proteção contra spoofing |
+**Como preencher no formulário "Nova entrada" da tela que você mandou:**
+- Campo **Tipo**: escolha `TXT` (para o #1) ou `NS` (para #2 e #3).
+- Campo **Nome**: digite apenas `_lovable-email` ou `notify` (o Registro.br já completa `.vozesparanaenses.com.br` do lado direito — não repita).
+- Campo de dados (retângulo grande): cole o valor da coluna "Dados".
+- Clique **ADICIONAR** e repita para cada linha. No fim, **SALVAR ALTERAÇÕES**.
 
----
+### ⚠️ Sobre o tipo NS no Registro.br
 
-## Valores sugeridos para adicionar agora
+Você havia dito antes que o painel não mostrava a opção NS. **Verifique agora**: na tela "Nova entrada" abra o dropdown "Tipo" e procure "NS". Alguns painéis do Registro.br listam apenas quando você já saiu do "modo redirecionamento" — você já está no **modo avançado** (a mensagem no topo confirma), então NS deve aparecer.
 
-### 1. DKIM (copie o valor exato do Zoho)
+Se realmente não aparecer NS no dropdown, o caminho continua sendo migrar o gerenciamento de DNS para o **Cloudflare** (mantendo o domínio no Registro.br) — só que agora ficou mais simples porque copiamos todos os registros de cima. Me avise qual dos dois caminhos.
 
-No painel do Zoho Mail, vá em **Configuração → Email Configuration → DKIM** e gere a chave para `vozesparanaenses.com.br`. O Zoho vai te dar um registro parecido com:
+### 📋 Depois de salvar
 
-```
-v=DKIM1; k=rsa; p=MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKB...
-```
+- Propagação: alguns minutos até 72 h (Registro.br costuma ser rápido, ~15 min).
+- Não precisa fazer nada aqui — Lovable verifica sozinho e ativa `notify.vozesparanaenses.com.br` para envio automático (contato, transacional, etc.).
+- Enquanto isso, o Zoho continua funcionando normal — os 3 registros novos não afetam contato@.
 
-Adicione no Registro.br:
-
-| Tipo | Nome | Valor |
-|------|------|-------|
-| TXT  | `zoho._domainkey` | (chave completa que o Zoho gerar) |
-
-> No Registro.br, quando o nome é `zoho._domainkey`, o sistema completa para `zoho._domainkey.vozesparanaenses.com.br`.
-
----
-
-### 2. DMARC
-
-Adicione no Registro.br:
-
-| Tipo | Nome | Valor |
-|------|------|-------|
-| TXT  | `_dmarc` | `v=DMARC1; p=quarantine; rua=mailto:contato@vozesparanaenses.com.br` |
-
----
-
-## Resumo
-
-- **Já funciona para receber**: sim, os MX e a verificação Zoho estão corretos.
-- **Falta para entregabilidade completa**: DKIM + DMARC.
-- **Envio transacional do portal**: já está no subdomínio `notify.vozesparanaenses.com.br` — não mexa nos registros dele.
-
-Quer que eu já implemente o formulário de contato do site enviando para `contato@vozesparanaenses.com.br` via Lovable Emails?
+### O que fazer agora
+1. Confirme se o dropdown "Tipo" no Registro.br mostra a opção **NS**.
+2. Se sim: adicione as 3 linhas acima e salve.
+3. Se não: me diga que eu explico o caminho Cloudflare com os valores exatos.
