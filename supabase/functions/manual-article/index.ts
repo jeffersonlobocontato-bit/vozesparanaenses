@@ -15,10 +15,15 @@ const cors = {
 };
 
 type Payload = {
-  url: string;
+  url?: string;
   regiao_id: string;
   categoria_id: string;
   observacoes?: string;
+  // Novo: modo "texto colado". Quando informado, pula o Firecrawl e usa
+  // o texto direto como corpo bruto para o pipeline (extract-facts + generate-article).
+  texto?: string;
+  titulo?: string;
+  fonte_url?: string;
 };
 
 Deno.serve(async (req) => {
@@ -31,7 +36,6 @@ Deno.serve(async (req) => {
   const selfUrl = Deno.env.get("SUPABASE_URL");
   const selfKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
   if (!extUrl || !extKey) return json({ error: "missing_external_supabase_env" }, 500);
-  if (!firecrawlKey) return json({ error: "missing_firecrawl_api_key" }, 500);
   if (!selfUrl || !selfKey) return json({ error: "missing_self_supabase_env" }, 500);
 
   let body: Payload;
@@ -40,15 +44,33 @@ Deno.serve(async (req) => {
   } catch {
     return json({ error: "invalid_json_body" }, 400);
   }
-  const url = (body.url ?? "").trim();
-  if (!/^https?:\/\//i.test(url)) return json({ error: "invalid_url" }, 400);
+  const modoTexto = typeof body.texto === "string" && body.texto.trim().length > 0;
+  const url = (body.url ?? body.fonte_url ?? "").trim();
+  if (!modoTexto && !/^https?:\/\//i.test(url)) return json({ error: "invalid_url" }, 400);
+  if (!modoTexto && !firecrawlKey) return json({ error: "missing_firecrawl_api_key" }, 500);
+  if (modoTexto && !body.titulo?.trim()) return json({ error: "missing_titulo_texto" }, 400);
   if (!body.regiao_id) return json({ error: "missing_regiao_id" }, 400);
   if (!body.categoria_id) return json({ error: "missing_categoria_id" }, 400);
 
   const sb = createClient(extUrl, extKey, { auth: { persistSession: false } });
 
-  // 1. Firecrawl → markdown + og:image
-  const fcRes = await fetch("https://api.firecrawl.dev/v2/scrape", {
+  // 1. Fonte do conteúdo: Firecrawl (URL) ou texto colado direto pelo editor.
+  let markdown: string;
+  let titulo: string;
+  let ogImage: string | null = null;
+  let author: string | null = null;
+  let effectiveUrl: string;
+
+  if (modoTexto) {
+    markdown = body.texto!.trim();
+    if (markdown.length < 200) {
+      return json({ error: "empty_content", hint: "Cole ao menos 200 caracteres de texto para a IA reorganizar." }, 422);
+    }
+    titulo = body.titulo!.trim().slice(0, 250);
+    // URL sintética estável (garante idempotência do hash em reenvios do mesmo texto)
+    effectiveUrl = url || `manual-text://${await sha256(titulo + "|" + markdown.slice(0, 200))}`;
+  } else {
+    const fcRes = await fetch("https://api.firecrawl.dev/v2/scrape", {
     method: "POST",
     headers: { "Content-Type": "application/json", Authorization: `Bearer ${firecrawlKey}` },
     body: JSON.stringify({
@@ -56,20 +78,22 @@ Deno.serve(async (req) => {
       formats: ["markdown"],
       onlyMainContent: true,
     }),
-  });
-  if (!fcRes.ok) {
-    const t = await fcRes.text();
-    return json({ error: "firecrawl_failed", status: fcRes.status, detail: t.slice(0, 400) }, 502);
-  }
-  const fcJson = await fcRes.json();
-  const data = fcJson?.data ?? fcJson;
-  const markdown: string = data?.markdown ?? "";
-  const metadata: Record<string, unknown> = data?.metadata ?? {};
-  const titulo = String(metadata?.title ?? metadata?.ogTitle ?? "Sem título").slice(0, 250);
-  const ogImage = (metadata?.ogImage ?? metadata?.["og:image"] ?? null) as string | null;
-  const author = (metadata?.author ?? metadata?.["article:author"] ?? null) as string | null;
-  if (!markdown || markdown.length < 200) {
-    return json({ error: "empty_content", hint: "Firecrawl não retornou corpo suficiente para redigir." }, 422);
+    });
+    if (!fcRes.ok) {
+      const t = await fcRes.text();
+      return json({ error: "firecrawl_failed", status: fcRes.status, detail: t.slice(0, 400) }, 502);
+    }
+    const fcJson = await fcRes.json();
+    const data = fcJson?.data ?? fcJson;
+    markdown = data?.markdown ?? "";
+    const metadata: Record<string, unknown> = data?.metadata ?? {};
+    titulo = String(metadata?.title ?? metadata?.ogTitle ?? "Sem título").slice(0, 250);
+    ogImage = (metadata?.ogImage ?? metadata?.["og:image"] ?? null) as string | null;
+    author = (metadata?.author ?? metadata?.["article:author"] ?? null) as string | null;
+    if (!markdown || markdown.length < 200) {
+      return json({ error: "empty_content", hint: "Firecrawl não retornou corpo suficiente para redigir." }, 422);
+    }
+    effectiveUrl = url;
   }
 
   // 2. Garantir uma "fonte manual" (uma linha por editor humano — reusada)
@@ -101,12 +125,12 @@ Deno.serve(async (req) => {
 
   // 3. Inserir/reaproveitar raw_article. Se uma tentativa anterior travou na
   // extração/geração, NÃO bloqueia como duplicado: retomamos do ponto salvo.
-  const hash = await sha256(url + "|" + titulo);
+  const hash = await sha256(effectiveUrl + "|" + titulo);
   let rawId: string | null = null;
   const rawInsert = await sb.from("raw_articles").insert({
     fonte_id: fonteId,
     regiao_id: body.regiao_id,
-    url,
+    url: effectiveUrl,
     titulo,
     corpo_limpo: markdown.slice(0, 30000),
     hash_conteudo: hash,

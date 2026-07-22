@@ -19,7 +19,11 @@ export function ManualWriterBox({ onCreated }: Props) {
   const [regioes, setRegioes] = useState<Regiao[]>([]);
   const [agenteId, setAgenteId] = useState<string>("");
   const [regiaoId, setRegiaoId] = useState<string>("");
+  const [modo, setModo] = useState<"url" | "texto">("url");
   const [url, setUrl] = useState("");
+  const [titulo, setTitulo] = useState("");
+  const [texto, setTexto] = useState("");
+  const [fonteUrl, setFonteUrl] = useState("");
   const [obs, setObs] = useState("");
   const [busy, setBusy] = useState(false);
   const [step, setStep] = useState<string | null>(null);
@@ -48,28 +52,39 @@ export function ManualWriterBox({ onCreated }: Props) {
   async function submit(e: React.FormEvent) {
     e.preventDefault();
     setErr(null); setOk(null);
-    if (!/^https?:\/\//i.test(url.trim())) { setErr("URL inválida (precisa começar com http/https)."); return; }
+    if (modo === "url") {
+      if (!/^https?:\/\//i.test(url.trim())) { setErr("URL inválida (precisa começar com http/https)."); return; }
+    } else {
+      if (!titulo.trim()) { setErr("Informe um título provisório para a matéria."); return; }
+      if (texto.trim().length < 200) { setErr("Cole ao menos 200 caracteres de texto."); return; }
+    }
     if (!agenteId) { setErr("Escolha um redator."); return; }
     if (!regiaoId) { setErr("Escolha uma região."); return; }
     const agente = agentes.find((a) => a.id === agenteId);
     if (!agente?.categoria) { setErr("Agente sem editoria vinculada."); return; }
 
     setBusy(true);
-    setStep(`Lendo fonte…`);
+    setStep(modo === "url" ? `Lendo fonte…` : `Reorganizando texto colado…`);
     try {
-      // Sinaliza etapas (a edge function faz tudo em uma chamada, mas mostramos progresso ao editor)
       const progressTimer = setTimeout(() => setStep(`Extraindo fatos e redigindo com ${agente.nome}…`), 3500);
-      const { data, error } = await supabase.functions.invoke("manual-article", {
-        body: {
-          url: url.trim(),
-          regiao_id: regiaoId,
-          categoria_id: agente.categoria.id,
-          observacoes: obs.trim() || undefined,
-        },
-      });
+      const body = modo === "url"
+        ? {
+            url: url.trim(),
+            regiao_id: regiaoId,
+            categoria_id: agente.categoria.id,
+            observacoes: obs.trim() || undefined,
+          }
+        : {
+            texto: texto.trim(),
+            titulo: titulo.trim(),
+            fonte_url: fonteUrl.trim() || undefined,
+            regiao_id: regiaoId,
+            categoria_id: agente.categoria.id,
+            observacoes: obs.trim() || undefined,
+          };
+      const { data, error } = await supabase.functions.invoke("manual-article", { body });
       clearTimeout(progressTimer);
       if (error) {
-        // Extrai o corpo do erro (supabase-js só dá "non-2xx" genérico)
         let detail = "";
         try {
           const errWithCtx = error as { context?: { response?: Response } };
@@ -81,7 +96,7 @@ export function ManualWriterBox({ onCreated }: Props) {
       const payload = data as { ok?: boolean; error?: string; hint?: string; titulo?: string };
       if (!payload?.ok) throw new Error(payload?.hint ?? payload?.error ?? "Falha desconhecida");
       setOk(`Rascunho criado: "${payload.titulo ?? "sem título"}". Aparece abaixo na fila.`);
-      setUrl(""); setObs("");
+      setUrl(""); setObs(""); setTexto(""); setTitulo(""); setFonteUrl("");
       onCreated();
     } catch (e) {
       setErr(e instanceof Error ? e.message : "Falha ao gerar matéria manual");
@@ -94,7 +109,25 @@ export function ManualWriterBox({ onCreated }: Props) {
     <section className="rounded-lg border-2 border-[#0066CC] bg-blue-50/70 p-4">
       <div className="mb-2 flex items-center justify-between">
         <h2 className="text-sm font-bold text-[#0A2540]">✍️ Redator manual (chat)</h2>
-        <span className="text-[11px] text-[#0A2540]">Cole o link, escolha o redator e gere sem rodar o pipeline</span>
+        <span className="text-[11px] text-[#0A2540]">Cole link ou texto pronto — a IA organiza SEO, GEO e ajustes finos</span>
+      </div>
+      <div className="mb-3 inline-flex overflow-hidden rounded border border-[#0066CC] text-[11px] font-semibold">
+        <button
+          type="button"
+          onClick={() => setModo("url")}
+          disabled={busy}
+          className={`px-3 py-1 ${modo === "url" ? "bg-[#0066CC] text-white" : "bg-white text-[#0A2540]"}`}
+        >
+          🔗 URL da notícia
+        </button>
+        <button
+          type="button"
+          onClick={() => setModo("texto")}
+          disabled={busy}
+          className={`px-3 py-1 ${modo === "texto" ? "bg-[#0066CC] text-white" : "bg-white text-[#0A2540]"}`}
+        >
+          📝 Colar texto pronto
+        </button>
       </div>
       <form onSubmit={submit} className="space-y-2">
         <div className="grid gap-2 md:grid-cols-2">
@@ -121,11 +154,36 @@ export function ManualWriterBox({ onCreated }: Props) {
             </select>
           </label>
         </div>
-        <label className="block text-xs font-semibold text-[#0A2540]">
-          URL da notícia-fonte
-          <input type="url" value={url} onChange={(e) => setUrl(e.target.value)} disabled={busy}
-            placeholder="https://…" className="mt-1 w-full rounded border bg-white px-2 py-1.5 text-sm" />
-        </label>
+        {modo === "url" ? (
+          <label className="block text-xs font-semibold text-[#0A2540]">
+            URL da notícia-fonte
+            <input type="url" value={url} onChange={(e) => setUrl(e.target.value)} disabled={busy}
+              placeholder="https://…" className="mt-1 w-full rounded border bg-white px-2 py-1.5 text-sm" />
+          </label>
+        ) : (
+          <>
+            <label className="block text-xs font-semibold text-[#0A2540]">
+              Título provisório
+              <input value={titulo} onChange={(e) => setTitulo(e.target.value)} disabled={busy}
+                placeholder="Ex.: Prefeitura anuncia obras no anel viário de Maringá"
+                className="mt-1 w-full rounded border bg-white px-2 py-1.5 text-sm" />
+            </label>
+            <label className="block text-xs font-semibold text-[#0A2540]">
+              Texto integral (a IA reescreve, organiza TL;DR, 5W1H, FAQ, SEO e GEO)
+              <textarea value={texto} onChange={(e) => setTexto(e.target.value)} disabled={busy} rows={10}
+                placeholder="Cole aqui a matéria pronta, release, transcrição de coletiva, etc. Mínimo 200 caracteres."
+                className="mt-1 w-full rounded border bg-white px-2 py-1.5 text-sm font-mono text-[12px] leading-relaxed" />
+              <span className="mt-1 block text-[10px] text-[#0A2540]/70">
+                {texto.trim().length} caracteres · {texto.trim().split(/\s+/).filter(Boolean).length} palavras
+              </span>
+            </label>
+            <label className="block text-xs font-semibold text-[#0A2540]">
+              URL de origem (opcional — para crédito/referência)
+              <input type="url" value={fonteUrl} onChange={(e) => setFonteUrl(e.target.value)} disabled={busy}
+                placeholder="https://… (opcional)" className="mt-1 w-full rounded border bg-white px-2 py-1.5 text-sm" />
+            </label>
+          </>
+        )}
         <label className="block text-xs font-semibold text-[#0A2540]">
           Observações para o redator (opcional)
           <textarea value={obs} onChange={(e) => setObs(e.target.value)} disabled={busy} rows={2}

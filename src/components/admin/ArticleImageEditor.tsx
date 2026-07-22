@@ -8,18 +8,117 @@ type Props = {
   originalUrl: string | null;
   currentCredito: string | null;
   currentLegenda: string | null;
+  currentGaleria?: { url: string; legenda?: string | null; credito?: string | null }[] | null;
   onUpdated: () => void;
 };
 
-export function ArticleImageEditor({ articleId, currentUrl, originalUrl, currentCredito, currentLegenda, onUpdated }: Props) {
-  const [busy, setBusy] = useState<"ai" | "upload" | "original" | "meta" | null>(null);
+export function ArticleImageEditor({ articleId, currentUrl, originalUrl, currentCredito, currentLegenda, currentGaleria, onUpdated }: Props) {
+  const [busy, setBusy] = useState<"ai" | "upload" | "original" | "meta" | "remove" | "gal-add" | "gal-save" | null>(null);
   const [msg, setMsg] = useState<string | null>(null);
   const [legenda, setLegenda] = useState(currentLegenda ?? "");
   const [credito, setCredito] = useState(currentCredito ?? "");
+  const [galeria, setGaleria] = useState<{ url: string; legenda?: string | null; credito?: string | null }[]>(currentGaleria ?? []);
   const usingOriginal = !!originalUrl && currentUrl === originalUrl;
 
   useEffect(() => { setLegenda(currentLegenda ?? ""); }, [currentLegenda]);
   useEffect(() => { setCredito(currentCredito ?? ""); }, [currentCredito]);
+  useEffect(() => { setGaleria(currentGaleria ?? []); }, [currentGaleria]);
+
+  async function removeCover() {
+    if (!confirm("Publicar matéria sem foto de capa? A imagem atual será removida.")) return;
+    setBusy("remove"); setMsg("Removendo capa…");
+    try {
+      const sb = await getExternalBrowser();
+      const { error } = await sb
+        .from("generated_articles")
+        .update({ imagem_capa_url: null, imagem_legenda: null, imagem_credito: null })
+        .eq("id", articleId);
+      if (error) throw error;
+      setMsg("Capa removida — matéria sem foto.");
+      onUpdated();
+    } catch (e: unknown) {
+      setMsg("Falha: " + (e instanceof Error ? e.message : "erro"));
+    } finally { setBusy(null); }
+  }
+
+  async function uploadToStorage(file: File): Promise<string> {
+    const sb = await getExternalBrowser();
+    const ext = (file.name.split(".").pop() || "jpg").toLowerCase().replace(/[^a-z0-9]/g, "");
+    const path = `galeria/${articleId}/${Date.now()}-${Math.random().toString(36).slice(2, 8)}.${ext}`;
+    const { error: upErr } = await sb.storage.from("article-covers").upload(path, file, {
+      contentType: file.type || "image/jpeg",
+      upsert: false,
+    });
+    if (upErr) throw upErr;
+    const { data } = sb.storage.from("article-covers").getPublicUrl(path);
+    return data.publicUrl;
+  }
+
+  async function addGaleriaFiles(files: FileList) {
+    setBusy("gal-add"); setMsg("Enviando fotos para a galeria…");
+    try {
+      const sb = await getExternalBrowser();
+      const novas = [...galeria];
+      for (const f of Array.from(files)) {
+        if (f.size > 8 * 1024 * 1024) { setMsg(`"${f.name}" acima de 8MB — pulando.`); continue; }
+        const url = await uploadToStorage(f);
+        novas.push({ url, legenda: null, credito: null });
+      }
+      const { error } = await sb.from("generated_articles").update({ imagem_galeria: novas }).eq("id", articleId);
+      if (error) throw error;
+      setGaleria(novas);
+      setMsg(`Galeria atualizada (${novas.length} foto(s)).`);
+      onUpdated();
+    } catch (e: unknown) {
+      setMsg("Falha: " + (e instanceof Error ? e.message : "erro"));
+    } finally { setBusy(null); }
+  }
+
+  async function saveGaleria(next: typeof galeria) {
+    setBusy("gal-save"); setMsg(null);
+    try {
+      const sb = await getExternalBrowser();
+      const { error } = await sb.from("generated_articles").update({ imagem_galeria: next }).eq("id", articleId);
+      if (error) throw error;
+      setGaleria(next);
+      onUpdated();
+    } catch (e: unknown) {
+      setMsg("Falha: " + (e instanceof Error ? e.message : "erro"));
+    } finally { setBusy(null); }
+  }
+
+  function moveGaleria(idx: number, dir: -1 | 1) {
+    const next = [...galeria];
+    const j = idx + dir;
+    if (j < 0 || j >= next.length) return;
+    [next[idx], next[j]] = [next[j], next[idx]];
+    void saveGaleria(next);
+  }
+
+  function removeGaleriaItem(idx: number) {
+    if (!confirm("Remover esta foto da galeria?")) return;
+    const next = galeria.filter((_, i) => i !== idx);
+    void saveGaleria(next);
+  }
+
+  async function setAsCover(idx: number) {
+    const item = galeria[idx];
+    if (!item) return;
+    setBusy("gal-save"); setMsg("Definindo como capa…");
+    try {
+      const sb = await getExternalBrowser();
+      const { error } = await sb.from("generated_articles").update({
+        imagem_capa_url: item.url,
+        imagem_legenda: item.legenda ?? null,
+        imagem_credito: item.credito ?? null,
+      }).eq("id", articleId);
+      if (error) throw error;
+      setMsg("Foto definida como capa.");
+      onUpdated();
+    } catch (e: unknown) {
+      setMsg("Falha: " + (e instanceof Error ? e.message : "erro"));
+    } finally { setBusy(null); }
+  }
 
   const metaDirty =
     (legenda.trim() || null) !== (currentLegenda?.trim() || null) ||
@@ -163,6 +262,17 @@ export function ArticleImageEditor({ articleId, currentUrl, originalUrl, current
               }}
             />
           </label>
+          {currentUrl && (
+            <button
+              type="button"
+              onClick={removeCover}
+              disabled={busy !== null}
+              className="rounded border border-red-600 px-3 py-1 font-semibold text-red-600 hover:bg-red-50 disabled:opacity-60"
+              title="Publica a matéria sem foto de capa"
+            >
+              {busy === "remove" ? "Removendo…" : "🗑 Publicar sem foto"}
+            </button>
+          )}
         </div>
         <div className="mt-2 grid gap-2 sm:grid-cols-[1fr_auto]">
           <div className="flex flex-col gap-1">
@@ -204,6 +314,101 @@ export function ArticleImageEditor({ articleId, currentUrl, originalUrl, current
           </span>
         )}
         {msg && <span className="text-muted-foreground">{msg}</span>}
+      </div>
+
+      {/* Galeria de fotos */}
+      <div className="mt-3 rounded border border-[#0A2540]/20 bg-white p-2">
+        <div className="mb-2 flex items-center justify-between">
+          <span className="text-[11px] font-bold uppercase tracking-wide text-[#0A2540]">
+            Galeria ({galeria.length})
+          </span>
+          <label className="cursor-pointer rounded bg-[#0A2540] px-2 py-1 text-[10px] font-semibold text-white hover:bg-[#0d2f52]">
+            {busy === "gal-add" ? "Enviando…" : "+ Adicionar fotos"}
+            <input
+              type="file"
+              accept="image/*"
+              multiple
+              className="hidden"
+              disabled={busy !== null}
+              onChange={(e) => {
+                const fs = e.target.files;
+                if (fs && fs.length) addGaleriaFiles(fs);
+                e.target.value = "";
+              }}
+            />
+          </label>
+        </div>
+        {galeria.length === 0 ? (
+          <p className="text-[10px] italic text-muted-foreground">
+            Nenhuma foto na galeria. A foto #1 sempre será o destaque (capa da matéria).
+          </p>
+        ) : (
+          <div className="grid gap-2 sm:grid-cols-2 md:grid-cols-3">
+            {galeria.map((g, i) => (
+              <div key={g.url + i} className="flex flex-col gap-1 rounded border bg-muted/30 p-1">
+                <div className="relative h-24 w-full overflow-hidden rounded bg-muted">
+                  <img src={g.url} alt={g.legenda ?? `Foto ${i + 1}`} className="h-full w-full object-cover" />
+                  <span className="absolute left-1 top-1 rounded bg-[#0A2540] px-1.5 py-0.5 text-[9px] font-bold text-white">
+                    #{i + 1}{i === 0 ? " (destaque)" : ""}
+                  </span>
+                </div>
+                <input
+                  value={g.legenda ?? ""}
+                  onChange={(e) => {
+                    const next = [...galeria];
+                    next[i] = { ...next[i], legenda: e.target.value };
+                    setGaleria(next);
+                  }}
+                  onBlur={() => saveGaleria(galeria)}
+                  placeholder="Legenda"
+                  className="rounded border bg-white px-1.5 py-1 text-[10px]"
+                  disabled={busy !== null}
+                />
+                <input
+                  value={g.credito ?? ""}
+                  onChange={(e) => {
+                    const next = [...galeria];
+                    next[i] = { ...next[i], credito: e.target.value };
+                    setGaleria(next);
+                  }}
+                  onBlur={() => saveGaleria(galeria)}
+                  placeholder="Crédito"
+                  className="rounded border bg-white px-1.5 py-1 text-[10px]"
+                  disabled={busy !== null}
+                />
+                <div className="flex flex-wrap gap-1">
+                  <button
+                    type="button"
+                    onClick={() => moveGaleria(i, -1)}
+                    disabled={busy !== null || i === 0}
+                    className="rounded border px-1.5 py-0.5 text-[10px] disabled:opacity-40"
+                    title="Mover para cima"
+                  >↑</button>
+                  <button
+                    type="button"
+                    onClick={() => moveGaleria(i, 1)}
+                    disabled={busy !== null || i === galeria.length - 1}
+                    className="rounded border px-1.5 py-0.5 text-[10px] disabled:opacity-40"
+                    title="Mover para baixo"
+                  >↓</button>
+                  <button
+                    type="button"
+                    onClick={() => setAsCover(i)}
+                    disabled={busy !== null}
+                    className="rounded border border-[#0A2540] px-1.5 py-0.5 text-[10px] font-semibold text-[#0A2540] disabled:opacity-40"
+                    title="Definir esta foto como capa"
+                  >★ Capa</button>
+                  <button
+                    type="button"
+                    onClick={() => removeGaleriaItem(i)}
+                    disabled={busy !== null}
+                    className="rounded border border-red-600 px-1.5 py-0.5 text-[10px] font-semibold text-red-600 disabled:opacity-40"
+                  >🗑</button>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
       </div>
     </div>
   );

@@ -73,6 +73,7 @@ export type ArticleFull = ArticleListItem & {
   editor_responsavel: string | null;
   video_embed_url: string | null;
   imagem_legenda: string | null;
+  imagem_galeria: GaleriaItem[] | null;
   video_legenda: string | null;
   video_credito: string | null;
 };
@@ -87,6 +88,23 @@ export type FiveWOneH = {
 };
 
 export type FaqItem = { pergunta: string; resposta: string };
+
+export type GaleriaItem = { url: string; legenda?: string | null; credito?: string | null };
+
+function coerceGaleria(v: unknown): GaleriaItem[] | null {
+  if (!Array.isArray(v)) return null;
+  const out: GaleriaItem[] = [];
+  for (const item of v) {
+    if (!item || typeof item !== "object") continue;
+    const rec = item as Record<string, unknown>;
+    const url = typeof rec.url === "string" ? rec.url.trim() : "";
+    if (!url) continue;
+    const legenda = typeof rec.legenda === "string" && rec.legenda.trim() ? rec.legenda.trim() : null;
+    const credito = typeof rec.credito === "string" && rec.credito.trim() ? rec.credito.trim() : null;
+    out.push({ url, legenda, credito });
+  }
+  return out.length > 0 ? out : null;
+}
 
 function coerceFaq(v: unknown): FaqItem[] | null {
   if (!Array.isArray(v)) return null;
@@ -984,7 +1002,7 @@ export const getArticle = createServerFn({ method: "GET" })
     const { data: row, error } = await sb
       .from("generated_articles")
       .select(
-        "id, slug, titulo, subtitulo, resumo, corpo, imagem_capa_url, imagem_legenda, publicado_em, updated_at, cidade_principal, cidades_mencionadas, tldr, fatos_5w1h, faq, editor_responsavel, seo_title, seo_description, og_image_url, video_embed_url, video_legenda, video_credito, regiao:regioes(slug, nome), categoria:editorial_categories(slug, nome)",
+        "id, slug, titulo, subtitulo, resumo, corpo, imagem_capa_url, imagem_legenda, imagem_galeria, publicado_em, updated_at, cidade_principal, cidades_mencionadas, tldr, fatos_5w1h, faq, editor_responsavel, seo_title, seo_description, og_image_url, video_embed_url, video_legenda, video_credito, regiao:regioes(slug, nome), categoria:editorial_categories(slug, nome)",
       )
       .eq("regiao_id", (region as { id: string }).id)
       .eq("slug", data.slug)
@@ -992,7 +1010,7 @@ export const getArticle = createServerFn({ method: "GET" })
       .maybeSingle();
     if (error) {
       // Fallback quando as colunas geo/updated_at ainda não existirem no schema.
-      if (/column .* does not exist|cidade_|updated_at|tldr|fatos_5w1h|faq|editor_responsavel|video_embed_url|video_legenda|video_credito|imagem_legenda/i.test(error.message)) {
+      if (/column .* does not exist|cidade_|updated_at|tldr|fatos_5w1h|faq|editor_responsavel|video_embed_url|video_legenda|video_credito|imagem_legenda|imagem_galeria/i.test(error.message)) {
         const { data: legacy, error: legacyErr } = await sb
           .from("generated_articles")
           .select(
@@ -1025,6 +1043,7 @@ export const getArticle = createServerFn({ method: "GET" })
           editor_responsavel: null,
           video_embed_url: null,
           imagem_legenda: null,
+          imagem_galeria: null,
           video_legenda: null,
           video_credito: null,
         };
@@ -1046,6 +1065,7 @@ export const getArticle = createServerFn({ method: "GET" })
       editor_responsavel: string | null;
       video_embed_url: string | null;
       imagem_legenda: string | null;
+      imagem_galeria: unknown;
       video_legenda: string | null;
       video_credito: string | null;
     };
@@ -1064,6 +1084,7 @@ export const getArticle = createServerFn({ method: "GET" })
       editor_responsavel: r.editor_responsavel && r.editor_responsavel.trim() ? r.editor_responsavel.trim() : null,
       video_embed_url: r.video_embed_url && r.video_embed_url.trim() ? r.video_embed_url.trim() : null,
       imagem_legenda: r.imagem_legenda && r.imagem_legenda.trim() ? r.imagem_legenda.trim() : null,
+      imagem_galeria: coerceGaleria(r.imagem_galeria),
       video_legenda: r.video_legenda && r.video_legenda.trim() ? r.video_legenda.trim() : null,
       video_credito: r.video_credito && r.video_credito.trim() ? r.video_credito.trim() : null,
     };
