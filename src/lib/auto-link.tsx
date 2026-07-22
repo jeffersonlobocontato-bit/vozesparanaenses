@@ -188,3 +188,25 @@ export function autoLinkParagraph(
   }
   return nodes;
 }
+
+/**
+ * Insere <br/> em quebras de linha simples (`\n`) dentro dos nós string.
+ * Preserva quebras manuais feitas pelo editor (listas empilhadas, dados de
+ * pesquisa, etc.) sem exigir linha em branco entre cada item.
+ */
+export function withLineBreaks(nodes: ReactNode[], keyPrefix: string): ReactNode[] {
+  const out: ReactNode[] = [];
+  let brIdx = 0;
+  nodes.forEach((n, i) => {
+    if (typeof n !== "string" || !n.includes("\n")) {
+      out.push(n);
+      return;
+    }
+    const parts = n.split("\n");
+    parts.forEach((part, j) => {
+      if (j > 0) out.push(<br key={`${keyPrefix}-br-${i}-${brIdx++}`} />);
+      if (part) out.push(part);
+    });
+  });
+  return out;
+}
