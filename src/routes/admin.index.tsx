@@ -9,7 +9,12 @@ import { displayRegionName } from "@/lib/region-labels";
 import { ManualWriterBox } from "@/components/admin/ManualWriterBox";
 import { PageHeader, primaryBtnClass, tabPillsWrapClass, tabPillClass } from "@/components/admin/ui";
 
+type AdminQueueSearch = { edit?: string };
+
 export const Route = createFileRoute("/admin/")({
+  validateSearch: (search: Record<string, unknown>): AdminQueueSearch => ({
+    edit: typeof search.edit === "string" ? search.edit : undefined,
+  }),
   component: AdminQueue,
 });
 
@@ -57,7 +62,8 @@ type Draft = {
 const STATUS_TABS: Draft["status"][] = ["rascunho", "aprovado", "publicado", "expirado", "rejeitado"];
 
 function AdminQueue() {
-  const [tab, setTab] = useState<Draft["status"]>("rascunho");
+  const editSlug = Route.useSearch({ select: (s) => s.edit });
+  const [tab, setTab] = useState<Draft["status"]>(editSlug ? "publicado" : "rascunho");
   const [items, setItems] = useState<Draft[] | null>(null);
   const [pinned, setPinned] = useState<Draft[] | null>(null);
   const [err, setErr] = useState<string | null>(null);
@@ -123,6 +129,15 @@ function AdminQueue() {
 
   useEffect(() => { load(); }, [load]);
   useEffect(() => { loadPinned(); }, [loadPinned]);
+
+  // Deep-link vindo do site público (botão flutuante "Editar esta matéria"):
+  // troca para a aba «publicado» e abre o editor da matéria correspondente
+  // ao slug assim que a lista termina de carregar.
+  useEffect(() => {
+    if (!editSlug || !items) return;
+    const found = items.find((it) => it.slug === editSlug);
+    if (found) setEditingId(found.id);
+  }, [editSlug, items]);
 
   async function unpin(id: string) {
     if (!confirm("Desfixar esta matéria?")) return;
