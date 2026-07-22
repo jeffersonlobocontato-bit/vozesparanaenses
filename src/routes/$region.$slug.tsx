@@ -504,6 +504,34 @@ function ArticlePage() {
           </figure>
         )}
 
+        {/* Galeria de fotos — segundas fotos em diante (a #1 já é a capa) */}
+        {(() => {
+          const gal = article.imagem_galeria ?? null;
+          if (!gal || gal.length <= 1) return null;
+          const extras = gal.slice(1);
+          return (
+            <section className="mx-auto mt-8 max-w-3xl">
+              <h2 className="mb-3 text-[11px] font-bold uppercase tracking-[0.2em] text-[#0A2540]">
+                Galeria
+              </h2>
+              <div className="grid gap-4 sm:grid-cols-2">
+                {extras.map((g, i) => (
+                  <figure key={i} className="overflow-hidden rounded-sm border border-slate-200 bg-white">
+                    <img src={g.url} alt={g.legenda ?? article.title} className="h-56 w-full object-cover" loading="lazy" />
+                    {(g.legenda || g.credito) && (
+                      <figcaption className="p-2 text-xs text-slate-600">
+                        {g.legenda && <span className="text-slate-700">{g.legenda}</span>}
+                        {g.legenda && g.credito && " "}
+                        {g.credito && <span className="italic text-slate-500">{g.credito}</span>}
+                      </figcaption>
+                    )}
+                  </figure>
+                ))}
+              </div>
+            </section>
+          );
+        })()}
+
         {/* Vídeo — YouTube/Vimeo (iframe) ou arquivo direto (<video>) */}
         {(() => {
           const v = parseVideoEmbed(article.video_embed_url);
