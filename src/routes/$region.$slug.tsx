@@ -10,7 +10,7 @@ import {
   cidadeSlug,
   type ArticleListItem,
 } from "@/lib/content.functions";
-import { buildLinkTerms, autoLinkParagraph } from "@/lib/auto-link";
+import { buildLinkTerms, autoLinkParagraph, withLineBreaks } from "@/lib/auto-link";
 import { SiteHeader, SiteFooter } from "@/components/SiteHeader";
 import { getCityCoords, formatGeoPosition, formatICBM } from "@/lib/geo-cities";
 import { AdSlot } from "@/components/AdSlot";
