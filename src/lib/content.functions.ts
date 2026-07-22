@@ -73,6 +73,7 @@ export type ArticleFull = ArticleListItem & {
   editor_responsavel: string | null;
   video_embed_url: string | null;
   imagem_legenda: string | null;
+  imagem_galeria: GaleriaItem[] | null;
   video_legenda: string | null;
   video_credito: string | null;
 };
@@ -87,6 +88,23 @@ export type FiveWOneH = {
 };
 
 export type FaqItem = { pergunta: string; resposta: string };
+
+export type GaleriaItem = { url: string; legenda?: string | null; credito?: string | null };
+
+function coerceGaleria(v: unknown): GaleriaItem[] | null {
+  if (!Array.isArray(v)) return null;
+  const out: GaleriaItem[] = [];
+  for (const item of v) {
+    if (!item || typeof item !== "object") continue;
+    const rec = item as Record<string, unknown>;
+    const url = typeof rec.url === "string" ? rec.url.trim() : "";
+    if (!url) continue;
+    const legenda = typeof rec.legenda === "string" && rec.legenda.trim() ? rec.legenda.trim() : null;
+    const credito = typeof rec.credito === "string" && rec.credito.trim() ? rec.credito.trim() : null;
+    out.push({ url, legenda, credito });
+  }
+  return out.length > 0 ? out : null;
+}
 
 function coerceFaq(v: unknown): FaqItem[] | null {
   if (!Array.isArray(v)) return null;
