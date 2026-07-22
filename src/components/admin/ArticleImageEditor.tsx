@@ -59,17 +59,39 @@ export function ArticleImageEditor({ articleId, currentUrl, originalUrl, current
     try {
       const sb = await getExternalBrowser();
       const novas = [...galeria];
+      let enviadas = 0;
       for (const f of Array.from(files)) {
         if (f.size > 8 * 1024 * 1024) { setMsg(`"${f.name}" acima de 8MB — pulando.`); continue; }
-        const url = await uploadToStorage(f);
-        novas.push({ url, legenda: null, credito: null });
+        try {
+          const url = await uploadToStorage(f);
+          novas.push({ url, legenda: null, credito: null });
+          enviadas++;
+          setMsg(`Enviando fotos para a galeria… (${enviadas}/${files.length})`);
+        } catch (upErr: unknown) {
+          const msgErr = upErr instanceof Error ? upErr.message : String(upErr);
+          console.error("[galeria] upload falhou para", f.name, upErr);
+          throw new Error(`Upload de "${f.name}" falhou: ${msgErr}`);
+        }
+      }
+      if (enviadas === 0) {
+        setMsg("Nenhuma foto foi enviada (todas acima de 8MB ou erro).");
+        return;
       }
       const { error } = await sb.from("generated_articles").update({ imagem_galeria: novas }).eq("id", articleId);
-      if (error) throw error;
+      if (error) {
+        console.error("[galeria] update imagem_galeria falhou", error);
+        if (/column .*imagem_galeria.* does not exist/i.test(error.message)) {
+          throw new Error(
+            "A coluna imagem_galeria ainda não existe no banco. Rode a migração supabase-external/045_galeria.sql no Supabase externo e tente de novo.",
+          );
+        }
+        throw error;
+      }
       setGaleria(novas);
       setMsg(`Galeria atualizada (${novas.length} foto(s)).`);
       onUpdated();
     } catch (e: unknown) {
+      console.error("[galeria] addGaleriaFiles error", e);
       setMsg("Falha: " + (e instanceof Error ? e.message : "erro"));
     } finally { setBusy(null); }
   }
