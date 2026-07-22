@@ -8,18 +8,126 @@ type Props = {
   originalUrl: string | null;
   currentCredito: string | null;
   currentLegenda: string | null;
+  currentGaleria?: { url: string; legenda?: string | null; credito?: string | null }[] | null;
   onUpdated: () => void;
 };
 
-export function ArticleImageEditor({ articleId, currentUrl, originalUrl, currentCredito, currentLegenda, onUpdated }: Props) {
-  const [busy, setBusy] = useState<"ai" | "upload" | "original" | "meta" | null>(null);
+export function ArticleImageEditor({ articleId, currentUrl, originalUrl, currentCredito, currentLegenda, currentGaleria, onUpdated }: Props) {
+  const [busy, setBusy] = useState<"ai" | "upload" | "original" | "meta" | "remove" | "gal-add" | "gal-save" | null>(null);
   const [msg, setMsg] = useState<string | null>(null);
   const [legenda, setLegenda] = useState(currentLegenda ?? "");
   const [credito, setCredito] = useState(currentCredito ?? "");
+  const [galeria, setGaleria] = useState<{ url: string; legenda?: string | null; credito?: string | null }[]>(currentGaleria ?? []);
   const usingOriginal = !!originalUrl && currentUrl === originalUrl;
 
   useEffect(() => { setLegenda(currentLegenda ?? ""); }, [currentLegenda]);
   useEffect(() => { setCredito(currentCredito ?? ""); }, [currentCredito]);
+  useEffect(() => { setGaleria(currentGaleria ?? []); }, [currentGaleria]);
+
+  async function removeCover() {
+    if (!confirm("Publicar matéria sem foto de capa? A imagem atual será removida.")) return;
+    setBusy("remove"); setMsg("Removendo capa…");
+    try {
+      const sb = await getExternalBrowser();
+      const { error } = await sb
+        .from("generated_articles")
+        .update({ imagem_capa_url: null, imagem_legenda: null, imagem_credito: null })
+        .eq("id", articleId);
+      if (error) throw error;
+      setMsg("Capa removida — matéria sem foto.");
+      onUpdated();
+    } catch (e: unknown) {
+      setMsg("Falha: " + (e instanceof Error ? e.message : "erro"));
+    } finally { setBusy(null); }
+  }
+
+  async function fileToBase64(file: File): Promise<string> {
+    return await new Promise((resolve, reject) => {
+      const r = new FileReader();
+      r.onload = () => resolve(String(r.result));
+      r.onerror = () => reject(r.error);
+      r.readAsDataURL(file);
+    });
+  }
+
+  async function uploadToStorage(file: File): Promise<string> {
+    const sb = await getExternalBrowser();
+    const ext = (file.name.split(".").pop() || "jpg").toLowerCase().replace(/[^a-z0-9]/g, "");
+    const path = `galeria/${articleId}/${Date.now()}-${Math.random().toString(36).slice(2, 8)}.${ext}`;
+    const { error: upErr } = await sb.storage.from("article-covers").upload(path, file, {
+      contentType: file.type || "image/jpeg",
+      upsert: false,
+    });
+    if (upErr) throw upErr;
+    const { data } = sb.storage.from("article-covers").getPublicUrl(path);
+    return data.publicUrl;
+  }
+
+  async function addGaleriaFiles(files: FileList) {
+    setBusy("gal-add"); setMsg("Enviando fotos para a galeria…");
+    try {
+      const sb = await getExternalBrowser();
+      const novas = [...galeria];
+      for (const f of Array.from(files)) {
+        if (f.size > 8 * 1024 * 1024) { setMsg(`"${f.name}" acima de 8MB — pulando.`); continue; }
+        const url = await uploadToStorage(f);
+        novas.push({ url, legenda: null, credito: null });
+      }
+      const { error } = await sb.from("generated_articles").update({ imagem_galeria: novas }).eq("id", articleId);
+      if (error) throw error;
+      setGaleria(novas);
+      setMsg(`Galeria atualizada (${novas.length} foto(s)).`);
+      onUpdated();
+    } catch (e: unknown) {
+      setMsg("Falha: " + (e instanceof Error ? e.message : "erro"));
+    } finally { setBusy(null); }
+  }
+
+  async function saveGaleria(next: typeof galeria) {
+    setBusy("gal-save"); setMsg(null);
+    try {
+      const sb = await getExternalBrowser();
+      const { error } = await sb.from("generated_articles").update({ imagem_galeria: next }).eq("id", articleId);
+      if (error) throw error;
+      setGaleria(next);
+      onUpdated();
+    } catch (e: unknown) {
+      setMsg("Falha: " + (e instanceof Error ? e.message : "erro"));
+    } finally { setBusy(null); }
+  }
+
+  function moveGaleria(idx: number, dir: -1 | 1) {
+    const next = [...galeria];
+    const j = idx + dir;
+    if (j < 0 || j >= next.length) return;
+    [next[idx], next[j]] = [next[j], next[idx]];
+    void saveGaleria(next);
+  }
+
+  function removeGaleriaItem(idx: number) {
+    if (!confirm("Remover esta foto da galeria?")) return;
+    const next = galeria.filter((_, i) => i !== idx);
+    void saveGaleria(next);
+  }
+
+  async function setAsCover(idx: number) {
+    const item = galeria[idx];
+    if (!item) return;
+    setBusy("gal-save"); setMsg("Definindo como capa…");
+    try {
+      const sb = await getExternalBrowser();
+      const { error } = await sb.from("generated_articles").update({
+        imagem_capa_url: item.url,
+        imagem_legenda: item.legenda ?? null,
+        imagem_credito: item.credito ?? null,
+      }).eq("id", articleId);
+      if (error) throw error;
+      setMsg("Foto definida como capa.");
+      onUpdated();
+    } catch (e: unknown) {
+      setMsg("Falha: " + (e instanceof Error ? e.message : "erro"));
+    } finally { setBusy(null); }
+  }
 
   const metaDirty =
     (legenda.trim() || null) !== (currentLegenda?.trim() || null) ||
