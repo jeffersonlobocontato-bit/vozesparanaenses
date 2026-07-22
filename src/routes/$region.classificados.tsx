@@ -20,8 +20,8 @@ const listQO = (slug: string) =>
 export const Route = createFileRoute("/$region/classificados")({
   loader: async ({ context, params }) => {
     const region = await context.queryClient.ensureQueryData(regionQO(params.region));
-    await context.queryClient.ensureQueryData(listQO(params.region));
-    return { region };
+    const items = await context.queryClient.ensureQueryData(listQO(params.region));
+    return { region, items };
   },
   head: ({ loaderData }) =>
     loaderData
@@ -31,6 +31,15 @@ export const Route = createFileRoute("/$region/classificados")({
             {
               name: "description",
               content: `Classificados de emprego, imóveis e veículos em ${loaderData.region.name}.`,
+            },
+            // Sem anúncio classificado ainda nesta região: não indexa até ter
+            // conteúdo de verdade — mesma regra já aplicada em cidade/editoria,
+            // que faltava aqui (é a página que mais aparecia rankeando mal no
+            // Search Console, e o motivo era só este: nunca decidia noindex
+            // porque o loader não devolvia a lista pro head() checar).
+            {
+              name: "robots",
+              content: (loaderData.items?.length ?? 0) > 0 ? "index, follow" : "noindex, follow",
             },
           ],
         }
