@@ -210,3 +210,53 @@ export function withLineBreaks(nodes: ReactNode[], keyPrefix: string): ReactNode
   });
   return out;
 }
+
+/**
+ * Converte marcações Markdown inline (`**negrito**` e `*itálico*`) dentro dos
+ * nós string em `<strong>` / `<em>`. Preserva ReactNodes (links já criados).
+ */
+export function withInlineMarkdown(nodes: ReactNode[], keyPrefix: string): ReactNode[] {
+  const out: ReactNode[] = [];
+  let idx = 0;
+  // **bold** primeiro; depois *italic* (single asterisco não colado a espaço).
+  const boldRe = /\*\*([^*\n]+?)\*\*/g;
+  const italicRe = /(^|[^*])\*([^*\n]+?)\*(?!\*)/g;
+  nodes.forEach((n) => {
+    if (typeof n !== "string") {
+      out.push(n);
+      return;
+    }
+    // Passo 1: bold
+    const pieces: ReactNode[] = [];
+    let last = 0;
+    let m: RegExpExecArray | null;
+    boldRe.lastIndex = 0;
+    while ((m = boldRe.exec(n)) !== null) {
+      if (m.index > last) pieces.push(n.slice(last, m.index));
+      pieces.push(<strong key={`${keyPrefix}-b-${idx++}`}>{m[1]}</strong>);
+      last = m.index + m[0].length;
+    }
+    if (last < n.length) pieces.push(n.slice(last));
+    // Passo 2: italic sobre os pedaços string restantes
+    for (const p of pieces) {
+      if (typeof p !== "string") {
+        out.push(p);
+        continue;
+      }
+      let last2 = 0;
+      let m2: RegExpExecArray | null;
+      italicRe.lastIndex = 0;
+      let matchedAny = false;
+      while ((m2 = italicRe.exec(p)) !== null) {
+        matchedAny = true;
+        const start = m2.index + m2[1].length;
+        if (start > last2) out.push(p.slice(last2, start));
+        out.push(<em key={`${keyPrefix}-i-${idx++}`}>{m2[2]}</em>);
+        last2 = m2.index + m2[0].length;
+      }
+      if (!matchedAny) out.push(p);
+      else if (last2 < p.length) out.push(p.slice(last2));
+    }
+  });
+  return out;
+}
