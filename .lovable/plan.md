@@ -1,14 +1,25 @@
-## Correções a aplicar (do files_33-2.zip)
+## Problema
 
-**1. `src/routes/$region.classificados.tsx`** — loader passa `items` pro `head()` e adiciona `<meta robots="noindex, follow">` quando a região ainda não tem classificados publicados.
+Ao salvar a matéria, as listas (ex.: "1º cenário estimulado" da pesquisa) que você quebra manualmente com Enter voltam a virar texto corrido no site publicado.
 
-**2. `src/routes/$region.index.tsx`** — loader passa `articles` pro `head()` e adiciona `<meta robots="noindex, follow">` quando a região ainda não tem matérias (útil pra Nacional/Internacional recém-criadas).
+## Causa (verificada)
 
-**3. `supabase/functions/generate-article/index.ts`** — trava anti-duplicata antes de auto-publicar:
-- Consulta títulos publicados na mesma categoria+região nas últimas 48h.
-- Compara via similaridade de Jaccard (palavras relevantes, ignorando stopwords) com limiar 0.5.
-- Se detectar duplicata provável, força fila manual em vez de publicar automaticamente.
+- O editor salva `corpo` exatamente como você digita — as quebras de linha (`\n`) continuam no banco.
+- O problema é na renderização em `src/routes/$region.$slug.tsx`: o corpo é dividido em parágrafos por **linhas em branco** (`split(/\n\s*\n/)`) e cada parágrafo vira um único `<p>`. Quebras de linha simples (Enter uma vez) são colapsadas em espaço pelo HTML — por isso a lista aparece corrida.
+- É comportamento padrão de Markdown (linha única = mesma frase). Precisamos respeitar quebras de linha explícitas.
 
-**4. `supabase-external/046_consulta_duplicatas.sql`** (novo) — query de leitura (não altera nada) para o SQL Editor do Supabase externo listar prováveis duplicatas já publicadas (mesma categoria+região+dia), pra revisão manual.
+## Solução
 
-Nenhuma dependência nova, nenhuma migração destrutiva, sem mudanças de UI pública além dos meta tags.
+Renderizar quebras de linha simples dentro de cada parágrafo como `<br/>`, mantendo o agrupamento atual por linha em branco.
+
+### Alterações
+
+1. **`src/lib/auto-link.tsx`** — na função `autoLinkParagraph` (ou equivalente que monta os nós do parágrafo), quando o texto contiver `\n`, dividir por `\n` e intercalar `<br key=... />` entre os pedaços antes de aplicar linkificação/auto-link. Assim cada linha do bloco vira uma linha visual.
+
+2. Nenhuma mudança no editor, no schema ou no pipeline — o conteúdo salvo já está correto; só a renderização precisa respeitar as quebras.
+
+### Resultado esperado
+
+- Um Enter simples → nova linha visual (linhas empilhadas como no seu print de referência).
+- Dois Enters (linha em branco) → novo parágrafo com espaçamento maior (comportamento atual mantido).
+- Matérias antigas se beneficiam automaticamente, sem migração.
