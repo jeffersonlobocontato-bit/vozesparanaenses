@@ -41,15 +41,6 @@ export function ArticleImageEditor({ articleId, currentUrl, originalUrl, current
     } finally { setBusy(null); }
   }
 
-  async function fileToBase64(file: File): Promise<string> {
-    return await new Promise((resolve, reject) => {
-      const r = new FileReader();
-      r.onload = () => resolve(String(r.result));
-      r.onerror = () => reject(r.error);
-      r.readAsDataURL(file);
-    });
-  }
-
   async function uploadToStorage(file: File): Promise<string> {
     const sb = await getExternalBrowser();
     const ext = (file.name.split(".").pop() || "jpg").toLowerCase().replace(/[^a-z0-9]/g, "");
