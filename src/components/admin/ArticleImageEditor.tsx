@@ -109,13 +109,13 @@ export function ArticleImageEditor({ articleId, currentUrl, originalUrl, current
     return data.publicUrl;
   }
 
-  async function addGaleriaFiles(files: FileList) {
+  async function addGaleriaFiles(files: File[]) {
     setBusy("gal-add"); setMsg("Enviando fotos para a galeria…");
     try {
+      const selected = files;
       const sb = await getExternalBrowser();
       const novas = [...galeria];
       let enviadas = 0;
-      const selected = Array.from(files);
       for (const f of selected) {
         try {
           setMsg(`Preparando e comprimindo "${f.name}" (${formatBytes(f.size)})…`);
@@ -410,9 +410,9 @@ export function ArticleImageEditor({ articleId, currentUrl, originalUrl, current
               className="hidden"
               disabled={busy !== null}
               onChange={(e) => {
-                const fs = e.target.files;
-                if (fs && fs.length) addGaleriaFiles(fs);
-                e.target.value = "";
+                const fs = Array.from(e.target.files ?? []);
+                if (fs.length) void addGaleriaFiles(fs);
+                e.currentTarget.value = "";
               }}
             />
           </label>
