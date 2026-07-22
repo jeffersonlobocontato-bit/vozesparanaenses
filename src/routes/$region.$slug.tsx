@@ -18,6 +18,7 @@ import { AdsenseSlot } from "@/components/AdsenseSlot";
 import { WhatsAppCTA } from "@/components/WhatsAppCTA";
 import { ShareButtons } from "@/components/ShareButtons";
 import { parseVideoEmbed } from "@/lib/video-embed";
+import { AdminInlineEditButton } from "@/components/AdminInlineEditButton";
 
 const articleQO = (regionSlug: string, slug: string) =>
   queryOptions({
@@ -412,6 +413,9 @@ function ArticlePage() {
         <h1 className="font-display text-4xl font-black leading-[1.02] tracking-tight text-[#0A2540] md:text-6xl lg:text-7xl">
           {article.title}
         </h1>
+
+        {/* Atalho de edição inline — visível somente para admins/editores logados */}
+        <AdminInlineEditButton slug={article.slug} />
 
         {/* Publicação + byline */}
         {(publishedLabel || article.editor_responsavel) && (
