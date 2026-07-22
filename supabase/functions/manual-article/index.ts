@@ -36,7 +36,6 @@ Deno.serve(async (req) => {
   const selfUrl = Deno.env.get("SUPABASE_URL");
   const selfKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
   if (!extUrl || !extKey) return json({ error: "missing_external_supabase_env" }, 500);
-  if (!firecrawlKey) return json({ error: "missing_firecrawl_api_key" }, 500);
   if (!selfUrl || !selfKey) return json({ error: "missing_self_supabase_env" }, 500);
 
   let body: Payload;
@@ -48,6 +47,7 @@ Deno.serve(async (req) => {
   const modoTexto = typeof body.texto === "string" && body.texto.trim().length > 0;
   const url = (body.url ?? body.fonte_url ?? "").trim();
   if (!modoTexto && !/^https?:\/\//i.test(url)) return json({ error: "invalid_url" }, 400);
+  if (!modoTexto && !firecrawlKey) return json({ error: "missing_firecrawl_api_key" }, 500);
   if (modoTexto && !body.titulo?.trim()) return json({ error: "missing_titulo_texto" }, 400);
   if (!body.regiao_id) return json({ error: "missing_regiao_id" }, 400);
   if (!body.categoria_id) return json({ error: "missing_categoria_id" }, 400);
