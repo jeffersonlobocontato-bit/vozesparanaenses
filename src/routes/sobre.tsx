@@ -70,11 +70,6 @@ function AboutPage() {
         </section>
 
         <section className="mt-10">
-          <h2 className="font-display text-3xl font-bold text-[#0A2540]">Método editorial (DEL)</h2>
-          {renderRichText(cfg.metodo_editorial)}
-        </section>
-
-        <section className="mt-10">
           <h2 className="font-display text-3xl font-bold text-[#0A2540]">Transparência sobre IA</h2>
           {renderRichText(cfg.transparencia_ia)}
         </section>
