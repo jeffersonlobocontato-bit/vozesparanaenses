@@ -1,4 +1,5 @@
 import { createServerFn } from "@tanstack/react-start";
+import type { ReactNode } from "react";
 
 export type SobreConfig = {
   hero_title: string;
@@ -65,7 +66,7 @@ export const getSobreConfig = createServerFn({ method: "GET" }).handler(
 
 /** Renderiza texto simples com suporte a **negrito**, quebras `\n` (novas linhas)
  *  e parágrafos separados por linha em branco. Retorna array de nós React. */
-export function renderRichText(text: string): React.ReactNode[] {
+export function renderRichText(text: string): ReactNode[] {
   const paragraphs = text.split(/\n\s*\n/).map((p) => p.trim()).filter(Boolean);
   return paragraphs.map((para, pi) => {
     const lines = para.split(/\n/);
@@ -82,8 +83,8 @@ export function renderRichText(text: string): React.ReactNode[] {
   });
 }
 
-function renderInline(text: string): React.ReactNode[] {
-  const parts: React.ReactNode[] = [];
+function renderInline(text: string): ReactNode[] {
+  const parts: ReactNode[] = [];
   const regex = /\*\*(.+?)\*\*/g;
   let last = 0;
   let m: RegExpExecArray | null;
