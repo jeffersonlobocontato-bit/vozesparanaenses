@@ -91,6 +91,7 @@ function AdminLayout() {
                 { to: "/admin/pedidos-chat", label: "Pedidos (chat)" },
                 { to: "/admin/agentes", label: "Agentes IA" },
                 { to: "/admin/memoria-editorial", label: "Memória" },
+                { to: "/admin/sobre", label: "Sobre" },
               ].map((it) => (
                 <Link
                   key={it.to}
