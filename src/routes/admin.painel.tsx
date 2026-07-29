@@ -50,7 +50,7 @@ function AdminDashboard() {
   const [m, setM] = useState<Metrics | null>(null);
   const [recent, setRecent] = useState<RecentDraft[]>([]);
   const [err, setErr] = useState<string | null>(null);
-  const [pipelineRunning, setPipelineRunning] = useState<"prefeituras" | "portais" | "curadoria" | null>(null);
+  const [pipelineRunning, setPipelineRunning] = useState<"prefeituras" | "portais" | "curadoria" | "escrita" | null>(null);
   const pipelineBusy = pipelineRunning !== null;
   const [pipelineLog, setPipelineLog] = useState<string[]>([]);
 
