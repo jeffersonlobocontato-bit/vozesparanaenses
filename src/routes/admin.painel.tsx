@@ -22,6 +22,8 @@ type Metrics = {
   publishedToday: number;
   clustersNovos: number;
   clustersSelecionados: number;
+  clustersParanaNovos: number;
+  clustersParanaPendentes: number;
   rawLast24h: number;
   fontesAtivas: number;
   fontesTotal: number;
@@ -59,7 +61,7 @@ function AdminDashboard() {
       const startOfDay = new Date(); startOfDay.setHours(0, 0, 0, 0);
 
       const [drafts, approved, published, rejected, publishedToday,
-        clustersNovos, clustersSelecionados, rawLast24h,
+        clustersNovos, clustersSelecionados, clustersParanaNovos, clustersParanaPendentes, rawLast24h,
         fontesAtivas, fontesTotal, regioesAtivas, ultima, recentRes,
         campanhasAtivas, campanhasTotal, criativosPendentes, criativosAprovados,
         impressoesHoje, cliquesHoje] = await Promise.all([
@@ -76,6 +78,11 @@ function AdminDashboard() {
         // abria uma tela vazia.
         sb.from("article_clusters").select("*", { count: "exact", head: true }).eq("status", "novo").eq("curadoria_nacional", true),
         sb.from("article_clusters").select("*", { count: "exact", head: true }).eq("status", "selecionado_cota").eq("curadoria_nacional", true),
+        // Pautas do fluxo paranaense (curadoria_nacional=false): ficam
+        // aguardando classificação/escrita e antes não apareciam em nenhum
+        // lugar do painel, dando a impressão de que o pipeline não gerou nada.
+        sb.from("article_clusters").select("*", { count: "exact", head: true }).eq("status", "novo").eq("curadoria_nacional", false),
+        sb.from("article_clusters").select("*", { count: "exact", head: true }).in("status", ["selecionado_cota", "fatos_extraidos"]).eq("curadoria_nacional", false),
         sb.from("raw_articles").select("*", { count: "exact", head: true }).gte("coletado_em", since24h),
         sb.from("fontes").select("*", { count: "exact", head: true }).eq("ativo", true),
         sb.from("fontes").select("*", { count: "exact", head: true }),
@@ -104,6 +111,8 @@ function AdminDashboard() {
         publishedToday: publishedToday.count ?? 0,
         clustersNovos: clustersNovos.count ?? 0,
         clustersSelecionados: clustersSelecionados.count ?? 0,
+        clustersParanaNovos: clustersParanaNovos.count ?? 0,
+        clustersParanaPendentes: clustersParanaPendentes.count ?? 0,
         rawLast24h: rawLast24h.count ?? 0,
         fontesAtivas: fontesAtivas.count ?? 0,
         fontesTotal: fontesTotal.count ?? 0,
@@ -419,6 +428,8 @@ function AdminDashboard() {
           <Kpi label="Coletado (24h)" value={m?.rawLast24h} tone="slate" icon={Radar} />
           <Kpi label="Pautas novas" value={m?.clustersNovos} tone="amber" icon={Layers} to="/admin/clusters" />
           <Kpi label="Selecionadas por cota" value={m?.clustersSelecionados} tone="blue" icon={ListChecks} to="/admin/clusters" />
+          <Kpi label="Pautas PR (novas)" value={m?.clustersParanaNovos} tone="amber" icon={Layers} to="/admin" />
+          <Kpi label="Pautas PR aguardando escrita" value={m?.clustersParanaPendentes} tone="blue" icon={ListChecks} to="/admin" />
           <Kpi label="Fontes ativas" value={m ? `${m.fontesAtivas}/${m.fontesTotal}` : undefined} tone="teal" icon={Radio} to="/admin/fontes" />
         </div>
         {m?.ultimaGeracao && (
