@@ -106,6 +106,15 @@ Deno.serve(async (req) => {
   if (error) return json({ error: "raw_query_failed", detail: error.message }, 500);
   if (!raws?.length) return json({ ok: true, processed: 0, clusters: 0 });
 
+  // pgvector chega do PostgREST como STRING ("[0.1,0.2,...]"), não como
+  // array. Sem normalizar, `cosine()` opera sobre caracteres (NaN) e o
+  // centróide vira [null,...], fazendo TODO insert de cluster falhar —
+  // exatamente o sintoma "processado=25 clusters=0" repetido em todo lote,
+  // porque nada é marcado como processado e o mesmo lote volta sempre.
+  for (const r of raws as Raw[]) {
+    r.embedding = toVetor(r.embedding);
+  }
+
   // (o filtro por tipo de fonte / curadoria já foi aplicado na SQL acima)
 
   // 1. Fontes oficiais (prefeitura) não precisam de embedding nem de
@@ -311,6 +320,7 @@ Deno.serve(async (req) => {
       .gte("criado_em", since)
       .limit(300);
     const outros = (outrosData ?? []) as { id: string; regiao_id: string; grupo_estadual_id: string | null; embedding_centroide: number[] }[];
+    for (const o of outros) o.embedding_centroide = toVetor(o.embedding_centroide) ?? [];
     const CROSS_REGION_THRESHOLD = 0.85;
 
     for (const novo of novosClusters) {
@@ -431,4 +441,19 @@ function mediaVetores(vetores: number[][]): number[] {
     for (let i = 0; i < dim; i++) soma[i] += v[i] ?? 0;
   }
   return soma.map((s) => s / n);
+}
+
+// deno-lint-ignore no-explicit-any
+function toVetor(v: any): number[] | null {
+  if (Array.isArray(v)) return v.every((n) => typeof n === "number" && Number.isFinite(n)) ? v : null;
+  if (typeof v === "string") {
+    try {
+      const parsed = JSON.parse(v);
+      if (Array.isArray(parsed) && parsed.length && parsed.every((n) => typeof n === "number" && Number.isFinite(n))) {
+        return parsed as number[];
+      }
+    } catch { /* string inválida → trata como sem embedding */ }
+    return null;
+  }
+  return null;
 }
