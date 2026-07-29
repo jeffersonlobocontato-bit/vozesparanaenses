@@ -110,44 +110,56 @@ Deno.serve(async (req) => {
 
   // 2. Chamar IA — só para extração de fatos
   const userPrompt = buildUserPrompt(raws);
-  const aiRes = await fetch(AI_URL, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${aiKey}`,
-    },
-    body: JSON.stringify({
-      model: MODEL,
-      temperature: 0,
-      max_tokens: 2200,
-      messages: [
-        { role: "system", content: SYSTEM_PROMPT },
-        { role: "user", content: userPrompt },
-      ],
-      response_format: { type: "json_object" },
-    }),
-  });
+  // O gateway às vezes devolve 200 com um erro embutido no corpo
+  // ("JSON error injected into SSE stream") — falha transitória do
+  // provedor, não do prompt. Repetimos algumas vezes antes de desistir,
+  // para o pipeline não morrer no primeiro soluço.
+  let content: string | null = null;
+  let ultimoErro = "";
+  for (let tentativa = 1; tentativa <= 3; tentativa++) {
+    const aiRes = await fetch(AI_URL, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${aiKey}`,
+      },
+      body: JSON.stringify({
+        model: MODEL,
+        temperature: 0,
+        max_tokens: 2200,
+        messages: [
+          { role: "system", content: SYSTEM_PROMPT },
+          { role: "user", content: userPrompt },
+        ],
+        response_format: { type: "json_object" },
+      }),
+    });
 
-  if (aiRes.status === 429) return json({ error: "rate_limited" }, 429);
-  if (aiRes.status === 402) return json({ error: "ai_credits_exhausted" }, 402);
-  if (!aiRes.ok) {
-    const t = await aiRes.text();
-    return json({ error: "ai_gateway_error", status: aiRes.status, detail: t.slice(0, 500) }, 502);
+    if (aiRes.status === 429) return json({ error: "rate_limited" }, 429);
+    if (aiRes.status === 402) return json({ error: "ai_credits_exhausted" }, 402);
+    if (!aiRes.ok) {
+      ultimoErro = `http ${aiRes.status}: ${(await aiRes.text()).slice(0, 300)}`;
+    } else {
+      const aiJson = await aiRes.json();
+      const choiceError = aiJson?.choices?.[0]?.error;
+      const c = aiJson?.choices?.[0]?.message?.content;
+      if (choiceError) ultimoErro = choiceError?.message ?? "Modelo encerrou sem JSON.";
+      else if (!c) ultimoErro = "resposta vazia do modelo";
+      else { content = c; break; }
+    }
+    console.warn(`[extract-facts] tentativa ${tentativa} falhou: ${ultimoErro}`);
+    if (tentativa < 3) await new Promise((r) => setTimeout(r, 1200 * tentativa));
   }
 
-  const aiJson = await aiRes.json();
-  const choiceError = aiJson?.choices?.[0]?.error;
-  if (choiceError) {
-    return json({ error: "ai_choice_error", detail: choiceError?.message ?? "Modelo encerrou sem JSON." }, 502);
-  }
-  const content = aiJson?.choices?.[0]?.message?.content;
-  if (!content) return json({ error: "ai_empty_response" }, 502);
+  if (!content) return json({ error: "ai_choice_error", detail: `${ultimoErro} (3 tentativas)` }, 502);
 
   let parsed: FactsPayload;
   try {
     parsed = JSON.parse(content);
   } catch {
-    return json({ error: "ai_invalid_json", raw: content.slice(0, 500) }, 502);
+    const m = content.match(/\{[\s\S]*\}/);
+    if (!m) return json({ error: "ai_invalid_json", raw: content.slice(0, 500) }, 502);
+    try { parsed = JSON.parse(m[0]); } catch { return json({ error: "ai_invalid_json", raw: content.slice(0, 500) }, 502); }
   }
 
   // 3. Persistir extracted_facts
