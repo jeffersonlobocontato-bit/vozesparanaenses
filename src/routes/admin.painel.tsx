@@ -246,19 +246,7 @@ function AdminDashboard() {
           if (wd.erros?.length && !wd.escritas) throw new Error(`${wd.erros[0]?.etapa ?? "escrita"}: ${wd.erros[0]?.detalhe ?? "erro ao gerar matéria"}`);
         }
       }
-      setPipelineLog((l) => [...l, "Drenando pautas já selecionadas que ficaram pendentes…"]);
-      for (let i = 1; i <= 30; i++) {
-        const r = await supabase.functions.invoke("process-pending-clusters", { body: { limit: 5, sync: true } });
-        if (r.error) throw r.error;
-        const d = (r.data ?? {}) as { pendentes?: number; escritas?: number; erros?: Array<{ etapa?: string; detalhe?: string }> };
-        setPipelineLog((l) => [...l, `  pendente ${i}: pendentes=${d.pendentes ?? 0} escritas=${d.escritas ?? 0} erros=${d.erros?.length ?? 0}`]);
-        if (d.erros?.length) {
-          const first = d.erros[0];
-          setPipelineLog((l) => [...l, `    aviso: ${first.etapa ?? "escrita"} — ${(first.detalhe ?? "erro ao gerar matéria").slice(0, 220)}`]);
-        }
-        if (d.erros?.length && !d.escritas) throw new Error(`${d.erros[0]?.etapa ?? "escrita"}: ${d.erros[0]?.detalhe ?? "erro ao gerar matéria"}`);
-        if (!d.pendentes || !d.escritas) break;
-      }
+      await drenarPendentes(60);
     } catch (e: unknown) {
       setPipelineLog((l) => [...l, `  ✗ ${e instanceof Error ? e.message : "erro"}`]);
       setPipelineLog((l) => [...l, "Scraping interrompido — nenhuma etapa seguinte foi mascarada como concluída."]);
