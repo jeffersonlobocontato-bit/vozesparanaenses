@@ -6,9 +6,11 @@ type Categoria = { id: string; nome: string; slug: string };
 type Regiao = { id: string; nome: string; slug: string };
 
 /**
- * Card "Publicar matéria": o editor preenche os campos essenciais e a IA
- * autopreenche SEO (title/description/slug), GEO (região/cidade/JSON-LD),
- * TL;DR, 5W1H e FAQ. Publica direto ao final.
+ * Card "Publicar matéria": o texto enviado é publicado LITERALMENTE, sem
+ * reescrita da IA. A IA entra só para autopreencher os metadados de
+ * indexação — SEO (title/description/slug), GEO (cidade/JSON-LD), TL;DR,
+ * 5W1H e FAQ. Diferente do "Redator manual", que reescreve a partir de um
+ * link ou texto-fonte.
  */
 export function PublishArticleBox() {
   const [regioes, setRegioes] = useState<Regiao[]>([]);
@@ -21,7 +23,7 @@ export function PublishArticleBox() {
   const [imagem, setImagem] = useState("");
   const [legenda, setLegenda] = useState("");
   const [credito, setCredito] = useState("");
-  const [obs, setObs] = useState("");
+  const [subtitulo, setSubtitulo] = useState("");
   const [publicarDireto, setPublicarDireto] = useState(true);
   const [busy, setBusy] = useState(false);
   const [step, setStep] = useState<string | null>(null);
@@ -48,21 +50,21 @@ export function PublishArticleBox() {
     e.preventDefault();
     setErr(null); setOk(null);
     if (!titulo.trim()) { setErr("Informe o título da matéria."); return; }
-    if (texto.trim().length < 200) { setErr("O texto precisa ter ao menos 200 caracteres."); return; }
+    if (texto.trim().length < 120) { setErr("O texto precisa ter ao menos 120 caracteres."); return; }
     if (!regiaoId) { setErr("Escolha a região."); return; }
     if (!categoriaId) { setErr("Escolha a editoria."); return; }
 
     setBusy(true);
-    setStep("Organizando SEO, GEO e estrutura com a IA…");
+    setStep("Montando SEO e GEO (o texto não será alterado)…");
     try {
-      const { data, error } = await supabase.functions.invoke("manual-article", {
+      const { data, error } = await supabase.functions.invoke("publish-article", {
         body: {
           titulo: titulo.trim(),
           texto: texto.trim(),
+          subtitulo: subtitulo.trim() || undefined,
           fonte_url: fonteUrl.trim() || undefined,
           regiao_id: regiaoId,
           categoria_id: categoriaId,
-          observacoes: obs.trim() || undefined,
           imagem_capa_url: imagem.trim() || undefined,
           imagem_legenda: legenda.trim() || undefined,
           imagem_credito: credito.trim() || undefined,
@@ -82,7 +84,7 @@ export function PublishArticleBox() {
       setOk(payload.publicado
         ? `Publicada: "${payload.titulo ?? titulo}". Já está no ar.`
         : `Rascunho criado: "${payload.titulo ?? titulo}". Revise na Fila editorial.`);
-      setTitulo(""); setTexto(""); setFonteUrl(""); setImagem(""); setLegenda(""); setCredito(""); setObs("");
+      setTitulo(""); setTexto(""); setSubtitulo(""); setFonteUrl(""); setImagem(""); setLegenda(""); setCredito("");
     } catch (e) {
       setErr(e instanceof Error ? e.message : "Falha ao publicar matéria");
     } finally {
@@ -95,6 +97,12 @@ export function PublishArticleBox() {
 
   return (
     <form onSubmit={submit} className="space-y-3">
+      <p className="rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-[11px] leading-relaxed text-amber-800">
+        O texto abaixo é publicado <strong>exatamente como você escreveu</strong> — a IA não reescreve
+        nem resume o corpo. Ela só monta os metadados de indexação (SEO, GEO, TL;DR, 5W1H e FAQ).
+        Para que a IA <em>escreva</em> a matéria a partir de um link ou texto-fonte, use o
+        “Redator manual” na Fila editorial.
+      </p>
       <div className="grid gap-3 sm:grid-cols-2">
         <label className={labelCls}>
           Região
@@ -119,9 +127,15 @@ export function PublishArticleBox() {
       </label>
 
       <label className={labelCls}>
-        Texto da matéria
+        Subtítulo (opcional)
+        <input value={subtitulo} onChange={(e) => setSubtitulo(e.target.value)} disabled={busy}
+          placeholder="Linha de apoio, até 160 caracteres" className={inputCls} />
+      </label>
+
+      <label className={labelCls}>
+        Texto final da matéria (publicado sem alteração)
         <textarea value={texto} onChange={(e) => setTexto(e.target.value)} disabled={busy} rows={10}
-          placeholder="Escreva ou cole o texto completo. A IA cuida de SEO, GEO, TL;DR, 5W1H e FAQ."
+          placeholder="Cole aqui o texto pronto. Ele vai ao ar palavra por palavra como está."
           className={`${inputCls} font-mono text-[12px] leading-relaxed`} />
         <span className="mt-1 block text-[10px] text-slate-500">
           {texto.trim().length} caracteres · {texto.trim().split(/\s+/).filter(Boolean).length} palavras
@@ -145,18 +159,11 @@ export function PublishArticleBox() {
         </label>
       </div>
 
-      <div className="grid gap-3 sm:grid-cols-2">
-        <label className={labelCls}>
-          Fonte/referência (opcional)
-          <input type="url" value={fonteUrl} onChange={(e) => setFonteUrl(e.target.value)} disabled={busy}
-            placeholder="https://…" className={inputCls} />
-        </label>
-        <label className={labelCls}>
-          Observações para a IA (opcional)
-          <input value={obs} onChange={(e) => setObs(e.target.value)} disabled={busy}
-            placeholder="Ex.: destacar impacto em Maringá" className={inputCls} />
-        </label>
-      </div>
+      <label className={labelCls}>
+        Fonte/referência (opcional)
+        <input type="url" value={fonteUrl} onChange={(e) => setFonteUrl(e.target.value)} disabled={busy}
+          placeholder="https://…" className={inputCls} />
+      </label>
 
       <div className="flex flex-wrap items-center gap-3">
         <label className="inline-flex items-center gap-2 text-xs font-medium text-slate-600">
