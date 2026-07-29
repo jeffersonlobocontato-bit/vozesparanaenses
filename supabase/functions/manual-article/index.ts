@@ -202,6 +202,7 @@ Deno.serve(async (req) => {
     .limit(1)
     .maybeSingle();
   if (existingArticle?.id) {
+    await finalize(sb, existingArticle.id as string, body);
     return json({
       ok: true,
       resumed: true,
@@ -209,6 +210,7 @@ Deno.serve(async (req) => {
       raw_article_id: rawId,
       article: existingArticle,
       titulo: existingArticle.titulo ?? titulo,
+      publicado: body.publicar === true,
     });
   }
 
@@ -246,14 +248,36 @@ Deno.serve(async (req) => {
   }
   const gaJson = await ga.json();
 
+  const newArticleId = gaJson?.article?.id as string | undefined;
+  if (newArticleId) await finalize(sb, newArticleId, body);
+
   return json({
     ok: true,
     cluster_id: clusterId,
     raw_article_id: rawId,
     article: gaJson?.article ?? null,
     titulo: gaJson?.titulo ?? titulo,
+    publicado: body.publicar === true && Boolean(newArticleId),
   });
 });
+
+// Aplica mídia opcional e publica a matéria quando o editor pediu publicação direta.
+async function finalize(
+  sb: ReturnType<typeof createClient>,
+  articleId: string,
+  body: Payload,
+) {
+  const patch: Record<string, unknown> = {};
+  if (body.imagem_capa_url?.trim()) patch.imagem_capa_url = body.imagem_capa_url.trim();
+  if (body.imagem_legenda?.trim()) patch.imagem_legenda = body.imagem_legenda.trim();
+  if (body.imagem_credito?.trim()) patch.imagem_credito = body.imagem_credito.trim();
+  if (body.publicar === true) {
+    patch.status = "publicado";
+    patch.publicado_em = new Date().toISOString();
+  }
+  if (Object.keys(patch).length === 0) return;
+  await sb.from("generated_articles").update(patch).eq("id", articleId);
+}
 
 async function sha256(s: string) {
   const data = new TextEncoder().encode(s);
