@@ -49,6 +49,17 @@ Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: cors });
   if (req.method !== "POST") return json({ error: "method_not_allowed" }, 405);
 
+  // Orçamento de tempo pra chamada síncrona inteira. Sem isso, buscar o
+  // texto completo da matéria (necessário pra não sair rasa) pra dezenas
+  // de fontes estourava o tempo de execução da plataforma, derrubando a
+  // função inteira antes de terminar (erro genérico "non-2xx status
+  // code") — e perdendo o que já tinha funcionado. Perto do limite, para
+  // de buscar texto completo (usa só o teaser) e de iniciar fonte nova,
+  // mas continua inserindo normalmente o que já processou.
+  const inicioExec = Date.now();
+  const ORCAMENTO_MS = 35_000;
+  const dentroDoOrcamento = () => Date.now() - inicioExec < ORCAMENTO_MS;
+
   const url = Deno.env.get("EXTERNAL_SUPABASE_URL");
   const key = Deno.env.get("EXTERNAL_SUPABASE_SERVICE_ROLE_KEY");
   if (!url || !key) return json({ error: "missing_external_supabase_env" }, 500);
@@ -132,6 +143,7 @@ Deno.serve(async (req) => {
       let insertedItem: Item | null = null;
       let insertedId: string | null = null;
       let duplicates = 0;
+      let orcamentoEstourou = false;
       for (const it of items) {
         const hash = await sha256(it.url + "|" + it.titulo);
         const deteccao = detectarCidade(`${it.titulo}\n${it.corpo}`, cidades);
@@ -144,7 +156,9 @@ Deno.serve(async (req) => {
         let credito = it.credito ?? null;
         let corpo = it.corpo ?? "";
         const CORPO_RASO = 400; // abaixo disso, vale a pena buscar a página inteira
-        if (!imagem || !credito || corpo.length < CORPO_RASO) {
+        const precisaEnriquecer = !imagem || !credito || corpo.length < CORPO_RASO;
+        if (precisaEnriquecer && !dentroDoOrcamento()) orcamentoEstourou = true;
+        if (precisaEnriquecer && dentroDoOrcamento()) {
           try {
             const meta = await fetchArticleImageMeta(it.url);
             if (!imagem && meta.imagem) imagem = meta.imagem;
@@ -180,7 +194,7 @@ Deno.serve(async (req) => {
         break;
       }
       await sb.from("fontes").update({ ultimo_scrape_em: new Date().toISOString() }).eq("id", fonte.id);
-      return { fonte: fonte.nome, total: items.length, inserted: insertedItem ? 1 : 0, inserted_id: insertedId, inserted_url: insertedItem?.url ?? null, duplicates };
+      return { fonte: fonte.nome, total: items.length, inserted: insertedItem ? 1 : 0, inserted_id: insertedId, inserted_url: insertedItem?.url ?? null, duplicates, orcamento_estourou: orcamentoEstourou || undefined };
     } catch (e) {
       return { fonte: fonte.nome, error: (e as Error).message };
     }
@@ -191,12 +205,13 @@ Deno.serve(async (req) => {
   // — o Edge Runtime tem timeout curto do lado do cliente (fetch) e o
   // pipeline no admin encadeia scrape → cluster → classify; travar aqui
   // fazia o botão "Rodar pipeline" abortar antes do fim.
-  const CONCURRENCY = 6;
+  const CONCURRENCY = 14;
   async function runAll(fontesList: Fonte[]): Promise<Record<string, unknown>[]> {
     const queue = [...fontesList];
     const results: Record<string, unknown>[] = [];
     const workers = Array.from({ length: Math.min(CONCURRENCY, queue.length) }, async () => {
       while (queue.length) {
+        if (!dentroDoOrcamento()) break; // não inicia fonte nova, deixa pro próximo clique
         const f = queue.shift();
         if (!f) return;
         results.push(await processFonte(f));
@@ -212,7 +227,18 @@ Deno.serve(async (req) => {
   // uma raw_articles ainda vazia, porque o scraping real ainda não terminou.
   if (body.fonte_id || body.sync) {
     const results = await runAll(selectedEligible as Fonte[]);
-    return json({ ok: true, processed: results.length, total_eligible: eligible.length, offset: fonteOffset, limit: fonteLimit, report: results });
+    const orcamentoEstourouEm = results.filter((r) => r.orcamento_estourou).length;
+    return json({
+      ok: true,
+      processed: results.length,
+      total_eligible: eligible.length,
+      offset: fonteOffset,
+      limit: fonteLimit,
+      report: results,
+      aviso: orcamentoEstourouEm > 0
+        ? `Orçamento de tempo (${ORCAMENTO_MS / 1000}s) apertado: ${orcamentoEstourouEm} fonte(s) ficaram com teaser curto desta vez.`
+        : undefined,
+    });
   }
 
   const queue = [...(selectedEligible as Fonte[])];

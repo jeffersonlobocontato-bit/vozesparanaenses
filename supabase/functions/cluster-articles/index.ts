@@ -144,10 +144,20 @@ Deno.serve(async (req) => {
   const items = rawsVeiculo;
   const needEmbed = items.filter((r) => !r.embedding);
   let embedFalhas = 0;
+  let vaziosMarcados = 0;
   let ultimoErroEmbed: string | undefined;
   for (const r of needEmbed) {
     const text = `${r.titulo ?? ""}\n\n${r.corpo_limpo ?? ""}`.slice(0, 4000);
-    if (!text.trim()) continue;
+    if (!text.trim()) {
+      // Sem título nem corpo, nunca vai ter o que gerar embedding — sem
+      // marcar como processado aqui, esse item fica preso pra sempre,
+      // sendo puxado de novo em TODO lote seguinte (é o "processado=25
+      // clusters=0" repetido: o mesmo grupo de itens vazios dominando o
+      // limite da consulta rodada após rodada).
+      await sb.from("raw_articles").update({ processado: true }).eq("id", r.id);
+      vaziosMarcados++;
+      continue;
+    }
     const { vetor, erro } = await embed(text, aiKey);
     if (vetor) {
       r.embedding = vetor;
@@ -221,7 +231,10 @@ Deno.serve(async (req) => {
     const needEmbedCur = rawsCuradoria.filter((r) => !r.embedding);
     for (const r of needEmbedCur) {
       const text = `${r.titulo ?? ""}\n\n${r.corpo_limpo ?? ""}`.slice(0, 4000);
-      if (!text.trim()) continue;
+      if (!text.trim()) {
+        await sb.from("raw_articles").update({ processado: true }).eq("id", r.id);
+        continue;
+      }
       const { vetor } = await embed(text, aiKey);
       if (vetor) {
         r.embedding = vetor;
@@ -329,6 +342,7 @@ Deno.serve(async (req) => {
     clusters_curadoria_nacional: createdCuradoria,
     linked_cross_regiao: linked,
     embeddings_falharam: embedFalhas,
+    itens_vazios_marcados: vaziosMarcados,
     embeddings_tentados: needEmbed.length,
     aviso: embedFalhas > 0 && embedFalhas === needEmbed.length
       ? `TODOS os ${embedFalhas} embeddings falharam — nenhum cluster novo pôde ser formado. Último erro: ${ultimoErroEmbed}`
