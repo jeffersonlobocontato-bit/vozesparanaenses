@@ -212,6 +212,8 @@ function AdminDashboard() {
   async function runPrefeituras() {
     setPipelineRunning("prefeituras");
     setPipelineLog(["Coletando releases oficiais de prefeituras…"]);
+    setPipelineRunning("prefeituras");
+    setPipelineLog(["Coletando releases oficiais de prefeituras…"]);
     try {
       const { data, error } = await supabase.functions.invoke("scrape-prefeitura", { body: { force: true, sync: true } });
       if (error) throw error;
