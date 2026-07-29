@@ -100,7 +100,7 @@ function AdminDashboard() {
         sb.from("ad_clicks").select("*", { count: "exact", head: true }).gte("clicado_em", startOfDay.toISOString()),
       ]);
 
-      const errs = [drafts, approved, published, rejected, publishedToday, clustersNovos, clustersSelecionados, rawLast24h, fontesAtivas, fontesTotal, regioesAtivas, recentRes, campanhasAtivas, campanhasTotal, criativosPendentes, criativosAprovados, impressoesHoje, cliquesHoje].map(r => r.error).filter(Boolean);
+      const errs = [drafts, approved, published, rejected, publishedToday, clustersNovos, clustersSelecionados, clustersParanaNovos, clustersParanaPendentes, rawLast24h, fontesAtivas, fontesTotal, regioesAtivas, recentRes, campanhasAtivas, campanhasTotal, criativosPendentes, criativosAprovados, impressoesHoje, cliquesHoje].map(r => r.error).filter(Boolean);
       if (errs.length) throw errs[0];
 
       setM({
