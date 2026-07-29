@@ -24,6 +24,11 @@ type Payload = {
   texto?: string;
   titulo?: string;
   fonte_url?: string;
+  // Novo: "Publicar matéria" — publica direto após a IA montar SEO/GEO.
+  publicar?: boolean;
+  imagem_capa_url?: string;
+  imagem_legenda?: string;
+  imagem_credito?: string;
 };
 
 Deno.serve(async (req) => {
