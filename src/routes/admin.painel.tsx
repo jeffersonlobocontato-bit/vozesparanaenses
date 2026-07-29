@@ -3,6 +3,7 @@ import { useCallback, useEffect, useState } from "react";
 import { getExternalBrowser } from "@/lib/external-supabase-browser";
 import { supabase } from "@/integrations/supabase/client";
 import { displayRegionName } from "@/lib/region-labels";
+import { PublishArticleBox } from "@/components/admin/PublishArticleBox";
 import {
   FileText, CheckCircle2, Send, XCircle, CalendarClock,
   Radar, Layers, ListChecks, Radio, Megaphone,
@@ -371,6 +372,13 @@ function AdminDashboard() {
 
       {/* KPIs editoriais */}
       <Section title="Editorial" subtitle="Estado atual das matérias">
+        <div className="mb-4 rounded-2xl border-2 border-[#0066CC]/40 bg-white p-5 shadow-sm">
+          <div className="mb-3">
+            <h3 className="text-sm font-bold uppercase tracking-wide text-[#0A2540]">📝 Publicar matéria</h3>
+            <p className="text-xs text-slate-500">Preencha os campos e envie — a IA autopreenche SEO, GEO, TL;DR, 5W1H e FAQ.</p>
+          </div>
+          <PublishArticleBox />
+        </div>
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
           <Kpi label="Rascunhos" value={m?.drafts} tone="amber" icon={FileText} to="/admin" />
           <Kpi label="Aprovados" value={m?.approved} tone="blue" icon={CheckCircle2} to="/admin" />
