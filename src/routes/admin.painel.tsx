@@ -209,9 +209,51 @@ function AdminDashboard() {
     load();
   }
 
+  // Drena as pautas já selecionadas que ainda não viraram matéria.
+  // Não para no primeiro lote sem escrita: tolera até 3 rodadas vazias
+  // seguidas antes de desistir, e só encerra quando não há mais pendentes.
+  async function drenarPendentes(maxCiclos = 60) {
+    setPipelineLog((l) => [...l, "Drenando pautas já selecionadas que ficaram pendentes…"]);
+    let vazios = 0;
+    let totalEscritas = 0;
+    for (let i = 1; i <= maxCiclos; i++) {
+      const r = await supabase.functions.invoke("process-pending-clusters", { body: { limit: 5, sync: true } });
+      if (r.error) throw r.error;
+      const d = (r.data ?? {}) as { pendentes?: number; escritas?: number; erros?: Array<{ etapa?: string; detalhe?: string }> };
+      totalEscritas += d.escritas ?? 0;
+      setPipelineLog((l) => [...l, `  pendente ${i}: pendentes=${d.pendentes ?? 0} escritas=${d.escritas ?? 0} erros=${d.erros?.length ?? 0}`]);
+      if (d.erros?.length) {
+        const first = d.erros[0];
+        setPipelineLog((l) => [...l, `    aviso: ${first.etapa ?? "escrita"} — ${(first.detalhe ?? "erro ao gerar matéria").slice(0, 220)}`]);
+      }
+      if (!d.pendentes) break;
+      if (!d.escritas) {
+        vazios += 1;
+        if (vazios >= 3) {
+          setPipelineLog((l) => [...l, `  ⚠ 3 lotes seguidos sem escrita — restam ${d.pendentes} pauta(s) travada(s). Veja os avisos acima.`]);
+          break;
+        }
+      } else {
+        vazios = 0;
+      }
+    }
+    setPipelineLog((l) => [...l, `  ✓ escrita concluída: ${totalEscritas} matéria(s) nova(s) na fila.`]);
+    return totalEscritas;
+  }
+
+  async function escreverPendentes() {
+    setPipelineRunning("escrita");
+    setPipelineLog(["Escrevendo pautas pendentes…"]);
+    try {
+      await drenarPendentes(80);
+    } catch (e: unknown) {
+      setPipelineLog((l) => [...l, `  ✗ ${e instanceof Error ? e.message : "erro"}`]);
+    }
+    setPipelineRunning(null);
+    load();
+  }
+
   async function runPrefeituras() {
-    setPipelineRunning("prefeituras");
-    setPipelineLog(["Coletando releases oficiais de prefeituras…"]);
     setPipelineRunning("prefeituras");
     setPipelineLog(["Coletando releases oficiais de prefeituras…"]);
     try {
