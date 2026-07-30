@@ -101,6 +101,27 @@ export type Database = {
         }
         Relationships: []
       }
+      form_rate_limit: {
+        Row: {
+          criado_em: string
+          endpoint: string
+          id: string
+          ip_hash: string
+        }
+        Insert: {
+          criado_em?: string
+          endpoint: string
+          id?: string
+          ip_hash: string
+        }
+        Update: {
+          criado_em?: string
+          endpoint?: string
+          id?: string
+          ip_hash?: string
+        }
+        Relationships: []
+      }
       suppressed_emails: {
         Row: {
           created_at: string
