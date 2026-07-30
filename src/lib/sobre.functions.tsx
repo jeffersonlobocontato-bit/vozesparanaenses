@@ -19,7 +19,7 @@ export const DEFAULT_SOBRE: SobreConfig = {
   intro:
     "Somos um portal regional que cobre as 10 macrorregiões do Paraná (recorte IPARDES) com foco no impacto local. Cada matéria é organizada por região e por cidade principal, de forma que o leitor encontre primeiro o que acontece perto de casa.",
   quem_somos:
-    "O Vozes Paranaenses foi fundado por **Jefferson Lobo**, responsável editorial pelo projeto. A formalização da empresa (razão social e CNPJ) está em andamento — atualizaremos esta seção assim que estiver concluída.",
+    "O Vozes Paranaenses é um veículo da **AGÊNCIA DE INTELIGÊNCIA VOZES LTDA — CNPJ: 68.276.102/0001-78**.\n\nO portal foi fundado por **Jefferson Lobo**, responsável editorial pelo projeto.",
   missao:
     "Ampliar as vozes das regiões paranaenses e garantir que informação de qualidade sobre política, economia, cultura, esporte, segurança e cotidiano chegue a quem mora nas cidades cobertas.",
   metodo_editorial:

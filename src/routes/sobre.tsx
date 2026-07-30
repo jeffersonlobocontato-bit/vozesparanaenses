@@ -36,6 +36,8 @@ export const Route = createFileRoute("/sobre")({
           about: {
             "@type": "NewsMediaOrganization",
             name: "Vozes Paranaenses",
+            legalName: "Agência de Inteligência Vozes Ltda",
+            taxID: "68.276.102/0001-78",
             areaServed: { "@type": "State", name: "Paraná" },
             founder: { "@type": "Person", name: "Jefferson Lobo" },
           },
