@@ -583,7 +583,7 @@ export function ArticleEditor({ articleId, initial, onSaved, onCancel }: Props) 
           </div>
         )}
       </div>
-      <div className="flex flex-wrap items-center gap-2">
+      <div className="sticky bottom-2 z-20 flex flex-wrap items-center gap-2 rounded-lg border bg-background/95 p-2 shadow-md backdrop-blur">
         <button onClick={save} disabled={saving}
           className="rounded bg-[#0A2540] px-3 py-1.5 text-xs font-semibold text-white hover:bg-[#0d2f52] disabled:opacity-60">
           {saving ? "Salvando…" : "💾 Salvar alterações"}
