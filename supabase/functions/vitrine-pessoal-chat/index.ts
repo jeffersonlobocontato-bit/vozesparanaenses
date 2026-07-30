@@ -90,6 +90,26 @@ Deno.serve(async (req) => {
 
   const sb = createClient(url, key, { auth: { persistSession: false } });
 
+  // Correção de segurança: sem isso, um bot podia criar pedidos (e disparar
+  // geração de matéria com IA) infinitamente, só chamando esta função com
+  // init:true repetidas vezes — cada chamada gera custo real de IA. Limita
+  // por IP, sem bloquear quem já está no meio de uma conversa legítima.
+  if (!body.token) {
+    const ip = req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ?? "unknown";
+    const ipHash = await sha256Hex(ip + "vp-salt");
+    const desde = new Date(Date.now() - 15 * 60_000).toISOString();
+    const { count } = await sb
+      .from("form_rate_limit")
+      .select("id", { count: "exact", head: true })
+      .eq("endpoint", "vitrine-pessoal-chat-init")
+      .eq("ip_hash", ipHash)
+      .gte("criado_em", desde);
+    if ((count ?? 0) >= 5) {
+      return json({ error: "rate_limited", detail: "Muitas tentativas — tente novamente mais tarde." }, 429);
+    }
+    await sb.from("form_rate_limit").insert({ ip_hash: ipHash, endpoint: "vitrine-pessoal-chat-init" });
+  }
+
   // Sem token: primeira chamada de verdade — cria o pedido já em modo
   // "entrevistando" e devolve o token novo pro front guardar.
   let pedidoId: string;
@@ -217,6 +237,12 @@ Deno.serve(async (req) => {
 
   return json({ mensagem: respostaAgente, finalizado: Boolean(finalizado), token, aviso });
 });
+
+async function sha256Hex(texto: string): Promise<string> {
+  const data = new TextEncoder().encode(texto);
+  const digest = await crypto.subtle.digest("SHA-256", data);
+  return Array.from(new Uint8Array(digest)).map((b) => b.toString(16).padStart(2, "0")).join("");
+}
 
 function json(payload: unknown, status = 200) {
   return new Response(JSON.stringify(payload), { status, headers: { ...cors, "Content-Type": "application/json" } });
