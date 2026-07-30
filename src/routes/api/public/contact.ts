@@ -33,6 +33,64 @@ function generateToken(): string {
     .join('')
 }
 
+// Correção de segurança: este formulário não tinha NENHUMA proteção
+// contra bot — dava pra chamar /api/public/contact direto (sem passar
+// pelo navegador) em massa, gerando spam de e-mail ou esgotando a fila
+// de envio. Duas camadas agora: hash do IP com limite de tentativas, e
+// reCAPTCHA v3 (invisível, sem quebrar a experiência de quem é humano).
+async function hashIp(ip: string): Promise<string> {
+  const data = new TextEncoder().encode(ip + (process.env.RATE_LIMIT_SALT ?? 'vp-salt'))
+  const digest = await crypto.subtle.digest('SHA-256', data)
+  return Array.from(new Uint8Array(digest)).map((b) => b.toString(16).padStart(2, '0')).join('')
+}
+
+function getClientIp(request: Request): string {
+  const fwd = request.headers.get('x-forwarded-for')
+  if (fwd) return fwd.split(',')[0].trim()
+  return request.headers.get('x-real-ip') ?? 'unknown'
+}
+
+async function checkRateLimit(
+  supabase: ReturnType<typeof createClient>,
+  request: Request,
+  endpoint: string,
+  maxTentativas = 5,
+  janelaMinutos = 15,
+): Promise<boolean> {
+  const ipHash = await hashIp(getClientIp(request))
+  const desde = new Date(Date.now() - janelaMinutos * 60_000).toISOString()
+  const { count } = await supabase
+    .from('form_rate_limit')
+    .select('id', { count: 'exact', head: true })
+    .eq('endpoint', endpoint)
+    .eq('ip_hash', ipHash)
+    .gte('criado_em', desde)
+  if ((count ?? 0) >= maxTentativas) return false
+  await supabase.from('form_rate_limit').insert({ ip_hash: ipHash, endpoint })
+  return true
+}
+
+async function verificarRecaptcha(token: string | undefined): Promise<boolean> {
+  const secret = process.env.RECAPTCHA_SECRET_KEY
+  if (!secret) {
+    console.warn('RECAPTCHA_SECRET_KEY não configurado — pulando verificação (configure antes de ir pra produção)')
+    return true
+  }
+  if (!token) return false
+  try {
+    const res = await fetch('https://www.google.com/recaptcha/api/siteverify', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      body: `secret=${secret}&response=${token}`,
+    })
+    const data = await res.json()
+    return data.success === true && (data.score ?? 1) >= 0.5
+  } catch (e) {
+    console.error('Falha ao verificar reCAPTCHA', e)
+    return false
+  }
+}
+
 export const Route = createFileRoute('/api/public/contact')({
   server: {
     handlers: {
@@ -47,11 +105,21 @@ export const Route = createFileRoute('/api/public/contact')({
 
         const supabase = createClient(supabaseUrl, supabaseServiceKey)
 
+        const permitido = await checkRateLimit(supabase, request, 'contato')
+        if (!permitido) {
+          return Response.json({ error: 'Muitas tentativas — tente novamente mais tarde.' }, { status: 429 })
+        }
+
         let body: unknown
         try {
           body = await request.json()
         } catch {
           return Response.json({ error: 'Invalid JSON in request body' }, { status: 400 })
+        }
+
+        const recaptchaOk = await verificarRecaptcha((body as { recaptchaToken?: string })?.recaptchaToken)
+        if (!recaptchaOk) {
+          return Response.json({ error: 'Falha na verificação de segurança. Tente novamente.' }, { status: 403 })
         }
 
         const parseResult = contactSchema.safeParse(body)

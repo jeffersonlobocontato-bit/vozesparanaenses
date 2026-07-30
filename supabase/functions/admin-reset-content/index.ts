@@ -11,6 +11,20 @@ const cors = {
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: cors });
 
+  // O comentário no topo deste arquivo sempre disse que essa função exigia
+  // x-admin-token — mas o código NUNCA checava isso de verdade. Qualquer
+  // pessoa que descobrisse a URL da função conseguia apagar o banco
+  // editorial inteiro sem autenticação nenhuma. Corrigido: agora exige de
+  // fato o token, comparado contra o secret ADMIN_RESET_TOKEN.
+  const adminToken = Deno.env.get("ADMIN_RESET_TOKEN");
+  const headerToken = req.headers.get("x-admin-token");
+  if (!adminToken || headerToken !== adminToken) {
+    return new Response(JSON.stringify({ error: "unauthorized" }), {
+      status: 401,
+      headers: { ...cors, "content-type": "application/json" },
+    });
+  }
+
   const url = Deno.env.get("EXTERNAL_SUPABASE_URL");
   const key = Deno.env.get("EXTERNAL_SUPABASE_SERVICE_ROLE_KEY");
   if (!url || !key) {
