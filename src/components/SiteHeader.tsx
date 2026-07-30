@@ -193,7 +193,7 @@ export function SiteFooter() {
       </div>
       <div className="border-t border-white/10">
         <div className="mx-auto max-w-7xl px-4 py-4 text-[10px] font-bold uppercase tracking-[0.16em] text-white/40">
-          © {new Date().getFullYear()} Vozes Paranaenses · Paraná
+          © {new Date().getFullYear()} Vozes Paranaenses é uma publicação da Agência de Inteligência Vozes Ltda · CNPJ: 68.276.102/0001-78 · Paraná
         </div>
       </div>
     </footer>
