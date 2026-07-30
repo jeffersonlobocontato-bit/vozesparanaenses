@@ -7,7 +7,7 @@
 // é pública por natureza — pode ficar direto no código do front-end. A
 // Secret Key (essa sim, sigilosa) vai como variável de ambiente do lado do
 // servidor (RECAPTCHA_SECRET_KEY), nunca aqui.
-export const RECAPTCHA_SITE_KEY = "COLE_AQUI_A_SITE_KEY_DO_RECAPTCHA_V3";
+export const RECAPTCHA_SITE_KEY = "6LfjlW0tAAAAAHbXOKBbOx1rqn56BBLDZWnYr4CE";
 
 let scriptPromise: Promise<void> | null = null;
 
