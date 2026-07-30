@@ -420,7 +420,7 @@ function AdminQueue() {
                   fatos_5w1h: it.fatos_5w1h ?? null,
                   faq: it.faq ?? null,
                 }}
-                onSaved={() => { setEditingId(null); load(); }}
+                onSaved={() => { saveAndStay(); }}
                 onCancel={() => setEditingId(null)}
               />
             ) : null}
