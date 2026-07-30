@@ -51,7 +51,8 @@ function getClientIp(request: Request): string {
 }
 
 async function checkRateLimit(
-  supabase: ReturnType<typeof createClient>,
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  supabase: any,
   request: Request,
   endpoint: string,
   maxTentativas = 5,
