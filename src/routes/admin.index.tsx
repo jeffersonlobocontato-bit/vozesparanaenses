@@ -75,8 +75,9 @@ function AdminQueue() {
   const [pipelineBusy, setPipelineBusy] = useState(false);
   const [pipelineLog, setPipelineLog] = useState<string[]>([]);
 
-  const load = useCallback(async () => {
-    setItems(null); setErr(null);
+  const load = useCallback(async (opts?: { silent?: boolean }) => {
+    if (!opts?.silent) setItems(null);
+    setErr(null);
     try {
       const sb = await getExternalBrowser();
       const fullSelect = "id, slug, titulo, subtitulo, resumo, corpo, seo_title, seo_description, editor_responsavel, status, gerado_em, imagem_capa_url, imagem_credito, imagem_legenda, imagem_original_url, imagem_galeria, video_embed_url, video_legenda, video_credito, publicado_automaticamente, fixado_posicao, fixado_escopo, fixado_regioes, fixado_cidades, regiao_id, categoria_id, tldr, fatos_5w1h, faq, regiao:regioes(slug, nome), categoria:editorial_categories(slug, nome)";
@@ -105,6 +106,16 @@ function AdminQueue() {
       setErr(e instanceof Error ? e.message : "Erro ao carregar");
     }
   }, [tab]);
+
+  // Salvar dentro do editor não deve fechar o editor nem jogar a página para
+  // outro ponto: recarrega a lista sem esvaziá-la (silent) e restaura o scroll.
+  const saveAndStay = useCallback(async () => {
+    const y = typeof window !== "undefined" ? window.scrollY : 0;
+    await load({ silent: true });
+    if (typeof window !== "undefined") {
+      requestAnimationFrame(() => window.scrollTo({ top: y }));
+    }
+  }, [load]);
 
   const loadPinned = useCallback(async () => {
     try {
@@ -409,7 +420,7 @@ function AdminQueue() {
                   fatos_5w1h: it.fatos_5w1h ?? null,
                   faq: it.faq ?? null,
                 }}
-                onSaved={() => { setEditingId(null); load(); }}
+                onSaved={() => { saveAndStay(); }}
                 onCancel={() => setEditingId(null)}
               />
             ) : null}
