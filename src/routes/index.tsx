@@ -298,7 +298,6 @@ function PortalHome({
   mostRead,
   eleicoes2026Top,
   loc,
-  colunaAtual,
 }: {
   regions: Region[];
   articles: RankedArticle[];
@@ -306,7 +305,7 @@ function PortalHome({
   mostRead: ArticleListItem[];
   eleicoes2026Top?: ArticleListItem;
   loc?: { cidade: string | null; regiaoSlug: string | null };
-  colunaAtual?: ColunaComEdicaoAtual | null;
+  colunas?: ColunaAtalho[];
 }) {
   const REGIONS_FALLBACK: Region[] = [
     { id: "fb-metropolitana", slug: "metropolitana", name: "Metropolitana" },
