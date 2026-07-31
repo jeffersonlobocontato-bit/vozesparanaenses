@@ -1252,6 +1252,7 @@ export type ColunaNota = {
 
 export type ColunaEdicao = {
   id: string;
+  slug: string | null;
   titulo: string;
   subtitulo: string | null;
   imagem_principal_url: string | null;
@@ -1276,12 +1277,18 @@ export type ColunaAtalho = {
   foto_colunista_url: string | null;
   edicao: {
     id: string;
+    slug: string | null;
     titulo: string;
     subtitulo: string | null;
     imagem_principal_url: string | null;
     publicado_em: string | null;
   } | null;
 };
+
+/** true quando a coluna `slug` de coluna_edicoes ainda não existe no banco. */
+function isMissingColumn(err: { code?: string; message?: string } | null) {
+  return err?.code === "42703" || /column .* does not exist/i.test(err?.message ?? "");
+}
 
 /**
  * Todas as colunas ativas com a edição publicada mais recente de cada uma.
@@ -1304,16 +1311,29 @@ export const listColunasAtalhos = createServerFn({ method: "GET" })
 
     const { data: edicoes, error: edErr } = await sb
       .from("coluna_edicoes")
-      .select("id, coluna_id, titulo, subtitulo, imagem_principal_url, publicado_em")
+      .select("id, slug, coluna_id, titulo, subtitulo, imagem_principal_url, publicado_em")
       .eq("status", "publicado")
       .order("publicado_em", { ascending: false });
-    if (edErr && !isMissingSchema(edErr)) throw new Error(edErr.message);
+    let linhas = edicoes;
+    if (edErr) {
+      if (isMissingColumn(edErr)) {
+        const alt = await sb
+          .from("coluna_edicoes")
+          .select("id, coluna_id, titulo, subtitulo, imagem_principal_url, publicado_em")
+          .eq("status", "publicado")
+          .order("publicado_em", { ascending: false });
+        linhas = alt.data as typeof edicoes;
+      } else if (!isMissingSchema(edErr)) {
+        throw new Error(edErr.message);
+      }
+    }
 
     const maisRecente = new Map<string, NonNullable<ColunaAtalho["edicao"]>>();
-    for (const e of (edicoes ?? []) as Array<{ id: string; coluna_id: string; titulo: string; subtitulo: string | null; imagem_principal_url: string | null; publicado_em: string | null }>) {
+    for (const e of (linhas ?? []) as Array<{ id: string; slug?: string | null; coluna_id: string; titulo: string; subtitulo: string | null; imagem_principal_url: string | null; publicado_em: string | null }>) {
       if (!maisRecente.has(e.coluna_id)) {
         maisRecente.set(e.coluna_id, {
           id: e.id,
+          slug: e.slug ?? null,
           titulo: e.titulo,
           subtitulo: e.subtitulo,
           imagem_principal_url: e.imagem_principal_url,
