@@ -449,17 +449,13 @@ function PortalHome({
           </div>
         </section>
 
+        {/* Colunas — atalhos para as colunas do portal, logo abaixo das regiões */}
+        <ColumnsShortcut colunas={colunas ?? []} />
+
         {/* AdSense — Grupo 2 (antes das secundárias) */}
         <div className="mb-8 empty:hidden">
           <AdsenseSlot slot="5202964012" />
         </div>
-
-        {/* Coluna de opinião/bastidores — sempre a edição publicada mais recente */}
-        {colunaAtual?.edicao && (
-          <div className="mb-8">
-            <ColumnModule coluna={colunaAtual} />
-          </div>
-        )}
 
         {/* Secondary + Mais lidas */}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8 items-start">
