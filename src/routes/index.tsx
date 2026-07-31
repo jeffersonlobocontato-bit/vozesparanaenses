@@ -194,17 +194,6 @@ const MOST_READ_FALLBACK = [
   "Nota Paraná: confira os números sorteados do prêmio mensal",
 ];
 
-const CATEGORIES = [
-  "Últimas Notícias",
-  "Política",
-  "Economia",
-  "Agronegócio",
-  "Educação",
-  "Segurança",
-  "Esportes",
-  "Cultura",
-];
-
 /* --------------------------- Editorias: paleta monocromática azul --------------------------- */
 /* Escala de 6 tons — do azul-marinho ao azul-céu. Cada editoria ancora num tom;
    no hover, desloca para o tom vizinho (mais claro ou mais escuro), criando
@@ -276,21 +265,6 @@ function CategoryTag({
 
 /* --------------------------- Portal Home --------------------------- */
 
-function useTodayBR() {
-  const [label, setLabel] = useState<string | null>(null);
-  useEffect(() => {
-    setLabel(
-      new Date().toLocaleDateString("pt-BR", {
-        weekday: "long",
-        day: "2-digit",
-        month: "long",
-        timeZone: "America/Sao_Paulo",
-      }),
-    );
-  }, []);
-  return label;
-}
-
 function PortalHome({
   regions,
   articles,
@@ -334,7 +308,6 @@ function PortalHome({
     if (a.region && !articleByRegion.has(a.region.slug)) articleByRegion.set(a.region.slug, a);
   }
 
-  const todayBR = useTodayBR();
 
   return (
     <div className="w-full bg-white text-slate-900">
