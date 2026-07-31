@@ -1,11 +1,22 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { SiteHeader, SiteFooter } from "@/components/SiteHeader";
-import { listColunaEdicoes, type ColunaEdicao } from "@/lib/content.functions";
+import {
+  listColunaEdicoes,
+  listColunasAtalhos,
+  listArticlesByCategoryGlobal,
+  type ColunaEdicao,
+} from "@/lib/content.functions";
+import { ColumnSidebar, ColumnFooterTaxonomy } from "@/components/ColumnTaxonomy";
 
 export const Route = createFileRoute("/coluna/$slug/arquivo")({
   loader: async ({ params }) => {
-    const edicoes = await listColunaEdicoes({ data: { slug: params.slug } });
-    return { edicoes };
+    const [edicoes, colunas, politica, eleicoes] = await Promise.all([
+      listColunaEdicoes({ data: { slug: params.slug } }),
+      listColunasAtalhos(),
+      listArticlesByCategoryGlobal({ data: { categorySlug: "politica", limit: 11, requireImage: false } }),
+      listArticlesByCategoryGlobal({ data: { categorySlug: "eleicoes-2026", limit: 11, requireImage: false } }),
+    ]);
+    return { edicoes, taxonomia: { colunas, politica, eleicoes } };
   },
   head: ({ params }) => ({
     meta: [{ title: `Arquivo — ${params.slug.replace(/-/g, " ")} — Vozes Paranaenses` }],
@@ -14,13 +25,14 @@ export const Route = createFileRoute("/coluna/$slug/arquivo")({
 });
 
 function ColunaArquivo() {
-  const { edicoes } = Route.useLoaderData();
+  const { edicoes, taxonomia } = Route.useLoaderData();
   const { slug } = Route.useParams();
 
   return (
     <div className="min-h-screen bg-slate-50">
       <SiteHeader />
-      <main className="mx-auto max-w-3xl px-4 py-10">
+      <div className="mx-auto grid max-w-6xl gap-10 px-4 py-10 lg:grid-cols-[minmax(0,1fr)_300px]">
+      <main className="min-w-0">
         <h1 className="font-display text-3xl font-black text-[#0A2540]">Edições anteriores</h1>
         <p className="mt-2 text-slate-600">Todas as publicações já saídas nesta coluna, da mais recente à mais antiga.</p>
 
@@ -52,7 +64,11 @@ function ColunaArquivo() {
             </p>
           )}
         </div>
+
+        <ColumnFooterTaxonomy data={taxonomia} />
       </main>
+      <ColumnSidebar data={taxonomia} currentSlug={slug} />
+      </div>
       <SiteFooter />
     </div>
   );
