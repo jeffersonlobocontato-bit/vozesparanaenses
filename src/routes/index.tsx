@@ -18,8 +18,8 @@ import { LocationBar, ProximityBadge } from "@/components/LocationBar";
 import { SiteHeader, SiteFooter } from "@/components/SiteHeader";
 import { AdSlot } from "@/components/AdSlot";
 import { AdsenseSlot } from "@/components/AdsenseSlot";
-import { ColumnModule } from "@/components/ColumnModule";
-import { getColunaAtual, type ColunaComEdicaoAtual } from "@/lib/content.functions";
+import { ColumnsShortcut } from "@/components/ColumnsShortcut";
+import { listColunasAtalhos, type ColunaAtalho } from "@/lib/content.functions";
 import { WhatsAppCTA } from "@/components/WhatsAppCTA";
 import { WeatherWidget } from "@/components/WeatherWidget";
 import { arrangePinnedSlots } from "@/lib/pinned-layout";
@@ -72,9 +72,9 @@ const mostReadQO = queryOptions({
   staleTime: 5 * 60 * 1000,
 });
 
-const colunaAtualQO = queryOptions({
-  queryKey: ["coluna", "vozes-politicas", "atual"],
-  queryFn: () => getColunaAtual({ data: { slug: "vozes-politicas" } }),
+const colunasAtalhosQO = queryOptions({
+  queryKey: ["colunas", "atalhos"],
+  queryFn: () => listColunasAtalhos(),
   staleTime: 5 * 60 * 1000,
 });
 
@@ -119,7 +119,7 @@ export const Route = createFileRoute("/")({
     await context.queryClient.ensureQueryData(vaptVuptQO);
     await context.queryClient.ensureQueryData(mostReadQO);
     await context.queryClient.ensureQueryData(eleicoes2026TopQO);
-    await context.queryClient.ensureQueryData(colunaAtualQO);
+    await context.queryClient.ensureQueryData(colunasAtalhosQO);
   },
   component: Home,
   errorComponent: ({ error }) => (
@@ -136,7 +136,7 @@ function Home() {
   const { data: vaptVupt } = useSuspenseQuery(vaptVuptQO);
   const { data: mostRead } = useSuspenseQuery(mostReadQO);
   const { data: eleicoes2026Top } = useSuspenseQuery(eleicoes2026TopQO);
-  const { data: colunaAtual } = useSuspenseQuery(colunaAtualQO);
+  const { data: colunas } = useSuspenseQuery(colunasAtalhosQO);
   return (
     <PortalHome
       regions={regions}
@@ -145,7 +145,7 @@ function Home() {
       mostRead={mostRead}
       eleicoes2026Top={eleicoes2026Top[0]}
       loc={loc}
-      colunaAtual={colunaAtual}
+      colunas={colunas}
     />
   );
 }
@@ -298,7 +298,7 @@ function PortalHome({
   mostRead,
   eleicoes2026Top,
   loc,
-  colunaAtual,
+  colunas,
 }: {
   regions: Region[];
   articles: RankedArticle[];
@@ -306,7 +306,7 @@ function PortalHome({
   mostRead: ArticleListItem[];
   eleicoes2026Top?: ArticleListItem;
   loc?: { cidade: string | null; regiaoSlug: string | null };
-  colunaAtual?: ColunaComEdicaoAtual | null;
+  colunas?: ColunaAtalho[];
 }) {
   const REGIONS_FALLBACK: Region[] = [
     { id: "fb-metropolitana", slug: "metropolitana", name: "Metropolitana" },
@@ -449,17 +449,13 @@ function PortalHome({
           </div>
         </section>
 
+        {/* Colunas — atalhos para as colunas do portal, logo abaixo das regiões */}
+        <ColumnsShortcut colunas={colunas ?? []} />
+
         {/* AdSense — Grupo 2 (antes das secundárias) */}
         <div className="mb-8 empty:hidden">
           <AdsenseSlot slot="5202964012" />
         </div>
-
-        {/* Coluna de opinião/bastidores — sempre a edição publicada mais recente */}
-        {colunaAtual?.edicao && (
-          <div className="mb-8">
-            <ColumnModule coluna={colunaAtual} />
-          </div>
-        )}
 
         {/* Secondary + Mais lidas */}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8 items-start">
