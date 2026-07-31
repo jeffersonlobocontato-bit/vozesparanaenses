@@ -340,28 +340,6 @@ function PortalHome({
     <div className="w-full bg-white text-slate-900">
       <SiteHeader />
 
-      {/* Faixa data/editorias — sub-nav densa estilo CGN */}
-      <div className="border-b border-slate-200 bg-white">
-        <div className="mx-auto flex max-w-7xl items-center gap-3 overflow-x-auto px-4 py-2 whitespace-nowrap">
-          <span
-            suppressHydrationWarning
-            className="shrink-0 text-[10px] font-bold uppercase tracking-[0.16em] text-slate-400 capitalize"
-          >
-            {todayBR ?? "\u00A0"}
-          </span>
-          <span className="h-3 w-px shrink-0 bg-slate-300" />
-          {CATEGORIES.map((c) => (
-            <a
-              key={c}
-              href="#"
-              className="shrink-0 text-[11px] font-bold uppercase tracking-[0.06em] text-slate-600 transition-colors hover:text-[#0A2540]"
-            >
-              {c}
-            </a>
-          ))}
-        </div>
-      </div>
-
       <LocationBar />
 
       <main className="mx-auto max-w-7xl px-4 py-6">
