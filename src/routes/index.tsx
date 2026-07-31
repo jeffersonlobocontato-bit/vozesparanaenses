@@ -18,8 +18,8 @@ import { LocationBar, ProximityBadge } from "@/components/LocationBar";
 import { SiteHeader, SiteFooter } from "@/components/SiteHeader";
 import { AdSlot } from "@/components/AdSlot";
 import { AdsenseSlot } from "@/components/AdsenseSlot";
-import { ColumnModule } from "@/components/ColumnModule";
-import { getColunaAtual, type ColunaComEdicaoAtual } from "@/lib/content.functions";
+import { ColumnsShortcut } from "@/components/ColumnsShortcut";
+import { listColunasAtalhos, type ColunaAtalho } from "@/lib/content.functions";
 import { WhatsAppCTA } from "@/components/WhatsAppCTA";
 import { WeatherWidget } from "@/components/WeatherWidget";
 import { arrangePinnedSlots } from "@/lib/pinned-layout";
@@ -72,9 +72,9 @@ const mostReadQO = queryOptions({
   staleTime: 5 * 60 * 1000,
 });
 
-const colunaAtualQO = queryOptions({
-  queryKey: ["coluna", "vozes-politicas", "atual"],
-  queryFn: () => getColunaAtual({ data: { slug: "vozes-politicas" } }),
+const colunasAtalhosQO = queryOptions({
+  queryKey: ["colunas", "atalhos"],
+  queryFn: () => listColunasAtalhos(),
   staleTime: 5 * 60 * 1000,
 });
 
@@ -119,7 +119,7 @@ export const Route = createFileRoute("/")({
     await context.queryClient.ensureQueryData(vaptVuptQO);
     await context.queryClient.ensureQueryData(mostReadQO);
     await context.queryClient.ensureQueryData(eleicoes2026TopQO);
-    await context.queryClient.ensureQueryData(colunaAtualQO);
+    await context.queryClient.ensureQueryData(colunasAtalhosQO);
   },
   component: Home,
   errorComponent: ({ error }) => (
@@ -136,7 +136,7 @@ function Home() {
   const { data: vaptVupt } = useSuspenseQuery(vaptVuptQO);
   const { data: mostRead } = useSuspenseQuery(mostReadQO);
   const { data: eleicoes2026Top } = useSuspenseQuery(eleicoes2026TopQO);
-  const { data: colunaAtual } = useSuspenseQuery(colunaAtualQO);
+  const { data: colunas } = useSuspenseQuery(colunasAtalhosQO);
   return (
     <PortalHome
       regions={regions}
@@ -145,7 +145,7 @@ function Home() {
       mostRead={mostRead}
       eleicoes2026Top={eleicoes2026Top[0]}
       loc={loc}
-      colunaAtual={colunaAtual}
+      colunas={colunas}
     />
   );
 }
