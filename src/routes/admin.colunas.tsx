@@ -49,14 +49,18 @@ function AdminColunas() {
   const [salvando, setSalvando] = useState(false);
   const [msg, setMsg] = useState<string | null>(null);
   const [uploadPrincipalBusy, setUploadPrincipalBusy] = useState(false);
+  const [fotoColunista, setFotoColunista] = useState<string | null>(null);
+  const [uploadAvatarBusy, setUploadAvatarBusy] = useState(false);
+  const [comentarios, setComentarios] = useState<Array<{ id: string; nome: string; comentario: string; criado_em: string; aprovado: boolean }>>([]);
 
   const load = useCallback(async () => {
     setCarregando(true);
     try {
       const sb = await getExternalBrowser();
-      const { data: coluna } = await sb.from("colunas").select("id").eq("slug", COLUNA_SLUG).maybeSingle();
+      const { data: coluna } = await sb.from("colunas").select("id, foto_colunista_url").eq("slug", COLUNA_SLUG).maybeSingle();
       if (!coluna) { setCarregando(false); return; }
       setColunaId(coluna.id);
+      setFotoColunista((coluna as { foto_colunista_url: string | null }).foto_colunista_url ?? null);
       const { data: eds } = await sb
         .from("coluna_edicoes")
         .select("id, titulo, subtitulo, imagem_principal_url, pergunta_engajamento, status, publicado_em")
@@ -90,10 +94,52 @@ function AdminColunas() {
     setPerguntaEngajamento(ed.pergunta_engajamento ?? "");
     setNotas((ns?.length ? ns : [novaNota(1)]) as Nota[]);
     setMsg(null);
+    await carregarComentarios(id);
+  }
+
+  async function carregarComentarios(edicaoId: string) {
+    const sb = await getExternalBrowser();
+    const { data } = await sb
+      .from("coluna_comentarios")
+      .select("id, nome, comentario, criado_em, aprovado")
+      .eq("edicao_id", edicaoId)
+      .order("criado_em", { ascending: false });
+    setComentarios((data ?? []) as typeof comentarios);
+  }
+
+  async function moderarComentario(id: string, acao: "ocultar" | "mostrar" | "excluir") {
+    const sb = await getExternalBrowser();
+    if (acao === "excluir") {
+      await sb.from("coluna_comentarios").delete().eq("id", id);
+    } else {
+      await sb.from("coluna_comentarios").update({ aprovado: acao === "mostrar" }).eq("id", id);
+    }
+    if (edicaoAtivaId) await carregarComentarios(edicaoAtivaId);
+  }
+
+  async function onUploadAvatar(file: File) {
+    if (!colunaId) { setMsg("Coluna não encontrada."); return; }
+    setUploadAvatarBusy(true);
+    const url = await uploadImagem(file);
+    if (url) {
+      const sb = await getExternalBrowser();
+      const { error } = await sb.from("colunas").update({ foto_colunista_url: url }).eq("id", colunaId);
+      if (error) setMsg("Erro ao salvar a foto: " + error.message);
+      else { setFotoColunista(url); setMsg("Foto da coluna atualizada."); }
+    }
+    setUploadAvatarBusy(false);
+  }
+
+  async function removerAvatar() {
+    if (!colunaId) return;
+    const sb = await getExternalBrowser();
+    await sb.from("colunas").update({ foto_colunista_url: null }).eq("id", colunaId);
+    setFotoColunista(null);
   }
 
   function novaEdicaoEmBranco() {
     setEdicaoAtivaId(null);
+    setComentarios([]);
     setTitulo("");
     setSubtitulo("");
     setImagemPrincipal(null);
@@ -209,6 +255,22 @@ function AdminColunas() {
 
       {msg && <p className="rounded border bg-muted p-2 text-xs">{msg}</p>}
 
+      {/* Identidade da coluna */}
+      <div className="flex flex-wrap items-center gap-4 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
+        <span className="h-16 w-16 shrink-0 overflow-hidden rounded-full bg-slate-200">
+          {fotoColunista && <img src={fotoColunista} alt="" className="h-full w-full object-cover" />}
+        </span>
+        <div className="text-sm">
+          <p className="font-semibold text-slate-800">Foto / avatar da coluna</p>
+          <p className="mb-2 text-xs text-muted-foreground">Aparece no módulo de colunas da home, na lateral e no topo da coluna aberta.</p>
+          <input type="file" accept="image/*" disabled={uploadAvatarBusy}
+            onChange={(e) => e.target.files?.[0] && onUploadAvatar(e.target.files[0])} />
+          {fotoColunista && (
+            <button onClick={removerAvatar} className="ml-2 rounded border px-2 py-1 text-xs">Remover</button>
+          )}
+        </div>
+      </div>
+
       <div className="grid gap-6 lg:grid-cols-[280px_1fr]">
         {/* Lista de edições */}
         <div className="space-y-2">
@@ -298,6 +360,34 @@ function AdminColunas() {
               {salvando ? "Publicando…" : "Publicar (vira a edição atual da home)"}
             </button>
           </div>
+
+          {edicaoAtivaId && (
+            <div className="border-t pt-4">
+              <p className="mb-2 text-sm font-semibold">Comentários dos leitores ({comentarios.length})</p>
+              <div className="space-y-2">
+                {comentarios.map((c) => (
+                  <div key={c.id} className="rounded-lg border border-slate-200 p-2 text-xs">
+                    <div className="flex items-center justify-between gap-2">
+                      <span className="font-semibold text-slate-700">
+                        {c.nome} · {new Date(c.criado_em).toLocaleString("pt-BR")}
+                        {!c.aprovado && <span className="ml-2 rounded bg-amber-100 px-1 py-0.5 text-amber-800">oculto</span>}
+                      </span>
+                      <span className="flex gap-1">
+                        <button onClick={() => moderarComentario(c.id, c.aprovado ? "ocultar" : "mostrar")} className="rounded border px-2 py-0.5">
+                          {c.aprovado ? "Ocultar" : "Mostrar"}
+                        </button>
+                        <button onClick={() => moderarComentario(c.id, "excluir")} className="rounded border border-red-200 px-2 py-0.5 text-red-600">
+                          Excluir
+                        </button>
+                      </span>
+                    </div>
+                    <p className="mt-1 whitespace-pre-line text-slate-600">{c.comentario}</p>
+                  </div>
+                ))}
+                {comentarios.length === 0 && <p className="text-xs text-muted-foreground">Nenhum comentário nesta edição.</p>}
+              </div>
+            </div>
+          )}
         </div>
       </div>
     </div>

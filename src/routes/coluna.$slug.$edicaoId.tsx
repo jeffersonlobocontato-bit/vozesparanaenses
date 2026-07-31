@@ -8,6 +8,7 @@ import {
 } from "@/lib/content.functions";
 import type { ColunaAtalho } from "@/lib/content.functions";
 import { ColumnSidebar, ColumnFooterTaxonomy } from "@/components/ColumnTaxonomy";
+import { ColumnComments } from "@/components/ColumnComments";
 
 export const Route = createFileRoute("/coluna/$slug/$edicaoId")({
   loader: async ({ params }) => {
@@ -88,6 +89,8 @@ function ColunaEdicaoPage() {
             <p className="text-sm font-semibold text-[#0A2540]">🗳️ {edicao.pergunta_engajamento}</p>
           </div>
         )}
+
+        <ColumnComments edicaoId={edicao.id} />
 
         <ColumnFooterTaxonomy data={taxonomia} />
       </main>
