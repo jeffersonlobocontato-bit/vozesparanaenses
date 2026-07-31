@@ -1,12 +1,23 @@
 import { createFileRoute, Link, notFound } from "@tanstack/react-router";
 import { SiteHeader, SiteFooter } from "@/components/SiteHeader";
-import { getColunaEdicaoPorId, type ColunaNota } from "@/lib/content.functions";
+import {
+  getColunaEdicaoPorId,
+  listColunasAtalhos,
+  listArticlesByCategoryGlobal,
+  type ColunaNota,
+} from "@/lib/content.functions";
+import { ColumnSidebar, ColumnFooterTaxonomy } from "@/components/ColumnTaxonomy";
 
 export const Route = createFileRoute("/coluna/$slug/$edicaoId")({
   loader: async ({ params }) => {
-    const edicao = await getColunaEdicaoPorId({ data: { id: params.edicaoId } });
+    const [edicao, colunas, politica, eleicoes] = await Promise.all([
+      getColunaEdicaoPorId({ data: { id: params.edicaoId } }),
+      listColunasAtalhos(),
+      listArticlesByCategoryGlobal({ data: { categorySlug: "politica", limit: 11, requireImage: false } }),
+      listArticlesByCategoryGlobal({ data: { categorySlug: "eleicoes-2026", limit: 11, requireImage: false } }),
+    ]);
     if (!edicao) throw notFound();
-    return { edicao };
+    return { edicao, taxonomia: { colunas, politica, eleicoes } };
   },
   head: ({ loaderData }) => ({
     meta: loaderData ? [
@@ -18,13 +29,14 @@ export const Route = createFileRoute("/coluna/$slug/$edicaoId")({
 });
 
 function ColunaEdicaoPage() {
-  const { edicao } = Route.useLoaderData();
+  const { edicao, taxonomia } = Route.useLoaderData();
   const { slug } = Route.useParams();
 
   return (
     <div className="min-h-screen bg-slate-50">
       <SiteHeader />
-      <main className="mx-auto max-w-3xl px-4 py-10">
+      <div className="mx-auto grid max-w-6xl gap-10 px-4 py-10 lg:grid-cols-[minmax(0,1fr)_300px]">
+      <main className="min-w-0">
         <Link to="/coluna/$slug/arquivo" params={{ slug }} className="text-sm font-semibold text-[#0066CC] hover:underline">
           ← Ver todas as edições
         </Link>
@@ -61,7 +73,11 @@ function ColunaEdicaoPage() {
             <p className="text-sm font-semibold text-[#0A2540]">🗳️ {edicao.pergunta_engajamento}</p>
           </div>
         )}
+
+        <ColumnFooterTaxonomy data={taxonomia} />
       </main>
+      <ColumnSidebar data={taxonomia} currentSlug={slug} />
+      </div>
       <SiteFooter />
     </div>
   );
