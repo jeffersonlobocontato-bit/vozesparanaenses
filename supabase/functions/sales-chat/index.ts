@@ -38,6 +38,27 @@ Deno.serve(async (req) => {
 
   const sb = createClient(url, key, { auth: { persistSession: false } });
 
+  // Correção de segurança: sem isso, um bot podia martelar este endpoint
+  // (cada mensagem chama a IA, custo real) infinitamente. Limite leve por
+  // IP, generoso o bastante pra não incomodar conversa legítima longa.
+  {
+    const ip = req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ?? "unknown";
+    const data = new TextEncoder().encode(ip + "sales-salt");
+    const digest = await crypto.subtle.digest("SHA-256", data);
+    const ipHash = Array.from(new Uint8Array(digest)).map((b) => b.toString(16).padStart(2, "0")).join("");
+    const desde = new Date(Date.now() - 5 * 60_000).toISOString();
+    const { count } = await sb
+      .from("form_rate_limit")
+      .select("id", { count: "exact", head: true })
+      .eq("endpoint", "sales-chat")
+      .eq("ip_hash", ipHash)
+      .gte("criado_em", desde);
+    if ((count ?? 0) >= 20) {
+      return json({ error: "rate_limited", detail: "Muitas mensagens em pouco tempo — aguarde um instante." }, 429);
+    }
+    await sb.from("form_rate_limit").insert({ ip_hash: ipHash, endpoint: "sales-chat" });
+  }
+
   const [espacos, abrangencia, periodicidade, combosAnuncio, publieditorial, combosMistos] = await Promise.all([
     sb.from("catalogo_espacos").select("slot, nome, preco_mensal_base").eq("ativo", true),
     sb.from("catalogo_abrangencia").select("abrangencia, multiplicador, descricao"),

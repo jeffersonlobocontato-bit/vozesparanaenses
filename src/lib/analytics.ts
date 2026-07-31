@@ -2,6 +2,7 @@ import { useEffect, useRef } from "react";
 import { useRouterState } from "@tanstack/react-router";
 import { supabase } from "@/integrations/supabase/client";
 import { listRegions } from "@/lib/content.functions";
+import { getConsentimento } from "@/lib/cookie-consent";
 
 declare global {
   interface Window {
@@ -38,6 +39,13 @@ function classificarOrigem(referrer: string, host: string): string {
 }
 
 async function trackPageview(pathname: string) {
+  // Correção de LGPD: antes, isso disparava pra TODO visitante, sem
+  // perguntar nada ("rastreamento sem escolha", apontado na auditoria).
+  // Agora só roda depois de "Aceitar" no CookieConsentBanner — recusar ou
+  // ainda não ter decidido significa nenhum evento de analytics é enviado,
+  // nem pro GA4 nem pro nosso próprio analytics_events.
+  if (getConsentimento() !== "aceito") return;
+
   // GA4: como o site navega por rotas client-side (sem recarregar a página),
   // o pageview automático do gtag só dispararia uma vez, no primeiro
   // carregamento. Desativamos esse automático (send_page_view: false, no

@@ -85,7 +85,7 @@ Deno.serve(async (req) => {
   if (!url || !key) return json({ error: "missing_external_supabase_env" }, 500);
   if (!aiKey) return json({ error: "missing_lovable_api_key" }, 500);
 
-  let body: { token?: string; mensagem?: string; init?: boolean };
+  let body: { token?: string; mensagem?: string; init?: boolean; recaptchaToken?: string };
   try { body = await req.json(); } catch { return json({ error: "invalid_json_body" }, 400); }
 
   const sb = createClient(url, key, { auth: { persistSession: false } });
@@ -108,6 +108,24 @@ Deno.serve(async (req) => {
       return json({ error: "rate_limited", detail: "Muitas tentativas — tente novamente mais tarde." }, 429);
     }
     await sb.from("form_rate_limit").insert({ ip_hash: ipHash, endpoint: "vitrine-pessoal-chat-init" });
+
+    const recaptchaSecret = Deno.env.get("RECAPTCHA_SECRET_KEY");
+    if (recaptchaSecret) {
+      if (!body.recaptchaToken) return json({ error: "recaptcha_missing" }, 403);
+      try {
+        const rc = await fetch("https://www.google.com/recaptcha/api/siteverify", {
+          method: "POST",
+          headers: { "Content-Type": "application/x-www-form-urlencoded" },
+          body: `secret=${recaptchaSecret}&response=${body.recaptchaToken}`,
+        });
+        const rcData = await rc.json();
+        if (!rcData.success || (rcData.score ?? 1) < 0.5) {
+          return json({ error: "recaptcha_failed" }, 403);
+        }
+      } catch {
+        return json({ error: "recaptcha_verification_error" }, 403);
+      }
+    }
   }
 
   // Sem token: primeira chamada de verdade — cria o pedido já em modo
