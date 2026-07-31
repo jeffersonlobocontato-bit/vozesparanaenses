@@ -359,6 +359,34 @@ function AdminColunas() {
               {salvando ? "Publicando…" : "Publicar (vira a edição atual da home)"}
             </button>
           </div>
+
+          {edicaoAtivaId && (
+            <div className="border-t pt-4">
+              <p className="mb-2 text-sm font-semibold">Comentários dos leitores ({comentarios.length})</p>
+              <div className="space-y-2">
+                {comentarios.map((c) => (
+                  <div key={c.id} className="rounded-lg border border-slate-200 p-2 text-xs">
+                    <div className="flex items-center justify-between gap-2">
+                      <span className="font-semibold text-slate-700">
+                        {c.nome} · {new Date(c.criado_em).toLocaleString("pt-BR")}
+                        {!c.aprovado && <span className="ml-2 rounded bg-amber-100 px-1 py-0.5 text-amber-800">oculto</span>}
+                      </span>
+                      <span className="flex gap-1">
+                        <button onClick={() => moderarComentario(c.id, c.aprovado ? "ocultar" : "mostrar")} className="rounded border px-2 py-0.5">
+                          {c.aprovado ? "Ocultar" : "Mostrar"}
+                        </button>
+                        <button onClick={() => moderarComentario(c.id, "excluir")} className="rounded border border-red-200 px-2 py-0.5 text-red-600">
+                          Excluir
+                        </button>
+                      </span>
+                    </div>
+                    <p className="mt-1 whitespace-pre-line text-slate-600">{c.comentario}</p>
+                  </div>
+                ))}
+                {comentarios.length === 0 && <p className="text-xs text-muted-foreground">Nenhum comentário nesta edição.</p>}
+              </div>
+            </div>
+          )}
         </div>
       </div>
     </div>
