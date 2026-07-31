@@ -1,37 +1,78 @@
 import { Link } from "@tanstack/react-router";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import logoWhite from "@/assets/vozes-logo-white.png.asset.json";
 
-// Nav principal — regiões prioritárias + acessos rápidos.
-// Estilo CGN: barra escura densa, uppercase, tracking largo, sem ornamentos.
-const PRIMARY_NAV: { label: string; to: string; params?: Record<string, string> }[] = [
+type NavItem = { label: string; to: string; params?: Record<string, string> };
+
+// Tarja azul do topo: editorias temáticas.
+const EDITORIAS_NAV: NavItem[] = [
   { label: "Últimas", to: "/" },
-  { label: "Metropolitana", to: "/$region", params: { region: "metropolitana" } },
-  { label: "Oeste", to: "/$region", params: { region: "oeste" } },
-  { label: "Norte", to: "/$region", params: { region: "norte-central" } },
-  { label: "Campos Gerais", to: "/$region", params: { region: "campos-gerais" } },
-  { label: "Litoral", to: "/$region", params: { region: "litoral" } },
-  { label: "Sudoeste", to: "/$region", params: { region: "sudoeste" } },
+  { label: "Política", to: "/editoria/$categoria", params: { categoria: "politica" } },
+  { label: "Eleições 2026", to: "/editoria/$categoria", params: { categoria: "eleicoes-2026" } },
+  { label: "Economia", to: "/editoria/$categoria", params: { categoria: "economia" } },
+  { label: "Agronegócio", to: "/editoria/$categoria", params: { categoria: "agronegocio" } },
+  { label: "Segurança", to: "/editoria/$categoria", params: { categoria: "seguranca" } },
+  { label: "Esportes", to: "/editoria/$categoria", params: { categoria: "esportes" } },
+  { label: "Educação", to: "/editoria/$categoria", params: { categoria: "educacao" } },
+  { label: "Cultura", to: "/editoria/$categoria", params: { categoria: "cultura" } },
   { label: "Nacional", to: "/editoria/$categoria", params: { categoria: "nacional" } },
   { label: "Internacional", to: "/editoria/$categoria", params: { categoria: "internacional" } },
 ];
 
-const SECONDARY_NAV: { label: string; to: string; params?: Record<string, string> }[] = [
+// Linha branca abaixo (ao lado da data): as 10 macrorregiões.
+const REGIOES_NAV: NavItem[] = [
+  { label: "Metropolitana", to: "/$region", params: { region: "metropolitana" } },
+  { label: "Litoral", to: "/$region", params: { region: "litoral" } },
+  { label: "Campos Gerais", to: "/$region", params: { region: "campos-gerais" } },
+  { label: "Norte Pioneiro", to: "/$region", params: { region: "norte-pioneiro" } },
+  { label: "Norte", to: "/$region", params: { region: "norte-central" } },
+  { label: "Noroeste", to: "/$region", params: { region: "noroeste" } },
+  { label: "Centro Oeste", to: "/$region", params: { region: "centro-ocidental" } },
+  { label: "Oeste", to: "/$region", params: { region: "oeste" } },
+  { label: "Sudoeste", to: "/$region", params: { region: "sudoeste" } },
+  { label: "Centro-Sul", to: "/$region", params: { region: "centro-sul" } },
+];
+
+const SECONDARY_NAV: NavItem[] = [
   { label: "WhatsApp", to: "/whatsapp" },
   { label: "Anuncie", to: "/" },
 ];
 
+const INSTITUCIONAL_NAV: NavItem[] = [
+  { label: "Sobre o portal", to: "/sobre" },
+  { label: "Política editorial", to: "/politica-editorial" },
+  { label: "Correções", to: "/correcoes" },
+  { label: "Contato", to: "/contato" },
+];
+
+function useTodayBR() {
+  const [label, setLabel] = useState<string | null>(null);
+  useEffect(() => {
+    setLabel(
+      new Date().toLocaleDateString("pt-BR", {
+        weekday: "long",
+        day: "2-digit",
+        month: "long",
+        timeZone: "America/Sao_Paulo",
+      }),
+    );
+  }, []);
+  return label;
+}
+
 export function SiteHeader() {
   const [open, setOpen] = useState(false);
+  const today = useTodayBR();
   return (
     <header className="sticky top-0 z-40 bg-[#0A2540] text-white shadow-[0_1px_0_0_rgba(255,255,255,0.05)]">
       <div className="mx-auto flex h-14 max-w-7xl items-center gap-4 px-4">
-        {/* Burger — mobile only */}
+        {/* Burger — abre todos os atalhos (mobile + desktop) */}
         <button
           type="button"
-          aria-label="Abrir menu"
+          aria-label="Abrir menu de editorias e regiões"
+          aria-expanded={open}
           onClick={() => setOpen((v) => !v)}
-          className="flex h-8 w-8 shrink-0 flex-col items-center justify-center gap-[3px] md:hidden"
+          className="flex h-8 w-8 shrink-0 flex-col items-center justify-center gap-[3px]"
         >
           <span className="block h-[2px] w-5 bg-white" />
           <span className="block h-[2px] w-5 bg-white" />
@@ -52,9 +93,9 @@ export function SiteHeader() {
           />
         </Link>
 
-        {/* Nav principal — desktop */}
+        {/* Editorias temáticas — desktop */}
         <nav className="ml-2 hidden min-w-0 flex-1 items-center gap-5 overflow-x-auto md:flex">
-          {PRIMARY_NAV.map((item) => (
+          {EDITORIAS_NAV.map((item) => (
             <Link
               key={item.label}
               to={item.to as never}
@@ -92,20 +133,58 @@ export function SiteHeader() {
         </div>
       </div>
 
-      {/* Mobile menu */}
+      {/* Linha inferior — data + 10 macrorregiões */}
+      <div className="border-t border-white/10 bg-white">
+        <div className="mx-auto flex max-w-7xl items-center gap-3 overflow-x-auto px-4 py-2 whitespace-nowrap">
+          <span
+            suppressHydrationWarning
+            className="shrink-0 text-[10px] font-bold uppercase tracking-[0.16em] text-slate-400 capitalize"
+          >
+            {today ?? "\u00A0"}
+          </span>
+          <span className="h-3 w-px shrink-0 bg-slate-300" />
+          {REGIOES_NAV.map((item) => (
+            <Link
+              key={item.label}
+              to={item.to as never}
+              params={item.params as never}
+              className="shrink-0 text-[11px] font-bold uppercase tracking-[0.06em] text-slate-600 transition-colors hover:text-[#0A2540]"
+              activeProps={{ className: "shrink-0 text-[11px] font-bold uppercase tracking-[0.06em] text-[#0A2540]" }}
+            >
+              {item.label}
+            </Link>
+          ))}
+        </div>
+      </div>
+
+      {/* Menu completo (burger) */}
       {open && (
-        <div className="border-t border-white/10 bg-[#0A2540] md:hidden">
-          <nav className="mx-auto flex max-w-7xl flex-col px-4 py-2">
-            {[...PRIMARY_NAV, ...SECONDARY_NAV].map((item) => (
-              <Link
-                key={item.label}
-                to={item.to as never}
-                params={item.params as never}
-                onClick={() => setOpen(false)}
-                className="border-b border-white/5 py-3 text-[13px] font-bold uppercase tracking-[0.06em] text-white/90"
-              >
-                {item.label}
-              </Link>
+        <div className="border-t border-white/10 bg-[#0A2540]">
+          <nav className="mx-auto grid max-w-7xl grid-cols-1 gap-x-8 gap-y-6 px-4 py-6 md:grid-cols-3">
+            {[
+              { titulo: "Editorias", itens: EDITORIAS_NAV },
+              { titulo: "Macrorregiões", itens: REGIOES_NAV },
+              { titulo: "Serviços", itens: [...SECONDARY_NAV, ...INSTITUCIONAL_NAV] },
+            ].map((grupo) => (
+              <div key={grupo.titulo}>
+                <h4 className="mb-2 text-[10px] font-bold uppercase tracking-[0.16em] text-white/40">
+                  {grupo.titulo}
+                </h4>
+                <ul className="flex flex-col">
+                  {grupo.itens.map((item) => (
+                    <li key={`${grupo.titulo}-${item.label}`}>
+                      <Link
+                        to={item.to as never}
+                        params={item.params as never}
+                        onClick={() => setOpen(false)}
+                        className="block border-b border-white/5 py-2 text-[13px] font-bold uppercase tracking-[0.06em] text-white/85 hover:text-white"
+                      >
+                        {item.label}
+                      </Link>
+                    </li>
+                  ))}
+                </ul>
+              </div>
             ))}
           </nav>
         </div>
@@ -135,7 +214,7 @@ export function SiteFooter() {
             Regiões
           </h4>
           <ul className="space-y-1 text-sm">
-            {PRIMARY_NAV.slice(1).map((r) => (
+            {REGIOES_NAV.map((r) => (
               <li key={r.label}>
                 <Link
                   to={r.to as never}

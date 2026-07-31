@@ -194,17 +194,6 @@ const MOST_READ_FALLBACK = [
   "Nota Paraná: confira os números sorteados do prêmio mensal",
 ];
 
-const CATEGORIES = [
-  "Últimas Notícias",
-  "Política",
-  "Economia",
-  "Agronegócio",
-  "Educação",
-  "Segurança",
-  "Esportes",
-  "Cultura",
-];
-
 /* --------------------------- Editorias: paleta monocromática azul --------------------------- */
 /* Escala de 6 tons — do azul-marinho ao azul-céu. Cada editoria ancora num tom;
    no hover, desloca para o tom vizinho (mais claro ou mais escuro), criando
@@ -276,21 +265,6 @@ function CategoryTag({
 
 /* --------------------------- Portal Home --------------------------- */
 
-function useTodayBR() {
-  const [label, setLabel] = useState<string | null>(null);
-  useEffect(() => {
-    setLabel(
-      new Date().toLocaleDateString("pt-BR", {
-        weekday: "long",
-        day: "2-digit",
-        month: "long",
-        timeZone: "America/Sao_Paulo",
-      }),
-    );
-  }, []);
-  return label;
-}
-
 function PortalHome({
   regions,
   articles,
@@ -334,33 +308,10 @@ function PortalHome({
     if (a.region && !articleByRegion.has(a.region.slug)) articleByRegion.set(a.region.slug, a);
   }
 
-  const todayBR = useTodayBR();
 
   return (
     <div className="w-full bg-white text-slate-900">
       <SiteHeader />
-
-      {/* Faixa data/editorias — sub-nav densa estilo CGN */}
-      <div className="border-b border-slate-200 bg-white">
-        <div className="mx-auto flex max-w-7xl items-center gap-3 overflow-x-auto px-4 py-2 whitespace-nowrap">
-          <span
-            suppressHydrationWarning
-            className="shrink-0 text-[10px] font-bold uppercase tracking-[0.16em] text-slate-400 capitalize"
-          >
-            {todayBR ?? "\u00A0"}
-          </span>
-          <span className="h-3 w-px shrink-0 bg-slate-300" />
-          {CATEGORIES.map((c) => (
-            <a
-              key={c}
-              href="#"
-              className="shrink-0 text-[11px] font-bold uppercase tracking-[0.06em] text-slate-600 transition-colors hover:text-[#0A2540]"
-            >
-              {c}
-            </a>
-          ))}
-        </div>
-      </div>
 
       <LocationBar />
 
