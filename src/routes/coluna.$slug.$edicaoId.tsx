@@ -6,6 +6,7 @@ import {
   listArticlesByCategoryGlobal,
   type ColunaNota,
 } from "@/lib/content.functions";
+import type { ColunaAtalho } from "@/lib/content.functions";
 import { ColumnSidebar, ColumnFooterTaxonomy } from "@/components/ColumnTaxonomy";
 
 export const Route = createFileRoute("/coluna/$slug/$edicaoId")({
@@ -31,12 +32,26 @@ export const Route = createFileRoute("/coluna/$slug/$edicaoId")({
 function ColunaEdicaoPage() {
   const { edicao, taxonomia } = Route.useLoaderData();
   const { slug } = Route.useParams();
+  const coluna = taxonomia.colunas.find((c: ColunaAtalho) => c.slug === slug);
 
   return (
     <div className="min-h-screen bg-slate-50">
       <SiteHeader />
       <div className="mx-auto grid max-w-6xl gap-10 px-4 py-10 lg:grid-cols-[minmax(0,1fr)_300px]">
       <main className="min-w-0">
+        {coluna && (
+          <div className="mb-5 flex items-center gap-3 border-b-2 border-[#0A2540] pb-3">
+            <span className="h-12 w-12 shrink-0 overflow-hidden rounded-full bg-slate-200">
+              {coluna.foto_colunista_url && (
+                <img src={coluna.foto_colunista_url} alt={coluna.nome} className="h-full w-full object-cover" />
+              )}
+            </span>
+            <div className="min-w-0">
+              <p className="text-[11px] font-bold uppercase tracking-widest text-[#0066CC]">Coluna</p>
+              <h2 className="font-display text-xl font-black uppercase leading-tight text-[#0A2540]">{coluna.nome}</h2>
+            </div>
+          </div>
+        )}
         <Link to="/coluna/$slug/arquivo" params={{ slug }} className="text-sm font-semibold text-[#0066CC] hover:underline">
           ← Ver todas as edições
         </Link>
