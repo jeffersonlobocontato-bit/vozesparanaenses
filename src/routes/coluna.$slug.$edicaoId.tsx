@@ -13,20 +13,45 @@ import { ColumnComments } from "@/components/ColumnComments";
 export const Route = createFileRoute("/coluna/$slug/$edicaoId")({
   loader: async ({ params }) => {
     const [edicao, colunas, politica, eleicoes] = await Promise.all([
-      getColunaEdicaoPorId({ data: { id: params.edicaoId } }),
+      getColunaEdicaoPorId({ data: { id: params.edicaoId, colunaSlug: params.slug } }),
       listColunasAtalhos(),
       listArticlesByCategoryGlobal({ data: { categorySlug: "politica", limit: 11, requireImage: false } }),
       listArticlesByCategoryGlobal({ data: { categorySlug: "eleicoes-2026", limit: 11, requireImage: false } }),
     ]);
     if (!edicao) throw notFound();
-    return { edicao, taxonomia: { colunas, politica, eleicoes } };
+    return { edicao, colunaSlug: params.slug, taxonomia: { colunas, politica, eleicoes } };
   },
-  head: ({ loaderData }) => ({
-    meta: loaderData ? [
-      { title: `${loaderData.edicao.titulo} — Vozes Paranaenses` },
-      { name: "description", content: loaderData.edicao.subtitulo ?? "" },
-    ] : [],
-  }),
+  head: ({ loaderData }) => {
+    if (!loaderData) {
+      return { meta: [{ title: "Coluna — Vozes Paranaenses" }, { name: "robots", content: "noindex" }] };
+    }
+    const { edicao, colunaSlug } = loaderData;
+    const titulo = `${edicao.titulo} — Vozes Paranaenses`;
+    const descricao = edicao.subtitulo ?? edicao.notas[0]?.corpo.slice(0, 155) ?? "";
+    const imagem =
+      edicao.imagem_principal_url ??
+      edicao.notas.find((n: ColunaNota) => n.imagem_url)?.imagem_url ??
+      null;
+    const url = `https://vozesparanaenses.com.br/coluna/${colunaSlug}/${edicao.slug ?? edicao.id}`;
+    return {
+      meta: [
+        { title: titulo },
+        { name: "description", content: descricao },
+        { property: "og:type", content: "article" },
+        { property: "og:title", content: titulo },
+        { property: "og:description", content: descricao },
+        { property: "og:url", content: url },
+        { name: "twitter:card", content: imagem ? "summary_large_image" : "summary" },
+        ...(imagem
+          ? [
+              { property: "og:image", content: imagem },
+              { name: "twitter:image", content: imagem },
+            ]
+          : []),
+      ],
+      links: [{ rel: "canonical", href: url }],
+    };
+  },
   component: ColunaEdicaoPage,
 });
 
