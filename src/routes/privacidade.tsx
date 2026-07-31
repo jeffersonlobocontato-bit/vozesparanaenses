@@ -32,8 +32,9 @@ function Privacidade() {
         <section className="prose prose-slate mt-8 max-w-none">
           <h2>1. Quem somos</h2>
           <p>
-            Vozes Paranaenses é um portal jornalístico regional que opera em vozesparanaenses.lovable.app.
+            Vozes Paranaenses é um portal jornalístico regional que opera em vozesparanaenses.com.br.
             Esta política descreve como tratamos dados pessoais conforme a Lei Geral de Proteção de
+
             Dados (LGPD — Lei nº 13.709/2018).
           </p>
 
