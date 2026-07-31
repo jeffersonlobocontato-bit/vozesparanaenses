@@ -37,7 +37,7 @@ function ColunaArquivo() {
         <p className="mt-2 text-slate-600">Todas as publicações já saídas nesta coluna, da mais recente à mais antiga.</p>
 
         <div className="mt-8 space-y-4">
-          {edicoes.map((e: Pick<ColunaEdicao, "id" | "titulo" | "subtitulo" | "imagem_principal_url" | "publicado_em">) => (
+          {edicoes.map((e: Pick<ColunaEdicao, "id" | "slug" | "titulo" | "subtitulo" | "imagem_principal_url" | "publicado_em">) => (
             <Link
               key={e.id}
               to="/coluna/$slug/$edicaoId"
