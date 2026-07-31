@@ -90,6 +90,7 @@ function AdminLayout() {
                 { to: "/admin/vitrine-pessoal", label: "Vitrine Pessoal" },
                 { to: "/admin/pedidos-chat", label: "Pedidos (chat)" },
                 { to: "/admin/agentes", label: "Agentes IA" },
+                { to: "/admin/colunas", label: "Colunas" },
                 { to: "/admin/memoria-editorial", label: "Memória" },
                 { to: "/admin/sobre", label: "Sobre" },
               ].map((it) => (
