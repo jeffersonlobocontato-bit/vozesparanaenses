@@ -1268,6 +1268,71 @@ export type ColunaComEdicaoAtual = {
   edicao: ColunaEdicao | null;
 };
 
+/** Resumo de uma coluna para o módulo de atalhos da home. */
+export type ColunaAtalho = {
+  slug: string;
+  nome: string;
+  descricao: string | null;
+  foto_colunista_url: string | null;
+  edicao: {
+    id: string;
+    titulo: string;
+    subtitulo: string | null;
+    imagem_principal_url: string | null;
+    publicado_em: string | null;
+  } | null;
+};
+
+/**
+ * Todas as colunas ativas com a edição publicada mais recente de cada uma.
+ * Alimenta o módulo "Colunas" (atalhos) da home — sem carregar as notas.
+ */
+export const listColunasAtalhos = createServerFn({ method: "GET" })
+  .handler(async (): Promise<ColunaAtalho[]> => {
+    const { getExternalSupabase } = await import("./external-supabase.server");
+    const sb = getExternalSupabase();
+    const { data: colunas, error } = await sb
+      .from("colunas")
+      .select("id, slug, nome, descricao, foto_colunista_url")
+      .eq("ativo", true)
+      .order("criado_em", { ascending: true });
+    if (error) {
+      if (isMissingSchema(error)) return [];
+      throw new Error(error.message);
+    }
+    if (!colunas?.length) return [];
+
+    const { data: edicoes, error: edErr } = await sb
+      .from("coluna_edicoes")
+      .select("id, coluna_id, titulo, subtitulo, imagem_principal_url, publicado_em")
+      .eq("status", "publicado")
+      .order("publicado_em", { ascending: false });
+    if (edErr && !isMissingSchema(edErr)) throw new Error(edErr.message);
+
+    const maisRecente = new Map<string, NonNullable<ColunaAtalho["edicao"]>>();
+    for (const e of (edicoes ?? []) as Array<{ id: string; coluna_id: string; titulo: string; subtitulo: string | null; imagem_principal_url: string | null; publicado_em: string | null }>) {
+      if (!maisRecente.has(e.coluna_id)) {
+        maisRecente.set(e.coluna_id, {
+          id: e.id,
+          titulo: e.titulo,
+          subtitulo: e.subtitulo,
+          imagem_principal_url: e.imagem_principal_url,
+          publicado_em: e.publicado_em,
+        });
+      }
+    }
+
+    return (colunas as Array<{ id: string; slug: string; nome: string; descricao: string | null; foto_colunista_url: string | null }>)
+      .map((c) => ({
+        slug: c.slug,
+        nome: c.nome,
+        descricao: c.descricao,
+        foto_colunista_url: c.foto_colunista_url,
+        edicao: maisRecente.get(c.id) ?? null,
+      }))
+      .filter((c) => c.edicao !== null);
+  });
+
 /** Edição publicada mais recente de uma coluna — o que aparece na home. */
 export const getColunaAtual = createServerFn({ method: "GET" })
   .inputValidator((d: { slug: string }) => d)
