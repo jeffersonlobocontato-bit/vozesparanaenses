@@ -254,6 +254,22 @@ function AdminColunas() {
 
       {msg && <p className="rounded border bg-muted p-2 text-xs">{msg}</p>}
 
+      {/* Identidade da coluna */}
+      <div className="flex flex-wrap items-center gap-4 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
+        <span className="h-16 w-16 shrink-0 overflow-hidden rounded-full bg-slate-200">
+          {fotoColunista && <img src={fotoColunista} alt="" className="h-full w-full object-cover" />}
+        </span>
+        <div className="text-sm">
+          <p className="font-semibold text-slate-800">Foto / avatar da coluna</p>
+          <p className="mb-2 text-xs text-muted-foreground">Aparece no módulo de colunas da home, na lateral e no topo da coluna aberta.</p>
+          <input type="file" accept="image/*" disabled={uploadAvatarBusy}
+            onChange={(e) => e.target.files?.[0] && onUploadAvatar(e.target.files[0])} />
+          {fotoColunista && (
+            <button onClick={removerAvatar} className="ml-2 rounded border px-2 py-1 text-xs">Remover</button>
+          )}
+        </div>
+      </div>
+
       <div className="grid gap-6 lg:grid-cols-[280px_1fr]">
         {/* Lista de edições */}
         <div className="space-y-2">
