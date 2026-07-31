@@ -6,6 +6,7 @@ import {
   listArticlesByCategoryGlobal,
   type ColunaNota,
 } from "@/lib/content.functions";
+import type { ColunaAtalho } from "@/lib/content.functions";
 import { ColumnSidebar, ColumnFooterTaxonomy } from "@/components/ColumnTaxonomy";
 
 export const Route = createFileRoute("/coluna/$slug/$edicaoId")({
