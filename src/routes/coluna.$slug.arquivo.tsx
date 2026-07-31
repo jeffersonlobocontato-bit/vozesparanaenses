@@ -1,6 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { SiteHeader, SiteFooter } from "@/components/SiteHeader";
-import { listColunaEdicoes } from "@/lib/content.functions";
+import { listColunaEdicoes, type ColunaEdicao } from "@/lib/content.functions";
 
 export const Route = createFileRoute("/coluna/$slug/arquivo")({
   loader: async ({ params }) => {
@@ -25,7 +25,7 @@ function ColunaArquivo() {
         <p className="mt-2 text-slate-600">Todas as publicações já saídas nesta coluna, da mais recente à mais antiga.</p>
 
         <div className="mt-8 space-y-4">
-          {edicoes.map((e) => (
+          {edicoes.map((e: Pick<ColunaEdicao, "id" | "titulo" | "subtitulo" | "imagem_principal_url" | "publicado_em">) => (
             <Link
               key={e.id}
               to="/coluna/$slug/$edicaoId"
