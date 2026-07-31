@@ -2,6 +2,7 @@ import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useEffect, useRef, useState } from "react";
 import { SiteHeader, SiteFooter } from "@/components/SiteHeader";
 import { supabase } from "@/integrations/supabase/client";
+import { getRecaptchaToken } from "@/lib/recaptcha";
 
 export const Route = createFileRoute("/vitrine-pessoal/novo")({
   head: () => ({
@@ -38,7 +39,8 @@ function VitrinePessoalChat() {
   useEffect(() => {
     (async () => {
       try {
-        const { data, error } = await supabase.functions.invoke("vitrine-pessoal-chat", { body: { init: true } });
+        const recaptchaToken = await getRecaptchaToken("vitrine_pessoal_init");
+        const { data, error } = await supabase.functions.invoke("vitrine-pessoal-chat", { body: { init: true, recaptchaToken } });
         if (error) throw error;
         const res = data as { mensagem?: string; token?: string };
         if (!res.token || !res.mensagem) throw new Error("Não foi possível iniciar a entrevista.");

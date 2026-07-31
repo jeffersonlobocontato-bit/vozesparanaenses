@@ -38,6 +38,28 @@ Deno.serve(async (req) => {
 
   const sb = createClient(url, key, { auth: { persistSession: false } });
 
+  // Correção de segurança: cada submissão aqui dispara geração de matéria
+  // com IA — sem limite, alguém com um token válido (ou testando tokens)
+  // podia gerar custo repetido. Limite por IP, generoso o bastante pra não
+  // atrapalhar um preenchimento legítimo com tentativa de reenvio.
+  {
+    const ip = req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ?? "unknown";
+    const data = new TextEncoder().encode(ip + "pubpreench-salt");
+    const digest = await crypto.subtle.digest("SHA-256", data);
+    const ipHash = Array.from(new Uint8Array(digest)).map((b) => b.toString(16).padStart(2, "0")).join("");
+    const desde = new Date(Date.now() - 15 * 60_000).toISOString();
+    const { count } = await sb
+      .from("form_rate_limit")
+      .select("id", { count: "exact", head: true })
+      .eq("endpoint", "publieditorial-preencher")
+      .eq("ip_hash", ipHash)
+      .gte("criado_em", desde);
+    if ((count ?? 0) >= 5) {
+      return json({ error: "rate_limited", detail: "Muitas tentativas — tente novamente mais tarde." }, 429);
+    }
+    await sb.from("form_rate_limit").insert({ ip_hash: ipHash, endpoint: "publieditorial-preencher" });
+  }
+
   const { data: briefing, error: bErr } = await sb
     .from("publieditorial_briefings")
     .select("id, status")

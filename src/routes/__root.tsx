@@ -14,6 +14,7 @@ import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
 import { PageviewTracker } from "../lib/analytics";
 import { SalesChatWidget } from "../components/SalesChatWidget";
+import { CookieConsentBanner } from "../components/CookieConsentBanner";
 import { AdminFloatingEditor } from "../components/AdminFloatingEditor";
 import faviconAsset from "@/assets/favicon.png.asset.json";
 
@@ -123,14 +124,11 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       },
     ],
     scripts: [
-      {
-        src: "https://www.googletagmanager.com/gtag/js?id=G-HPX9FLN7XV",
-        async: true,
-      },
-      {
-        children:
-          "window.dataLayer = window.dataLayer || [];function gtag(){dataLayer.push(arguments);}gtag('js', new Date());gtag('config', 'G-HPX9FLN7XV', { send_page_view: false });",
-      },
+      // GA4 NÃO carrega mais aqui direto no head — antes disparava pra
+      // TODO visitante, sem perguntar nada (item de LGPD apontado na
+      // auditoria: "rastreamento sem escolha"). Agora só é injetado depois
+      // que o CookieConsentBanner recebe um "Aceitar" — ver
+      // src/lib/cookie-consent.ts e src/components/CookieConsentBanner.tsx.
       {
         type: "application/ld+json",
         children: JSON.stringify({
@@ -226,6 +224,7 @@ function RootComponent() {
       <PageviewTracker />
       {!isAdmin && <SalesChatWidget />}
       {!isAdmin && <AdminFloatingEditor />}
+      {!isAdmin && <CookieConsentBanner />}
       {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
       <Outlet />
     </QueryClientProvider>
