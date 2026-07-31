@@ -41,7 +41,7 @@ function ColunaArquivo() {
             <Link
               key={e.id}
               to="/coluna/$slug/$edicaoId"
-              params={{ slug, edicaoId: e.id }}
+            params={{ slug, edicaoId: e.slug ?? e.id }}
               className="flex gap-4 rounded-xl border border-slate-200 bg-white p-4 shadow-sm transition hover:border-[#0066CC]"
             >
               {e.imagem_principal_url && (
