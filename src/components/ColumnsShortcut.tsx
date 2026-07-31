@@ -34,7 +34,7 @@ export function ColumnsShortcut({ colunas }: { colunas: ColunaAtalho[] }) {
           <Link
             key={c.slug}
             to="/coluna/$slug/$edicaoId"
-            params={{ slug: c.slug, edicaoId: c.edicao!.id }}
+            params={{ slug: c.slug, edicaoId: c.edicao!.slug ?? c.edicao!.id }}
             className="group flex flex-col gap-3 bg-white p-5 transition-colors hover:bg-accent"
           >
             <div className="flex min-w-0 items-center gap-3">
