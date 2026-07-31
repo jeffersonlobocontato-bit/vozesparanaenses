@@ -57,7 +57,7 @@ export function ColumnSidebar({
               <Link
                 key={c.slug}
                 to={c.edicao ? "/coluna/$slug/$edicaoId" : "/coluna/$slug/arquivo"}
-                params={c.edicao ? { slug: c.slug, edicaoId: c.edicao.id } : { slug: c.slug }}
+                params={c.edicao ? { slug: c.slug, edicaoId: c.edicao.slug ?? c.edicao.id } : { slug: c.slug }}
                 className="group flex items-center gap-3"
               >
                 <span className="h-11 w-11 shrink-0 overflow-hidden rounded-full bg-slate-200">
