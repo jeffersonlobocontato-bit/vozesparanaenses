@@ -31,7 +31,7 @@ export const Route = createFileRoute("/coluna/$slug/$edicaoId")({
 function ColunaEdicaoPage() {
   const { edicao, taxonomia } = Route.useLoaderData();
   const { slug } = Route.useParams();
-  const coluna = taxonomia.colunas.find((c) => c.slug === slug);
+  const coluna = taxonomia.colunas.find((c: ColunaAtalho) => c.slug === slug);
 
   return (
     <div className="min-h-screen bg-slate-50">
