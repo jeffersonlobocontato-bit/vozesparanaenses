@@ -1252,6 +1252,7 @@ export type ColunaNota = {
 
 export type ColunaEdicao = {
   id: string;
+  slug: string | null;
   titulo: string;
   subtitulo: string | null;
   imagem_principal_url: string | null;
@@ -1276,12 +1277,18 @@ export type ColunaAtalho = {
   foto_colunista_url: string | null;
   edicao: {
     id: string;
+    slug: string | null;
     titulo: string;
     subtitulo: string | null;
     imagem_principal_url: string | null;
     publicado_em: string | null;
   } | null;
 };
+
+/** true quando a coluna `slug` de coluna_edicoes ainda não existe no banco. */
+function isMissingColumn(err: { code?: string; message?: string } | null) {
+  return err?.code === "42703" || /column .* does not exist/i.test(err?.message ?? "");
+}
 
 /**
  * Todas as colunas ativas com a edição publicada mais recente de cada uma.
@@ -1304,16 +1311,29 @@ export const listColunasAtalhos = createServerFn({ method: "GET" })
 
     const { data: edicoes, error: edErr } = await sb
       .from("coluna_edicoes")
-      .select("id, coluna_id, titulo, subtitulo, imagem_principal_url, publicado_em")
+      .select("id, slug, coluna_id, titulo, subtitulo, imagem_principal_url, publicado_em")
       .eq("status", "publicado")
       .order("publicado_em", { ascending: false });
-    if (edErr && !isMissingSchema(edErr)) throw new Error(edErr.message);
+    let linhas = edicoes;
+    if (edErr) {
+      if (isMissingColumn(edErr)) {
+        const alt = await sb
+          .from("coluna_edicoes")
+          .select("id, coluna_id, titulo, subtitulo, imagem_principal_url, publicado_em")
+          .eq("status", "publicado")
+          .order("publicado_em", { ascending: false });
+        linhas = alt.data as typeof edicoes;
+      } else if (!isMissingSchema(edErr)) {
+        throw new Error(edErr.message);
+      }
+    }
 
     const maisRecente = new Map<string, NonNullable<ColunaAtalho["edicao"]>>();
-    for (const e of (edicoes ?? []) as Array<{ id: string; coluna_id: string; titulo: string; subtitulo: string | null; imagem_principal_url: string | null; publicado_em: string | null }>) {
+    for (const e of (linhas ?? []) as Array<{ id: string; slug?: string | null; coluna_id: string; titulo: string; subtitulo: string | null; imagem_principal_url: string | null; publicado_em: string | null }>) {
       if (!maisRecente.has(e.coluna_id)) {
         maisRecente.set(e.coluna_id, {
           id: e.id,
+          slug: e.slug ?? null,
           titulo: e.titulo,
           subtitulo: e.subtitulo,
           imagem_principal_url: e.imagem_principal_url,
@@ -1372,6 +1392,7 @@ export const getColunaAtual = createServerFn({ method: "GET" })
       ...coluna,
       edicao: {
         id: edicao.id,
+        slug: (edicao as { slug?: string | null }).slug ?? null,
         titulo: edicao.titulo,
         subtitulo: edicao.subtitulo,
         imagem_principal_url: edicao.imagem_principal_url,
@@ -1385,48 +1406,82 @@ export const getColunaAtual = createServerFn({ method: "GET" })
 /** Arquivo cronológico — todas as edições publicadas, mais recente primeiro. */
 export const listColunaEdicoes = createServerFn({ method: "GET" })
   .inputValidator((d: { slug: string }) => d)
-  .handler(async ({ data }): Promise<Array<Pick<ColunaEdicao, "id" | "titulo" | "subtitulo" | "imagem_principal_url" | "publicado_em">>> => {
+  .handler(async ({ data }): Promise<Array<Pick<ColunaEdicao, "id" | "slug" | "titulo" | "subtitulo" | "imagem_principal_url" | "publicado_em">>> => {
     const { getExternalSupabase } = await import("./external-supabase.server");
     const sb = getExternalSupabase();
-    const { data: rows, error } = await sb
+    const base = (cols: string) => sb
       .from("coluna_edicoes")
-      .select("id, coluna_id!inner(slug), titulo, subtitulo, imagem_principal_url, publicado_em")
+      .select(cols)
       .eq("coluna_id.slug", data.slug)
       .eq("status", "publicado")
       .order("publicado_em", { ascending: false });
+    let { data: rows, error } = await base(
+      "id, slug, coluna_id!inner(slug), titulo, subtitulo, imagem_principal_url, publicado_em",
+    );
+    if (error && isMissingColumn(error)) {
+      const alt = await base("id, coluna_id!inner(slug), titulo, subtitulo, imagem_principal_url, publicado_em");
+      rows = alt.data;
+      error = alt.error;
+    }
     if (error) {
       if (isMissingSchema(error)) return [];
       throw new Error(error.message);
     }
-    return (rows ?? []) as Array<Pick<ColunaEdicao, "id" | "titulo" | "subtitulo" | "imagem_principal_url" | "publicado_em">>;
+    return ((rows ?? []) as unknown as Array<Record<string, unknown>>).map((r) => ({
+      id: r.id as string,
+      slug: (r.slug as string | null) ?? null,
+      titulo: r.titulo as string,
+      subtitulo: (r.subtitulo as string | null) ?? null,
+      imagem_principal_url: (r.imagem_principal_url as string | null) ?? null,
+      publicado_em: (r.publicado_em as string | null) ?? null,
+    }));
   });
 
-/** Uma edição específica pelo id (permalink do arquivo). */
+/**
+ * Uma edição específica pelo permalink: aceita o slug amigável
+ * (/coluna/<coluna>/<slug-da-edicao>) e, por compatibilidade, o UUID antigo.
+ */
 export const getColunaEdicaoPorId = createServerFn({ method: "GET" })
-  .inputValidator((d: { id: string }) => d)
+  .inputValidator((d: { id: string; colunaSlug?: string }) => d)
   .handler(async ({ data }): Promise<ColunaEdicao | null> => {
     const { getExternalSupabase } = await import("./external-supabase.server");
     const sb = getExternalSupabase();
-    const { data: edicao, error } = await sb
-      .from("coluna_edicoes")
-      .select("id, titulo, subtitulo, imagem_principal_url, pergunta_engajamento, publicado_em, coluna_notas(id, ordem, titulo_gatilho, corpo, imagem_url)")
-      .eq("id", data.id)
-      .eq("status", "publicado")
-      .maybeSingle();
+    const ehUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(data.id);
+    const buscar = (cols: string, porSlug: boolean) => {
+      let q = sb.from("coluna_edicoes").select(cols).eq("status", "publicado");
+      if (porSlug) {
+        q = q.eq("slug", data.id);
+        if (data.colunaSlug) q = q.eq("coluna_id.slug", data.colunaSlug);
+      } else {
+        q = q.eq("id", data.id);
+      }
+      return q.limit(1).maybeSingle();
+    };
+    const colsSlug =
+      "id, slug, coluna_id!inner(slug), titulo, subtitulo, imagem_principal_url, pergunta_engajamento, publicado_em, coluna_notas(id, ordem, titulo_gatilho, corpo, imagem_url)";
+    const colsUuid =
+      "id, titulo, subtitulo, imagem_principal_url, pergunta_engajamento, publicado_em, coluna_notas(id, ordem, titulo_gatilho, corpo, imagem_url)";
+
+    let { data: edicao, error } = ehUuid
+      ? await buscar(colsUuid, false)
+      : await buscar(colsSlug, true);
+    if (error && isMissingColumn(error)) return null;
     if (error) {
       if (isMissingSchema(error)) return null;
       throw new Error(error.message);
     }
     if (!edicao) return null;
-    const notas = ((edicao as unknown as { coluna_notas: ColunaNota[] }).coluna_notas ?? [])
+    const e = edicao as unknown as Record<string, unknown>;
+    const notas = (((e.coluna_notas as ColunaNota[]) ?? []) as ColunaNota[])
       .sort((a, b) => a.ordem - b.ordem);
     return {
-      id: edicao.id,
-      titulo: edicao.titulo,
-      subtitulo: edicao.subtitulo,
-      imagem_principal_url: edicao.imagem_principal_url,
-      pergunta_engajamento: edicao.pergunta_engajamento,
-      publicado_em: edicao.publicado_em,
+      id: e.id as string,
+      slug: (e.slug as string | null) ?? null,
+      titulo: e.titulo as string,
+      subtitulo: (e.subtitulo as string | null) ?? null,
+      imagem_principal_url: (e.imagem_principal_url as string | null) ?? null,
+      pergunta_engajamento: (e.pergunta_engajamento as string | null) ?? null,
+      publicado_em: (e.publicado_em as string | null) ?? null,
       notas,
     };
   });
