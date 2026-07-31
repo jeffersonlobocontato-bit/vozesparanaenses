@@ -298,6 +298,7 @@ function PortalHome({
   mostRead,
   eleicoes2026Top,
   loc,
+  colunas,
 }: {
   regions: Region[];
   articles: RankedArticle[];
