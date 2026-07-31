@@ -1430,3 +1430,56 @@ export const getColunaEdicaoPorId = createServerFn({ method: "GET" })
       notas,
     };
   });
+
+/* =====================================================================
+ * Comentários das colunas (interação do leitor)
+ * ===================================================================== */
+
+export type ColunaComentario = {
+  id: string;
+  nome: string;
+  comentario: string;
+  criado_em: string;
+};
+
+/** Lista comentários aprovados de uma edição de coluna. */
+export const listComentariosColuna = createServerFn({ method: "GET" })
+  .inputValidator((d: { edicaoId: string }) => d)
+  .handler(async ({ data }): Promise<ColunaComentario[]> => {
+    const { getExternalSupabase } = await import("./external-supabase.server");
+    const sb = getExternalSupabase();
+    const { data: rows, error } = await sb
+      .from("coluna_comentarios")
+      .select("id, nome, comentario, criado_em")
+      .eq("edicao_id", data.edicaoId)
+      .eq("aprovado", true)
+      .order("criado_em", { ascending: false })
+      .limit(200);
+    if (error) {
+      if (isMissingSchema(error)) return [];
+      throw new Error(error.message);
+    }
+    return (rows ?? []) as ColunaComentario[];
+  });
+
+/** Envia um comentário de leitor numa edição de coluna. */
+export const criarComentarioColuna = createServerFn({ method: "POST" })
+  .inputValidator((d: { edicaoId: string; nome: string; comentario: string }) => d)
+  .handler(async ({ data }): Promise<{ ok: boolean; erro?: string }> => {
+    const nome = (data.nome ?? "").trim().slice(0, 80);
+    const comentario = (data.comentario ?? "").trim().slice(0, 2000);
+    if (nome.length < 2) return { ok: false, erro: "Informe seu nome." };
+    if (comentario.length < 3) return { ok: false, erro: "Escreva seu comentário." };
+    if (/https?:\/\//i.test(comentario)) return { ok: false, erro: "Comentários com links não são aceitos." };
+
+    const { getExternalServiceRole } = await import("./external-supabase.server");
+    const sb = getExternalServiceRole();
+    const { error } = await sb
+      .from("coluna_comentarios")
+      .insert({ edicao_id: data.edicaoId, nome, comentario });
+    if (error) {
+      if (isMissingSchema(error)) return { ok: false, erro: "Comentários ainda não habilitados." };
+      return { ok: false, erro: error.message };
+    }
+    return { ok: true };
+  });
