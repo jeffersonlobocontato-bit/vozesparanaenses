@@ -39,6 +39,7 @@ import { Route as AdminPainelRouteImport } from './routes/admin.painel'
 import { Route as AdminMemoriaEditorialRouteImport } from './routes/admin.memoria-editorial'
 import { Route as AdminLoginRouteImport } from './routes/admin.login'
 import { Route as AdminFontesRouteImport } from './routes/admin.fontes'
+import { Route as AdminColunasRouteImport } from './routes/admin.colunas'
 import { Route as AdminClustersRouteImport } from './routes/admin.clusters'
 import { Route as AdminAnunciosRouteImport } from './routes/admin.anuncios'
 import { Route as AdminAnalyticsRouteImport } from './routes/admin.analytics'
@@ -46,6 +47,8 @@ import { Route as AdminAgentesRouteImport } from './routes/admin.agentes'
 import { Route as RegionClassificadosRouteImport } from './routes/$region.classificados'
 import { Route as RegionSlugRouteImport } from './routes/$region.$slug'
 import { Route as LovableEmailSuppressionRouteImport } from './routes/lovable/email/suppression'
+import { Route as ColunaSlugArquivoRouteImport } from './routes/coluna.$slug.arquivo'
+import { Route as ColunaSlugEdicaoIdRouteImport } from './routes/coluna.$slug.$edicaoId'
 import { Route as ApiPublicSitemapDotxmlRouteImport } from './routes/api/public/sitemap[.]xml'
 import { Route as ApiPublicSitemapNewsDotxmlRouteImport } from './routes/api/public/sitemap-news[.]xml'
 import { Route as ApiPublicRssDotxmlRouteImport } from './routes/api/public/rss[.]xml'
@@ -213,6 +216,11 @@ const AdminFontesRoute = AdminFontesRouteImport.update({
   path: '/fontes',
   getParentRoute: () => AdminRoute,
 } as any)
+const AdminColunasRoute = AdminColunasRouteImport.update({
+  id: '/colunas',
+  path: '/colunas',
+  getParentRoute: () => AdminRoute,
+} as any)
 const AdminClustersRoute = AdminClustersRouteImport.update({
   id: '/clusters',
   path: '/clusters',
@@ -246,6 +254,16 @@ const RegionSlugRoute = RegionSlugRouteImport.update({
 const LovableEmailSuppressionRoute = LovableEmailSuppressionRouteImport.update({
   id: '/lovable/email/suppression',
   path: '/lovable/email/suppression',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ColunaSlugArquivoRoute = ColunaSlugArquivoRouteImport.update({
+  id: '/coluna/$slug/arquivo',
+  path: '/coluna/$slug/arquivo',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ColunaSlugEdicaoIdRoute = ColunaSlugEdicaoIdRouteImport.update({
+  id: '/coluna/$slug/$edicaoId',
+  path: '/coluna/$slug/$edicaoId',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ApiPublicSitemapDotxmlRoute = ApiPublicSitemapDotxmlRouteImport.update({
@@ -355,6 +373,7 @@ export interface FileRoutesByFullPath {
   '/admin/analytics': typeof AdminAnalyticsRoute
   '/admin/anuncios': typeof AdminAnunciosRoute
   '/admin/clusters': typeof AdminClustersRoute
+  '/admin/colunas': typeof AdminColunasRoute
   '/admin/fontes': typeof AdminFontesRoute
   '/admin/login': typeof AdminLoginRoute
   '/admin/memoria-editorial': typeof AdminMemoriaEditorialRoute
@@ -382,6 +401,8 @@ export interface FileRoutesByFullPath {
   '/api/public/rss.xml': typeof ApiPublicRssDotxmlRoute
   '/api/public/sitemap-news.xml': typeof ApiPublicSitemapNewsDotxmlRoute
   '/api/public/sitemap.xml': typeof ApiPublicSitemapDotxmlRoute
+  '/coluna/$slug/$edicaoId': typeof ColunaSlugEdicaoIdRoute
+  '/coluna/$slug/arquivo': typeof ColunaSlugArquivoRoute
   '/lovable/email/suppression': typeof LovableEmailSuppressionRoute
   '/api/public/hooks/indexnow-ping': typeof ApiPublicHooksIndexnowPingRoute
   '/api/public/indexnow/$key': typeof ApiPublicIndexnowKeyRoute
@@ -408,6 +429,7 @@ export interface FileRoutesByTo {
   '/admin/analytics': typeof AdminAnalyticsRoute
   '/admin/anuncios': typeof AdminAnunciosRoute
   '/admin/clusters': typeof AdminClustersRoute
+  '/admin/colunas': typeof AdminColunasRoute
   '/admin/fontes': typeof AdminFontesRoute
   '/admin/login': typeof AdminLoginRoute
   '/admin/memoria-editorial': typeof AdminMemoriaEditorialRoute
@@ -435,6 +457,8 @@ export interface FileRoutesByTo {
   '/api/public/rss.xml': typeof ApiPublicRssDotxmlRoute
   '/api/public/sitemap-news.xml': typeof ApiPublicSitemapNewsDotxmlRoute
   '/api/public/sitemap.xml': typeof ApiPublicSitemapDotxmlRoute
+  '/coluna/$slug/$edicaoId': typeof ColunaSlugEdicaoIdRoute
+  '/coluna/$slug/arquivo': typeof ColunaSlugArquivoRoute
   '/lovable/email/suppression': typeof LovableEmailSuppressionRoute
   '/api/public/hooks/indexnow-ping': typeof ApiPublicHooksIndexnowPingRoute
   '/api/public/indexnow/$key': typeof ApiPublicIndexnowKeyRoute
@@ -464,6 +488,7 @@ export interface FileRoutesById {
   '/admin/analytics': typeof AdminAnalyticsRoute
   '/admin/anuncios': typeof AdminAnunciosRoute
   '/admin/clusters': typeof AdminClustersRoute
+  '/admin/colunas': typeof AdminColunasRoute
   '/admin/fontes': typeof AdminFontesRoute
   '/admin/login': typeof AdminLoginRoute
   '/admin/memoria-editorial': typeof AdminMemoriaEditorialRoute
@@ -491,6 +516,8 @@ export interface FileRoutesById {
   '/api/public/rss.xml': typeof ApiPublicRssDotxmlRoute
   '/api/public/sitemap-news.xml': typeof ApiPublicSitemapNewsDotxmlRoute
   '/api/public/sitemap.xml': typeof ApiPublicSitemapDotxmlRoute
+  '/coluna/$slug/$edicaoId': typeof ColunaSlugEdicaoIdRoute
+  '/coluna/$slug/arquivo': typeof ColunaSlugArquivoRoute
   '/lovable/email/suppression': typeof LovableEmailSuppressionRoute
   '/api/public/hooks/indexnow-ping': typeof ApiPublicHooksIndexnowPingRoute
   '/api/public/indexnow/$key': typeof ApiPublicIndexnowKeyRoute
@@ -521,6 +548,7 @@ export interface FileRouteTypes {
     | '/admin/analytics'
     | '/admin/anuncios'
     | '/admin/clusters'
+    | '/admin/colunas'
     | '/admin/fontes'
     | '/admin/login'
     | '/admin/memoria-editorial'
@@ -548,6 +576,8 @@ export interface FileRouteTypes {
     | '/api/public/rss.xml'
     | '/api/public/sitemap-news.xml'
     | '/api/public/sitemap.xml'
+    | '/coluna/$slug/$edicaoId'
+    | '/coluna/$slug/arquivo'
     | '/lovable/email/suppression'
     | '/api/public/hooks/indexnow-ping'
     | '/api/public/indexnow/$key'
@@ -574,6 +604,7 @@ export interface FileRouteTypes {
     | '/admin/analytics'
     | '/admin/anuncios'
     | '/admin/clusters'
+    | '/admin/colunas'
     | '/admin/fontes'
     | '/admin/login'
     | '/admin/memoria-editorial'
@@ -601,6 +632,8 @@ export interface FileRouteTypes {
     | '/api/public/rss.xml'
     | '/api/public/sitemap-news.xml'
     | '/api/public/sitemap.xml'
+    | '/coluna/$slug/$edicaoId'
+    | '/coluna/$slug/arquivo'
     | '/lovable/email/suppression'
     | '/api/public/hooks/indexnow-ping'
     | '/api/public/indexnow/$key'
@@ -629,6 +662,7 @@ export interface FileRouteTypes {
     | '/admin/analytics'
     | '/admin/anuncios'
     | '/admin/clusters'
+    | '/admin/colunas'
     | '/admin/fontes'
     | '/admin/login'
     | '/admin/memoria-editorial'
@@ -656,6 +690,8 @@ export interface FileRouteTypes {
     | '/api/public/rss.xml'
     | '/api/public/sitemap-news.xml'
     | '/api/public/sitemap.xml'
+    | '/coluna/$slug/$edicaoId'
+    | '/coluna/$slug/arquivo'
     | '/lovable/email/suppression'
     | '/api/public/hooks/indexnow-ping'
     | '/api/public/indexnow/$key'
@@ -692,6 +728,8 @@ export interface RootRouteChildren {
   ApiPublicRssDotxmlRoute: typeof ApiPublicRssDotxmlRoute
   ApiPublicSitemapNewsDotxmlRoute: typeof ApiPublicSitemapNewsDotxmlRoute
   ApiPublicSitemapDotxmlRoute: typeof ApiPublicSitemapDotxmlRoute
+  ColunaSlugEdicaoIdRoute: typeof ColunaSlugEdicaoIdRoute
+  ColunaSlugArquivoRoute: typeof ColunaSlugArquivoRoute
   LovableEmailSuppressionRoute: typeof LovableEmailSuppressionRoute
   ApiPublicHooksIndexnowPingRoute: typeof ApiPublicHooksIndexnowPingRoute
   ApiPublicIndexnowKeyRoute: typeof ApiPublicIndexnowKeyRoute
@@ -915,6 +953,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminFontesRouteImport
       parentRoute: typeof AdminRoute
     }
+    '/admin/colunas': {
+      id: '/admin/colunas'
+      path: '/colunas'
+      fullPath: '/admin/colunas'
+      preLoaderRoute: typeof AdminColunasRouteImport
+      parentRoute: typeof AdminRoute
+    }
     '/admin/clusters': {
       id: '/admin/clusters'
       path: '/clusters'
@@ -962,6 +1007,20 @@ declare module '@tanstack/react-router' {
       path: '/lovable/email/suppression'
       fullPath: '/lovable/email/suppression'
       preLoaderRoute: typeof LovableEmailSuppressionRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/coluna/$slug/arquivo': {
+      id: '/coluna/$slug/arquivo'
+      path: '/coluna/$slug/arquivo'
+      fullPath: '/coluna/$slug/arquivo'
+      preLoaderRoute: typeof ColunaSlugArquivoRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/coluna/$slug/$edicaoId': {
+      id: '/coluna/$slug/$edicaoId'
+      path: '/coluna/$slug/$edicaoId'
+      fullPath: '/coluna/$slug/$edicaoId'
+      preLoaderRoute: typeof ColunaSlugEdicaoIdRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/api/public/sitemap.xml': {
@@ -1103,6 +1162,7 @@ interface AdminRouteChildren {
   AdminAnalyticsRoute: typeof AdminAnalyticsRoute
   AdminAnunciosRoute: typeof AdminAnunciosRoute
   AdminClustersRoute: typeof AdminClustersRoute
+  AdminColunasRoute: typeof AdminColunasRoute
   AdminFontesRoute: typeof AdminFontesRoute
   AdminLoginRoute: typeof AdminLoginRoute
   AdminMemoriaEditorialRoute: typeof AdminMemoriaEditorialRoute
@@ -1121,6 +1181,7 @@ const AdminRouteChildren: AdminRouteChildren = {
   AdminAnalyticsRoute: AdminAnalyticsRoute,
   AdminAnunciosRoute: AdminAnunciosRoute,
   AdminClustersRoute: AdminClustersRoute,
+  AdminColunasRoute: AdminColunasRoute,
   AdminFontesRoute: AdminFontesRoute,
   AdminLoginRoute: AdminLoginRoute,
   AdminMemoriaEditorialRoute: AdminMemoriaEditorialRoute,
@@ -1161,6 +1222,8 @@ const rootRouteChildren: RootRouteChildren = {
   ApiPublicRssDotxmlRoute: ApiPublicRssDotxmlRoute,
   ApiPublicSitemapNewsDotxmlRoute: ApiPublicSitemapNewsDotxmlRoute,
   ApiPublicSitemapDotxmlRoute: ApiPublicSitemapDotxmlRoute,
+  ColunaSlugEdicaoIdRoute: ColunaSlugEdicaoIdRoute,
+  ColunaSlugArquivoRoute: ColunaSlugArquivoRoute,
   LovableEmailSuppressionRoute: LovableEmailSuppressionRoute,
   ApiPublicHooksIndexnowPingRoute: ApiPublicHooksIndexnowPingRoute,
   ApiPublicIndexnowKeyRoute: ApiPublicIndexnowKeyRoute,
@@ -1174,13 +1237,3 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}
