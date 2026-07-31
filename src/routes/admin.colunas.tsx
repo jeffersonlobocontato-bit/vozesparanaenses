@@ -139,6 +139,7 @@ function AdminColunas() {
 
   function novaEdicaoEmBranco() {
     setEdicaoAtivaId(null);
+    setComentarios([]);
     setTitulo("");
     setSubtitulo("");
     setImagemPrincipal(null);
