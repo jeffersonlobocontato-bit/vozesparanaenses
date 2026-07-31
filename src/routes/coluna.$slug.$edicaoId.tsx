@@ -1,6 +1,6 @@
 import { createFileRoute, Link, notFound } from "@tanstack/react-router";
 import { SiteHeader, SiteFooter } from "@/components/SiteHeader";
-import { getColunaEdicaoPorId } from "@/lib/content.functions";
+import { getColunaEdicaoPorId, type ColunaNota } from "@/lib/content.functions";
 
 export const Route = createFileRoute("/coluna/$slug/$edicaoId")({
   loader: async ({ params }) => {
@@ -44,7 +44,7 @@ function ColunaEdicaoPage() {
         )}
 
         <div className="mt-6 space-y-6">
-          {edicao.notas.map((nota) => (
+          {edicao.notas.map((nota: ColunaNota) => (
             <div key={nota.id} className="border-l-2 border-[#0066CC] pl-4">
               <h2 className="font-display text-lg font-bold text-[#0A2540]">{nota.titulo_gatilho}</h2>
               {nota.imagem_url && (
