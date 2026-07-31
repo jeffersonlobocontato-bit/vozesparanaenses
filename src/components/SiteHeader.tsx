@@ -6,7 +6,6 @@ type NavItem = { label: string; to: string; params?: Record<string, string> };
 
 // Tarja azul do topo: editorias temáticas.
 const EDITORIAS_NAV: NavItem[] = [
-  { label: "Últimas", to: "/" },
   { label: "Política", to: "/editoria/$categoria", params: { categoria: "politica" } },
   { label: "Eleições 2026", to: "/editoria/$categoria", params: { categoria: "eleicoes-2026" } },
   { label: "Economia", to: "/editoria/$categoria", params: { categoria: "economia" } },
