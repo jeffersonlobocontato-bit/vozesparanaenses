@@ -86,17 +86,11 @@ export function SiteHeader() {
           aria-label="Vozes Paranaenses — Página inicial"
           className="flex shrink-0 items-center"
         >
-          {/* Ícone VP em telas estreitas, marca horizontal a partir de sm */}
-          <img
-            src={iconMark.url}
-            alt="Vozes Paranaenses"
-            className="h-7 w-auto select-none sm:hidden"
-            draggable={false}
-          />
+          {/* Marca horizontal em todos os tamanhos */}
           <img
             src={horizontalDark.url}
             alt="Vozes Paranaenses — Portal de Notícias"
-            className="hidden h-8 w-auto select-none sm:block md:h-9"
+            className="h-7 w-auto select-none sm:h-8 md:h-9"
             draggable={false}
           />
         </Link>
