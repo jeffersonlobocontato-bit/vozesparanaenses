@@ -16,7 +16,7 @@ import { PageviewTracker } from "../lib/analytics";
 import { SalesChatWidget } from "../components/SalesChatWidget";
 import { CookieConsentBanner } from "../components/CookieConsentBanner";
 import { AdminFloatingEditor } from "../components/AdminFloatingEditor";
-import faviconAsset from "@/assets/favicon.png.asset.json";
+import logoVertical from "@/assets/vozes-vertical-dark.png.asset.json";
 
 function NotFoundComponent() {
   return (
@@ -114,8 +114,8 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
         rel: "stylesheet",
         href: appCss,
       },
-      { rel: "icon", type: "image/png", href: faviconAsset.url },
-      { rel: "apple-touch-icon", href: faviconAsset.url },
+      { rel: "icon", type: "image/png", href: "/favicon.png" },
+      { rel: "apple-touch-icon", href: "/favicon.png" },
       { rel: "preconnect", href: "https://fonts.googleapis.com" },
       { rel: "preconnect", href: "https://fonts.gstatic.com", crossOrigin: "anonymous" },
       {
@@ -137,7 +137,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
           name: "Vozes Paranaenses",
           alternateName: "Vozes Paranaenses",
           url: "/",
-          logo: { "@type": "ImageObject", url: faviconAsset.url },
+          logo: { "@type": "ImageObject", url: logoVertical.url },
           description:
             "Portal de notícias das 10 macrorregiões do Paraná — cobertura editorial regional com foco no impacto local.",
           inLanguage: "pt-BR",

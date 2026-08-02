@@ -1,9 +1,14 @@
 import { Link } from "@tanstack/react-router";
-import logoBlue from "@/assets/vozes-logo-blue.png.asset.json";
-import logoWhite from "@/assets/vozes-logo-white.png.asset.json";
+import horizontalLight from "@/assets/vozes-horizontal-light.png.asset.json";
+import horizontalDark from "@/assets/vozes-horizontal-dark.png.asset.json";
+import verticalLight from "@/assets/vozes-vertical-light.png.asset.json";
+import verticalDark from "@/assets/vozes-vertical-dark.png.asset.json";
+import iconMark from "@/assets/vozes-icon-dark.png.asset.json";
 
 type Size = "sm" | "md" | "lg";
+// "blue" = para fundos claros (wordmark em navy) · "white" = para fundos escuros
 type Variant = "blue" | "white" | "auto";
+type Lockup = "horizontal" | "vertical" | "icon";
 
 // Alturas seguindo proporção áurea (≈1.618) entre breakpoints:
 // sm 40 → md 64 → lg 104. Largura automática preserva o aspecto da marca.
@@ -18,13 +23,21 @@ export function Logo({
   withLink = true,
   className = "",
   variant = "blue",
+  lockup = "horizontal",
 }: {
   size?: Size;
   withLink?: boolean;
   className?: string;
   variant?: Variant;
+  lockup?: Lockup;
 }) {
-  const src = variant === "white" ? logoWhite.url : logoBlue.url;
+  const onDark = variant === "white";
+  const src =
+    lockup === "icon"
+      ? iconMark.url
+      : lockup === "vertical"
+        ? (onDark ? verticalDark.url : verticalLight.url)
+        : (onDark ? horizontalDark.url : horizontalLight.url);
   const img = (
     <img
       src={src}

@@ -1,6 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { SiteHeader, SiteFooter } from "@/components/SiteHeader";
 import { getSobreConfig, renderRichText, DEFAULT_SOBRE } from "@/lib/sobre.functions";
+import verticalLight from "@/assets/vozes-vertical-light.png.asset.json";
 
 export const Route = createFileRoute("/sobre")({
   loader: async () => {
@@ -54,6 +55,12 @@ function AboutPage() {
     <div className="min-h-screen bg-white text-slate-900">
       <SiteHeader />
       <article className="mx-auto max-w-3xl px-4 py-12">
+        <img
+          src={verticalLight.url}
+          alt="Vozes Paranaenses — Portal de Notícias"
+          className="mb-8 h-32 w-auto select-none md:h-40"
+          draggable={false}
+        />
         <h1 className="font-display text-5xl font-black tracking-tight text-[#0A2540] md:text-6xl">
           {cfg.hero_title}
         </h1>
