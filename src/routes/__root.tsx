@@ -16,7 +16,7 @@ import { PageviewTracker } from "../lib/analytics";
 import { SalesChatWidget } from "../components/SalesChatWidget";
 import { CookieConsentBanner } from "../components/CookieConsentBanner";
 import { AdminFloatingEditor } from "../components/AdminFloatingEditor";
-import faviconAsset from "@/assets/favicon.png.asset.json";
+import logoVertical from "@/assets/vozes-vertical-dark.png.asset.json";
 
 function NotFoundComponent() {
   return (
