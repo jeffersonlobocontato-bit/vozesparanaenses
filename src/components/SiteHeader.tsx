@@ -1,6 +1,8 @@
 import { Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
-import logoWhite from "@/assets/vozes-logo-white.png.asset.json";
+import horizontalDark from "@/assets/vozes-horizontal-dark.png.asset.json";
+import verticalDark from "@/assets/vozes-vertical-dark.png.asset.json";
+import iconMark from "@/assets/vozes-icon-dark.png.asset.json";
 
 type NavItem = { label: string; to: string; params?: Record<string, string> };
 
@@ -84,10 +86,17 @@ export function SiteHeader() {
           aria-label="Vozes Paranaenses — Página inicial"
           className="flex shrink-0 items-center"
         >
+          {/* Ícone VP em telas estreitas, marca horizontal a partir de sm */}
           <img
-            src={logoWhite.url}
+            src={iconMark.url}
             alt="Vozes Paranaenses"
-            className="h-8 w-auto select-none md:h-9"
+            className="h-7 w-auto select-none sm:hidden"
+            draggable={false}
+          />
+          <img
+            src={horizontalDark.url}
+            alt="Vozes Paranaenses — Portal de Notícias"
+            className="hidden h-8 w-auto select-none sm:block md:h-9"
             draggable={false}
           />
         </Link>
@@ -198,9 +207,9 @@ export function SiteFooter() {
       <div className="mx-auto grid max-w-7xl grid-cols-1 gap-8 px-4 py-10 md:grid-cols-4">
         <div className="md:col-span-2">
           <img
-            src={logoWhite.url}
-            alt="Vozes Paranaenses"
-            className="mb-3 h-10 w-auto select-none"
+            src={verticalDark.url}
+            alt="Vozes Paranaenses — Portal de Notícias"
+            className="mb-4 h-24 w-auto select-none md:h-28"
             draggable={false}
           />
           <p className="max-w-md text-xs leading-relaxed text-white/60">
