@@ -51,10 +51,10 @@ const HOME_EDITORIAS: Array<{ slug: string; name: string }> = [
   { slug: "eleicoes-2026", name: "Eleições 2026" },
   { slug: "esportes", name: "Esportes" },
   { slug: "cidades", name: "Cidades" },
+  { slug: "internacional", name: "Internacional" },
 ];
 
 const editoriaQO = (slug: string) =>
-  // (mantido abaixo)
   queryOptions({
     queryKey: ["articles", "cat-global", slug, 7],
     queryFn: () =>
