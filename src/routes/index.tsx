@@ -51,6 +51,7 @@ const HOME_EDITORIAS: Array<{ slug: string; name: string }> = [
   { slug: "eleicoes-2026", name: "Eleições 2026" },
   { slug: "esportes", name: "Esportes" },
   { slug: "cidades", name: "Cidades" },
+  { slug: "internacional", name: "Internacional" },
 ];
 
 const editoriaQO = (slug: string) =>
@@ -232,6 +233,7 @@ const BLUE_SCALE: Record<string, BlueTag> = {
   "destaque":   { base: "bg-[#2E6DA4]", hover: "hover:bg-[#0D3D6C]", text: "text-white" },
   "cidades":    { base: "bg-[#2E6DA4]", hover: "hover:bg-[#4A85B0]", text: "text-white" },
   "geral":      { base: "bg-[#2E6DA4]", hover: "hover:bg-[#4A85B0]", text: "text-white" },
+  "internacional": { base: "bg-[#0D3D6C]", hover: "hover:bg-[#2E6DA4]", text: "text-white" },
   // 500 — azul-aço
   "agronegocio":{ base: "bg-[#4A85B0]", hover: "hover:bg-[#2E6DA4]", text: "text-white" },
   "agro":       { base: "bg-[#4A85B0]", hover: "hover:bg-[#2E6DA4]", text: "text-white" },
