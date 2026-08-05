@@ -19,6 +19,7 @@ import { SiteHeader, SiteFooter } from "@/components/SiteHeader";
 import { AdSlot } from "@/components/AdSlot";
 import { AdsenseSlot } from "@/components/AdsenseSlot";
 import { ColumnsShortcut } from "@/components/ColumnsShortcut";
+import { StoriesBar, type StoryTopic } from "@/components/StoriesBar";
 import { listColunasAtalhos, type ColunaAtalho } from "@/lib/content.functions";
 import { WhatsAppCTA } from "@/components/WhatsAppCTA";
 import { WeatherWidget } from "@/components/WeatherWidget";
@@ -59,6 +60,15 @@ const editoriaQO = (slug: string) =>
       listArticlesByCategoryGlobal({ data: { categorySlug: slug, limit: 7 } }),
     staleTime: 5 * 60 * 1000,
   });
+
+// Editorias que viram "stories" no topo do mobile (subset de HOME_EDITORIAS).
+const STORIES_EDITORIAS: Array<{ slug: string; name: string }> = [
+  { slug: "eleicoes-2026", name: "Eleições 2026" },
+  { slug: "politica", name: "Política" },
+  { slug: "seguranca", name: "Segurança" },
+  { slug: "esportes", name: "Esportes" },
+  { slug: "cidades", name: "Cidades" },
+];
 
 const vaptVuptQO = queryOptions({
   queryKey: ["articles", "vapt-vupt", 8],
@@ -137,6 +147,13 @@ function Home() {
   const { data: mostRead } = useSuspenseQuery(mostReadQO);
   const { data: eleicoes2026Top } = useSuspenseQuery(eleicoes2026TopQO);
   const { data: colunas } = useSuspenseQuery(colunasAtalhosQO);
+  // Stories do mobile: reaproveita as consultas de editoria já carregadas.
+  const storyTopicos: StoryTopic[] = STORIES_EDITORIAS.map((e) => ({
+    label: e.name,
+    categorySlug: e.slug,
+    // eslint-disable-next-line react-hooks/rules-of-hooks
+    artigos: useSuspenseQuery(editoriaQO(e.slug)).data,
+  }));
   return (
     <PortalHome
       regions={regions}
@@ -146,6 +163,7 @@ function Home() {
       eleicoes2026Top={eleicoes2026Top[0]}
       loc={loc}
       colunas={colunas}
+      storyTopicos={storyTopicos}
     />
   );
 }
@@ -273,6 +291,7 @@ function PortalHome({
   eleicoes2026Top,
   loc,
   colunas,
+  storyTopicos,
 }: {
   regions: Region[];
   articles: RankedArticle[];
@@ -281,6 +300,7 @@ function PortalHome({
   eleicoes2026Top?: ArticleListItem;
   loc?: { cidade: string | null; regiaoSlug: string | null };
   colunas?: ColunaAtalho[];
+  storyTopicos?: StoryTopic[];
 }) {
   const REGIONS_FALLBACK: Region[] = [
     { id: "fb-metropolitana", slug: "metropolitana", name: "Metropolitana" },
@@ -312,6 +332,8 @@ function PortalHome({
   return (
     <div className="w-full bg-white text-slate-900">
       <SiteHeader />
+
+      <StoriesBar topicos={storyTopicos ?? []} colunas={colunas ?? []} />
 
       <LocationBar />
 
