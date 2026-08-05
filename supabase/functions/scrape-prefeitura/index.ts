@@ -106,7 +106,19 @@ Deno.serve(async (req) => {
       // captura a manchete mais recente que a fonte considerou relevante.
       let insertedItem: Item | null = null;
       let duplicates = 0;
+      let descartadasPorIdade = 0;
+      const LIMITE_IDADE_MS = 24 * 3600 * 1000;
       for (const it of items) {
+        // Correção: descarta release/matéria com mais de 24h de publicação
+        // ANTES de gastar tempo enriquecendo/inserindo — mesma lógica do
+        // scrape-source. Só descarta quando a data é conhecida.
+        if (it.data) {
+          const idadeMs = Date.now() - new Date(it.data).getTime();
+          if (Number.isFinite(idadeMs) && idadeMs > LIMITE_IDADE_MS) {
+            descartadasPorIdade++;
+            continue;
+          }
+        }
         const hash = await sha256(it.url + "|" + it.titulo);
         const deteccao = detectarCidade(`${it.titulo}\n${it.corpo}`, cidades);
         // Se o RSS/HTML de listagem não trouxe imagem, OU o corpo veio raso,
@@ -151,7 +163,7 @@ Deno.serve(async (req) => {
         break;
       }
       await sb.from("fontes").update({ ultimo_scrape_em: new Date().toISOString() }).eq("id", fonte.id);
-      return { fonte: fonte.nome, total: items.length, inserted: insertedItem ? 1 : 0, duplicates };
+      return { fonte: fonte.nome, total: items.length, inserted: insertedItem ? 1 : 0, duplicates, descartadas_por_idade: descartadasPorIdade || undefined };
     } catch (e) {
       return { fonte: fonte.nome, error: (e as Error).message };
     }
@@ -183,7 +195,8 @@ Deno.serve(async (req) => {
   // uma raw_articles ainda vazia, porque o scraping real ainda não terminou.
   if (body.fonte_id || body.sync) {
     const results = await runAll(eligible as Fonte[]);
-    return json({ ok: true, processed: results.length, report: results });
+    const totalDescartadasPorIdade = results.reduce((s, r) => s + (Number((r as Record<string, unknown>).descartadas_por_idade) || 0), 0);
+    return json({ ok: true, processed: results.length, report: results, descartadas_por_idade: totalDescartadasPorIdade || undefined });
   }
 
   const queue = [...(eligible as Fonte[])];
