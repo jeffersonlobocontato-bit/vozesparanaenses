@@ -143,8 +143,23 @@ Deno.serve(async (req) => {
       let insertedItem: Item | null = null;
       let insertedId: string | null = null;
       let duplicates = 0;
+      let descartadasPorIdade = 0;
       let orcamentoEstourou = false;
+      const LIMITE_IDADE_MS = 24 * 3600 * 1000;
       for (const it of items) {
+        // Correção: descarta qualquer matéria com mais de 24h de publicação
+        // ANTES de gastar tempo enriquecendo/inserindo — sem isso, o
+        // pipeline clusterizava e às vezes até escrevia matéria sobre fato
+        // já velho, gastando IA em conteúdo que não seria usado. Só
+        // descarta quando a data é conhecida; sem data (comum no fallback
+        // de HTML), deixa passar — não dá pra provar que está velha.
+        if (it.data) {
+          const idadeMs = Date.now() - new Date(it.data).getTime();
+          if (Number.isFinite(idadeMs) && idadeMs > LIMITE_IDADE_MS) {
+            descartadasPorIdade++;
+            continue;
+          }
+        }
         const hash = await sha256(it.url + "|" + it.titulo);
         const deteccao = detectarCidade(`${it.titulo}\n${it.corpo}`, cidades);
         // Se o RSS/HTML de listagem não trouxe imagem, OU o corpo veio raso
@@ -194,7 +209,7 @@ Deno.serve(async (req) => {
         break;
       }
       await sb.from("fontes").update({ ultimo_scrape_em: new Date().toISOString() }).eq("id", fonte.id);
-      return { fonte: fonte.nome, total: items.length, inserted: insertedItem ? 1 : 0, inserted_id: insertedId, inserted_url: insertedItem?.url ?? null, duplicates, orcamento_estourou: orcamentoEstourou || undefined };
+      return { fonte: fonte.nome, total: items.length, inserted: insertedItem ? 1 : 0, inserted_id: insertedId, inserted_url: insertedItem?.url ?? null, duplicates, descartadas_por_idade: descartadasPorIdade || undefined, orcamento_estourou: orcamentoEstourou || undefined };
     } catch (e) {
       return { fonte: fonte.nome, error: (e as Error).message };
     }
@@ -228,6 +243,7 @@ Deno.serve(async (req) => {
   if (body.fonte_id || body.sync) {
     const results = await runAll(selectedEligible as Fonte[]);
     const orcamentoEstourouEm = results.filter((r) => r.orcamento_estourou).length;
+    const totalDescartadasPorIdade = results.reduce((s, r) => s + (Number(r.descartadas_por_idade) || 0), 0);
     return json({
       ok: true,
       processed: results.length,
@@ -235,6 +251,7 @@ Deno.serve(async (req) => {
       offset: fonteOffset,
       limit: fonteLimit,
       report: results,
+      descartadas_por_idade: totalDescartadasPorIdade || undefined,
       aviso: orcamentoEstourouEm > 0
         ? `Orçamento de tempo (${ORCAMENTO_MS / 1000}s) apertado: ${orcamentoEstourouEm} fonte(s) ficaram com teaser curto desta vez.`
         : undefined,
