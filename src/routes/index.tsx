@@ -54,6 +54,7 @@ const HOME_EDITORIAS: Array<{ slug: string; name: string }> = [
 ];
 
 const editoriaQO = (slug: string) =>
+  // (mantido abaixo)
   queryOptions({
     queryKey: ["articles", "cat-global", slug, 7],
     queryFn: () =>
