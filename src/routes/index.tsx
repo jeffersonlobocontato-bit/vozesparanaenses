@@ -54,6 +54,7 @@ const HOME_EDITORIAS: Array<{ slug: string; name: string }> = [
 ];
 
 const editoriaQO = (slug: string) =>
+// Editorias que viram "stories" no topo do mobile (subset de HOME_EDITORIAS).
   queryOptions({
     queryKey: ["articles", "cat-global", slug, 7],
     queryFn: () =>
