@@ -54,13 +54,21 @@ const HOME_EDITORIAS: Array<{ slug: string; name: string }> = [
 ];
 
 const editoriaQO = (slug: string) =>
-// Editorias que viram "stories" no topo do mobile (subset de HOME_EDITORIAS).
   queryOptions({
     queryKey: ["articles", "cat-global", slug, 7],
     queryFn: () =>
       listArticlesByCategoryGlobal({ data: { categorySlug: slug, limit: 7 } }),
     staleTime: 5 * 60 * 1000,
   });
+
+// Editorias que viram "stories" no topo do mobile (subset de HOME_EDITORIAS).
+const STORIES_EDITORIAS: Array<{ slug: string; name: string }> = [
+  { slug: "eleicoes-2026", name: "Eleições 2026" },
+  { slug: "politica", name: "Política" },
+  { slug: "seguranca", name: "Segurança" },
+  { slug: "esportes", name: "Esportes" },
+  { slug: "cidades", name: "Cidades" },
+];
 
 const vaptVuptQO = queryOptions({
   queryKey: ["articles", "vapt-vupt", 8],
