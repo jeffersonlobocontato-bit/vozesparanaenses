@@ -99,6 +99,14 @@ Deno.serve(async (req) => {
             body: JSON.stringify({ cluster_id: c.id }),
           });
           if (!ga.ok) { erros.push({ cluster_id: c.id, etapa: "generate-article", detalhe: (await ga.text()).slice(0, 300) }); continue; }
+          // Correção: sem isso, o cluster continuava com status
+          // "selecionado_cota"/"fatos_extraidos" mesmo já tendo virado
+          // matéria — qualquer chamada seguinte (o dreno de segurança do
+          // painel, um duplo clique, ou outra aba rodando o pipeline ao
+          // mesmo tempo) encontrava a MESMA pauta como "pendente" de novo
+          // e escrevia outra matéria pra ela. Marcar como feito imediatamente
+          // após escrever, não só na checagem de duplicata do início.
+          await markClustersDone(sb, [c.id]);
           escritas++;
         } catch (e) {
           erros.push({ cluster_id: c.id, etapa: "exception", detalhe: (e as Error).message });

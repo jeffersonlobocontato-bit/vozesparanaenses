@@ -153,6 +153,21 @@ Deno.serve(async (req) => {
   }
 
   const clusterId = facts.cluster_id;
+
+  // Segunda camada de proteção contra escrita duplicada: se esse cluster
+  // já tem matéria gerada (de uma chamada concorrente, um retry, ou outro
+  // caminho que dispare esta função), não gera de novo — devolve a que já
+  // existe. Sem isso, bastava generate-article ser chamada duas vezes pro
+  // mesmo cluster (o que aconteceu na prática) pra sair matéria triplicada.
+  const { data: jaExiste } = await sb
+    .from("generated_articles")
+    .select("id, slug, titulo")
+    .eq("cluster_id", clusterId)
+    .maybeSingle();
+  if (jaExiste) {
+    return json({ ok: true, ja_existia: true, article: jaExiste, titulo: jaExiste.titulo });
+  }
+
   const { data: cluster, error: cErr } = await sb
     .from("article_clusters")
     .select("id, regiao_id, categoria_id, interesse_score, categoria:editorial_categories(slug)")
