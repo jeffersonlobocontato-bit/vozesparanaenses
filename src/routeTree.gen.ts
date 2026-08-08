@@ -26,6 +26,8 @@ import { Route as VitrineTokenRouteImport } from './routes/vitrine.$token'
 import { Route as VitrinePessoalNovoRouteImport } from './routes/vitrine-pessoal.novo'
 import { Route as RIdRouteImport } from './routes/r.$id'
 import { Route as PublieditorialTokenRouteImport } from './routes/publieditorial.$token'
+import { Route as ImprensaPainelRouteImport } from './routes/imprensa.painel'
+import { Route as ImprensaEntrarRouteImport } from './routes/imprensa.entrar'
 import { Route as EmailUnsubscribeRouteImport } from './routes/email/unsubscribe'
 import { Route as EditoriaCategoriaRouteImport } from './routes/editoria.$categoria'
 import { Route as AutorSlugRouteImport } from './routes/autor.$slug'
@@ -38,6 +40,7 @@ import { Route as AdminPedidosChatRouteImport } from './routes/admin.pedidos-cha
 import { Route as AdminPainelRouteImport } from './routes/admin.painel'
 import { Route as AdminMemoriaEditorialRouteImport } from './routes/admin.memoria-editorial'
 import { Route as AdminLoginRouteImport } from './routes/admin.login'
+import { Route as AdminImprensaClientesRouteImport } from './routes/admin.imprensa-clientes'
 import { Route as AdminFontesRouteImport } from './routes/admin.fontes'
 import { Route as AdminColunasRouteImport } from './routes/admin.colunas'
 import { Route as AdminClustersRouteImport } from './routes/admin.clusters'
@@ -151,6 +154,16 @@ const PublieditorialTokenRoute = PublieditorialTokenRouteImport.update({
   path: '/publieditorial/$token',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ImprensaPainelRoute = ImprensaPainelRouteImport.update({
+  id: '/imprensa/painel',
+  path: '/imprensa/painel',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ImprensaEntrarRoute = ImprensaEntrarRouteImport.update({
+  id: '/imprensa/entrar',
+  path: '/imprensa/entrar',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const EmailUnsubscribeRoute = EmailUnsubscribeRouteImport.update({
   id: '/email/unsubscribe',
   path: '/email/unsubscribe',
@@ -209,6 +222,11 @@ const AdminMemoriaEditorialRoute = AdminMemoriaEditorialRouteImport.update({
 const AdminLoginRoute = AdminLoginRouteImport.update({
   id: '/login',
   path: '/login',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminImprensaClientesRoute = AdminImprensaClientesRouteImport.update({
+  id: '/imprensa-clientes',
+  path: '/imprensa-clientes',
   getParentRoute: () => AdminRoute,
 } as any)
 const AdminFontesRoute = AdminFontesRouteImport.update({
@@ -375,6 +393,7 @@ export interface FileRoutesByFullPath {
   '/admin/clusters': typeof AdminClustersRoute
   '/admin/colunas': typeof AdminColunasRoute
   '/admin/fontes': typeof AdminFontesRoute
+  '/admin/imprensa-clientes': typeof AdminImprensaClientesRoute
   '/admin/login': typeof AdminLoginRoute
   '/admin/memoria-editorial': typeof AdminMemoriaEditorialRoute
   '/admin/painel': typeof AdminPainelRoute
@@ -387,6 +406,8 @@ export interface FileRoutesByFullPath {
   '/autor/$slug': typeof AutorSlugRoute
   '/editoria/$categoria': typeof EditoriaCategoriaRoute
   '/email/unsubscribe': typeof EmailUnsubscribeRoute
+  '/imprensa/entrar': typeof ImprensaEntrarRoute
+  '/imprensa/painel': typeof ImprensaPainelRoute
   '/publieditorial/$token': typeof PublieditorialTokenRoute
   '/r/$id': typeof RIdRoute
   '/vitrine-pessoal/novo': typeof VitrinePessoalNovoRoute
@@ -431,6 +452,7 @@ export interface FileRoutesByTo {
   '/admin/clusters': typeof AdminClustersRoute
   '/admin/colunas': typeof AdminColunasRoute
   '/admin/fontes': typeof AdminFontesRoute
+  '/admin/imprensa-clientes': typeof AdminImprensaClientesRoute
   '/admin/login': typeof AdminLoginRoute
   '/admin/memoria-editorial': typeof AdminMemoriaEditorialRoute
   '/admin/painel': typeof AdminPainelRoute
@@ -443,6 +465,8 @@ export interface FileRoutesByTo {
   '/autor/$slug': typeof AutorSlugRoute
   '/editoria/$categoria': typeof EditoriaCategoriaRoute
   '/email/unsubscribe': typeof EmailUnsubscribeRoute
+  '/imprensa/entrar': typeof ImprensaEntrarRoute
+  '/imprensa/painel': typeof ImprensaPainelRoute
   '/publieditorial/$token': typeof PublieditorialTokenRoute
   '/r/$id': typeof RIdRoute
   '/vitrine-pessoal/novo': typeof VitrinePessoalNovoRoute
@@ -490,6 +514,7 @@ export interface FileRoutesById {
   '/admin/clusters': typeof AdminClustersRoute
   '/admin/colunas': typeof AdminColunasRoute
   '/admin/fontes': typeof AdminFontesRoute
+  '/admin/imprensa-clientes': typeof AdminImprensaClientesRoute
   '/admin/login': typeof AdminLoginRoute
   '/admin/memoria-editorial': typeof AdminMemoriaEditorialRoute
   '/admin/painel': typeof AdminPainelRoute
@@ -502,6 +527,8 @@ export interface FileRoutesById {
   '/autor/$slug': typeof AutorSlugRoute
   '/editoria/$categoria': typeof EditoriaCategoriaRoute
   '/email/unsubscribe': typeof EmailUnsubscribeRoute
+  '/imprensa/entrar': typeof ImprensaEntrarRoute
+  '/imprensa/painel': typeof ImprensaPainelRoute
   '/publieditorial/$token': typeof PublieditorialTokenRoute
   '/r/$id': typeof RIdRoute
   '/vitrine-pessoal/novo': typeof VitrinePessoalNovoRoute
@@ -550,6 +577,7 @@ export interface FileRouteTypes {
     | '/admin/clusters'
     | '/admin/colunas'
     | '/admin/fontes'
+    | '/admin/imprensa-clientes'
     | '/admin/login'
     | '/admin/memoria-editorial'
     | '/admin/painel'
@@ -562,6 +590,8 @@ export interface FileRouteTypes {
     | '/autor/$slug'
     | '/editoria/$categoria'
     | '/email/unsubscribe'
+    | '/imprensa/entrar'
+    | '/imprensa/painel'
     | '/publieditorial/$token'
     | '/r/$id'
     | '/vitrine-pessoal/novo'
@@ -606,6 +636,7 @@ export interface FileRouteTypes {
     | '/admin/clusters'
     | '/admin/colunas'
     | '/admin/fontes'
+    | '/admin/imprensa-clientes'
     | '/admin/login'
     | '/admin/memoria-editorial'
     | '/admin/painel'
@@ -618,6 +649,8 @@ export interface FileRouteTypes {
     | '/autor/$slug'
     | '/editoria/$categoria'
     | '/email/unsubscribe'
+    | '/imprensa/entrar'
+    | '/imprensa/painel'
     | '/publieditorial/$token'
     | '/r/$id'
     | '/vitrine-pessoal/novo'
@@ -664,6 +697,7 @@ export interface FileRouteTypes {
     | '/admin/clusters'
     | '/admin/colunas'
     | '/admin/fontes'
+    | '/admin/imprensa-clientes'
     | '/admin/login'
     | '/admin/memoria-editorial'
     | '/admin/painel'
@@ -676,6 +710,8 @@ export interface FileRouteTypes {
     | '/autor/$slug'
     | '/editoria/$categoria'
     | '/email/unsubscribe'
+    | '/imprensa/entrar'
+    | '/imprensa/painel'
     | '/publieditorial/$token'
     | '/r/$id'
     | '/vitrine-pessoal/novo'
@@ -718,6 +754,8 @@ export interface RootRouteChildren {
   AutorSlugRoute: typeof AutorSlugRoute
   EditoriaCategoriaRoute: typeof EditoriaCategoriaRoute
   EmailUnsubscribeRoute: typeof EmailUnsubscribeRoute
+  ImprensaEntrarRoute: typeof ImprensaEntrarRoute
+  ImprensaPainelRoute: typeof ImprensaPainelRoute
   PublieditorialTokenRoute: typeof PublieditorialTokenRoute
   RIdRoute: typeof RIdRoute
   VitrinePessoalNovoRoute: typeof VitrinePessoalNovoRoute
@@ -862,6 +900,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof PublieditorialTokenRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/imprensa/painel': {
+      id: '/imprensa/painel'
+      path: '/imprensa/painel'
+      fullPath: '/imprensa/painel'
+      preLoaderRoute: typeof ImprensaPainelRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/imprensa/entrar': {
+      id: '/imprensa/entrar'
+      path: '/imprensa/entrar'
+      fullPath: '/imprensa/entrar'
+      preLoaderRoute: typeof ImprensaEntrarRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/email/unsubscribe': {
       id: '/email/unsubscribe'
       path: '/email/unsubscribe'
@@ -944,6 +996,13 @@ declare module '@tanstack/react-router' {
       path: '/login'
       fullPath: '/admin/login'
       preLoaderRoute: typeof AdminLoginRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/imprensa-clientes': {
+      id: '/admin/imprensa-clientes'
+      path: '/imprensa-clientes'
+      fullPath: '/admin/imprensa-clientes'
+      preLoaderRoute: typeof AdminImprensaClientesRouteImport
       parentRoute: typeof AdminRoute
     }
     '/admin/fontes': {
@@ -1164,6 +1223,7 @@ interface AdminRouteChildren {
   AdminClustersRoute: typeof AdminClustersRoute
   AdminColunasRoute: typeof AdminColunasRoute
   AdminFontesRoute: typeof AdminFontesRoute
+  AdminImprensaClientesRoute: typeof AdminImprensaClientesRoute
   AdminLoginRoute: typeof AdminLoginRoute
   AdminMemoriaEditorialRoute: typeof AdminMemoriaEditorialRoute
   AdminPainelRoute: typeof AdminPainelRoute
@@ -1183,6 +1243,7 @@ const AdminRouteChildren: AdminRouteChildren = {
   AdminClustersRoute: AdminClustersRoute,
   AdminColunasRoute: AdminColunasRoute,
   AdminFontesRoute: AdminFontesRoute,
+  AdminImprensaClientesRoute: AdminImprensaClientesRoute,
   AdminLoginRoute: AdminLoginRoute,
   AdminMemoriaEditorialRoute: AdminMemoriaEditorialRoute,
   AdminPainelRoute: AdminPainelRoute,
@@ -1212,6 +1273,8 @@ const rootRouteChildren: RootRouteChildren = {
   AutorSlugRoute: AutorSlugRoute,
   EditoriaCategoriaRoute: EditoriaCategoriaRoute,
   EmailUnsubscribeRoute: EmailUnsubscribeRoute,
+  ImprensaEntrarRoute: ImprensaEntrarRoute,
+  ImprensaPainelRoute: ImprensaPainelRoute,
   PublieditorialTokenRoute: PublieditorialTokenRoute,
   RIdRoute: RIdRoute,
   VitrinePessoalNovoRoute: VitrinePessoalNovoRoute,
@@ -1237,13 +1300,3 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}
