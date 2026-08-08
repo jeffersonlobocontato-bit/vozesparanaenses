@@ -39,7 +39,7 @@ create policy "cliente ve proprio registro" on public.clientes_imprensa
   using (user_id = auth.uid());
 
 grant all on public.clientes_imprensa to service_role;
-grant select, all on public.clientes_imprensa to authenticated;
+grant select, insert, update, delete on public.clientes_imprensa to authenticated;
 
 -- =====================================================================
 -- Submissões de conteúdo (o que o cliente gera/publica pelo chat)
@@ -82,7 +82,7 @@ create policy "cliente gerencia proprias submissoes" on public.imprensa_submisso
   with check (cliente_id in (select id from public.clientes_imprensa where user_id = auth.uid()));
 
 grant all on public.imprensa_submissoes to service_role;
-grant select, all on public.imprensa_submissoes to authenticated;
+grant select, insert, update, delete on public.imprensa_submissoes to authenticated;
 
 -- Rastreio de origem: liga a matéria final publicada ao cliente que a gerou.
 alter table public.generated_articles
