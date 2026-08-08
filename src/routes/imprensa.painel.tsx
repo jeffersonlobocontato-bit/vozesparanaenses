@@ -4,6 +4,17 @@ import { getExternalBrowser } from "@/lib/external-supabase-browser";
 import { Logo } from "@/components/Logo";
 
 export const Route = createFileRoute("/imprensa/painel")({
+  head: () => ({
+    meta: [
+      { title: "Portal da Imprensa — Painel do cliente | Vozes Paranaenses" },
+      { name: "description", content: "Painel do cliente do Portal da Imprensa: gere, revise e envie seus conteúdos para publicação no Vozes Paranaenses." },
+      { property: "og:title", content: "Portal da Imprensa — Painel do cliente" },
+      { property: "og:description", content: "Gere, revise e envie conteúdos para publicação no Vozes Paranaenses." },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary" },
+      { name: "robots", content: "noindex,nofollow" },
+    ],
+  }),
   component: ImprensaPainel,
 });
 
