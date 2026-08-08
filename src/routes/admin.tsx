@@ -91,6 +91,7 @@ function AdminLayout() {
                 { to: "/admin/pedidos-chat", label: "Pedidos (chat)" },
                 { to: "/admin/agentes", label: "Agentes IA" },
                 { to: "/admin/colunas", label: "Colunas" },
+                { to: "/admin/imprensa-clientes", label: "Portal Imprensa" },
                 { to: "/admin/memoria-editorial", label: "Memória" },
                 { to: "/admin/sobre", label: "Sobre" },
               ].map((it) => (
