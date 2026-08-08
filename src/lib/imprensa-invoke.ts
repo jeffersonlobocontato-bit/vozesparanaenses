@@ -9,7 +9,7 @@ import { getExternalBrowser } from "./external-supabase-browser";
  * anexamos manualmente o token da sessão externa, que é o que as funções
  * validam com a service role externa.
  */
-export async function invokeImprensa<T>(name: string, body: unknown): Promise<T> {
+export async function invokeImprensa<T>(name: string, body: Record<string, unknown>): Promise<T> {
   const sbExterno = await getExternalBrowser();
   const { data: sess } = await sbExterno.auth.getSession();
   const token = sess.session?.access_token;
