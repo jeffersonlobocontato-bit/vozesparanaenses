@@ -42,6 +42,8 @@ function ImprensaPainel() {
   const [corpo, setCorpo] = useState("");
   const [fotos, setFotos] = useState<Foto[]>([]);
   const [uploadBusy, setUploadBusy] = useState(false);
+  const [regioes, setRegioes] = useState<Array<{ id: string; nome: string }>>([]);
+  const [regiaoId, setRegiaoId] = useState("");
 
   const [termoAceito, setTermoAceito] = useState(false);
   const [publicando, setPublicando] = useState(false);
@@ -64,6 +66,8 @@ function ImprensaPainel() {
         return;
       }
       setNomeEmpresa(cliente.nome_empresa);
+      const { data: rs } = await sb.from("regioes").select("id, nome").order("nome");
+      setRegioes((rs ?? []) as Array<{ id: string; nome: string }>);
       setChecando(false);
     })();
   }, [nav]);
@@ -118,12 +122,13 @@ function ImprensaPainel() {
   async function publicar() {
     if (!submissaoId) return;
     if (!termoAceito) { setErro("Aceite o termo de responsabilidade antes de publicar."); return; }
+    if (!regiaoId) { setErro("Selecione a região da matéria antes de publicar."); return; }
     setPublicando(true);
     setErro(null);
     try {
       const sb = await getExternalBrowser();
       const { data, error } = await sb.functions.invoke("imprensa-publicar", {
-        body: { submissao_id: submissaoId, titulo, subtitulo, corpo, fotos, termo_aceito: true },
+        body: { submissao_id: submissaoId, titulo, subtitulo, corpo, fotos, termo_aceito: true, regiao_id: regiaoId },
       });
       if (error) throw error;
       const res = data as { detail: string };
@@ -203,6 +208,16 @@ function ImprensaPainel() {
             <textarea value={corpo} onChange={(e) => setCorpo(e.target.value)} rows={12} className="w-full rounded border px-3 py-2" />
           </label>
 
+          <label className="block text-sm">
+            <span className="mb-1 block font-medium">Região da matéria</span>
+            <select value={regiaoId} onChange={(e) => setRegiaoId(e.target.value)} className="w-full rounded border px-3 py-2">
+              <option value="">Selecione a região mais relevante para este conteúdo</option>
+              {regioes.map((r) => (
+                <option key={r.id} value={r.id}>{r.nome}</option>
+              ))}
+            </select>
+          </label>
+
           <div className="text-sm">
             <span className="mb-1 block font-medium">Fotos</span>
             <div className="mb-2 flex flex-wrap gap-2">
@@ -224,7 +239,7 @@ function ImprensaPainel() {
 
           <button
             onClick={publicar}
-            disabled={!termoAceito || publicando}
+            disabled={!termoAceito || !regiaoId || publicando}
             className="w-full rounded bg-[#0066CC] px-4 py-3 text-sm font-semibold text-white disabled:opacity-40"
           >
             {publicando ? "Enviando…" : "Publicar"}

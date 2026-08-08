@@ -53,15 +53,15 @@ Deno.serve(async (req) => {
 
   let body: {
     submissao_id?: string; titulo?: string; subtitulo?: string; corpo?: string;
-    fotos?: Array<{ url: string; legenda?: string }>; termo_aceito?: boolean;
+    fotos?: Array<{ url: string; legenda?: string }>; termo_aceito?: boolean; regiao_id?: string;
   };
   try { body = await req.json(); } catch { return json({ error: "invalid_json_body" }, 400); }
 
   if (!body.termo_aceito) {
     return json({ error: "termo_nao_aceito", detail: "É preciso aceitar o termo de responsabilidade antes de publicar." }, 400);
   }
-  if (!body.submissao_id || !body.titulo?.trim() || !body.corpo?.trim()) {
-    return json({ error: "campos_obrigatorios_faltando" }, 400);
+  if (!body.submissao_id || !body.titulo?.trim() || !body.corpo?.trim() || !body.regiao_id) {
+    return json({ error: "campos_obrigatorios_faltando", detail: "Falta título, corpo ou região." }, 400);
   }
 
   const { data: submissao, error: subErr } = await sb
@@ -92,6 +92,7 @@ Deno.serve(async (req) => {
       slug: slugFinal,
       corpo: body.corpo.trim(),
       categoria_id: submissao.categoria_detectada_id,
+      regiao_id: body.regiao_id,
       imagem_capa_url: body.fotos?.[0]?.url ?? null,
       imagem_galeria: body.fotos ?? [],
       status: "rascunho",
