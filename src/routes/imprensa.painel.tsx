@@ -1,6 +1,7 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { getExternalBrowser } from "@/lib/external-supabase-browser";
+import { invokeImprensa } from "@/lib/imprensa-invoke";
 import { Logo } from "@/components/Logo";
 
 export const Route = createFileRoute("/imprensa/painel")({
@@ -80,15 +81,10 @@ function ImprensaPainel() {
     setGerando(true);
     setErro(null);
     try {
-      const sb = await getExternalBrowser();
-      const { data, error } = await sb.functions.invoke("imprensa-gerar-rascunho", {
-        body: { texto_bruto: textoBruto, submissao_id: submissaoId ?? undefined },
-      });
-      if (error) throw error;
-      const res = data as {
+      const res = await invokeImprensa<{
         submissao_id: string; categoria_detectada: { nome: string };
         titulo: string; subtitulo: string; corpo: string;
-      };
+      }>("imprensa-gerar-rascunho", { texto_bruto: textoBruto, submissao_id: submissaoId ?? undefined });
       setSubmissaoId(res.submissao_id);
       setCategoriaDetectada(res.categoria_detectada.nome);
       setTitulo(res.titulo);
@@ -126,12 +122,9 @@ function ImprensaPainel() {
     setPublicando(true);
     setErro(null);
     try {
-      const sb = await getExternalBrowser();
-      const { data, error } = await sb.functions.invoke("imprensa-publicar", {
-        body: { submissao_id: submissaoId, titulo, subtitulo, corpo, fotos, termo_aceito: true, regiao_id: regiaoId },
+      const res = await invokeImprensa<{ detail: string }>("imprensa-publicar", {
+        submissao_id: submissaoId, titulo, subtitulo, corpo, fotos, termo_aceito: true, regiao_id: regiaoId,
       });
-      if (error) throw error;
-      const res = data as { detail: string };
       setPublicado(res.detail);
     } catch (e: unknown) {
       const detail = (e as { context?: { body?: { detail?: string; error?: string } } })?.context?.body;
