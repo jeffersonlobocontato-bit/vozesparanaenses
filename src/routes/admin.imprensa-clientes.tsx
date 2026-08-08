@@ -1,6 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useCallback, useEffect, useState } from "react";
 import { getExternalBrowser } from "@/lib/external-supabase-browser";
+import { invokeImprensa } from "@/lib/imprensa-invoke";
 import { PageHeader } from "@/components/admin/ui";
 
 export const Route = createFileRoute("/admin/imprensa-clientes")({
@@ -51,17 +52,15 @@ function AdminImprensaClientes() {
     setMsg(null);
     setUltimaSenha(null);
     try {
-      const sb = await getExternalBrowser();
-      const { data, error } = await sb.functions.invoke("imprensa-criar-cliente", {
-        body: {
+      const res = await invokeImprensa<{ ok: true; cliente: Cliente; senha_temporaria: string; link_acesso: string }>(
+        "imprensa-criar-cliente",
+        {
           nome_empresa: nomeEmpresa.trim(),
           nome_contato: nomeContato.trim(),
           email: email.trim(),
           slug: slug.trim() || undefined,
         },
-      });
-      if (error) throw error;
-      const res = data as { ok: true; cliente: Cliente; senha_temporaria: string; link_acesso: string };
+      );
       setUltimaSenha({ email: res.cliente.email, senha: res.senha_temporaria, link: res.link_acesso });
       setNomeEmpresa("");
       setNomeContato("");
