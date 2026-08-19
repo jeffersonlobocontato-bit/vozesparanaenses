@@ -513,7 +513,7 @@ function ArticlePage() {
           const gal = article.imagem_galeria ?? null;
           if (!gal || gal.length === 0) return null;
           const norm = (u?: string | null) => (u ?? "").split("?")[0].trim();
-          const capa = norm(article.imagem_capa_url);
+          const capa = norm(article.cover_image_url);
           const seen = new Set<string>();
           const extras = gal.filter((g) => {
             const u = norm(g.url);
