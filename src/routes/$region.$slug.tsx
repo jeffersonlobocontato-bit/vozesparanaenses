@@ -508,11 +508,20 @@ function ArticlePage() {
           </figure>
         )}
 
-        {/* Galeria de fotos — segundas fotos em diante (a #1 já é a capa) */}
+        {/* Galeria de fotos — todas as fotos que não sejam a própria capa */}
         {(() => {
           const gal = article.imagem_galeria ?? null;
-          if (!gal || gal.length <= 1) return null;
-          const extras = gal.slice(1);
+          if (!gal || gal.length === 0) return null;
+          const norm = (u?: string | null) => (u ?? "").split("?")[0].trim();
+          const capa = norm(article.cover_image_url);
+          const seen = new Set<string>();
+          const extras = gal.filter((g) => {
+            const u = norm(g.url);
+            if (!u || u === capa || seen.has(u)) return false;
+            seen.add(u);
+            return true;
+          });
+          if (extras.length === 0) return null;
           return (
             <section className="mx-auto mt-8 max-w-3xl">
               <h2 className="mb-3 text-[11px] font-bold uppercase tracking-[0.2em] text-[#0A2540]">
