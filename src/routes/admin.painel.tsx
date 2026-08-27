@@ -195,232 +195,279 @@ function AdminDashboard() {
 
   useEffect(() => { load(); }, [load]);
 
+  // Timeouts por etapa (o scrape é o mais lento por causa do Firecrawl).
+  const T_SCRAPE = 90_000;
+  const T_PADRAO = 60_000;
+
+  function tratarErroRodada(e: unknown, rotuloInterrompido: string) {
+    if (e instanceof PipelineCancelado) {
+      logLine("⏹ cancelado pelo usuário.");
+    } else {
+      logLine(`✗ ${e instanceof Error ? e.message : "erro"}`);
+      logLine(rotuloInterrompido);
+    }
+    encerrarRodada();
+  }
+
   async function runPipeline() {
-    setPipelineRunning("portais");
-    setPipelineLog(["Iniciando pipeline…"]);
-    // Cada etapa é chamada em lotes pequenos porque o `supabase.functions.invoke`
-    // do browser fecha a conexão em ~60s. Antes rodávamos `cluster-articles`
-    // sem limite (limite padrão 100) e a chamada estourava o timeout — a função
-    // continuava rodando no servidor, mas o front-end via erro e abortava o
-    // pipeline. Agora fatiamos em lotes de 25 e loopamos até esvaziar a fila.
+    iniciarRodada("portais", "Iniciando pipeline…");
     try {
-      // 1/4 Scrape em lotes pequenos. Rodar todos os portais em uma única
-      // chamada síncrona pode passar do limite do gateway e abortar o pipeline
-      // antes de chegar na escrita, mesmo já havendo matérias coletadas.
-      setPipelineLog((l) => [...l, "1/4 Scrape de fontes (em lotes)…"]);
+      // 1/4 Scrape em lotes pequenos. Cada lote tem tempo limite próprio: uma
+      // fonte lenta (Firecrawl travando) não paralisa mais a rodada inteira.
+      logLine("1/4 Scrape de fontes (em lotes)…");
       const scrapeBatchSize = 6;
       for (let i = 0; i < 12; i++) {
-        const scrape = await supabase.functions.invoke("scrape-source", {
-          body: { force: true, sync: true, apenas_curadoria: false, limit: scrapeBatchSize, offset: i * scrapeBatchSize },
-        });
-        if (scrape.error) {
-          setPipelineLog((l) => [...l, `  ⚠ scrape lote ${i + 1} falhou (${scrape.error.message}); seguindo para clusterizar o que já foi coletado.`]);
-          break;
+        try {
+          const sd = await invokeFn<{ processed?: number; total_eligible?: number; report?: Array<{ inserted?: number }> }>(
+            "scrape-source",
+            { force: true, sync: true, apenas_curadoria: false, limit: scrapeBatchSize, offset: i * scrapeBatchSize },
+            T_SCRAPE,
+          );
+          const inseridos = sd.report?.reduce((sum, row) => sum + (row.inserted ?? 0), 0) ?? 0;
+          logLine(`  lote ${i + 1}: fontes=${sd.processed ?? 0}/${sd.total_eligible ?? "?"} novas=${inseridos}`);
+          if (!sd.processed || sd.processed < scrapeBatchSize) break;
+        } catch (e) {
+          if (e instanceof PipelineCancelado) throw e;
+          logLine(`  ⚠ scrape lote ${i + 1}: ${e instanceof Error ? e.message : "erro"} — seguindo para o próximo lote.`);
         }
-        const sd = (scrape.data ?? {}) as { processed?: number; total_eligible?: number; report?: Array<{ inserted?: number }> };
-        const inseridos = sd.report?.reduce((sum, row) => sum + (row.inserted ?? 0), 0) ?? 0;
-        setPipelineLog((l) => [...l, `  lote ${i + 1}: fontes=${sd.processed ?? 0}/${sd.total_eligible ?? "?"} novas=${inseridos}`]);
-        if (!sd.processed || sd.processed < scrapeBatchSize) break;
       }
 
-      // 2/4 Clustering em lotes de 25 (~25s cada) até drenar
-      setPipelineLog((l) => [...l, "2/4 Clustering (em lotes)…"]);
+      // 2/4 Clustering em lotes de 25 até drenar; falha de lote vira aviso.
+      logLine("2/4 Clustering (em lotes)…");
+      let falhasCluster = 0;
       for (let i = 1; i <= 20; i++) {
-        const r = await supabase.functions.invoke("cluster-articles", { body: { limit: 25, fonte_tipo: "veiculo", apenas_curadoria: false } });
-        if (r.error) throw r.error;
-        const d = (r.data ?? {}) as { processed?: number; clusters?: number };
-        setPipelineLog((l) => [...l, `  lote ${i}: processado=${d.processed ?? 0} clusters=${d.clusters ?? 0}`]);
-        if (!d.processed) break;
+        try {
+          const d = await invokeFn<{ processed?: number; clusters?: number }>(
+            "cluster-articles",
+            { limit: 25, fonte_tipo: "veiculo", apenas_curadoria: false },
+            T_PADRAO,
+          );
+          logLine(`  lote ${i}: processado=${d.processed ?? 0} clusters=${d.clusters ?? 0}`);
+          if (!d.processed) break;
+        } catch (e) {
+          if (e instanceof PipelineCancelado) throw e;
+          falhasCluster += 1;
+          logLine(`  ⚠ clustering lote ${i}: ${e instanceof Error ? e.message : "erro"}`);
+          if (falhasCluster >= 3) { logLine("  ⚠ 3 falhas seguidas no clustering — seguindo para a classificação."); break; }
+        }
       }
 
-      // 3/4 + 4/4 em ciclos: classifica um lote e já escreve o que foi
-      // selecionado. Antes o painel tentava drenar TODA a classificação antes
-      // de começar a escrita; se a aba/HTTP caísse no meio, parecia
-      // "finalizado", mas nenhuma matéria nova era gerada.
-      setPipelineLog((l) => [...l, "3/4 Classificação + cotas e 4/4 escrita (em ciclos seguros)…"]);
+      // 3/4 + 4/4 em ciclos: classifica um lote e já escreve o que foi selecionado.
+      logLine("3/4 Classificação + cotas e 4/4 escrita (em ciclos seguros)…");
+      let falhasCiclo = 0;
       for (let i = 1; i <= 30; i++) {
-        const r = await supabase.functions.invoke("classify-and-quota", { body: { sync: true, limit: 15 } });
-        if (r.error) throw r.error;
-        const d = (r.data ?? {}) as { classified?: number; selected?: number };
-        setPipelineLog((l) => [...l, `  lote ${i}: classificados=${d.classified ?? 0} selecionados=${d.selected ?? 0}`]);
-        if (!d.classified) break;
-        if ((d.selected ?? 0) > 0) {
-          const w = await supabase.functions.invoke("process-pending-clusters", { body: { limit: 5, sync: true } });
-          if (w.error) throw w.error;
-          const wd = (w.data ?? {}) as { pendentes?: number; escritas?: number; erros?: Array<{ etapa?: string; detalhe?: string }> };
-          setPipelineLog((l) => [...l, `    escrita: pendentes=${wd.pendentes ?? 0} escritas=${wd.escritas ?? 0} erros=${wd.erros?.length ?? 0}`]);
-          if (wd.erros?.length) {
-            const first = wd.erros[0];
-            setPipelineLog((l) => [...l, `    aviso: ${first.etapa ?? "escrita"} — ${(first.detalhe ?? "erro ao gerar matéria").slice(0, 220)}`]);
-          }
-          if (wd.erros?.length && !wd.escritas) throw new Error(`${wd.erros[0]?.etapa ?? "escrita"}: ${wd.erros[0]?.detalhe ?? "erro ao gerar matéria"}`);
+        try {
+          const d = await invokeFn<{ classified?: number; selected?: number }>(
+            "classify-and-quota",
+            { sync: true, limit: 15 },
+            T_PADRAO,
+          );
+          logLine(`  lote ${i}: classificados=${d.classified ?? 0} selecionados=${d.selected ?? 0}`);
+          if (!d.classified) break;
+          if ((d.selected ?? 0) > 0) await escreverLote();
+        } catch (e) {
+          if (e instanceof PipelineCancelado) throw e;
+          falhasCiclo += 1;
+          logLine(`  ⚠ ciclo ${i}: ${e instanceof Error ? e.message : "erro"}`);
+          if (falhasCiclo >= 3) { logLine("  ⚠ 3 falhas seguidas — seguindo para a drenagem final."); break; }
         }
       }
 
       await drenarPendentes(60);
     } catch (e: unknown) {
-      setPipelineLog((l) => [...l, `  ✗ ${e instanceof Error ? e.message : "erro"}`]);
-      setPipelineLog((l) => [...l, "Pipeline interrompido — nenhuma etapa seguinte foi mascarada como concluída."]);
-      setPipelineRunning(null);
-      load();
+      tratarErroRodada(e, "Pipeline interrompido — nenhuma etapa seguinte foi mascarada como concluída.");
       return;
     }
-    setPipelineLog((l) => [...l, "Pipeline finalizado."]);
-    setPipelineRunning(null);
-    load();
+    logLine("Pipeline finalizado.");
+    encerrarRodada();
+  }
+
+  // Escreve um lote de pautas já selecionadas. Erros viram aviso no log.
+  async function escreverLote(): Promise<{ pendentes: number; escritas: number; erros: number }> {
+    const wd = await invokeFn<{ pendentes?: number; escritas?: number; erros?: Array<{ etapa?: string; detalhe?: string }> }>(
+      "process-pending-clusters",
+      { limit: 5, sync: true },
+      T_PADRAO,
+    );
+    logLine(`    escrita: pendentes=${wd.pendentes ?? 0} escritas=${wd.escritas ?? 0} erros=${wd.erros?.length ?? 0}`);
+    if (wd.erros?.length) {
+      const first = wd.erros[0];
+      logLine(`    aviso: ${first?.etapa ?? "escrita"} — ${(first?.detalhe ?? "erro ao gerar matéria").slice(0, 220)}`);
+    }
+    return { pendentes: wd.pendentes ?? 0, escritas: wd.escritas ?? 0, erros: wd.erros?.length ?? 0 };
   }
 
   // Drena as pautas já selecionadas que ainda não viraram matéria.
-  // Não para no primeiro lote sem escrita: tolera até 3 rodadas vazias
-  // seguidas antes de desistir, e só encerra quando não há mais pendentes.
   async function drenarPendentes(maxCiclos = 60) {
-    setPipelineLog((l) => [...l, "Drenando pautas já selecionadas que ficaram pendentes…"]);
+    logLine("Drenando pautas já selecionadas que ficaram pendentes…");
     let vazios = 0;
+    let falhas = 0;
     let totalEscritas = 0;
     for (let i = 1; i <= maxCiclos; i++) {
-      const r = await supabase.functions.invoke("process-pending-clusters", { body: { limit: 5, sync: true } });
-      if (r.error) throw r.error;
-      const d = (r.data ?? {}) as { pendentes?: number; escritas?: number; erros?: Array<{ etapa?: string; detalhe?: string }> };
-      totalEscritas += d.escritas ?? 0;
-      setPipelineLog((l) => [...l, `  pendente ${i}: pendentes=${d.pendentes ?? 0} escritas=${d.escritas ?? 0} erros=${d.erros?.length ?? 0}`]);
-      if (d.erros?.length) {
-        const first = d.erros[0];
-        setPipelineLog((l) => [...l, `    aviso: ${first.etapa ?? "escrita"} — ${(first.detalhe ?? "erro ao gerar matéria").slice(0, 220)}`]);
+      let d: { pendentes: number; escritas: number; erros: number };
+      try {
+        d = await escreverLote();
+      } catch (e) {
+        if (e instanceof PipelineCancelado) throw e;
+        falhas += 1;
+        logLine(`  ⚠ escrita ${i}: ${e instanceof Error ? e.message : "erro"}`);
+        if (falhas >= 3) { logLine("  ⚠ 3 falhas seguidas na escrita — encerrando a drenagem."); break; }
+        continue;
       }
+      falhas = 0;
+      totalEscritas += d.escritas;
       if (!d.pendentes) break;
       if (!d.escritas) {
         vazios += 1;
         if (vazios >= 3) {
-          setPipelineLog((l) => [...l, `  ⚠ 3 lotes seguidos sem escrita — restam ${d.pendentes} pauta(s) travada(s). Veja os avisos acima.`]);
+          logLine(`  ⚠ 3 lotes seguidos sem escrita — restam ${d.pendentes} pauta(s) travada(s). Veja os avisos acima.`);
           break;
         }
       } else {
         vazios = 0;
       }
     }
-    setPipelineLog((l) => [...l, `  ✓ escrita concluída: ${totalEscritas} matéria(s) nova(s) na fila.`]);
+    logLine(`  ✓ escrita concluída: ${totalEscritas} matéria(s) nova(s) na fila.`);
     return totalEscritas;
   }
 
   async function escreverPendentes() {
-    setPipelineRunning("escrita");
-    setPipelineLog(["Escrevendo pautas pendentes…"]);
+    iniciarRodada("escrita", "Escrevendo pautas pendentes…");
     try {
       await drenarPendentes(80);
     } catch (e: unknown) {
-      setPipelineLog((l) => [...l, `  ✗ ${e instanceof Error ? e.message : "erro"}`]);
+      tratarErroRodada(e, "Escrita interrompida.");
+      return;
     }
-    setPipelineRunning(null);
-    load();
+    encerrarRodada();
   }
 
   async function runPrefeituras() {
-    setPipelineRunning("prefeituras");
-    setPipelineLog(["Coletando releases oficiais de prefeituras…"]);
+    iniciarRodada("prefeituras", "Coletando releases oficiais de prefeituras…");
     try {
-      const { data, error } = await supabase.functions.invoke("scrape-prefeitura", { body: { force: true, sync: true } });
-      if (error) throw error;
-      const summary = data && typeof data === "object" ? JSON.stringify(data).slice(0, 240) : "ok";
-      setPipelineLog((l) => [...l, `  ✓ ${summary}`]);
-      // Encadeia clustering (em lotes, pra não estourar o timeout do
-      // browser) + classificação pra as matérias oficiais entrarem na fila.
-      setPipelineLog((l) => [...l, "cluster-articles (em lotes)…"]);
-      for (let i = 1; i <= 20; i++) {
-        const r = await supabase.functions.invoke("cluster-articles", { body: { limit: 25, fonte_tipo: "prefeitura" } });
-        if (r.error) throw r.error;
-        const d = (r.data ?? {}) as { processed?: number; clusters?: number };
-        setPipelineLog((l) => [...l, `  lote ${i}: processado=${d.processed ?? 0} clusters=${d.clusters ?? 0}`]);
-        if (!d.processed) break;
+      try {
+        const data = await invokeFn("scrape-prefeitura", { force: true, sync: true }, T_SCRAPE);
+        logLine(`  ✓ ${JSON.stringify(data).slice(0, 240)}`);
+      } catch (e) {
+        if (e instanceof PipelineCancelado) throw e;
+        logLine(`  ⚠ scrape prefeituras: ${e instanceof Error ? e.message : "erro"} — seguindo com o que já foi coletado.`);
       }
-      setPipelineLog((l) => [...l, "classificação + escrita (em ciclos seguros)…"]);
+
+      logLine("cluster-articles (em lotes)…");
+      let falhasCluster = 0;
+      for (let i = 1; i <= 20; i++) {
+        try {
+          const d = await invokeFn<{ processed?: number; clusters?: number }>(
+            "cluster-articles",
+            { limit: 25, fonte_tipo: "prefeitura" },
+            T_PADRAO,
+          );
+          logLine(`  lote ${i}: processado=${d.processed ?? 0} clusters=${d.clusters ?? 0}`);
+          if (!d.processed) break;
+        } catch (e) {
+          if (e instanceof PipelineCancelado) throw e;
+          falhasCluster += 1;
+          logLine(`  ⚠ clustering lote ${i}: ${e instanceof Error ? e.message : "erro"}`);
+          if (falhasCluster >= 3) break;
+        }
+      }
+
+      logLine("classificação + escrita (em ciclos seguros)…");
+      let falhasCiclo = 0;
       for (let i = 1; i <= 30; i++) {
-        const r = await supabase.functions.invoke("classify-and-quota", { body: { sync: true, limit: 15 } });
-        if (r.error) throw r.error;
-        const d = (r.data ?? {}) as { classified?: number; selected?: number };
-        setPipelineLog((l) => [...l, `  lote ${i}: classificados=${d.classified ?? 0} selecionados=${d.selected ?? 0}`]);
-        if (!d.classified) break;
-        if ((d.selected ?? 0) > 0) {
-          const w = await supabase.functions.invoke("process-pending-clusters", { body: { limit: 5, sync: true } });
-          if (w.error) throw w.error;
-          const wd = (w.data ?? {}) as { pendentes?: number; escritas?: number; erros?: Array<{ etapa?: string; detalhe?: string }> };
-          setPipelineLog((l) => [...l, `    escrita: pendentes=${wd.pendentes ?? 0} escritas=${wd.escritas ?? 0} erros=${wd.erros?.length ?? 0}`]);
-          if (wd.erros?.length) {
-            const first = wd.erros[0];
-            setPipelineLog((l) => [...l, `    aviso: ${first.etapa ?? "escrita"} — ${(first.detalhe ?? "erro ao gerar matéria").slice(0, 220)}`]);
-          }
-          if (wd.erros?.length && !wd.escritas) throw new Error(`${wd.erros[0]?.etapa ?? "escrita"}: ${wd.erros[0]?.detalhe ?? "erro ao gerar matéria"}`);
+        try {
+          const d = await invokeFn<{ classified?: number; selected?: number }>(
+            "classify-and-quota",
+            { sync: true, limit: 15 },
+            T_PADRAO,
+          );
+          logLine(`  lote ${i}: classificados=${d.classified ?? 0} selecionados=${d.selected ?? 0}`);
+          if (!d.classified) break;
+          if ((d.selected ?? 0) > 0) await escreverLote();
+        } catch (e) {
+          if (e instanceof PipelineCancelado) throw e;
+          falhasCiclo += 1;
+          logLine(`  ⚠ ciclo ${i}: ${e instanceof Error ? e.message : "erro"}`);
+          if (falhasCiclo >= 3) break;
         }
       }
       await drenarPendentes(60);
     } catch (e: unknown) {
-      setPipelineLog((l) => [...l, `  ✗ ${e instanceof Error ? e.message : "erro"}`]);
-      setPipelineLog((l) => [...l, "Scraping interrompido — nenhuma etapa seguinte foi mascarada como concluída."]);
-      setPipelineRunning(null);
-      load();
+      tratarErroRodada(e, "Scraping interrompido — nenhuma etapa seguinte foi mascarada como concluída.");
       return;
     }
-    setPipelineLog((l) => [...l, "Scraping de prefeituras finalizado."]);
-    setPipelineRunning(null);
-    load();
+    logLine("Scraping de prefeituras finalizado.");
+    encerrarRodada();
   }
 
   async function runCuradoria(editorias: string[], rotulo: string) {
-    setPipelineRunning("curadoria");
-    setPipelineLog([`Coletando fontes de curadoria — ${rotulo}…`]);
+    iniciarRodada("curadoria", `Coletando fontes de curadoria — ${rotulo}…`);
     try {
-      const scrape = await supabase.functions.invoke("scrape-source", {
-        body: { force: true, sync: true, curadoria_editorias: editorias },
-      });
-      if (scrape.error) throw scrape.error;
-      const sd = (scrape.data ?? {}) as { report?: Array<{ inserted?: number; inserted_id?: string | null }> };
+      const sd = await invokeFn<{ report?: Array<{ inserted?: number; inserted_id?: string | null }> }>(
+        "scrape-source",
+        { force: true, sync: true, curadoria_editorias: editorias },
+        T_SCRAPE,
+      );
       const insertedIds = (sd.report ?? [])
         .filter((row) => (row.inserted ?? 0) > 0 && row.inserted_id)
         .map((row) => row.inserted_id as string);
-      setPipelineLog((l) => [...l, `  ✓ ${JSON.stringify(scrape.data).slice(0, 200)}`]);
+      logLine(`  ✓ ${JSON.stringify(sd).slice(0, 200)}`);
       if (!insertedIds.length) {
-        setPipelineLog((l) => [...l, "  • Nenhuma matéria nova foi coletada neste ciclo; não vou reaproveitar pauta antiga/backlog."]);
-        setPipelineLog((l) => [...l, `Coleta de ${rotulo} finalizada sem novidades.`]);
-        setPipelineRunning(null);
-        load();
+        logLine("  • Nenhuma matéria nova foi coletada neste ciclo; não vou reaproveitar pauta antiga/backlog.");
+        logLine(`Coleta de ${rotulo} finalizada sem novidades.`);
+        encerrarRodada();
         return;
       }
-      setPipelineLog((l) => [...l, `cluster-articles (em lotes, só ${rotulo})…`]);
+      logLine(`cluster-articles (em lotes, só ${rotulo})…`);
       const createdClusterIds: string[] = [];
+      let falhasCluster = 0;
       for (let i = 1; i <= 20; i++) {
-        const r = await supabase.functions.invoke("cluster-articles", {
-          body: { limit: 25, curadoria_editorias: editorias, raw_article_ids: insertedIds },
-        });
-        if (r.error) throw r.error;
-        const d = (r.data ?? {}) as { processed?: number; clusters?: number; cluster_ids?: string[] };
-        createdClusterIds.push(...(d.cluster_ids ?? []));
-        setPipelineLog((l) => [...l, `  lote ${i}: processado=${d.processed ?? 0} clusters=${d.clusters ?? 0}`]);
-        if (!d.processed) break;
+        try {
+          const d = await invokeFn<{ processed?: number; clusters?: number; cluster_ids?: string[] }>(
+            "cluster-articles",
+            { limit: 25, curadoria_editorias: editorias, raw_article_ids: insertedIds },
+            T_PADRAO,
+          );
+          createdClusterIds.push(...(d.cluster_ids ?? []));
+          logLine(`  lote ${i}: processado=${d.processed ?? 0} clusters=${d.clusters ?? 0}`);
+          if (!d.processed) break;
+        } catch (e) {
+          if (e instanceof PipelineCancelado) throw e;
+          falhasCluster += 1;
+          logLine(`  ⚠ clustering lote ${i}: ${e instanceof Error ? e.message : "erro"}`);
+          if (falhasCluster >= 3) break;
+        }
       }
       if (!createdClusterIds.length) {
-        setPipelineLog((l) => [...l, "  • Nenhum cluster novo foi criado neste ciclo; classificação antiga não será reaproveitada."]);
-        setPipelineLog((l) => [...l, `Coleta de ${rotulo} finalizada sem pauta nova.`]);
-        setPipelineRunning(null);
-        load();
+        logLine("  • Nenhum cluster novo foi criado neste ciclo; classificação antiga não será reaproveitada.");
+        logLine(`Coleta de ${rotulo} finalizada sem pauta nova.`);
+        encerrarRodada();
         return;
       }
-      setPipelineLog((l) => [...l, "classify-and-quota (em lotes, sem escrever sozinho)…"]);
+      logLine("classify-and-quota (em lotes, sem escrever sozinho)…");
+      let falhasCiclo = 0;
       for (let i = 1; i <= 30; i++) {
-        const r = await supabase.functions.invoke("classify-and-quota", { body: { sync: true, limit: 15, cluster_ids: createdClusterIds } });
-        if (r.error) throw r.error;
-        const d = (r.data ?? {}) as { classified?: number; selected?: number };
-        setPipelineLog((l) => [...l, `  lote ${i}: classificados=${d.classified ?? 0} selecionados=${d.selected ?? 0}`]);
-        if (!d.classified) break;
+        try {
+          const d = await invokeFn<{ classified?: number; selected?: number }>(
+            "classify-and-quota",
+            { sync: true, limit: 15, cluster_ids: createdClusterIds },
+            T_PADRAO,
+          );
+          logLine(`  lote ${i}: classificados=${d.classified ?? 0} selecionados=${d.selected ?? 0}`);
+          if (!d.classified) break;
+        } catch (e) {
+          if (e instanceof PipelineCancelado) throw e;
+          falhasCiclo += 1;
+          logLine(`  ⚠ ciclo ${i}: ${e instanceof Error ? e.message : "erro"}`);
+          if (falhasCiclo >= 3) break;
+        }
       }
     } catch (e: unknown) {
-      setPipelineLog((l) => [...l, `  ✗ ${e instanceof Error ? e.message : "erro"}`]);
-      setPipelineLog((l) => [...l, "Coleta interrompida — nenhuma etapa seguinte foi mascarada como concluída."]);
-      setPipelineRunning(null);
-      load();
+      tratarErroRodada(e, "Coleta interrompida — nenhuma etapa seguinte foi mascarada como concluída.");
       return;
     }
-    setPipelineLog((l) => [...l, `Coleta de ${rotulo} finalizada — vá em Curadoria pra decidir o que escrever.`]);
-    setPipelineRunning(null);
-    load();
+    logLine(`Coleta de ${rotulo} finalizada — vá em Curadoria pra decidir o que escrever.`);
+    encerrarRodada();
   }
 
   const runCuradoriaSegurancaEsporte = () => runCuradoria(["seguranca", "esportes"], "Segurança & Esporte");
