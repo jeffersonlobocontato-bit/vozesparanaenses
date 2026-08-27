@@ -8,7 +8,7 @@ import {
   FileText, CheckCircle2, Send, XCircle, CalendarClock,
   Radar, Layers, ListChecks, Radio, Megaphone,
   Clock3, MousePointerClick, Eye, Users, Newspaper, Map,
-  Bot, BookOpen, KeyRound, Activity, RefreshCw, Play,
+  Bot, BookOpen, KeyRound, Activity, RefreshCw, Play, Square,
 } from "lucide-react";
 
 export const Route = createFileRoute("/admin/painel")({
