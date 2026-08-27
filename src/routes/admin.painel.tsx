@@ -497,6 +497,12 @@ function AdminDashboard() {
             className="inline-flex items-center gap-1.5 rounded-full border border-amber-300 bg-amber-50 px-4 py-2 text-xs font-semibold text-amber-800 shadow-sm transition hover:border-amber-400 hover:bg-amber-100 disabled:opacity-60">
             {pipelineRunning === "escrita" ? <><Activity className="h-3.5 w-3.5 animate-pulse" /> Escrevendo…</> : <><FileText className="h-3.5 w-3.5" /> Escrever pautas pendentes</>}
           </button>
+          {pipelineBusy && (
+            <button onClick={cancelarPipeline}
+              className="inline-flex items-center gap-1.5 rounded-full border border-rose-300 bg-rose-50 px-4 py-2 text-xs font-semibold text-rose-800 shadow-sm transition hover:border-rose-400 hover:bg-rose-100">
+              <Square className="h-3.5 w-3.5" /> Cancelar
+            </button>
+          )}
         </div>
       </div>
 
