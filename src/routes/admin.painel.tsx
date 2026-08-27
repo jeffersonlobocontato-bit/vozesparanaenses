@@ -46,6 +46,13 @@ type RecentDraft = {
   regiao: { slug: string; nome: string } | null;
 };
 
+class PipelineCancelado extends Error {
+  constructor() {
+    super("cancelado pelo usuário");
+    this.name = "PipelineCancelado";
+  }
+}
+
 function AdminDashboard() {
   const [m, setM] = useState<Metrics | null>(null);
   const [recent, setRecent] = useState<RecentDraft[]>([]);
