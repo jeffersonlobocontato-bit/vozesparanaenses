@@ -53,6 +53,60 @@ function AdminDashboard() {
   const [pipelineRunning, setPipelineRunning] = useState<"prefeituras" | "portais" | "curadoria" | "escrita" | null>(null);
   const pipelineBusy = pipelineRunning !== null;
   const [pipelineLog, setPipelineLog] = useState<string[]>([]);
+  // Controle da rodada: permite cancelar e mede o tempo decorrido de cada etapa.
+  const abortRef = useRef<AbortController | null>(null);
+  const startRef = useRef<number>(0);
+
+  const logLine = useCallback((msg: string) => {
+    const s = Math.max(0, Math.round((Date.now() - startRef.current) / 1000));
+    const mm = String(Math.floor(s / 60)).padStart(2, "0");
+    const ss = String(s % 60).padStart(2, "0");
+    setPipelineLog((l) => [...l, `[${mm}:${ss}] ${msg}`]);
+  }, []);
+
+  function iniciarRodada(tipo: "prefeituras" | "portais" | "curadoria" | "escrita", primeiraLinha: string) {
+    abortRef.current = new AbortController();
+    startRef.current = Date.now();
+    setPipelineRunning(tipo);
+    setPipelineLog([`[00:00] ${primeiraLinha}`]);
+  }
+
+  function encerrarRodada() {
+    abortRef.current = null;
+    setPipelineRunning(null);
+    load();
+  }
+
+  function cancelarPipeline() {
+    abortRef.current?.abort();
+  }
+
+  // Chamada com tempo limite: se a função do servidor demorar demais, o painel
+  // segue em frente em vez de ficar travado esperando para sempre.
+  async function invokeFn<T = Record<string, unknown>>(nome: string, body: unknown, ms: number): Promise<T> {
+    const ctrl = abortRef.current;
+    if (ctrl?.signal.aborted) throw new PipelineCancelado();
+    let timer: ReturnType<typeof setTimeout> | undefined;
+    let onAbort: (() => void) | undefined;
+    try {
+      const res = (await Promise.race([
+        supabase.functions.invoke(nome, { body: body as Record<string, unknown> }),
+        new Promise((_, rej) => {
+          timer = setTimeout(() => rej(new Error(`${nome}: tempo esgotado (${Math.round(ms / 1000)}s)`)), ms);
+        }),
+        new Promise((_, rej) => {
+          if (!ctrl) return;
+          onAbort = () => rej(new PipelineCancelado());
+          ctrl.signal.addEventListener("abort", onAbort);
+        }),
+      ])) as { data: unknown; error: { message?: string } | null };
+      if (res.error) throw new Error(`${nome}: ${res.error.message ?? "falha na chamada"}`);
+      return (res.data ?? {}) as T;
+    } finally {
+      if (timer) clearTimeout(timer);
+      if (ctrl && onAbort) ctrl.signal.removeEventListener("abort", onAbort);
+    }
+  }
 
   const load = useCallback(async () => {
     setErr(null);
