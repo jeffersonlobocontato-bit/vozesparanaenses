@@ -1,25 +1,28 @@
-## Problema
+# Destravar o pipeline de portais
 
-Ao salvar a matéria, as listas (ex.: "1º cenário estimulado" da pesquisa) que você quebra manualmente com Enter voltam a virar texto corrido no site publicado.
+## O problema
 
-## Causa (verificada)
+No painel, "Rodar pipeline (portais)" chama as funções do servidor em sequência, uma etapa esperando a outra. Nenhuma dessas chamadas tem tempo limite no navegador: se uma função demora (é o que os registros recentes mostram — o Firecrawl devolvendo tempo esgotado e erro de todos os motores em fontes como Tarobá e Jornal de Ponta Grossa), a tela fica parada no mesmo passo, sem novo texto no log e sem jeito de cancelar. É exatamente o "fica travado".
 
-- O editor salva `corpo` exatamente como você digita — as quebras de linha (`\n`) continuam no banco.
-- O problema é na renderização em `src/routes/$region.$slug.tsx`: o corpo é dividido em parágrafos por **linhas em branco** (`split(/\n\s*\n/)`) e cada parágrafo vira um único `<p>`. Quebras de linha simples (Enter uma vez) são colapsadas em espaço pelo HTML — por isso a lista aparece corrida.
-- É comportamento padrão de Markdown (linha única = mesma frase). Precisamos respeitar quebras de linha explícitas.
+Um segundo agravante: hoje qualquer erro no meio da clusterização/escrita interrompe o pipeline inteiro, então uma fonte problemática derruba a rodada toda.
 
-## Solução
+## O que vou fazer
 
-Renderizar quebras de linha simples dentro de cada parágrafo como `<br/>`, mantendo o agrupamento atual por linha em branco.
+1. **Tempo limite por chamada.** Cada chamada ao servidor ganha um limite (scrape 90s, demais 60s). Estourou, o log escreve "lote X demorou demais — seguindo" e o pipeline avança em vez de congelar.
+2. **Botão Cancelar.** Enquanto o pipeline roda, um botão interrompe a rodada de forma limpa (o log registra "cancelado pelo usuário").
+3. **Relógio de progresso.** Cada linha do log passa a mostrar o tempo decorrido e a etapa atual, para ficar visível se algo está apenas lento ou realmente parado.
+4. **Tolerância a falhas por lote.** Erros de clusterização/classificação/escrita passam a ser registrados como aviso e o pipeline segue para o próximo lote; só interrompe se todos os lotes de uma etapa falharem. O resumo final lista quantos lotes falharam.
+5. **Aplicar o mesmo tratamento** aos outros botões que usam a mesma sequência (prefeituras e curadorias), para não repetir o travamento por lá.
 
-### Alterações
+## Detalhes técnicos
 
-1. **`src/lib/auto-link.tsx`** — na função `autoLinkParagraph` (ou equivalente que monta os nós do parágrafo), quando o texto contiver `\n`, dividir por `\n` e intercalar `<br key=... />` entre os pedaços antes de aplicar linkificação/auto-link. Assim cada linha do bloco vira uma linha visual.
+- Arquivo principal: `src/routes/admin.painel.tsx`.
+- Criar um utilitário local `invokeComTimeout(nome, body, ms, signal)` sobre `supabase.functions.invoke`, usando `AbortController` (a opção de sinal já é suportada pelo cliente) e um `Promise.race` de segurança.
+- Um `AbortController` por rodada, guardado em `useRef`, abortado pelo botão Cancelar; o `catch` distingue "abortado" de erro real.
+- Trocar os `throw r.error` dentro dos laços por contagem de falhas + linha de aviso no log; manter o `throw` apenas quando a etapa inteira falhar.
+- Sem mudanças nas funções do servidor nem no banco nesta etapa.
 
-2. Nenhuma mudança no editor, no schema ou no pipeline — o conteúdo salvo já está correto; só a renderização precisa respeitar as quebras.
+## Fora do escopo (posso fazer depois, se quiser)
 
-### Resultado esperado
-
-- Um Enter simples → nova linha visual (linhas empilhadas como no seu print de referência).
-- Dois Enters (linha em branco) → novo parágrafo com espaçamento maior (comportamento atual mantido).
-- Matérias antigas se beneficiam automaticamente, sem migração.
+- Investigar por que algumas fontes vivem estourando no Firecrawl e definir uma lista de fontes com coleta direta por HTML.
+- Verificar se o agendamento automático (cron) do banco externo está de fato instalado, já que o arquivo `003_pipeline_cron.sql` precisa ser rodado manualmente com URL e chave preenchidas.
