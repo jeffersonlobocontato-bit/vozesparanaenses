@@ -1,5 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { getExternalBrowser } from "@/lib/external-supabase-browser";
 import { supabase } from "@/integrations/supabase/client";
 import { displayRegionName } from "@/lib/region-labels";
