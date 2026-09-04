@@ -271,6 +271,36 @@ export function ArticleEditor({ articleId, initial, onSaved, onCancel }: Props) 
         <input className={inputCls} value={form.titulo} onChange={(e) => set("titulo", e.target.value)} />
       </div>
       <div>
+        <label className={labelCls}>Data e hora da publicação (horário de Brasília)</label>
+        <div className="flex flex-wrap items-center gap-2">
+          <input
+            type="datetime-local"
+            className={inputCls + " sm:max-w-[260px]"}
+            value={form.publicado_em}
+            onChange={(e) => set("publicado_em", e.target.value)}
+          />
+          <button
+            type="button"
+            onClick={() => set("publicado_em", isoParaCampoSP(new Date().toISOString()))}
+            className="rounded border px-2 py-1 text-xs font-semibold hover:bg-accent"
+          >
+            Agora
+          </button>
+          {form.publicado_em && (
+            <button
+              type="button"
+              onClick={() => set("publicado_em", "")}
+              className="rounded border px-2 py-1 text-xs font-semibold hover:bg-accent"
+            >
+              Limpar
+            </button>
+          )}
+        </div>
+        <p className="mt-1 text-[11px] text-muted-foreground">
+          Altera a data exibida na matéria e a ordem nas listagens.
+        </p>
+      </div>
+      <div>
         <label className={labelCls}>Subtítulo</label>
         <input className={inputCls} value={form.subtitulo} onChange={(e) => set("subtitulo", e.target.value)} />
       </div>
