@@ -44,6 +44,7 @@ type Props = {
     tldr?: string | null;
     fatos_5w1h?: FiveW | null;
     faq?: FaqItem[] | null;
+    publicado_em?: string | null;
   };
   onSaved: () => void;
   onCancel: () => void;
