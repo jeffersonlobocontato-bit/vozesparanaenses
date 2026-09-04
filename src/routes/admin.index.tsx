@@ -30,6 +30,7 @@ type Draft = {
   editor_responsavel: string | null;
   status: "rascunho" | "aprovado" | "rejeitado" | "publicado" | "expirado";
   gerado_em: string;
+  publicado_em: string | null;
   imagem_capa_url: string | null;
   imagem_credito: string | null;
   imagem_legenda: string | null;
