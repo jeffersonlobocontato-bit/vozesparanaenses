@@ -50,6 +50,26 @@ type Props = {
   onCancel: () => void;
 };
 
+// Data/hora de publicação é sempre tratada no fuso de Brasília (UTC-3, sem
+// horário de verão), independente do fuso do computador do editor.
+function isoParaCampoSP(iso?: string | null): string {
+  if (!iso) return "";
+  const d = new Date(iso);
+  if (Number.isNaN(d.getTime())) return "";
+  const p = new Intl.DateTimeFormat("sv-SE", {
+    timeZone: "America/Sao_Paulo",
+    year: "numeric", month: "2-digit", day: "2-digit",
+    hour: "2-digit", minute: "2-digit", hour12: false,
+  }).format(d);
+  return p.replace(" ", "T").slice(0, 16);
+}
+
+function campoSPParaIso(v: string): string | null {
+  if (!v.trim()) return null;
+  const d = new Date(`${v}:00-03:00`);
+  return Number.isNaN(d.getTime()) ? null : d.toISOString();
+}
+
 export function ArticleEditor({ articleId, initial, onSaved, onCancel }: Props) {
   const [form, setForm] = useState({
     titulo: initial.titulo ?? "",
