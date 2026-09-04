@@ -30,6 +30,7 @@ type Draft = {
   editor_responsavel: string | null;
   status: "rascunho" | "aprovado" | "rejeitado" | "publicado" | "expirado";
   gerado_em: string;
+  publicado_em: string | null;
   imagem_capa_url: string | null;
   imagem_credito: string | null;
   imagem_legenda: string | null;
@@ -80,10 +81,10 @@ function AdminQueue() {
     setErr(null);
     try {
       const sb = await getExternalBrowser();
-      const fullSelect = "id, slug, titulo, subtitulo, resumo, corpo, seo_title, seo_description, editor_responsavel, status, gerado_em, imagem_capa_url, imagem_credito, imagem_legenda, imagem_original_url, imagem_galeria, video_embed_url, video_legenda, video_credito, publicado_automaticamente, fixado_posicao, fixado_escopo, fixado_regioes, fixado_cidades, regiao_id, categoria_id, tldr, fatos_5w1h, faq, regiao:regioes(slug, nome), categoria:editorial_categories(slug, nome)";
-      const pinBasicSelect = "id, slug, titulo, subtitulo, resumo, corpo, seo_title, seo_description, editor_responsavel, status, gerado_em, imagem_capa_url, imagem_credito, imagem_legenda, imagem_original_url, publicado_automaticamente, fixado_posicao, regiao_id, categoria_id, regiao:regioes(slug, nome), categoria:editorial_categories(slug, nome)";
-      const midSelect = "id, slug, titulo, subtitulo, resumo, corpo, seo_title, seo_description, editor_responsavel, status, gerado_em, imagem_capa_url, imagem_credito, imagem_legenda, imagem_original_url, publicado_automaticamente, regiao_id, categoria_id, regiao:regioes(slug, nome), categoria:editorial_categories(slug, nome)";
-      const fallbackSelect = "id, slug, titulo, subtitulo, resumo, corpo, seo_title, seo_description, status, gerado_em, regiao_id, categoria_id, regiao:regioes(slug, nome), categoria:editorial_categories(slug, nome)";
+      const fullSelect = "id, slug, titulo, subtitulo, resumo, corpo, seo_title, seo_description, editor_responsavel, status, gerado_em, publicado_em, imagem_capa_url, imagem_credito, imagem_legenda, imagem_original_url, imagem_galeria, video_embed_url, video_legenda, video_credito, publicado_automaticamente, fixado_posicao, fixado_escopo, fixado_regioes, fixado_cidades, regiao_id, categoria_id, tldr, fatos_5w1h, faq, regiao:regioes(slug, nome), categoria:editorial_categories(slug, nome)";
+      const pinBasicSelect = "id, slug, titulo, subtitulo, resumo, corpo, seo_title, seo_description, editor_responsavel, status, gerado_em, publicado_em, imagem_capa_url, imagem_credito, imagem_legenda, imagem_original_url, publicado_automaticamente, fixado_posicao, regiao_id, categoria_id, regiao:regioes(slug, nome), categoria:editorial_categories(slug, nome)";
+      const midSelect = "id, slug, titulo, subtitulo, resumo, corpo, seo_title, seo_description, editor_responsavel, status, gerado_em, publicado_em, imagem_capa_url, imagem_credito, imagem_legenda, imagem_original_url, publicado_automaticamente, regiao_id, categoria_id, regiao:regioes(slug, nome), categoria:editorial_categories(slug, nome)";
+      const fallbackSelect = "id, slug, titulo, subtitulo, resumo, corpo, seo_title, seo_description, status, gerado_em, publicado_em, regiao_id, categoria_id, regiao:regioes(slug, nome), categoria:editorial_categories(slug, nome)";
       const run = (sel: string) =>
         sb.from("generated_articles")
           .select(sel)
@@ -419,6 +420,7 @@ function AdminQueue() {
                   tldr: it.tldr ?? null,
                   fatos_5w1h: it.fatos_5w1h ?? null,
                   faq: it.faq ?? null,
+                  publicado_em: it.publicado_em ?? null,
                 }}
                 onSaved={() => { saveAndStay(); }}
                 onCancel={() => setEditingId(null)}

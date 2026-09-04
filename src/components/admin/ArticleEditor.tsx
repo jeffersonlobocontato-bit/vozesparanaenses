@@ -44,10 +44,31 @@ type Props = {
     tldr?: string | null;
     fatos_5w1h?: FiveW | null;
     faq?: FaqItem[] | null;
+    publicado_em?: string | null;
   };
   onSaved: () => void;
   onCancel: () => void;
 };
+
+// Data/hora de publicação é sempre tratada no fuso de Brasília (UTC-3, sem
+// horário de verão), independente do fuso do computador do editor.
+function isoParaCampoSP(iso?: string | null): string {
+  if (!iso) return "";
+  const d = new Date(iso);
+  if (Number.isNaN(d.getTime())) return "";
+  const p = new Intl.DateTimeFormat("sv-SE", {
+    timeZone: "America/Sao_Paulo",
+    year: "numeric", month: "2-digit", day: "2-digit",
+    hour: "2-digit", minute: "2-digit", hour12: false,
+  }).format(d);
+  return p.replace(" ", "T").slice(0, 16);
+}
+
+function campoSPParaIso(v: string): string | null {
+  if (!v.trim()) return null;
+  const d = new Date(`${v}:00-03:00`);
+  return Number.isNaN(d.getTime()) ? null : d.toISOString();
+}
 
 export function ArticleEditor({ articleId, initial, onSaved, onCancel }: Props) {
   const [form, setForm] = useState({
@@ -72,6 +93,7 @@ export function ArticleEditor({ articleId, initial, onSaved, onCancel }: Props) 
     onde: initial.fatos_5w1h?.onde ?? "",
     por_que: initial.fatos_5w1h?.por_que ?? "",
     como: initial.fatos_5w1h?.como ?? "",
+    publicado_em: isoParaCampoSP(initial.publicado_em),
   });
   const [faq, setFaq] = useState<FaqItem[]>(initial.faq ?? []);
   const [escopo, setEscopo] = useState<PinScope>(initial.fixado_escopo ?? "estado");
@@ -173,6 +195,7 @@ export function ArticleEditor({ articleId, initial, onSaved, onCancel }: Props) 
         seo_title: form.seo_title.trim() || null,
         seo_description: form.seo_description.trim() || null,
         editor_responsavel: form.editor_responsavel.trim() || null,
+        publicado_em: campoSPParaIso(form.publicado_em),
         categoria_id: form.categoria_id || null,
         fixado_posicao: selectedPin,
         fixado_escopo: effectiveEscopo,
@@ -246,6 +269,36 @@ export function ArticleEditor({ articleId, initial, onSaved, onCancel }: Props) 
       <div>
         <label className={labelCls}>Título</label>
         <input className={inputCls} value={form.titulo} onChange={(e) => set("titulo", e.target.value)} />
+      </div>
+      <div>
+        <label className={labelCls}>Data e hora da publicação (horário de Brasília)</label>
+        <div className="flex flex-wrap items-center gap-2">
+          <input
+            type="datetime-local"
+            className={inputCls + " sm:max-w-[260px]"}
+            value={form.publicado_em}
+            onChange={(e) => set("publicado_em", e.target.value)}
+          />
+          <button
+            type="button"
+            onClick={() => set("publicado_em", isoParaCampoSP(new Date().toISOString()))}
+            className="rounded border px-2 py-1 text-xs font-semibold hover:bg-accent"
+          >
+            Agora
+          </button>
+          {form.publicado_em && (
+            <button
+              type="button"
+              onClick={() => set("publicado_em", "")}
+              className="rounded border px-2 py-1 text-xs font-semibold hover:bg-accent"
+            >
+              Limpar
+            </button>
+          )}
+        </div>
+        <p className="mt-1 text-[11px] text-muted-foreground">
+          Altera a data exibida na matéria e a ordem nas listagens.
+        </p>
       </div>
       <div>
         <label className={labelCls}>Subtítulo</label>
