@@ -195,6 +195,7 @@ export function ArticleEditor({ articleId, initial, onSaved, onCancel }: Props) 
         seo_title: form.seo_title.trim() || null,
         seo_description: form.seo_description.trim() || null,
         editor_responsavel: form.editor_responsavel.trim() || null,
+        publicado_em: campoSPParaIso(form.publicado_em),
         categoria_id: form.categoria_id || null,
         fixado_posicao: selectedPin,
         fixado_escopo: effectiveEscopo,
