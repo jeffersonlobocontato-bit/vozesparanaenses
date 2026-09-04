@@ -93,6 +93,7 @@ export function ArticleEditor({ articleId, initial, onSaved, onCancel }: Props) 
     onde: initial.fatos_5w1h?.onde ?? "",
     por_que: initial.fatos_5w1h?.por_que ?? "",
     como: initial.fatos_5w1h?.como ?? "",
+    publicado_em: isoParaCampoSP(initial.publicado_em),
   });
   const [faq, setFaq] = useState<FaqItem[]>(initial.faq ?? []);
   const [escopo, setEscopo] = useState<PinScope>(initial.fixado_escopo ?? "estado");
