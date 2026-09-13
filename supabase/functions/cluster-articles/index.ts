@@ -74,6 +74,16 @@ Deno.serve(async (req) => {
     if (!fonteIdsFiltrados.length) return json({ ok: true, processed: 0, clusters: 0 });
   }
 
+  const chamadaGeralSemFiltro = !body.fonte_tipo && body.apenas_curadoria === undefined && !(body.curadoria_editorias && body.curadoria_editorias.length);
+  let fonteIdsTecnologiaExcluir: string[] = [];
+  if (chamadaGeralSemFiltro) {
+    // Tecnologia roda com pipeline independente (cron próprio) — exclui já na consulta.
+    const { data: fontesTec } = await sb.from("fontes").select("id").eq("curadoria_editoria", "tecnologia");
+    fonteIdsTecnologiaExcluir = (fontesTec ?? []).map((f) => f.id);
+  }
+
+
+
   // Tenta com a coluna nova de curadoria (migration 041). Se ela ainda não
   // foi rodada no banco, a consulta falha por coluna inexistente — nesse
   // caso, refaz sem essa coluna, em vez de derrubar o pipeline inteiro
@@ -92,6 +102,8 @@ Deno.serve(async (req) => {
       .limit(limit);
     if (body.regiao_id) q = q.eq("regiao_id", body.regiao_id);
     if (fonteIdsFiltrados) q = q.in("fonte_id", fonteIdsFiltrados);
+    if (fonteIdsTecnologiaExcluir.length) q = q.not("fonte_id", "in", `(${fonteIdsTecnologiaExcluir.join(",")})`);
+
     if (rawArticleIds.length) q = q.in("id", rawArticleIds);
     return q;
   }
