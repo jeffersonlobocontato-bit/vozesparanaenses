@@ -102,6 +102,8 @@ Deno.serve(async (req) => {
       .limit(limit);
     if (body.regiao_id) q = q.eq("regiao_id", body.regiao_id);
     if (fonteIdsFiltrados) q = q.in("fonte_id", fonteIdsFiltrados);
+    if (fonteIdsTecnologiaExcluir.length) q = q.not("fonte_id", "in", `(${fonteIdsTecnologiaExcluir.join(",")})`);
+
     if (rawArticleIds.length) q = q.in("id", rawArticleIds);
     return q;
   }
