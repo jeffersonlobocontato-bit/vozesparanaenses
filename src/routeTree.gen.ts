@@ -55,6 +55,7 @@ import { Route as ColunaSlugEdicaoIdRouteImport } from './routes/coluna.$slug.$e
 import { Route as ApiPublicSitemapDotxmlRouteImport } from './routes/api/public/sitemap[.]xml'
 import { Route as ApiPublicSitemapNewsDotxmlRouteImport } from './routes/api/public/sitemap-news[.]xml'
 import { Route as ApiPublicRssDotxmlRouteImport } from './routes/api/public/rss[.]xml'
+import { Route as ApiPublicPublicarTecnologiaPeriodicoRouteImport } from './routes/api/public/publicar-tecnologia-periodico'
 import { Route as ApiPublicLlmsDottxtRouteImport } from './routes/api/public/llms[.]txt'
 import { Route as ApiPublicLlmsFullDottxtRouteImport } from './routes/api/public/llms-full[.]txt'
 import { Route as ApiPublicContactRouteImport } from './routes/api/public/contact'
@@ -300,6 +301,12 @@ const ApiPublicRssDotxmlRoute = ApiPublicRssDotxmlRouteImport.update({
   path: '/api/public/rss.xml',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiPublicPublicarTecnologiaPeriodicoRoute =
+  ApiPublicPublicarTecnologiaPeriodicoRouteImport.update({
+    id: '/api/public/publicar-tecnologia-periodico',
+    path: '/api/public/publicar-tecnologia-periodico',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const ApiPublicLlmsDottxtRoute = ApiPublicLlmsDottxtRouteImport.update({
   id: '/api/public/llms.txt',
   path: '/api/public/llms.txt',
@@ -419,6 +426,7 @@ export interface FileRoutesByFullPath {
   '/api/public/contact': typeof ApiPublicContactRoute
   '/api/public/llms-full.txt': typeof ApiPublicLlmsFullDottxtRoute
   '/api/public/llms.txt': typeof ApiPublicLlmsDottxtRoute
+  '/api/public/publicar-tecnologia-periodico': typeof ApiPublicPublicarTecnologiaPeriodicoRoute
   '/api/public/rss.xml': typeof ApiPublicRssDotxmlRoute
   '/api/public/sitemap-news.xml': typeof ApiPublicSitemapNewsDotxmlRoute
   '/api/public/sitemap.xml': typeof ApiPublicSitemapDotxmlRoute
@@ -478,6 +486,7 @@ export interface FileRoutesByTo {
   '/api/public/contact': typeof ApiPublicContactRoute
   '/api/public/llms-full.txt': typeof ApiPublicLlmsFullDottxtRoute
   '/api/public/llms.txt': typeof ApiPublicLlmsDottxtRoute
+  '/api/public/publicar-tecnologia-periodico': typeof ApiPublicPublicarTecnologiaPeriodicoRoute
   '/api/public/rss.xml': typeof ApiPublicRssDotxmlRoute
   '/api/public/sitemap-news.xml': typeof ApiPublicSitemapNewsDotxmlRoute
   '/api/public/sitemap.xml': typeof ApiPublicSitemapDotxmlRoute
@@ -540,6 +549,7 @@ export interface FileRoutesById {
   '/api/public/contact': typeof ApiPublicContactRoute
   '/api/public/llms-full.txt': typeof ApiPublicLlmsFullDottxtRoute
   '/api/public/llms.txt': typeof ApiPublicLlmsDottxtRoute
+  '/api/public/publicar-tecnologia-periodico': typeof ApiPublicPublicarTecnologiaPeriodicoRoute
   '/api/public/rss.xml': typeof ApiPublicRssDotxmlRoute
   '/api/public/sitemap-news.xml': typeof ApiPublicSitemapNewsDotxmlRoute
   '/api/public/sitemap.xml': typeof ApiPublicSitemapDotxmlRoute
@@ -603,6 +613,7 @@ export interface FileRouteTypes {
     | '/api/public/contact'
     | '/api/public/llms-full.txt'
     | '/api/public/llms.txt'
+    | '/api/public/publicar-tecnologia-periodico'
     | '/api/public/rss.xml'
     | '/api/public/sitemap-news.xml'
     | '/api/public/sitemap.xml'
@@ -662,6 +673,7 @@ export interface FileRouteTypes {
     | '/api/public/contact'
     | '/api/public/llms-full.txt'
     | '/api/public/llms.txt'
+    | '/api/public/publicar-tecnologia-periodico'
     | '/api/public/rss.xml'
     | '/api/public/sitemap-news.xml'
     | '/api/public/sitemap.xml'
@@ -723,6 +735,7 @@ export interface FileRouteTypes {
     | '/api/public/contact'
     | '/api/public/llms-full.txt'
     | '/api/public/llms.txt'
+    | '/api/public/publicar-tecnologia-periodico'
     | '/api/public/rss.xml'
     | '/api/public/sitemap-news.xml'
     | '/api/public/sitemap.xml'
@@ -763,6 +776,7 @@ export interface RootRouteChildren {
   ApiPublicContactRoute: typeof ApiPublicContactRoute
   ApiPublicLlmsFullDottxtRoute: typeof ApiPublicLlmsFullDottxtRoute
   ApiPublicLlmsDottxtRoute: typeof ApiPublicLlmsDottxtRoute
+  ApiPublicPublicarTecnologiaPeriodicoRoute: typeof ApiPublicPublicarTecnologiaPeriodicoRoute
   ApiPublicRssDotxmlRoute: typeof ApiPublicRssDotxmlRoute
   ApiPublicSitemapNewsDotxmlRoute: typeof ApiPublicSitemapNewsDotxmlRoute
   ApiPublicSitemapDotxmlRoute: typeof ApiPublicSitemapDotxmlRoute
@@ -1103,6 +1117,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicRssDotxmlRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/publicar-tecnologia-periodico': {
+      id: '/api/public/publicar-tecnologia-periodico'
+      path: '/api/public/publicar-tecnologia-periodico'
+      fullPath: '/api/public/publicar-tecnologia-periodico'
+      preLoaderRoute: typeof ApiPublicPublicarTecnologiaPeriodicoRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/public/llms.txt': {
       id: '/api/public/llms.txt'
       path: '/api/public/llms.txt'
@@ -1282,6 +1303,8 @@ const rootRouteChildren: RootRouteChildren = {
   ApiPublicContactRoute: ApiPublicContactRoute,
   ApiPublicLlmsFullDottxtRoute: ApiPublicLlmsFullDottxtRoute,
   ApiPublicLlmsDottxtRoute: ApiPublicLlmsDottxtRoute,
+  ApiPublicPublicarTecnologiaPeriodicoRoute:
+    ApiPublicPublicarTecnologiaPeriodicoRoute,
   ApiPublicRssDotxmlRoute: ApiPublicRssDotxmlRoute,
   ApiPublicSitemapNewsDotxmlRoute: ApiPublicSitemapNewsDotxmlRoute,
   ApiPublicSitemapDotxmlRoute: ApiPublicSitemapDotxmlRoute,
