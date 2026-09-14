@@ -297,10 +297,10 @@ export function ArticleImageEditor({ articleId, currentUrl, originalUrl, current
         </div>
         {originalUrl && (
           <div className="flex flex-col items-center gap-1">
-            <div className={`relative h-20 w-32 shrink-0 overflow-hidden rounded border bg-muted ${usingOriginal ? "ring-2 ring-[#0A2540]" : ""}`}>
+            <div className={`relative h-20 w-32 shrink-0 overflow-hidden rounded border bg-muted ${usingOriginal ? "ring-2 ring-[#12201E]" : ""}`}>
               <img src={originalUrl} alt="foto original scraping" className="h-full w-full object-cover" />
               {usingOriginal && (
-                <span className="absolute right-1 top-1 rounded bg-[#0A2540] px-1.5 py-0.5 text-[9px] font-bold text-white">EM USO</span>
+                <span className="absolute right-1 top-1 rounded bg-[#12201E] px-1.5 py-0.5 text-[9px] font-bold text-white">EM USO</span>
               )}
             </div>
             <span className="text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">Foto original (fonte)</span>
@@ -313,7 +313,7 @@ export function ArticleImageEditor({ articleId, currentUrl, originalUrl, current
             <button
               onClick={useOriginal}
               disabled={busy !== null || usingOriginal}
-              className="rounded border border-[#0A2540] px-3 py-1 font-semibold text-[#0A2540] hover:bg-[#0A2540]/10 disabled:opacity-60"
+              className="rounded border border-[#12201E] px-3 py-1 font-semibold text-[#12201E] hover:bg-[#12201E]/10 disabled:opacity-60"
               title="Usa a foto original da fonte já copiada para o storage"
             >
               {busy === "original" ? "Aplicando…" : usingOriginal ? "✓ Usando original" : "📷 Usar original"}
@@ -322,7 +322,7 @@ export function ArticleImageEditor({ articleId, currentUrl, originalUrl, current
           <button
             onClick={generateWithAI}
             disabled={busy !== null}
-            className="rounded bg-[#0A2540] px-3 py-1 font-semibold text-white hover:bg-[#0d2f52] disabled:opacity-60"
+            className="rounded bg-[#12201E] px-3 py-1 font-semibold text-white hover:bg-[#0d2f52] disabled:opacity-60"
             title={originalUrl ? "Gera uma variação com IA a partir da foto original" : "Gera uma imagem editorial com IA"}
           >
             {busy === "ai" ? "Gerando…" : originalUrl ? "🎨 Variação IA da original" : "🎨 Gerar com IA"}
@@ -381,7 +381,7 @@ export function ArticleImageEditor({ articleId, currentUrl, originalUrl, current
               type="button"
               onClick={saveMeta}
               disabled={busy !== null || !metaDirty}
-              className="rounded bg-[#0A2540] px-3 py-1.5 text-[11px] font-semibold text-white hover:bg-[#0d2f52] disabled:opacity-60"
+              className="rounded bg-[#12201E] px-3 py-1.5 text-[11px] font-semibold text-white hover:bg-[#0d2f52] disabled:opacity-60"
             >
               {busy === "meta" ? "Salvando…" : "💾 Salvar legenda/crédito"}
             </button>
@@ -396,12 +396,12 @@ export function ArticleImageEditor({ articleId, currentUrl, originalUrl, current
       </div>
 
       {/* Galeria de fotos */}
-      <div className="mt-3 rounded border border-[#0A2540]/20 bg-white p-2">
+      <div className="mt-3 rounded border border-[#12201E]/20 bg-white p-2">
         <div className="mb-2 flex items-center justify-between">
-          <span className="text-[11px] font-bold uppercase tracking-wide text-[#0A2540]">
+          <span className="text-[11px] font-bold uppercase tracking-wide text-[#12201E]">
             Galeria ({galeria.length})
           </span>
-          <label className="cursor-pointer rounded bg-[#0A2540] px-2 py-1 text-[10px] font-semibold text-white hover:bg-[#0d2f52]">
+          <label className="cursor-pointer rounded bg-[#12201E] px-2 py-1 text-[10px] font-semibold text-white hover:bg-[#0d2f52]">
             {busy === "gal-add" ? "Enviando…" : "+ Adicionar fotos"}
             <input
               type="file"
@@ -427,7 +427,7 @@ export function ArticleImageEditor({ articleId, currentUrl, originalUrl, current
               <div key={g.url + i} className="flex flex-col gap-1 rounded border bg-muted/30 p-1">
                 <div className="relative h-24 w-full overflow-hidden rounded bg-muted">
                   <img src={g.url} alt={g.legenda ?? `Foto ${i + 1}`} className="h-full w-full object-cover" />
-                  <span className="absolute left-1 top-1 rounded bg-[#0A2540] px-1.5 py-0.5 text-[9px] font-bold text-white">
+                  <span className="absolute left-1 top-1 rounded bg-[#12201E] px-1.5 py-0.5 text-[9px] font-bold text-white">
                     #{i + 1}{i === 0 ? " (destaque)" : ""}
                   </span>
                 </div>
@@ -474,7 +474,7 @@ export function ArticleImageEditor({ articleId, currentUrl, originalUrl, current
                     type="button"
                     onClick={() => setAsCover(i)}
                     disabled={busy !== null}
-                    className="rounded border border-[#0A2540] px-1.5 py-0.5 text-[10px] font-semibold text-[#0A2540] disabled:opacity-40"
+                    className="rounded border border-[#12201E] px-1.5 py-0.5 text-[10px] font-semibold text-[#12201E] disabled:opacity-40"
                     title="Definir esta foto como capa"
                   >★ Capa</button>
                   <button

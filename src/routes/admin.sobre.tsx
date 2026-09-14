@@ -106,8 +106,8 @@ function AdminSobre() {
           {r.atualizado_em ? `Atualizado em ${new Date(r.atualizado_em).toLocaleString("pt-BR")}` : "Nunca salvo"}
         </p>
         <div className="flex items-center gap-2">
-          <a href="/sobre" target="_blank" rel="noreferrer" className="rounded-full border border-slate-200 bg-white px-3 py-2 text-xs font-medium text-slate-700 hover:border-[#0066CC] hover:text-[#0066CC]">Ver página</a>
-          <button onClick={save} className="inline-flex items-center gap-1.5 rounded-full bg-gradient-to-r from-[#0A2540] to-[#0d3a6e] px-4 py-2 text-xs font-semibold text-white shadow-sm transition hover:shadow-md">
+          <a href="/sobre" target="_blank" rel="noreferrer" className="rounded-full border border-slate-200 bg-white px-3 py-2 text-xs font-medium text-slate-700 hover:border-[#E29F65] hover:text-[#E29F65]">Ver página</a>
+          <button onClick={save} className="inline-flex items-center gap-1.5 rounded-full bg-gradient-to-r from-[#12201E] to-[#0d3a6e] px-4 py-2 text-xs font-semibold text-white shadow-sm transition hover:shadow-md">
             Salvar
           </button>
         </div>

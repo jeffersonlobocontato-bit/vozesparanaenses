@@ -66,7 +66,7 @@ export function SiteHeader() {
   const [open, setOpen] = useState(false);
   const today = useTodayBR();
   return (
-    <header className="sticky top-0 z-40 bg-[#0A2540] text-white shadow-[0_1px_0_0_rgba(255,255,255,0.05)]">
+    <header className="sticky top-0 z-40 bg-[#12201E] text-white shadow-[0_1px_0_0_rgba(255,255,255,0.05)]">
       <div className="mx-auto flex h-14 max-w-7xl items-center gap-4 px-4">
         {/* Burger — abre todos os atalhos (mobile + desktop) */}
         <button
@@ -151,8 +151,8 @@ export function SiteHeader() {
               key={item.label}
               to={item.to as never}
               params={item.params as never}
-              className="shrink-0 text-[11px] font-bold uppercase tracking-[0.06em] text-slate-600 transition-colors hover:text-[#0A2540]"
-              activeProps={{ className: "shrink-0 text-[11px] font-bold uppercase tracking-[0.06em] text-[#0A2540]" }}
+              className="shrink-0 text-[11px] font-bold uppercase tracking-[0.06em] text-slate-600 transition-colors hover:text-[#12201E]"
+              activeProps={{ className: "shrink-0 text-[11px] font-bold uppercase tracking-[0.06em] text-[#12201E]" }}
             >
               {item.label}
             </Link>
@@ -162,7 +162,7 @@ export function SiteHeader() {
 
       {/* Menu completo (burger) */}
       {open && (
-        <div className="border-t border-white/10 bg-[#0A2540]">
+        <div className="border-t border-white/10 bg-[#12201E]">
           <nav className="mx-auto grid max-w-7xl grid-cols-1 gap-x-8 gap-y-6 px-4 py-6 md:grid-cols-3">
             {[
               { titulo: "Editorias", itens: EDITORIAS_NAV },
@@ -198,7 +198,7 @@ export function SiteHeader() {
 
 export function SiteFooter() {
   return (
-    <footer className="mt-16 bg-[#0A2540] text-white/90">
+    <footer className="mt-16 bg-[#12201E] text-white/90">
       <div className="mx-auto grid max-w-7xl grid-cols-1 gap-8 px-4 py-10 md:grid-cols-4">
         <div className="md:col-span-2">
           <img

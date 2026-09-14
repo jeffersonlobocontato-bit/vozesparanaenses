@@ -105,8 +105,8 @@ function CategoryPage() {
     };
   const { data: articles } = useSuspenseQuery(listQO(regionSlug, categoriaSlug));
 
-  const primary = region.tema_config?.paleta?.primaria ?? "#0A2540";
-  const accent = region.tema_config?.paleta?.acento ?? "#0066CC";
+  const primary = region.tema_config?.paleta?.primaria ?? "#12201E";
+  const accent = region.tema_config?.paleta?.acento ?? "#E29F65";
 
   return (
     <div className="min-h-screen bg-white text-slate-900 font-['Barlow',system-ui,sans-serif]">
@@ -151,7 +151,7 @@ function CategoryPage() {
                     {cat.name}
                   </div>
                   <h3
-                    className="mt-1 text-xl font-black leading-tight text-[#0A2540] group-hover:text-[#0d2f52] md:text-2xl"
+                    className="mt-1 text-xl font-black leading-tight text-[#12201E] group-hover:text-[#0d2f52] md:text-2xl"
                     
                   >
                     {a.title}

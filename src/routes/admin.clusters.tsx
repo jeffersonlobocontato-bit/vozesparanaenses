@@ -348,7 +348,7 @@ function AdminClusters() {
           <button
             onClick={() => rodarColetaCuradoria(["seguranca", "esportes"], "Segurança & Esporte")}
             disabled={coletando}
-            className="rounded bg-[#0066CC] px-3 py-1 text-xs font-semibold text-white disabled:opacity-60"
+            className="rounded bg-[#E29F65] px-3 py-1 text-xs font-semibold text-white disabled:opacity-60"
           >
             {coletando ? "Coletando…" : "▶ Rodar Seg./Esporte"}
           </button>
@@ -432,7 +432,7 @@ function AdminClusters() {
                 <button
                   onClick={() => extractFacts(c.id)}
                   disabled={busyIds.has(c.id)}
-                  className="shrink-0 rounded bg-[#0066CC] px-3 py-1.5 text-xs font-semibold text-white disabled:opacity-60"
+                  className="shrink-0 rounded bg-[#E29F65] px-3 py-1.5 text-xs font-semibold text-white disabled:opacity-60"
                 >
                   {busyIds.has(c.id) ? "Escrevendo…" : "✎ Escrever agora"}
                 </button>
@@ -467,7 +467,7 @@ function AdminClusters() {
                 <button
                   onClick={() => extractFacts(c.id)}
                   disabled={busyIds.has(c.id)}
-                  className="shrink-0 rounded bg-[#0066CC] px-3 py-1.5 text-xs font-semibold text-white disabled:opacity-60"
+                  className="shrink-0 rounded bg-[#E29F65] px-3 py-1.5 text-xs font-semibold text-white disabled:opacity-60"
                 >
                   {busyIds.has(c.id) ? "Escrevendo…" : "✎ Escrever agora"}
                 </button>
@@ -482,10 +482,10 @@ function AdminClusters() {
         return (
           <section
             key={g.bloco + idx}
-            className="rounded-xl border-2 border-[#0A2540]/20 bg-muted/30 p-4"
+            className="rounded-xl border-2 border-[#12201E]/20 bg-muted/30 p-4"
           >
-            <header className="mb-4 flex flex-wrap items-baseline justify-between gap-2 border-b border-[#0A2540]/20 pb-2">
-              <h2 className="text-lg font-bold text-[#0A2540]">
+            <header className="mb-4 flex flex-wrap items-baseline justify-between gap-2 border-b border-[#12201E]/20 pb-2">
+              <h2 className="text-lg font-bold text-[#12201E]">
                 {idx === 0 ? "Último scraping · " : "Scraping anterior · "}
                 {g.bloco}{" "}
                 <span className="text-sm font-normal text-muted-foreground">
@@ -502,7 +502,7 @@ function AdminClusters() {
             <div className="space-y-5">
               {g.editorias.map((ed) => (
                 <div key={ed.nome}>
-                  <h3 className="mb-2 text-sm font-bold uppercase tracking-wide text-[#0066CC]">
+                  <h3 className="mb-2 text-sm font-bold uppercase tracking-wide text-[#E29F65]">
                     {ed.nome}
                   </h3>
                   <div className="space-y-4 pl-2">
@@ -515,8 +515,8 @@ function AdminClusters() {
                           {ci.clusters.map((c) => (
                             <li key={c.id} className="rounded-lg border bg-card p-4">
                               <div className="mb-2 flex flex-wrap items-center gap-2 text-xs">
-                                {c.regiao && <span className="rounded bg-[#0A2540] px-2 py-0.5 font-semibold text-white">{c.regiao.nome}</span>}
-                                {c.categoria && <span className="rounded bg-[#0066CC] px-2 py-0.5 font-semibold text-white">{c.categoria.nome}</span>}
+                                {c.regiao && <span className="rounded bg-[#12201E] px-2 py-0.5 font-semibold text-white">{c.regiao.nome}</span>}
+                                {c.categoria && <span className="rounded bg-[#E29F65] px-2 py-0.5 font-semibold text-white">{c.categoria.nome}</span>}
                                 {(() => {
                                   const e = escalaInteresse(c.interesse_score);
                                   return (
@@ -546,7 +546,7 @@ function AdminClusters() {
                                 <ul className="mt-3 space-y-1.5 border-t pt-3 text-xs">
                                   {c.artigos.map((a, i) => (
                                     <li key={i} className="leading-snug">
-                                      <a href={a.url} target="_blank" rel="noreferrer" className="font-medium text-[#0A2540] hover:underline">
+                                      <a href={a.url} target="_blank" rel="noreferrer" className="font-medium text-[#12201E] hover:underline">
                                         {a.titulo ?? a.url}
                                       </a>
                                       {a.fonte && <span className="ml-1 text-muted-foreground">· {a.fonte}</span>}
@@ -557,12 +557,12 @@ function AdminClusters() {
                               <div className="mt-3">
                                 {c.status === "fatos_extraidos" ? (
                                   <button disabled={busyIds.has(c.id)} onClick={() => generate(c.id)}
-                                    className="rounded bg-[#0066CC] px-3 py-1.5 text-xs font-semibold text-white hover:bg-[#0055aa] disabled:opacity-60">
+                                    className="rounded bg-[#E29F65] px-3 py-1.5 text-xs font-semibold text-white hover:bg-[#0055aa] disabled:opacity-60">
                                     {busyIds.has(c.id) ? "Gerando…" : "Gerar matéria"}
                                   </button>
                                 ) : (
                                   <button disabled={busyIds.has(c.id)} onClick={() => extractFacts(c.id)}
-                                    className="rounded bg-[#0A2540] px-3 py-1.5 text-xs font-semibold text-white hover:bg-[#0d2f52] disabled:opacity-60">
+                                    className="rounded bg-[#12201E] px-3 py-1.5 text-xs font-semibold text-white hover:bg-[#0d2f52] disabled:opacity-60">
                                     {busyIds.has(c.id) ? "Processando…" : "Extrair fatos + gerar matéria"}
                                   </button>
                                 )}

@@ -276,7 +276,7 @@ function AdminColunas() {
         <div className="space-y-2">
           <button
             onClick={novaEdicaoEmBranco}
-            className="w-full rounded-lg bg-[#0066CC] px-3 py-2 text-sm font-semibold text-white"
+            className="w-full rounded-lg bg-[#E29F65] px-3 py-2 text-sm font-semibold text-white"
           >
             + Nova edição
           </button>
@@ -284,7 +284,7 @@ function AdminColunas() {
             <button
               key={e.id}
               onClick={() => abrirEdicao(e.id)}
-              className={`block w-full rounded-lg border p-2 text-left text-xs ${edicaoAtivaId === e.id ? "border-[#0066CC] bg-[#0066CC]/5" : "border-slate-200 bg-white"}`}
+              className={`block w-full rounded-lg border p-2 text-left text-xs ${edicaoAtivaId === e.id ? "border-[#E29F65] bg-[#E29F65]/5" : "border-slate-200 bg-white"}`}
             >
               <span className={`mb-1 inline-block rounded px-1.5 py-0.5 text-[10px] font-bold uppercase ${e.status === "publicado" ? "bg-emerald-100 text-emerald-800" : "bg-amber-100 text-amber-800"}`}>
                 {e.status}
@@ -356,7 +356,7 @@ function AdminColunas() {
             <button onClick={() => salvar(false)} disabled={salvando} className="rounded border px-4 py-2 text-sm font-semibold disabled:opacity-60">
               {salvando ? "Salvando…" : "Salvar rascunho"}
             </button>
-            <button onClick={() => salvar(true)} disabled={salvando} className="rounded bg-[#0066CC] px-4 py-2 text-sm font-semibold text-white disabled:opacity-60">
+            <button onClick={() => salvar(true)} disabled={salvando} className="rounded bg-[#E29F65] px-4 py-2 text-sm font-semibold text-white disabled:opacity-60">
               {salvando ? "Publicando…" : "Publicar (vira a edição atual da home)"}
             </button>
           </div>

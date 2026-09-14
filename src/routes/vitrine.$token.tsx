@@ -199,7 +199,7 @@ function VitrinePessoalEditor() {
       <SiteHeader />
       <main className="mx-auto max-w-2xl px-4 py-12">
         <div className="mb-6 flex items-center justify-between">
-          <h1 className="font-display text-2xl font-black text-[#0A2540]">Sua Vitrine Pessoal</h1>
+          <h1 className="font-display text-2xl font-black text-[#12201E]">Sua Vitrine Pessoal</h1>
           <StatusBadge status={pedido.status} />
         </div>
 
@@ -313,7 +313,7 @@ function VitrinePessoalEditor() {
                 {salvando ? "Salvando…" : "Salvar rascunho"}
               </button>
               <button onClick={() => salvar(true)} disabled={salvando}
-                className="flex-1 rounded-lg bg-[#0066CC] px-4 py-2 text-sm font-bold text-white disabled:opacity-60">
+                className="flex-1 rounded-lg bg-[#E29F65] px-4 py-2 text-sm font-bold text-white disabled:opacity-60">
                 {salvando ? "Enviando…" : "Enviar versão final para aprovação"}
               </button>
             </div>

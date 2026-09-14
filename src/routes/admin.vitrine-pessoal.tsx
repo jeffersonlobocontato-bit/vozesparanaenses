@@ -123,7 +123,7 @@ function AdminVitrinePessoal() {
 
               {art && (
                 <div className="mt-3">
-                  <button onClick={() => setExpandido(expandido === p.id ? null : p.id)} className="text-xs font-semibold text-[#0066CC] hover:underline">
+                  <button onClick={() => setExpandido(expandido === p.id ? null : p.id)} className="text-xs font-semibold text-[#E29F65] hover:underline">
                     {expandido === p.id ? "Ocultar texto" : `Ver texto: "${art.titulo}"`}
                   </button>
                   {expandido === p.id && (
@@ -172,7 +172,7 @@ function AdminVitrinePessoal() {
                       </a>
                     )}
                     <button disabled={busy === p.id} onClick={() => confirmarPagamento(p.id)}
-                      className="rounded bg-[#0066CC] px-3 py-1.5 text-xs font-semibold text-white disabled:opacity-60">
+                      className="rounded bg-[#E29F65] px-3 py-1.5 text-xs font-semibold text-white disabled:opacity-60">
                       Confirmar Pix recebido
                     </button>
                   </>

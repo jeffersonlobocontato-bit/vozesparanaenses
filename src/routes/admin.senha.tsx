@@ -47,7 +47,7 @@ function AdminSenha() {
           <input type="password" required value={pwd2} onChange={(e) => setPwd2(e.target.value)}
             className="w-full rounded border px-2 py-1.5" autoComplete="new-password" />
         </label>
-        <button disabled={busy} className="w-full rounded bg-[#0066CC] px-4 py-2 text-sm font-semibold text-white hover:bg-[#0055aa] disabled:opacity-60">
+        <button disabled={busy} className="w-full rounded bg-[#E29F65] px-4 py-2 text-sm font-semibold text-white hover:bg-[#0055aa] disabled:opacity-60">
           {busy ? "Salvando…" : "Salvar nova senha"}
         </button>
         {msg && <p className="text-xs text-muted-foreground">{msg}</p>}

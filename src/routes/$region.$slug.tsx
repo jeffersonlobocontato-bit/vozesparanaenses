@@ -371,11 +371,11 @@ function ArticlePage() {
           aria-label="Trilha de navegação"
           className="mb-6 flex flex-wrap items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-500"
         >
-          <Link to="/" className="hover:text-[#0A2540]">
+          <Link to="/" className="hover:text-[#12201E]">
             Início
           </Link>
           <span className="text-slate-300">›</span>
-          <Link to="/$region" params={{ region }} className="hover:text-[#0A2540]">
+          <Link to="/$region" params={{ region }} className="hover:text-[#12201E]">
             {article.region?.name ?? region}
           </Link>
           {article.cidade_principal && cidadeAtualSlug && (
@@ -384,7 +384,7 @@ function ArticlePage() {
               <Link
                 to="/$region/cidade/$cidade"
                 params={{ region, cidade: cidadeAtualSlug }}
-                className="hover:text-[#0A2540]"
+                className="hover:text-[#12201E]"
               >
                 {article.cidade_principal}
               </Link>
@@ -396,7 +396,7 @@ function ArticlePage() {
               <Link
                 to="/$region/editoria/$categoria"
                 params={{ region, categoria: categoriaSlug }}
-                className="rounded-sm bg-[#0A2540] px-2 py-1 text-white transition-colors hover:bg-[#0d2f52]"
+                className="rounded-sm bg-[#12201E] px-2 py-1 text-white transition-colors hover:bg-[#0d2f52]"
               >
                 {categoria}
               </Link>
@@ -404,13 +404,13 @@ function ArticlePage() {
           ) : (
             <>
               <span className="text-slate-300">›</span>
-              <span className="rounded-sm bg-[#0A2540] px-2 py-1 text-white">{categoria}</span>
+              <span className="rounded-sm bg-[#12201E] px-2 py-1 text-white">{categoria}</span>
             </>
           )}
         </nav>
 
         {/* Headline massivo, no acento da marca */}
-        <h1 className="font-display text-4xl font-black leading-[1.02] tracking-tight text-[#0A2540] md:text-6xl lg:text-7xl">
+        <h1 className="font-display text-4xl font-black leading-[1.02] tracking-tight text-[#12201E] md:text-6xl lg:text-7xl">
           {article.title}
         </h1>
 
@@ -419,7 +419,7 @@ function ArticlePage() {
 
         {/* Publicação + byline */}
         {(publishedLabel || article.editor_responsavel) && (
-          <div className="mt-6 flex flex-wrap items-center gap-x-4 gap-y-1 border-l-2 border-[#0A2540]/20 pl-3 text-sm text-slate-600">
+          <div className="mt-6 flex flex-wrap items-center gap-x-4 gap-y-1 border-l-2 border-[#12201E]/20 pl-3 text-sm text-slate-600">
             {article.editor_responsavel && (
               <span>
                 Por{" "}
@@ -433,7 +433,7 @@ function ArticlePage() {
                       .replace(/[^a-z0-9]+/g, "-")
                       .replace(/(^-|-$)/g, ""),
                   }}
-                  className="font-semibold text-slate-800 underline decoration-[#0A2540]/30 underline-offset-2 hover:decoration-[#0A2540]"
+                  className="font-semibold text-slate-800 underline decoration-[#12201E]/30 underline-offset-2 hover:decoration-[#12201E]"
                 >
                   {article.editor_responsavel}
                 </Link>
@@ -474,10 +474,10 @@ function ArticlePage() {
         {/* TL;DR — resposta direta (answer-first para motores de IA) */}
         {article.tldr && (
           <aside
-            className="article-tldr mx-auto mt-8 max-w-3xl border-l-4 border-[#0A2540] bg-slate-50 p-4"
+            className="article-tldr mx-auto mt-8 max-w-3xl border-l-4 border-[#12201E] bg-slate-50 p-4"
             aria-label="Resumo rápido"
           >
-            <div className="mb-1 text-[10px] font-bold uppercase tracking-[0.2em] text-[#0A2540]">
+            <div className="mb-1 text-[10px] font-bold uppercase tracking-[0.2em] text-[#12201E]">
               Em resumo
             </div>
             <p className="text-base leading-relaxed text-slate-800">{article.tldr}</p>
@@ -524,7 +524,7 @@ function ArticlePage() {
           if (extras.length === 0) return null;
           return (
             <section className="mx-auto mt-8 max-w-3xl">
-              <h2 className="mb-3 text-[11px] font-bold uppercase tracking-[0.2em] text-[#0A2540]">
+              <h2 className="mb-3 text-[11px] font-bold uppercase tracking-[0.2em] text-[#12201E]">
                 Galeria
               </h2>
               <div className="grid gap-4 sm:grid-cols-2">
@@ -586,7 +586,7 @@ function ArticlePage() {
         {/* 5W1H — os fatos essenciais */}
         {article.fatos_5w1h && (
           <section className="mx-auto mt-10 max-w-3xl border border-slate-200 bg-white p-5">
-            <h2 className="mb-4 text-[11px] font-bold uppercase tracking-[0.2em] text-[#0A2540]">
+            <h2 className="mb-4 text-[11px] font-bold uppercase tracking-[0.2em] text-[#12201E]">
               Os fatos
             </h2>
             <dl className="grid grid-cols-1 gap-x-6 gap-y-3 sm:grid-cols-2">
@@ -632,7 +632,7 @@ function ArticlePage() {
                   <p
                     className={
                       isFirst
-                        ? "mb-6 first-letter:float-left first-letter:mr-3 first-letter:pt-1 first-letter:font-display first-letter:text-6xl first-letter:font-black first-letter:leading-[0.85] first-letter:text-[#0A2540]"
+                        ? "mb-6 first-letter:float-left first-letter:mr-3 first-letter:pt-1 first-letter:font-display first-letter:text-6xl first-letter:font-black first-letter:leading-[0.85] first-letter:text-[#12201E]"
                         : "mb-6"
                     }
                   >
@@ -660,7 +660,7 @@ function ArticlePage() {
         {/* FAQ — perguntas frequentes */}
         {article.faq && article.faq.length > 0 && (
           <section className="mx-auto mt-12 max-w-3xl border-t border-slate-200 pt-8">
-            <h2 className="mb-6 font-display text-2xl font-black text-[#0A2540]">
+            <h2 className="mb-6 font-display text-2xl font-black text-[#12201E]">
               Perguntas frequentes
             </h2>
             <div className="space-y-5">
@@ -670,8 +670,8 @@ function ArticlePage() {
                   className="group border-b border-slate-200 pb-4"
                   {...(i === 0 ? { open: true } : {})}
                 >
-                  <summary className="cursor-pointer list-none text-base font-bold text-slate-900 marker:hidden hover:text-[#0A2540]">
-                    <span className="mr-2 text-[#0A2540] group-open:rotate-90 inline-block transition-transform">›</span>
+                  <summary className="cursor-pointer list-none text-base font-bold text-slate-900 marker:hidden hover:text-[#12201E]">
+                    <span className="mr-2 text-[#12201E] group-open:rotate-90 inline-block transition-transform">›</span>
                     {f.pergunta}
                   </summary>
                   <p className="mt-3 pl-5 text-[15px] leading-relaxed text-slate-700">
@@ -690,10 +690,10 @@ function ArticlePage() {
               {article.editor_responsavel ? (
                 <>
                   Editor(a) responsável:{" "}
-                  <span className="font-bold text-[#0A2540]">{article.editor_responsavel}</span> · Redação Vozes Paranaenses
+                  <span className="font-bold text-[#12201E]">{article.editor_responsavel}</span> · Redação Vozes Paranaenses
                 </>
               ) : (
-                <>Redação <span className="font-bold text-[#0A2540]">Vozes Paranaenses</span></>
+                <>Redação <span className="font-bold text-[#12201E]">Vozes Paranaenses</span></>
               )}
             </span>
             {article.region?.name && <span>{article.region.name} · PR</span>}
@@ -702,11 +702,11 @@ function ArticlePage() {
             <Link
               to="/correcoes"
               search={{ materia: `${region}/${slug}` }}
-              className="rounded border border-slate-300 px-2 py-1 font-semibold text-slate-700 hover:border-[#0A2540] hover:text-[#0A2540]"
+              className="rounded border border-slate-300 px-2 py-1 font-semibold text-slate-700 hover:border-[#12201E] hover:text-[#12201E]"
             >
               Corrigir esta matéria
             </Link>
-            <Link to="/politica-editorial" className="underline underline-offset-2 hover:text-[#0A2540]">
+            <Link to="/politica-editorial" className="underline underline-offset-2 hover:text-[#12201E]">
               Política editorial
             </Link>
             <span className="italic text-slate-400">
@@ -726,7 +726,7 @@ function ArticlePage() {
                 <Link
                   to="/$region/editoria/$categoria"
                   params={{ region, categoria: categoriaSlug }}
-                  className="rounded-full border border-[#0A2540]/20 bg-white px-3 py-1 text-xs font-semibold text-[#0A2540] hover:bg-[#0A2540] hover:text-white"
+                  className="rounded-full border border-[#12201E]/20 bg-white px-3 py-1 text-xs font-semibold text-[#12201E] hover:bg-[#12201E] hover:text-white"
                 >
                   {article.categoria.name}
                 </Link>
@@ -735,7 +735,7 @@ function ArticlePage() {
                 <Link
                   to="/$region/cidade/$cidade"
                   params={{ region, cidade: cidadeAtualSlug }}
-                  className="rounded-full border border-[#0A2540]/20 bg-white px-3 py-1 text-xs font-semibold text-[#0A2540] hover:bg-[#0A2540] hover:text-white"
+                  className="rounded-full border border-[#12201E]/20 bg-white px-3 py-1 text-xs font-semibold text-[#12201E] hover:bg-[#12201E] hover:text-white"
                 >
                   {article.cidade_principal}
                 </Link>
@@ -748,7 +748,7 @@ function ArticlePage() {
                     key={c}
                     to="/$region/cidade/$cidade"
                     params={{ region, cidade: cidadeSlug(c) }}
-                    className="rounded-full border border-slate-200 bg-slate-50 px-3 py-1 text-xs font-medium text-slate-700 hover:border-[#0A2540] hover:text-[#0A2540]"
+                    className="rounded-full border border-slate-200 bg-slate-50 px-3 py-1 text-xs font-medium text-slate-700 hover:border-[#12201E] hover:text-[#12201E]"
                   >
                     {c}
                   </Link>
@@ -777,14 +777,14 @@ function ArticlePage() {
         <section className="border-t border-slate-200 bg-white">
           <div className="mx-auto max-w-6xl px-4 py-10">
             <div className="mb-6 flex items-center gap-3">
-              <span className="inline-block bg-[#0A2540] px-3 py-1 text-xs font-bold uppercase tracking-[0.18em] text-white">
+              <span className="inline-block bg-[#12201E] px-3 py-1 text-xs font-bold uppercase tracking-[0.18em] text-white">
                 Mais de {article.cidade_principal}
               </span>
               <span className="h-px flex-1 bg-slate-200" />
               <Link
                 to="/$region/cidade/$cidade"
                 params={{ region, cidade: cidadeAtualSlug }}
-                className="text-[11px] font-bold uppercase tracking-[0.18em] text-[#0A2540] hover:text-[#0d2f52]"
+                className="text-[11px] font-bold uppercase tracking-[0.18em] text-[#12201E] hover:text-[#0d2f52]"
               >
                 Ver todas ›
               </Link>
@@ -806,17 +806,17 @@ function ArticlePage() {
                         loading="lazy"
                       />
                     ) : (
-                      <div className="flex h-full w-full items-center justify-center bg-[#0A2540]/10 text-xs uppercase tracking-widest text-[#0A2540]/60">
+                      <div className="flex h-full w-full items-center justify-center bg-[#12201E]/10 text-xs uppercase tracking-widest text-[#12201E]/60">
                         Sem imagem
                       </div>
                     )}
                   </div>
                   {r.categoria && (
-                    <div className="mt-3 text-[10px] font-bold uppercase tracking-[0.18em] text-[#0A2540]">
+                    <div className="mt-3 text-[10px] font-bold uppercase tracking-[0.18em] text-[#12201E]">
                       {r.categoria.name}
                     </div>
                   )}
-                  <h3 className="mt-1 font-display text-lg font-bold leading-[1.15] text-slate-900 group-hover:text-[#0A2540]">
+                  <h3 className="mt-1 font-display text-lg font-bold leading-[1.15] text-slate-900 group-hover:text-[#12201E]">
                     {r.title}
                   </h3>
                 </Link>
@@ -831,14 +831,14 @@ function ArticlePage() {
         <section className="border-t border-slate-200 bg-slate-50">
           <div className="mx-auto max-w-6xl px-4 py-12">
             <div className="mb-6 flex items-center gap-3">
-              <span className="inline-block bg-[#0A2540] px-3 py-1 text-xs font-bold uppercase tracking-[0.18em] text-white">
+              <span className="inline-block bg-[#12201E] px-3 py-1 text-xs font-bold uppercase tracking-[0.18em] text-white">
                 Mais {article.region?.name ?? "da região"}
               </span>
               <span className="h-px flex-1 bg-slate-200" />
               <Link
                 to="/$region"
                 params={{ region }}
-                className="text-[11px] font-bold uppercase tracking-[0.18em] text-[#0A2540] hover:text-[#0d2f52]"
+                className="text-[11px] font-bold uppercase tracking-[0.18em] text-[#12201E] hover:text-[#0d2f52]"
               >
                 Ver todas ›
               </Link>
@@ -861,17 +861,17 @@ function ArticlePage() {
                         loading="lazy"
                       />
                     ) : (
-                      <div className="flex h-full w-full items-center justify-center bg-[#0A2540]/10 text-xs uppercase tracking-widest text-[#0A2540]/60">
+                      <div className="flex h-full w-full items-center justify-center bg-[#12201E]/10 text-xs uppercase tracking-widest text-[#12201E]/60">
                         Sem imagem
                       </div>
                     )}
                   </div>
                   {r.categoria && (
-                    <div className="mt-3 text-[10px] font-bold uppercase tracking-[0.18em] text-[#0A2540]">
+                    <div className="mt-3 text-[10px] font-bold uppercase tracking-[0.18em] text-[#12201E]">
                       {r.categoria.name}
                     </div>
                   )}
-                  <h3 className="mt-1 font-display text-xl font-bold leading-[1.1] text-slate-900 group-hover:text-[#0A2540]">
+                  <h3 className="mt-1 font-display text-xl font-bold leading-[1.1] text-slate-900 group-hover:text-[#12201E]">
                     {r.title}
                   </h3>
                 </Link>
@@ -898,7 +898,7 @@ function LeiaTambemInline({
       aria-label="Leia também"
       className="my-8 border-y border-slate-200 bg-slate-50 px-5 py-5"
     >
-      <div className="mb-3 text-[10px] font-bold uppercase tracking-[0.2em] text-[#0A2540]">
+      <div className="mb-3 text-[10px] font-bold uppercase tracking-[0.2em] text-[#12201E]">
         Leia também
       </div>
       <ul className="space-y-2">
@@ -909,8 +909,8 @@ function LeiaTambemInline({
               params={{ region, slug: it.slug }}
               className="group flex items-baseline gap-2 text-base leading-snug"
             >
-              <span className="mt-0.5 text-[#0A2540]">›</span>
-              <span className="font-semibold text-slate-800 underline decoration-[#0A2540]/20 underline-offset-2 group-hover:text-[#0A2540] group-hover:decoration-[#0A2540]">
+              <span className="mt-0.5 text-[#12201E]">›</span>
+              <span className="font-semibold text-slate-800 underline decoration-[#12201E]/20 underline-offset-2 group-hover:text-[#12201E] group-hover:decoration-[#12201E]">
                 {it.title}
               </span>
               {it.region && (

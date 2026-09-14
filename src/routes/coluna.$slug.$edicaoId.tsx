@@ -66,19 +66,19 @@ function ColunaEdicaoPage() {
       <div className="mx-auto grid max-w-6xl gap-10 px-4 py-10 lg:grid-cols-[minmax(0,1fr)_300px]">
       <main className="min-w-0">
         {coluna && (
-          <div className="mb-5 flex items-center gap-3 border-b-2 border-[#0A2540] pb-3">
+          <div className="mb-5 flex items-center gap-3 border-b-2 border-[#12201E] pb-3">
             <span className="h-12 w-12 shrink-0 overflow-hidden rounded-full bg-slate-200">
               {coluna.foto_colunista_url && (
                 <img src={coluna.foto_colunista_url} alt={coluna.nome} className="h-full w-full object-cover" />
               )}
             </span>
             <div className="min-w-0">
-              <p className="text-[11px] font-bold uppercase tracking-widest text-[#0066CC]">Coluna</p>
-              <h2 className="font-display text-xl font-black uppercase leading-tight text-[#0A2540]">{coluna.nome}</h2>
+              <p className="text-[11px] font-bold uppercase tracking-widest text-[#E29F65]">Coluna</p>
+              <h2 className="font-display text-xl font-black uppercase leading-tight text-[#12201E]">{coluna.nome}</h2>
             </div>
           </div>
         )}
-        <Link to="/coluna/$slug/arquivo" params={{ slug }} className="text-sm font-semibold text-[#0066CC] hover:underline">
+        <Link to="/coluna/$slug/arquivo" params={{ slug }} className="text-sm font-semibold text-[#E29F65] hover:underline">
           ← Ver todas as edições
         </Link>
 
@@ -86,7 +86,7 @@ function ColunaEdicaoPage() {
           <img src={edicao.imagem_principal_url} alt={edicao.titulo} className="mt-4 h-56 w-full rounded-xl object-cover sm:h-72" />
         )}
 
-        <h1 className="font-display mt-4 text-3xl font-black leading-tight text-[#0A2540] sm:text-4xl">
+        <h1 className="font-display mt-4 text-3xl font-black leading-tight text-[#12201E] sm:text-4xl">
           {edicao.titulo}
         </h1>
         {edicao.subtitulo && <p className="mt-2 text-base font-medium text-slate-600">{edicao.subtitulo}</p>}
@@ -98,8 +98,8 @@ function ColunaEdicaoPage() {
 
         <div className="mt-6 space-y-6">
           {edicao.notas.map((nota: ColunaNota) => (
-            <div key={nota.id} className="border-l-2 border-[#0066CC] pl-4">
-              <h2 className="font-display text-lg font-bold text-[#0A2540]">{nota.titulo_gatilho}</h2>
+            <div key={nota.id} className="border-l-2 border-[#E29F65] pl-4">
+              <h2 className="font-display text-lg font-bold text-[#12201E]">{nota.titulo_gatilho}</h2>
               {nota.imagem_url && (
                 <img src={nota.imagem_url} alt="" className="my-3 w-full max-w-md rounded-lg object-cover sm:float-left sm:mr-4 sm:w-56" />
               )}
@@ -110,8 +110,8 @@ function ColunaEdicaoPage() {
         </div>
 
         {edicao.pergunta_engajamento && (
-          <div className="mt-7 rounded-xl bg-[#0066CC]/5 p-4">
-            <p className="text-sm font-semibold text-[#0A2540]">🗳️ {edicao.pergunta_engajamento}</p>
+          <div className="mt-7 rounded-xl bg-[#E29F65]/5 p-4">
+            <p className="text-sm font-semibold text-[#12201E]">🗳️ {edicao.pergunta_engajamento}</p>
           </div>
         )}
 

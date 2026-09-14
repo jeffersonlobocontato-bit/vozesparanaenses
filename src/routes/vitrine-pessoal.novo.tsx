@@ -217,10 +217,10 @@ function VitrinePessoalChat() {
       <SiteHeader />
       <main className="mx-auto flex min-h-[calc(100vh-200px)] max-w-2xl flex-col px-4 py-8">
         <div className="mb-4 text-center">
-          <span className="rounded-full bg-[#0066CC]/10 px-3 py-1 text-xs font-bold uppercase tracking-wider text-[#0066CC]">
+          <span className="rounded-full bg-[#E29F65]/10 px-3 py-1 text-xs font-bold uppercase tracking-wider text-[#E29F65]">
             Vitrine Pessoal — R$ 199
           </span>
-          <h1 className="font-display mt-3 text-2xl font-black text-[#0A2540] md:text-3xl">
+          <h1 className="font-display mt-3 text-2xl font-black text-[#12201E] md:text-3xl">
             Vamos conversar sobre o seu trabalho
           </h1>
           <p className="mt-2 text-sm text-slate-600">
@@ -235,7 +235,7 @@ function VitrinePessoalChat() {
                 <div
                   className={
                     m.role === "user"
-                      ? "max-w-[85%] whitespace-pre-wrap rounded-2xl rounded-br-sm bg-[#0066CC] px-4 py-2.5 text-sm text-white"
+                      ? "max-w-[85%] whitespace-pre-wrap rounded-2xl rounded-br-sm bg-[#E29F65] px-4 py-2.5 text-sm text-white"
                       : "max-w-[85%] whitespace-pre-wrap rounded-2xl rounded-bl-sm bg-slate-100 px-4 py-2.5 text-sm text-slate-800"
                   }
                 >
@@ -280,7 +280,7 @@ function VitrinePessoalChat() {
                         ? "Transcrevendo seu áudio…"
                         : "Escreva ou grave sua resposta. Depois clique em Enviar."
                 }
-                className="min-h-[44px] flex-1 resize-none rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm outline-none focus:border-[#0066CC] disabled:bg-slate-100"
+                className="min-h-[44px] flex-1 resize-none rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm outline-none focus:border-[#E29F65] disabled:bg-slate-100"
               />
               {!redirecionando && (
                 gravando ? (
@@ -304,7 +304,7 @@ function VitrinePessoalChat() {
               <button
                 type="submit"
                 disabled={enviando || transcrevendo || gravando || redirecionando || !rascunho.trim()}
-                className="shrink-0 rounded-xl bg-[#0066CC] px-4 py-2.5 text-sm font-bold text-white disabled:opacity-50"
+                className="shrink-0 rounded-xl bg-[#E29F65] px-4 py-2.5 text-sm font-bold text-white disabled:opacity-50"
               >
                 Enviar
               </button>

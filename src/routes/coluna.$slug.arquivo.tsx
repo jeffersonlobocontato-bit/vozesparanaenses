@@ -33,7 +33,7 @@ function ColunaArquivo() {
       <SiteHeader />
       <div className="mx-auto grid max-w-6xl gap-10 px-4 py-10 lg:grid-cols-[minmax(0,1fr)_300px]">
       <main className="min-w-0">
-        <h1 className="font-display text-3xl font-black text-[#0A2540]">Edições anteriores</h1>
+        <h1 className="font-display text-3xl font-black text-[#12201E]">Edições anteriores</h1>
         <p className="mt-2 text-slate-600">Todas as publicações já saídas nesta coluna, da mais recente à mais antiga.</p>
 
         <div className="mt-8 space-y-4">
@@ -42,18 +42,18 @@ function ColunaArquivo() {
               key={e.id}
               to="/coluna/$slug/$edicaoId"
             params={{ slug, edicaoId: e.slug ?? e.id }}
-              className="flex gap-4 rounded-xl border border-slate-200 bg-white p-4 shadow-sm transition hover:border-[#0066CC]"
+              className="flex gap-4 rounded-xl border border-slate-200 bg-white p-4 shadow-sm transition hover:border-[#E29F65]"
             >
               {e.imagem_principal_url && (
                 <img src={e.imagem_principal_url} alt="" className="h-20 w-28 shrink-0 rounded-lg object-cover" />
               )}
               <div>
                 {e.publicado_em && (
-                  <p className="text-xs font-semibold uppercase tracking-wide text-[#0066CC]">
+                  <p className="text-xs font-semibold uppercase tracking-wide text-[#E29F65]">
                     {new Date(e.publicado_em).toLocaleDateString("pt-BR", { day: "2-digit", month: "long", year: "numeric" })}
                   </p>
                 )}
-                <p className="mt-1 font-display text-lg font-bold leading-tight text-[#0A2540]">{e.titulo}</p>
+                <p className="mt-1 font-display text-lg font-bold leading-tight text-[#12201E]">{e.titulo}</p>
                 {e.subtitulo && <p className="mt-1 text-sm text-slate-500 line-clamp-2">{e.subtitulo}</p>}
               </div>
             </Link>

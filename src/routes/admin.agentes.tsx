@@ -287,7 +287,7 @@ function AgenteEditor({ cat, inicial, onSave }: {
         </p>
         <button
           onClick={() => onSave(cat, state)}
-          className="rounded bg-[#0066CC] px-4 py-1.5 text-xs font-semibold text-white hover:bg-[#0055aa]"
+          className="rounded bg-[#E29F65] px-4 py-1.5 text-xs font-semibold text-white hover:bg-[#0055aa]"
         >Salvar agente</button>
       </div>
     </div>

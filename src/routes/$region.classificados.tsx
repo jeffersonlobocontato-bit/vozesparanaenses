@@ -74,17 +74,17 @@ function ClassificadosPage() {
   });
 
   const tema = region.tema_config ?? {};
-  const primary = tema.paleta?.primaria ?? "#0A2540";
+  const primary = tema.paleta?.primaria ?? "#12201E";
 
   return (
     <div className="min-h-screen bg-white">
       <SiteHeader />
       <main className="mx-auto grid max-w-7xl grid-cols-1 gap-8 px-4 py-10 lg:grid-cols-3">
         <section className="lg:col-span-2">
-          <div className="text-[11px] font-bold uppercase tracking-[0.16em] text-[#0A2540]/70">
+          <div className="text-[11px] font-bold uppercase tracking-[0.16em] text-[#12201E]/70">
             {region.name}
           </div>
-          <h1 className="mt-1 font-display text-5xl leading-[1.02] text-[#0A2540] md:text-6xl">
+          <h1 className="mt-1 font-display text-5xl leading-[1.02] text-[#12201E] md:text-6xl">
             Classificados
           </h1>
           <p className="mt-2 text-slate-600">Emprego, imóveis e veículos publicados por moradores da região.</p>

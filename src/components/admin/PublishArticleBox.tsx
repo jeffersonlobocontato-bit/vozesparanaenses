@@ -92,7 +92,7 @@ export function PublishArticleBox() {
     }
   }
 
-  const inputCls = "mt-1 w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-800 outline-none focus:border-[#0066CC]";
+  const inputCls = "mt-1 w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-800 outline-none focus:border-[#E29F65]";
   const labelCls = "block text-xs font-semibold text-slate-600";
 
   return (
@@ -171,7 +171,7 @@ export function PublishArticleBox() {
           Publicar imediatamente (desmarque para enviar à Fila como rascunho)
         </label>
         <button type="submit" disabled={busy}
-          className="inline-flex items-center gap-1.5 rounded-full bg-gradient-to-r from-[#0A2540] to-[#0d3a6e] px-4 py-2 text-xs font-semibold text-white shadow-sm transition hover:shadow-md disabled:opacity-60">
+          className="inline-flex items-center gap-1.5 rounded-full bg-gradient-to-r from-[#12201E] to-[#0d3a6e] px-4 py-2 text-xs font-semibold text-white shadow-sm transition hover:shadow-md disabled:opacity-60">
           {busy ? (step ?? "Processando…") : publicarDireto ? "▶ Publicar matéria" : "▶ Enviar para a fila"}
         </button>
         {ok && <span className="text-[11px] font-semibold text-emerald-700">✓ {ok}</span>}

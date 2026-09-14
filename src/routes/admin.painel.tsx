@@ -477,12 +477,12 @@ function AdminDashboard() {
     <div className="space-y-6">
       <div className="flex flex-wrap items-end justify-between gap-4 border-b border-slate-200 pb-5">
         <div>
-          <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[#0066CC]">Visão geral</p>
-          <h1 className="mt-1 text-3xl font-bold text-[#0A2540]">Painel editorial</h1>
+          <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[#E29F65]">Visão geral</p>
+          <h1 className="mt-1 text-3xl font-bold text-[#12201E]">Painel editorial</h1>
           <p className="mt-1 text-sm text-slate-500">Métricas em tempo real do portal, pipeline e monetização.</p>
         </div>
         <div className="flex flex-wrap items-center gap-2">
-          <button onClick={load} className="inline-flex items-center gap-1.5 rounded-full border border-slate-200 bg-white px-3.5 py-2 text-xs font-medium text-slate-700 shadow-sm transition hover:border-[#0066CC] hover:text-[#0066CC]">
+          <button onClick={load} className="inline-flex items-center gap-1.5 rounded-full border border-slate-200 bg-white px-3.5 py-2 text-xs font-medium text-slate-700 shadow-sm transition hover:border-[#E29F65] hover:text-[#E29F65]">
             <RefreshCw className="h-3.5 w-3.5" /> Atualizar
           </button>
           <button onClick={runPrefeituras} disabled={pipelineBusy}
@@ -490,7 +490,7 @@ function AdminDashboard() {
             {pipelineRunning === "prefeituras" ? <><Activity className="h-3.5 w-3.5 animate-pulse" /> Coletando…</> : <><Radio className="h-3.5 w-3.5" /> Scrape prefeituras</>}
           </button>
           <button onClick={runPipeline} disabled={pipelineBusy}
-            className="inline-flex items-center gap-1.5 rounded-full bg-gradient-to-r from-[#0A2540] to-[#0d3a6e] px-4 py-2 text-xs font-semibold text-white shadow-sm transition hover:shadow-md disabled:opacity-60">
+            className="inline-flex items-center gap-1.5 rounded-full bg-gradient-to-r from-[#12201E] to-[#0d3a6e] px-4 py-2 text-xs font-semibold text-white shadow-sm transition hover:shadow-md disabled:opacity-60">
             {pipelineRunning === "portais" ? <><Activity className="h-3.5 w-3.5 animate-pulse" /> Rodando pipeline…</> : <><Play className="h-3.5 w-3.5" /> Rodar pipeline agora</>}
           </button>
           <button onClick={escreverPendentes} disabled={pipelineBusy}
@@ -510,9 +510,9 @@ function AdminDashboard() {
 
       {/* KPIs editoriais */}
       <Section title="Editorial" subtitle="Estado atual das matérias">
-        <div className="mb-4 rounded-2xl border-2 border-[#0066CC]/40 bg-white p-5 shadow-sm">
+        <div className="mb-4 rounded-2xl border-2 border-[#E29F65]/40 bg-white p-5 shadow-sm">
           <div className="mb-3">
-            <h3 className="text-sm font-bold uppercase tracking-wide text-[#0A2540]">📝 Publicar matéria</h3>
+            <h3 className="text-sm font-bold uppercase tracking-wide text-[#12201E]">📝 Publicar matéria</h3>
             <p className="text-xs text-slate-500">Preencha os campos e envie — a IA autopreenche SEO, GEO, TL;DR, 5W1H e FAQ.</p>
           </div>
           <PublishArticleBox />
@@ -672,7 +672,7 @@ function Section({ title, subtitle, children }: { title: string; subtitle?: stri
     <section>
       <div className="mb-3 flex items-baseline justify-between gap-3">
         <div>
-          <h2 className="text-sm font-bold uppercase tracking-[0.14em] text-[#0A2540]">{title}</h2>
+          <h2 className="text-sm font-bold uppercase tracking-[0.14em] text-[#12201E]">{title}</h2>
           {subtitle && <p className="text-xs text-slate-500">{subtitle}</p>}
         </div>
       </div>
@@ -693,10 +693,10 @@ function Kpi({ label, value, tone, icon: Icon, to }: {
             <Icon className="h-5 w-5" />
           </div>
         )}
-        {to && <span className="text-slate-300 transition group-hover:text-[#0066CC]">›</span>}
+        {to && <span className="text-slate-300 transition group-hover:text-[#E29F65]">›</span>}
       </div>
       <div className="mt-3 text-[11px] font-semibold uppercase tracking-wider text-slate-500">{label}</div>
-      <div className="mt-0.5 text-2xl font-bold text-[#0A2540]">{value ?? "…"}</div>
+      <div className="mt-0.5 text-2xl font-bold text-[#12201E]">{value ?? "…"}</div>
     </div>
   );
   return to ? <Link to={to}>{body}</Link> : body;
@@ -711,7 +711,7 @@ function Shortcut({ to, title, desc, icon: Icon, tone }: {
       <div className={`mb-3 flex h-10 w-10 items-center justify-center rounded-xl ${ICON_TONE[tone]}`}>
         <Icon className="h-5 w-5" />
       </div>
-      <div className="font-semibold text-[#0A2540] group-hover:text-[#0066CC]">{title}</div>
+      <div className="font-semibold text-[#12201E] group-hover:text-[#E29F65]">{title}</div>
       <p className="mt-1 text-xs leading-relaxed text-slate-500">{desc}</p>
     </Link>
   );
@@ -727,18 +727,18 @@ function PipelineCard({ tone, titulo, desc, to, actionLabel, onAction, running, 
         <div className={`mb-3 flex h-9 w-9 items-center justify-center rounded-xl ${ICON_TONE[tone]}`}>
           <Play className="h-4 w-4" />
         </div>
-        <div className="font-semibold text-[#0A2540]">{titulo}</div>
+        <div className="font-semibold text-[#12201E]">{titulo}</div>
         <p className="mt-1 text-xs leading-relaxed text-slate-500">{desc}</p>
       </div>
       <div className="mt-3 flex items-center justify-between gap-2">
         <button
           onClick={onAction}
           disabled={running || blocked}
-          className="rounded-full bg-[#0A2540] px-3 py-1.5 text-xs font-semibold text-white disabled:opacity-60"
+          className="rounded-full bg-[#12201E] px-3 py-1.5 text-xs font-semibold text-white disabled:opacity-60"
         >
           {running ? "Rodando…" : actionLabel}
         </button>
-        <Link to={to} className="text-xs font-semibold text-[#0066CC] hover:underline">
+        <Link to={to} className="text-xs font-semibold text-[#E29F65] hover:underline">
           Ver →
         </Link>
       </div>

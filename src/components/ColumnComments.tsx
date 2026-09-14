@@ -42,9 +42,9 @@ export function ColumnComments({ edicaoId }: { edicaoId: string }) {
   }
 
   return (
-    <section className="mt-10 border-t-2 border-[#0A2540] pt-6">
-      <h2 className="font-display text-xl font-black uppercase text-[#0A2540]">
-        Comentários {itens.length > 0 && <span className="text-[#0066CC]">({itens.length})</span>}
+    <section className="mt-10 border-t-2 border-[#12201E] pt-6">
+      <h2 className="font-display text-xl font-black uppercase text-[#12201E]">
+        Comentários {itens.length > 0 && <span className="text-[#E29F65]">({itens.length})</span>}
       </h2>
       <p className="mt-1 text-sm text-slate-600">
         Participe do debate. Comentários ofensivos ou com links são removidos.
@@ -70,7 +70,7 @@ export function ColumnComments({ edicaoId }: { edicaoId: string }) {
           <button
             type="submit"
             disabled={enviando}
-            className="rounded-lg bg-[#0066CC] px-4 py-2 text-sm font-semibold text-white disabled:opacity-60"
+            className="rounded-lg bg-[#E29F65] px-4 py-2 text-sm font-semibold text-white disabled:opacity-60"
           >
             {enviando ? "Enviando…" : "Comentar"}
           </button>
@@ -82,11 +82,11 @@ export function ColumnComments({ edicaoId }: { edicaoId: string }) {
         {itens.map((c) => (
           <li key={c.id} className="rounded-xl border border-slate-200 bg-white p-4">
             <div className="flex items-center gap-2">
-              <span className="flex h-8 w-8 items-center justify-center rounded-full bg-[#0066CC]/10 text-xs font-bold text-[#0066CC]">
+              <span className="flex h-8 w-8 items-center justify-center rounded-full bg-[#E29F65]/10 text-xs font-bold text-[#E29F65]">
                 {c.nome.slice(0, 2).toUpperCase()}
               </span>
               <div>
-                <p className="text-sm font-semibold text-[#0A2540]">{c.nome}</p>
+                <p className="text-sm font-semibold text-[#12201E]">{c.nome}</p>
                 <p className="text-[11px] uppercase tracking-wide text-slate-400">
                   {new Date(c.criado_em).toLocaleDateString("pt-BR", { day: "2-digit", month: "short", year: "numeric" })}
                 </p>

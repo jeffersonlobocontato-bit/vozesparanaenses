@@ -69,10 +69,10 @@ function AdminLogin() {
   }
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-[#0A2540] px-4">
+    <div className="flex min-h-screen items-center justify-center bg-[#12201E] px-4">
       <form onSubmit={onSubmit} className="w-full max-w-sm space-y-4 rounded-lg bg-white p-6 shadow-xl">
         <div className="flex justify-center pb-2"><Logo size="sm" variant="blue" withLink={false} /></div>
-        <h1 className="text-center text-lg font-semibold text-[#0A2540]">Painel Editorial</h1>
+        <h1 className="text-center text-lg font-semibold text-[#12201E]">Painel Editorial</h1>
         <label className="block text-sm">
           <span className="mb-1 block text-muted-foreground">E-mail</span>
           <input type="email" required value={email} onChange={(e) => setEmail(e.target.value)}
@@ -86,11 +86,11 @@ function AdminLogin() {
         {err && <p className="text-xs text-red-600">{err}</p>}
         {resetMsg && <p className="text-xs text-green-700">{resetMsg}</p>}
         <button disabled={busy} type="submit"
-          className="w-full rounded bg-[#0066CC] px-3 py-2 text-sm font-semibold text-white hover:bg-[#0055aa] disabled:opacity-60">
+          className="w-full rounded bg-[#E29F65] px-3 py-2 text-sm font-semibold text-white hover:bg-[#0055aa] disabled:opacity-60">
           {busy ? "Entrando…" : "Entrar"}
         </button>
         <button type="button" onClick={onReset} disabled={resetBusy}
-          className="w-full text-center text-xs text-[#0066CC] hover:underline disabled:opacity-60">
+          className="w-full text-center text-xs text-[#E29F65] hover:underline disabled:opacity-60">
           {resetBusy ? "Enviando…" : "Esqueci minha senha"}
         </button>
       </form>

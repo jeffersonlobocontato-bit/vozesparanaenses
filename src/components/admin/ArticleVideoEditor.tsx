@@ -138,7 +138,7 @@ export function ArticleVideoEditor({ articleId, currentUrl, currentLegenda, curr
           type="button"
           onClick={() => save(url.trim() || null)}
           disabled={busy !== null || url.trim() === (currentUrl ?? "")}
-          className="rounded bg-[#0A2540] px-3 py-1.5 text-xs font-semibold text-white hover:bg-[#0d2f52] disabled:opacity-60"
+          className="rounded bg-[#12201E] px-3 py-1.5 text-xs font-semibold text-white hover:bg-[#0d2f52] disabled:opacity-60"
         >
           {busy === "save" ? "Salvando…" : "Salvar URL"}
         </button>
@@ -207,7 +207,7 @@ export function ArticleVideoEditor({ articleId, currentUrl, currentLegenda, curr
           type="button"
           onClick={saveMeta}
           disabled={busy !== null || !metaDirty}
-          className="rounded bg-[#0A2540] px-3 py-1.5 text-[11px] font-semibold text-white hover:bg-[#0d2f52] disabled:opacity-60"
+          className="rounded bg-[#12201E] px-3 py-1.5 text-[11px] font-semibold text-white hover:bg-[#0d2f52] disabled:opacity-60"
         >
           {busy === "meta" ? "Salvando…" : "💾 Salvar legenda/crédito"}
         </button>

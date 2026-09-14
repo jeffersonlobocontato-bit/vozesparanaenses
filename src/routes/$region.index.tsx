@@ -96,8 +96,8 @@ function RegionPage() {
   const { data: articles } = useSuspenseQuery(articlesQO(slug));
 
   const tema = region.tema_config ?? {};
-  const primary = tema.paleta?.primaria ?? "#0A2540";
-  const accent = tema.paleta?.acento ?? "#0066CC";
+  const primary = tema.paleta?.primaria ?? "#12201E";
+  const accent = tema.paleta?.acento ?? "#E29F65";
 
   const { hero, side: sideCards, rest } = arrangePinnedSlots(articles, 4, { region: slug });
 

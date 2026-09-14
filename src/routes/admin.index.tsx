@@ -349,8 +349,8 @@ function AdminQueue() {
         {items?.map((it) => (
           <li key={it.id} className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
             <div className="mb-1 flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
-              {it.regiao && <span className="rounded bg-[#0A2540] px-2 py-0.5 font-semibold text-white">{displayRegionName(it.regiao.slug, it.regiao.nome)}</span>}
-              {it.categoria && <span className="rounded bg-[#0066CC] px-2 py-0.5 font-semibold text-white">{it.categoria.nome}</span>}
+              {it.regiao && <span className="rounded bg-[#12201E] px-2 py-0.5 font-semibold text-white">{displayRegionName(it.regiao.slug, it.regiao.nome)}</span>}
+              {it.categoria && <span className="rounded bg-[#E29F65] px-2 py-0.5 font-semibold text-white">{it.categoria.nome}</span>}
               {it.publicado_automaticamente && (
                 <span className="rounded bg-emerald-600 px-2 py-0.5 font-semibold text-white" title="Sem foto real da fonte e interesse alto o bastante — publicou sozinha, sem espera por decisão">
                   ⚡ Publicação automática
@@ -443,7 +443,7 @@ function AdminQueue() {
               )}
               {it.status === "rascunho" && (
                 <button disabled={busyId === it.id} onClick={() => updateStatus(it.id, "aprovado")}
-                  className="rounded bg-[#0066CC] px-3 py-1 text-xs font-semibold text-white hover:bg-[#0055aa] disabled:opacity-60">
+                  className="rounded bg-[#E29F65] px-3 py-1 text-xs font-semibold text-white hover:bg-[#0055aa] disabled:opacity-60">
                   Aprovar
                 </button>
               )}

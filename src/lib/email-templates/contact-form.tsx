@@ -77,7 +77,7 @@ const container = {
 }
 
 const heading = {
-  color: '#0A2540',
+  color: '#12201E',
   fontFamily: '"Bebas Neue", Arial, sans-serif',
   fontSize: '28px',
   fontWeight: 'bold',
