@@ -152,7 +152,7 @@ function AdminMemoria() {
         <p className="text-[10px] text-muted-foreground">
           {m.atualizado_em ? `Atualizado em ${new Date(m.atualizado_em).toLocaleString("pt-BR")}` : "Nunca salvo"}
         </p>
-        <button onClick={save} className="inline-flex items-center gap-1.5 rounded-full bg-gradient-to-r from-[#0A2540] to-[#0d3a6e] px-4 py-2 text-xs font-semibold text-white shadow-sm transition hover:shadow-md">
+        <button onClick={save} className="inline-flex items-center gap-1.5 rounded-full bg-gradient-to-r from-[#12201E] to-[#0d3a6e] px-4 py-2 text-xs font-semibold text-white shadow-sm transition hover:shadow-md">
           Salvar memória editorial
         </button>
       </div>

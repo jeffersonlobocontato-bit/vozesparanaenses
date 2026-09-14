@@ -46,10 +46,10 @@ function ResetPassword() {
   }
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-[#0A2540] px-4">
+    <div className="flex min-h-screen items-center justify-center bg-[#12201E] px-4">
       <form onSubmit={onSubmit} className="w-full max-w-sm space-y-4 rounded-lg bg-white p-6 shadow-xl">
         <div className="flex justify-center pb-2"><Logo size="sm" variant="blue" withLink={false} /></div>
-        <h1 className="text-center text-lg font-semibold text-[#0A2540]">Redefinir senha</h1>
+        <h1 className="text-center text-lg font-semibold text-[#12201E]">Redefinir senha</h1>
         <label className="block text-sm">
           <span className="mb-1 block text-muted-foreground">Nova senha</span>
           <input type="password" required value={pass} onChange={(e) => setPass(e.target.value)}
@@ -63,7 +63,7 @@ function ResetPassword() {
         {err && <p className="text-xs text-red-600">{err}</p>}
         {msg && <p className="text-xs text-green-700">{msg}</p>}
         <button disabled={busy || !ready} type="submit"
-          className="w-full rounded bg-[#0066CC] px-3 py-2 text-sm font-semibold text-white hover:bg-[#0055aa] disabled:opacity-60">
+          className="w-full rounded bg-[#E29F65] px-3 py-2 text-sm font-semibold text-white hover:bg-[#0055aa] disabled:opacity-60">
           {busy ? "Salvando…" : "Salvar nova senha"}
         </button>
       </form>

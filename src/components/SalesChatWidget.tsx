@@ -33,7 +33,7 @@ function renderMessageContent(content: string) {
                 href={url}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="mt-2 inline-block rounded-full bg-[#0066CC] px-4 py-2 text-sm font-bold text-white shadow-sm transition-transform hover:scale-105 hover:bg-[#0052a3]"
+                className="mt-2 inline-block rounded-full bg-[#E29F65] px-4 py-2 text-sm font-bold text-white shadow-sm transition-transform hover:scale-105 hover:bg-[#0052a3]"
               >
                 {isFormUrl(url) ? "RESPONDER FORMULÁRIO" : "ABRIR LINK"}
               </a>
@@ -95,7 +95,7 @@ export function SalesChatWidget() {
     <div className="fixed bottom-4 right-4 z-50 flex flex-col items-end gap-3">
       {aberto && (
         <div className="flex h-[70vh] max-h-[560px] w-[92vw] max-w-sm flex-col overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-2xl">
-          <div className="flex items-center justify-between bg-[#0A2540] px-4 py-3 text-white">
+          <div className="flex items-center justify-between bg-[#12201E] px-4 py-3 text-white">
             <div>
               <p className="text-sm font-bold">Anuncie com a gente</p>
               <p className="text-[11px] opacity-80">Resposta na hora, sem compromisso</p>
@@ -107,7 +107,7 @@ export function SalesChatWidget() {
             {mensagens.map((m, i) => (
               <div key={i} className={`flex ${m.role === "user" ? "justify-end" : "justify-start"}`}>
                 <div className={`max-w-[85%] rounded-2xl px-3 py-2 text-sm leading-snug ${
-                  m.role === "user" ? "bg-[#0066CC] text-white" : "bg-slate-100 text-slate-800"
+                  m.role === "user" ? "bg-[#E29F65] text-white" : "bg-slate-100 text-slate-800"
                 }`}>
                   {m.role === "assistant" ? renderMessageContent(m.content) : m.content}
                 </div>
@@ -137,9 +137,9 @@ export function SalesChatWidget() {
               onChange={(e) => setInput(e.target.value)}
               placeholder="Escreva sua mensagem…"
               disabled={enviando}
-              className="flex-1 rounded-full border border-slate-300 px-3 py-2 text-sm outline-none focus:border-[#0066CC]"
+              className="flex-1 rounded-full border border-slate-300 px-3 py-2 text-sm outline-none focus:border-[#E29F65]"
             />
-            <button disabled={enviando || !input.trim()} className="rounded-full bg-[#0066CC] px-4 py-2 text-sm font-semibold text-white disabled:opacity-50">
+            <button disabled={enviando || !input.trim()} className="rounded-full bg-[#E29F65] px-4 py-2 text-sm font-semibold text-white disabled:opacity-50">
               Enviar
             </button>
           </form>
@@ -148,7 +148,7 @@ export function SalesChatWidget() {
 
       <button
         onClick={() => setAberto((v) => !v)}
-        className="flex items-center gap-2 rounded-full bg-[#0A2540] px-5 py-3 text-sm font-bold text-white shadow-lg transition-transform hover:scale-105"
+        className="flex items-center gap-2 rounded-full bg-[#12201E] px-5 py-3 text-sm font-bold text-white shadow-lg transition-transform hover:scale-105"
         aria-label="Abrir chat de anúncios"
       >
         📢 {aberto ? "Fechar" : "Anuncie aqui"}

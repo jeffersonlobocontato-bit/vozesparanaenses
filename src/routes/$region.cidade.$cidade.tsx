@@ -141,20 +141,20 @@ function CityPage() {
       <SiteHeader />
       <main className="mx-auto max-w-6xl px-4 py-10">
         <nav className="mb-4 flex flex-wrap items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-500">
-          <Link to="/" className="hover:text-[#0A2540]">Vozes Paranaenses</Link>
+          <Link to="/" className="hover:text-[#12201E]">Vozes Paranaenses</Link>
           <span className="text-slate-300">›</span>
-          <Link to="/$region" params={{ region }} className="hover:text-[#0A2540]">
+          <Link to="/$region" params={{ region }} className="hover:text-[#12201E]">
             {reg.name}
           </Link>
           <span className="text-slate-300">›</span>
-          <span className="text-[#0A2540]">{city.cityName}</span>
+          <span className="text-[#12201E]">{city.cityName}</span>
         </nav>
 
         <header className="mb-8 border-b border-slate-200 pb-6">
-          <div className="text-xs font-bold uppercase tracking-[0.18em] text-[#0A2540]">
+          <div className="text-xs font-bold uppercase tracking-[0.18em] text-[#12201E]">
             {reg.name} · Paraná
           </div>
-          <h1 className="mt-2 font-display text-5xl font-black leading-none tracking-tight text-[#0A2540] md:text-6xl">
+          <h1 className="mt-2 font-display text-5xl font-black leading-none tracking-tight text-[#12201E] md:text-6xl">
             Notícias de {city.cityName}
           </h1>
           <p className="mt-3 max-w-2xl text-sm text-slate-600">
@@ -166,7 +166,7 @@ function CityPage() {
         {city.articles.length === 0 ? (
           <p className="text-sm text-slate-500">
             Ainda não temos matérias marcadas com esta cidade.{" "}
-            <Link to="/$region" params={{ region }} className="text-[#0A2540] underline">
+            <Link to="/$region" params={{ region }} className="text-[#12201E] underline">
               Ver tudo do {reg.name}
             </Link>
             .
@@ -190,17 +190,17 @@ function CityPage() {
                       className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
                     />
                   ) : (
-                    <div className="flex h-full w-full items-center justify-center bg-[#0A2540]/10 text-xs uppercase tracking-widest text-[#0A2540]/60">
+                    <div className="flex h-full w-full items-center justify-center bg-[#12201E]/10 text-xs uppercase tracking-widest text-[#12201E]/60">
                       Sem imagem
                     </div>
                   )}
                 </div>
                 {a.categoria && (
-                  <div className="mt-3 text-[10px] font-bold uppercase tracking-[0.18em] text-[#0A2540]">
+                  <div className="mt-3 text-[10px] font-bold uppercase tracking-[0.18em] text-[#12201E]">
                     {a.categoria.name}
                   </div>
                 )}
-                <h2 className="mt-1 font-display text-xl font-bold leading-[1.1] text-slate-900 group-hover:text-[#0A2540]">
+                <h2 className="mt-1 font-display text-xl font-bold leading-[1.1] text-slate-900 group-hover:text-[#12201E]">
                   {a.title}
                 </h2>
                 {a.subtitle && (
@@ -221,7 +221,7 @@ function CityPage() {
 
         {neighbors.length > 0 && (
           <section className="mt-14 border-t border-slate-200 pt-8">
-            <h2 className="font-display text-2xl font-bold text-[#0A2540]">
+            <h2 className="font-display text-2xl font-bold text-[#12201E]">
               Cidades vizinhas
             </h2>
             <p className="mt-1 text-sm text-slate-600">
@@ -233,7 +233,7 @@ function CityPage() {
                   <Link
                     to="/$region/cidade/$cidade"
                     params={{ region, cidade: n.slug }}
-                    className="inline-flex items-center gap-2 rounded-full border border-slate-300 bg-white px-3 py-1.5 text-xs font-semibold text-[#0A2540] transition-colors hover:border-[#0A2540] hover:bg-[#0A2540] hover:text-white"
+                    className="inline-flex items-center gap-2 rounded-full border border-slate-300 bg-white px-3 py-1.5 text-xs font-semibold text-[#12201E] transition-colors hover:border-[#12201E] hover:bg-[#12201E] hover:text-white"
                   >
                     <span>{n.name}</span>
                     <span className="text-[10px] font-normal text-slate-500 group-hover:text-white/80">

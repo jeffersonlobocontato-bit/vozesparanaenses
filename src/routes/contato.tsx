@@ -69,10 +69,10 @@ export const Route = createFileRoute("/contato")({
 function Card({ title, email, desc }: { title: string; email: string; desc: string }) {
   return (
     <div className="rounded-lg border border-slate-200 bg-white p-5">
-      <div className="text-[10px] font-bold uppercase tracking-[0.16em] text-[#0A2540]">{title}</div>
+      <div className="text-[10px] font-bold uppercase tracking-[0.16em] text-[#12201E]">{title}</div>
       <a
         href={`mailto:${email}`}
-        className="mt-2 block font-display text-xl font-bold text-slate-900 hover:text-[#0A2540]"
+        className="mt-2 block font-display text-xl font-bold text-slate-900 hover:text-[#12201E]"
       >
         {email}
       </a>
@@ -122,7 +122,7 @@ function Contato() {
     <div className="min-h-screen bg-white text-slate-900">
       <SiteHeader />
       <article className="mx-auto max-w-4xl px-4 py-12">
-        <h1 className="font-display text-4xl font-black leading-tight text-[#0A2540] md:text-5xl">
+        <h1 className="font-display text-4xl font-black leading-tight text-[#12201E] md:text-5xl">
           Fale com a redação
         </h1>
         <p className="mt-4 max-w-2xl text-lg text-slate-600">
@@ -233,7 +233,7 @@ function Contato() {
                 <Button
                   type="submit"
                   disabled={status === "submitting"}
-                  className="bg-[#0A2540] text-white hover:bg-[#0A2540]/90"
+                  className="bg-[#12201E] text-white hover:bg-[#12201E]/90"
                 >
                   {status === "submitting" ? "Enviando..." : "Enviar mensagem"}
                 </Button>
@@ -245,12 +245,12 @@ function Contato() {
           </div>
         </form>
 
-        <div className="mt-10 rounded-lg border-l-4 border-[#0A2540] bg-slate-50 p-5">
-          <div className="text-[10px] font-bold uppercase tracking-[0.2em] text-[#0A2540]">
+        <div className="mt-10 rounded-lg border-l-4 border-[#12201E] bg-slate-50 p-5">
+          <div className="text-[10px] font-bold uppercase tracking-[0.2em] text-[#12201E]">
             Encontrou erro em uma matéria?
           </div>
           <p className="mt-2 text-sm text-slate-700">
-            Use o formulário dedicado em <a href="/correcoes" className="font-semibold text-[#0A2540] underline">correções</a> para
+            Use o formulário dedicado em <a href="/correcoes" className="font-semibold text-[#12201E] underline">correções</a> para
             que o registro fique vinculado à matéria original.
           </p>
         </div>

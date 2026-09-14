@@ -63,13 +63,13 @@ function Correcoes() {
   }
 
   const inputCls =
-    "w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm focus:border-[#0A2540] focus:outline-none";
+    "w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm focus:border-[#12201E] focus:outline-none";
 
   return (
     <div className="min-h-screen bg-white text-slate-900">
       <SiteHeader />
       <article className="mx-auto max-w-3xl px-4 py-12">
-        <h1 className="font-display text-4xl font-black leading-tight text-[#0A2540] md:text-5xl">
+        <h1 className="font-display text-4xl font-black leading-tight text-[#12201E] md:text-5xl">
           Política de correções
         </h1>
         <p className="mt-4 text-lg text-slate-600">
@@ -94,7 +94,7 @@ function Correcoes() {
         </section>
 
         <div className="mt-10 rounded-xl border border-slate-200 bg-slate-50 p-6">
-          <h2 className="font-display text-2xl font-black text-[#0A2540]">Reportar um erro</h2>
+          <h2 className="font-display text-2xl font-black text-[#12201E]">Reportar um erro</h2>
           <p className="mt-1 text-sm text-slate-600">
             Todos os campos são revisados pela redação. Não publicamos seus dados.
           </p>
@@ -151,7 +151,7 @@ function Correcoes() {
               <button
                 type="submit"
                 disabled={status === "sending"}
-                className="rounded-md bg-[#0A2540] px-4 py-2 text-sm font-semibold text-white hover:bg-[#0d2f52] disabled:opacity-60"
+                className="rounded-md bg-[#12201E] px-4 py-2 text-sm font-semibold text-white hover:bg-[#0d2f52] disabled:opacity-60"
               >
                 {status === "sending" ? "Enviando…" : "Enviar correção"}
               </button>

@@ -75,7 +75,7 @@ function AdminLayout() {
         <div className="mx-auto flex max-w-7xl items-center justify-between gap-4 px-6 py-3">
           <div className="flex items-center gap-8">
             <div className="flex items-center gap-2">
-              <div className="rounded-lg bg-[#0A2540] px-2 py-1.5">
+              <div className="rounded-lg bg-[#12201E] px-2 py-1.5">
                 <Logo size="sm" variant="white" withLink={false} />
               </div>
             </div>
@@ -99,7 +99,7 @@ function AdminLayout() {
                   key={it.to}
                   to={it.to}
                   activeOptions={it.exact ? { exact: true } : undefined}
-                  className="rounded-full px-3 py-1.5 text-slate-600 transition hover:text-[#0A2540] [&.active]:bg-white [&.active]:font-semibold [&.active]:text-[#0A2540] [&.active]:shadow-sm"
+                  className="rounded-full px-3 py-1.5 text-slate-600 transition hover:text-[#12201E] [&.active]:bg-white [&.active]:font-semibold [&.active]:text-[#12201E] [&.active]:shadow-sm"
                 >
                   {it.label}
                 </Link>
@@ -108,7 +108,7 @@ function AdminLayout() {
                 href="/"
                 target="_blank"
                 rel="noreferrer"
-                className="rounded-full px-3 py-1.5 text-slate-600 transition hover:text-[#0A2540]"
+                className="rounded-full px-3 py-1.5 text-slate-600 transition hover:text-[#12201E]"
                 title="Abrir o site em outra aba (modo editor: mostra atalho «Editar matéria» em cada notícia)"
               >
                 🏠 Ver site
@@ -120,10 +120,10 @@ function AdminLayout() {
               <span className="h-2 w-2 rounded-full bg-emerald-500" />
               <span className="max-w-[180px] truncate">{email}</span>
             </div>
-            <Link to="/admin/senha" className="rounded-full border border-slate-200 bg-white px-3 py-1.5 text-slate-700 hover:border-[#0A2540] hover:text-[#0A2540]">Senha</Link>
+            <Link to="/admin/senha" className="rounded-full border border-slate-200 bg-white px-3 py-1.5 text-slate-700 hover:border-[#12201E] hover:text-[#12201E]">Senha</Link>
             <button
               onClick={async () => { const sb = await getExternalBrowser(); await sb.auth.signOut(); nav({ to: "/admin/login", replace: true }); }}
-              className="rounded-full bg-[#0A2540] px-3 py-1.5 font-semibold text-white transition hover:bg-[#0d2f52]"
+              className="rounded-full bg-[#12201E] px-3 py-1.5 font-semibold text-white transition hover:bg-[#0d2f52]"
             >Sair</button>
           </div>
         </div>

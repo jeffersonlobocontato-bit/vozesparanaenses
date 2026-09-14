@@ -71,7 +71,7 @@ export function StoriesBar({
               params={s.params as never}
               className="flex w-[72px] flex-col items-center gap-1.5"
             >
-              <span className="block rounded-full bg-gradient-to-tr from-[#0A2540] to-[#2E6DA4] p-[2px]">
+              <span className="block rounded-full bg-gradient-to-tr from-[#12201E] to-[#2E6DA4] p-[2px]">
                 <span className="block rounded-full bg-white p-[2px]">
                   {s.image ? (
                     <img
@@ -81,7 +81,7 @@ export function StoriesBar({
                       className="h-14 w-14 rounded-full object-cover"
                     />
                   ) : (
-                    <span className="flex h-14 w-14 items-center justify-center rounded-full bg-[#0A2540] text-sm font-bold text-white">
+                    <span className="flex h-14 w-14 items-center justify-center rounded-full bg-[#12201E] text-sm font-bold text-white">
                       {initials(s.label)}
                     </span>
                   )}

@@ -30,7 +30,7 @@ function escapeRegex(s: string): string {
  */
 function parseInlineLinks(text: string, keyPrefix: string): ReactNode[] {
   const cls =
-    "text-[#0A2540] underline decoration-[#0A2540]/30 underline-offset-2 hover:decoration-[#0A2540]";
+    "text-[#12201E] underline decoration-[#12201E]/30 underline-offset-2 hover:decoration-[#12201E]";
   // Regex combinado: markdown [label](url) OU URL crua
   const combined =
     /\[([^\]]+)\]\((https?:\/\/[^\s)]+)\)|(https?:\/\/[^\s<)\]]+|www\.[^\s<)\]]+)/gi;
@@ -107,7 +107,7 @@ export function buildLinkTerms(opts: {
 
 function renderTermLink(term: LinkTerm, label: string, key: string): ReactNode {
   const cls =
-    "text-[#0A2540] underline decoration-[#0A2540]/30 underline-offset-2 hover:decoration-[#0A2540]";
+    "text-[#12201E] underline decoration-[#12201E]/30 underline-offset-2 hover:decoration-[#12201E]";
   if (term.type === "city") {
     return (
       <Link

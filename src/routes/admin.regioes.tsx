@@ -102,8 +102,8 @@ function AdminRegioes() {
       <ul className="space-y-2">
         {regs?.map((r) => {
           const open = openId === r.id;
-          const primaria = r.tema_config?.cor_primaria ?? "#0A2540";
-          const destaque = r.tema_config?.cor_destaque ?? "#0066CC";
+          const primaria = r.tema_config?.cor_primaria ?? "#12201E";
+          const destaque = r.tema_config?.cor_destaque ?? "#E29F65";
           return (
             <li key={r.id} className="rounded-2xl border border-slate-200 bg-white shadow-sm">
               <button onClick={() => setOpenId(open ? null : r.id)}
@@ -131,8 +131,8 @@ function RegionEditor({ r, cats, quotas, onSaveTema, onSaveQuota }: {
   onSaveTema: (r: Regiao, p: string, d: string) => void;
   onSaveQuota: (regiaoId: string, categoriaId: string, piso: number, teto: number) => void;
 }) {
-  const [primaria, setPrimaria] = useState(r.tema_config?.cor_primaria ?? "#0A2540");
-  const [destaque, setDestaque] = useState(r.tema_config?.cor_destaque ?? "#0066CC");
+  const [primaria, setPrimaria] = useState(r.tema_config?.cor_primaria ?? "#12201E");
+  const [destaque, setDestaque] = useState(r.tema_config?.cor_destaque ?? "#E29F65");
   return (
     <div className="border-t px-4 py-4">
       <h3 className="mb-2 text-sm font-semibold">Tema visual</h3>
@@ -146,7 +146,7 @@ function RegionEditor({ r, cats, quotas, onSaveTema, onSaveQuota }: {
           <input type="color" value={destaque} onChange={(e) => setDestaque(e.target.value)} className="h-9 w-16 rounded border" />
         </label>
         <button onClick={() => onSaveTema(r, primaria, destaque)}
-          className="rounded bg-[#0066CC] px-3 py-1.5 text-xs font-semibold text-white hover:bg-[#0055aa]">Salvar tema</button>
+          className="rounded bg-[#E29F65] px-3 py-1.5 text-xs font-semibold text-white hover:bg-[#0055aa]">Salvar tema</button>
       </div>
 
       <h3 className="mb-2 mt-6 text-sm font-semibold">Cotas por editoria (% do total regional)</h3>
@@ -179,7 +179,7 @@ function QuotaRow({ regiaoId, categoria, initial, onSave }: {
       <td className="px-2 py-1"><input type="number" min={0} max={100} value={piso} onChange={(e) => setPiso(Number(e.target.value))} className="w-20 rounded border px-1 py-0.5 text-right" /></td>
       <td className="px-2 py-1"><input type="number" min={0} max={100} value={teto} onChange={(e) => setTeto(Number(e.target.value))} className="w-20 rounded border px-1 py-0.5 text-right" /></td>
       <td className="px-2 py-1 text-right"><button onClick={() => onSave(regiaoId, categoria.id, piso, teto)}
-        className="text-xs text-[#0066CC] hover:underline">salvar</button></td>
+        className="text-xs text-[#E29F65] hover:underline">salvar</button></td>
     </tr>
   );
 }

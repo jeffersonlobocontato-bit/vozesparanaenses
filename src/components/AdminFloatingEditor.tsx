@@ -54,7 +54,7 @@ export function AdminFloatingEditor() {
       {articleSlug && (
         <a
           href={`/admin?edit=${encodeURIComponent(articleSlug)}`}
-          className="rounded-full bg-[#0066CC] px-4 py-2 text-xs font-bold text-white shadow-lg ring-2 ring-white transition hover:bg-[#0055aa]"
+          className="rounded-full bg-[#E29F65] px-4 py-2 text-xs font-bold text-white shadow-lg ring-2 ring-white transition hover:bg-[#0055aa]"
           title="Abrir o editor desta matéria no painel"
         >
           ✎ Editar esta matéria
@@ -62,7 +62,7 @@ export function AdminFloatingEditor() {
       )}
       <a
         href="/admin"
-        className="rounded-full bg-[#0A2540] px-4 py-2 text-[11px] font-semibold text-white shadow-lg ring-2 ring-white transition hover:bg-[#0d2f52]"
+        className="rounded-full bg-[#12201E] px-4 py-2 text-[11px] font-semibold text-white shadow-lg ring-2 ring-white transition hover:bg-[#0d2f52]"
         title="Voltar ao painel editorial"
       >
         🔧 Painel editorial ({role})

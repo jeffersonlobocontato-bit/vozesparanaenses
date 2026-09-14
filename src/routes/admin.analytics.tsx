@@ -27,7 +27,7 @@ type ArtigoRow = {
   categoria: { nome: string } | { nome: string }[] | null;
 };
 
-const CORES = ["#0A2540", "#0066CC", "#B42318", "#C4650A", "#5B2A86", "#0F766E", "#946800", "#BE185D", "#4D7C0F"];
+const CORES = ["#12201E", "#E29F65", "#B42318", "#C4650A", "#5B2A86", "#0F766E", "#946800", "#BE185D", "#4D7C0F"];
 const PERIODOS = [
   { label: "Hoje", dias: 1 },
   { label: "Últimos 7 dias", dias: 7 },
@@ -274,7 +274,7 @@ function AdminAnalytics() {
                   key={s.v}
                   onClick={() => setSegmento(s.v)}
                   className={`rounded-full px-3 py-1.5 transition-colors ${
-                    segmento === s.v ? "bg-[#0A2540] text-white" : "text-slate-600 hover:text-slate-900"
+                    segmento === s.v ? "bg-[#12201E] text-white" : "text-slate-600 hover:text-slate-900"
                   }`}
                 >
                   {s.label}
@@ -338,7 +338,7 @@ function AdminAnalytics() {
                   <XAxis dataKey="dia" fontSize={11} />
                   <YAxis fontSize={11} allowDecimals={false} />
                   <Tooltip />
-                  <Line type="monotone" dataKey="total" stroke="#0066CC" strokeWidth={2} dot={false} />
+                  <Line type="monotone" dataKey="total" stroke="#E29F65" strokeWidth={2} dot={false} />
                 </LineChart>
               </ResponsiveContainer>
             </div>
@@ -364,7 +364,7 @@ function AdminAnalytics() {
                   <XAxis type="number" fontSize={11} allowDecimals={false} />
                   <YAxis dataKey="nome" type="category" fontSize={11} width={110} />
                   <Tooltip />
-                  <Bar dataKey="total" fill="#0A2540" radius={[0, 4, 4, 0]} />
+                  <Bar dataKey="total" fill="#12201E" radius={[0, 4, 4, 0]} />
                 </BarChart>
               </ResponsiveContainer>
             </div>
@@ -399,7 +399,7 @@ function AdminAnalytics() {
                       <td className="py-1.5 text-muted-foreground">{i + 1}</td>
                       <td className="py-1.5">
                         {p.meta ? (
-                          <a href={p.pagina} target="_blank" rel="noreferrer" className="text-[#0066CC] hover:underline">{p.meta.titulo}</a>
+                          <a href={p.pagina} target="_blank" rel="noreferrer" className="text-[#E29F65] hover:underline">{p.meta.titulo}</a>
                         ) : (
                           <span className="truncate text-muted-foreground">{p.pagina}</span>
                         )}
@@ -468,7 +468,7 @@ function KpiCard({ label, valor, variacao, semComparacao }: {
     <div className="rounded-2xl border border-slate-200 bg-white shadow-sm p-4">
       <p className="text-xs text-muted-foreground">{label}</p>
       <div className="flex items-baseline gap-2">
-        <p className="text-3xl font-bold text-[#0A2540]">{valor}</p>
+        <p className="text-3xl font-bold text-[#12201E]">{valor}</p>
         {!semComparacao && variacao.texto && (
           <span className={`text-xs font-semibold ${variacao.positivo ? "text-emerald-600" : "text-red-600"}`}>
             {variacao.texto}

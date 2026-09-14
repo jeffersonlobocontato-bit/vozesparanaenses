@@ -34,7 +34,7 @@ export function AdminInlineEditButton({ slug }: { slug: string }) {
     <div className="mt-4 print:hidden">
       <a
         href={`/admin?edit=${encodeURIComponent(slug)}`}
-        className="inline-flex items-center gap-2 rounded-full bg-[#0066CC] px-4 py-2 text-xs font-bold text-white shadow-sm ring-1 ring-[#0066CC]/20 transition hover:bg-[#0055aa]"
+        className="inline-flex items-center gap-2 rounded-full bg-[#E29F65] px-4 py-2 text-xs font-bold text-white shadow-sm ring-1 ring-[#E29F65]/20 transition hover:bg-[#0055aa]"
         title="Abrir esta matéria no editor do painel"
       >
         ✎ Editar esta matéria

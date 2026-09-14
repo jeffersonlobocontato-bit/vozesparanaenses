@@ -68,7 +68,7 @@ function Unsubscribe() {
     <div className="min-h-screen bg-white text-slate-900">
       <SiteHeader />
       <article className="mx-auto max-w-xl px-4 py-16 text-center">
-        <h1 className="font-display text-3xl font-black text-[#0A2540]">Cancelar inscrição</h1>
+        <h1 className="font-display text-3xl font-black text-[#12201E]">Cancelar inscrição</h1>
 
         {status === 'loading' && (
           <p className="mt-6 text-slate-600">Verificando seu link de cancelamento...</p>
@@ -79,7 +79,7 @@ function Unsubscribe() {
             <p className="text-slate-700">
               Você está cancelando o recebimento de e-mails do Vozes Paranaenses.
             </p>
-            <Button onClick={handleConfirm} className="bg-[#0A2540] hover:bg-[#0A2540]/90">
+            <Button onClick={handleConfirm} className="bg-[#12201E] hover:bg-[#12201E]/90">
               Confirmar cancelamento
             </Button>
           </div>

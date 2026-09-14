@@ -114,7 +114,7 @@ function AdminImprensaClientes() {
           <input value={slug} onChange={(e) => setSlug(e.target.value)} placeholder="ex.: fiep, prefeitura-cascavel" className="w-full rounded border px-3 py-2" />
         </label>
         <div className="sm:col-span-2">
-          <button onClick={criarCliente} disabled={criando} className="rounded bg-[#0066CC] px-4 py-2 text-sm font-semibold text-white disabled:opacity-60">
+          <button onClick={criarCliente} disabled={criando} className="rounded bg-[#E29F65] px-4 py-2 text-sm font-semibold text-white disabled:opacity-60">
             {criando ? "Criando…" : "Criar acesso do cliente"}
           </button>
         </div>

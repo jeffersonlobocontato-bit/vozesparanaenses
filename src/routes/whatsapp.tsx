@@ -56,10 +56,10 @@ function WhatsappPage() {
     <div className="min-h-screen bg-white text-slate-900">
       <SiteHeader />
       <main className="mx-auto max-w-xl px-4 py-12">
-        <div className="text-[11px] font-bold uppercase tracking-[0.16em] text-[#0A2540]/70">
+        <div className="text-[11px] font-bold uppercase tracking-[0.16em] text-[#12201E]/70">
           Newsletter
         </div>
-        <h2 className="mt-1 font-display text-5xl leading-[1.02] text-[#0A2540] md:text-6xl">
+        <h2 className="mt-1 font-display text-5xl leading-[1.02] text-[#12201E] md:text-6xl">
           Notícias da sua região no WhatsApp
         </h2>
         <p className="mt-3 text-slate-600">

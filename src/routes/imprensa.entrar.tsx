@@ -61,10 +61,10 @@ function ImprensaLogin() {
   }
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-[#0A2540] px-4">
+    <div className="flex min-h-screen items-center justify-center bg-[#12201E] px-4">
       <form onSubmit={onSubmit} className="w-full max-w-sm space-y-4 rounded-lg bg-white p-6 shadow-xl">
         <div className="flex justify-center pb-2"><Logo size="sm" variant="blue" withLink={false} /></div>
-        <h1 className="text-center text-lg font-semibold text-[#0A2540]">Portal da Imprensa</h1>
+        <h1 className="text-center text-lg font-semibold text-[#12201E]">Portal da Imprensa</h1>
         <p className="text-center text-xs text-muted-foreground">
           Acesso exclusivo pra assessorias e empresas parceiras
         </p>
@@ -80,7 +80,7 @@ function ImprensaLogin() {
         </label>
         {err && <p className="text-xs text-red-600">{err}</p>}
         <button disabled={busy} type="submit"
-          className="w-full rounded bg-[#0066CC] px-3 py-2 text-sm font-semibold text-white hover:bg-[#0055aa] disabled:opacity-60">
+          className="w-full rounded bg-[#E29F65] px-3 py-2 text-sm font-semibold text-white hover:bg-[#0055aa] disabled:opacity-60">
           {busy ? "Entrando…" : "Entrar"}
         </button>
       </form>

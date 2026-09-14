@@ -25,7 +25,7 @@ export function CookieConsentBanner() {
       <div className="mx-auto flex max-w-5xl flex-col items-start gap-3 sm:flex-row sm:items-center sm:justify-between">
         <p className="text-sm text-slate-700">
           Utilizamos cookies e tecnologias semelhantes para melhorar sua navegação. Ao continuar navegando você concorda com a nossa{" "}
-          <a href="/privacidade" className="text-[#0066CC] underline">Política de Privacidade</a> e Política de Cookies.
+          <a href="/privacidade" className="text-[#E29F65] underline">Política de Privacidade</a> e Política de Cookies.
         </p>
         <div className="flex shrink-0 gap-2">
           <button
@@ -36,7 +36,7 @@ export function CookieConsentBanner() {
           </button>
           <button
             onClick={() => escolher("aceito")}
-            className="rounded-full bg-[#0066CC] px-4 py-2 text-xs font-semibold text-white hover:bg-[#0055ab]"
+            className="rounded-full bg-[#E29F65] px-4 py-2 text-xs font-semibold text-white hover:bg-[#0055ab]"
           >
             Aceitar
           </button>

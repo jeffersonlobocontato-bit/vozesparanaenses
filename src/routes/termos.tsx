@@ -23,7 +23,7 @@ function Termos() {
     <div className="min-h-screen bg-white text-slate-900">
       <SiteHeader />
       <article className="mx-auto max-w-3xl px-4 py-12">
-        <h1 className="font-display text-4xl font-black leading-tight text-[#0A2540] md:text-5xl">
+        <h1 className="font-display text-4xl font-black leading-tight text-[#12201E] md:text-5xl">
           Termos de uso
         </h1>
         <p className="mt-4 text-sm text-slate-500">Última atualização: {new Date().toLocaleDateString("pt-BR")}</p>

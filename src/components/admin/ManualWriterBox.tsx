@@ -106,17 +106,17 @@ export function ManualWriterBox({ onCreated }: Props) {
   }
 
   return (
-    <section className="rounded-lg border-2 border-[#0066CC] bg-blue-50/70 p-4">
+    <section className="rounded-lg border-2 border-[#E29F65] bg-blue-50/70 p-4">
       <div className="mb-2 flex items-center justify-between">
-        <h2 className="text-sm font-bold text-[#0A2540]">✍️ Redator manual (chat)</h2>
-        <span className="text-[11px] text-[#0A2540]">Cole link ou texto pronto — a IA organiza SEO, GEO e ajustes finos</span>
+        <h2 className="text-sm font-bold text-[#12201E]">✍️ Redator manual (chat)</h2>
+        <span className="text-[11px] text-[#12201E]">Cole link ou texto pronto — a IA organiza SEO, GEO e ajustes finos</span>
       </div>
-      <div className="mb-3 inline-flex overflow-hidden rounded border border-[#0066CC] text-[11px] font-semibold">
+      <div className="mb-3 inline-flex overflow-hidden rounded border border-[#E29F65] text-[11px] font-semibold">
         <button
           type="button"
           onClick={() => setModo("url")}
           disabled={busy}
-          className={`px-3 py-1 ${modo === "url" ? "bg-[#0066CC] text-white" : "bg-white text-[#0A2540]"}`}
+          className={`px-3 py-1 ${modo === "url" ? "bg-[#E29F65] text-white" : "bg-white text-[#12201E]"}`}
         >
           🔗 URL da notícia
         </button>
@@ -124,14 +124,14 @@ export function ManualWriterBox({ onCreated }: Props) {
           type="button"
           onClick={() => setModo("texto")}
           disabled={busy}
-          className={`px-3 py-1 ${modo === "texto" ? "bg-[#0066CC] text-white" : "bg-white text-[#0A2540]"}`}
+          className={`px-3 py-1 ${modo === "texto" ? "bg-[#E29F65] text-white" : "bg-white text-[#12201E]"}`}
         >
           📝 Colar texto pronto
         </button>
       </div>
       <form onSubmit={submit} className="space-y-2">
         <div className="grid gap-2 md:grid-cols-2">
-          <label className="text-xs font-semibold text-[#0A2540]">
+          <label className="text-xs font-semibold text-[#12201E]">
             Redator (editoria)
             <select value={agenteId} onChange={(e) => setAgenteId(e.target.value)} disabled={busy}
               className="mt-1 w-full rounded border bg-white px-2 py-1.5 text-sm">
@@ -143,7 +143,7 @@ export function ManualWriterBox({ onCreated }: Props) {
               ))}
             </select>
           </label>
-          <label className="text-xs font-semibold text-[#0A2540]">
+          <label className="text-xs font-semibold text-[#12201E]">
             Região
             <select value={regiaoId} onChange={(e) => setRegiaoId(e.target.value)} disabled={busy}
               className="mt-1 w-full rounded border bg-white px-2 py-1.5 text-sm">
@@ -155,36 +155,36 @@ export function ManualWriterBox({ onCreated }: Props) {
           </label>
         </div>
         {modo === "url" ? (
-          <label className="block text-xs font-semibold text-[#0A2540]">
+          <label className="block text-xs font-semibold text-[#12201E]">
             URL da notícia-fonte
             <input type="url" value={url} onChange={(e) => setUrl(e.target.value)} disabled={busy}
               placeholder="https://…" className="mt-1 w-full rounded border bg-white px-2 py-1.5 text-sm" />
           </label>
         ) : (
           <>
-            <label className="block text-xs font-semibold text-[#0A2540]">
+            <label className="block text-xs font-semibold text-[#12201E]">
               Título provisório
               <input value={titulo} onChange={(e) => setTitulo(e.target.value)} disabled={busy}
                 placeholder="Ex.: Prefeitura anuncia obras no anel viário de Maringá"
                 className="mt-1 w-full rounded border bg-white px-2 py-1.5 text-sm" />
             </label>
-            <label className="block text-xs font-semibold text-[#0A2540]">
+            <label className="block text-xs font-semibold text-[#12201E]">
               Texto integral (a IA reescreve, organiza TL;DR, 5W1H, FAQ, SEO e GEO)
               <textarea value={texto} onChange={(e) => setTexto(e.target.value)} disabled={busy} rows={10}
                 placeholder="Cole aqui a matéria pronta, release, transcrição de coletiva, etc. Mínimo 200 caracteres."
                 className="mt-1 w-full rounded border bg-white px-2 py-1.5 text-sm font-mono text-[12px] leading-relaxed" />
-              <span className="mt-1 block text-[10px] text-[#0A2540]/70">
+              <span className="mt-1 block text-[10px] text-[#12201E]/70">
                 {texto.trim().length} caracteres · {texto.trim().split(/\s+/).filter(Boolean).length} palavras
               </span>
             </label>
-            <label className="block text-xs font-semibold text-[#0A2540]">
+            <label className="block text-xs font-semibold text-[#12201E]">
               URL de origem (opcional — para crédito/referência)
               <input type="url" value={fonteUrl} onChange={(e) => setFonteUrl(e.target.value)} disabled={busy}
                 placeholder="https://… (opcional)" className="mt-1 w-full rounded border bg-white px-2 py-1.5 text-sm" />
             </label>
           </>
         )}
-        <label className="block text-xs font-semibold text-[#0A2540]">
+        <label className="block text-xs font-semibold text-[#12201E]">
           Observações para o redator (opcional)
           <textarea value={obs} onChange={(e) => setObs(e.target.value)} disabled={busy} rows={2}
             placeholder="Ex.: focar no impacto em Maringá, destacar posição da prefeitura, evitar termo X…"
@@ -192,10 +192,10 @@ export function ManualWriterBox({ onCreated }: Props) {
         </label>
         <div className="flex flex-wrap items-center gap-2">
           <button type="submit" disabled={busy}
-            className="rounded bg-[#0066CC] px-3 py-1.5 text-xs font-semibold text-white hover:bg-[#0055aa] disabled:opacity-60">
+            className="rounded bg-[#E29F65] px-3 py-1.5 text-xs font-semibold text-white hover:bg-[#0055aa] disabled:opacity-60">
             {busy ? (step ?? "Gerando…") : "▶ Gerar rascunho"}
           </button>
-          {step && busy && <span className="text-[11px] text-[#0A2540]">{step}</span>}
+          {step && busy && <span className="text-[11px] text-[#12201E]">{step}</span>}
           {ok && <span className="text-[11px] font-semibold text-green-700">{ok}</span>}
           {err && <span className="text-[11px] font-semibold text-red-700">✗ {err}</span>}
         </div>

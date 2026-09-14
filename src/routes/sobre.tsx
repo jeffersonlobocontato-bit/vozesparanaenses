@@ -61,7 +61,7 @@ function AboutPage() {
           className="mb-8 h-32 w-auto select-none md:h-40"
           draggable={false}
         />
-        <h1 className="font-display text-5xl font-black tracking-tight text-[#0A2540] md:text-6xl">
+        <h1 className="font-display text-5xl font-black tracking-tight text-[#12201E] md:text-6xl">
           {cfg.hero_title}
         </h1>
         <div className="mt-6 text-lg [&>p]:mt-4 [&>p:first-child]:mt-0 [&>p]:leading-relaxed [&>p]:text-slate-700">
@@ -69,26 +69,26 @@ function AboutPage() {
         </div>
 
         <section className="mt-10">
-          <h2 className="font-display text-3xl font-bold text-[#0A2540]">Quem somos</h2>
+          <h2 className="font-display text-3xl font-bold text-[#12201E]">Quem somos</h2>
           {renderRichText(cfg.quem_somos)}
         </section>
 
         <section className="mt-10">
-          <h2 className="font-display text-3xl font-bold text-[#0A2540]">Missão</h2>
+          <h2 className="font-display text-3xl font-bold text-[#12201E]">Missão</h2>
           {renderRichText(cfg.missao)}
         </section>
 
         <section className="mt-10">
-          <h2 className="font-display text-3xl font-bold text-[#0A2540]">Transparência sobre IA</h2>
+          <h2 className="font-display text-3xl font-bold text-[#12201E]">Transparência sobre IA</h2>
           {renderRichText(cfg.transparencia_ia)}
         </section>
 
         <section className="mt-10">
-          <h2 className="font-display text-3xl font-bold text-[#0A2540]">Política de correções</h2>
+          <h2 className="font-display text-3xl font-bold text-[#12201E]">Política de correções</h2>
           {renderRichText(cfg.correcoes)}
           <p className="mt-3 text-base leading-relaxed text-slate-700">
             Envie para{" "}
-            <a href={`mailto:${cfg.email_redacao}`} className="text-[#0A2540] underline">
+            <a href={`mailto:${cfg.email_redacao}`} className="text-[#12201E] underline">
               {cfg.email_redacao}
             </a>
             .
@@ -96,11 +96,11 @@ function AboutPage() {
         </section>
 
         <section className="mt-10">
-          <h2 className="font-display text-3xl font-bold text-[#0A2540]">Contato</h2>
+          <h2 className="font-display text-3xl font-bold text-[#12201E]">Contato</h2>
           <ul className="mt-3 list-disc space-y-1 pl-6 text-base text-slate-700">
-            <li>Redação: <a href={`mailto:${cfg.email_redacao}`} className="text-[#0A2540] underline">{cfg.email_redacao}</a></li>
-            <li>Comercial: <a href={`mailto:${cfg.email_comercial}`} className="text-[#0A2540] underline">{cfg.email_comercial}</a></li>
-            <li><Link to="/whatsapp" className="text-[#0A2540] underline">Receber notícias por WhatsApp</Link></li>
+            <li>Redação: <a href={`mailto:${cfg.email_redacao}`} className="text-[#12201E] underline">{cfg.email_redacao}</a></li>
+            <li>Comercial: <a href={`mailto:${cfg.email_comercial}`} className="text-[#12201E] underline">{cfg.email_comercial}</a></li>
+            <li><Link to="/whatsapp" className="text-[#12201E] underline">Receber notícias por WhatsApp</Link></li>
           </ul>
         </section>
       </article>

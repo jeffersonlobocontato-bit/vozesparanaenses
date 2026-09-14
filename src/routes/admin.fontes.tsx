@@ -218,7 +218,7 @@ function AdminFontes() {
           </label>
         </div>
         <div className="md:col-span-2">
-          <button disabled={busy} className="rounded bg-[#0066CC] px-4 py-2 text-sm font-semibold text-white hover:bg-[#0055aa] disabled:opacity-60">
+          <button disabled={busy} className="rounded bg-[#E29F65] px-4 py-2 text-sm font-semibold text-white hover:bg-[#0055aa] disabled:opacity-60">
             {busy ? "Salvando…" : editingId ? "Salvar alterações" : tab === "prefeitura" ? "Adicionar prefeitura" : "Adicionar fonte"}
           </button>
           {msg && <span className="ml-3 text-xs text-muted-foreground">{msg}</span>}
@@ -270,7 +270,7 @@ function AdminFontes() {
                         </button>
                       </td>
                       <td className="px-3 py-2 text-right">
-                        <button onClick={() => startEdit(f)} className="mr-2 text-xs text-[#0066CC] hover:underline">editar</button>
+                        <button onClick={() => startEdit(f)} className="mr-2 text-xs text-[#E29F65] hover:underline">editar</button>
                         <button onClick={() => remove(f)} className="text-xs text-red-600 hover:underline">excluir</button>
                       </td>
                     </tr>

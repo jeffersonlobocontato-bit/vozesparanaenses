@@ -19,10 +19,10 @@ function ArticleLine({ a }: { a: ArticleListItem }) {
         <img src={a.cover_image_url} alt="" loading="lazy" className="h-14 w-20 shrink-0 rounded-md object-cover" />
       )}
       <span className="min-w-0">
-        <span className="block text-[11px] font-bold uppercase tracking-wide text-[#0066CC]">
+        <span className="block text-[11px] font-bold uppercase tracking-wide text-[#E29F65]">
           {a.region.name}
         </span>
-        <span className="mt-0.5 line-clamp-3 block text-sm font-semibold leading-snug text-[#0A2540] group-hover:underline">
+        <span className="mt-0.5 line-clamp-3 block text-sm font-semibold leading-snug text-[#12201E] group-hover:underline">
           {a.title}
         </span>
       </span>
@@ -32,7 +32,7 @@ function ArticleLine({ a }: { a: ArticleListItem }) {
 
 function SectionTitle({ children }: { children: React.ReactNode }) {
   return (
-    <h2 className="font-display mb-2 border-b-2 border-[#0A2540] pb-1 text-sm font-black uppercase tracking-wide text-[#0A2540]">
+    <h2 className="font-display mb-2 border-b-2 border-[#12201E] pb-1 text-sm font-black uppercase tracking-wide text-[#12201E]">
       {children}
     </h2>
   );
@@ -66,8 +66,8 @@ export function ColumnSidebar({
                   )}
                 </span>
                 <span className="min-w-0">
-                  <span className="block text-[11px] font-bold uppercase tracking-wide text-[#0066CC]">{c.nome}</span>
-                  <span className="line-clamp-2 block text-sm font-semibold leading-snug text-[#0A2540] group-hover:underline">
+                  <span className="block text-[11px] font-bold uppercase tracking-wide text-[#E29F65]">{c.nome}</span>
+                  <span className="line-clamp-2 block text-sm font-semibold leading-snug text-[#12201E] group-hover:underline">
                     {c.edicao?.titulo ?? "Ver edições"}
                   </span>
                 </span>
@@ -81,7 +81,7 @@ export function ColumnSidebar({
         <section>
           <SectionTitle>Política</SectionTitle>
           {data.politica.slice(0, 5).map((a) => <ArticleLine key={a.id} a={a} />)}
-          <Link to="/editoria/$categoria" params={{ categoria: "politica" }} className="mt-2 inline-block text-xs font-bold uppercase text-[#0066CC] hover:underline">
+          <Link to="/editoria/$categoria" params={{ categoria: "politica" }} className="mt-2 inline-block text-xs font-bold uppercase text-[#E29F65] hover:underline">
             Ver toda a editoria →
           </Link>
         </section>
@@ -91,7 +91,7 @@ export function ColumnSidebar({
         <section>
           <SectionTitle>Eleições 2026</SectionTitle>
           {data.eleicoes.slice(0, 5).map((a) => <ArticleLine key={a.id} a={a} />)}
-          <Link to="/editoria/$categoria" params={{ categoria: "eleicoes-2026" }} className="mt-2 inline-block text-xs font-bold uppercase text-[#0066CC] hover:underline">
+          <Link to="/editoria/$categoria" params={{ categoria: "eleicoes-2026" }} className="mt-2 inline-block text-xs font-bold uppercase text-[#E29F65] hover:underline">
             Ver toda a editoria →
           </Link>
         </section>
@@ -118,7 +118,7 @@ export function ColumnFooterTaxonomy({ data }: { data: ColumnTaxonomyData }) {
             <div className="grid gap-1">
               {b.itens.map((a) => <ArticleLine key={a.id} a={a} />)}
             </div>
-            <Link to="/editoria/$categoria" params={{ categoria: b.slug }} className="mt-2 inline-block text-xs font-bold uppercase text-[#0066CC] hover:underline">
+            <Link to="/editoria/$categoria" params={{ categoria: b.slug }} className="mt-2 inline-block text-xs font-bold uppercase text-[#E29F65] hover:underline">
               Ver toda a editoria →
             </Link>
           </div>

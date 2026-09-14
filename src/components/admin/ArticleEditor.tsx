@@ -541,7 +541,7 @@ export function ArticleEditor({ articleId, initial, onSaved, onCancel }: Props) 
                         onClick={() => toggleRegion(r.slug)}
                         className={`rounded-full border px-2 py-0.5 text-[11px] font-medium transition-colors ${
                           on
-                            ? "border-[#0A2540] bg-[#0A2540] text-white"
+                            ? "border-[#12201E] bg-[#12201E] text-white"
                             : "border-slate-300 bg-white text-slate-700 hover:bg-accent"
                         }`}
                       >
@@ -566,7 +566,7 @@ export function ArticleEditor({ articleId, initial, onSaved, onCancel }: Props) 
                     return (
                       <span
                         key={slug}
-                        className="inline-flex items-center gap-1 rounded-full bg-[#0A2540] px-2 py-0.5 text-[11px] font-medium text-white"
+                        className="inline-flex items-center gap-1 rounded-full bg-[#12201E] px-2 py-0.5 text-[11px] font-medium text-white"
                       >
                         {m?.name ?? slug}
                         <button
@@ -638,7 +638,7 @@ export function ArticleEditor({ articleId, initial, onSaved, onCancel }: Props) 
       </div>
       <div className="sticky bottom-2 z-20 flex flex-wrap items-center gap-2 rounded-lg border bg-background/95 p-2 shadow-md backdrop-blur">
         <button onClick={save} disabled={saving}
-          className="rounded bg-[#0A2540] px-3 py-1.5 text-xs font-semibold text-white hover:bg-[#0d2f52] disabled:opacity-60">
+          className="rounded bg-[#12201E] px-3 py-1.5 text-xs font-semibold text-white hover:bg-[#0d2f52] disabled:opacity-60">
           {saving ? "Salvando…" : "💾 Salvar alterações"}
         </button>
         <button onClick={onCancel} disabled={saving}

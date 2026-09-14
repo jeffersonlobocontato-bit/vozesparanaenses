@@ -140,7 +140,7 @@ function ImprensaPainel() {
     return (
       <div className="mx-auto max-w-lg px-4 py-16 text-center">
         <Logo size="sm" variant="blue" />
-        <h1 className="mt-6 font-display text-2xl font-bold text-[#0A2540]">Enviado!</h1>
+        <h1 className="mt-6 font-display text-2xl font-bold text-[#12201E]">Enviado!</h1>
         <p className="mt-2 text-slate-600">{publicado}</p>
       </div>
     );
@@ -153,7 +153,7 @@ function ImprensaPainel() {
         <span className="text-sm text-muted-foreground">{nomeEmpresa}</span>
       </div>
 
-      <h1 className="font-display text-2xl font-bold text-[#0A2540]">Portal da Imprensa</h1>
+      <h1 className="font-display text-2xl font-bold text-[#12201E]">Portal da Imprensa</h1>
       <p className="mt-1 text-sm text-slate-600">
         Cole seu release, ou escreva o que quer divulgar com o máximo de detalhe — a IA identifica a editoria e
         escreve o rascunho seguindo o padrão editorial do portal.
@@ -173,7 +173,7 @@ function ImprensaPainel() {
           <button
             onClick={gerarRascunho}
             disabled={gerando}
-            className="rounded bg-[#0066CC] px-4 py-2 text-sm font-semibold text-white disabled:opacity-60"
+            className="rounded bg-[#E29F65] px-4 py-2 text-sm font-semibold text-white disabled:opacity-60"
           >
             {gerando ? "Gerando rascunho…" : "Gerar rascunho"}
           </button>
@@ -183,7 +183,7 @@ function ImprensaPainel() {
       {titulo && (
         <div className="mt-6 space-y-4">
           {categoriaDetectada && (
-            <p className="text-xs font-semibold uppercase tracking-wide text-[#0066CC]">
+            <p className="text-xs font-semibold uppercase tracking-wide text-[#E29F65]">
               Editoria identificada: {categoriaDetectada}
             </p>
           )}
@@ -233,7 +233,7 @@ function ImprensaPainel() {
           <button
             onClick={publicar}
             disabled={!termoAceito || !regiaoId || publicando}
-            className="w-full rounded bg-[#0066CC] px-4 py-3 text-sm font-semibold text-white disabled:opacity-40"
+            className="w-full rounded bg-[#E29F65] px-4 py-3 text-sm font-semibold text-white disabled:opacity-40"
           >
             {publicando ? "Enviando…" : "Publicar"}
           </button>

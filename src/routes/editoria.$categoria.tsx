@@ -86,8 +86,8 @@ function CategoryGlobalPage() {
     };
   const { data: articles } = useSuspenseQuery(listQO(categoriaSlug));
 
-  const primary = "#0A2540";
-  const accent = "#0066CC";
+  const primary = "#12201E";
+  const accent = "#E29F65";
 
   return (
     <div className="min-h-screen bg-white text-slate-900 font-['Barlow',system-ui,sans-serif]">
@@ -132,7 +132,7 @@ function CategoryGlobalPage() {
                     <div className="text-[10px] font-bold uppercase tracking-[0.14em]" style={{ color: accent }}>
                       {cat.name} · {a.region.name}
                     </div>
-                    <h3 className="mt-1 text-xl font-black leading-tight text-[#0A2540] group-hover:text-[#0d2f52] md:text-2xl">
+                    <h3 className="mt-1 text-xl font-black leading-tight text-[#12201E] group-hover:text-[#0d2f52] md:text-2xl">
                       {a.title}
                     </h3>
                     {a.summary && (
