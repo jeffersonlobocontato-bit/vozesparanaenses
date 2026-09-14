@@ -18,6 +18,7 @@ const EDITORIAS_NAV: NavItem[] = [
   { label: "Cultura", to: "/editoria/$categoria", params: { categoria: "cultura" } },
   { label: "Nacional", to: "/editoria/$categoria", params: { categoria: "nacional" } },
   { label: "Internacional", to: "/editoria/$categoria", params: { categoria: "internacional" } },
+  { label: "Tecnologia", to: "/editoria/$categoria", params: { categoria: "tecnologia" } },
 ];
 
 // Linha branca abaixo (ao lado da data): as 10 macrorregiões.
