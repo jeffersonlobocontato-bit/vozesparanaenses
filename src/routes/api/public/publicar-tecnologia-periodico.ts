@@ -139,7 +139,17 @@ Responda em JSON com TODOS estes campos preenchidos (corpo em parágrafos separa
       );
     }
     const data = await resp.json();
-    let draft: { titulo: string; subtitulo: string; corpo: string };
+    let draft: {
+      titulo: string;
+      subtitulo: string;
+      corpo: string;
+      seo_title?: string;
+      seo_description?: string;
+      resumo?: string;
+      tldr?: string;
+      fatos_5w1h?: Record<string, unknown> | null;
+      faq?: Array<{ pergunta: string; resposta: string }>;
+    };
     try {
       draft = JSON.parse(data.choices[0].message.content);
     } catch {
@@ -154,6 +164,12 @@ Responda em JSON com TODOS estes campos preenchidos (corpo em parágrafos separa
         subtitulo: draft.subtitulo,
         slug: slugify(draft.titulo),
         corpo: draft.corpo,
+        seo_title: draft.seo_title ?? draft.titulo,
+        seo_description: draft.seo_description ?? draft.resumo ?? null,
+        resumo: draft.resumo ?? null,
+        tldr: draft.tldr ?? null,
+        fatos_5w1h: draft.fatos_5w1h ?? null,
+        faq: Array.isArray(draft.faq) ? draft.faq : [],
         categoria_id: catTec.id,
         regiao_id: regiaoNacional.id,
         status: "publicado",
