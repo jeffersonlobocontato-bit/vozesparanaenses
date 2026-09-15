@@ -124,7 +124,10 @@ async function run(): Promise<Response> {
 Notícias de tecnologia publicadas esta semana, pra contextualizar:
 ${contextoSemana}
 
-Escreva uma matéria em formato de comentário/análise, citando Jefferson Lobo fazendo a leitura crítica desses fatos (nunca invente citação literal entre aspas — parafraseie a posição dele, atribuindo com "segundo Jefferson Lobo" ou "na leitura de Jefferson Lobo"). Mínimo 3000 caracteres no corpo. Responda em JSON: {"titulo": "...", "subtitulo": "...", "corpo": "..."} — corpo em parágrafos separados por \\n\\n.`,
+Escreva uma matéria em formato de comentário/análise, citando Jefferson Lobo fazendo a leitura crítica desses fatos (nunca invente citação literal entre aspas — parafraseie a posição dele, atribuindo com "segundo Jefferson Lobo" ou "na leitura de Jefferson Lobo"). Mínimo 3000 caracteres no corpo.
+
+Responda em JSON com TODOS estes campos preenchidos (corpo em parágrafos separados por \\n\\n):
+{"titulo":"...","subtitulo":"...","corpo":"...","seo_title":"até 60 caracteres","seo_description":"até 155 caracteres","resumo":"2-3 frases autocontidas","tldr":"2-3 frases answer-first respondendo 'o que aconteceu?'","fatos_5w1h":{"quem":"...","o_que":"...","quando":"...","onde":"...","por_que":"...","como":"..."},"faq":[{"pergunta":"...","resposta":"1-3 frases baseadas somente no texto"}]}`,
           },
         ],
       }),
@@ -136,7 +139,17 @@ Escreva uma matéria em formato de comentário/análise, citando Jefferson Lobo 
       );
     }
     const data = await resp.json();
-    let draft: { titulo: string; subtitulo: string; corpo: string };
+    let draft: {
+      titulo: string;
+      subtitulo: string;
+      corpo: string;
+      seo_title?: string;
+      seo_description?: string;
+      resumo?: string;
+      tldr?: string;
+      fatos_5w1h?: Record<string, unknown> | null;
+      faq?: Array<{ pergunta: string; resposta: string }>;
+    };
     try {
       draft = JSON.parse(data.choices[0].message.content);
     } catch {
@@ -151,6 +164,12 @@ Escreva uma matéria em formato de comentário/análise, citando Jefferson Lobo 
         subtitulo: draft.subtitulo,
         slug: slugify(draft.titulo),
         corpo: draft.corpo,
+        seo_title: draft.seo_title ?? draft.titulo,
+        seo_description: draft.seo_description ?? draft.resumo ?? null,
+        resumo: draft.resumo ?? null,
+        tldr: draft.tldr ?? null,
+        fatos_5w1h: draft.fatos_5w1h ?? null,
+        faq: Array.isArray(draft.faq) ? draft.faq : [],
         categoria_id: catTec.id,
         regiao_id: regiaoNacional.id,
         status: "publicado",
