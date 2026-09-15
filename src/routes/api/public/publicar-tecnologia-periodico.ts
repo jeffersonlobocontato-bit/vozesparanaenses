@@ -124,7 +124,10 @@ async function run(): Promise<Response> {
 Notícias de tecnologia publicadas esta semana, pra contextualizar:
 ${contextoSemana}
 
-Escreva uma matéria em formato de comentário/análise, citando Jefferson Lobo fazendo a leitura crítica desses fatos (nunca invente citação literal entre aspas — parafraseie a posição dele, atribuindo com "segundo Jefferson Lobo" ou "na leitura de Jefferson Lobo"). Mínimo 3000 caracteres no corpo. Responda em JSON: {"titulo": "...", "subtitulo": "...", "corpo": "..."} — corpo em parágrafos separados por \\n\\n.`,
+Escreva uma matéria em formato de comentário/análise, citando Jefferson Lobo fazendo a leitura crítica desses fatos (nunca invente citação literal entre aspas — parafraseie a posição dele, atribuindo com "segundo Jefferson Lobo" ou "na leitura de Jefferson Lobo"). Mínimo 3000 caracteres no corpo.
+
+Responda em JSON com TODOS estes campos preenchidos (corpo em parágrafos separados por \\n\\n):
+{"titulo":"...","subtitulo":"...","corpo":"...","seo_title":"até 60 caracteres","seo_description":"até 155 caracteres","resumo":"2-3 frases autocontidas","tldr":"2-3 frases answer-first respondendo 'o que aconteceu?'","fatos_5w1h":{"quem":"...","o_que":"...","quando":"...","onde":"...","por_que":"...","como":"..."},"faq":[{"pergunta":"...","resposta":"1-3 frases baseadas somente no texto"}]}`,
           },
         ],
       }),
