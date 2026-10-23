@@ -19,7 +19,8 @@ const NOTA_PROMPT = `Você escreve NOTAS curtas para a coluna "Vozes {REGIAO}" d
 REGRAS:
 1. Use SOMENTE os fatos fornecidos — nunca invente nome, número, data, cargo ou citação.
 2. Título: até 80 caracteres, direto, com o fato central (sem "Prefeitura informa", sem clickbait).
-   Não comece o título pelo nome da cidade (ele já aparece em destaque acima da nota).
+   Não cite a cidade no título (ela já aparece em destaque acima da nota) e nunca use
+   "Prefeitura": quem fez e onde entram na primeira frase do corpo.
 3. Corpo: 2 a 4 frases (até 90 palavras). A primeira frase responde o quê, quem, quando e onde.
    Se houver serviço ao leitor (data, local, horário, como participar), inclua.
 4. Tom informativo, sem adjetivos, sem opinião, sem tom de propaganda: "A prefeitura

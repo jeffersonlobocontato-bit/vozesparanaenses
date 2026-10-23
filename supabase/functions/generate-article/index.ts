@@ -18,6 +18,7 @@ import { avaliarCriticidade, carregarConfigCriticidade } from "../_shared/critic
 import { ehDoDia } from "../_shared/data-publicacao.ts";
 import { classificarFoto, creditoParaExibir, type FotoStatus } from "../_shared/foto-credito.ts";
 import { escreverNota, publicarNotaNaColuna } from "../_shared/nota-coluna.ts";
+import { garantirRegraTitulo, regraTituloPrompt } from "../_shared/titulo.ts";
 
 const cors = {
   "Access-Control-Allow-Origin": "*",
@@ -31,7 +32,7 @@ const MODEL = "google/gemini-2.5-flash";
 const BASE_SYSTEM_PROMPT = `Você é editor-chefe do portal regional "Vozes Paranaenses".
 Sua tarefa: a partir de FATOS JÁ APURADOS (fornecidos como JSON, não como
 texto-fonte bruto), redigir UMA reportagem original em português brasileiro,
-seguindo o Método DEL (Denso, Editorial, Local) + a regra do lide 5W1H
+seguindo o Método DEL (Decomposição de Estrutura de Linguagem) + a regra do lide 5W1H
 (O quê / Quem / Quando / Onde / Como / Por quê) na PRIMEIRA frase.
 
 REGRAS INEGOCIÁVEIS:
@@ -42,7 +43,8 @@ REGRAS INEGOCIÁVEIS:
 3. Tom editorial: informativo, direto, sem opinião, foco no impacto local.
    O PRIMEIRO parágrafo (lide) deve responder O QUÊ + QUEM + QUANDO + ONDE em
    até 30 palavras. COMO e POR QUÊ entram no 2º parágrafo.
-4. Título: até 90 caracteres, sem clickbait, com o fato central.
+4. Título: até 90 caracteres, sem clickbait, com o fato central. Nunca use
+   "Prefeitura" no título (ver REGRA DO TÍTULO no fim).
 5. Subtítulo: contexto complementar, até 160 caracteres.
 6. Resumo: 2-3 frases, autocontido (para redes sociais e SEO).
 7. Corpo: profundidade condicionada ao que foi apurado — se os fatos são
@@ -290,6 +292,10 @@ Deno.serve(async (req) => {
       const regiaoNome = (regiaoRow as { nome?: string } | null)?.nome ?? "Paraná";
       const nota = await escreverNota(facts, cidade?.nome ?? regiaoNome, regiaoNome, aiKey);
       if ("error" in nota) return json(nota, 502);
+      // Regra do título: sem "Prefeitura"; a cidade já é o destaque da nota.
+      nota.titulo = (await garantirRegraTitulo({
+        titulo: nota.titulo, cidadeTag: cidade?.nome ?? null, contexto: nota.corpo, aiKey, maxChars: 80,
+      })).titulo;
       const crit = await avaliarCriticidade(
         { titulo: nota.titulo, corpo: nota.corpo, fatos: { ...facts, dados }, formato: "nota", categoria: categoriaSlug },
         aiKey, configCriticidade,
@@ -348,11 +354,23 @@ Deno.serve(async (req) => {
     systemPrompt = `${systemPrompt}\n\n---\n\n## INSTRUÇÕES ADICIONAIS DO EDITOR (prioridade máxima sobre estilo, sem inventar fatos)\n${extra}`;
   }
 
+  // Regra do título: sem "Prefeitura"; com cidade identificada (vira tag),
+  // o título não repete a cidade — ela vai para o lide. Ver _shared/titulo.ts.
+  const cidadeTag = cidade?.nome ?? null;
+  systemPrompt = `${systemPrompt}\n\n---\n\n${regraTituloPrompt(cidadeTag)}`;
+
   // 2. Chamar IA — só para redação (Método DEL), a partir dos fatos já prontos
   const userPrompt = buildUserPrompt(facts, dados);
   const aiResult = await generateArticleJson(systemPrompt, userPrompt, aiKey);
   if ("error" in aiResult) return json(aiResult, aiResult.httpStatus ?? 502);
   const parsed = aiResult.parsed;
+  const tituloFinal = await garantirRegraTitulo({
+    titulo: parsed.titulo, cidadeTag, contexto: `${parsed.resumo ?? ""}\n${parsed.corpo}`, aiKey,
+  });
+  if (tituloFinal.ajustado) {
+    console.log(`[generate-article] título ajustado (${tituloFinal.motivos.join("; ")}): "${parsed.titulo}" → "${tituloFinal.titulo}"`);
+    parsed.titulo = tituloFinal.titulo;
+  }
 
   const baseSlug = slugify(parsed.titulo);
   // Garante unicidade por (regiao_id, slug). Se colidir com uma matéria já

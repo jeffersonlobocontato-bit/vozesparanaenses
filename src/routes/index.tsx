@@ -268,6 +268,20 @@ function CategoryTag({
   );
 }
 
+/**
+ * Etiqueta da cidade da matéria. Pela regra do título (supabase/functions/
+ * _shared/titulo.ts), matéria com cidade identificada não repete a cidade
+ * no título — a cidade aparece aqui.
+ */
+function CityTag({ cidade, className = "" }: { cidade?: string | null; className?: string }) {
+  if (!cidade) return null;
+  return (
+    <span className={`text-[11px] font-bold uppercase tracking-wider ${className || "text-slate-500"}`}>
+      {cidade}
+    </span>
+  );
+}
+
 /* --------------------------- Portal Home --------------------------- */
 
 function PortalHome({
@@ -349,6 +363,7 @@ function PortalHome({
                 <>
                   <div className="flex items-center gap-2 flex-wrap">
                     <CategoryTag name={catName} slug={catSlug} />
+                    <CityTag cidade={a?.cidade_principal} />
                     {a && <ProximityBadge proximidade={a.proximidade} />}
                   </div>
                   <h3 className="font-display text-2xl md:text-[1.6rem] leading-tight mt-2 hover:text-secondary transition-colors">
@@ -434,11 +449,14 @@ function PortalHome({
                       <div className="h-full w-full bg-gradient-to-br from-slate-200 to-slate-300" />
                     )}
                   </div>
-                  <CategoryTag
-                    name={a?.categoria?.name ?? a?.region?.name ?? fb.cat}
-                    slug={a?.categoria?.slug ?? null}
-                    className="self-start"
-                  />
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <CategoryTag
+                      name={a?.categoria?.name ?? a?.region?.name ?? fb.cat}
+                      slug={a?.categoria?.slug ?? null}
+                      className="self-start"
+                    />
+                    <CityTag cidade={a?.cidade_principal} />
+                  </div>
                   <h4 className="font-display text-2xl md:text-3xl leading-tight group-hover:text-secondary">
                     {a?.title ?? fb.title}
                   </h4>
@@ -685,9 +703,9 @@ function VaptVuptModule({ articles }: { articles: ArticleListItem[] }) {
             <>
               <div className="flex items-center gap-2 flex-wrap">
                 <CategoryTag name={catName} slug={catSlug} className="text-[10px] px-1.5 py-0.5" />
-                {a.region && (
+                {(a.cidade_principal || a.region) && (
                   <span className="text-[10px] font-bold uppercase tracking-wider text-slate-500">
-                    {a.region.name}
+                    {a.cidade_principal ?? a.region?.name}
                   </span>
                 )}
               </div>
@@ -738,6 +756,7 @@ function _HeroCardImpl({ article }: { article: RankedArticle | undefined }) {
       <div className="absolute bottom-0 left-0 p-6 md:p-8">
         <div className="mb-3 flex items-center gap-2 flex-wrap">
           <CategoryTag name={catName} slug={catSlug} className="text-xs px-3 py-1.5" />
+          <CityTag cidade={article?.cidade_principal} className="text-white/90 text-xs" />
           {article && <ProximityBadge proximidade={article.proximidade} />}
         </div>
         <h1 className="font-display text-3xl md:text-5xl text-white leading-tight group-hover:underline">

@@ -8,6 +8,7 @@ import { classificarFoto } from "./foto-credito.ts";
 import { ehDoDia, extrairDataPublicacao, inicioDoCiclo, diaSaoPaulo } from "./data-publicacao.ts";
 import { avaliarRegras } from "./criticidade.ts";
 import { decidirFormato, podeIrParaDobra, temaHeuristico, parseCrivo } from "./crivo-editorial.ts";
+import { limparPrefeituraMecanico, verificarTitulo } from "./titulo.ts";
 import { dataAtendeNetParaIso, ehAtendeNet, parseListaAtendeNet, parseMateriaAtendeNet } from "./atende-net.ts";
 import { cicloAtual, fonteElegivel, normalizarUrl } from "./coleta.ts";
 
@@ -147,5 +148,14 @@ const dadosPag = JSON.stringify({ midia_capa: "https://cascavel.atende.net/stati
 const mat = parseMateriaAtendeNet(`<pagina content="${b64(latin1(corpoHtml))}" dados-pagina="${b64(utf8(dadosPag))}"></pagina>`);
 ok("matéria Atende.Net: corpo latin1, entidades e rodapé", mat.corpoCompleto.startsWith("A prefeitura abriu inscrições — até sexta.") && mat.corpoCompleto.includes("Segundo parágrafo.") && !mat.corpoCompleto.includes("Imagens"), JSON.stringify(mat.corpoCompleto));
 ok("matéria Atende.Net: capa e data", mat.imagem?.endsWith("_607x1120.jpeg") === true && mat.data === "2026-10-23T10:34:27-03:00");
+
+// Regra do título: sem "Prefeitura"; com tag de cidade, sem a cidade
+ok("título com Prefeitura viola", verificarTitulo("Prefeitura de Cambará abre PSS na saúde", null).length === 1);
+ok("título com a cidade da tag viola", verificarTitulo("Cascavel recebe corrida de 75 anos", "Cascavel").length === 1);
+ok("título sem cidade e sem Prefeitura passa", verificarTitulo("Corrida de 75 anos entrega kits a 6 mil atletas", "Cascavel").length === 0);
+ok("cidade sem tag pode ficar no título", verificarTitulo("Cambará abre processo seletivo na saúde", null).length === 0);
+ok("cidade com acento/caixa é reconhecida", verificarTitulo("SÃO JOSÉ DOS PINHAIS amplia vagas em creches", "São José dos Pinhais").length === 1);
+ok("nome de cidade dentro de outra palavra não conta", verificarTitulo("Lapada de sol marca o fim de semana", "Lapa").length === 0);
+ok("ajuste mecânico tira Prefeitura de", limparPrefeituraMecanico("Prefeitura de Cambará abre PSS na saúde") === "Cambará abre PSS na saúde");
 console.log(falhas ? `\n${falhas} FALHA(S)` : "\nTudo certo");
 if (falhas) Deno.exit(1);

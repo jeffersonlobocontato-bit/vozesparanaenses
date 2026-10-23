@@ -57,6 +57,8 @@ export type ArticleListItem = {
   fixado_escopo?: "estado" | "regiao" | "cidades" | null;
   fixado_regioes?: string[] | null;
   fixado_cidades?: string[] | null;
+  /** Cidade da matéria (tag) — preenchida nas listas que trazem a coluna. */
+  cidade_principal?: string | null;
 };
 
 export type ArticleFull = ArticleListItem & {
@@ -849,7 +851,8 @@ export const listArticlesWithoutImage = createServerFn({ method: "GET" })
         .is("imagem_capa_url", null)
         .order("publicado_em", { ascending: false })
         .limit(data.limit);
-    let res = await run(MATERIA_LIST_COLS);
+    let res = await run(MATERIA_LIST_COLS_GEO);
+    if (res.error && /cidade/i.test(res.error.message)) res = await run(MATERIA_LIST_COLS);
     if (res.error && /fixado_(posicao|escopo|regioes|cidades)/i.test(res.error.message)) {
       res = await run(
         "id, slug, titulo, subtitulo, resumo, imagem_capa_url, publicado_em, regiao:regioes(slug, nome), categoria:editorial_categories(slug, nome)",
@@ -859,7 +862,10 @@ export const listArticlesWithoutImage = createServerFn({ method: "GET" })
       if (isMissingSchema(res.error)) return [];
       throw new Error(res.error.message);
     }
-    return ((res.data ?? []) as unknown as MateriaRow[]).map(mapMateria);
+    return ((res.data ?? []) as unknown as Array<MateriaRow & { cidade_principal?: string | null }>).map((m) => ({
+      ...mapMateria(m),
+      cidade_principal: m.cidade_principal ?? null,
+    }));
   });
 
 /**
