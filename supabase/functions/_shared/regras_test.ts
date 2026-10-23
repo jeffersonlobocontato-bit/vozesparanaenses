@@ -8,7 +8,8 @@ import { classificarFoto } from "./foto-credito.ts";
 import { ehDoDia, extrairDataPublicacao, inicioDoCiclo, diaSaoPaulo } from "./data-publicacao.ts";
 import { avaliarRegras } from "./criticidade.ts";
 import { decidirFormato, decidirImagem, motivoDescartePortal, pareceReleaseDeAssessoria, podeIrParaDobra, temaHeuristico, parseCrivo } from "./crivo-editorial.ts";
-import { escolherFotoCommons, promptIlustracao } from "./imagem.ts";
+import { escolherFotoCommons, filtrarCandidatasCommons, promptIlustracao } from "./imagem.ts";
+import { escolherFotoBaixoRisco, normalizarAvaliacoes, normalizarPlano } from "./analista-imagem.ts";
 import { limparPrefeituraMecanico, verificarTitulo } from "./titulo.ts";
 import { dataAtendeNetParaIso, ehAtendeNet, parseListaAtendeNet, parseMateriaAtendeNet } from "./atende-net.ts";
 import { cicloAtual, fonteElegivel, normalizarUrl } from "./coleta.ts";
@@ -189,5 +190,20 @@ const fc = escolherFotoCommons([
   pag("File:Vista aérea.jpg", 4000, 2000, "All rights reserved", "Cascavel (Paraná)"),
 ]);
 ok("Commons: escolhe a vista com licença livre", fc?.titulo === "Vista de Cascavel (Paraná).jpg" && fc.credito === "Foto: Fulano / Wikimedia Commons (CC BY-SA 2.0)", JSON.stringify(fc));
+
+// Analista de imagem (nacional/internacional)
+ok("plano inválido → sensível, sem imagem", normalizarPlano(null).tema_sensivel === true);
+ok("plano: no máximo 2 buscas", normalizarPlano({ tema_sensivel: false, buscas: ["Palácio do Planalto", "Congresso Nacional", "STF"], motivo: "x" }).buscas.length === 2);
+ok("plano sem tema_sensivel explícito → sensível", normalizarPlano({ buscas: ["Kremlin"] }).tema_sensivel === true);
+const av = normalizarAvaliacoes({ avaliacoes: [{ indice: 1, risco: "baixo" }, { indice: 0, risco: "medio" }, { indice: 9, risco: "baixo" }] }, 3);
+ok("avaliação: índice fora do intervalo é ignorado; ausente = alto", av.length === 3 && av[2].risco === "alto" && av[1].risco === "baixo");
+ok("escolhe só risco baixo", escolherFotoBaixoRisco(av) === 1 && escolherFotoBaixoRisco([{ indice: 0, risco: "medio", motivos: [] }]) === null);
+const cands = filtrarCandidatasCommons([
+  pag("File:Palácio do Planalto.jpg", 3000, 2000, "CC BY 3.0 br", "Palácio do Planalto"),
+  pag("File:Brasão do Brasil.jpg", 2000, 1500, "Public domain", "Coats of arms of Brazil"),
+  pag("File:Congresso.jpg", 4000, 2600, "All rights reserved", "Congresso Nacional"),
+  pag("File:Esplanada.png", 4000, 2600, "CC0", "Brasília"),
+]);
+ok("Commons por tema: só JPEG livre e sem brasão", cands.length === 1 && cands[0].titulo === "Palácio do Planalto.jpg", JSON.stringify(cands.map((c) => c.titulo)));
 console.log(falhas ? `\n${falhas} FALHA(S)` : "\nTudo certo");
 if (falhas) Deno.exit(1);

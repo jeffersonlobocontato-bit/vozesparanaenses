@@ -74,7 +74,8 @@ export async function gerarIlustracaoTematica(p: {
   }
 }
 
-const LICENCAS_LIVRES = /^(cc0|public domain|pd|cc by(-sa)?( \d(\.\d)?)?)$/i;
+// Inclui versões com jurisdição ("CC BY 3.0 br", "CC BY-SA 3.0 de").
+const LICENCAS_LIVRES = /^(cc0|public domain|pd|cc by(-sa)?( \d(\.\d)?)?( [a-z]{2,3})?)$/i;
 const NAO_E_VISTA = /(flag|bandeira|coat of arms|bras[aã]o|\bmaps?\b|mapa|logo|cemit|cemetery|grave|t[uú]mulo|interior|portrait|retrato|selo|seal|diagram|inaugura|evento|event|festa|festival|show|people|pessoas|reuni[aã]o|meeting|montage|montagem|escola|school|infantil|parquinho|hospital)/i;
 const E_VISTA = /(vista|\bview|panorama|panor[aâ]mica|aerial|a[eé]rea|skyline|cityscape|downtown|centro da cidade|[-,] centro\b|centro noturno|sobrevoo)/i;
 const CAT_VISTA = /(views of|aerial photographs of|skylines of|panoramics of)/i;
@@ -192,4 +193,84 @@ export async function fotoDaCidade(sb: Sb, cidade: { slug: string; nome: string 
     await sb.from("cidades").update({ foto_geral_url: achada.url, foto_geral_credito: achada.credito }).eq("slug", cidade.slug);
   }
   return achada;
+}
+
+// ---------------------------------------------------------------------
+// Busca por TEMA no Commons (analista de imagem de nacional/internacional)
+// ---------------------------------------------------------------------
+
+export type FotoCandidata = {
+  url: string;
+  credito: string;
+  titulo: string;
+  licenca: string;
+  autor: string;
+  descricao: string;
+};
+
+// Arquivos que não servem de foto de capa (mapas, brasões, diagramas...).
+const NAO_E_FOTO_DE_CAPA = /(\bmaps?\b|mapa|coat of arms|bras[aã]o|logo|diagram|diagrama|chart|gr[aá]fico|signature|assinatura|seal\b|selo|icon|cartoon|caricatur)/i;
+
+/**
+ * Filtra resultados do Commons para candidatas a capa (exportado para
+ * teste): licença livre, JPEG, paisagem, >= 1000px, sem mapa/brasão/logo.
+ */
+export function filtrarCandidatasCommons(pages: CommonsInfo[], max = 4): FotoCandidata[] {
+  const out: Array<FotoCandidata & { score: number }> = [];
+  for (const p of pages) {
+    const ii = p.imageinfo?.[0];
+    if (!ii?.width || !ii.height) continue;
+    const meta = ii.extmetadata ?? {};
+    const licenca = semTags(meta.LicenseShortName?.value);
+    if (!LICENCAS_LIVRES.test(licenca)) continue;
+    if (!/\.jpe?g$/i.test(p.title)) continue;
+    if (ii.width < 1000 || ii.width < ii.height * 1.15) continue;
+    const categorias = semTags(meta.Categories?.value);
+    if (NAO_E_FOTO_DE_CAPA.test(`${p.title} ${categorias}`)) continue;
+    const autor = semTags(meta.Artist?.value).slice(0, 80) || "autor desconhecido";
+    out.push({
+      url: ii.thumburl ?? ii.url ?? "",
+      credito: `Foto: ${autor} / Wikimedia Commons (${licenca})`,
+      titulo: p.title.replace(/^File:/, ""),
+      licenca,
+      autor,
+      descricao: semTags(meta.ImageDescription?.value).slice(0, 300),
+      score: Math.min(ii.width, 4000) / 1000,
+    });
+  }
+  return out
+    .filter((c) => c.url)
+    .sort((a, b) => b.score - a.score)
+    .slice(0, max)
+    .map(({ score: _s, ...c }) => c);
+}
+
+export async function buscarCommonsTema(busca: string, max = 4): Promise<FotoCandidata[]> {
+  const j = await commonsJson(
+    "action=query&generator=search&gsrnamespace=6&gsrlimit=30" +
+      `&gsrsearch=${encodeURIComponent(`${busca} filetype:bitmap`)}` +
+      "&prop=imageinfo&iiprop=url|size|mime|extmetadata&iiurlwidth=1600",
+  );
+  const pages = Object.values((j?.query as { pages?: Record<string, CommonsInfo> } | undefined)?.pages ?? {});
+  return filtrarCandidatasCommons(pages, max);
+}
+
+/** Copia uma imagem (de licença livre) para o storage e devolve a URL pública. */
+export async function copiarImagemParaStorage(sb: Sb, srcUrl: string, path: string): Promise<string | null> {
+  const ctrl = new AbortController();
+  const t = setTimeout(() => ctrl.abort(), 10_000);
+  try {
+    const res = await fetch(srcUrl, { signal: ctrl.signal, headers: { "user-agent": UA } });
+    if (!res.ok) return null;
+    const mime = res.headers.get("content-type")?.split(";")[0].trim() || "image/jpeg";
+    const buf = new Uint8Array(await res.arrayBuffer());
+    if (!/^image\//.test(mime) || buf.byteLength <= 1024) return null;
+    const { error } = await sb.storage.from("article-covers").upload(path, buf, { contentType: mime, upsert: true });
+    if (error) return null;
+    return sb.storage.from("article-covers").getPublicUrl(path).data.publicUrl as string;
+  } catch {
+    return null;
+  } finally {
+    clearTimeout(t);
+  }
 }

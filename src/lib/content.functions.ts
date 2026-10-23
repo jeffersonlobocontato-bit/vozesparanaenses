@@ -690,7 +690,25 @@ export const listRankedArticles = createServerFn({ method: "GET" })
       ({ row }) => !(typeof row.fixado_posicao === "number" && row.fixado_posicao !== null),
     );
 
-    const ranked = [...pinnedScored, ...regularScored].slice(0, data.limit).map(({ row, prox }) => ({
+    // Primeira dobra (manchete + 4 laterais + 2 secundárias = 7) sempre com
+    // ao menos 1 matéria NACIONAL e 1 INTERNACIONAL quando houver uma com
+    // imagem nas últimas 24h — a analista de imagem (analista-imagem-
+    // curadoria) é quem dá imagem de risco baixo a essas matérias.
+    const ordenado = [...pinnedScored, ...regularScored];
+    const DOBRA = 7;
+    for (const escopo of ["nacional", "internacional"]) {
+      if (ordenado.slice(0, DOBRA).some(({ row }) => row.regiao?.slug === escopo)) continue;
+      const idx = ordenado.findIndex(({ row }, i) =>
+        i >= DOBRA && row.regiao?.slug === escopo && !!row.publicado_em &&
+        Date.now() - new Date(row.publicado_em).getTime() < 24 * 3600_000,
+      );
+      if (idx < 0) continue;
+      const [item] = ordenado.splice(idx, 1);
+      // Entra numa lateral, sem tirar matéria fixada pelo editor.
+      ordenado.splice(Math.min(Math.max(pinnedScored.length, 3), ordenado.length), 0, item);
+    }
+
+    const ranked = ordenado.slice(0, data.limit).map(({ row, prox }) => ({
       ...mapMateria(row),
       proximidade: prox,
       cidade_principal: row.cidade_principal,
