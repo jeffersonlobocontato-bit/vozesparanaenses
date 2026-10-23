@@ -80,7 +80,7 @@ Deno.serve(async (req) => {
 
 async function processClusters(
   { clusters, categorias, sb, aiKey, url, key }: {
-    clusters: Array<{ id: string; regiao_id: string; prioridade_score: number; criado_em: string; curadoria_nacional?: boolean }>;
+    clusters: Array<{ id: string; regiao_id: string; prioridade_score: number; criado_em: string; fonte_oficial?: boolean; curadoria_nacional?: boolean }>;
     categorias: { id: string; slug: string; nome: string; peso_engajamento: number }[];
     // deno-lint-ignore no-explicit-any
     sb: any;
@@ -111,13 +111,13 @@ async function processClusters(
       .select("raw_article_id")
       .eq("cluster_id", c.id)
       .limit(3);
-    const ids = (ca ?? []).map((r) => r.raw_article_id);
+    const ids = (ca ?? []).map((r: { raw_article_id: string }) => r.raw_article_id);
     const { data: raws } = await sb
       .from("raw_articles")
       .select("titulo, corpo_limpo")
       .in("id", ids);
     const excerpt = (raws ?? [])
-      .map((r) => `${r.titulo ?? ""}\n${(r.corpo_limpo ?? "").slice(0, 400)}`)
+      .map((r: { titulo: string | null; corpo_limpo: string | null }) => `${r.titulo ?? ""}\n${(r.corpo_limpo ?? "").slice(0, 400)}`)
       .join("\n\n---\n\n")
       .slice(0, 3000);
     const crivo = await classify(excerpt, categoriasElegiveis, aiKey);
@@ -143,7 +143,7 @@ async function processClusters(
         .from("article_clusters")
         .select("regiao_id")
         .eq("grupo_estadual_id", grupoEstadualId);
-      const regioesDistintas = new Set((irmaos ?? []).map((i) => i.regiao_id)).size;
+      const regioesDistintas = new Set((irmaos ?? []).map((i: { regiao_id: string }) => i.regiao_id)).size;
       bonusEstadual = Math.max(0, regioesDistintas - 1) * 0.5;
     }
 

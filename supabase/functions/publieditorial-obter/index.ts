@@ -40,7 +40,7 @@ Deno.serve(async (req) => {
   const { data: chat } = await sb
     .from("publieditorial_chat_messages")
     .select("role, content, criado_em")
-    .eq("briefing_id", briefing.id)
+    .eq("briefing_id", (briefing as { id: string }).id)
     .order("criado_em", { ascending: true });
 
   return json({ ok: true, briefing, chat: chat ?? [] });

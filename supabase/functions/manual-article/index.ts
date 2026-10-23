@@ -263,7 +263,8 @@ Deno.serve(async (req) => {
 
 // Aplica mídia opcional e publica a matéria quando o editor pediu publicação direta.
 async function finalize(
-  sb: ReturnType<typeof createClient>,
+  // deno-lint-ignore no-explicit-any
+  sb: any,
   articleId: string,
   body: Payload,
 ) {

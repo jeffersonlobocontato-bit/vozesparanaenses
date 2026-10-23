@@ -163,7 +163,10 @@ Deno.serve(async (req) => {
   }
 
   // 3. Persistir extracted_facts
-  const fontesResumo = raws.map((r) => ({ url: r.url, veiculo: r.fontes?.nome ?? r.fontes?.url_base }));
+  const fontesResumo = raws.map((r) => {
+    const f = Array.isArray(r.fontes) ? r.fontes[0] : r.fontes;
+    return { url: r.url, veiculo: f?.nome ?? f?.url_base };
+  });
   const { data: inserted, error: insErr } = await sb
     .from("extracted_facts")
     .insert({
@@ -200,10 +203,12 @@ Deno.serve(async (req) => {
   });
 });
 
-function buildUserPrompt(raws: Array<{ url: string; titulo: string | null; corpo_limpo: string | null; fontes?: { nome?: string; url_base?: string } | null }>) {
+type FonteRef = { nome?: string; url_base?: string };
+function buildUserPrompt(raws: Array<{ url: string; titulo: string | null; corpo_limpo: string | null; fontes?: FonteRef[] | FonteRef | null }>) {
   const sources = raws
     .map((r, i) => {
-      const veiculo = r.fontes?.nome ?? r.fontes?.url_base ?? "fonte";
+      const f = Array.isArray(r.fontes) ? r.fontes[0] : r.fontes;
+      const veiculo = f?.nome ?? f?.url_base ?? "fonte";
       return `--- FONTE ${i + 1} (${veiculo}) ---\nURL: ${r.url}\nTítulo: ${r.titulo ?? ""}\n\n${(r.corpo_limpo ?? "").slice(0, 4500)}`;
     })
     .join("\n\n");
