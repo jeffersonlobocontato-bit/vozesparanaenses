@@ -48,7 +48,6 @@ const rankedQO = (loc: ViewerLocation) =>
 const HOME_EDITORIAS: Array<{ slug: string; name: string }> = [
   { slug: "seguranca", name: "Segurança" },
   { slug: "politica", name: "Política" },
-  { slug: "eleicoes-2026", name: "Eleições 2026" },
   { slug: "esportes", name: "Esportes" },
   { slug: "cidades", name: "Cidades" },
   { slug: "internacional", name: "Internacional" },
@@ -64,7 +63,6 @@ const editoriaQO = (slug: string) =>
 
 // Editorias que viram "stories" no topo do mobile (subset de HOME_EDITORIAS).
 const STORIES_EDITORIAS: Array<{ slug: string; name: string }> = [
-  { slug: "eleicoes-2026", name: "Eleições 2026" },
   { slug: "politica", name: "Política" },
   { slug: "seguranca", name: "Segurança" },
   { slug: "esportes", name: "Esportes" },
@@ -86,16 +84,6 @@ const mostReadQO = queryOptions({
 const colunasAtalhosQO = queryOptions({
   queryKey: ["colunas", "atalhos"],
   queryFn: () => listColunasAtalhos(),
-  staleTime: 5 * 60 * 1000,
-});
-
-// Card fixo no topo — última matéria publicada em Eleições 2026.
-const eleicoes2026TopQO = queryOptions({
-  queryKey: ["articles", "eleicoes-2026-top", 1, "any"],
-  queryFn: () =>
-    listArticlesByCategoryGlobal({
-      data: { categorySlug: "eleicoes-2026", limit: 1, requireImage: false },
-    }),
   staleTime: 5 * 60 * 1000,
 });
 
@@ -129,7 +117,6 @@ export const Route = createFileRoute("/")({
     );
     await context.queryClient.ensureQueryData(vaptVuptQO);
     await context.queryClient.ensureQueryData(mostReadQO);
-    await context.queryClient.ensureQueryData(eleicoes2026TopQO);
     await context.queryClient.ensureQueryData(colunasAtalhosQO);
   },
   component: Home,
@@ -146,7 +133,6 @@ function Home() {
   const { data: articles } = useSuspenseQuery(rankedQO(loc));
   const { data: vaptVupt } = useSuspenseQuery(vaptVuptQO);
   const { data: mostRead } = useSuspenseQuery(mostReadQO);
-  const { data: eleicoes2026Top } = useSuspenseQuery(eleicoes2026TopQO);
   const { data: colunas } = useSuspenseQuery(colunasAtalhosQO);
   // Stories do mobile: reaproveita as consultas de editoria já carregadas.
   const storyTopicos: StoryTopic[] = STORIES_EDITORIAS.map((e) => ({
@@ -161,7 +147,6 @@ function Home() {
       articles={articles}
       vaptVupt={vaptVupt}
       mostRead={mostRead}
-      eleicoes2026Top={eleicoes2026Top[0]}
       loc={loc}
       colunas={colunas}
       storyTopicos={storyTopicos}
@@ -290,7 +275,6 @@ function PortalHome({
   articles,
   vaptVupt,
   mostRead,
-  eleicoes2026Top,
   loc,
   colunas,
   storyTopicos,
@@ -299,7 +283,6 @@ function PortalHome({
   articles: RankedArticle[];
   vaptVupt: ArticleListItem[];
   mostRead: ArticleListItem[];
-  eleicoes2026Top?: ArticleListItem;
   loc?: { cidade: string | null; regiaoSlug: string | null };
   colunas?: ColunaAtalho[];
   storyTopicos?: StoryTopic[];
@@ -354,8 +337,6 @@ function PortalHome({
             <HeroCard article={hero} />
           </div>
           <div className="col-span-12 lg:col-span-4 flex flex-col gap-6">
-            {/* Dobra Eleições 2026 oculta a pedido */}
-            {/* <Eleicoes2026Card article={eleicoes2026Top} /> */}
             {[0, 1, 2, 3].map((i) => {
               const a = side[i];
               const fb = SIDE_FALLBACK[i];
@@ -682,57 +663,6 @@ function EditoriaModule({ slug, name }: { slug: string; name: string }) {
 
 function HeroCard({ article }: { article: RankedArticle | undefined }) {
   return _HeroCardImpl({ article });
-}
-
-function Eleicoes2026Card({ article }: { article?: ArticleListItem }) {
-  const badge = (
-    <span className="inline-flex items-center gap-1 rounded-sm bg-amber-400 px-2 py-0.5 text-[10px] font-black uppercase tracking-widest text-[#002147]">
-      <span aria-hidden>🗳️</span> Eleições 2026
-    </span>
-  );
-  const inner = (
-    <div className="group relative flex h-full items-stretch overflow-hidden rounded-lg border border-amber-400/40 bg-gradient-to-r from-[#002147] to-[#0D3D6C] text-white">
-      <div className="hidden w-40 shrink-0 overflow-hidden bg-[#001529] sm:block">
-        {article?.cover_image_url ? (
-          <img
-            src={article.cover_image_url}
-            alt={article.title}
-            className="h-full w-full object-cover opacity-90 transition-transform duration-500 group-hover:scale-105"
-            loading="lazy"
-          />
-        ) : (
-          <div className="h-full w-full bg-gradient-to-br from-[#0D3D6C] to-[#002147]" />
-        )}
-      </div>
-      <div className="flex min-w-0 flex-1 flex-col justify-center gap-2 px-4 py-3">
-        <div className="flex items-center gap-2">
-          {badge}
-          <span className="text-[10px] font-bold uppercase tracking-wider text-amber-200/80">
-            Última atualização
-          </span>
-        </div>
-        <h3 className="font-display text-base leading-snug text-white line-clamp-2 md:text-lg group-hover:underline">
-          {article?.title ?? "Cobertura completa das Eleições 2026 no Paraná"}
-        </h3>
-      </div>
-    </div>
-  );
-  if (article?.region) {
-    return (
-      <Link
-        to="/$region/$slug"
-        params={{ region: article.region.slug, slug: article.slug }}
-        className="block h-full"
-      >
-        {inner}
-      </Link>
-    );
-  }
-  return (
-    <Link to="/editoria/$categoria" params={{ categoria: "eleicoes-2026" }} className="block h-full">
-      {inner}
-    </Link>
-  );
 }
 
 function VaptVuptModule({ articles }: { articles: ArticleListItem[] }) {
