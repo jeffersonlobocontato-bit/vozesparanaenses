@@ -102,9 +102,9 @@ export function SiteHeader() {
           />
         </Link>
 
-        {/* Editorias temáticas — desktop */}
-        <nav className="ml-2 hidden min-w-0 flex-1 items-center gap-5 overflow-x-auto md:flex">
-          {EDITORIAS_NAV.map((item) => (
+        {/* Editorias temáticas — desktop (subconjunto, sem rolagem lateral) */}
+        <nav className="ml-2 hidden min-w-0 flex-1 items-center gap-4 md:flex">
+          {EDITORIAS_NAV_MAIN.map((item) => (
             <Link
               key={item.label}
               to={item.to as never}
