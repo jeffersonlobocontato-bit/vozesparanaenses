@@ -1538,3 +1538,70 @@ export const criarComentarioColuna = createServerFn({ method: "POST" })
     }
     return { ok: true };
   });
+
+/* ------------------------------------------------------------------ */
+/* Colunas por cidade — "Vozes {Cidade}" (formato blog)                */
+/* Notas avulsas publicadas pelo pipeline, mais recente primeiro.      */
+/* Tabela `coluna_cidade_notas` (067_automacao_399_cidades.sql).       */
+/* ------------------------------------------------------------------ */
+
+export type NotaCidade = {
+  id: string;
+  titulo: string;
+  corpo: string;
+  fonte_nome: string | null;
+  fonte_url: string | null;
+  publicado_em: string;
+};
+
+export type PaginaNotasCidade = {
+  colunaNome: string;
+  cidadeNome: string;
+  notas: NotaCidade[];
+  temMais: boolean;
+};
+
+/** Página de notas da coluna da cidade. `antesDe` = cursor (publicado_em da última nota exibida). */
+export const listNotasCidade = createServerFn({ method: "GET" })
+  .inputValidator((d: { citySlug: string; limit?: number; antesDe?: string | null }) => d)
+  .handler(async ({ data }): Promise<PaginaNotasCidade> => {
+    const { getExternalSupabase } = await import("./external-supabase.server");
+    const sb = getExternalSupabase();
+    const limit = Math.max(1, Math.min(data.limit ?? 10, 30));
+    const cidadeNome = cidadeFromSlug(data.citySlug);
+    const vazio = { colunaNome: `Vozes ${cidadeNome}`, cidadeNome, notas: [], temMais: false };
+
+    const { data: coluna, error: colErr } = await sb
+      .from("colunas")
+      .select("nome, cidade:cidades(nome)")
+      .eq("cidade_slug", data.citySlug)
+      .eq("ativo", true)
+      .maybeSingle();
+    if (colErr) {
+      if (isMissingSchema(colErr) || /cidade_slug/i.test(colErr.message)) return vazio;
+      throw new Error(colErr.message);
+    }
+    if (!coluna) return vazio;
+    const nomeCidade = (Array.isArray(coluna.cidade) ? coluna.cidade[0]?.nome : (coluna.cidade as { nome?: string } | null)?.nome) ?? cidadeNome;
+
+    let q = sb
+      .from("coluna_cidade_notas")
+      .select("id, titulo, corpo, fonte_nome, fonte_url, publicado_em")
+      .eq("cidade_slug", data.citySlug)
+      .eq("status", "publicado")
+      .order("publicado_em", { ascending: false })
+      .limit(limit + 1);
+    if (data.antesDe) q = q.lt("publicado_em", data.antesDe);
+    const { data: rows, error } = await q;
+    if (error) {
+      if (isMissingSchema(error)) return { ...vazio, colunaNome: coluna.nome, cidadeNome: nomeCidade };
+      throw new Error(error.message);
+    }
+    const notas = (rows ?? []) as NotaCidade[];
+    return {
+      colunaNome: coluna.nome,
+      cidadeNome: nomeCidade,
+      notas: notas.slice(0, limit),
+      temMais: notas.length > limit,
+    };
+  });

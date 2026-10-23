@@ -58,6 +58,10 @@ type Draft = {
     como?: string | null;
   } | null;
   faq: Array<{ pergunta: string; resposta: string }> | null;
+  // Agente de criticidade (067) — por que a matéria ficou na fila.
+  criticidade_nivel?: "baixo" | "medio" | "alto" | "critico" | null;
+  criticidade_motivos?: string[] | null;
+  foto_origem?: string | null;
 };
 
 const STATUS_TABS: Draft["status"][] = ["rascunho", "aprovado", "publicado", "expirado", "rejeitado"];
@@ -81,7 +85,8 @@ function AdminQueue() {
     setErr(null);
     try {
       const sb = await getExternalBrowser();
-      const fullSelect = "id, slug, titulo, subtitulo, resumo, corpo, seo_title, seo_description, editor_responsavel, status, gerado_em, publicado_em, imagem_capa_url, imagem_credito, imagem_legenda, imagem_original_url, imagem_galeria, video_embed_url, video_legenda, video_credito, publicado_automaticamente, fixado_posicao, fixado_escopo, fixado_regioes, fixado_cidades, regiao_id, categoria_id, tldr, fatos_5w1h, faq, regiao:regioes(slug, nome), categoria:editorial_categories(slug, nome)";
+      const fullSelect = "id, slug, titulo, subtitulo, resumo, corpo, seo_title, seo_description, editor_responsavel, status, gerado_em, publicado_em, imagem_capa_url, imagem_credito, imagem_legenda, imagem_original_url, imagem_galeria, video_embed_url, video_legenda, video_credito, publicado_automaticamente, fixado_posicao, fixado_escopo, fixado_regioes, fixado_cidades, regiao_id, categoria_id, tldr, fatos_5w1h, faq, criticidade_nivel, criticidade_motivos, foto_origem, regiao:regioes(slug, nome), categoria:editorial_categories(slug, nome)";
+      const semCriticidadeSelect = fullSelect.replace(", criticidade_nivel, criticidade_motivos, foto_origem", "");
       const pinBasicSelect = "id, slug, titulo, subtitulo, resumo, corpo, seo_title, seo_description, editor_responsavel, status, gerado_em, publicado_em, imagem_capa_url, imagem_credito, imagem_legenda, imagem_original_url, publicado_automaticamente, fixado_posicao, regiao_id, categoria_id, regiao:regioes(slug, nome), categoria:editorial_categories(slug, nome)";
       const midSelect = "id, slug, titulo, subtitulo, resumo, corpo, seo_title, seo_description, editor_responsavel, status, gerado_em, publicado_em, imagem_capa_url, imagem_credito, imagem_legenda, imagem_original_url, publicado_automaticamente, regiao_id, categoria_id, regiao:regioes(slug, nome), categoria:editorial_categories(slug, nome)";
       const fallbackSelect = "id, slug, titulo, subtitulo, resumo, corpo, seo_title, seo_description, status, gerado_em, publicado_em, regiao_id, categoria_id, regiao:regioes(slug, nome), categoria:editorial_categories(slug, nome)";
@@ -92,6 +97,9 @@ function AdminQueue() {
           .order("gerado_em", { ascending: false })
           .limit(50);
       let res = await run(fullSelect);
+      if (res.error && /criticidade_|foto_origem/i.test(res.error.message)) {
+        res = await run(semCriticidadeSelect);
+      }
       if (res.error && /fixado_(escopo|regioes|cidades)|video_embed_url|video_legenda|video_credito|imagem_legenda|imagem_galeria|tldr|fatos_5w1h|faq/i.test(res.error.message)) {
         res = await run(pinBasicSelect);
       }
@@ -381,6 +389,7 @@ function AdminQueue() {
               <span>{new Date(it.gerado_em).toLocaleString("pt-BR")}</span>
             </div>
             <h2 className="text-lg font-semibold leading-snug">{it.titulo}</h2>
+            <CriticidadeAviso nivel={it.criticidade_nivel} motivos={it.criticidade_motivos} />
             {it.subtitulo && <p className="mt-1 text-sm text-muted-foreground">{it.subtitulo}</p>}
             {it.resumo && <p className="mt-2 text-sm">{it.resumo}</p>}
             <ArticleImageEditor
@@ -473,6 +482,25 @@ function AdminQueue() {
           </li>
         ))}
       </ul>
+    </div>
+  );
+}
+
+// Por que o agente de criticidade segurou a matéria (só aparece se houver risco).
+function CriticidadeAviso({ nivel, motivos }: { nivel?: Draft["criticidade_nivel"]; motivos?: string[] | null }) {
+  if (!nivel || nivel === "baixo") return null;
+  const cor =
+    nivel === "critico" ? "border-red-300 bg-red-50 text-red-800"
+    : nivel === "alto" ? "border-orange-300 bg-orange-50 text-orange-800"
+    : "border-amber-300 bg-amber-50 text-amber-800";
+  return (
+    <div className={`mt-2 rounded border px-3 py-2 text-xs ${cor}`}>
+      <span className="font-bold uppercase tracking-wide">Criticidade {nivel}</span>
+      {motivos?.length ? (
+        <ul className="mt-1 list-disc pl-4">
+          {motivos.map((m, i) => <li key={i}>{m}</li>)}
+        </ul>
+      ) : null}
     </div>
   );
 }

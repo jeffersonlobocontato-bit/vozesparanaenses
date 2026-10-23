@@ -12,6 +12,12 @@
 // separadas e auditáveis.
 
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
+import { carregarCidades, cidadePorNome } from "../_shared/cidades.ts";
+import { decidirFormato, prioridadeDoTema, temaHeuristico, type Prioridade, type Tema } from "../_shared/crivo-editorial.ts";
+import { avaliarCriticidade, carregarConfigCriticidade } from "../_shared/criticidade.ts";
+import { ehDoDia } from "../_shared/data-publicacao.ts";
+import { classificarFoto, creditoParaExibir, type FotoStatus } from "../_shared/foto-credito.ts";
+import { escreverNota, publicarNotaNaColuna } from "../_shared/nota-coluna.ts";
 
 const cors = {
   "Access-Control-Allow-Origin": "*",
@@ -59,7 +65,20 @@ padrão editorial do veículo?
 
 Retorne APENAS JSON válido, sem markdown, no schema fornecido.`;
 
-type Payload = { cluster_id?: string; extracted_facts_id?: string; extra_instructions?: string };
+// modo "automatico" = chamado pelo pipeline (process-pending-clusters): aplica
+// o crivo (matéria/nota/descarte), o validador do dia e a publicação
+// automática pela criticidade. Sem modo = chamado por editor (Escrever
+// agora, matéria manual, tecnologia): sempre gera matéria em rascunho.
+type Payload = { cluster_id?: string; extracted_facts_id?: string; extra_instructions?: string; modo?: "automatico" };
+
+type RawFoto = {
+  id: string;
+  imagem_original_url: string | null;
+  imagem_credito: string | null;
+  foto_status: FotoStatus | null;
+  data_publicacao_original: string | null;
+  fonte: { nome: string; tipo: string } | { nome: string; tipo: string }[] | null;
+};
 
 type DnaSintatico = Record<string, string | undefined>;
 type DnaSemantico = Record<string, string | undefined>;
@@ -170,11 +189,93 @@ Deno.serve(async (req) => {
 
   const { data: cluster, error: cErr } = await sb
     .from("article_clusters")
-    .select("id, regiao_id, categoria_id, interesse_score, categoria:editorial_categories(slug)")
+    .select("id, regiao_id, categoria_id, interesse_score, cidade_slug, tema_crivo, prioridade_crivo, forcar_nota, curadoria_nacional, categoria:editorial_categories(slug)")
     .eq("id", clusterId)
     .maybeSingle();
   if (cErr || !cluster) return json({ error: "cluster_not_found", detail: cErr?.message }, 404);
   const categoriaSlug = Array.isArray(cluster.categoria) ? cluster.categoria[0]?.slug : cluster.categoria?.slug;
+  const automatico = body.modo === "automatico" && !(body.extra_instructions ?? "").trim();
+
+  // Cidade e REGIÃO da notícia = cidade de que o fato trata (cidade_principal
+  // apurada pela IA), não a cidade do jornal que publicou. Ex.: Palotina em
+  // jornal de Curitiba → Oeste. Cai para a cidade detectada na coleta.
+  const dados = (facts.dados ?? {}) as Record<string, unknown>;
+  const cidades = await carregarCidades(sb);
+  // Curadoria nacional/internacional não é reclassificada para região do PR.
+  const cidade = cluster.curadoria_nacional ? null : (
+    cidadePorNome(dados.cidade_principal as string | null, cidades)
+    ?? (cluster.cidade_slug ? cidades.find((c) => c.slug === cluster.cidade_slug) ?? null : null)
+  );
+  const regiaoId: string = cidade?.regiao_id ?? cluster.regiao_id;
+
+  const { data: caRows } = await sb.from("cluster_articles").select("raw_article_id").eq("cluster_id", clusterId);
+  const rawIdsCluster = (caRows ?? []).map((r) => r.raw_article_id);
+  const { data: rawsData } = rawIdsCluster.length
+    ? await sb.from("raw_articles")
+      .select("id, imagem_original_url, imagem_credito, foto_status, data_publicacao_original, fonte:fontes(nome, tipo)")
+      .in("id", rawIdsCluster)
+    : { data: [] as RawFoto[] };
+  const raws = (rawsData ?? []) as RawFoto[];
+  const nomeFonte = (r: RawFoto) => (Array.isArray(r.fonte) ? r.fonte[0]?.nome : r.fonte?.nome) ?? null;
+  const tipoFonte = (r: RawFoto) => (Array.isArray(r.fonte) ? r.fonte[0]?.tipo : r.fonte?.tipo) ?? null;
+
+  // Regra da foto: só foto com crédito institucional. Coletas antigas (sem
+  // foto_status) são reclassificadas aqui. Prefeitura primeiro.
+  const { data: veiculosRows } = await sb.from("fontes").select("nome").eq("tipo", "veiculo");
+  const nomesVeiculos = (veiculosRows ?? []).map((f: { nome: string }) => f.nome);
+  const statusFoto = (r: RawFoto): FotoStatus => r.foto_status ?? classificarFoto(r.imagem_original_url, r.imagem_credito, nomesVeiculos);
+  const rawFotoAutorizada = [...raws]
+    .sort((a, b) => (tipoFonte(a) === "prefeitura" ? -1 : 0) - (tipoFonte(b) === "prefeitura" ? -1 : 0))
+    .find((r) => statusFoto(r) === "autorizada" && r.imagem_original_url) ?? null;
+  const fotoStatus: FotoStatus = rawFotoAutorizada ? "autorizada" : raws.some((r) => r.imagem_original_url) ? "proibida" : "sem_foto";
+
+  const tema = (cluster.tema_crivo as Tema | null) ?? temaHeuristico(`${facts.o_que ?? ""} ${facts.quem ?? ""}`);
+  const prioridade = (cluster.prioridade_crivo as Prioridade | null) ?? prioridadeDoTema(tema);
+  const configCriticidade = await carregConfig(sb);
+
+  if (automatico) {
+    // Validador do dia: só publica o que a fonte publicou hoje.
+    if (raws.length && !raws.some((r) => ehDoDia(r.data_publicacao_original))) {
+      await encerrarCluster(sb, clusterId, rawIdsCluster, "descartado");
+      return json({ ok: true, ignorado: "fora_do_dia" });
+    }
+    const decisao = decidirFormato({
+      prioridade,
+      valorNoticioso: true,
+      fotoStatus,
+      forcarNota: !!cluster.forcar_nota,
+      temCidade: !!cidade,
+    });
+    if (decisao.formato === "descartar") {
+      await encerrarCluster(sb, clusterId, rawIdsCluster, "descartado");
+      return json({ ok: true, ignorado: decisao.motivo });
+    }
+    if (decisao.formato === "nota" && cidade) {
+      const nota = await escreverNota(facts, cidade.nome, aiKey);
+      if ("error" in nota) return json(nota, 502);
+      const crit = await avaliarCriticidade(
+        { titulo: nota.titulo, corpo: nota.corpo, fatos: { ...facts, dados }, formato: "nota", categoria: categoriaSlug },
+        aiKey, configCriticidade,
+      );
+      const fonteRaw = raws[0];
+      const fontesFatos = (facts.fontes ?? []) as Array<{ url?: string; veiculo?: string }>;
+      const resultado = await publicarNotaNaColuna(sb, {
+        cidadeSlug: cidade.slug,
+        regiaoId,
+        clusterId,
+        titulo: nota.titulo,
+        corpo: nota.corpo,
+        fonteNome: (fonteRaw && nomeFonte(fonteRaw)) ?? fontesFatos[0]?.veiculo ?? null,
+        fonteUrl: fontesFatos[0]?.url ?? null,
+        tema,
+        dataOriginal: raws.map((r) => r.data_publicacao_original).filter(Boolean).sort()[0] ?? null,
+        criticidade: crit,
+      });
+      if ("error" in resultado) return json(resultado, 500);
+      await encerrarCluster(sb, clusterId, rawIdsCluster, "rascunho_gerado");
+      return json({ ok: true, formato: "nota", nota: resultado, motivo: decisao.motivo, criticidade: crit });
+    }
+  }
 
   // 1b. Carregar o agente redator especializado da editoria (se existir e
   // estiver ativo) — o prompt-base do agente é injetado ANTES do system
@@ -211,7 +312,6 @@ Deno.serve(async (req) => {
   }
 
   // 2. Chamar IA — só para redação (Método DEL), a partir dos fatos já prontos
-  const dados = (facts.dados ?? {}) as Record<string, unknown>;
   const userPrompt = buildUserPrompt(facts, dados);
   const aiResult = await generateArticleJson(systemPrompt, userPrompt, aiKey);
   if ("error" in aiResult) return json(aiResult, aiResult.httpStatus ?? 502);
@@ -225,7 +325,7 @@ Deno.serve(async (req) => {
     const { data: existing } = await sb
       .from("generated_articles")
       .select("id")
-      .eq("regiao_id", cluster.regiao_id)
+      .eq("regiao_id", regiaoId)
       .eq("slug", baseSlug)
       .maybeSingle();
     if (existing) {
@@ -233,7 +333,7 @@ Deno.serve(async (req) => {
       slug = `${baseSlug}-${suffix}`;
     }
   }
-  const cidadePrincipal = (dados.cidade_principal as string | null) ?? null;
+  const cidadePrincipal = cidade?.nome ?? (dados.cidade_principal as string | null) ?? null;
   const cidadesMencionadas = (dados.cidades_mencionadas as string[] | undefined) ?? [];
 
   // 3. Persistir generated_articles (rascunho) — extracted_facts já existe, não regrava
@@ -242,8 +342,11 @@ Deno.serve(async (req) => {
     .from("generated_articles")
     .insert({
       cluster_id: clusterId,
-      regiao_id: cluster.regiao_id,
+      regiao_id: regiaoId,
       categoria_id: cluster.categoria_id,
+      formato: "materia",
+      tema_crivo: tema,
+      prioridade_crivo: prioridade,
       slug,
       titulo: parsed.titulo,
       subtitulo: parsed.subtitulo ?? null,
@@ -274,8 +377,11 @@ Deno.serve(async (req) => {
         .from("generated_articles")
         .insert({
           cluster_id: clusterId,
-          regiao_id: cluster.regiao_id,
+          regiao_id: regiaoId,
           categoria_id: cluster.categoria_id,
+          formato: "materia",
+          tema_crivo: tema,
+          prioridade_crivo: prioridade,
           slug: retrySlug,
           titulo: parsed.titulo,
           subtitulo: parsed.subtitulo ?? null,
@@ -308,123 +414,95 @@ Deno.serve(async (req) => {
   // rede não deixar a pauta presa em `selecionado_cota`/`fatos_extraidos`.
   await markClusterDone(sb, clusterId);
 
-  // 3b. Sempre copiar a foto original do scraping para o storage — assim o
-  // editor pode escolher, com um clique, entre a foto real e uma variação IA
-  // (mesmo se a fonte tirar o arquivo do ar depois).
-  let temFotoReal = false;
+  // 3b. Foto — regra de risco zero:
+  //   - foto da fonte SÓ se o crédito é institucional (assessoria,
+  //     divulgação, prefeitura, governo, foto pública) → copia para o storage
+  //     com o crédito original;
+  //   - senão, FOTO GERAL DA CIDADE (cidades.foto_geral_url), ou da região
+  //     como último recurso. Foto de fotógrafo/outro veículo nunca é usada.
+  let fotoOrigem: "fonte_autorizada" | "cidade_geral" | "regiao_geral" | "nenhuma" = "nenhuma";
   try {
-    const { data: ca } = await sb
-      .from("cluster_articles")
-      .select("raw_article_id")
-      .eq("cluster_id", clusterId);
-    const rawIdsList = (ca ?? []).map((r) => r.raw_article_id);
-    if (rawIdsList.length) {
-      const { data: raws } = await sb
-        .from("raw_articles")
-        .select("imagem_original_url, imagem_credito, fonte:fontes(nome)")
-        .in("id", rawIdsList)
-        .not("imagem_original_url", "is", null)
-        .limit(1);
-      const raw = raws?.[0] as
-        | { imagem_original_url: string | null; imagem_credito: string | null; fonte: { nome: string } | { nome: string }[] | null }
-        | undefined;
-      const srcUrl = raw?.imagem_original_url ?? null;
-      if (srcUrl) {
-        temFotoReal = true;
-        const controller = new AbortController();
-        const timeout = setTimeout(() => controller.abort(), 6_000);
-        let imgRes: Response | null = null;
-        try {
-          imgRes = await fetch(srcUrl, {
-            headers: { "User-Agent": "VozesParanaensesBot/1.0 (+https://vozesparanaenses.com.br)" },
-            signal: controller.signal,
-          });
-        } catch (_) {
-          imgRes = null;
-        } finally {
-          clearTimeout(timeout);
-        }
-        if (imgRes?.ok) {
-          const buf = new Uint8Array(await imgRes.arrayBuffer());
-          const mime = imgRes.headers.get("content-type")?.split(";")[0].trim() || "image/jpeg";
-          if (/^image\//.test(mime) && buf.byteLength > 1024) {
-            const ext = mime.split("/")[1]?.split("+")[0] ?? "jpg";
-            const path = `${inserted.id}/original.${ext}`;
-            const { error: upErr } = await sb.storage.from("article-covers").upload(path, buf, {
-              contentType: mime, upsert: true,
-            });
-            if (!upErr) {
-              const { data: pub } = sb.storage.from("article-covers").getPublicUrl(path);
-              const veic = Array.isArray(raw?.fonte) ? raw?.fonte[0]?.nome : raw?.fonte?.nome;
-              const creditoScraped = raw?.imagem_credito?.trim();
-              const credito = creditoScraped && creditoScraped.length
-                ? (veic && !creditoScraped.toLowerCase().includes(veic.toLowerCase())
-                    ? `${creditoScraped} / ${veic}`
-                    : creditoScraped)
-                : `Imagem: reprodução${veic ? ` — ${veic}` : ""}`;
-              await sb.from("generated_articles")
-                .update({
-                  imagem_original_url: pub.publicUrl,
-                  imagem_capa_url: pub.publicUrl,
-                  og_image_url: pub.publicUrl,
-                  imagem_credito: credito,
-                })
-                .eq("id", inserted.id);
-            }
-          }
-        }
+    if (rawFotoAutorizada?.imagem_original_url) {
+      const copiada = await copiarFotoParaStorage(sb, rawFotoAutorizada.imagem_original_url, inserted.id);
+      if (copiada) {
+        await sb.from("generated_articles").update({
+          imagem_original_url: copiada,
+          imagem_capa_url: copiada,
+          og_image_url: copiada,
+          imagem_credito: creditoParaExibir(rawFotoAutorizada.imagem_credito ?? ""),
+        }).eq("id", inserted.id);
+        fotoOrigem = "fonte_autorizada";
+      }
+    }
+    if (fotoOrigem === "nenhuma") {
+      const { data: fotoCidade } = cidade
+        ? await sb.from("cidades").select("foto_geral_url, foto_geral_credito").eq("slug", cidade.slug).maybeSingle()
+        : { data: null };
+      const { data: fotoRegiao } = fotoCidade?.foto_geral_url
+        ? { data: null }
+        : await sb.from("regioes").select("hero_image_url").eq("id", regiaoId).maybeSingle();
+      const urlGeral = fotoCidade?.foto_geral_url ?? fotoRegiao?.hero_image_url ?? null;
+      if (urlGeral) {
+        fotoOrigem = fotoCidade?.foto_geral_url ? "cidade_geral" : "regiao_geral";
+        await sb.from("generated_articles").update({
+          imagem_capa_url: urlGeral,
+          og_image_url: urlGeral,
+          imagem_credito: fotoCidade?.foto_geral_credito ?? `Imagem ilustrativa${cidade ? ` — ${cidade.nome}` : ""}`,
+          imagem_legenda: cidade ? `Vista de ${cidade.nome} (imagem ilustrativa)` : null,
+        }).eq("id", inserted.id);
       }
     }
   } catch (_) {
-    // Falha ao copiar a foto original não bloqueia a geração da matéria —
-    // o editor pode gerar/subir a capa manualmente depois.
+    // Falha na foto não bloqueia a matéria — o editor pode ajustar a capa.
   }
 
-  // 3c. Publicação automática: só quando NÃO há foto real da fonte (o uso da
-  // foto em si, mesmo com crédito, é uma decisão de risco que fica sempre
-  // com o editor humano), o interesse de leitura está no patamar "muito
-  // alto" E a categoria não é Segurança/Policial — matéria sobre pessoa
-  // identificável em contexto criminal carrega risco real de difamação/
-  // exposição mesmo sem foto, então fica sempre na fila manual, sem exceção.
-  const AUTO_PUBLISH_INTERESSE_MINIMO = 3.5;
-  const CATEGORIAS_SEMPRE_MANUAIS = ["seguranca"];
-  const categoriaSensivel = categoriaSlug ? CATEGORIAS_SEMPRE_MANUAIS.includes(categoriaSlug) : false;
+  // 3c. Criticidade decide se publica sozinha ou vai para a fila humana.
+  const crit = await avaliarCriticidade(
+    { titulo: parsed.titulo, corpo: parsed.corpo, fatos: { ...facts, dados }, formato: "materia", categoria: categoriaSlug },
+    aiKey, configCriticidade,
+  );
 
   // Trava contra duplicidade: se o clustering não juntou duas fontes que
-  // cobriram o MESMO fato (pode acontecer quando o texto de origem é
-  // redigido de forma diferente o bastante pra ficar abaixo do limiar de
-  // similaridade do embedding), o resultado são duas matérias quase
-  // idênticas publicadas separadamente — isso é exatamente "conteúdo
-  // duplicado" pra política de baixo valor do AdSense. Sem um segundo
-  // cluster pra comparar, o jeito mais barato de pegar isso aqui é
-  // comparar o TÍTULO contra o que já foi publicado na mesma
-  // categoria+região nas últimas 48h — se a sobreposição de palavras
-  // relevantes for alta, força fila manual mesmo que o interesse desse
-  // cluster sozinho justificasse publicação automática.
+  // cobriram o MESMO fato, o título parecido com algo das últimas 48h na
+  // mesma categoria+região manda para revisão (conteúdo duplicado é
+  // "baixo valor" para o AdSense).
   let possivelDuplicata = false;
-  if (cluster.categoria_id && cluster.regiao_id) {
+  if (cluster.categoria_id) {
     const desde48h = new Date(Date.now() - 48 * 3600 * 1000).toISOString();
     const { data: recentes } = await sb
       .from("generated_articles")
       .select("titulo")
       .eq("categoria_id", cluster.categoria_id)
-      .eq("regiao_id", cluster.regiao_id)
+      .eq("regiao_id", regiaoId)
       .gte("gerado_em", desde48h)
       .neq("id", inserted.id);
     if (recentes?.length) {
       possivelDuplicata = recentes.some((r) => tituloMuitoParecido(parsed.titulo, r.titulo));
     }
   }
+  const motivos = [...crit.motivos, ...(possivelDuplicata ? ["título muito parecido com matéria das últimas 48h"] : [])];
 
-  const podeAutoPublicar =
-    !temFotoReal && !categoriaSensivel && !possivelDuplicata &&
-    (cluster.interesse_score ?? 0) >= AUTO_PUBLISH_INTERESSE_MINIMO;
-  if (podeAutoPublicar) {
-    await sb.from("generated_articles")
-      .update({ status: "publicado", publicado_automaticamente: true, publicado_em: new Date().toISOString() })
-      .eq("id", inserted.id);
-  } else if (possivelDuplicata) {
-    console.warn(`[generate-article] possível duplicata detectada, mandando pra revisão manual: "${parsed.titulo}"`);
+  // Modo automático: publica se a criticidade não pediu revisão. Modo
+  // editor: mantém a regra antiga (interesse muito alto e categoria não
+  // sensível), agora também condicionada à criticidade.
+  const AUTO_PUBLISH_INTERESSE_MINIMO = 3.5;
+  const categoriaSensivel = categoriaSlug === "seguranca";
+  const podeAutoPublicar = !crit.revisao && !possivelDuplicata && (
+    automatico ||
+    (!categoriaSensivel && (cluster.interesse_score ?? 0) >= AUTO_PUBLISH_INTERESSE_MINIMO)
+  );
+  await sb.from("generated_articles").update({
+    foto_origem: fotoOrigem,
+    criticidade_nivel: crit.nivel,
+    criticidade_score: crit.score,
+    criticidade_motivos: motivos,
+    criticidade_avaliada_em: new Date().toISOString(),
+    ...(podeAutoPublicar
+      ? { status: "publicado", publicado_automaticamente: true, publicado_em: new Date().toISOString() }
+      : {}),
+  }).eq("id", inserted.id);
+  if (!podeAutoPublicar) {
+    console.log(`[generate-article] fila de revisão (${crit.nivel}): "${parsed.titulo}" — ${motivos.join("; ")}`);
   }
 
   // 5. Marcar raws desse cluster como processados
@@ -438,10 +516,48 @@ Deno.serve(async (req) => {
     model: MODEL,
     titulo: parsed.titulo,
     publicado_automaticamente: podeAutoPublicar,
-    tem_foto_real: temFotoReal,
-    categoria_sensivel: categoriaSensivel,
+    foto_origem: fotoOrigem,
+    criticidade: { nivel: crit.nivel, revisao: crit.revisao || possivelDuplicata, motivos },
   });
 });
+
+// deno-lint-ignore no-explicit-any
+async function carregConfig(sb: any) {
+  try { return await carregarConfigCriticidade(sb); } catch { return undefined; }
+}
+
+// deno-lint-ignore no-explicit-any
+async function encerrarCluster(sb: any, clusterId: string, rawIds: string[], status: "descartado" | "rascunho_gerado") {
+  if (status === "rascunho_gerado") await markClusterDone(sb, clusterId);
+  else await sb.from("article_clusters").update({ status }).eq("id", clusterId);
+  if (rawIds.length) await sb.from("raw_articles").update({ processado: true }).in("id", rawIds);
+}
+
+// Copia a foto institucional para o storage (a fonte pode tirar do ar depois).
+// deno-lint-ignore no-explicit-any
+async function copiarFotoParaStorage(sb: any, srcUrl: string, articleId: string): Promise<string | null> {
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), 6_000);
+  try {
+    const imgRes = await fetch(srcUrl, {
+      headers: { "User-Agent": "VozesParanaensesBot/1.0 (+https://vozesparanaenses.com.br)" },
+      signal: controller.signal,
+    });
+    if (!imgRes.ok) return null;
+    const buf = new Uint8Array(await imgRes.arrayBuffer());
+    const mime = imgRes.headers.get("content-type")?.split(";")[0].trim() || "image/jpeg";
+    if (!/^image\//.test(mime) || buf.byteLength <= 1024) return null;
+    const ext = mime.split("/")[1]?.split("+")[0] ?? "jpg";
+    const path = `${articleId}/original.${ext}`;
+    const { error } = await sb.storage.from("article-covers").upload(path, buf, { contentType: mime, upsert: true });
+    if (error) return null;
+    return sb.storage.from("article-covers").getPublicUrl(path).data.publicUrl as string;
+  } catch {
+    return null;
+  } finally {
+    clearTimeout(timeout);
+  }
+}
 
 async function generateArticleJson(
   systemPrompt: string,
