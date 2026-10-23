@@ -39,7 +39,7 @@ const empty: {
   regiao_id: string;
   tipo_renderizacao: "estatico" | "spa_js";
   protecao_antibot: boolean;
-  // Vazio = segue os ciclos fixos (11h/18h). Só fontes de curadoria usam
+  // Vazio = segue os ciclos fixos (portais 10h/16h/21h, prefeituras 12h/18h). Só fontes de curadoria usam
   // frequência própria — preencher aqui tira a fonte dos ciclos.
   frequencia_horas: string;
   ativo: boolean;
@@ -214,8 +214,8 @@ function AdminFontes() {
           </select>
         </label>
         <label className="text-sm">
-          <span className="mb-1 block text-xs font-medium">Frequência (horas) — deixe vazio para seguir os ciclos 11h/18h</span>
-          <input type="number" min={1} value={form.frequencia_horas} placeholder="ciclos 11h/18h"
+          <span className="mb-1 block text-xs font-medium">Frequência (horas) — deixe vazio para seguir os ciclos fixos da frente</span>
+          <input type="number" min={1} value={form.frequencia_horas} placeholder="ciclos fixos"
             onChange={(e) => setForm({ ...form, frequencia_horas: e.target.value })}
             className="w-full rounded border px-2 py-1.5" />
         </label>

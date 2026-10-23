@@ -32,7 +32,7 @@ type Fonte = {
   abrangencia: string | null;
 };
 
-// Ciclos 11h e 18h (Brasília), em lotes — ver ../_shared/coleta.ts.
+// Ciclos 12h e 18h (Brasília), em lotes — ver ../_shared/coleta.ts.
 type Item = {
   url: string;
   titulo: string;

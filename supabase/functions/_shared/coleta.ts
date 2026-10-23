@@ -1,7 +1,11 @@
 // Vozes Paranaenses — regras de coleta comuns a scrape-source (veículos) e
 // scrape-prefeitura (assessorias oficiais).
 //
-// Ciclos fixos: 11h e 18h (Brasília). Cada ciclo fica aberto por
+// Ciclos fixos por frente (Brasília), alternados para girar a home:
+//   portais 10h, 16h e 21h · prefeituras 12h e 18h
+// (curadoria — nacional/internacional 7h e 14h, tecnologia 14h, esportes
+// 21h — é por tempo decorrido; quem marca a hora é o cron, migration 076).
+// Cada ciclo fica aberto por
 // JANELA_HORAS; o cron chama a função várias vezes dentro da janela e cada
 // chamada processa um LOTE de fontes ainda não coletadas NESTE ciclo — é o
 // que permite varrer 800+ fontes sem estourar o tempo de uma edge function.
@@ -14,7 +18,10 @@ import { ehDoDia, extrairDataDaUrl, horaSaoPaulo, inicioDoCiclo } from "./data-p
 import { detectarCidade, type Cidade } from "./cidades.ts";
 import { classificarFoto } from "./foto-credito.ts";
 
-export const CICLOS = [11, 18];
+export const CICLOS_PREFEITURAS = [12, 18];
+export const CICLOS_PORTAIS = [10, 16, 21];
+/** Padrão (prefeituras). */
+export const CICLOS = CICLOS_PREFEITURAS;
 export const JANELA_HORAS = 2;
 export const MAX_POR_FONTE = 15;
 // Pausa entre páginas de matéria do MESMO site: sites de prefeitura são
@@ -42,20 +49,20 @@ export type ItemColetado = {
 
 export type MetaPagina = { imagem: string | null; credito: string | null; corpoCompleto: string; data: string | null; dataOrigem: string | null };
 
-/** Ciclo aberto agora (11 ou 18), ou null fora das janelas. */
-export function cicloAtual(agora: Date = new Date()): number | null {
+/** Ciclo aberto agora (hora de início), ou null fora das janelas. */
+export function cicloAtual(agora: Date = new Date(), ciclos: number[] = CICLOS): number | null {
   const h = horaSaoPaulo(agora);
-  return CICLOS.find((c) => h >= c && h < c + JANELA_HORAS) ?? null;
+  return ciclos.find((c) => h >= c && h < c + JANELA_HORAS) ?? null;
 }
 
 /** A fonte ainda não foi coletada no ciclo aberto? */
-export function fonteElegivel(f: FonteColeta, agora: Date = new Date()): boolean {
+export function fonteElegivel(f: FonteColeta, agora: Date = new Date(), ciclos: number[] = CICLOS): boolean {
   if (f.frequencia_horas != null) {
     // Exceção legada (fontes de curadoria nacional): por tempo decorrido.
     if (!f.ultimo_scrape_em) return true;
     return agora.getTime() - new Date(f.ultimo_scrape_em).getTime() >= f.frequencia_horas * 3600_000;
   }
-  const ciclo = cicloAtual(agora);
+  const ciclo = cicloAtual(agora, ciclos);
   if (ciclo == null) return false;
   if (!f.ultimo_scrape_em) return true;
   return new Date(f.ultimo_scrape_em).getTime() < inicioDoCiclo(ciclo, agora).getTime();

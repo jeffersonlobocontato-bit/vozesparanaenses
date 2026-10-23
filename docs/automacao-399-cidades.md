@@ -7,7 +7,7 @@ Objetivo: o portal cobre sozinho as 399 cidades do PR, com notícias **do dia**,
 | Tema | Regra |
 |---|---|
 | Fontes | Por cidade: site oficial da prefeitura + pelo menos 1 veículo local. Veículo regional pode cobrir várias cidades. |
-| Varredura | Dois ciclos por dia: **11h e 18h** (Brasília), para prefeituras, portais e curadoria (`073_portais_e_curadoria_nos_ciclos.sql`). |
+| Varredura | Horários alternados por frente (Brasília, `076_horarios_alternados_por_frente.sql`): nacional/internacional **7h e 14h**, portais **10h, 16h e 21h**, prefeituras **12h e 18h**, tecnologia **14h** (1 publicação por dia), esportes **21h**. Processamento (agrupar, crivo, escrever) das 7h às 23h. |
 | Validador | **Data de publicação da fonte.** Só entra o que foi publicado HOJE. Sem data identificável = descartado. |
 | Repetição | Nunca: hash da URL+título na coleta, agrupamento por similaridade e checagem contra tudo o que foi selecionado nas últimas 72h (`cluster_duplicado`). |
 | Região | Pela **cidade de que a notícia fala**, nunca pela cidade do jornal. Palotina em jornal de Curitiba = Oeste. |
@@ -27,7 +27,7 @@ Objetivo: o portal cobre sozinho as 399 cidades do PR, com notícias **do dia**,
 ## Fluxo
 
 ```
-cron 11h/18h (lotes a cada 3 min, janela de 2h)
+cron por frente (lotes a cada 3–10 min, janela de 2h por ciclo)
   scrape-prefeitura / scrape-source        _shared/coleta.ts
     ├─ data do dia? (RSS → URL → página: meta, JSON-LD, <time>, texto)   _shared/data-publicacao.ts
     ├─ cidade citada → região                                            _shared/cidades.ts
@@ -72,7 +72,7 @@ Supondo 800 fontes e 30–40% das cidades com algo novo por dia, são cerca de 3
 npx deno run --allow-read supabase/functions/_shared/regras_test.ts
 ```
 
-São 62 casos cobrindo região pela cidade (Palotina/Curitiba, sobrenome "Castro", "festa de São João"), crédito de foto, data do dia (fuso, JSON-LD, texto, URL), ciclos 11h/18h, gatilhos de criticidade (sem travar "casos suspeitos de dengue", "candidatos do concurso", "vacinação de crianças") e decisão matéria/nota.
+São 62 casos cobrindo região pela cidade (Palotina/Curitiba, sobrenome "Castro", "festa de São João"), crédito de foto, data do dia (fuso, JSON-LD, texto, URL), ciclos por frente, gatilhos de criticidade (sem travar "casos suspeitos de dengue", "candidatos do concurso", "vacinação de crianças") e decisão matéria/nota.
 
 ## Pendências conhecidas
 

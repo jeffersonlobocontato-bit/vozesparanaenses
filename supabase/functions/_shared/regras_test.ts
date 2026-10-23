@@ -12,7 +12,7 @@ import { escolherFotoCommons, filtrarCandidatasCommons, promptIlustracao } from 
 import { escolherFotoBaixoRisco, normalizarAvaliacoes, normalizarPlano } from "./analista-imagem.ts";
 import { limparPrefeituraMecanico, verificarTitulo } from "./titulo.ts";
 import { dataAtendeNetParaIso, ehAtendeNet, parseListaAtendeNet, parseMateriaAtendeNet } from "./atende-net.ts";
-import { cicloAtual, fonteElegivel, normalizarUrl } from "./coleta.ts";
+import { CICLOS_PORTAIS, cicloAtual, fonteElegivel, normalizarUrl } from "./coleta.ts";
 
 const src = Deno.readTextFileSync(new URL("../../../src/lib/parana-municipios.ts", import.meta.url));
 const cidades = [...src.matchAll(/\{ slug: "([^"]+)", name: "([^"]+)", region: "([^"]+)" \}/g)].map((m) => ({ slug: m[1], nome: JSON.parse(`"${m[2]}"`), regiao_id: m[3] }));
@@ -91,14 +91,21 @@ ok("versão do sistema / Data: solto NÃO contam", x === null, JSON.stringify(x)
 ok("sem data → null", extrairDataPublicacao("<p>nada</p>", "https://a.com/noticia") === null);
 ok("inicio ciclo 11h", inicioDoCiclo(11, agora).toISOString() === "2026-10-22T14:00:00.000Z");
 
-// Ciclos
-ok("14h30 → ciclo fechado", cicloAtual(agora) === null);
-ok("11h20 → ciclo 11", cicloAtual(new Date("2026-10-22T11:20:00-03:00")) === 11);
-ok("19h50 → ciclo 18", cicloAtual(new Date("2026-10-22T19:50:00-03:00")) === 18);
-ok("20h → fechado", cicloAtual(new Date("2026-10-22T20:00:00-03:00")) === null);
-const t1120 = new Date("2026-10-22T11:20:00-03:00");
-ok("fonte coletada 7h hoje → elegível no ciclo 11", fonteElegivel({ id: "1", nome: "x", regiao_id: null, frequencia_horas: null, ultimo_scrape_em: "2026-10-22T07:00:00-03:00" }, t1120));
-ok("fonte coletada 11h05 → não elegível", !fonteElegivel({ id: "1", nome: "x", regiao_id: null, frequencia_horas: null, ultimo_scrape_em: "2026-10-22T11:05:00-03:00" }, t1120));
+// Ciclos (prefeituras 12h/18h, portais 10h/16h/21h)
+ok("14h30 → prefeituras fechado", cicloAtual(agora) === null);
+ok("12h20 → prefeituras ciclo 12", cicloAtual(new Date("2026-10-22T12:20:00-03:00")) === 12);
+ok("11h20 → prefeituras fechado", cicloAtual(new Date("2026-10-22T11:20:00-03:00")) === null);
+ok("19h50 → prefeituras ciclo 18", cicloAtual(new Date("2026-10-22T19:50:00-03:00")) === 18);
+ok("20h → prefeituras fechado", cicloAtual(new Date("2026-10-22T20:00:00-03:00")) === null);
+ok("10h30 → portais ciclo 10", cicloAtual(new Date("2026-10-22T10:30:00-03:00"), CICLOS_PORTAIS) === 10);
+ok("16h10 → portais ciclo 16", cicloAtual(new Date("2026-10-22T16:10:00-03:00"), CICLOS_PORTAIS) === 16);
+ok("22h50 → portais ciclo 21", cicloAtual(new Date("2026-10-22T22:50:00-03:00"), CICLOS_PORTAIS) === 21);
+ok("12h → portais fechado", cicloAtual(new Date("2026-10-22T12:00:00-03:00"), CICLOS_PORTAIS) === null);
+const t1220 = new Date("2026-10-22T12:20:00-03:00");
+ok("fonte coletada 7h hoje → elegível no ciclo 12", fonteElegivel({ id: "1", nome: "x", regiao_id: null, frequencia_horas: null, ultimo_scrape_em: "2026-10-22T07:00:00-03:00" }, t1220));
+ok("fonte coletada 12h05 → não elegível", !fonteElegivel({ id: "1", nome: "x", regiao_id: null, frequencia_horas: null, ultimo_scrape_em: "2026-10-22T12:05:00-03:00" }, t1220));
+const t1615 = new Date("2026-10-22T16:15:00-03:00");
+ok("portal coletado 10h30 → elegível no ciclo 16", fonteElegivel({ id: "1", nome: "x", regiao_id: null, frequencia_horas: null, ultimo_scrape_em: "2026-10-22T10:30:00-03:00" }, t1615, CICLOS_PORTAIS));
 ok("normaliza utm/www", normalizarUrl("https://www.a.com/n/?utm_source=x&id=2#top") === "https://a.com/n/?id=2", normalizarUrl("https://www.a.com/n/?utm_source=x&id=2#top"));
 
 // Criticidade (regras)

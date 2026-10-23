@@ -1,7 +1,7 @@
 // Vozes Paranaenses — publicação periódica da editoria Tecnologia.
-// Chamada por cron (ver supabase-external/059_cron_tecnologia.sql), mas só
-// age de verdade se já passaram 2 dias desde a última publicação de
-// Tecnologia — chamar com mais frequência não acelera o ritmo.
+// Chamada por cron (migration 076: 14h45 e 15h45), mas só age de verdade
+// se já passaram 20h desde a última publicação de Tecnologia — uma por dia,
+// no horário das 14h; chamar com mais frequência não acelera o ritmo.
 //
 // A cada 7 dias (a partir da última edição especial), em vez de escrever a
 // partir de um cluster comum, gera a edição semanal com Jefferson Lobo como
@@ -14,7 +14,7 @@ import { createClient } from "@supabase/supabase-js";
 
 const AI_URL = "https://ai.gateway.lovable.dev/v1/chat/completions";
 const MODEL = "google/gemini-2.5-flash";
-const INTERVALO_MS = 2 * 24 * 3600 * 1000;
+const INTERVALO_MS = 20 * 3600 * 1000;
 const INTERVALO_SEMANAL_MS = 7 * 24 * 3600 * 1000;
 
 function slugify(s: string): string {
@@ -66,7 +66,7 @@ async function run(): Promise<Response> {
     return Response.json({
       ok: true,
       aguardando: true,
-      motivo: "Ainda não passaram 2 dias desde a última publicação de Tecnologia.",
+      motivo: "Tecnologia já publicou nas últimas 20h.",
     });
   }
 

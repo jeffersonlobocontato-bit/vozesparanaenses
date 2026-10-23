@@ -2,11 +2,11 @@
 // Coleta artigos brutos das `fontes` (RSS ou HTML simples), calcula hash de
 // conteúdo (deduplicação) e insere em `raw_articles` no Supabase externo.
 // Body opcional: { fonte_id?: string }. Sem body, processa um lote das fontes
-// ativas ainda não coletadas no ciclo aberto (11h/18h — ver ../_shared/coleta.ts).
+// ativas ainda não coletadas no ciclo aberto (portais 10h/16h/21h — ver ../_shared/coleta.ts).
 
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
 import { carregarCidades } from "../_shared/cidades.ts";
-import { carregarNomesVeiculos, fonteElegivel, processarItensDaFonte, type MetaPagina, type RelatorioFonte } from "../_shared/coleta.ts";
+import { carregarNomesVeiculos, CICLOS_PORTAIS, fonteElegivel, processarItensDaFonte, type MetaPagina, type RelatorioFonte } from "../_shared/coleta.ts";
 import { extrairDataPublicacao, normalizarDataRss } from "../_shared/data-publicacao.ts";
 
 const cors = {
@@ -102,13 +102,14 @@ Deno.serve(async (req) => {
 
   const [cidades, nomesVeiculos] = await Promise.all([carregarCidades(sb), carregarNomesVeiculos(sb)]);
 
-  // Curadoria nacional/tecnologia tem cron próprio (a cada 6h), fora dos
-  // ciclos 11h/18h das cidades: elegível por tempo decorrido.
+  // Curadoria tem cron próprio por editoria (nacional/internacional 7h e
+  // 14h, tecnologia 14h, esportes 21h — migration 076): elegível por tempo
+  // decorrido, para cada janela do cron coletar uma vez só.
   const ehCuradoria = !!(body.apenas_curadoria || body.curadoria_editorias?.length);
   const eligible = (fontes ?? []).filter((f) => {
     if (body.fonte_id || body.force) return true;
     if (ehCuradoria) return !f.ultimo_scrape_em || Date.now() - new Date(f.ultimo_scrape_em).getTime() >= 5 * 3600_000;
-    return fonteElegivel(f as Fonte);
+    return fonteElegivel(f as Fonte, new Date(), CICLOS_PORTAIS);
   });
   // Chamada do cron (background) tem mais fôlego que o botão síncrono do painel.
   if (!body.fonte_id && !body.sync) ORCAMENTO_MS = 110_000;
