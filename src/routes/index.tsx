@@ -117,7 +117,6 @@ export const Route = createFileRoute("/")({
     );
     await context.queryClient.ensureQueryData(vaptVuptQO);
     await context.queryClient.ensureQueryData(mostReadQO);
-    await context.queryClient.ensureQueryData(eleicoes2026TopQO);
     await context.queryClient.ensureQueryData(colunasAtalhosQO);
   },
   component: Home,
@@ -148,7 +147,6 @@ function Home() {
       articles={articles}
       vaptVupt={vaptVupt}
       mostRead={mostRead}
-      eleicoes2026Top={eleicoes2026Top[0]}
       loc={loc}
       colunas={colunas}
       storyTopicos={storyTopicos}
