@@ -77,6 +77,7 @@ type RawFoto = {
   imagem_credito: string | null;
   foto_status: FotoStatus | null;
   data_publicacao_original: string | null;
+  coletado_em: string | null;
   fonte: { nome: string; tipo: string } | { nome: string; tipo: string }[] | null;
 };
 
@@ -213,7 +214,7 @@ Deno.serve(async (req) => {
   const rawIdsCluster = (caRows ?? []).map((r) => r.raw_article_id);
   const { data: rawsData } = rawIdsCluster.length
     ? await sb.from("raw_articles")
-      .select("id, imagem_original_url, imagem_credito, foto_status, data_publicacao_original, fonte:fontes(nome, tipo)")
+      .select("id, imagem_original_url, imagem_credito, foto_status, data_publicacao_original, coletado_em, fonte:fontes(nome, tipo)")
       .in("id", rawIdsCluster)
     : { data: [] as RawFoto[] };
   const raws = (rawsData ?? []) as RawFoto[];
@@ -235,8 +236,15 @@ Deno.serve(async (req) => {
   const configCriticidade = await carregConfig(sb);
 
   if (automatico) {
-    // Validador do dia: só publica o que a fonte publicou hoje.
-    if (raws.length && !raws.some((r) => ehDoDia(r.data_publicacao_original))) {
+    // Validador do dia: a fonte publicou no MESMO dia em que coletamos, e a
+    // coleta é recente (24h). Comparar com a hora atual descartava tudo o
+    // que era escrito depois da meia-noite (o ciclo das 18h vai até 21h e a
+    // fila pode atrasar).
+    const doDiaDaColeta = (r: RawFoto) =>
+      !!r.coletado_em &&
+      Date.now() - new Date(r.coletado_em).getTime() < 24 * 3600_000 &&
+      ehDoDia(r.data_publicacao_original, new Date(r.coletado_em));
+    if (raws.length && !raws.some(doDiaDaColeta)) {
       await encerrarCluster(sb, clusterId, rawIdsCluster, "descartado");
       return json({ ok: true, ignorado: "fora_do_dia" });
     }
