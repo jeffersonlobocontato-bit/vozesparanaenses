@@ -7,6 +7,8 @@ import iconMark from "@/assets/vozes-icon-dark.png.asset.json";
 type NavItem = { label: string; to: string; params?: Record<string, string> };
 
 // Tarja azul do topo: editorias temáticas.
+// EDITORIAS_NAV_MAIN é o subconjunto exibido inline (sem rolagem lateral);
+// a lista completa fica no menu do burger.
 const EDITORIAS_NAV: NavItem[] = [
   { label: "Política", to: "/editoria/$categoria", params: { categoria: "politica" } },
   { label: "Eleições 2026", to: "/editoria/$categoria", params: { categoria: "eleicoes-2026" } },
@@ -20,6 +22,10 @@ const EDITORIAS_NAV: NavItem[] = [
   { label: "Internacional", to: "/editoria/$categoria", params: { categoria: "internacional" } },
   { label: "Tecnologia", to: "/editoria/$categoria", params: { categoria: "tecnologia" } },
 ];
+
+const EDITORIAS_NAV_MAIN: NavItem[] = EDITORIAS_NAV.filter((i) =>
+  ["Política", "Economia", "Agronegócio", "Segurança", "Esportes", "Educação", "Cultura", "Tecnologia"].includes(i.label),
+);
 
 // Linha branca abaixo (ao lado da data): as 10 macrorregiões.
 const REGIOES_NAV: NavItem[] = [
@@ -96,9 +102,9 @@ export function SiteHeader() {
           />
         </Link>
 
-        {/* Editorias temáticas — desktop */}
-        <nav className="ml-2 hidden min-w-0 flex-1 items-center gap-5 overflow-x-auto md:flex">
-          {EDITORIAS_NAV.map((item) => (
+        {/* Editorias temáticas — desktop (subconjunto, sem rolagem lateral) */}
+        <nav className="ml-2 hidden min-w-0 flex-1 items-center gap-4 md:flex">
+          {EDITORIAS_NAV_MAIN.map((item) => (
             <Link
               key={item.label}
               to={item.to as never}
