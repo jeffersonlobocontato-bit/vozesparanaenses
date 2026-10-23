@@ -22,6 +22,7 @@ import { Route as RegionRouteImport } from './routes/$region'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AdminIndexRouteImport } from './routes/admin.index'
 import { Route as RegionIndexRouteImport } from './routes/$region.index'
+import { Route as VozesCidadeRouteImport } from './routes/vozes.$cidade'
 import { Route as VitrineTokenRouteImport } from './routes/vitrine.$token'
 import { Route as VitrinePessoalNovoRouteImport } from './routes/vitrine-pessoal.novo'
 import { Route as RIdRouteImport } from './routes/r.$id'
@@ -38,6 +39,7 @@ import { Route as AdminResetPasswordRouteImport } from './routes/admin.reset-pas
 import { Route as AdminRegioesRouteImport } from './routes/admin.regioes'
 import { Route as AdminPedidosChatRouteImport } from './routes/admin.pedidos-chat'
 import { Route as AdminPainelRouteImport } from './routes/admin.painel'
+import { Route as AdminNotasCidadesRouteImport } from './routes/admin.notas-cidades'
 import { Route as AdminMemoriaEditorialRouteImport } from './routes/admin.memoria-editorial'
 import { Route as AdminLoginRouteImport } from './routes/admin.login'
 import { Route as AdminImprensaClientesRouteImport } from './routes/admin.imprensa-clientes'
@@ -135,6 +137,11 @@ const RegionIndexRoute = RegionIndexRouteImport.update({
   path: '/',
   getParentRoute: () => RegionRoute,
 } as any)
+const VozesCidadeRoute = VozesCidadeRouteImport.update({
+  id: '/vozes/$cidade',
+  path: '/vozes/$cidade',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const VitrineTokenRoute = VitrineTokenRouteImport.update({
   id: '/vitrine/$token',
   path: '/vitrine/$token',
@@ -213,6 +220,11 @@ const AdminPedidosChatRoute = AdminPedidosChatRouteImport.update({
 const AdminPainelRoute = AdminPainelRouteImport.update({
   id: '/painel',
   path: '/painel',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminNotasCidadesRoute = AdminNotasCidadesRouteImport.update({
+  id: '/notas-cidades',
+  path: '/notas-cidades',
   getParentRoute: () => AdminRoute,
 } as any)
 const AdminMemoriaEditorialRoute = AdminMemoriaEditorialRouteImport.update({
@@ -403,6 +415,7 @@ export interface FileRoutesByFullPath {
   '/admin/imprensa-clientes': typeof AdminImprensaClientesRoute
   '/admin/login': typeof AdminLoginRoute
   '/admin/memoria-editorial': typeof AdminMemoriaEditorialRoute
+  '/admin/notas-cidades': typeof AdminNotasCidadesRoute
   '/admin/painel': typeof AdminPainelRoute
   '/admin/pedidos-chat': typeof AdminPedidosChatRoute
   '/admin/regioes': typeof AdminRegioesRoute
@@ -419,6 +432,7 @@ export interface FileRoutesByFullPath {
   '/r/$id': typeof RIdRoute
   '/vitrine-pessoal/novo': typeof VitrinePessoalNovoRoute
   '/vitrine/$token': typeof VitrineTokenRoute
+  '/vozes/$cidade': typeof VozesCidadeRoute
   '/$region/': typeof RegionIndexRoute
   '/admin/': typeof AdminIndexRoute
   '/$region/cidade/$cidade': typeof RegionCidadeCidadeRoute
@@ -463,6 +477,7 @@ export interface FileRoutesByTo {
   '/admin/imprensa-clientes': typeof AdminImprensaClientesRoute
   '/admin/login': typeof AdminLoginRoute
   '/admin/memoria-editorial': typeof AdminMemoriaEditorialRoute
+  '/admin/notas-cidades': typeof AdminNotasCidadesRoute
   '/admin/painel': typeof AdminPainelRoute
   '/admin/pedidos-chat': typeof AdminPedidosChatRoute
   '/admin/regioes': typeof AdminRegioesRoute
@@ -479,6 +494,7 @@ export interface FileRoutesByTo {
   '/r/$id': typeof RIdRoute
   '/vitrine-pessoal/novo': typeof VitrinePessoalNovoRoute
   '/vitrine/$token': typeof VitrineTokenRoute
+  '/vozes/$cidade': typeof VozesCidadeRoute
   '/$region': typeof RegionIndexRoute
   '/admin': typeof AdminIndexRoute
   '/$region/cidade/$cidade': typeof RegionCidadeCidadeRoute
@@ -526,6 +542,7 @@ export interface FileRoutesById {
   '/admin/imprensa-clientes': typeof AdminImprensaClientesRoute
   '/admin/login': typeof AdminLoginRoute
   '/admin/memoria-editorial': typeof AdminMemoriaEditorialRoute
+  '/admin/notas-cidades': typeof AdminNotasCidadesRoute
   '/admin/painel': typeof AdminPainelRoute
   '/admin/pedidos-chat': typeof AdminPedidosChatRoute
   '/admin/regioes': typeof AdminRegioesRoute
@@ -542,6 +559,7 @@ export interface FileRoutesById {
   '/r/$id': typeof RIdRoute
   '/vitrine-pessoal/novo': typeof VitrinePessoalNovoRoute
   '/vitrine/$token': typeof VitrineTokenRoute
+  '/vozes/$cidade': typeof VozesCidadeRoute
   '/$region/': typeof RegionIndexRoute
   '/admin/': typeof AdminIndexRoute
   '/$region/cidade/$cidade': typeof RegionCidadeCidadeRoute
@@ -590,6 +608,7 @@ export interface FileRouteTypes {
     | '/admin/imprensa-clientes'
     | '/admin/login'
     | '/admin/memoria-editorial'
+    | '/admin/notas-cidades'
     | '/admin/painel'
     | '/admin/pedidos-chat'
     | '/admin/regioes'
@@ -606,6 +625,7 @@ export interface FileRouteTypes {
     | '/r/$id'
     | '/vitrine-pessoal/novo'
     | '/vitrine/$token'
+    | '/vozes/$cidade'
     | '/$region/'
     | '/admin/'
     | '/$region/cidade/$cidade'
@@ -650,6 +670,7 @@ export interface FileRouteTypes {
     | '/admin/imprensa-clientes'
     | '/admin/login'
     | '/admin/memoria-editorial'
+    | '/admin/notas-cidades'
     | '/admin/painel'
     | '/admin/pedidos-chat'
     | '/admin/regioes'
@@ -666,6 +687,7 @@ export interface FileRouteTypes {
     | '/r/$id'
     | '/vitrine-pessoal/novo'
     | '/vitrine/$token'
+    | '/vozes/$cidade'
     | '/$region'
     | '/admin'
     | '/$region/cidade/$cidade'
@@ -712,6 +734,7 @@ export interface FileRouteTypes {
     | '/admin/imprensa-clientes'
     | '/admin/login'
     | '/admin/memoria-editorial'
+    | '/admin/notas-cidades'
     | '/admin/painel'
     | '/admin/pedidos-chat'
     | '/admin/regioes'
@@ -728,6 +751,7 @@ export interface FileRouteTypes {
     | '/r/$id'
     | '/vitrine-pessoal/novo'
     | '/vitrine/$token'
+    | '/vozes/$cidade'
     | '/$region/'
     | '/admin/'
     | '/$region/cidade/$cidade'
@@ -773,6 +797,7 @@ export interface RootRouteChildren {
   RIdRoute: typeof RIdRoute
   VitrinePessoalNovoRoute: typeof VitrinePessoalNovoRoute
   VitrineTokenRoute: typeof VitrineTokenRoute
+  VozesCidadeRoute: typeof VozesCidadeRoute
   ApiPublicContactRoute: typeof ApiPublicContactRoute
   ApiPublicLlmsFullDottxtRoute: typeof ApiPublicLlmsFullDottxtRoute
   ApiPublicLlmsDottxtRoute: typeof ApiPublicLlmsDottxtRoute
@@ -886,6 +911,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof RegionIndexRouteImport
       parentRoute: typeof RegionRoute
     }
+    '/vozes/$cidade': {
+      id: '/vozes/$cidade'
+      path: '/vozes/$cidade'
+      fullPath: '/vozes/$cidade'
+      preLoaderRoute: typeof VozesCidadeRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/vitrine/$token': {
       id: '/vitrine/$token'
       path: '/vitrine/$token'
@@ -996,6 +1028,13 @@ declare module '@tanstack/react-router' {
       path: '/painel'
       fullPath: '/admin/painel'
       preLoaderRoute: typeof AdminPainelRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/notas-cidades': {
+      id: '/admin/notas-cidades'
+      path: '/notas-cidades'
+      fullPath: '/admin/notas-cidades'
+      preLoaderRoute: typeof AdminNotasCidadesRouteImport
       parentRoute: typeof AdminRoute
     }
     '/admin/memoria-editorial': {
@@ -1247,6 +1286,7 @@ interface AdminRouteChildren {
   AdminImprensaClientesRoute: typeof AdminImprensaClientesRoute
   AdminLoginRoute: typeof AdminLoginRoute
   AdminMemoriaEditorialRoute: typeof AdminMemoriaEditorialRoute
+  AdminNotasCidadesRoute: typeof AdminNotasCidadesRoute
   AdminPainelRoute: typeof AdminPainelRoute
   AdminPedidosChatRoute: typeof AdminPedidosChatRoute
   AdminRegioesRoute: typeof AdminRegioesRoute
@@ -1267,6 +1307,7 @@ const AdminRouteChildren: AdminRouteChildren = {
   AdminImprensaClientesRoute: AdminImprensaClientesRoute,
   AdminLoginRoute: AdminLoginRoute,
   AdminMemoriaEditorialRoute: AdminMemoriaEditorialRoute,
+  AdminNotasCidadesRoute: AdminNotasCidadesRoute,
   AdminPainelRoute: AdminPainelRoute,
   AdminPedidosChatRoute: AdminPedidosChatRoute,
   AdminRegioesRoute: AdminRegioesRoute,
@@ -1300,6 +1341,7 @@ const rootRouteChildren: RootRouteChildren = {
   RIdRoute: RIdRoute,
   VitrinePessoalNovoRoute: VitrinePessoalNovoRoute,
   VitrineTokenRoute: VitrineTokenRoute,
+  VozesCidadeRoute: VozesCidadeRoute,
   ApiPublicContactRoute: ApiPublicContactRoute,
   ApiPublicLlmsFullDottxtRoute: ApiPublicLlmsFullDottxtRoute,
   ApiPublicLlmsDottxtRoute: ApiPublicLlmsDottxtRoute,
