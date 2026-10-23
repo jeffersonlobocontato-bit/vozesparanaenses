@@ -71,7 +71,9 @@ const GATILHOS: Array<{ nivel: Nivel; motivo: string; teste: (t: string) => bool
     teste: (t) => ELEITORAL.test(t) || (/\bcandidat\w*/.test(t) && CARGO_POLITICO.test(t)),
   },
   { nivel: "alto", motivo: "acusação de corrupção/improbidade", teste: (t) => /\b(corrupc\w*|improbidade|desvio de (verba|dinheiro|recurso)s?|propina|fraude|superfaturamento|lavagem de dinheiro)\b/.test(t) },
-  { nivel: "medio", motivo: "morte/tragédia", teste: (t) => /\b(morre\w*|mort[oa]s?|obitos?|falec\w*|homicidio|assassinat\w*|latrocinio|feminicidio|afogad[oa])\b/.test(t) },
+  // Morte CONCRETA de alguém — não "falecidos"/"mortos" genéricos (Finados,
+  // limpeza de cemitério, "Dia dos Mortos").
+  { nivel: "medio", motivo: "morte/tragédia", teste: (t) => /\b(morre|morreu|morreram|morrem|morte de|mort[oa] (em|apos|durante|no|na)|obito de|faleceu|falecimento de|homicidio|assassinat\w*|latrocinio|feminicidio|afogad[oa])\b/.test(t) },
   { nivel: "medio", motivo: "orientação de medicação", teste: (t) => /\b(dosagem|automedicac\w*|tomar (o |a )?(remedio|medicamento)|\d+ ?mg)\b/.test(t) },
   { nivel: "critico", motivo: "dado pessoal sensível", teste: (t) => /\b(cpf|\d{3}\.\d{3}\.\d{3}-\d{2}|portador de hiv|soropositiv\w*)\b/.test(t) },
 ];

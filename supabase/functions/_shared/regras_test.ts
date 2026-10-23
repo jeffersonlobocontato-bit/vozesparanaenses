@@ -107,6 +107,8 @@ ok("suspeito preso → alto", r("Polícia prende o suspeito de assalto em Toledo
 ok("criança morre em acidente → alto", r("Criança morre em acidente na BR-277") === "alto");
 ok("estupro → critico", r("Homem é investigado por estupro") === "critico");
 ok("eleição → alto", r("Segundo turno da eleição para governador movimenta Palotina") === "alto");
+ok("Finados/cemitério → baixo", r("Prefeitura define prazo para limpeza de túmulos antes do Dia de Finados; famílias homenageiam entes falecidos e mortos queridos") === "baixo");
+ok("homem morre em acidente → medio+", r("Homem morre em acidente na PR-317") !== "baixo");
 ok("morte natural → medio", r("Morre aos 90 anos o pioneiro de Palotina") === "medio");
 
 // Crivo
