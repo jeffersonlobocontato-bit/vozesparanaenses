@@ -42,7 +42,7 @@ Deno.serve(async (req) => {
   return json({
     ok: true,
     pedido,
-    pix: (pedido as { status: string }).status === "aprovado" ? { chave: PIX_CHAVE, titular: PIX_TITULAR } : null,
+    pix: (pedido as unknown as { status: string }).status === "aprovado" ? { chave: PIX_CHAVE, titular: PIX_TITULAR } : null,
   });
 });
 
