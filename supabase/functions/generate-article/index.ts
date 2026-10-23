@@ -13,7 +13,7 @@
 
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
 import { carregarCidades, cidadePorNome } from "../_shared/cidades.ts";
-import { decidirFormato, prioridadeDoTema, temaHeuristico, type OrigemPauta, type Prioridade, type Tema } from "../_shared/crivo-editorial.ts";
+import { decidirFormato, podeIrParaDobra, prioridadeDoTema, temaHeuristico, type OrigemPauta, type Prioridade, type Tema } from "../_shared/crivo-editorial.ts";
 import { avaliarCriticidade, carregarConfigCriticidade } from "../_shared/criticidade.ts";
 import { ehDoDia } from "../_shared/data-publicacao.ts";
 import { classificarFoto, creditoParaExibir, type FotoStatus } from "../_shared/foto-credito.ts";
@@ -451,6 +451,22 @@ Deno.serve(async (req) => {
   // de qualquer tarefa auxiliar (ex.: copiar foto externa), para uma demora de
   // rede não deixar a pauta presa em `selecionado_cota`/`fatos_extraidos`.
   await markClusterDone(sb, clusterId);
+
+  // Primeira dobra da home: portal sempre; prefeitura só das 20 maiores
+  // cidades (cidades.destaque_home). Update separado e tolerante: antes da
+  // 072 a coluna não existe e a matéria não pode falhar por isso.
+  try {
+    let cidadeDestaque = false;
+    if (origem === "prefeitura" && cidade) {
+      const { data: c } = await sb.from("cidades").select("destaque_home").eq("slug", cidade.slug).maybeSingle();
+      cidadeDestaque = !!(c as { destaque_home?: boolean } | null)?.destaque_home;
+    }
+    await sb.from("generated_articles")
+      .update({ destaque_home: podeIrParaDobra(origem, cidadeDestaque) })
+      .eq("id", inserted.id);
+  } catch (_) {
+    // sem a coluna, a home trata a matéria como elegível (comportamento antigo)
+  }
 
   // 3b. Foto — regra de risco zero:
   //   - foto da fonte SÓ se o crédito é institucional (assessoria,

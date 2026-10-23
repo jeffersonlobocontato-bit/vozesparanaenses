@@ -583,7 +583,9 @@ export const listRankedArticles = createServerFn({ method: "GET" })
     const { getExternalSupabase } = await import("./external-supabase.server");
     const sb = getExternalSupabase();
     // Puxamos um pool maior para reordenar em memória.
-    const poolSize = Math.max(data.limit * 4, 40);
+    // Pool maior porque as matérias fora da dobra (prefeituras pequenas)
+    // são filtradas depois.
+    const poolSize = Math.max(data.limit * 8, 100);
     const runRanked = (cols: string) =>
       sb
         .from("generated_articles")
@@ -592,7 +594,13 @@ export const listRankedArticles = createServerFn({ method: "GET" })
         .not("imagem_capa_url", "is", null)
         .order("publicado_em", { ascending: false })
         .limit(poolSize);
-    let rankedRes = await runRanked(MATERIA_LIST_COLS_GEO);
+    // Primeira dobra: só matéria marcada como destaque_home (portal, ou
+    // prefeitura das 20 maiores cidades — 072). Antes da 072 a coluna não
+    // existe e tudo continua elegível.
+    let rankedRes = await runRanked(`${MATERIA_LIST_COLS_GEO}, destaque_home`);
+    if (rankedRes.error && /destaque_home/i.test(rankedRes.error.message)) {
+      rankedRes = await runRanked(MATERIA_LIST_COLS_GEO);
+    }
     if (rankedRes.error && /fixado_(posicao|escopo|regioes|cidades)/i.test(rankedRes.error.message)) {
       rankedRes = await runRanked(
         "id, slug, titulo, subtitulo, resumo, imagem_capa_url, publicado_em, cidade_principal, cidades_mencionadas, regiao:regioes(slug, nome), categoria:editorial_categories(slug, nome)",
@@ -636,6 +644,12 @@ export const listRankedArticles = createServerFn({ method: "GET" })
         ...pinnedRows.filter((row) => !seen.has(row.id)),
       ];
     }
+
+    // Fora da dobra (prefeitura de cidade pequena) sai daqui — continua nas
+    // páginas de região, cidade e editoria. Matéria fixada pelo editor fica.
+    rows = (rows as Array<{ destaque_home?: boolean | null; fixado_posicao?: number | null }>).filter(
+      (r) => r.destaque_home !== false || typeof r.fixado_posicao === "number",
+    );
 
     const cidadeNorm = normalizeCidade(data.cidade);
     const regiao = data.regiaoSlug;

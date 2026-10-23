@@ -5,12 +5,11 @@
 //     ../_shared/crivo-editorial.ts.
 //  2. Descarta o que não tem valor noticioso e o que REPETE um fato já
 //     selecionado nas últimas 72h (cluster_duplicado, por centróide).
-//  3. Aplica quota_rules por região × categoria (janela 7d) às pautas de
-//     PORTAL. Estourou o teto: marca forcar_nota e o generate-article
-//     descarta (portal nunca vira nota), exceto prioridade alta (serviço/
-//     saúde/educação/segurança/utilidade pública), que sempre passa.
-//     Release de PREFEITURA não entra na cota: vira nota na coluna
-//     regional e não ocupa espaço das matérias.
+//  3. Aplica quota_rules por região × categoria (janela 7d). Estourou o
+//     teto: marca forcar_nota — release de prefeitura vira NOTA na coluna
+//     regional e notícia de portal é descartada (portal nunca vira nota) —,
+//     exceto prioridade alta (serviço/saúde/educação/segurança/utilidade
+//     pública), que sempre passa.
 //
 // Body opcional: { regiao_id?: string }
 
@@ -224,14 +223,13 @@ async function processClusters(
     const total = Math.max(regionTotals.get(c.regiao_id) ?? 0, 10);
     const currentPct = ((currentCounts.get(`${c.regiao_id}:${c.categoria_id}`) ?? 0) / total) * 100;
     const teto = rule?.teto ?? 100;
-    const oficial = c.fonte_oficial;
-    const estourou = !oficial && currentPct >= teto && c.prioridade !== "alta";
+    const estourou = currentPct >= teto && c.prioridade !== "alta";
     await sb.from("article_clusters")
       .update({ status: "selecionado_cota", ...(estourou ? { forcar_nota: true } : {}) })
       .eq("id", c.id);
     if (estourou) {
       viraramNota++;
-    } else if (!oficial) {
+    } else {
       currentCounts.set(`${c.regiao_id}:${c.categoria_id}`, (currentCounts.get(`${c.regiao_id}:${c.categoria_id}`) ?? 0) + 1);
       regionTotals.set(c.regiao_id, (regionTotals.get(c.regiao_id) ?? 0) + 1);
     }

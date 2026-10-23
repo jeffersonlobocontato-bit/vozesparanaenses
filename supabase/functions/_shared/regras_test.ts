@@ -7,7 +7,7 @@ import { detectarCidade, cidadePorNome } from "./cidades.ts";
 import { classificarFoto } from "./foto-credito.ts";
 import { ehDoDia, extrairDataPublicacao, inicioDoCiclo, diaSaoPaulo } from "./data-publicacao.ts";
 import { avaliarRegras } from "./criticidade.ts";
-import { decidirFormato, temaHeuristico, parseCrivo } from "./crivo-editorial.ts";
+import { decidirFormato, podeIrParaDobra, temaHeuristico, parseCrivo } from "./crivo-editorial.ts";
 import { dataAtendeNetParaIso, ehAtendeNet, parseListaAtendeNet, parseMateriaAtendeNet } from "./atende-net.ts";
 import { cicloAtual, fonteElegivel, normalizarUrl } from "./coleta.ts";
 
@@ -118,14 +118,17 @@ ok("tema festa → evento", temaHeuristico("Festa do Peão terá shows nacionais
 ok("tema prefeito entrega → propaganda", temaHeuristico("Prefeito entrega uniformes e celebra parceria") === "propaganda_governo");
 ok("parseCrivo", parseCrivo('{"categoria":"saude","tema":"saude","valor_noticioso":true}', "").prioridade === "alta");
 const f = (o: Partial<Parameters<typeof decidirFormato>[0]>) => decidirFormato({ origem: "portal", valorNoticioso: true, fotoStatus: "proibida", forcarNota: false, temRegiao: true, ...o });
-ok("prefeitura com foto → nota na coluna regional", f({ origem: "prefeitura", fotoStatus: "autorizada" }).formato === "nota");
+ok("prefeitura com foto → matéria com a foto", f({ origem: "prefeitura", fotoStatus: "autorizada" }).formato === "materia" && f({ origem: "prefeitura", fotoStatus: "autorizada" }).foto === "fonte_autorizada");
+ok("prefeitura com foto e cota estourada → nota", f({ origem: "prefeitura", fotoStatus: "autorizada", forcarNota: true }).formato === "nota");
 ok("prefeitura sem foto → nota", f({ origem: "prefeitura", fotoStatus: "sem_foto" }).formato === "nota");
-ok("prefeitura sem região → descarta", f({ origem: "prefeitura", temRegiao: false }).formato === "descartar");
+ok("prefeitura sem foto e sem região → descarta", f({ origem: "prefeitura", fotoStatus: "sem_foto", temRegiao: false }).formato === "descartar");
 ok("portal com foto liberada → matéria c/ foto", f({ fotoStatus: "autorizada" }).formato === "materia" && f({ fotoStatus: "autorizada" }).foto === "fonte_autorizada");
 ok("portal sem foto liberada → matéria sem capa (VAPT-VUPT)", f({}).formato === "materia" && f({}).foto === "nenhuma");
 ok("portal sem foto nenhuma → matéria sem capa", f({ fotoStatus: "sem_foto" }).formato === "materia" && f({ fotoStatus: "sem_foto" }).foto === "nenhuma");
 ok("portal com cota estourada → descarta (nunca nota)", f({ fotoStatus: "autorizada", forcarNota: true }).formato === "descartar");
-ok("prefeitura ignora cota", f({ origem: "prefeitura", forcarNota: true }).formato === "nota");
+ok("dobra: portal sempre", podeIrParaDobra("portal", false));
+ok("dobra: prefeitura das 20 maiores", podeIrParaDobra("prefeitura", true));
+ok("dobra: prefeitura de cidade pequena fica fora", !podeIrParaDobra("prefeitura", false));
 ok("sem valor → descarta", f({ valorNoticioso: false }).formato === "descartar");
 ok("prefeitura sem valor → descarta", f({ origem: "prefeitura", valorNoticioso: false }).formato === "descartar");
 

@@ -11,9 +11,11 @@
 //                      agenda/visita de autoridade, balanço de gestão).
 //
 // DESTINO (out/2026) — decidido pela ORIGEM da pauta:
-//   release de PREFEITURA ......................... NOTA na coluna regional
+//   release de PREFEITURA com foto ................ MATÉRIA com a foto
+//   release de PREFEITURA sem foto ................ NOTA na coluna regional
 //                                                   "Vozes {Região}" (com
 //                                                   a cidade marcada)
+//   prefeitura que estourou a cota ................ NOTA
 //   notícia de PORTAL/veículo com foto liberada ... MATÉRIA com a foto
 //   notícia de PORTAL/veículo sem foto liberada ... MATÉRIA sem capa →
 //                                                   módulo VAPT-VUPT
@@ -22,6 +24,11 @@
 //
 // A prioridade do crivo (abaixo) continua valendo para a ordem da fila,
 // a cota e a criticidade — só não decide mais o formato.
+//
+// PRIMEIRA DOBRA DA HOME: matéria de portal sempre pode entrar; matéria de
+// prefeitura só se a cidade estiver entre as 20 maiores (cidades.
+// destaque_home). As demais aparecem nas páginas de região, cidade e
+// editoria. Ver podeIrParaDobra().
 //
 // A classificação usa a MESMA chamada de IA que já escolhia a editoria em
 // classify-and-quota (um JSON só), para não somar custo por pauta.
@@ -130,14 +137,28 @@ export function decidirFormato(p: {
   if (!p.valorNoticioso) return { formato: "descartar", foto: "nenhuma", motivo: "sem valor noticioso" };
 
   if (p.origem === "prefeitura") {
+    if (p.fotoStatus === "autorizada" && !p.forcarNota) {
+      return { formato: "materia", foto: "fonte_autorizada", motivo: "release de prefeitura com foto" };
+    }
     // A nota vai para a coluna da REGIÃO; sem região não há coluna.
-    return p.temRegiao
-      ? { formato: "nota", foto: "nenhuma", motivo: "release de prefeitura → coluna regional" }
-      : { formato: "descartar", foto: "nenhuma", motivo: "release sem região identificada" };
+    if (!p.temRegiao) return { formato: "descartar", foto: "nenhuma", motivo: "release sem região identificada" };
+    return {
+      formato: "nota",
+      foto: "nenhuma",
+      motivo: p.forcarNota ? "cota atingida → coluna regional" : "release de prefeitura sem foto → coluna regional",
+    };
   }
 
   // Portal/veículo: sempre matéria. Cota estourada não vira mais nota.
   if (p.forcarNota) return { formato: "descartar", foto: "nenhuma", motivo: "cota da região/editoria atingida" };
   if (p.fotoStatus === "autorizada") return { formato: "materia", foto: "fonte_autorizada", motivo: "foto com crédito institucional" };
   return { formato: "materia", foto: "nenhuma", motivo: "portal sem foto liberada → VAPT-VUPT" };
+}
+
+/**
+ * A matéria pode ocupar a primeira dobra da home? Portal sempre; prefeitura
+ * só das cidades marcadas como destaque (as 20 maiores — cidades.destaque_home).
+ */
+export function podeIrParaDobra(origem: OrigemPauta, cidadeDestaque: boolean): boolean {
+  return origem === "portal" || cidadeDestaque;
 }
