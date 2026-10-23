@@ -1,13 +1,19 @@
 // Vozes Paranaenses — classify-and-quota
 // Para cada cluster novo:
-//  1. Classifica a categoria editorial via LLM barato (google/gemini-2.5-flash-lite).
-//  2. Aplica quota_rules por região × categoria: define quantos clusters
-//     entram em `selecionado_cota` respeitando piso/teto (janela últimos 7d).
-//  3. Marca demais como `descartado`.
+//  1. Classifica a categoria editorial E o crivo editorial (tema/prioridade/
+//     valor noticioso) numa única chamada de LLM barato — ver
+//     ../_shared/crivo-editorial.ts.
+//  2. Descarta o que não tem valor noticioso e o que REPETE um fato já
+//     selecionado nas últimas 72h (cluster_duplicado, por centróide).
+//  3. Aplica quota_rules por região × categoria (janela 7d). Estourou o
+//     teto: a pauta não é mais descartada — vira NOTA na coluna da cidade
+//     (forcar_nota), exceto prioridade alta (serviço/saúde/educação/
+//     segurança/utilidade pública), que nunca é rebaixada.
 //
 // Body opcional: { regiao_id?: string }
 
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
+import { CRIVO_PROMPT, CRIVO_SCHEMA, parseCrivo, pesoPrioridade, type ResultadoCrivo } from "../_shared/crivo-editorial.ts";
 
 const cors = {
   "Access-Control-Allow-Origin": "*",
@@ -82,11 +88,12 @@ async function processClusters(
     url: string;
     key: string;
   },
-): Promise<{ classified: number; selected: number; discarded: number; fila: number }> {
+): Promise<Record<string, number>> {
   const _serve = null; // placeholder para manter escopo
 
   // 1. Classificar cada cluster (usa título do primeiro artigo do cluster)
-  const classified: { id: string; regiao_id: string; categoria_id: string; score: number; curadoria_nacional: boolean }[] = [];
+  const classified: { id: string; regiao_id: string; categoria_id: string; score: number; curadoria_nacional: boolean; prioridade: string }[] = [];
+  let semValor = 0;
   for (const c of clusters) {
     // Se o cluster já está fincado em uma região do Paraná (pela detecção
     // de cidade no scrape-source), NUNCA classifica como nacional/
@@ -113,8 +120,17 @@ async function processClusters(
       .map((r) => `${r.titulo ?? ""}\n${(r.corpo_limpo ?? "").slice(0, 400)}`)
       .join("\n\n---\n\n")
       .slice(0, 3000);
-    const catSlug = await classify(excerpt, categoriasElegiveis, aiKey);
+    const crivo = await classify(excerpt, categoriasElegiveis, aiKey);
+    const catSlug = crivo.categoria ?? "";
     const cat = categoriasElegiveis.find((k) => k.slug === catSlug) ?? categoriasElegiveis[0];
+
+    if (!crivo.valor_noticioso && !c.curadoria_nacional) {
+      await sb.from("article_clusters")
+        .update({ categoria_id: cat.id, tema_crivo: crivo.tema, prioridade_crivo: crivo.prioridade, status: "descartado" })
+        .eq("id", c.id);
+      semValor++;
+      continue;
+    }
 
     // Bônus por cobertura estadual: se este cluster está vinculado (mesma
     // notícia detectada em outra região — ver cluster-articles), soma um
@@ -142,10 +158,16 @@ async function processClusters(
     // corroborando o mesmo fato).
     const OFICIAL_SCORE_BASE = 2.0;
     const scoreBase = c.fonte_oficial ? OFICIAL_SCORE_BASE : c.prioridade_score;
-    const interesseScore = Number((scoreBase * cat.peso_engajamento * fatorRecencia + bonusEstadual).toFixed(2));
+    // Crivo: pauta de serviço/utilidade pública sobe; evento/propaganda desce.
+    const interesseScore = Number(((scoreBase * cat.peso_engajamento * fatorRecencia + bonusEstadual) * pesoPrioridade(crivo.prioridade)).toFixed(2));
 
-    await sb.from("article_clusters").update({ categoria_id: cat.id, interesse_score: interesseScore }).eq("id", c.id);
-    classified.push({ id: c.id, regiao_id: c.regiao_id, categoria_id: cat.id, score: c.prioridade_score, curadoria_nacional: !!c.curadoria_nacional });
+    await sb.from("article_clusters").update({
+      categoria_id: cat.id,
+      interesse_score: interesseScore,
+      tema_crivo: crivo.tema,
+      prioridade_crivo: crivo.prioridade,
+    }).eq("id", c.id);
+    classified.push({ id: c.id, regiao_id: c.regiao_id, categoria_id: cat.id, score: c.prioridade_score, curadoria_nacional: !!c.curadoria_nacional, prioridade: crivo.prioridade });
   }
 
   // 2. Aplicar quotas — janela 7 dias, agrupando por região × categoria
@@ -173,6 +195,8 @@ async function processClusters(
 
   let selected = 0;
   let discarded = 0;
+  let duplicadas = 0;
+  let viraramNota = 0;
   const selecionados: string[] = [];
   for (const c of classified.sort((a, b) => b.score - a.score)) {
     // Curadoria nacional (cards 3 e 4 do painel) é classificada pra saber
@@ -182,20 +206,34 @@ async function processClusters(
     // card 4 (Nacional geral) escreveria sozinho, que é exatamente o que
     // não queremos.
     if (c.curadoria_nacional) continue;
+
+    // Nunca repetir: mesmo fato já selecionado/escrito nas últimas 72h
+    // (inclusive o que foi selecionado neste mesmo lote, logo acima).
+    const { data: igual } = await sb.rpc("cluster_duplicado", { p_cluster_id: c.id });
+    if (igual) {
+      await sb.from("article_clusters").update({ status: "descartado" }).eq("id", c.id);
+      console.log(`[classify-and-quota] cluster ${c.id} repete ${igual} — descartado`);
+      duplicadas++;
+      discarded++;
+      continue;
+    }
+
     const rule = quotaMap.get(`${c.regiao_id}:${c.categoria_id}`);
     const total = Math.max(regionTotals.get(c.regiao_id) ?? 0, 10);
     const currentPct = ((currentCounts.get(`${c.regiao_id}:${c.categoria_id}`) ?? 0) / total) * 100;
     const teto = rule?.teto ?? 100;
-    if (currentPct >= teto) {
-      await sb.from("article_clusters").update({ status: "descartado" }).eq("id", c.id);
-      discarded++;
+    const estourou = currentPct >= teto && c.prioridade !== "alta";
+    await sb.from("article_clusters")
+      .update({ status: "selecionado_cota", ...(estourou ? { forcar_nota: true } : {}) })
+      .eq("id", c.id);
+    if (estourou) {
+      viraramNota++;
     } else {
-      await sb.from("article_clusters").update({ status: "selecionado_cota" }).eq("id", c.id);
       currentCounts.set(`${c.regiao_id}:${c.categoria_id}`, (currentCounts.get(`${c.regiao_id}:${c.categoria_id}`) ?? 0) + 1);
       regionTotals.set(c.regiao_id, (regionTotals.get(c.regiao_id) ?? 0) + 1);
-      selected++;
-      selecionados.push(c.id);
     }
+    selected++;
+    selecionados.push(c.id);
   }
 
   // A redação (extrair fatos + escrever) NÃO acontece mais aqui — fica
@@ -207,8 +245,8 @@ async function processClusters(
   // tudo" sem nenhuma matéria sair e sem erro visível em canto nenhum.
   // Ter um único lugar escrevendo evita essa corrida e concentra o erro
   // num só ponto, já com retorno detalhado.
-  console.log(`[classify-and-quota] concluído: classified=${classified.length} selected=${selected} discarded=${discarded} pendentes_para_escrita=${selecionados.length}`);
-  return { classified: classified.length, selected, discarded, pendentes_para_escrita: selecionados.length };
+  console.log(`[classify-and-quota] concluído: classified=${classified.length} selected=${selected} discarded=${discarded} duplicadas=${duplicadas} sem_valor=${semValor} viraram_nota=${viraramNota}`);
+  return { classified: classified.length, selected, discarded, duplicadas, sem_valor: semValor, viraram_nota: viraramNota, pendentes_para_escrita: selecionados.length };
 }
 
 function json(body: unknown, status = 200) {
@@ -222,16 +260,19 @@ async function classify(
   excerpt: string,
   categorias: { slug: string; nome: string }[],
   apiKey: string,
-): Promise<string> {
+): Promise<ResultadoCrivo> {
   const slugs = categorias.map((c) => c.slug).join(", ");
-  const sys = `Você é um editor de um portal do Paraná (Brasil). Classifique o excerto em UMA categoria dentre: ${slugs}.
+  const sys = `Você é um editor de um portal do Paraná (Brasil). Classifique o excerto em UMA editoria dentre: ${slugs}.
 
 Regras de escopo geográfico (aplicar ANTES de escolher a editoria temática):
 - Se o fato NÃO menciona o Paraná nem cidade/pessoa/instituição do Paraná, e ocorre em outro estado brasileiro ou tem escopo nacional (Brasil, governo federal, Congresso, STF, seleção brasileira, etc.), responda "nacional".
 - Se o fato ocorre fora do Brasil (outro país, órgãos internacionais, esportes/política/economia estrangeiros) e não tem ligação direta com o Paraná, responda "internacional".
 - Caso contrário (fato paranaense OU com impacto direto no Paraná), escolha a editoria temática apropriada (politica, economia, agro, seguranca, educacao, esportes, cultura, saude, cidades, meio-ambiente).
 
-Responda APENAS com o slug, sem aspas, sem texto extra.`;
+${CRIVO_PROMPT}
+
+Responda APENAS com JSON: ${CRIVO_SCHEMA}`;
+  const fallback = (): ResultadoCrivo => ({ ...parseCrivo("", excerpt), categoria: categorias[0].slug });
   try {
     const res = await fetch(AI_URL, {
       method: "POST",
@@ -239,19 +280,22 @@ Responda APENAS com o slug, sem aspas, sem texto extra.`;
       body: JSON.stringify({
         model: MODEL,
         messages: [{ role: "system", content: sys }, { role: "user", content: excerpt }],
-        max_tokens: 20,
+        max_tokens: 150,
         temperature: 0,
+        response_format: { type: "json_object" },
       }),
     });
-    if (!res.ok) return categorias[0].slug;
+    if (!res.ok) return fallback();
     const j = await res.json();
-    const raw = String(j.choices?.[0]?.message?.content ?? "").trim().toLowerCase();
+    const raw = String(j.choices?.[0]?.message?.content ?? "").trim();
+    const crivo = parseCrivo(raw, excerpt);
     // Prioriza slugs mais longos primeiro (ex.: "internacional" antes de
     // "nacional") para não confundir substrings.
     const ordered = [...categorias].sort((a, b) => b.slug.length - a.slug.length);
-    const found = ordered.find((c) => raw.includes(c.slug));
-    return found?.slug ?? categorias[0].slug;
+    const alvo = (crivo.categoria ?? raw).toLowerCase();
+    const found = ordered.find((c) => alvo.includes(c.slug));
+    return { ...crivo, categoria: found?.slug ?? categorias[0].slug };
   } catch {
-    return categorias[0].slug;
+    return fallback();
   }
 }

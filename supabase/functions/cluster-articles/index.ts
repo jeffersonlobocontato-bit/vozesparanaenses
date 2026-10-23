@@ -23,6 +23,7 @@ type Raw = {
   titulo: string | null;
   corpo_limpo: string | null;
   embedding: number[] | null;
+  cidade_detectada_slug: string | null;
   fonte: { tipo: string; curadoria_editoria: string | null } | { tipo: string; curadoria_editoria: string | null }[] | null;
 };
 
@@ -94,8 +95,8 @@ Deno.serve(async (req) => {
       .from("raw_articles")
       .select(
         comCuradoria
-          ? "id, regiao_id, titulo, corpo_limpo, embedding, fonte:fonte_id(tipo, curadoria_editoria)"
-          : "id, regiao_id, titulo, corpo_limpo, embedding, fonte:fonte_id(tipo)",
+          ? "id, regiao_id, titulo, corpo_limpo, embedding, cidade_detectada_slug, fonte:fonte_id(tipo, curadoria_editoria)"
+          : "id, regiao_id, titulo, corpo_limpo, embedding, cidade_detectada_slug, fonte:fonte_id(tipo)",
       )
       .eq("processado", false)
       .order("coletado_em", { ascending: false })
@@ -149,9 +150,29 @@ Deno.serve(async (req) => {
   let createdOficiais = 0;
   for (const r of rawsOficiais) {
     if (!r.regiao_id) continue;
+    // O release oficial também ganha embedding: sem ele, o mesmo fato vindo
+    // da prefeitura E do jornal local virava duas pautas e duas matérias
+    // (a checagem "já publicado" do classify-and-quota compara centróides).
+    if (!r.embedding) {
+      const texto = `${r.titulo ?? ""}\n\n${r.corpo_limpo ?? ""}`.slice(0, 4000);
+      if (texto.trim()) {
+        const { vetor } = await embed(texto, aiKey);
+        if (vetor) {
+          r.embedding = vetor;
+          await sb.from("raw_articles").update({ embedding: vetor }).eq("id", r.id);
+        }
+      }
+    }
     const { data: cluster, error: cErr } = await sb
       .from("article_clusters")
-      .insert({ regiao_id: r.regiao_id, prioridade_score: 1, status: "novo", fonte_oficial: true })
+      .insert({
+        regiao_id: r.regiao_id,
+        prioridade_score: 1,
+        status: "novo",
+        fonte_oficial: true,
+        cidade_slug: r.cidade_detectada_slug,
+        ...(r.embedding ? { embedding_centroide: r.embedding } : {}),
+      })
       .select("id")
       .single();
     if (cErr || !cluster) { console.error("cluster oficial insert failed", cErr?.message); continue; }
@@ -219,7 +240,7 @@ Deno.serve(async (req) => {
     const centroide = mediaVetores(g.map((r) => r.embedding!));
     const { data: cluster, error: cErr } = await sb
       .from("article_clusters")
-      .insert({ regiao_id, prioridade_score: g.length, status: "novo", embedding_centroide: centroide })
+      .insert({ regiao_id, prioridade_score: g.length, status: "novo", embedding_centroide: centroide, cidade_slug: cidadeMaisCitada(g) })
       .select("id")
       .single();
     if (cErr || !cluster) {
@@ -379,6 +400,16 @@ function json(body: unknown, status = 200) {
     status,
     headers: { ...cors, "content-type": "application/json" },
   });
+}
+
+// Cidade que mais aparece entre as matérias do grupo (detectada na coleta).
+function cidadeMaisCitada(g: Raw[]): string | null {
+  const cont = new Map<string, number>();
+  for (const r of g) if (r.cidade_detectada_slug) cont.set(r.cidade_detectada_slug, (cont.get(r.cidade_detectada_slug) ?? 0) + 1);
+  let melhor: string | null = null;
+  let max = 0;
+  for (const [slug, n] of cont) if (n > max) { melhor = slug; max = n; }
+  return melhor;
 }
 
 async function embed(text: string, apiKey: string): Promise<{ vetor: number[] | null; erro?: string }> {

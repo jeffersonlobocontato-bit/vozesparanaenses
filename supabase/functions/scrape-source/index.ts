@@ -1,10 +1,13 @@
 // Vozes Paranaenses — scrape-source
 // Coleta artigos brutos das `fontes` (RSS ou HTML simples), calcula hash de
 // conteúdo (deduplicação) e insere em `raw_articles` no Supabase externo.
-// Body opcional: { fonte_id?: string }. Sem body, processa todas as fontes
-// ativas cujo `ultimo_scrape_em` seja mais antigo que `frequencia_horas`.
+// Body opcional: { fonte_id?: string }. Sem body, processa um lote das fontes
+// ativas ainda não coletadas no ciclo aberto (11h/18h — ver ../_shared/coleta.ts).
 
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
+import { carregarCidades } from "../_shared/cidades.ts";
+import { carregarNomesVeiculos, fonteElegivel, processarItensDaFonte, type MetaPagina, type RelatorioFonte } from "../_shared/coleta.ts";
+import { extrairDataPublicacao, normalizarDataRss } from "../_shared/data-publicacao.ts";
 
 const cors = {
   "Access-Control-Allow-Origin": "*",
@@ -21,20 +24,9 @@ type Fonte = {
   protecao_antibot: boolean;
   frequencia_horas: number | null;
   ultimo_scrape_em: string | null;
+  cidade_slug: string | null;
+  abrangencia: string | null;
 };
-
-type Cidade = { slug: string; nome: string; regiao_id: string };
-
-// Ciclos fixos de coleta (horário de Brasília) — ver 014_scraping_priorizado.sql.
-// Fontes com frequencia_horas = null seguem esses horários; um valor numérico
-// na fonte é tratado como exceção pontual (comportamento antigo, por tempo
-// decorrido desde a última coleta).
-const FIXED_HOURS = [7, 12, 15, 19];
-
-function horaSaoPaulo(d = new Date()): number {
-  const s = new Intl.DateTimeFormat("pt-BR", { timeZone: "America/Sao_Paulo", hour: "2-digit", hour12: false }).format(d);
-  return parseInt(s, 10);
-}
 
 type Item = {
   url: string;
@@ -57,7 +49,7 @@ Deno.serve(async (req) => {
   // de buscar texto completo (usa só o teaser) e de iniciar fonte nova,
   // mas continua inserindo normalmente o que já processou.
   const inicioExec = Date.now();
-  const ORCAMENTO_MS = 35_000;
+  let ORCAMENTO_MS = 35_000;
   const dentroDoOrcamento = () => Date.now() - inicioExec < ORCAMENTO_MS;
 
   const url = Deno.env.get("EXTERNAL_SUPABASE_URL");
@@ -75,9 +67,11 @@ Deno.serve(async (req) => {
 
   let query = sb
     .from("fontes")
-    .select("id, regiao_id, nome, url_base, tipo_renderizacao, protecao_antibot, frequencia_horas, ultimo_scrape_em, curadoria_editoria")
+    .select("id, regiao_id, nome, url_base, tipo_renderizacao, protecao_antibot, frequencia_horas, ultimo_scrape_em, curadoria_editoria, cidade_slug, abrangencia")
     .eq("ativo", true)
-    .order("nome", { ascending: true });
+    // Menos recentemente coletadas primeiro: cada chamada do cron dentro
+    // da janela do ciclo pega o próximo lote.
+    .order("ultimo_scrape_em", { ascending: true, nullsFirst: true });
   if (body.fonte_id) query = query.eq("id", body.fonte_id);
   // Este scraper é só de veículo de imprensa — prefeitura tem função própria
   // (scrape-prefeitura). Sem este filtro, "Rodar portais" também raspava
@@ -106,112 +100,33 @@ Deno.serve(async (req) => {
   const { data: fontes, error } = await query;
   if (error) return json({ error: "fontes_query_failed", detail: error.message }, 500);
 
-  const { data: cidadesData } = await sb.from("cidades").select("slug, nome, regiao_id");
-  const cidades = (cidadesData ?? []) as Cidade[];
+  const [cidades, nomesVeiculos] = await Promise.all([carregarCidades(sb), carregarNomesVeiculos(sb)]);
 
-  const now = Date.now();
-  const horaAtual = horaSaoPaulo();
+  // Curadoria nacional/tecnologia tem cron próprio (a cada 6h), fora dos
+  // ciclos 11h/18h das cidades: elegível por tempo decorrido.
+  const ehCuradoria = !!(body.apenas_curadoria || body.curadoria_editorias?.length);
   const eligible = (fontes ?? []).filter((f) => {
     if (body.fonte_id || body.force) return true;
-    if (f.frequencia_horas != null) {
-      // Exceção: comportamento antigo, por tempo decorrido desde a última coleta.
-      if (!f.ultimo_scrape_em) return true;
-      const last = new Date(f.ultimo_scrape_em).getTime();
-      return now - last >= f.frequencia_horas * 3600 * 1000;
-    }
-    // Padrão: só coleta nos ciclos fixos do dia, com uma trava de 2h contra
-    // execuções duplicadas se o cron ticar mais de uma vez dentro do mesmo ciclo.
-    if (!FIXED_HOURS.includes(horaAtual)) return false;
-    if (!f.ultimo_scrape_em) return true;
-    const last = new Date(f.ultimo_scrape_em).getTime();
-    return now - last >= 2 * 3600 * 1000;
+    if (ehCuradoria) return !f.ultimo_scrape_em || Date.now() - new Date(f.ultimo_scrape_em).getTime() >= 5 * 3600_000;
+    return fonteElegivel(f as Fonte);
   });
+  // Chamada do cron (background) tem mais fôlego que o botão síncrono do painel.
+  if (!body.fonte_id && !body.sync) ORCAMENTO_MS = 110_000;
   const fonteLimit = body.limit ? Math.max(1, Math.min(body.limit, 30)) : null;
   const fonteOffset = Math.max(0, body.offset ?? 0);
   const selectedEligible = fonteLimit
     ? eligible.slice(fonteOffset, fonteOffset + fonteLimit)
     : eligible;
 
-  async function processFonte(fonte: Fonte): Promise<Record<string, unknown>> {
+  async function processFonte(fonte: Fonte): Promise<RelatorioFonte> {
     try {
-      const items = await scrapeFonte(fonte);
-      // 1 notícia por fonte, por ciclo: percorre em ordem de destaque (a ordem
-      // natural do RSS/HTML/Firecrawl) e fica com a PRIMEIRA ainda não vista
-      // — se já existe (hash duplicado), pula pra próxima; assim que uma
-      // inserção der certo, para. Isso limita o volume por ciclo e ainda
-      // captura a manchete mais recente que a fonte considerou relevante.
-      let insertedItem: Item | null = null;
-      let insertedId: string | null = null;
-      let duplicates = 0;
-      let descartadasPorIdade = 0;
-      let orcamentoEstourou = false;
-      const LIMITE_IDADE_MS = 24 * 3600 * 1000;
-      for (const it of items) {
-        // Correção: descarta qualquer matéria com mais de 24h de publicação
-        // ANTES de gastar tempo enriquecendo/inserindo — sem isso, o
-        // pipeline clusterizava e às vezes até escrevia matéria sobre fato
-        // já velho, gastando IA em conteúdo que não seria usado. Só
-        // descarta quando a data é conhecida; sem data (comum no fallback
-        // de HTML), deixa passar — não dá pra provar que está velha.
-        if (it.data) {
-          const idadeMs = Date.now() - new Date(it.data).getTime();
-          if (Number.isFinite(idadeMs) && idadeMs > LIMITE_IDADE_MS) {
-            descartadasPorIdade++;
-            continue;
-          }
-        }
-        const hash = await sha256(it.url + "|" + it.titulo);
-        const deteccao = detectarCidade(`${it.titulo}\n${it.corpo}`, cidades);
-        // Se o RSS/HTML de listagem não trouxe imagem, OU o corpo veio raso
-        // (teaser de RSS de 1-3 frases, ou vazio no fallback de HTML), busca
-        // a página da matéria pra pegar imagem/crédito E o texto completo —
-        // sem isso, a matéria final sai curta mesmo com o agente de redação
-        // instruído a aprofundar, porque o material bruto já chega raso.
-        let imagem = it.imagem ?? null;
-        let credito = it.credito ?? null;
-        let corpo = it.corpo ?? "";
-        const CORPO_RASO = 400; // abaixo disso, vale a pena buscar a página inteira
-        const precisaEnriquecer = !imagem || !credito || corpo.length < CORPO_RASO;
-        if (precisaEnriquecer && !dentroDoOrcamento()) orcamentoEstourou = true;
-        if (precisaEnriquecer && dentroDoOrcamento()) {
-          try {
-            const meta = await fetchArticleImageMeta(it.url);
-            if (!imagem && meta.imagem) imagem = meta.imagem;
-            if (!credito && meta.credito) credito = meta.credito;
-            if (meta.corpoCompleto.length > corpo.length) corpo = meta.corpoCompleto;
-            if (imagem) console.log(`[${fonte.nome}] og:image ${it.url} -> ${imagem}${credito ? ` (${credito})` : ""}`);
-            console.log(`[${fonte.nome}] corpo ${it.url}: teaser=${it.corpo.length} completo=${corpo.length}`);
-          } catch (e) {
-            console.warn(`[${fonte.nome}] fetch full article failed`, (e as Error).message);
-          }
-        }
-        const { data: inserted, error: insErr } = await sb.from("raw_articles").insert({
-          fonte_id: fonte.id,
-          regiao_id: deteccao?.regiao_id ?? fonte.regiao_id,
-          cidade_detectada_slug: deteccao?.slug ?? null,
-          regiao_detectada_id: deteccao?.regiao_id ?? null,
-          url: it.url,
-          titulo: it.titulo,
-          corpo_limpo: corpo,
-          hash_conteudo: hash,
-          data_publicacao_original: it.data,
-          imagem_original_url: imagem,
-          imagem_credito: credito,
-          processado: false,
-        }).select("id").single();
-        if (insErr) {
-          if (insErr.code === "23505") { duplicates++; continue; }
-          console.error(`[${fonte.nome}] insert error`, insErr.message);
-          continue;
-        }
-        insertedItem = it;
-        insertedId = inserted?.id ?? null;
-        break;
-      }
-      await sb.from("fontes").update({ ultimo_scrape_em: new Date().toISOString() }).eq("id", fonte.id);
-      return { fonte: fonte.nome, total: items.length, inserted: insertedItem ? 1 : 0, inserted_id: insertedId, inserted_url: insertedItem?.url ?? null, duplicates, descartadas_por_idade: descartadasPorIdade || undefined, orcamento_estourou: orcamentoEstourou || undefined };
+      const itens = await scrapeFonte(fonte);
+      return await processarItensDaFonte({
+        sb, fonte, itens, cidades, nomesVeiculos, dentroDoOrcamento,
+        buscarPagina: fetchArticleImageMeta,
+      });
     } catch (e) {
-      return { fonte: fonte.nome, error: (e as Error).message };
+      return { fonte: fonte.nome, total: 0, inseridas: 0, duplicadas: 0, sem_data: 0, fora_do_dia: 0, fotos: {}, erro: (e as Error).message };
     }
   }
 
@@ -221,9 +136,9 @@ Deno.serve(async (req) => {
   // pipeline no admin encadeia scrape → cluster → classify; travar aqui
   // fazia o botão "Rodar pipeline" abortar antes do fim.
   const CONCURRENCY = 14;
-  async function runAll(fontesList: Fonte[]): Promise<Record<string, unknown>[]> {
+  async function runAll(fontesList: Fonte[]): Promise<RelatorioFonte[]> {
     const queue = [...fontesList];
-    const results: Record<string, unknown>[] = [];
+    const results: RelatorioFonte[] = [];
     const workers = Array.from({ length: Math.min(CONCURRENCY, queue.length) }, async () => {
       while (queue.length) {
         if (!dentroDoOrcamento()) break; // não inicia fonte nova, deixa pro próximo clique
@@ -243,7 +158,6 @@ Deno.serve(async (req) => {
   if (body.fonte_id || body.sync) {
     const results = await runAll(selectedEligible as Fonte[]);
     const orcamentoEstourouEm = results.filter((r) => r.orcamento_estourou).length;
-    const totalDescartadasPorIdade = results.reduce((s, r) => s + (Number(r.descartadas_por_idade) || 0), 0);
     return json({
       ok: true,
       processed: results.length,
@@ -251,17 +165,21 @@ Deno.serve(async (req) => {
       offset: fonteOffset,
       limit: fonteLimit,
       report: results,
-      descartadas_por_idade: totalDescartadasPorIdade || undefined,
       aviso: orcamentoEstourouEm > 0
-        ? `Orçamento de tempo (${ORCAMENTO_MS / 1000}s) apertado: ${orcamentoEstourouEm} fonte(s) ficaram com teaser curto desta vez.`
+        ? `Orçamento de tempo (${ORCAMENTO_MS / 1000}s) atingido: ${orcamentoEstourouEm} fonte(s) ficaram pela metade e voltam na próxima rodada.`
         : undefined,
     });
   }
 
+  // Fora da janela do ciclo (ou ciclo já concluído), o cron chama e sai.
+  if (!selectedEligible.length) return json({ ok: true, queued: 0, mode: "idle" });
+
   const queue = [...(selectedEligible as Fonte[])];
   const task = (async () => {
     const results = await runAll(queue);
-    console.log(`[scrape-source] background done: ${results.length} fontes`);
+    const inseridas = results.reduce((n, r) => n + r.inseridas, 0);
+    console.log(`[scrape-source] lote: ${results.length} fontes, ${inseridas} notícias do dia`);
+    if (!inseridas) return;
     // Encadeia o resto do pipeline (cluster + classify) para que o usuário
     // não precise ficar apertando 3 botões — o scrape roda em background e
     // dispara os próximos passos automaticamente.
@@ -286,43 +204,11 @@ Deno.serve(async (req) => {
   return json({ ok: true, queued: queue.length, total_eligible: eligible.length, offset: fonteOffset, limit: fonteLimit, mode: "background" });
 });
 
-// Detecta a cidade mais mencionada no texto (título + corpo) comparando
-// contra a base de `cidades`, e retorna a região correspondente. Usado para
-// classificar a matéria pela região da cidade citada, em vez de assumir
-// sempre a região configurada na fonte.
-function detectarCidade(texto: string, cidades: Cidade[]): { slug: string; regiao_id: string } | null {
-  if (!cidades.length) return null;
-  const alvo = normalizar(texto);
-  let melhor: { slug: string; regiao_id: string; count: number } | null = null;
-  for (const c of cidades) {
-    const nomeNorm = normalizar(c.nome);
-    if (nomeNorm.length < 4) continue; // evita falso-positivo em nomes curtos
-    const re = new RegExp(`\\b${nomeNorm.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}\\b`, "g");
-    const count = (alvo.match(re) ?? []).length;
-    if (count > 0 && (!melhor || count > melhor.count)) {
-      melhor = { slug: c.slug, regiao_id: c.regiao_id, count };
-    }
-  }
-  return melhor ? { slug: melhor.slug, regiao_id: melhor.regiao_id } : null;
-}
-
-function normalizar(s: string): string {
-  return s.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
-}
-
 function json(body: unknown, status = 200) {
   return new Response(JSON.stringify(body), {
     status,
     headers: { ...cors, "content-type": "application/json" },
   });
-}
-
-async function sha256(input: string): Promise<string> {
-  const buf = new TextEncoder().encode(input);
-  const hash = await crypto.subtle.digest("SHA-256", buf);
-  return Array.from(new Uint8Array(hash))
-    .map((b) => b.toString(16).padStart(2, "0"))
-    .join("");
 }
 
 async function scrapeFonte(fonte: Fonte): Promise<Item[]> {
@@ -463,7 +349,7 @@ function parseRss(xml: string): Item[] {
       url: link.trim(),
       titulo: titulo.trim().slice(0, 500),
       corpo: stripTags(descr).slice(0, 4000),
-      data: data ? new Date(data).toISOString() : null,
+      data: normalizarDataRss(data),
       imagem: enclosure ? enclosure.trim() : null,
       credito: credito ? credito.trim().slice(0, 200) : null,
     });
@@ -499,7 +385,7 @@ function match(s: string, re: RegExp): string {
 // 2) twitter:image / twitter:image:src
 // 3) <link rel="image_src">
 // 4) primeiro <img src=""> do corpo (fallback)
-async function fetchArticleImageMeta(url: string): Promise<{ imagem: string | null; credito: string | null; corpoCompleto: string }> {
+async function fetchArticleImageMeta(url: string): Promise<MetaPagina> {
   const ctrl = new AbortController();
   const t = setTimeout(() => ctrl.abort(), 8000);
   try {
@@ -510,7 +396,7 @@ async function fetchArticleImageMeta(url: string): Promise<{ imagem: string | nu
         accept: "text/html,application/xhtml+xml",
       },
     });
-    if (!res.ok) return { imagem: null, credito: null, corpoCompleto: "" };
+    if (!res.ok) return { imagem: null, credito: null, corpoCompleto: "", data: null, dataOrigem: null };
     const html = await res.text();
     const head = html.slice(0, 200_000); // og/twitter costumam estar no <head>
     const patterns: RegExp[] = [
@@ -539,7 +425,8 @@ async function fetchArticleImageMeta(url: string): Promise<{ imagem: string | nu
     }
     const credito = extractCredit(html, head);
     const corpoCompleto = extractArticleBody(html);
-    return { imagem, credito, corpoCompleto };
+    const dataPub = extrairDataPublicacao(html, url);
+    return { imagem, credito, corpoCompleto, data: dataPub?.iso ?? null, dataOrigem: dataPub?.origem ?? null };
   } finally {
     clearTimeout(t);
   }

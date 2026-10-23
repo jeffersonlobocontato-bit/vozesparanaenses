@@ -1,0 +1,400 @@
+slug,cidade,status,metodo,itens,url_base
+abatia,"Abatiá",sem_lista,,0,
+adrianopolis,"Adrianópolis",ok,html,5,https://www.adrianopolis.pr.gov.br/noticiasView/?id=73097
+agudos-do-sul,"Agudos do Sul",ok,html,12,https://www.agudosdosul.pr.gov.br/comunicacao/noticias
+almirante-tamandare,"Almirante Tamandaré",fora_do_ar,,0,
+altamira-do-parana,"Altamira do Paraná",ok,html,10,https://www.altamiradoparana.pr.gov.br/noticias_site
+alto-paraiso,"Alto Paraíso",sem_lista,,0,
+alto-parana,"Alto Paraná",sem_lista,,0,
+alto-piquiri,"Alto Piquiri",sem_lista,,0,
+altonia,"Altônia",ok,html,40,https://altonia.pr.gov.br/noticias/
+alvorada-do-sul,"Alvorada do Sul",sem_lista,,0,
+amapora,"Amaporã",ok,html,6,https://www.amapora.pr.gov.br/noticia/24/cinema-na-praca/
+ampere,"Ampére",sem_lista,,0,
+anahy,"Anahy",sem_lista,,0,
+andira,"Andirá",sem_data,html,12,https://andira.pr.gov.br/cidade/noticias
+angulo,"Ângulo",sem_lista,,0,
+antonina,"Antonina",sem_data,html,40,https://www.antonina.pr.gov.br/noticias/
+antonio-olinto,"Antônio Olinto",sem_lista,,0,
+apucarana,"Apucarana",sem_lista,,0,
+arapongas,"Arapongas",sem_lista,,0,
+arapoti,"Arapoti",ok,html,8,https://www.arapoti.pr.gov.br/noticias_site
+arapua,"Arapuã",ok,rss,10,https://arapua.pr.gov.br/feed/
+araruna,"Araruna",sem_lista,,0,
+araucaria,"Araucária",sem_lista,,0,
+ariranha-do-ivai,"Ariranha do Ivaí",sem_data,html,9,https://www.ariranhadoivai.pr.gov.br/feed
+assai,"Assaí",sem_lista,,0,
+assis-chateaubriand,"Assis Chateaubriand",sem_lista,,0,
+astorga,"Astorga",ok,html,5,https://astorga.pr.gov.br/noticiasView/?id=196
+atalaia,"Atalaia",sem_lista,,0,
+balsa-nova,"Balsa Nova",ok,html,6,https://www.balsanova.pr.gov.br/noticiasView/1932_noticia.html
+bandeirantes,"Bandeirantes",ok,html,14,https://www.bandeirantes.pr.gov.br/noticia/categoria/
+barbosa-ferraz,"Barbosa Ferraz",sem_lista,,0,
+barra-do-jacare,"Barra do Jacaré",sem_data,html,17,https://www.barradojacare.pr.gov.br/noticias
+barracao,"Barracão",sem_data,html,21,https://barracao.pr.gov.br/noticias
+bela-vista-da-caroba,"Bela Vista da Caroba",ok,html,20,https://www.belavistadacaroba.pr.gov.br/noticias
+bela-vista-do-paraiso,"Bela Vista do Paraíso",fora_do_ar,,0,
+bituruna,"Bituruna",ok,html,41,https://www.bituruna.pr.gov.br/noticias/
+boa-esperanca,"Boa Esperança",ok,rss,6,https://boaesperanca.pr.gov.br/feed/
+boa-esperanca-do-iguacu,"Boa Esperança do Iguaçu",sem_data,html,17,https://www.boaesperancadoiguacu.pr.gov.br/noticias
+boa-ventura-de-sao-roque,"Boa Ventura de São Roque",fora_do_ar,,0,
+boa-vista-da-aparecida,"Boa Vista da Aparecida",ok,html,22,https://www.boavistadaaparecida.pr.gov.br/noticias
+bocaiuva-do-sul,"Bocaiúva do Sul",sem_data,html,10,https://www.bocaiuvadosul.pr.gov.br/noticias_site
+bom-jesus-do-sul,"Bom Jesus do Sul",sem_data,html,20,https://bomjesusdosul.pr.gov.br/noticias
+bom-sucesso,"Bom Sucesso",sem_data,html,14,https://www.bomsucesso.pr.gov.br/noticias
+bom-sucesso-do-sul,"Bom Sucesso do Sul",ok,rss,10,https://bomsucessodosul.pr.gov.br/feed/
+borrazopolis,"Borrazópolis",ok,rss,10,https://borrazopolis.pr.gov.br/feed/
+braganey,"Braganey",fora_do_ar,,0,
+brasilandia-do-sul,"Brasilândia do Sul",sem_lista,,0,
+cafeara,"Cafeara",sem_data,html,11,https://www.cafeara.pr.gov.br/noticias_site
+cafelandia,"Cafelândia",sem_lista,,0,
+cafezal-do-sul,"Cafezal do Sul",sem_lista,,0,
+california,"Califórnia",sem_lista,,0,
+cambara,"Cambará",ok,rss,10,https://cambara.pr.gov.br/feed/
+cambe,"Cambé",sem_lista,,0,
+cambira,"Cambira",ok,rss,20,https://cambira.pr.gov.br/feed/
+campina-da-lagoa,"Campina da Lagoa",sem_lista,,0,
+campina-do-simao,"Campina do Simão",sem_lista,,0,
+campina-grande-do-sul,"Campina Grande do Sul",sem_data,html,33,https://campinagrandedosul.pr.gov.br/noticias
+campo-bonito,"Campo Bonito",fora_do_ar,,0,
+campo-do-tenente,"Campo do Tenente",ok,html,11,https://www.campodotenente.pr.gov.br/noticias
+campo-largo,"Campo Largo",sem_lista,,0,
+campo-magro,"Campo Magro",sem_lista,,0,
+campo-mourao,"Campo Mourão",sem_lista,,0,
+candido-de-abreu,"Cândido de Abreu",sem_lista,,0,
+candoi,"Candói",ok,html,40,https://www.candoi.pr.gov.br/noticias/
+cantagalo,"Cantagalo",sem_data,html,11,https://www.cantagalo.pr.gov.br/noticias_site
+capanema,"Capanema",sem_data,html,15,https://www.capanema.pr.gov.br/noticias
+capitao-leonidas-marques,"Capitão Leônidas Marques",ok,rss,10,https://capitaoleonidasmarques.pr.gov.br/feed/
+carambei,"Carambeí",sem_lista,,0,
+carlopolis,"Carlópolis",sem_lista,,0,
+cascavel,"Cascavel",sem_lista,,0,
+castro,"Castro",sem_lista,,0,
+catanduvas,"Catanduvas",sem_lista,,0,
+centenario-do-sul,"Centenário do Sul",sem_lista,,0,
+cerro-azul,"Cerro Azul",sem_lista,,0,
+ceu-azul,"Céu Azul",sem_lista,,0,
+chopinzinho,"Chopinzinho",sem_data,html,10,https://www.chopinzinho.pr.gov.br/noticias_individual/2263
+cianorte,"Cianorte",fora_do_ar,,0,
+cidade-gaucha,"Cidade Gaúcha",sem_lista,,0,
+clevelandia,"Clevelândia",ok,html,5,https://www.clevelandia.pr.gov.br/noticiasView/?id=983
+colombo,"Colombo",ok,rss,10,https://prefeitura.colombo.pr.gov.br/feed/
+colorado,"Colorado",ok,html,9,https://www.colorado.pr.gov.br/cidade/noticias
+congonhinhas,"Congonhinhas",ok,rss,10,https://congonhinhas.pr.gov.br/feed/
+conselheiro-mairinck,"Conselheiro Mairinck",sem_data,html,11,https://www.conselheiromairinck.pr.gov.br/noticias_site
+contenda,"Contenda",ok,html,10,https://www.contenda.pr.gov.br/noticias/
+corbelia,"Corbélia",sem_lista,,0,
+cornelio-procopio,"Cornélio Procópio",fora_do_ar,,0,
+coronel-domingos-soares,"Coronel Domingos Soares",fora_do_ar,,0,
+coronel-vivida,"Coronel Vivida",ok,rss,12,https://coronelvivida.pr.gov.br/feed/
+corumbatai-do-sul,"Corumbataí do Sul",ok,html,20,https://www.corumbataidosul.pr.gov.br/noticia
+cruz-machado,"Cruz Machado",ok,html,16,https://www.cruzmachado.pr.gov.br/noticia/categoria/
+cruzeiro-do-iguacu,"Cruzeiro do Iguaçu",sem_data,html,30,https://cruzeirodoiguacu.pr.gov.br/noticias
+cruzeiro-do-oeste,"Cruzeiro do Oeste",sem_lista,,0,
+cruzeiro-do-sul,"Cruzeiro do Sul",sem_lista,,0,
+cruzmaltina,"Cruzmaltina",sem_data,html,3,https://www.cruzmaltina.pr.gov.br/feed
+curitiba,"Curitiba",fora_do_ar,,0,
+curiuva,"Curiúva",sem_lista,,0,
+diamante-d-oeste,"Diamante D'Oeste",ok,rss,10,https://diamantedoeste.pr.gov.br/feed/
+diamante-do-norte,"Diamante do Norte",sem_lista,,0,
+diamante-do-sul,"Diamante do Sul",ok,html,3,https://diamantedosul.pr.gov.br/ultimas-noticias/
+dois-vizinhos,"Dois Vizinhos",sem_lista,,0,
+douradina,"Douradina",fora_do_ar,,0,
+doutor-camargo,"Doutor Camargo",ok,rss,10,https://www.doutorcamargo.pr.gov.br/feed/
+doutor-ulysses,"Doutor Ulysses",sem_lista,,0,
+eneas-marques,"Enéas Marques",sem_lista,,0,
+engenheiro-beltrao,"Engenheiro Beltrão",sem_data,html,31,https://www.engenheirobeltrao.pr.gov.br/portal/noticias/3
+entre-rios-do-oeste,"Entre Rios do Oeste",ok,html,40,https://www.entreriosdooeste.pr.gov.br/noticias/
+esperanca-nova,"Esperança Nova",ok,html,14,https://www.esperancanova.pr.gov.br/noticia/categoria
+espigao-alto-do-iguacu,"Espigão Alto do Iguaçu",ok,rss,10,https://espigaoaltodoiguacu.pr.gov.br/feed/
+farol,"Farol",sem_lista,,0,
+faxinal,"Faxinal",sem_lista,,0,
+fazenda-rio-grande,"Fazenda Rio Grande",ok,html,3,https://www.fazendariogrande.pr.gov.br/Erro/?aspxerrorpath=/feed
+fenix,"Fênix",sem_lista,,0,
+fernandes-pinheiro,"Fernandes Pinheiro",sem_lista,,0,
+figueira,"Figueira",ok,html,11,https://www.figueira.pr.gov.br/noticia/categoria
+flor-da-serra-do-sul,"Flor da Serra do Sul",fora_do_ar,,0,
+florai,"Floraí",sem_lista,,0,
+floresta,"Floresta",sem_lista,,0,
+florestopolis,"Florestópolis",sem_lista,,0,
+florida,"Flórida",sem_lista,,0,
+formosa-do-oeste,"Formosa do Oeste",sem_data,html,19,https://www.formosadooeste.pr.gov.br/noticia
+foz-do-iguacu,"Foz do Iguaçu",fora_do_ar,,0,
+foz-do-jordao,"Foz do Jordão",ok,html,40,https://www.fozdojordao.pr.gov.br/noticias/
+francisco-alves,"Francisco Alves",sem_lista,,0,
+francisco-beltrao,"Francisco Beltrão",sem_data,html,3,https://franciscobeltrao.pr.gov.br/noticias
+general-carneiro,"General Carneiro",ok,html,10,https://www.generalcarneiro.pr.gov.br/noticias_site
+godoy-moreira,"Godoy Moreira",sem_lista,,0,
+goioere,"Goioerê",fora_do_ar,,0,
+goioxim,"Goioxim",sem_data,html,30,https://www.goioxim.pr.gov.br/noticias/
+grandes-rios,"Grandes Rios",sem_data,html,4,https://www.grandesrios.pr.gov.br/feed
+guaira,"Guaíra",sem_data,html,8,https://www.guaira.pr.gov.br/noticias/noticia/7582
+guairaca,"Guairaçá",sem_lista,,0,
+guamiranga,"Guamiranga",sem_lista,,0,
+guapirama,"Guapirama",ok,html,4,https://www.guapirama.pr.gov.br/noticia/3338/obras/
+guaporema,"Guaporema",ok,html,40,https://www.guaporema.pr.gov.br/noticias/
+guaraci,"Guaraci",ok,html,17,https://guaraci.pr.gov.br/noticias
+guaraniacu,"Guaraniaçu",sem_lista,,0,
+guarapuava,"Guarapuava",sem_data,html,12,https://guarapuava.pr.gov.br/noticias/
+guaraquecaba,"Guaraqueçaba",sem_lista,,0,
+guaratuba,"Guaratuba",ok,html,12,https://cidadao.guaratuba.pr.gov.br/noticias/
+honorio-serpa,"Honório Serpa",sem_data,html,15,https://www.honorioserpa.pr.gov.br/noticias
+ibaiti,"Ibaiti",ok,html,5,https://www.ibaiti.pr.gov.br/noticia/5530/itr-2026/
+ibema,"Ibema",fora_do_ar,,0,
+ibipora,"Ibiporã",ok,html,40,https://www.ibipora.pr.gov.br/noticias/
+icaraima,"Icaraíma",sem_lista,,0,
+iguaracu,"Iguaraçu",sem_lista,,0,
+iguatu,"Iguatu",sem_lista,,0,
+imbau,"Imbaú",sem_data,html,30,https://www.imbau.pr.gov.br/portal/noticias
+imbituva,"Imbituva",sem_lista,,0,
+inacio-martins,"Inácio Martins",ok,html,28,https://www.inaciomartins.pr.gov.br/conteudo-de-demonstracao/noticias
+inaja,"Inajá",sem_data,html,30,https://www.inaja.pr.gov.br/portal/noticias
+indianopolis,"Indianópolis",sem_lista,,0,
+ipiranga,"Ipiranga",ok,rss,10,https://ipiranga.pr.gov.br/feed
+ipora,"Iporã",sem_lista,,0,
+iracema-do-oeste,"Iracema do Oeste",sem_lista,,0,
+irati,"Irati",fora_do_ar,,0,
+iretama,"Iretama",sem_lista,,0,
+itaguaje,"Itaguajé",sem_lista,,0,
+itaipulandia,"Itaipulândia",fora_do_ar,,0,
+itambaraca,"Itambaracá",ok,html,7,https://itambaraca.pr.gov.br/noticias/
+itambe,"Itambé",sem_lista,,0,
+itapejara-d-oeste,"Itapejara d'Oeste",ok,rss,10,https://www.itapejaradoeste.pr.gov.br/feed
+itaperucu,"Itaperuçu",ok,rss,10,https://itaperucu.pr.gov.br/feed/
+itauna-do-sul,"Itaúna do Sul",sem_lista,,0,
+ivai,"Ivaí",ok,html,13,https://www.ivai.pr.gov.br/noticia/categoria/
+ivaipora,"Ivaiporã",sem_lista,,0,
+ivate,"Ivaté",sem_data,html,7,https://www.ivate.pr.gov.br/noticiasView/?id=73101
+ivatuba,"Ivatuba",sem_lista,,0,
+jaboti,"Jaboti",sem_data,html,30,https://www.jaboti.pr.gov.br/portal/noticias/3
+jacarezinho,"Jacarezinho",ok,html,40,https://www.jacarezinho.pr.gov.br/noticias/
+jaguapita,"Jaguapitã",ok,rss,10,https://jaguapita.pr.gov.br/feed/
+jaguariaiva,"Jaguariaíva",ok,rss,10,https://jaguariaiva.pr.gov.br/feed/
+jandaia-do-sul,"Jandaia do Sul",sem_lista,,0,
+janiopolis,"Janiópolis",sem_lista,,0,
+japira,"Japira",ok,html,13,https://www.japira.pr.gov.br/noticia/categoria
+japura,"Japurá",ok,html,40,https://www.japura.pr.gov.br/noticias/
+jardim-alegre,"Jardim Alegre",sem_data,html,9,https://www.jardimalegre.pr.gov.br/feed
+jardim-olinda,"Jardim Olinda",sem_data,html,11,https://www.jardimolinda.pr.gov.br/noticias_site
+jataizinho,"Jataizinho",sem_lista,,0,
+jesuitas,"Jesuítas",sem_lista,,0,
+joaquim-tavora,"Joaquim Távora",sem_lista,,0,
+jundiai-do-sul,"Jundiaí do Sul",ok,html,16,https://www.jundiaidosul.pr.gov.br/noticia/categoria/
+juranda,"Juranda",sem_lista,,0,
+jussara,"Jussara",sem_data,html,22,https://www.jussara.pr.gov.br/noticias/
+kalore,"Kaloré",sem_lista,,0,
+lapa,"Lapa",sem_lista,,0,
+laranjal,"Laranjal",sem_data,html,11,https://www.laranjal.pr.gov.br/noticias
+laranjeiras-do-sul,"Laranjeiras do Sul",sem_lista,,0,
+leopolis,"Leópolis",sem_lista,,0,
+lidianopolis,"Lidianópolis",sem_data,html,6,https://www.lidianopolis.pr.gov.br/noticias
+lindoeste,"Lindoeste",sem_lista,,0,
+loanda,"Loanda",ok,html,40,https://www.loanda.pr.gov.br/noticias/
+lobato,"Lobato",sem_lista,,0,
+londrina,"Londrina",fora_do_ar,,0,
+luiziana,"Luiziana",ok,rss,10,https://www.luiziana.pr.gov.br/feed/
+lunardelli,"Lunardelli",sem_lista,,0,
+lupionopolis,"Lupionópolis",ok,rss,30,https://lupionopolis.pr.gov.br/api/rss/noticias
+mallet,"Mallet",ok,html,6,https://mallet.pr.gov.br/noticiasView/?id=434
+mambore,"Mamborê",sem_lista,,0,
+mandaguacu,"Mandaguaçu",ok,html,17,https://www.mandaguacu.pr.gov.br/noticia/categoria
+mandaguari,"Mandaguari",sem_lista,,0,
+mandirituba,"Mandirituba",ok,html,8,https://www.mandirituba.pr.gov.br/?pagina=404
+manfrinopolis,"Manfrinópolis",ok,rss,10,https://manfrinopolis.pr.gov.br/feed
+mangueirinha,"Mangueirinha",ok,html,40,https://www.mangueirinha.pr.gov.br/noticias/
+manoel-ribas,"Manoel Ribas",sem_lista,,0,
+marechal-candido-rondon,"Marechal Cândido Rondon",sem_lista,,0,
+maria-helena,"Maria Helena",sem_data,html,41,https://www.mariahelena.pr.gov.br/noticias/
+marialva,"Marialva",sem_lista,,0,
+marilandia-do-sul,"Marilândia do Sul",ok,html,20,https://www.marilandiadosul.pr.gov.br/noticia
+marilena,"Marilena",ok,html,9,https://www.marilena.pr.gov.br/noticias
+mariluz,"Mariluz",ok,html,40,https://www.mariluz.pr.gov.br/noticias/
+maringa,"Maringá",ok,html,10,https://www.maringa.pr.gov.br/noticias
+mariopolis,"Mariópolis",sem_data,html,5,https://www.mariopolis.pr.gov.br/noticias/
+maripa,"Maripá",sem_lista,,0,
+marmeleiro,"Marmeleiro",sem_lista,,0,
+marquinho,"Marquinho",sem_lista,,0,
+marumbi,"Marumbi",sem_lista,,0,
+matelandia,"Matelândia",ok,rss,10,https://www.matelandia.pr.gov.br/feed/
+matinhos,"Matinhos",sem_lista,,0,
+mato-rico,"Mato Rico",sem_lista,,0,
+maua-da-serra,"Mauá da Serra",sem_data,html,9,https://www.mauadaserra.pr.gov.br/feed
+medianeira,"Medianeira",sem_lista,,0,
+mercedes,"Mercedes",sem_lista,,0,
+mirador,"Mirador",sem_lista,,0,
+miraselva,"Miraselva",sem_lista,,0,
+missal,"Missal",sem_data,html,7,https://www.missal.pr.gov.br/noticias/
+moreira-sales,"Moreira Sales",ok,rss,10,https://www.moreirasales.pr.gov.br/feed/
+morretes,"Morretes",ok,html,40,https://www.morretes.pr.gov.br/noticias/
+munhoz-de-melo,"Munhoz de Melo",fora_do_ar,,0,
+nossa-senhora-das-gracas,"Nossa Senhora das Graças",sem_data,html,5,https://nossasenhoradasgracas.pr.gov.br/noticias/
+nova-alianca-do-ivai,"Nova Aliança do Ivaí",fora_do_ar,,0,
+nova-america-da-colina,"Nova América da Colina",sem_lista,,0,
+nova-aurora,"Nova Aurora",sem_lista,,0,
+nova-cantu,"Nova Cantu",sem_data,html,50,https://www.novacantu.pr.gov.br/noticias
+nova-esperanca,"Nova Esperança",sem_lista,,0,
+nova-esperanca-do-sudoeste,"Nova Esperança do Sudoeste",sem_lista,,0,
+nova-fatima,"Nova Fátima",ok,html,13,https://www.novafatima.pr.gov.br/noticia/categoria/
+nova-laranjeiras,"Nova Laranjeiras",sem_lista,,0,
+nova-londrina,"Nova Londrina",sem_lista,,0,
+nova-olimpia,"Nova Olímpia",sem_data,html,8,https://novaolimpia.pr.gov.br/noticias
+nova-prata-do-iguacu,"Nova Prata do Iguaçu",sem_lista,,0,
+nova-santa-barbara,"Nova Santa Bárbara",fora_do_ar,,0,
+nova-santa-rosa,"Nova Santa Rosa",ok,rss,10,https://novasantarosa.pr.gov.br/feed/
+nova-tebas,"Nova Tebas",sem_lista,,0,
+novo-itacolomi,"Novo Itacolomi",sem_lista,,0,
+ortigueira,"Ortigueira",sem_lista,,0,
+ourizona,"Ourizona",sem_lista,,0,
+ouro-verde-do-oeste,"Ouro Verde do Oeste",sem_lista,,0,
+paicandu,"Paiçandu",sem_lista,,0,
+palmas,"Palmas",fora_do_ar,,0,
+palmeira,"Palmeira",ok,rss,10,https://palmeira.pr.gov.br/feed/
+palmital,"Palmital",sem_data,html,10,https://www.palmital.pr.gov.br/noticias
+palotina,"Palotina",ok,html,20,https://www.palotina.pr.gov.br/noticia
+paraiso-do-norte,"Paraíso do Norte",sem_lista,,0,
+paranacity,"Paranacity",sem_data,html,11,https://www.paranacity.pr.gov.br/noticias-site
+paranagua,"Paranaguá",sem_data,html,3,https://www.paranagua.pr.gov.br/noticias/noticia6307.html
+paranapoema,"Paranapoema",sem_lista,,0,
+paranavai,"Paranavaí",sem_lista,,0,
+pato-bragado,"Pato Bragado",sem_lista,,0,
+pato-branco,"Pato Branco",ok,rss,20,https://patobranco.pr.gov.br/feed/
+paula-freitas,"Paula Freitas",ok,html,40,https://www.paulafreitas.pr.gov.br/noticias/
+paulo-frontin,"Paulo Frontin",ok,html,16,https://www.paulofrontin.pr.gov.br/noticia/categoria/
+peabiru,"Peabiru",sem_lista,,0,
+perobal,"Perobal",sem_lista,,0,
+perola,"Pérola",ok,html,14,https://www.perola.pr.gov.br/noticia/categoria
+perola-d-oeste,"Pérola d'Oeste",sem_lista,,0,
+pien,"Piên",ok,html,22,https://www.pien.pr.gov.br/noticias
+pinhais,"Pinhais",sem_lista,,0,
+pinhal-de-sao-bento,"Pinhal de São Bento",sem_lista,,0,
+pinhalao,"Pinhalão",ok,html,14,https://www.pinhalao.pr.gov.br/noticia/categoria/
+pinhao,"Pinhão",ok,rss,10,https://www.pinhao.pr.gov.br/feed/
+pirai-do-sul,"Piraí do Sul",ok,html,14,https://www.piraidosul.pr.gov.br/noticia/categoria/
+piraquara,"Piraquara",sem_data,html,30,https://www.piraquara.pr.gov.br/portal/noticias
+pitanga,"Pitanga",sem_data,html,11,https://www.pitanga.pr.gov.br/noticias/pss-educacao-2026
+pitangueiras,"Pitangueiras",sem_lista,,0,
+planaltina-do-parana,"Planaltina do Paraná",sem_lista,,0,
+planalto,"Planalto",sem_data,html,18,https://www.planalto.pr.gov.br/noticias
+ponta-grossa,"Ponta Grossa",ok,rss,10,https://www.pontagrossa.pr.gov.br/feed/
+pontal-do-parana,"Pontal do Paraná",sem_lista,,0,
+porecatu,"Porecatu",ok,rss,10,https://porecatu.pr.gov.br/feed/
+porto-amazonas,"Porto Amazonas",ok,rss,10,https://www.portoamazonas.pr.gov.br/feed/
+porto-barreiro,"Porto Barreiro",ok,html,40,https://www.portobarreiro.pr.gov.br/noticias/
+porto-rico,"Porto Rico",sem_lista,,0,
+porto-vitoria,"Porto Vitória",ok,rss,10,https://portovitoria.pr.gov.br/feed/
+prado-ferreira,"Prado Ferreira",sem_lista,,0,
+pranchita,"Pranchita",ok,html,10,https://www.pranchita.pr.gov.br/noticias_site
+presidente-castelo-branco,"Presidente Castelo Branco",sem_lista,,0,
+primeiro-de-maio,"Primeiro de Maio",sem_lista,,0,
+prudentopolis,"Prudentópolis",sem_data,html,40,https://www.prudentopolis.pr.gov.br/noticias/
+quarto-centenario,"Quarto Centenário",sem_data,html,10,https://www.quartocentenario.pr.gov.br/noticias_site
+quatigua,"Quatiguá",sem_lista,,0,
+quatro-barras,"Quatro Barras",ok,html,40,https://www.quatrobarras.pr.gov.br/noticias/
+quatro-pontes,"Quatro Pontes",ok,html,13,https://www.quatropontes.pr.gov.br/noticias/24/categoria
+quedas-do-iguacu,"Quedas do Iguaçu",ok,html,5,https://www.quedasdoiguacu.pr.gov.br/noticiasView/?id=127
+querencia-do-norte,"Querência do Norte",sem_lista,,0,
+quinta-do-sol,"Quinta do Sol",sem_lista,,0,
+quitandinha,"Quitandinha",sem_lista,,0,
+ramilandia,"Ramilândia",sem_data,html,40,https://www.ramilandia.pr.gov.br/noticias/
+rancho-alegre,"Rancho Alegre",ok,html,11,https://www.ranchoalegre.pr.gov.br/noticias
+rancho-alegre-d-oeste,"Rancho Alegre D'Oeste",sem_lista,,0,
+realeza,"Realeza",sem_lista,,0,
+reboucas,"Rebouças",ok,rss,10,https://reboucas.pr.gov.br/feed/
+renascenca,"Renascença",fora_do_ar,,0,
+reserva,"Reserva",ok,rss,10,https://reserva.pr.gov.br/feed/
+reserva-do-iguacu,"Reserva do Iguaçu",ok,html,40,https://www.reservadoiguacu.pr.gov.br/noticias/
+ribeirao-claro,"Ribeirão Claro",ok,html,11,https://ribeiraoclaro.pr.gov.br/noticias/
+ribeirao-do-pinhal,"Ribeirão do Pinhal",sem_data,html,10,https://www.ribeiraodopinhal.pr.gov.br/noticias_site
+rio-azul,"Rio Azul",ok,html,6,https://rioazul.pr.gov.br/noticiasView/?id=578
+rio-bom,"Rio Bom",ok,html,13,https://www.riobom.pr.gov.br/noticia/categoria
+rio-bonito-do-iguacu,"Rio Bonito do Iguaçu",fora_do_ar,,0,
+rio-branco-do-ivai,"Rio Branco do Ivaí",ok,html,40,https://www.riobrancodoivai.pr.gov.br/noticias/
+rio-branco-do-sul,"Rio Branco do Sul",sem_lista,,0,
+rio-negro,"Rio Negro",sem_lista,,0,
+rolandia,"Rolândia",sem_data,html,11,https://www.rolandia.pr.gov.br/noticias_site
+roncador,"Roncador",sem_lista,,0,
+rondon,"Rondon",fora_do_ar,,0,
+rosario-do-ivai,"Rosário do Ivaí",sem_lista,,0,
+sabaudia,"Sabáudia",ok,html,9,https://www.sabaudia.pr.gov.br/noticia/2651/causa-animal
+salgado-filho,"Salgado Filho",ok,html,40,https://www.salgadofilho.pr.gov.br/noticias/
+salto-do-itarare,"Salto do Itararé",sem_data,html,14,https://www.saltodoitarare.pr.gov.br/noticias
+salto-do-lontra,"Salto do Lontra",sem_lista,,0,
+santa-amelia,"Santa Amélia",ok,html,12,https://www.santaamelia.pr.gov.br/noticias_site
+santa-cecilia-do-pavao,"Santa Cecília do Pavão",sem_lista,,0,
+santa-cruz-de-monte-castelo,"Santa Cruz de Monte Castelo",sem_lista,,0,
+santa-fe,"Santa Fé",ok,rss,10,https://www.santafe.pr.gov.br/feed/
+santa-helena,"Santa Helena",sem_lista,,0,
+santa-ines,"Santa Inês",ok,html,7,https://santaines.pr.gov.br/cidade/noticias
+santa-isabel-do-ivai,"Santa Isabel do Ivaí",sem_lista,,0,
+santa-izabel-do-oeste,"Santa Izabel do Oeste",sem_lista,,0,
+santa-lucia,"Santa Lúcia",sem_lista,,0,
+santa-maria-do-oeste,"Santa Maria do Oeste",sem_data,html,10,https://www.santamariadooeste.pr.gov.br/noticias
+santa-mariana,"Santa Mariana",sem_lista,,0,
+santa-monica,"Santa Mônica",ok,html,38,https://www.santamonica.pr.gov.br/noticias/
+santa-tereza-do-oeste,"Santa Tereza do Oeste",fora_do_ar,,0,
+santa-terezinha-de-itaipu,"Santa Terezinha de Itaipu",fora_do_ar,,0,
+santana-do-itarare,"Santana do Itararé",fora_do_ar,,0,
+santo-antonio-da-platina,"Santo Antônio da Platina",sem_lista,,0,
+santo-antonio-do-caiua,"Santo Antônio do Caiuá",fora_do_ar,,0,
+santo-antonio-do-paraiso,"Santo Antônio do Paraíso",fora_do_ar,,0,
+santo-antonio-do-sudoeste,"Santo Antônio do Sudoeste",fora_do_ar,,0,
+santo-inacio,"Santo Inácio",sem_lista,,0,
+sao-carlos-do-ivai,"São Carlos do Ivaí",sem_lista,,0,
+sao-jeronimo-da-serra,"São Jerônimo da Serra",ok,html,20,https://www.saojeronimodaserra.pr.gov.br/noticia
+sao-joao,"São João",fora_do_ar,,0,
+sao-joao-do-caiua,"São João do Caiuá",ok,rss,10,https://www.saojoaodocaiua.pr.gov.br/feed/
+sao-joao-do-ivai,"São João do Ivaí",sem_lista,,0,
+sao-joao-do-triunfo,"São João do Triunfo",fora_do_ar,,0,
+sao-jorge-d-oeste,"São Jorge d'Oeste",fora_do_ar,,0,
+sao-jorge-do-ivai,"São Jorge do Ivaí",fora_do_ar,,0,
+sao-jorge-do-patrocinio,"São Jorge do Patrocínio",fora_do_ar,,0,
+sao-jose-da-boa-vista,"São José da Boa Vista",ok,rss,10,https://saojosedaboavista.pr.gov.br/feed/
+sao-jose-das-palmeiras,"São José das Palmeiras",fora_do_ar,,0,
+sao-jose-dos-pinhais,"São José dos Pinhais",fora_do_ar,,0,
+sao-manoel-do-parana,"São Manoel do Paraná",fora_do_ar,,0,
+sao-mateus-do-sul,"São Mateus do Sul",sem_data,html,30,https://www.saomateusdosul.pr.gov.br/portal/noticias/3
+sao-miguel-do-iguacu,"São Miguel do Iguaçu",fora_do_ar,,0,
+sao-pedro-do-iguacu,"São Pedro do Iguaçu",ok,html,40,https://www.saopedrodoiguacu.pr.gov.br/noticias/
+sao-pedro-do-ivai,"São Pedro do Ivaí",sem_lista,,0,
+sao-pedro-do-parana,"São Pedro do Paraná",fora_do_ar,,0,
+sao-sebastiao-da-amoreira,"São Sebastião da Amoreira",fora_do_ar,,0,
+sao-tome,"São Tomé",sem_lista,,0,
+sapopema,"Sapopema",ok,html,13,https://www.sapopema.pr.gov.br/noticia/categoria
+sarandi,"Sarandi",sem_lista,,0,
+saudade-do-iguacu,"Saudade do Iguaçu",sem_data,html,40,https://www.saudadedoiguacu.pr.gov.br/noticias/
+senges,"Sengés",sem_lista,,0,
+serranopolis-do-iguacu,"Serranópolis do Iguaçu",fora_do_ar,,0,
+sertaneja,"Sertaneja",sem_lista,,0,
+sertanopolis,"Sertanópolis",ok,rss,10,https://www.sertanopolis.pr.gov.br/feed/
+siqueira-campos,"Siqueira Campos",ok,html,16,https://www.siqueiracampos.pr.gov.br/noticia/categoria/
+sulina,"Sulina",ok,html,5,https://www.sulina.pr.gov.br/noticias_site
+tamarana,"Tamarana",sem_lista,,0,
+tamboara,"Tamboara",fora_do_ar,,0,
+tapejara,"Tapejara",ok,rss,10,https://www.tapejara.pr.gov.br/feed/
+tapira,"Tapira",sem_lista,,0,
+teixeira-soares,"Teixeira Soares",sem_lista,,0,
+telemaco-borba,"Telêmaco Borba",ok,html,27,https://telemacoborba.pr.gov.br/index.php/imprensa/noticias
+terra-boa,"Terra Boa",ok,rss,10,https://terraboa.pr.gov.br/feed/
+terra-rica,"Terra Rica",sem_lista,,0,
+terra-roxa,"Terra Roxa",ok,html,3,https://www.terraroxa.pr.gov.br/cidadao/noticia
+tibagi,"Tibagi",ok,rss,10,https://tibagi.pr.gov.br/feed/
+tijucas-do-sul,"Tijucas do Sul",ok,html,12,https://www.tijucasdosul.pr.gov.br/planos-diretor-e-de-mobilidade/noticias
+toledo,"Toledo",ok,html,22,https://www.toledo.pr.gov.br/noticias
+tomazina,"Tomazina",ok,html,15,https://www.tomazina.pr.gov.br/noticia/categoria
+tres-barras-do-parana,"Três Barras do Paraná",fora_do_ar,,0,
+tunas-do-parana,"Tunas do Paraná",ok,html,40,https://www.tunasdoparana.pr.gov.br/noticias/
+tuneiras-do-oeste,"Tuneiras do Oeste",sem_lista,,0,
+tupassi,"Tupãssi",sem_lista,,0,
+turvo,"Turvo",sem_data,html,4,https://www.turvo.pr.gov.br/noticias/ultimas-noticias
+ubirata,"Ubiratã",ok,rss,10,https://www.ubirata.pr.gov.br/feed/
+umuarama,"Umuarama",sem_lista,,0,
+uniao-da-vitoria,"União da Vitória",sem_data,html,42,https://uniaodavitoria.pr.gov.br/noticias/
+uniflor,"Uniflor",sem_lista,,0,
+urai,"Uraí",sem_lista,,0,
+ventania,"Ventania",sem_data,html,10,https://www.ventania.pr.gov.br/noticias_site
+vera-cruz-do-oeste,"Vera Cruz do Oeste",fora_do_ar,,0,
+vere,"Verê",sem_lista,,0,
+virmond,"Virmond",sem_lista,,0,
+vitorino,"Vitorino",ok,rss,10,https://vitorino.pr.gov.br/feed/
+wenceslau-braz,"Wenceslau Braz",sem_lista,,0,
+xambre,"Xambrê",ok,html,9,https://www.xambre.pr.gov.br/noticias_site

@@ -96,7 +96,9 @@ Deno.serve(async (req) => {
           const ga = await fetch(`${selfUrl}/functions/v1/generate-article`, {
             method: "POST",
             headers: { "Content-Type": "application/json", Authorization: `Bearer ${selfKey}` },
-            body: JSON.stringify({ cluster_id: c.id }),
+            // modo automático: crivo (matéria/nota/descarte), validador do
+            // dia e publicação pela criticidade — ver generate-article.
+            body: JSON.stringify({ cluster_id: c.id, modo: "automatico" }),
           });
           if (!ga.ok) { erros.push({ cluster_id: c.id, etapa: "generate-article", detalhe: (await ga.text()).slice(0, 300) }); continue; }
           // Correção: sem isso, o cluster continuava com status

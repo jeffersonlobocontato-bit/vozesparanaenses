@@ -1,6 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { queryOptions, useSuspenseQuery } from "@tanstack/react-query";
-import { getRegionBySlug, listArticlesByCity } from "@/lib/content.functions";
+import { getRegionBySlug, listArticlesByCity, listNotasCidade } from "@/lib/content.functions";
+import { ColunaCidadeResumo } from "@/components/ColunaCidade";
 import { SiteHeader, SiteFooter } from "@/components/SiteHeader";
 import { AdsenseSlot } from "@/components/AdsenseSlot";
 import {
@@ -16,6 +17,12 @@ const cityQO = (regionSlug: string, citySlug: string) =>
     queryFn: () => listArticlesByCity({ data: { regionSlug, citySlug, limit: 50 } }),
   });
 
+const notasQO = (citySlug: string) =>
+  queryOptions({
+    queryKey: ["coluna-cidade", citySlug],
+    queryFn: () => listNotasCidade({ data: { citySlug, limit: 5 } }),
+  });
+
 const regionQO = (regionSlug: string) =>
   queryOptions({
     queryKey: ["region", regionSlug],
@@ -27,6 +34,7 @@ export const Route = createFileRoute("/$region/cidade/$cidade")({
     const [city, region] = await Promise.all([
       context.queryClient.ensureQueryData(cityQO(params.region, params.cidade)),
       context.queryClient.ensureQueryData(regionQO(params.region)),
+      context.queryClient.ensureQueryData(notasQO(params.cidade)),
     ]);
     return { city, region };
   },
@@ -134,6 +142,7 @@ function CityPage() {
   const { region, cidade } = Route.useParams();
   const { data: city } = useSuspenseQuery(cityQO(region, cidade));
   const { data: reg } = useSuspenseQuery(regionQO(region));
+  const { data: notas } = useSuspenseQuery(notasQO(cidade));
   const neighbors = getNeighboringCities(cidade, 8);
 
   return (
@@ -218,6 +227,8 @@ function CityPage() {
             </div>
           </>
         )}
+
+        <ColunaCidadeResumo citySlug={cidade} dados={notas} />
 
         {neighbors.length > 0 && (
           <section className="mt-14 border-t border-slate-200 pt-8">
