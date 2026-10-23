@@ -51,7 +51,8 @@ Deno.serve(async (req) => {
   await sb.from("vitrine_pessoal_pedidos").update({ status: "publicado", publicado_em: now }).eq("id", pedido.id);
 
   const art = Array.isArray(pedido.generated_article) ? pedido.generated_article[0] : pedido.generated_article;
-  const regiaoSlug = Array.isArray(art?.regiao) ? art?.regiao[0]?.slug : art?.regiao?.slug;
+  const regiaoRaw = art?.regiao as { slug?: string } | { slug?: string }[] | null | undefined;
+  const regiaoSlug = Array.isArray(regiaoRaw) ? regiaoRaw[0]?.slug : regiaoRaw?.slug;
   const link = art?.slug && regiaoSlug ? `${SITE_URL}/${regiaoSlug}/${art.slug}` : null;
 
   return json({ ok: true, link });

@@ -193,7 +193,8 @@ Deno.serve(async (req) => {
     .eq("id", clusterId)
     .maybeSingle();
   if (cErr || !cluster) return json({ error: "cluster_not_found", detail: cErr?.message }, 404);
-  const categoriaSlug = Array.isArray(cluster.categoria) ? cluster.categoria[0]?.slug : cluster.categoria?.slug;
+  const categoriaRaw = cluster.categoria as { slug?: string } | { slug?: string }[] | null | undefined;
+  const categoriaSlug = Array.isArray(categoriaRaw) ? categoriaRaw[0]?.slug : categoriaRaw?.slug;
   const automatico = body.modo === "automatico" && !(body.extra_instructions ?? "").trim();
 
   // Cidade e REGIÃO da notícia = cidade de que o fato trata (cidade_principal
@@ -408,6 +409,7 @@ Deno.serve(async (req) => {
       return json({ error: "insert_failed", detail: insErr.message }, 500);
     }
   }
+  if (!inserted) return json({ error: "insert_failed", detail: "inserção sem retorno de dados" }, 500);
 
   // A partir daqui a matéria já existe. Marca o cluster como concluído ANTES
   // de qualquer tarefa auxiliar (ex.: copiar foto externa), para uma demora de

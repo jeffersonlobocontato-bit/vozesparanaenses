@@ -52,9 +52,10 @@ Deno.serve(async (req) => {
     .select("id, nome, advertiser:advertiser_id(nome)")
     .eq("id", briefing.campaign_id)
     .maybeSingle();
-  const advertiserNome = Array.isArray(campaign?.advertiser)
-    ? campaign?.advertiser[0]?.nome
-    : campaign?.advertiser?.nome;
+  const advertiserRaw = campaign?.advertiser as { nome?: string } | { nome?: string }[] | null | undefined;
+  const advertiserNome = Array.isArray(advertiserRaw)
+    ? advertiserRaw[0]?.nome
+    : advertiserRaw?.nome;
 
   // Núcleo comum de conteúdo pago + diferencial específico deste agente
   const [{ data: nucleo }, { data: agente }] = await Promise.all([
