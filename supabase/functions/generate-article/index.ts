@@ -13,7 +13,8 @@
 
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
 import { carregarCidades, cidadePorNome } from "../_shared/cidades.ts";
-import { decidirFormato, podeIrParaDobra, prioridadeDoTema, temaHeuristico, type OrigemPauta, type Prioridade, type Tema } from "../_shared/crivo-editorial.ts";
+import { decidirFormato, decidirImagem, podeIrParaDobra, prioridadeDoTema, temaHeuristico, type DecisaoImagem, type OrigemPauta, type Prioridade, type Tema, type TipoImagem } from "../_shared/crivo-editorial.ts";
+import { CREDITO_IA, fotoDaCidade, gerarIlustracaoTematica } from "../_shared/imagem.ts";
 import { avaliarCriticidade, carregarConfigCriticidade } from "../_shared/criticidade.ts";
 import { ehDoDia } from "../_shared/data-publicacao.ts";
 import { classificarFoto, creditoParaExibir, type FotoStatus } from "../_shared/foto-credito.ts";
@@ -82,7 +83,7 @@ type RawFoto = {
   coletado_em: string | null;
   fonte: FonteRef | FonteRef[] | null;
 };
-type FonteRef = { nome: string; tipo: string; cidade_slug?: string | null };
+type FonteRef = { nome: string; tipo: string; cidade_slug?: string | null; curadoria_editoria?: string | null };
 
 type DnaSintatico = Record<string, string | undefined>;
 type DnaSemantico = Record<string, string | undefined>;
@@ -217,7 +218,7 @@ Deno.serve(async (req) => {
   const rawIdsCluster = (caRows ?? []).map((r) => r.raw_article_id);
   const { data: rawsData } = rawIdsCluster.length
     ? await sb.from("raw_articles")
-      .select("id, imagem_original_url, imagem_credito, foto_status, data_publicacao_original, coletado_em, fonte:fontes(nome, tipo, cidade_slug)")
+      .select("id, imagem_original_url, imagem_credito, foto_status, data_publicacao_original, coletado_em, fonte:fontes(nome, tipo, cidade_slug, curadoria_editoria)")
       .in("id", rawIdsCluster)
     : { data: [] as RawFoto[] };
   const raws = (rawsData ?? []) as RawFoto[];
@@ -228,9 +229,13 @@ Deno.serve(async (req) => {
   // ORIGEM da pauta decide o destino (ver _shared/crivo-editorial.ts):
   // release de prefeitura → nota na coluna regional; portal → matéria.
   // Cluster oficial é sempre de 1 release só (cluster-articles).
+  const curadoriaFonte = (r: RawFoto) => (Array.isArray(r.fonte) ? r.fonte[0]?.curadoria_editoria : r.fonte?.curadoria_editoria) ?? null;
   const origem: OrigemPauta =
     cluster.fonte_oficial || (raws.length > 0 && raws.every((r) => tipoFonte(r) === "prefeitura"))
       ? "prefeitura"
+      // Esportes, nacional, internacional e tecnologia: só texto.
+      : cluster.curadoria_nacional || raws.some((r) => !!curadoriaFonte(r))
+      ? "curadoria"
       : "portal";
   // Release de prefeitura fala da própria cidade: a cidade (e a região) é a
   // da prefeitura que publicou, não uma cidade citada no texto (ex.: "Coronel
@@ -486,15 +491,25 @@ Deno.serve(async (req) => {
     // sem a coluna, a home trata a matéria como elegível (comportamento antigo)
   }
 
-  // 3b. Foto — regra de risco zero:
-  //   - foto da fonte SÓ se o crédito é institucional (assessoria,
-  //     divulgação, prefeitura, governo, foto pública) → copia para o storage
-  //     com o crédito original;
-  //   - senão, FOTO GERAL DA CIDADE (cidades.foto_geral_url), ou da região
-  //     como último recurso. Foto de fotógrafo/outro veículo nunca é usada.
-  let fotoOrigem: "fonte_autorizada" | "cidade_geral" | "regiao_geral" | "nenhuma" = "nenhuma";
+  // 3b. Imagem — regras de out/2026 (risco zero com foto de terceiros),
+  // ver decidirImagem() em _shared/crivo-editorial.ts:
+  //   prefeitura → foto da própria prefeitura ou nenhuma
+  //   curadoria (esportes, nacional, internacional, tecnologia) → nenhuma
+  //   portal → foto com crédito institucional; senão ilustração por IA
+  //     (tema geral) ou foto real da cidade (Commons, licença livre); fato
+  //     específico sem foto liberada → nenhuma (VAPT-VUPT)
+  // Matéria do editor (fora do automático) mantém a foto geral da cidade/
+  // região como reserva — exceto curadoria e esportes, que são só texto.
+  let fotoOrigem: "fonte_autorizada" | "cidade_geral" | "regiao_geral" | "ilustracao_ia" | "nenhuma" = "nenhuma";
   try {
-    if (rawFotoAutorizada?.imagem_original_url) {
+    const { data: imgRow } = await sb.from("article_clusters").select("imagem_tipo").eq("id", clusterId).maybeSingle();
+    const tipoImagem = ((imgRow as { imagem_tipo?: string } | null)?.imagem_tipo ?? null) as TipoImagem | null;
+    const regraNova = automatico || origem === "curadoria" || categoriaSlug === "esportes";
+    const decisaoImagem: DecisaoImagem = regraNova
+      ? decidirImagem({ origem, fotoStatus, categoriaSlug: categoriaSlug ?? null, tipoImagem, temCidade: !!cidade })
+      : rawFotoAutorizada ? "fonte" : "foto_cidade";
+
+    if (decisaoImagem === "fonte" && rawFotoAutorizada?.imagem_original_url) {
       const copiada = await copiarFotoParaStorage(sb, rawFotoAutorizada.imagem_original_url, inserted.id);
       if (copiada) {
         await sb.from("generated_articles").update({
@@ -507,25 +522,42 @@ Deno.serve(async (req) => {
         }).eq("id", inserted.id);
         fotoOrigem = "fonte_autorizada";
       }
+    } else if (decisaoImagem === "ilustracao_ia") {
+      const tema = `${parsed.titulo}. ${parsed.resumo ?? ""}`;
+      const url = await gerarIlustracaoTematica({ sb, aiKey, articleId: inserted.id, tema });
+      if (url) {
+        await sb.from("generated_articles").update({
+          imagem_capa_url: url,
+          og_image_url: url,
+          imagem_credito: CREDITO_IA,
+          imagem_legenda: "Imagem ilustrativa gerada por inteligência artificial",
+        }).eq("id", inserted.id);
+        fotoOrigem = "ilustracao_ia";
+      }
+    } else if (decisaoImagem === "foto_cidade" && cidade) {
+      const foto = await fotoDaCidade(sb, cidade);
+      const copiada = foto ? (await copiarFotoParaStorage(sb, foto.url, inserted.id)) ?? foto.url : null;
+      if (foto && copiada) {
+        await sb.from("generated_articles").update({
+          imagem_capa_url: copiada,
+          og_image_url: copiada,
+          imagem_credito: foto.credito,
+          imagem_legenda: `Vista de ${cidade.nome} (imagem ilustrativa)`,
+        }).eq("id", inserted.id);
+        fotoOrigem = "cidade_geral";
+      }
     }
-    // Portal no automático: sem foto liberada a matéria sai SEM capa e vai
-    // para o VAPT-VUPT (decisão editorial de out/2026). A foto geral da
-    // cidade fica só para matérias escritas pelo editor.
-    if (fotoOrigem === "nenhuma" && !(automatico && origem === "portal")) {
-      const { data: fotoCidade } = cidade
-        ? await sb.from("cidades").select("foto_geral_url, foto_geral_credito").eq("slug", cidade.slug).maybeSingle()
-        : { data: null };
-      const { data: fotoRegiao } = fotoCidade?.foto_geral_url
-        ? { data: null }
-        : await sb.from("regioes").select("hero_image_url").eq("id", regiaoId).maybeSingle();
-      const urlGeral = fotoCidade?.foto_geral_url ?? fotoRegiao?.hero_image_url ?? null;
+
+    // Editor (fora do automático): reserva antiga com a foto da região.
+    if (!regraNova && fotoOrigem === "nenhuma") {
+      const { data: fotoRegiao } = await sb.from("regioes").select("hero_image_url").eq("id", regiaoId).maybeSingle();
+      const urlGeral = (fotoRegiao as { hero_image_url?: string | null } | null)?.hero_image_url ?? null;
       if (urlGeral) {
-        fotoOrigem = fotoCidade?.foto_geral_url ? "cidade_geral" : "regiao_geral";
+        fotoOrigem = "regiao_geral";
         await sb.from("generated_articles").update({
           imagem_capa_url: urlGeral,
           og_image_url: urlGeral,
-          imagem_credito: fotoCidade?.foto_geral_credito ?? `Imagem ilustrativa${cidade ? ` — ${cidade.nome}` : ""}`,
-          imagem_legenda: cidade ? `Vista de ${cidade.nome} (imagem ilustrativa)` : null,
+          imagem_credito: "Imagem ilustrativa",
         }).eq("id", inserted.id);
       }
     }

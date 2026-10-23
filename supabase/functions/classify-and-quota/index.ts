@@ -14,7 +14,7 @@
 // Body opcional: { regiao_id?: string }
 
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
-import { CRIVO_PROMPT, CRIVO_SCHEMA, parseCrivo, pesoPrioridade, type ResultadoCrivo } from "../_shared/crivo-editorial.ts";
+import { CRIVO_PROMPT, CRIVO_SCHEMA, motivoDescartePortal, pareceReleaseDeAssessoria, parseCrivo, pesoPrioridade, type ResultadoCrivo } from "../_shared/crivo-editorial.ts";
 
 const cors = {
   "Access-Control-Allow-Origin": "*",
@@ -52,7 +52,9 @@ Deno.serve(async (req) => {
     .from("article_clusters")
     .select("id, regiao_id, categoria_id, prioridade_score, criado_em, fonte_oficial, curadoria_nacional, regiao:regioes(slug)")
     .eq("status", "novo")
-    .is("categoria_id", null)
+    // Curadoria de esportes já nasce com editoria (categoria_id) e também
+    // passa pelo crivo — desde out/2026 ela publica sozinha nos ciclos.
+    .or("categoria_id.is.null,curadoria_nacional.eq.true")
     .order("prioridade_score", { ascending: false })
     .limit(limit);
   if (body.regiao_id) cq = cq.eq("regiao_id", body.regiao_id);
@@ -81,7 +83,7 @@ Deno.serve(async (req) => {
 
 async function processClusters(
   { clusters, categorias, sb, aiKey, url, key }: {
-    clusters: Array<{ id: string; regiao_id: string; prioridade_score: number; criado_em: string; fonte_oficial?: boolean; curadoria_nacional?: boolean }>;
+    clusters: Array<{ id: string; regiao_id: string; categoria_id?: string | null; prioridade_score: number; criado_em: string; fonte_oficial?: boolean; curadoria_nacional?: boolean }>;
     categorias: { id: string; slug: string; nome: string; peso_engajamento: number }[];
     // deno-lint-ignore no-explicit-any
     sb: any;
@@ -95,6 +97,7 @@ async function processClusters(
   // 1. Classificar cada cluster (usa título do primeiro artigo do cluster)
   const classified: { id: string; regiao_id: string; categoria_id: string; score: number; curadoria_nacional: boolean; fonte_oficial: boolean; prioridade: string }[] = [];
   let semValor = 0;
+  let descartesPortal = 0;
   for (const c of clusters) {
     // Se o cluster já está fincado em uma região do Paraná (pela detecção
     // de cidade no scrape-source), NUNCA classifica como nacional/
@@ -115,7 +118,7 @@ async function processClusters(
     const ids = (ca ?? []).map((r: { raw_article_id: string }) => r.raw_article_id);
     const { data: raws } = await sb
       .from("raw_articles")
-      .select("titulo, corpo_limpo")
+      .select("titulo, corpo_limpo, imagem_credito")
       .in("id", ids);
     const excerpt = (raws ?? [])
       .map((r: { titulo: string | null; corpo_limpo: string | null }) => `${r.titulo ?? ""}\n${(r.corpo_limpo ?? "").slice(0, 400)}`)
@@ -123,13 +126,27 @@ async function processClusters(
       .slice(0, 3000);
     const crivo = await classify(excerpt, categoriasElegiveis, aiKey);
     const catSlug = crivo.categoria ?? "";
-    const cat = categoriasElegiveis.find((k) => k.slug === catSlug) ?? categoriasElegiveis[0];
+    // Curadoria que já nasceu com editoria (esportes) mantém a dela.
+    const cat = (c.categoria_id ? categorias.find((k) => k.id === c.categoria_id) : null)
+      ?? categoriasElegiveis.find((k) => k.slug === catSlug) ?? categoriasElegiveis[0];
 
-    if (!crivo.valor_noticioso && !c.curadoria_nacional) {
+    // Portais/jornais do PR (não é prefeitura nem curadoria): fora release de
+    // assessoria de prefeitura (já coletamos da própria prefeitura), fato
+    // fora do Paraná e crítica política sobre a cidade.
+    const ehPortal = !c.fonte_oficial && !c.curadoria_nacional;
+    const creditos = (raws ?? []).map((r: { imagem_credito?: string | null }) => r.imagem_credito ?? "").join(" ");
+    const motivoPortal = ehPortal
+      ? motivoDescartePortal({ ...crivo, origem_assessoria: crivo.origem_assessoria || pareceReleaseDeAssessoria(excerpt, creditos) })
+      : null;
+
+    if (!crivo.valor_noticioso || motivoPortal) {
       await sb.from("article_clusters")
         .update({ categoria_id: cat.id, tema_crivo: crivo.tema, prioridade_crivo: crivo.prioridade, status: "descartado" })
         .eq("id", c.id);
-      semValor++;
+      // Motivo em coluna própria (073); sem ela, só o status já basta.
+      await sb.from("article_clusters").update({ descarte_motivo: motivoPortal ?? "sem valor noticioso" }).eq("id", c.id);
+      if (motivoPortal) descartesPortal++;
+      else semValor++;
       continue;
     }
 
@@ -168,6 +185,8 @@ async function processClusters(
       tema_crivo: crivo.tema,
       prioridade_crivo: crivo.prioridade,
     }).eq("id", c.id);
+    // Que imagem a matéria pode ter (ver decidirImagem) — coluna da 073.
+    await sb.from("article_clusters").update({ imagem_tipo: crivo.imagem }).eq("id", c.id);
     classified.push({ id: c.id, regiao_id: c.regiao_id, categoria_id: cat.id, score: c.prioridade_score, curadoria_nacional: !!c.curadoria_nacional, fonte_oficial: !!c.fonte_oficial, prioridade: crivo.prioridade });
   }
 
@@ -200,13 +219,9 @@ async function processClusters(
   let viraramNota = 0;
   const selecionados: string[] = [];
   for (const c of classified.sort((a, b) => b.score - a.score)) {
-    // Curadoria nacional (cards 3 e 4 do painel) é classificada pra saber
-    // em qual editoria exibir na tela de curadoria, mas NUNCA entra na
-    // seleção automática por cota — fica em "novo" pra sempre, esperando
-    // o admin decidir manualmente (botão "Escrever agora"). Sem isso, o
-    // card 4 (Nacional geral) escreveria sozinho, que é exatamente o que
-    // não queremos.
-    if (c.curadoria_nacional) continue;
+    // Curadoria (esportes, nacional, internacional): desde out/2026 entra
+    // na seleção automática como as demais — publica só texto, sem foto
+    // (ver decidirFormato/decidirImagem).
 
     // Nunca repetir: mesmo fato já selecionado/escrito nas últimas 72h
     // (inclusive o que foi selecionado neste mesmo lote, logo acima).
@@ -246,8 +261,8 @@ async function processClusters(
   // tudo" sem nenhuma matéria sair e sem erro visível em canto nenhum.
   // Ter um único lugar escrevendo evita essa corrida e concentra o erro
   // num só ponto, já com retorno detalhado.
-  console.log(`[classify-and-quota] concluído: classified=${classified.length} selected=${selected} discarded=${discarded} duplicadas=${duplicadas} sem_valor=${semValor} viraram_nota=${viraramNota}`);
-  return { classified: classified.length, selected, discarded, duplicadas, sem_valor: semValor, viraram_nota: viraramNota, pendentes_para_escrita: selecionados.length };
+  console.log(`[classify-and-quota] concluído: classified=${classified.length} selected=${selected} discarded=${discarded} duplicadas=${duplicadas} sem_valor=${semValor} descartes_portal=${descartesPortal} viraram_nota=${viraramNota}`);
+  return { classified: classified.length, selected, discarded, duplicadas, sem_valor: semValor, descartes_portal: descartesPortal, viraram_nota: viraramNota, pendentes_para_escrita: selecionados.length };
 }
 
 function json(body: unknown, status = 200) {

@@ -1,15 +1,16 @@
 // Vozes Paranaenses — generate-article-image
 // Modos:
-//   { article_id, mode: "ai" }              → busca imagem original das raws do
-//     cluster e pede ao Nano Banana pra recriar com leve variação de ângulo/detalhe
-//     (evita cópia literal / risco autoral).
-//   { article_id, mode: "ai", source_url }  → força usar essa URL como base.
+//   { article_id, mode: "ai" }              → ilustração editorial gerada por IA
+//     SÓ a partir do tema (título + resumo). Desde out/2026 NUNCA parte da
+//     foto de outro veículo: recriar foto de terceiro "com pequenas variações"
+//     é obra derivada e não elimina o risco autoral. (source_url é ignorado.)
 //   { article_id, mode: "upload", base64, mime } → upload manual do editor.
 //   { article_id, mode: "original" }        → restaura a foto original (já copiada
 //     para o storage no momento da geração) como capa da matéria.
 // Salva em storage `article-covers` e atualiza imagem_capa_url + og_image_url + imagem_credito.
 
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
+import { CREDITO_IA, promptIlustracao } from "../_shared/imagem.ts";
 
 const cors = {
   "Access-Control-Allow-Origin": "*",
@@ -19,17 +20,11 @@ const cors = {
 
 const AI_URL = "https://ai.gateway.lovable.dev/v1/chat/completions";
 const IMG_MODEL = "google/gemini-2.5-flash-image";
-const EDIT_PROMPT =
-  "Recrie esta cena fotojornalística com pequenas variações: leve mudança de ângulo de câmera, " +
-  "reenquadramento sutil e ajuste de iluminação natural. Mantenha o contexto, o cenário e a " +
-  "atmosfera reconhecíveis, mas produza uma composição distinta da original (evitar cópia). " +
-  "Estilo: fotografia editorial realista, cores naturais, sem texto, sem marca d'água.";
-const GEN_PROMPT_FALLBACK =
-  "Fotografia editorial realista, estilo fotojornalismo brasileiro, cores naturais, sem texto, sem marca d'água, para a seguinte matéria:\n";
+// Reforço quando o filtro de segurança do modelo barra a primeira tentativa.
 const SAFE_PROMPT =
-  "Ilustração editorial neutra e segura para jornal, sem pessoas identificáveis, sem violência, " +
-  "sem sangue, sem armas, sem crianças. Foco no cenário/ambiente genérico relacionado ao tema. " +
-  "Estilo: fotografia editorial realista, cores naturais, sem texto, sem marca d'água. Tema:\n";
+  "Ilustração editorial neutra e segura para jornal, estilo ilustração digital (não fotografia), sem pessoas, " +
+  "sem rostos, sem crianças, sem violência, sem sangue, sem armas, sem texto, sem marcas. " +
+  "Represente o tema de forma genérica e simbólica. Tema:\n";
 
 type Body = {
   article_id: string;
@@ -90,37 +85,12 @@ Deno.serve(async (req) => {
   } else {
     if (!aiKey) return json({ error: "missing_lovable_api_key" }, 500);
 
-    // Descobre imagem-fonte
-    let sourceUrl = body.source_url ?? null;
-    // Preferir a cópia local (permanente e sempre acessível) antes de cair pras raws.
-    if (!sourceUrl && article.imagem_original_url) sourceUrl = article.imagem_original_url;
-    if (!sourceUrl && article.cluster_id) {
-      const { data: ca } = await sb.from("cluster_articles").select("raw_article_id").eq("cluster_id", article.cluster_id);
-      const rawIds = (ca ?? []).map((r) => r.raw_article_id);
-      if (rawIds.length) {
-        const { data: raws } = await sb
-          .from("raw_articles")
-          .select("imagem_original_url")
-          .in("id", rawIds)
-          .not("imagem_original_url", "is", null)
-          .limit(1);
-        sourceUrl = raws?.[0]?.imagem_original_url ?? null;
-      }
-    }
-
-    // Monta mensagem para Nano Banana
-    const content: Array<Record<string, unknown>> = [];
-    if (sourceUrl) {
-      content.push({ type: "text", text: EDIT_PROMPT });
-      content.push({ type: "image_url", image_url: { url: sourceUrl } });
-      credito = "Imagem: gerada por IA (Vozes Paranaenses) — inspirada na cena original";
-    } else {
-      content.push({
-        type: "text",
-        text: GEN_PROMPT_FALLBACK + `Título: ${article.titulo}\n${article.resumo ?? ""}`,
-      });
-      credito = "Imagem: gerada por IA (Vozes Paranaenses)";
-    }
+    // Só o tema — nunca a foto de outro veículo.
+    const content: Array<Record<string, unknown>> = [{
+      type: "text",
+      text: promptIlustracao(`${article.titulo}. ${article.resumo ?? ""}`),
+    }];
+    credito = CREDITO_IA;
 
     const callAI = async (msgContent: Array<Record<string, unknown>>) => {
       const r = await fetch(AI_URL, {
@@ -164,7 +134,7 @@ Deno.serve(async (req) => {
       if (aiRes.ok) {
         aiJson = await aiRes.json();
         ({ url: imgUrl, finish } = extractImg(aiJson));
-        credito = "Imagem: gerada por IA (Vozes Paranaenses)";
+        credito = CREDITO_IA;
       }
     }
 

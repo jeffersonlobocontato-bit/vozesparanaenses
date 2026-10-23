@@ -7,7 +7,8 @@ import { detectarCidade, cidadePorNome } from "./cidades.ts";
 import { classificarFoto } from "./foto-credito.ts";
 import { ehDoDia, extrairDataPublicacao, inicioDoCiclo, diaSaoPaulo } from "./data-publicacao.ts";
 import { avaliarRegras } from "./criticidade.ts";
-import { decidirFormato, podeIrParaDobra, temaHeuristico, parseCrivo } from "./crivo-editorial.ts";
+import { decidirFormato, decidirImagem, motivoDescartePortal, pareceReleaseDeAssessoria, podeIrParaDobra, temaHeuristico, parseCrivo } from "./crivo-editorial.ts";
+import { escolherFotoCommons, promptIlustracao } from "./imagem.ts";
 import { limparPrefeituraMecanico, verificarTitulo } from "./titulo.ts";
 import { dataAtendeNetParaIso, ehAtendeNet, parseListaAtendeNet, parseMateriaAtendeNet } from "./atende-net.ts";
 import { cicloAtual, fonteElegivel, normalizarUrl } from "./coleta.ts";
@@ -157,5 +158,36 @@ ok("cidade sem tag pode ficar no título", verificarTitulo("Cambará abre proces
 ok("cidade com acento/caixa é reconhecida", verificarTitulo("SÃO JOSÉ DOS PINHAIS amplia vagas em creches", "São José dos Pinhais").length === 1);
 ok("nome de cidade dentro de outra palavra não conta", verificarTitulo("Lapada de sol marca o fim de semana", "Lapa").length === 0);
 ok("ajuste mecânico tira Prefeitura de", limparPrefeituraMecanico("Prefeitura de Cambará abre PSS na saúde") === "Cambará abre PSS na saúde");
+
+// Portais (out/2026): assessoria, escopo, crítica política, imagem
+const cv = parseCrivo('{"categoria":"meio-ambiente","tema":"geral","valor_noticioso":true,"origem_assessoria":false,"escopo":"parana","critica_politica":false,"imagem":"tematica"}', "");
+ok("crivo lê escopo/imagem", cv.escopo === "parana" && cv.imagem === "tematica" && !cv.origem_assessoria);
+ok("crivo sem campos novos → padrão seguro", parseCrivo('{"categoria":"cidades","tema":"geral"}', "").imagem === "fato");
+ok("assessoria: crédito Divulgação/Prefeitura", pareceReleaseDeAssessoria("Texto qualquer. Foto: Divulgação/Prefeitura de Toledo"));
+ok("assessoria: com informações da Prefeitura", pareceReleaseDeAssessoria("A obra começa amanhã. (Com informações da Prefeitura de Cascavel)"));
+ok("assessoria: crédito da imagem", pareceReleaseDeAssessoria("", "Prefeitura de Londrina"));
+ok("assessoria de imprensa da polícia não conta", !pareceReleaseDeAssessoria("Segundo a assessoria de imprensa da Polícia Militar, dois foram presos."));
+ok("descarta release de assessoria", motivoDescartePortal({ origem_assessoria: true, escopo: "parana", critica_politica: false }) !== null);
+ok("descarta nacional em portal do PR", motivoDescartePortal({ origem_assessoria: false, escopo: "nacional", critica_politica: false }) !== null);
+ok("descarta crítica política", motivoDescartePortal({ origem_assessoria: false, escopo: "parana", critica_politica: true }) !== null);
+ok("mantém fato paranaense", motivoDescartePortal({ origem_assessoria: false, escopo: "parana", critica_politica: false }) === null);
+const fi = (o: Partial<Parameters<typeof decidirImagem>[0]>) => decidirImagem({ origem: "portal", fotoStatus: "proibida", categoriaSlug: "cidades", tipoImagem: "fato", temCidade: true, ...o });
+ok("curadoria → só texto", fi({ origem: "curadoria", fotoStatus: "autorizada" }) === "nenhuma" && f({ origem: "curadoria" }).foto === "nenhuma");
+ok("portal esportes → só texto", fi({ categoriaSlug: "esportes", fotoStatus: "autorizada" }) === "nenhuma");
+ok("portal com foto institucional → foto", fi({ fotoStatus: "autorizada" }) === "fonte");
+ok("portal tema geral → ilustração IA", fi({ tipoImagem: "tematica" }) === "ilustracao_ia");
+ok("portal fala da cidade → foto da cidade", fi({ tipoImagem: "cidade" }) === "foto_cidade");
+ok("portal fato específico sem foto → nenhuma", fi({}) === "nenhuma");
+ok("prefeitura com foto → foto dela", fi({ origem: "prefeitura", fotoStatus: "autorizada" }) === "fonte");
+ok("curadoria fora da dobra", !podeIrParaDobra("curadoria", true));
+ok("prompt de ilustração proíbe pessoas e crianças", /sem pessoas/.test(promptIlustracao("x")) && /sem crian/.test(promptIlustracao("x")));
+const pag = (title: string, w: number, h: number, lic: string, cats: string) => ({ title, imageinfo: [{ width: w, height: h, thumburl: `https://x/${title}`, extmetadata: { LicenseShortName: { value: lic }, Categories: { value: cats }, Artist: { value: "<a>Fulano</a>" } } }] });
+const fc = escolherFotoCommons([
+  pag("File:Flag of Palmeira, Paraná.jpg", 2000, 1000, "Public domain", "Flags"),
+  pag("File:Vista de Cascavel (Paraná).jpg", 5760, 3336, "CC BY-SA 2.0", "Cascavel (Paraná)"),
+  pag("File:Inauguração salão.jpg", 3000, 2000, "Public domain", "Cascavel (Paraná)"),
+  pag("File:Vista aérea.jpg", 4000, 2000, "All rights reserved", "Cascavel (Paraná)"),
+]);
+ok("Commons: escolhe a vista com licença livre", fc?.titulo === "Vista de Cascavel (Paraná).jpg" && fc.credito === "Foto: Fulano / Wikimedia Commons (CC BY-SA 2.0)", JSON.stringify(fc));
 console.log(falhas ? `\n${falhas} FALHA(S)` : "\nTudo certo");
 if (falhas) Deno.exit(1);

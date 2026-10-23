@@ -74,15 +74,28 @@ export const CRIVO_PROMPT = `CRIVO EDITORIAL — além da editoria, classifique 
 
 Regras do crivo:
 - Se uma inauguração/anúncio traz SERVIÇO concreto (ex.: "UBS abre amanhã com atendimento X, endereço Y"), é "servico", não "propaganda_governo".
-- "valor_noticioso": false quando o texto não tem fato novo para o leitor (nota de pesar genérica, felicitação, post institucional vazio, expediente).`;
+- "valor_noticioso": false quando o texto não tem fato novo para o leitor (nota de pesar genérica, felicitação, post institucional vazio, expediente).
 
-export const CRIVO_SCHEMA = `{"categoria": "<slug da editoria>", "tema": "<tema do crivo>", "valor_noticioso": true|false, "motivo": "<até 15 palavras>"}`;
+Para notícias de PORTAIS/JORNAIS, responda também:
+- "origem_assessoria": true quando o texto parece release de assessoria de prefeitura/câmara reproduzido pelo portal (crédito "Divulgação/Prefeitura", "Assessoria", "Secom", "Ascom", "com informações da Prefeitura", texto institucional em terceira pessoa elogiando a gestão).
+- "escopo": "parana" (fato de cidade do Paraná ou do estado do Paraná), "nacional" (outro estado ou Brasil em geral) ou "internacional".
+- "critica_politica": true quando o centro da notícia é crítica, denúncia, ataque ou polêmica política envolvendo prefeito, vereadores, câmara, partidos ou gestão municipal (embate político, CPI, acusação, troca de farpas). Notícia factual de serviço da prefeitura NÃO é crítica política.
+- "imagem": "tematica" (assunto geral que uma ilustração temática resolve: meio ambiente, saúde preventiva, clima, economia em geral, educação em geral), "cidade" (fala da cidade como um todo: aniversário, ranking, população, turismo, obra que muda a cidade) ou "fato" (fato específico — acidente, crime, evento, pessoa — que só uma foto real do fato ilustraria).`;
+
+export const CRIVO_SCHEMA = `{"categoria": "<slug da editoria>", "tema": "<tema do crivo>", "valor_noticioso": true|false, "origem_assessoria": true|false, "escopo": "parana"|"nacional"|"internacional", "critica_politica": true|false, "imagem": "tematica"|"cidade"|"fato", "motivo": "<até 15 palavras>"}`;
+
+export type Escopo = "parana" | "nacional" | "internacional";
+export type TipoImagem = "tematica" | "cidade" | "fato";
 
 export type ResultadoCrivo = {
   categoria: string | null;
   tema: Tema;
   prioridade: Prioridade;
   valor_noticioso: boolean;
+  origem_assessoria: boolean;
+  escopo: Escopo;
+  critica_politica: boolean;
+  imagem: TipoImagem;
   motivo: string | null;
   via: "ia" | "heuristica";
 };
@@ -90,19 +103,30 @@ export type ResultadoCrivo = {
 export function parseCrivo(raw: string, texto: string): ResultadoCrivo {
   try {
     const m = raw.match(/\{[\s\S]*\}/);
-    const j = JSON.parse(m ? m[0] : raw) as { categoria?: string; tema?: string; valor_noticioso?: boolean; motivo?: string };
+    const j = JSON.parse(m ? m[0] : raw) as {
+      categoria?: string; tema?: string; valor_noticioso?: boolean; motivo?: string;
+      origem_assessoria?: boolean; escopo?: string; critica_politica?: boolean; imagem?: string;
+    };
     const tema = TODOS_TEMAS.includes(j.tema as Tema) ? (j.tema as Tema) : temaHeuristico(texto);
     return {
       categoria: typeof j.categoria === "string" ? j.categoria.trim().toLowerCase() : null,
       tema,
       prioridade: prioridadeDoTema(tema),
       valor_noticioso: j.valor_noticioso !== false,
+      origem_assessoria: j.origem_assessoria === true || pareceReleaseDeAssessoria(texto),
+      escopo: j.escopo === "nacional" || j.escopo === "internacional" ? j.escopo : "parana",
+      critica_politica: j.critica_politica === true,
+      imagem: j.imagem === "tematica" || j.imagem === "cidade" ? j.imagem : "fato",
       motivo: typeof j.motivo === "string" ? j.motivo.slice(0, 200) : null,
       via: "ia",
     };
   } catch {
     const tema = temaHeuristico(texto);
-    return { categoria: null, tema, prioridade: prioridadeDoTema(tema), valor_noticioso: true, motivo: null, via: "heuristica" };
+    return {
+      categoria: null, tema, prioridade: prioridadeDoTema(tema), valor_noticioso: true,
+      origem_assessoria: pareceReleaseDeAssessoria(texto), escopo: "parana", critica_politica: false,
+      imagem: "fato", motivo: null, via: "heuristica",
+    };
   }
 }
 
@@ -117,6 +141,25 @@ const PISTAS: Array<[Tema, RegExp]> = [
   ["propaganda_governo", /\b(prefeito|prefeita|secretari[oa]) (entrega|visita|recebe|participa|anuncia|inaugura|destaca|celebra)\w*/],
 ];
 
+// Marcas de release de assessoria reproduzido por portal (vale sem IA).
+const PISTAS_ASSESSORIA = /(assessoria de (imprensa|comunica[cç][aã]o) (da prefeitura|do munic[ií]pio|da c[aâ]mara)|com informa[cç][oõ]es da prefeitura|fonte:\s*prefeitura|(foto|imagem)s?:?\s*(divulga[cç][aã]o\s*\/\s*)?prefeitura|divulga[cç][aã]o\s*\/\s*(pm[a-z]{0,3}|prefeitura|c[aâ]mara)\b|prefeitura municipal de [a-z\u00c0-\u00ff ]+ informa)/i;
+
+export function pareceReleaseDeAssessoria(texto: string, credito?: string | null): boolean {
+  return PISTAS_ASSESSORIA.test(texto) || /prefeitura|c[aâ]mara municipal/i.test(credito ?? "");
+}
+
+/**
+ * Portal/jornal: a pauta entra? (prefeitura e curadoria não passam aqui)
+ * Fora: release de assessoria (já temos o scraping das prefeituras), fato
+ * fora do Paraná e crítica política sobre a cidade.
+ */
+export function motivoDescartePortal(c: Pick<ResultadoCrivo, "origem_assessoria" | "escopo" | "critica_politica">): string | null {
+  if (c.origem_assessoria) return "release de assessoria (já coletado da prefeitura)";
+  if (c.escopo !== "parana") return `notícia ${c.escopo} em portal do Paraná`;
+  if (c.critica_politica) return "crítica política sobre a cidade";
+  return null;
+}
+
 export function temaHeuristico(texto: string): Tema {
   const t = texto.toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g, "");
   for (const [tema, re] of PISTAS) if (re.test(t)) return tema;
@@ -125,7 +168,8 @@ export function temaHeuristico(texto: string): Tema {
 
 export type Formato = "materia" | "nota" | "descartar";
 export type FotoOrigem = "fonte_autorizada" | "nenhuma";
-export type OrigemPauta = "prefeitura" | "portal";
+/** prefeitura = release oficial; portal = jornal/portal do PR; curadoria = esportes, nacional, internacional, tecnologia. */
+export type OrigemPauta = "prefeitura" | "portal" | "curadoria";
 
 export function decidirFormato(p: {
   origem: OrigemPauta;
@@ -149,6 +193,12 @@ export function decidirFormato(p: {
     };
   }
 
+  // Curadoria (esportes, nacional, internacional, tecnologia): só texto.
+  if (p.origem === "curadoria") {
+    if (p.forcarNota) return { formato: "descartar", foto: "nenhuma", motivo: "cota da editoria atingida" };
+    return { formato: "materia", foto: "nenhuma", motivo: "curadoria: só texto, sem foto de terceiros" };
+  }
+
   // Portal/veículo: sempre matéria. Cota estourada não vira mais nota.
   if (p.forcarNota) return { formato: "descartar", foto: "nenhuma", motivo: "cota da região/editoria atingida" };
   if (p.fotoStatus === "autorizada") return { formato: "materia", foto: "fonte_autorizada", motivo: "foto com crédito institucional" };
@@ -160,5 +210,37 @@ export function decidirFormato(p: {
  * só das cidades marcadas como destaque (as 20 maiores — cidades.destaque_home).
  */
 export function podeIrParaDobra(origem: OrigemPauta, cidadeDestaque: boolean): boolean {
+  if (origem === "curadoria") return false;
   return origem === "portal" || cidadeDestaque;
+}
+
+export type DecisaoImagem = "fonte" | "ilustracao_ia" | "foto_cidade" | "nenhuma";
+
+/**
+ * Imagem da matéria (regras de out/2026 — risco zero com foto de terceiros):
+ *   prefeitura: foto da própria prefeitura (institucional) ou nenhuma
+ *   curadoria (esportes, nacional, internacional, tecnologia): nenhuma
+ *   portal, editoria esportes: nenhuma
+ *   portal com foto de crédito institucional (AEN, governo): a foto
+ *   portal sem foto liberada:
+ *     assunto temático (meio ambiente, saúde...) → ilustração por IA,
+ *       criada só a partir do tema e identificada como IA
+ *     fala da cidade como um todo → foto real da cidade com licença livre
+ *       (Wikimedia Commons, conferindo cidade + Paraná)
+ *     fato específico → sem foto (vai para o VAPT-VUPT)
+ */
+export function decidirImagem(p: {
+  origem: OrigemPauta;
+  fotoStatus: FotoStatus;
+  categoriaSlug: string | null;
+  tipoImagem: TipoImagem | null;
+  temCidade: boolean;
+}): DecisaoImagem {
+  if (p.origem === "curadoria") return "nenhuma";
+  if (p.origem === "prefeitura") return p.fotoStatus === "autorizada" ? "fonte" : "nenhuma";
+  if (p.categoriaSlug === "esportes") return "nenhuma";
+  if (p.fotoStatus === "autorizada") return "fonte";
+  if (p.tipoImagem === "tematica") return "ilustracao_ia";
+  if (p.tipoImagem === "cidade" && p.temCidade) return "foto_cidade";
+  return "nenhuma";
 }
