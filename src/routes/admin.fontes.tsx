@@ -3,19 +3,28 @@ import { useEffect, useState, useCallback } from "react";
 import { getExternalBrowser } from "@/lib/external-supabase-browser";
 import { displayRegionName } from "@/lib/region-labels";
 import { PageHeader, refreshBtnClass, tabPillsWrapClass, tabPillClass } from "@/components/admin/ui";
+import { FichaFonte } from "@/components/admin/FichaFonte";
 
 export const Route = createFileRoute("/admin/fontes")({
   component: AdminFontes,
 });
 
 type Regiao = { id: string; slug: string; nome: string };
+type Estat = {
+  fonte_id: string;
+  coletadas: number;
+  materias_publicadas: number;
+  materias_total: number;
+  notas_publicadas: number;
+  ultima_publicacao_em: string | null;
+};
 type Fonte = {
   id: string;
   nome: string;
   url_base: string;
   tipo_renderizacao: "estatico" | "spa_js";
   protecao_antibot: boolean;
-  frequencia_horas: number;
+  frequencia_horas: number | null;
   ativo: boolean;
   ultimo_scrape_em: string | null;
   regiao_id: string | null;
@@ -30,7 +39,9 @@ const empty: {
   regiao_id: string;
   tipo_renderizacao: "estatico" | "spa_js";
   protecao_antibot: boolean;
-  frequencia_horas: number;
+  // Vazio = segue os ciclos fixos (11h/18h). Só fontes de curadoria usam
+  // frequência própria — preencher aqui tira a fonte dos ciclos.
+  frequencia_horas: string;
   ativo: boolean;
   email_imprensa: string;
 } = {
@@ -39,7 +50,7 @@ const empty: {
   regiao_id: "",
   tipo_renderizacao: "estatico",
   protecao_antibot: false,
-  frequencia_horas: 6,
+  frequencia_horas: "",
   ativo: true,
   email_imprensa: "",
 };
@@ -53,6 +64,9 @@ function AdminFontes() {
   const [editingId, setEditingId] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
   const [tab, setTab] = useState<"veiculo" | "prefeitura">("veiculo");
+  const [estat, setEstat] = useState<Map<string, Estat> | null>(null);
+  const [fichaId, setFichaId] = useState<string | null>(null);
+  const fecharFicha = useCallback(() => setFichaId(null), []);
 
   const load = useCallback(async () => {
     setItems(null); setErr(null);
@@ -66,6 +80,9 @@ function AdminFontes() {
       if (e2) throw e2;
       setItems((fontes ?? []) as unknown as Fonte[]);
       setRegioes((regs ?? []) as Regiao[]);
+      // Notícias por fonte (074). Sem a função no banco, a coluna mostra "—".
+      const { data: est, error: e3 } = await sb.rpc("fontes_estatisticas");
+      setEstat(e3 ? null : new Map(((est ?? []) as Estat[]).map((r) => [r.fonte_id, r])));
     } catch (e: unknown) {
       setErr(e instanceof Error ? e.message : "Erro ao carregar");
     }
@@ -82,7 +99,7 @@ function AdminFontes() {
       regiao_id: f.regiao_id ?? "",
       tipo_renderizacao: f.tipo_renderizacao,
       protecao_antibot: f.protecao_antibot,
-      frequencia_horas: f.frequencia_horas,
+      frequencia_horas: f.frequencia_horas == null ? "" : String(f.frequencia_horas),
       ativo: f.ativo,
       email_imprensa: f.email_imprensa ?? "",
     });
@@ -102,7 +119,9 @@ function AdminFontes() {
         regiao_id: form.regiao_id || null,
         tipo_renderizacao: form.tipo_renderizacao,
         protecao_antibot: form.protecao_antibot,
-        frequencia_horas: Math.max(1, Number(form.frequencia_horas) || 6),
+        // Vazio = ciclos fixos (null). Antes o formulário gravava 6h em toda
+        // fonte salva e tirava a fonte dos ciclos sem ninguém perceber.
+        frequencia_horas: form.frequencia_horas.trim() ? Math.max(1, Number(form.frequencia_horas) || 1) : null,
         ativo: form.ativo,
         tipo: tab,
         email_imprensa: tab === "prefeitura" ? (form.email_imprensa.trim() || null) : null,
@@ -195,9 +214,9 @@ function AdminFontes() {
           </select>
         </label>
         <label className="text-sm">
-          <span className="mb-1 block text-xs font-medium">Frequência (horas) — exceção ao ciclo fixo</span>
-          <input type="number" min={1} value={form.frequencia_horas}
-            onChange={(e) => setForm({ ...form, frequencia_horas: Number(e.target.value) })}
+          <span className="mb-1 block text-xs font-medium">Frequência (horas) — deixe vazio para seguir os ciclos 11h/18h</span>
+          <input type="number" min={1} value={form.frequencia_horas} placeholder="ciclos 11h/18h"
+            onChange={(e) => setForm({ ...form, frequencia_horas: e.target.value })}
             className="w-full rounded border px-2 py-1.5" />
         </label>
         {tab === "prefeitura" && (
@@ -245,6 +264,7 @@ function AdminFontes() {
                     <th className="px-3 py-2 text-left">Região</th>
                     <th className="px-3 py-2 text-left">Tipo</th>
                     <th className="px-3 py-2 text-left">Freq.</th>
+                    <th className="px-3 py-2 text-right" title="Matérias + notas publicadas geradas desta fonte">Notícias</th>
                     <th className="px-3 py-2 text-left">Último scrape</th>
                     {tab === "prefeitura" && <th className="px-3 py-2 text-left">E-mail imprensa</th>}
                     <th className="px-3 py-2 text-left">Status</th>
@@ -255,12 +275,27 @@ function AdminFontes() {
                   {filtered?.map((f) => (
                     <tr key={f.id} className="border-t">
                       <td className="px-3 py-2">
-                        <div className="font-medium">{f.nome}</div>
+                        <button type="button" onClick={() => setFichaId(f.id)} className="text-left font-medium text-[#12201E] underline-offset-2 hover:text-[#E29F65] hover:underline" title="Abrir ficha da fonte">
+                          {f.nome}
+                        </button>
                         <a href={f.url_base} target="_blank" rel="noreferrer" className="text-xs text-muted-foreground hover:underline">{f.url_base}</a>
                       </td>
                       <td className="px-3 py-2 text-xs">{f.regiao ? displayRegionName(f.regiao.slug, f.regiao.nome) : "—"}</td>
                       <td className="px-3 py-2 text-xs">{f.tipo_renderizacao === "spa_js" ? "SPA" : "Estático"}{f.protecao_antibot ? " · antibot" : ""}</td>
-                      <td className="px-3 py-2 text-xs">{f.frequencia_horas}h</td>
+                      <td className="px-3 py-2 text-xs">{f.frequencia_horas == null ? "ciclos" : `${f.frequencia_horas}h`}</td>
+                      <td className="px-3 py-2 text-right">
+                        {(() => {
+                          const e = estat?.get(f.id);
+                          if (!e) return <span className="text-xs text-muted-foreground">—</span>;
+                          const total = e.materias_publicadas + e.notas_publicadas;
+                          return (
+                            <button type="button" onClick={() => setFichaId(f.id)} className="text-right" title={`${e.materias_publicadas} matérias · ${e.notas_publicadas} notas · ${e.coletadas} coletadas`}>
+                              <div className="font-semibold tabular-nums">{total}</div>
+                              <div className="text-[10px] text-muted-foreground tabular-nums">{e.coletadas} coletadas</div>
+                            </button>
+                          );
+                        })()}
+                      </td>
                       <td className="px-3 py-2 text-xs">{f.ultimo_scrape_em ? new Date(f.ultimo_scrape_em).toLocaleString("pt-BR") : "nunca"}</td>
                       {tab === "prefeitura" && <td className="px-3 py-2 text-xs">{f.email_imprensa ?? "—"}</td>}
                       <td className="px-3 py-2">
@@ -281,6 +316,8 @@ function AdminFontes() {
           </>
         );
       })()}
+
+      {fichaId && <FichaFonte fonteId={fichaId} onClose={fecharFicha} />}
     </div>
   );
 }
