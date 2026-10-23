@@ -87,16 +87,6 @@ const colunasAtalhosQO = queryOptions({
   staleTime: 5 * 60 * 1000,
 });
 
-// Card fixo no topo — última matéria publicada em Eleições 2026.
-const eleicoes2026TopQO = queryOptions({
-  queryKey: ["articles", "eleicoes-2026-top", 1, "any"],
-  queryFn: () =>
-    listArticlesByCategoryGlobal({
-      data: { categorySlug: "eleicoes-2026", limit: 1, requireImage: false },
-    }),
-  staleTime: 5 * 60 * 1000,
-});
-
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
@@ -144,7 +134,6 @@ function Home() {
   const { data: articles } = useSuspenseQuery(rankedQO(loc));
   const { data: vaptVupt } = useSuspenseQuery(vaptVuptQO);
   const { data: mostRead } = useSuspenseQuery(mostReadQO);
-  const { data: eleicoes2026Top } = useSuspenseQuery(eleicoes2026TopQO);
   const { data: colunas } = useSuspenseQuery(colunasAtalhosQO);
   // Stories do mobile: reaproveita as consultas de editoria já carregadas.
   const storyTopicos: StoryTopic[] = STORIES_EDITORIAS.map((e) => ({
