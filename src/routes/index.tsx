@@ -63,7 +63,6 @@ const editoriaQO = (slug: string) =>
 
 // Editorias que viram "stories" no topo do mobile (subset de HOME_EDITORIAS).
 const STORIES_EDITORIAS: Array<{ slug: string; name: string }> = [
-  { slug: "eleicoes-2026", name: "Eleições 2026" },
   { slug: "politica", name: "Política" },
   { slug: "seguranca", name: "Segurança" },
   { slug: "esportes", name: "Esportes" },
