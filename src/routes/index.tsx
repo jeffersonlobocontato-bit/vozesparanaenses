@@ -48,7 +48,6 @@ const rankedQO = (loc: ViewerLocation) =>
 const HOME_EDITORIAS: Array<{ slug: string; name: string }> = [
   { slug: "seguranca", name: "Segurança" },
   { slug: "politica", name: "Política" },
-  { slug: "eleicoes-2026", name: "Eleições 2026" },
   { slug: "esportes", name: "Esportes" },
   { slug: "cidades", name: "Cidades" },
   { slug: "internacional", name: "Internacional" },
