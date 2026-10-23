@@ -239,8 +239,8 @@ function dataDeMesCurto(dd: string, mes: string, aaaa: string): string | null {
 }
 
 function tituloDaMateria(html: string): string | null {
-  const og = html.match(/<meta[^>]+property=["']og:title["'][^>]+content=["']([^"']{10,})["']/i)
-    ?? html.match(/<meta[^>]+content=["']([^"']{10,})["'][^>]+property=["']og:title["']/i);
+  const og = html.match(/<meta[^>]+(?:property|name)=["']og:title["'][^>]+content=["']([^"']{10,})["']/i)
+    ?? html.match(/<meta[^>]+content=["']([^"']{10,})["'][^>]+(?:property|name)=["']og:title["']/i);
   const tt = og ? null : html.match(/<title[^>]*>([\s\S]*?)<\/title>/i);
   const bruto = og?.[1] ?? tt?.[1];
   if (!bruto) return null;

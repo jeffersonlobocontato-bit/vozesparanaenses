@@ -106,6 +106,8 @@ x = extrairDataPublicacao(pg("Missal chega a 100 óculos entregues em 2026", `${
 ok("22 de Outubro, 2026", x?.iso?.startsWith("2026-10-22") === true, JSON.stringify(x));
 x = extrairDataPublicacao("<p>Data de publicação: 17:10 sexta-feira, 23/10/2026</p>", "https://a/noticias/noticia/1");
 ok("Data de publicação: hh:mm dia-da-semana, dd/mm/aaaa", x?.iso === "2026-10-23T20:10:00.000Z", JSON.stringify(x));
+x = extrairDataPublicacao(`<head><meta name="og:title" content="Prefeitura convoca credores de empenhos antigos até 28 de outubro | Prefeitura Municipal de Formosa do Oeste - PR"></head><body>${menu} Notícias Página Inicial Notícias Prefeitura convoca credores de empenhos antigos até 28 de outubro --> --> Imprimir Fechar 16 de outubro de 2026 texto</body>`, "https://a/noticia/view/36/x");
+ok("og:title com name= e '|'", x?.iso?.startsWith("2026-10-16") === true, JSON.stringify(x));
 x = extrairDataPublicacao('<head><meta property="og:article:published_time" content="2026-10-22"></head>', "https://a/noticiasView/1_x.html");
 ok("og:article:published_time", x?.origem === "meta_article" && x.iso.startsWith("2026-10-22"), JSON.stringify(x));
 x = extrairDataPublicacao(pg("Prefeitura abre inscrições para curso de informática", `<div>Sabáudia, quinta-feira, 22 de outubro de 2026</div>${menu}${menu} Prefeitura abre inscrições para curso de informática Texto da matéria sem data nenhuma.`), "https://a/noticia/9");
