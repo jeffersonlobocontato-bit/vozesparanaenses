@@ -71,5 +71,6 @@ São 62 casos cobrindo região pela cidade (Palotina/Curitiba, sobrenome "Castro
 ## Pendências conhecidas
 
 - **Mapeamento das fontes**: 18 prefeituras e 42 veículos cadastrados para 399 cidades. A maioria das prefeituras segue `https://www.{cidade}.pr.gov.br`. Falta um script de descoberta e verificação, além da curadoria dos veículos locais.
+- **Atende.Net (IPM)**: 51 cidades têm portal `{cidade}.atende.net`; a lista é montada com JavaScript, mas os dados vêm no HTML em base64. Leitor próprio em `_shared/atende-net.ts` (fetch comum, sem Firecrawl). 26 cidades que publicam de verdade lá foram cadastradas/corrigidas na `071_prefeituras_atende_net.sql` (levantamento de 23/10/2026). A lista estática traz só as 10 notícias mais recentes.
 - **Sites com JavaScript/anti-bot**: usam Firecrawl (custo por página). Em escala, avaliar um leitor por fornecedor de site de prefeitura (vários municípios usam a mesma plataforma).
 - **Cotas** (`quota_rules`): foram calibradas para 41 cidades. Com 399, cota estourada vira nota (não descarta), mas vale revisar os tetos.

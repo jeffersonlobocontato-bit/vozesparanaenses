@@ -8,6 +8,7 @@ import { classificarFoto } from "./foto-credito.ts";
 import { ehDoDia, extrairDataPublicacao, inicioDoCiclo, diaSaoPaulo } from "./data-publicacao.ts";
 import { avaliarRegras } from "./criticidade.ts";
 import { decidirFormato, temaHeuristico, parseCrivo } from "./crivo-editorial.ts";
+import { dataAtendeNetParaIso, ehAtendeNet, parseListaAtendeNet, parseMateriaAtendeNet } from "./atende-net.ts";
 import { cicloAtual, fonteElegivel, normalizarUrl } from "./coleta.ts";
 
 const src = Deno.readTextFileSync(new URL("../../../src/lib/parana-municipios.ts", import.meta.url));
@@ -127,5 +128,21 @@ ok("portal com cota estourada → descarta (nunca nota)", f({ fotoStatus: "autor
 ok("prefeitura ignora cota", f({ origem: "prefeitura", forcarNota: true }).formato === "nota");
 ok("sem valor → descarta", f({ valorNoticioso: false }).formato === "descartar");
 ok("prefeitura sem valor → descarta", f({ origem: "prefeitura", valorNoticioso: false }).formato === "descartar");
+
+// Atende.Net (IPM): dados em base64 no HTML estático
+const b64 = (bytes: Uint8Array) => btoa(String.fromCharCode(...bytes));
+const utf8 = (t: string) => new TextEncoder().encode(t);
+const latin1 = (t: string) => Uint8Array.from(t, (c) => c.charCodeAt(0));
+ok("atende.net detectado", ehAtendeNet("https://cascavel.atende.net/cidadao/noticia") && !ehAtendeNet("https://www.cascavel.pr.gov.br/noticias"));
+ok("data Atende.Net → ISO Brasília", dataAtendeNetParaIso("23/10/2026 14:01:08") === "2026-10-23T14:01:08-03:00");
+const listaJson = JSON.stringify({ registros: [{ codigo: "1", titulo: "Educa\u00e7\u00e3o abre vagas", chamada: "Inscri\u00e7\u00f5es at\u00e9 sexta", data: "23/10/2026 09:21:17", url: "/cidadao/noticia/educacao-abre-vagas" }] })
+  .replace(/\\\\u/g, "\\u");
+const lista = parseListaAtendeNet(`<html><consulta id_elemento="x" dados="${b64(utf8(listaJson))}"></consulta></html>`, "https://cascavel.atende.net");
+ok("lista Atende.Net: título, url absoluta e data", lista.length === 1 && lista[0].titulo === "Educação abre vagas" && lista[0].url === "https://cascavel.atende.net/cidadao/noticia/educacao-abre-vagas" && lista[0].data === "2026-10-23T09:21:17-03:00", JSON.stringify(lista));
+const corpoHtml = "<p>A prefeitura abriu inscri\u00e7\u00f5es &#8212; at\u00e9 sexta.</p><p>Segundo par\u00e1grafo.</p><div>Imagens Relacionadas</div>";
+const dadosPag = JSON.stringify({ midia_capa: "https://cascavel.atende.net/static/portal/img/capa_607x1120.jpeg", data: "23/10/2026 10:34:27" });
+const mat = parseMateriaAtendeNet(`<pagina content="${b64(latin1(corpoHtml))}" dados-pagina="${b64(utf8(dadosPag))}"></pagina>`);
+ok("matéria Atende.Net: corpo latin1, entidades e rodapé", mat.corpoCompleto.startsWith("A prefeitura abriu inscrições — até sexta.") && mat.corpoCompleto.includes("Segundo parágrafo.") && !mat.corpoCompleto.includes("Imagens"), JSON.stringify(mat.corpoCompleto));
+ok("matéria Atende.Net: capa e data", mat.imagem?.endsWith("_607x1120.jpeg") === true && mat.data === "2026-10-23T10:34:27-03:00");
 console.log(falhas ? `\n${falhas} FALHA(S)` : "\nTudo certo");
 if (falhas) Deno.exit(1);

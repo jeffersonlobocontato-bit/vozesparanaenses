@@ -11,6 +11,7 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
 import { carregarCidades } from "../_shared/cidades.ts";
 import { carregarNomesVeiculos, fonteElegivel, processarItensDaFonte, type MetaPagina, type RelatorioFonte } from "../_shared/coleta.ts";
 import { extrairDataPublicacao, normalizarDataRss } from "../_shared/data-publicacao.ts";
+import { ehAtendeNet, lerListaAtendeNet, lerMateriaAtendeNet } from "../_shared/atende-net.ts";
 
 const cors = {
   "Access-Control-Allow-Origin": "*",
@@ -86,7 +87,8 @@ Deno.serve(async (req) => {
       const itens = await scrapeFonte(fonte);
       return await processarItensDaFonte({
         sb, fonte, itens, cidades, nomesVeiculos, dentroDoOrcamento,
-        buscarPagina: fetchArticleImageMeta,
+        // Portal Atende.Net (IPM): leitor próprio, sem JavaScript nem Firecrawl.
+        buscarPagina: (u: string) => (ehAtendeNet(u) ? lerMateriaAtendeNet(u) : fetchArticleImageMeta(u)),
         fotoSempreLiberada: true,
       });
     } catch (e) {
@@ -165,6 +167,13 @@ function json(body: unknown, status = 200) {
 }
 
 async function scrapeFonte(fonte: Fonte): Promise<Item[]> {
+  // Atende.Net (IPM): a lista vem em JSON/base64 no HTML estático. Leitor
+  // próprio, de graça — nunca vai para o Firecrawl, mesmo marcado spa_js.
+  if (ehAtendeNet(fonte.url_base)) {
+    const itens = await lerListaAtendeNet(fonte.url_base);
+    console.log(`[${fonte.nome}] Atende.Net -> ${itens.length} itens`);
+    return itens;
+  }
   const useFirecrawl = fonte.protecao_antibot || fonte.tipo_renderizacao === "spa_js";
   if (useFirecrawl) {
     const fc = await scrapeViaFirecrawl(fonte);
