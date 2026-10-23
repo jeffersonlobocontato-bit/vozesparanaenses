@@ -89,6 +89,28 @@ ok("data de HOJE no cabeçalho NÃO conta", x === null, JSON.stringify(x));
 x = extrairDataPublicacao("<p>Versão do sistema: 2.0.0 - 22/10/2026 . Data: 22 de outubro de 2026</p>", "https://a/b");
 ok("versão do sistema / Data: solto NÃO contam", x === null, JSON.stringify(x));
 ok("sem data → null", extrairDataPublicacao("<p>nada</p>", "https://a.com/noticia") === null);
+// Formatos das prefeituras reativadas (out/2026) — data junto ao título
+const pg = (og: string, corpo: string) => `<html><head><meta property="og:title" content="${og}"></head><body>${corpo}</body></html>`;
+const menu = "Início Serviços Transparência Ouvidoria Licitações Concursos Secretarias Contato ".repeat(3);
+x = extrairDataPublicacao(pg("Produtor rural: atenção ao prazo", `${menu}<h1>Produtor rural: atenção ao prazo</h1><p>texto longo da matéria</p><div>Compartilhe: <span>22</span> / <span>Out,</span> / <span>2026</span> Por: Última modificação em 22/10/2026</div>`), "https://a/noticias_individual/1");
+ok("noticias_site: Compartilhe: 22 Out, 2026 Por:", x?.iso?.startsWith("2026-10-22") === true, JSON.stringify(x));
+x = extrairDataPublicacao(pg("Imbaú ganha destaque na revista Terras de Riquezas...", `${menu} Notícias Principal Notícias Notícia OUT 23 23 OUT 2026 AGRICULTURA, PECUÁRIA E ABASTECIMENTO SECRETARIAS 15 visualizações Imbaú ganha destaque na revista Terras de Riquezas com avanços`), "https://a/portal/noticias/0/3/2714/x");
+ok("portal: Notícia OUT 23 23 OUT 2026", x?.iso?.startsWith("2026-10-23") === true, JSON.stringify(x));
+x = extrairDataPublicacao(pg("Trupe Duda, de Planalto, encanta o público na V Mostra de Circo", `${menu} Trupe Duda, de Planalto, encanta o público na V Mostra de Circo 23 de outubro de 2026 A arte circense`), "https://a/noticia/1945");
+ok("título seguido de 23 de outubro de 2026", x?.iso?.startsWith("2026-10-23") === true, JSON.stringify(x));
+x = extrairDataPublicacao(pg("PADROEIRO DO MUNICÍPIO GANHA NOVO VISUAL APÓS REVITALIZAÇÃO - PREFEITURA DE MAUÁ DA SERRA", `${menu} Padroeiro do município ganha novo visual após revitalização 18 de Outubro de 2026 A Prefeitura`), "https://a/noticia?uri=x");
+ok("og:title em caixa alta com nome do site", x?.iso?.startsWith("2026-10-18") === true, JSON.stringify(x));
+x = extrairDataPublicacao(pg("Campina Grande do Sul realiza leilão online de bens móveis", `${menu} Início Portal de Not&#237;cias Not&#237;cias Administra&#231;&#227;o 23 de outubro de 2026 Campina Grande do Sul realiza leilão online de bens móveis`), "https://a/noticia/campina");
+ok("data logo antes do título (entidades numéricas)", x?.iso?.startsWith("2026-10-23") === true, JSON.stringify(x));
+x = extrairDataPublicacao(pg("Missal chega a 100 óculos entregues em 2026", `${menu} Missal chega a 100 óculos entregues em 2026 22 de Outubro, 2026 texto`), "https://a/noticias/missal/");
+ok("22 de Outubro, 2026", x?.iso?.startsWith("2026-10-22") === true, JSON.stringify(x));
+x = extrairDataPublicacao("<p>Data de publicação: 17:10 sexta-feira, 23/10/2026</p>", "https://a/noticias/noticia/1");
+ok("Data de publicação: hh:mm dia-da-semana, dd/mm/aaaa", x?.iso === "2026-10-23T20:10:00.000Z", JSON.stringify(x));
+x = extrairDataPublicacao('<head><meta property="og:article:published_time" content="2026-10-22"></head>', "https://a/noticiasView/1_x.html");
+ok("og:article:published_time", x?.origem === "meta_article" && x.iso.startsWith("2026-10-22"), JSON.stringify(x));
+x = extrairDataPublicacao(pg("Prefeitura abre inscrições para curso de informática", `<div>Sabáudia, quinta-feira, 22 de outubro de 2026</div>${menu}${menu} Prefeitura abre inscrições para curso de informática Texto da matéria sem data nenhuma.`), "https://a/noticia/9");
+ok("data de HOJE no topo, longe do título, NÃO conta", x === null, JSON.stringify(x));
+
 ok("inicio ciclo 11h", inicioDoCiclo(11, agora).toISOString() === "2026-10-22T14:00:00.000Z");
 
 // Ciclos (prefeituras 12h/18h, portais 10h/16h/21h)

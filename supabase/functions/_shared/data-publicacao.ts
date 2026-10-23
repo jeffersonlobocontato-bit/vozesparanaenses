@@ -69,8 +69,8 @@ export type DataExtraida = { iso: string; origem: string } | null;
 export function extrairDataPublicacao(html: string, url: string): DataExtraida {
   const head = html.slice(0, 250_000);
   const metas: Array<[RegExp, string]> = [
-    [/<meta[^>]+(?:property|name)=["']article:published_time["'][^>]+content=["']([^"']+)["']/i, "meta_article"],
-    [/<meta[^>]+content=["']([^"']+)["'][^>]+(?:property|name)=["']article:published_time["']/i, "meta_article"],
+    [/<meta[^>]+(?:property|name)=["'](?:og:)?article:published_time["'][^>]+content=["']([^"']+)["']/i, "meta_article"],
+    [/<meta[^>]+content=["']([^"']+)["'][^>]+(?:property|name)=["'](?:og:)?article:published_time["']/i, "meta_article"],
     [/"datePublished"\s*:\s*"([^"]+)"/i, "jsonld"],
     [/itemprop=["']datePublished["'][^>]+(?:content|datetime)=["']([^"']+)["']/i, "itemprop"],
     [/(?:content|datetime)=["']([^"']+)["'][^>]+itemprop=["']datePublished["']/i, "itemprop"],
@@ -84,6 +84,8 @@ export function extrairDataPublicacao(html: string, url: string): DataExtraida {
   }
   const isoTexto = dataNoTexto(head);
   if (isoTexto) return { iso: isoTexto, origem: "texto" };
+  const isoTitulo = dataJuntoAoTitulo(html);
+  if (isoTitulo) return { iso: isoTitulo, origem: "titulo" };
 
   const doCaminho = extrairDataDaUrl(url);
   if (doCaminho) return { iso: doCaminho, origem: "url" };
@@ -112,15 +114,36 @@ const MES = String.raw`(janeiro|fevereiro|mar[cç]o|abril|maio|junho|julho|agost
  * qualquer matéria velha passar como "do dia") e "Data: ..." solto (costuma
  * ser data de evento).
  */
+function textoPlano(html: string): string {
+  return decodificarEntidades(
+    html
+      .replace(/<script[\s\S]*?<\/script>|<style[\s\S]*?<\/style>/gi, " ")
+      .replace(/<[^>]+>/g, " "),
+  ).replace(/\s+/g, " ");
+}
+
+const ENTIDADES: Record<string, string> = {
+  nbsp: " ", amp: "&", quot: '"', apos: "'", lt: "<", gt: ">", ordm: "º", ordf: "ª",
+  ccedil: "ç", Ccedil: "Ç", atilde: "ã", Atilde: "Ã", otilde: "õ", Otilde: "Õ",
+  aacute: "á", Aacute: "Á", eacute: "é", Eacute: "É", iacute: "í", Iacute: "Í", oacute: "ó", Oacute: "Ó", uacute: "ú", Uacute: "Ú",
+  acirc: "â", Acirc: "Â", ecirc: "ê", Ecirc: "Ê", ocirc: "ô", Ocirc: "Ô", agrave: "à", Agrave: "À",
+};
+
+function decodificarEntidades(s: string): string {
+  return s
+    .replace(/&#(\d+);/g, (_, n) => String.fromCharCode(Number(n)))
+    .replace(/&#x([0-9a-f]+);/gi, (_, n) => String.fromCharCode(parseInt(n, 16)))
+    .replace(/&([a-z]+);/gi, (m, nome) => ENTIDADES[nome] ?? m);
+}
+
 function dataNoTexto(html: string): string | null {
-  const t = html
-    .replace(/<script[\s\S]*?<\/script>|<style[\s\S]*?<\/style>/gi, " ")
-    .replace(/<[^>]+>/g, " ")
-    .replace(/&nbsp;/g, " ").replace(/&ccedil;/g, "ç").replace(/&atilde;/g, "ã").replace(/&aacute;/g, "á")
-    .replace(/\s+/g, " ");
+  const t = textoPlano(html);
   // "Publicado em: 02/10/2026 11:25", "Publicação: 19/10/2026 14h41"
   let m = t.match(new RegExp(`${ROTULO}(\\d{1,2}\\/\\d{1,2}\\/\\d{4}${HORA.replace(/\((?!\?)/g, "(?:")})`, "i"));
   if (m) return normalizarIso(m[1]);
+  // "Data de publicação: 17:10 sexta-feira, 23/10/2026" (hora antes da data)
+  m = t.match(/data de publica[cç][aã]o\s*:?\s*(\d{1,2}:\d{2})\s*(?:[a-zçá]+(?:-feira)?,?\s*)?(\d{1,2}\/\d{1,2}\/\d{4})/i);
+  if (m) return normalizarIso(`${m[2]} ${m[1]}`);
   // "Data de Publicação: 21 de outubro de 2026", "Publicado em 09 de outubro de 2025 às 10:30"
   m = t.match(new RegExp(`${ROTULO}(\\d{1,2}) de ${MES} de (\\d{4})${HORA}`, "i"));
   if (m) return porExtenso(m[1], m[2], m[3], m[4], m[5]);
@@ -142,4 +165,86 @@ export function extrairDataDaUrl(url: string): string | null {
 
 export function normalizarDataRss(raw: string | null | undefined): string | null {
   return normalizarIso(raw);
+}
+
+const MES_CURTO: Record<string, number> = { jan: 1, fev: 2, mar: 3, abr: 4, mai: 5, jun: 6, jul: 7, ago: 8, set: 9, out: 10, nov: 11, dez: 12 };
+const MES_QUALQUER = String.raw`(jan|fev|mar|abr|mai|jun|jul|ago|set|out|nov|dez)[a-zç]*\.?`;
+
+/**
+ * Data de matéria que não traz rótulo nem metadado: a data COLADA AO TÍTULO
+ * da própria matéria (og:title / <title>) — "Título 22 de Outubro de 2026",
+ * "Administração 23 de outubro de 2026 Título", "OUT 22 22 OUT 2026 Título",
+ * e o padrão "Compartilhe: 22 Out, 2026 Por:". Data longe do título (a de
+ * HOJE no topo do site, a de "Leia mais") não conta.
+ */
+export function dataJuntoAoTitulo(html: string): string | null {
+  const corpo = html.replace(/^[\s\S]*?<\/head>/i, "");
+  const t = textoPlano(corpo);
+
+  // Plataforma "noticias_site": "Compartilhe: 22 Dez, 2025 Por:"
+  let m = t.match(new RegExp(String.raw`Compartilhe:?\s*(\d{1,2})\s*\/?\s*${MES_QUALQUER},?\s*\/?\s*(20\d{2})\s*Por\b`, "i"));
+  if (m) return dataDeMesCurto(m[1], m[2], m[3]);
+  // Plataformas "/portal/noticias" e "/noticiasView": "Notícia OUT 23 23 OUT 2026"
+  m = t.match(/Not[íi]cias?\s+(?:[A-Za-zÀ-ú]+\s+){0,3}?(?:jan|fev|mar|abr|mai|jun|jul|ago|set|out|nov|dez)\s+\d{1,2}\s+(\d{1,2})\s+(jan|fev|mar|abr|mai|jun|jul|ago|set|out|nov|dez)\s+(20\d{2})/i);
+  if (m) return dataDeMesCurto(m[1], m[2], m[3]);
+
+  const titulo = tituloDaMateria(html);
+  if (!titulo) return null;
+  const norm = (x: string) => x.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^a-z0-9 ]+/g, " ").replace(/\s+/g, " ");
+  const chave = norm(titulo).trim().slice(0, 40).trim();
+  if (chave.length < 15) return null;
+  const tn = norm(t);
+  // Índices de tn e t não batem 1:1 (acentos/pontuação viram espaço), então
+  // trabalha só sobre o texto normalizado — as datas sobrevivem à normalização.
+  const i = tn.indexOf(chave);
+  if (i < 0) return null;
+  // O título da página pode vir em caixa alta ou com o nome do site — a
+  // janela "depois" começa no fim da chave e cobre o resto do título + 160.
+  const fim = i + chave.length;
+  const antes = tn.slice(Math.max(0, i - 120), i);
+  const depois = tn.slice(fim, fim + Math.max(0, norm(titulo).trim().length - chave.length) + 160);
+
+  const datas = (trecho: string) => {
+    const achadas: Array<{ pos: number; iso: string | null }> = [];
+    const re = new RegExp(
+      String.raw`(\d{1,2}) (\d{1,2}) (20\d{2})(?!\d)|(\d{1,2}) de (janeiro|fevereiro|marco|abril|maio|junho|julho|agosto|setembro|outubro|novembro|dezembro) (?:de )?(20\d{2})|(\d{1,2}) (jan|fev|mar|abr|mai|jun|jul|ago|set|out|nov|dez)[a-z]* (20\d{2})`,
+      "g",
+    );
+    let x: RegExpExecArray | null;
+    while ((x = re.exec(trecho))) {
+      let iso: string | null = null;
+      if (x[1]) {
+        // dd/mm/aaaa vira "dd mm aaaa" na normalização; exige que no texto
+        // original exista a forma com barra (não é número solto).
+        if (!t.includes(`${x[1]}/${x[2]}/${x[3]}`)) continue;
+        iso = normalizarIso(`${x[1]}/${x[2]}/${x[3]}`);
+      } else if (x[4]) iso = porExtenso(x[4], x[5], x[6]);
+      else if (x[7]) iso = dataDeMesCurto(x[7], x[8], x[9]);
+      if (iso) achadas.push({ pos: x.index, iso });
+    }
+    return achadas;
+  };
+  // Mais perto do título primeiro: depois dele, e logo antes dele.
+  const dDepois = datas(depois)[0];
+  const lAntes = datas(antes);
+  const dAntes = lAntes[lAntes.length - 1];
+  if (dDepois && (!dAntes || dDepois.pos <= antes.length - dAntes.pos)) return dDepois.iso;
+  return dAntes?.iso ?? dDepois?.iso ?? null;
+}
+
+function dataDeMesCurto(dd: string, mes: string, aaaa: string): string | null {
+  const m = MES_CURTO[mes.toLowerCase().slice(0, 3)];
+  if (!m) return null;
+  return paraIso(`${aaaa}-${String(m).padStart(2, "0")}-${dd.padStart(2, "0")}T12:00:00-03:00`);
+}
+
+function tituloDaMateria(html: string): string | null {
+  const og = html.match(/<meta[^>]+property=["']og:title["'][^>]+content=["']([^"']{10,})["']/i)
+    ?? html.match(/<meta[^>]+content=["']([^"']{10,})["'][^>]+property=["']og:title["']/i);
+  const tt = og ? null : html.match(/<title[^>]*>([\s\S]*?)<\/title>/i);
+  const bruto = og?.[1] ?? tt?.[1];
+  if (!bruto) return null;
+  // "Site - Notícia - Título" / "Título - PREFEITURA DE X" → o pedaço mais longo.
+  const partes = decodificarEntidades(bruto).split(/\s+[-|–]\s+/).map((p) => p.trim());
+  return partes.sort((a, b) => b.length - a.length)[0] ?? null;
 }

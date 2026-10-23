@@ -8,7 +8,7 @@ Objetivo: o portal cobre sozinho as 399 cidades do PR, com notícias **do dia**,
 |---|---|
 | Fontes | Por cidade: site oficial da prefeitura + pelo menos 1 veículo local. Veículo regional pode cobrir várias cidades. |
 | Varredura | Horários alternados por frente (Brasília, `076_horarios_alternados_por_frente.sql`): nacional/internacional **7h e 14h**, portais **10h, 16h e 21h**, prefeituras **12h e 18h**, tecnologia **14h** (1 publicação por dia), esportes **21h**. Processamento (agrupar, crivo, escrever) das 7h às 23h. |
-| Validador | **Data de publicação da fonte.** Só entra o que foi publicado HOJE. Sem data identificável = descartado. |
+| Validador | **Data de publicação da fonte.** Só entra o que foi publicado HOJE. Sem data identificável = descartado. Ordem: meta/JSON-LD/`<time>` → rótulo ("Publicado em", "Data de publicação") → padrões de plataforma ("Compartilhe: 22 Out, 2026 Por:", "Notícia OUT 23 23 OUT 2026") → data colada ao título da matéria → URL. A data de hoje no topo do site não vale. |
 | Repetição | Nunca: hash da URL+título na coleta, agrupamento por similaridade e checagem contra tudo o que foi selecionado nas últimas 72h (`cluster_duplicado`). |
 | Região | Pela **cidade de que a notícia fala**, nunca pela cidade do jornal. Palotina em jornal de Curitiba = Oeste. |
 | Foto | Só foto com crédito de assessoria, divulgação, prefeitura/município, governo ou foto pública. Crédito pessoal, de outro veículo ou sem crédito: a foto da fonte **não** é usada. |
@@ -29,7 +29,7 @@ Objetivo: o portal cobre sozinho as 399 cidades do PR, com notícias **do dia**,
 ```
 cron por frente (lotes a cada 3–10 min, janela de 2h por ciclo)
   scrape-prefeitura / scrape-source        _shared/coleta.ts
-    ├─ data do dia? (RSS → URL → página: meta, JSON-LD, <time>, texto)   _shared/data-publicacao.ts
+    ├─ data do dia? (RSS → URL → página: meta, JSON-LD, <time>, texto, junto ao título)   _shared/data-publicacao.ts
     ├─ cidade citada → região                                            _shared/cidades.ts
     ├─ crédito da foto → autorizada | proibida | sem_credito | sem_foto  _shared/foto-credito.ts
     └─ raw_articles
