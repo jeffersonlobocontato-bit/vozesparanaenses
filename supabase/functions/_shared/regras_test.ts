@@ -12,6 +12,7 @@ import { escolherFotoCommons, filtrarCandidatasCommons, promptIlustracao } from 
 import { escolherFotoBaixoRisco, normalizarAvaliacoes, normalizarPlano } from "./analista-imagem.ts";
 import { limparPrefeituraMecanico, verificarTitulo } from "./titulo.ts";
 import { dataAtendeNetParaIso, ehAtendeNet, parseListaAtendeNet, parseMateriaAtendeNet } from "./atende-net.ts";
+import { ehListaJson, parseListaJson } from "./lista-json.ts";
 import { CICLOS_PORTAIS, cicloAtual, fonteElegivel, normalizarUrl } from "./coleta.ts";
 
 const src = Deno.readTextFileSync(new URL("../../../src/lib/parana-municipios.ts", import.meta.url));
@@ -89,6 +90,14 @@ ok("data de HOJE no cabeçalho NÃO conta", x === null, JSON.stringify(x));
 x = extrairDataPublicacao("<p>Versão do sistema: 2.0.0 - 22/10/2026 . Data: 22 de outubro de 2026</p>", "https://a/b");
 ok("versão do sistema / Data: solto NÃO contam", x === null, JSON.stringify(x));
 ok("sem data → null", extrairDataPublicacao("<p>nada</p>", "https://a.com/noticia") === null);
+// Lista em JSON (DataTables) — Paranaguá
+{
+  const js = JSON.stringify({ success: true, aaData: [["6318", "23/10/2026", "<a href='/noticias/noticia6318.html'>Projeto Leme prepara jovens de Paranaguá</a>"], ["6317", "22/10/2026", "<a href='/noticias/noticia6317.html'>Prefeitura reforça sinalização viária</a>"]] });
+  const it = parseListaJson(js, "https://www.paranagua.pr.gov.br/include/processo-listar-noticias.php");
+  ok("lista JSON: 2 itens com URL absoluta", it.length === 2 && it[0].url === "https://www.paranagua.pr.gov.br/noticias/noticia6318.html", JSON.stringify(it[0]));
+  ok("lista JSON: data dd/mm/aaaa vira ISO", it[0].data === "2026-10-23T15:00:00.000Z" && ehDoDia(it[0].data, new Date("2026-10-23T18:00:00-03:00")), String(it[0].data));
+  ok("lista JSON: detecta endpoint", ehListaJson("https://www.paranagua.pr.gov.br/include/processo-listar-noticias.php") && !ehListaJson("https://a.pr.gov.br/noticias"));
+}
 // Formatos das prefeituras reativadas (out/2026) — data junto ao título
 const pg = (og: string, corpo: string) => `<html><head><meta property="og:title" content="${og}"></head><body>${corpo}</body></html>`;
 const menu = "Início Serviços Transparência Ouvidoria Licitações Concursos Secretarias Contato ".repeat(3);

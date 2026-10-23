@@ -13,12 +13,14 @@
 --     "Editoria 23 de outubro de 2026 Título") — a data de hoje no topo do
 --     site, longe do título, continua sem valer.
 --
--- Resultado: 28 ATIVADAS (publicaram nos últimos 15 dias e a data é lida).
+-- Resultado: 29 ATIVADAS (publicaram nos últimos 15 dias e a data é lida).
 -- Fazenda Rio Grande, Formosa do Oeste e Saudade do Iguaçu pareciam fora
 -- do ar (falha da ferramenta de leitura), mas estão no ar e publicando.
--- Ficam inativas (31): 26 paradas (última notícia há mais de 15 dias —
--- Ramilândia, também no ar, parou em 01/09), 3 com data só na lista ou lista por JavaScript (Barra do
--- Jacaré, Paranaguá, Turvo), Grandes Rios (sem data) e Prudentópolis
+-- Paranaguá monta a lista por JavaScript a partir de um JSON; a coleta lê
+-- esse JSON direto (_shared/lista-json.ts).
+-- Ficam inativas (30): 26 paradas (última notícia há mais de 15 dias —
+-- Ramilândia, também no ar, parou em 01/09), 2 com data só na lista ou lista por JavaScript (Barra do
+-- Jacaré, Turvo), Grandes Rios (sem data) e Prudentópolis
 -- (matérias com erro de servidor). Endereços errados das
 -- paradas também são corrigidos, para a próxima revisão.
 --
@@ -37,7 +39,7 @@ from (values
   ('mandirituba',        'https://mandirituba.pr.gov.br/noticias'),               -- era ?pagina=404
   ('jaboti',             'https://www.jaboti.pr.gov.br/portal/noticias'),
   ('engenheiro-beltrao', 'https://www.engenheirobeltrao.pr.gov.br/portal/noticias'),
-  ('paranagua',          'https://www.paranagua.pr.gov.br/noticias'),             -- era matéria avulsa
+  ('paranagua',          'https://www.paranagua.pr.gov.br/include/processo-listar-noticias.php'), -- lista em JSON (o HTML não traz a lista)
   ('grandes-rios',       'https://www.grandesrios.pr.gov.br/noticias'),
   ('fazenda-rio-grande', 'https://www.fazendariogrande.pr.gov.br/noticias'),     -- era página de erro
   ('formosa-do-oeste',   'https://www.formosadooeste.pr.gov.br/noticia'),
@@ -54,8 +56,8 @@ where tipo::text = 'prefeitura' and not ativo and cidade_slug in (
   'guaira', 'imbau', 'jardim-alegre', 'jardim-olinda', 'lidianopolis', 'maria-helena',
   'maua-da-serra', 'missal', 'piraquara', 'pitanga', 'planalto', 'rolandia',
   'salto-do-itarare', 'santa-maria-do-oeste', 'sao-mateus-do-sul', 'uniao-da-vitoria',
-  'fazenda-rio-grande', 'formosa-do-oeste', 'saudade-do-iguacu'
+  'fazenda-rio-grande', 'formosa-do-oeste', 'saudade-do-iguacu', 'paranagua'
 );
 
--- Conferência: 187 ativas (159 + 28) e 31 inativas.
+-- Conferência: 188 ativas (159 + 29) e 30 inativas.
 select ativo, count(*) from public.fontes where tipo::text = 'prefeitura' group by ativo;

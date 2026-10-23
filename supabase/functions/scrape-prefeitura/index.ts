@@ -12,6 +12,7 @@ import { carregarCidades } from "../_shared/cidades.ts";
 import { carregarNomesVeiculos, fonteElegivel, processarItensDaFonte, type MetaPagina, type RelatorioFonte } from "../_shared/coleta.ts";
 import { extrairDataPublicacao, normalizarDataRss } from "../_shared/data-publicacao.ts";
 import { ehAtendeNet, lerListaAtendeNet, lerMateriaAtendeNet } from "../_shared/atende-net.ts";
+import { ehListaJson, lerListaJson } from "../_shared/lista-json.ts";
 
 const cors = {
   "Access-Control-Allow-Origin": "*",
@@ -172,6 +173,13 @@ async function scrapeFonte(fonte: Fonte): Promise<Item[]> {
   if (ehAtendeNet(fonte.url_base)) {
     const itens = await lerListaAtendeNet(fonte.url_base);
     console.log(`[${fonte.nome}] Atende.Net -> ${itens.length} itens`);
+    return itens;
+  }
+  // Lista montada no navegador a partir de um JSON (DataTables) — ex.:
+  // Paranaguá. Lê o JSON direto, com a data de cada matéria.
+  if (ehListaJson(fonte.url_base)) {
+    const itens = await lerListaJson(fonte.url_base);
+    console.log(`[${fonte.nome}] lista JSON -> ${itens.length} itens`);
     return itens;
   }
   const useFirecrawl = fonte.protecao_antibot || fonte.tipo_renderizacao === "spa_js";
