@@ -345,8 +345,8 @@ function PortalHome({
           <WhatsAppCTA variant="button" />
         </div>
 
-        {/* Publicidade — Super Banner topo */}
-        <AdSlot slot="home_topo" className="mb-6" />
+        {/* Publicidade — Super Banner topo (oculto a pedido) */}
+        {/* <AdSlot slot="home_topo" className="mb-6" /> */}
 
         {/* Hero */}
         <div className="grid grid-cols-12 gap-6 mb-8">
@@ -354,7 +354,8 @@ function PortalHome({
             <HeroCard article={hero} />
           </div>
           <div className="col-span-12 lg:col-span-4 flex flex-col gap-6">
-            <Eleicoes2026Card article={eleicoes2026Top} />
+            {/* Dobra Eleições 2026 oculta a pedido */}
+            {/* <Eleicoes2026Card article={eleicoes2026Top} /> */}
             {[0, 1, 2, 3].map((i) => {
               const a = side[i];
               const fb = SIDE_FALLBACK[i];
