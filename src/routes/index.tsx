@@ -275,7 +275,6 @@ function PortalHome({
   articles,
   vaptVupt,
   mostRead,
-  eleicoes2026Top,
   loc,
   colunas,
   storyTopicos,
@@ -284,7 +283,6 @@ function PortalHome({
   articles: RankedArticle[];
   vaptVupt: ArticleListItem[];
   mostRead: ArticleListItem[];
-  eleicoes2026Top?: ArticleListItem;
   loc?: { cidade: string | null; regiaoSlug: string | null };
   colunas?: ColunaAtalho[];
   storyTopicos?: StoryTopic[];
@@ -339,8 +337,6 @@ function PortalHome({
             <HeroCard article={hero} />
           </div>
           <div className="col-span-12 lg:col-span-4 flex flex-col gap-6">
-            {/* Dobra Eleições 2026 oculta a pedido */}
-            {/* <Eleicoes2026Card article={eleicoes2026Top} /> */}
             {[0, 1, 2, 3].map((i) => {
               const a = side[i];
               const fb = SIDE_FALLBACK[i];
