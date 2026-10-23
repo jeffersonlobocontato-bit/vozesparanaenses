@@ -1,7 +1,8 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute, isNotFound, Link, redirect } from "@tanstack/react-router";
 import { queryOptions, useSuspenseQuery } from "@tanstack/react-query";
 import {
   getArticle,
+  findNotaPorArtigoSlug,
   listArticlesByRegion,
   listRelatedArticles,
   listRegions,
@@ -56,9 +57,25 @@ const allCityLandingsQO = queryOptions({
 
 export const Route = createFileRoute("/$region/$slug")({
   loader: async ({ context, params }) => {
-    const article = await context.queryClient.ensureQueryData(
-      articleQO(params.region, params.slug),
-    );
+    let article;
+    try {
+      article = await context.queryClient.ensureQueryData(articleQO(params.region, params.slug));
+    } catch (e) {
+      // Release de prefeitura que era matéria sem foto e virou nota na coluna
+      // regional (070): o endereço antigo leva para a nota.
+      if (isNotFound(e)) {
+        const nota = await findNotaPorArtigoSlug({ data: { slug: params.slug } });
+        if (nota) {
+          throw redirect({
+            to: "/vozes/$cidade",
+            params: { cidade: nota.regiaoSlug },
+            hash: `nota-${nota.notaId}`,
+            statusCode: 301,
+          });
+        }
+      }
+      throw e;
+    }
     await Promise.all([
       context.queryClient.ensureQueryData(relatedQO(params.region)),
       context.queryClient.ensureQueryData(allRegionsQO),

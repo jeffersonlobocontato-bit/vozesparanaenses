@@ -12,8 +12,10 @@ function iniciais(nome: string) {
 
 /**
  * Módulo de atalhos para as colunas do portal (estilo "Blogs e colunas" da CNN):
- * cada coluna ativa com edição publicada vira um card com foto, nome e chamada
- * da edição atual. Ao criar novas colunas, elas entram automaticamente aqui.
+ * cada coluna ativa com post publicado vira um card com foto, nome e chamada
+ * do post mais recente. Vozes Políticas fica sempre no primeiro card; as
+ * demais — incluindo as colunas regionais "Vozes {Região}" — se alternam
+ * pela que recebeu post por último (ordem vem de listColunasAtalhos).
  */
 export function ColumnsShortcut({ colunas }: { colunas: ColunaAtalho[] }) {
   if (!colunas.length) return null;
@@ -30,44 +32,66 @@ export function ColumnsShortcut({ colunas }: { colunas: ColunaAtalho[] }) {
       </div>
 
       <div className="grid grid-cols-1 gap-px overflow-hidden rounded-lg border border-slate-200 bg-slate-200 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-        {colunas.map((c) => (
-          <Link
-            key={c.slug}
-            to="/coluna/$slug/$edicaoId"
-            params={{ slug: c.slug, edicaoId: c.edicao!.slug ?? c.edicao!.id }}
-            className="group flex flex-col gap-3 bg-white p-5 transition-colors hover:bg-accent"
-          >
-            <div className="flex min-w-0 items-center gap-3">
-              {c.foto_colunista_url ? (
-                <img
-                  src={c.foto_colunista_url}
-                  alt={c.nome}
-                  loading="lazy"
-                  className="h-12 w-12 shrink-0 rounded-full object-cover ring-2 ring-secondary"
-                />
-              ) : (
-                <span className="grid h-12 w-12 shrink-0 place-items-center rounded-full bg-primary text-sm font-bold text-primary-foreground ring-2 ring-secondary">
-                  {iniciais(c.nome)}
-                </span>
-              )}
-              <p className="min-w-0 truncate text-sm font-bold uppercase tracking-wider text-secondary">
-                {c.nome}
-              </p>
-            </div>
-
-            <h3 className="font-display text-xl leading-tight text-slate-900 group-hover:underline">
-              {c.edicao!.titulo}
-            </h3>
-            {c.edicao!.subtitulo && (
-              <p className="line-clamp-2 text-sm text-slate-600">{c.edicao!.subtitulo}</p>
-            )}
-
-            <span className="mt-auto pt-2 text-sm font-semibold text-primary">
-              Ler a coluna completa →
-            </span>
-          </Link>
-        ))}
+        {colunas.map((c) => {
+          const card = "group flex flex-col gap-3 bg-white p-5 transition-colors hover:bg-accent";
+          const conteudo = <CardConteudo c={c} />;
+          return c.regiaoSlug ? (
+            <Link
+              key={c.slug}
+              to="/vozes/$cidade"
+              params={{ cidade: c.regiaoSlug }}
+              hash={`nota-${c.edicao!.id}`}
+              className={card}
+            >
+              {conteudo}
+            </Link>
+          ) : (
+            <Link
+              key={c.slug}
+              to="/coluna/$slug/$edicaoId"
+              params={{ slug: c.slug, edicaoId: c.edicao!.slug ?? c.edicao!.id }}
+              className={card}
+            >
+              {conteudo}
+            </Link>
+          );
+        })}
       </div>
     </section>
+  );
+}
+
+function CardConteudo({ c }: { c: ColunaAtalho }) {
+  return (
+    <>
+      <div className="flex min-w-0 items-center gap-3">
+        {c.foto_colunista_url ? (
+          <img
+            src={c.foto_colunista_url}
+            alt={c.nome}
+            loading="lazy"
+            className="h-12 w-12 shrink-0 rounded-full object-cover ring-2 ring-secondary"
+          />
+        ) : (
+          <span className="grid h-12 w-12 shrink-0 place-items-center rounded-full bg-primary text-sm font-bold text-primary-foreground ring-2 ring-secondary">
+            {iniciais(c.nome)}
+          </span>
+        )}
+        <p className="min-w-0 truncate text-sm font-bold uppercase tracking-wider text-secondary">
+          {c.nome}
+        </p>
+      </div>
+
+      <h3 className="font-display text-xl leading-tight text-slate-900 group-hover:underline">
+        {c.edicao!.titulo}
+      </h3>
+      {c.edicao!.subtitulo && (
+        <p className="line-clamp-2 text-sm text-slate-600">{c.edicao!.subtitulo}</p>
+      )}
+
+      <span className="mt-auto pt-2 text-sm font-semibold text-primary">
+        Ler a coluna completa →
+      </span>
+    </>
   );
 }

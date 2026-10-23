@@ -10,15 +10,18 @@
 //                      protocolar) e propaganda de governo (autopromoção,
 //                      agenda/visita de autoridade, balanço de gestão).
 //
-// FORMATO (regra da foto — nunca corremos risco com foto de terceiro):
-//   foto de PREFEITURA (sempre liberada) ou de veículo
-//   com crédito institucional ............................ MATÉRIA com a foto
-//   prioridade ALTA sem foto liberada ................... MATÉRIA com foto
-//                                                         geral da cidade
-//   prioridade MÉDIA/BAIXA sem foto liberada ............ NOTA na coluna
-//                                                         "Vozes {Cidade}"
-//   estourou a cota da região/editoria .................. NOTA
-//   sem cidade identificada e prioridade baixa .......... descarta
+// DESTINO (out/2026) — decidido pela ORIGEM da pauta:
+//   release de PREFEITURA ......................... NOTA na coluna regional
+//                                                   "Vozes {Região}" (com
+//                                                   a cidade marcada)
+//   notícia de PORTAL/veículo com foto liberada ... MATÉRIA com a foto
+//   notícia de PORTAL/veículo sem foto liberada ... MATÉRIA sem capa →
+//                                                   módulo VAPT-VUPT
+//   portal que estourou a cota da região/editoria . descarta
+//   sem valor noticioso ........................... descarta
+//
+// A prioridade do crivo (abaixo) continua valendo para a ordem da fila,
+// a cota e a criticidade — só não decide mais o formato.
 //
 // A classificação usa a MESMA chamada de IA que já escolhia a editoria em
 // classify-and-quota (um JSON só), para não somar custo por pauta.
@@ -114,30 +117,27 @@ export function temaHeuristico(texto: string): Tema {
 }
 
 export type Formato = "materia" | "nota" | "descartar";
-export type FotoOrigem = "fonte_autorizada" | "cidade_geral" | "nenhuma";
+export type FotoOrigem = "fonte_autorizada" | "nenhuma";
+export type OrigemPauta = "prefeitura" | "portal";
 
 export function decidirFormato(p: {
-  prioridade: Prioridade;
+  origem: OrigemPauta;
   valorNoticioso: boolean;
   fotoStatus: FotoStatus;
   forcarNota: boolean;
-  temCidade: boolean;
+  temRegiao: boolean;
 }): { formato: Formato; foto: FotoOrigem; motivo: string } {
   if (!p.valorNoticioso) return { formato: "descartar", foto: "nenhuma", motivo: "sem valor noticioso" };
 
-  const quer = (formato: Formato, foto: FotoOrigem, motivo: string) => {
-    // Nota precisa de cidade (vai para a coluna "Vozes {Cidade}"). Sem
-    // cidade: pauta baixa é descartada; o resto vira matéria regional.
-    if (formato === "nota" && !p.temCidade) {
-      return p.prioridade === "baixa"
-        ? { formato: "descartar" as Formato, foto: "nenhuma" as FotoOrigem, motivo: "nota sem cidade identificada" }
-        : { formato: "materia" as Formato, foto: "cidade_geral" as FotoOrigem, motivo: `${motivo}; sem cidade para coluna` };
-    }
-    return { formato, foto, motivo };
-  };
+  if (p.origem === "prefeitura") {
+    // A nota vai para a coluna da REGIÃO; sem região não há coluna.
+    return p.temRegiao
+      ? { formato: "nota", foto: "nenhuma", motivo: "release de prefeitura → coluna regional" }
+      : { formato: "descartar", foto: "nenhuma", motivo: "release sem região identificada" };
+  }
 
-  if (p.forcarNota) return quer("nota", "nenhuma", "cota da região/editoria atingida");
-  if (p.fotoStatus === "autorizada") return quer("materia", "fonte_autorizada", "foto com crédito institucional");
-  if (p.prioridade === "alta") return quer("materia", "cidade_geral", "pauta prioritária sem foto liberada");
-  return quer("nota", "nenhuma", `prioridade ${p.prioridade} sem foto liberada`);
+  // Portal/veículo: sempre matéria. Cota estourada não vira mais nota.
+  if (p.forcarNota) return { formato: "descartar", foto: "nenhuma", motivo: "cota da região/editoria atingida" };
+  if (p.fotoStatus === "autorizada") return { formato: "materia", foto: "fonte_autorizada", motivo: "foto com crédito institucional" };
+  return { formato: "materia", foto: "nenhuma", motivo: "portal sem foto liberada → VAPT-VUPT" };
 }

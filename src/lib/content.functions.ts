@@ -1273,6 +1273,10 @@ export type ColunaComEdicaoAtual = {
 export type ColunaAtalho = {
   slug: string;
   nome: string;
+  /** "regiao" = coluna de notas "Vozes {Região}"; demais = colunas de opinião. */
+  tipo: string | null;
+  /** Slug da região (só colunas regionais) — o card leva a /vozes/{regiao}. */
+  regiaoSlug: string | null;
   descricao: string | null;
   foto_colunista_url: string | null;
   edicao: {
@@ -1290,9 +1294,14 @@ function isMissingColumn(err: { code?: string; message?: string } | null) {
   return err?.code === "42703" || /column .* does not exist/i.test(err?.message ?? "");
 }
 
+/** Coluna que fica sempre no primeiro card do módulo da home. */
+export const COLUNA_FIXA_SLUG = "vozes-politicas";
+
 /**
- * Todas as colunas ativas com a edição publicada mais recente de cada uma.
- * Alimenta o módulo "Colunas" (atalhos) da home — sem carregar as notas.
+ * Todas as colunas ativas com o post mais recente de cada uma. Alimenta o
+ * módulo "Colunas" da home: Vozes Políticas fixa no primeiro card e as
+ * demais (opinião + regionais "Vozes {Região}") ordenadas pela que recebeu
+ * post por último. Coluna regional: o "post" é a última nota publicada.
  */
 export const listColunasAtalhos = createServerFn({ method: "GET" })
   .handler(async (): Promise<ColunaAtalho[]> => {
@@ -1300,14 +1309,24 @@ export const listColunasAtalhos = createServerFn({ method: "GET" })
     const sb = getExternalSupabase();
     const { data: colunas, error } = await sb
       .from("colunas")
-      .select("id, slug, nome, descricao, foto_colunista_url")
+      .select("id, slug, nome, descricao, foto_colunista_url, tipo, regiao:regioes(slug, nome)")
       .eq("ativo", true)
       .order("criado_em", { ascending: true });
     if (error) {
       if (isMissingSchema(error)) return [];
-      throw new Error(error.message);
+      // Antes da 070 (sem colunas.regiao_id): só as colunas de opinião.
+      if (!isMissingColumn(error) && !/regiao/i.test(error.message)) throw new Error(error.message);
     }
-    if (!colunas?.length) return [];
+    let listaColunas = (colunas ?? null) as ColunaRow[] | null;
+    if (error) {
+      const alt = await sb
+        .from("colunas")
+        .select("id, slug, nome, descricao, foto_colunista_url, tipo")
+        .eq("ativo", true)
+        .order("criado_em", { ascending: true });
+      listaColunas = (alt.data ?? []) as ColunaRow[];
+    }
+    if (!listaColunas?.length) return [];
 
     const { data: edicoes, error: edErr } = await sb
       .from("coluna_edicoes")
@@ -1342,16 +1361,63 @@ export const listColunasAtalhos = createServerFn({ method: "GET" })
       }
     }
 
-    return (colunas as Array<{ id: string; slug: string; nome: string; descricao: string | null; foto_colunista_url: string | null }>)
-      .map((c) => ({
-        slug: c.slug,
-        nome: c.nome,
-        descricao: c.descricao,
-        foto_colunista_url: c.foto_colunista_url,
-        edicao: maisRecente.get(c.id) ?? null,
-      }))
-      .filter((c) => c.edicao !== null);
+    // Colunas regionais: o post mais recente é a última nota publicada.
+    const idsRegionais = listaColunas.filter((c) => c.tipo === "regiao").map((c) => c.id);
+    if (idsRegionais.length) {
+      const { data: notas } = await sb
+        .from("coluna_cidade_notas")
+        .select("id, coluna_id, titulo, corpo, cidade_slug, publicado_em")
+        .in("coluna_id", idsRegionais)
+        .eq("status", "publicado")
+        .order("publicado_em", { ascending: false })
+        .limit(300);
+      const { findMunicipioBySlug } = await import("./parana-municipios");
+      for (const n of (notas ?? []) as Array<{ id: string; coluna_id: string; titulo: string; corpo: string; cidade_slug: string | null; publicado_em: string }>) {
+        if (maisRecente.has(n.coluna_id)) continue;
+        const cidade = n.cidade_slug ? findMunicipioBySlug(n.cidade_slug)?.name ?? cidadeFromSlug(n.cidade_slug) : null;
+        maisRecente.set(n.coluna_id, {
+          id: n.id,
+          slug: null,
+          titulo: n.titulo,
+          subtitulo: cidade ? `${cidade}: ${n.corpo}` : n.corpo,
+          imagem_principal_url: null,
+          publicado_em: n.publicado_em,
+        });
+      }
+    }
+
+    const quando = (c: ColunaAtalho) => (c.edicao?.publicado_em ? new Date(c.edicao.publicado_em).getTime() : 0);
+    return listaColunas
+      .map((c): ColunaAtalho => {
+        const reg = Array.isArray(c.regiao) ? c.regiao[0] : c.regiao;
+        const regiaoSlug = c.tipo === "regiao" ? reg?.slug ?? null : null;
+        return {
+          slug: c.slug,
+          nome: regiaoSlug ? `Vozes ${displayRegionName(regiaoSlug, reg?.nome ?? "")}` : c.nome,
+          tipo: c.tipo ?? null,
+          regiaoSlug,
+          descricao: c.descricao,
+          foto_colunista_url: c.foto_colunista_url,
+          edicao: maisRecente.get(c.id) ?? null,
+        };
+      })
+      .filter((c) => c.edicao !== null && (c.tipo !== "regiao" || !!c.regiaoSlug))
+      .sort((a, b) => {
+        if (a.slug === COLUNA_FIXA_SLUG) return -1;
+        if (b.slug === COLUNA_FIXA_SLUG) return 1;
+        return quando(b) - quando(a);
+      });
   });
+
+type ColunaRow = {
+  id: string;
+  slug: string;
+  nome: string;
+  descricao: string | null;
+  foto_colunista_url: string | null;
+  tipo?: string | null;
+  regiao?: { slug?: string; nome?: string } | { slug?: string; nome?: string }[] | null;
+};
 
 /** Edição publicada mais recente de uma coluna — o que aparece na home. */
 export const getColunaAtual = createServerFn({ method: "GET" })
@@ -1540,9 +1606,11 @@ export const criarComentarioColuna = createServerFn({ method: "POST" })
   });
 
 /* ------------------------------------------------------------------ */
-/* Colunas por cidade — "Vozes {Cidade}" (formato blog)                */
-/* Notas avulsas publicadas pelo pipeline, mais recente primeiro.      */
-/* Tabela `coluna_cidade_notas` (067_automacao_399_cidades.sql).       */
+/* Colunas regionais — "Vozes {Região}" (formato blog)                 */
+/* Uma coluna por região concentra as notas de todas as suas cidades   */
+/* (releases de prefeitura). Cada nota guarda a cidade (cidade_slug).  */
+/* Tabelas: colunas (tipo 'regiao') + coluna_cidade_notas              */
+/* (067_automacao_399_cidades.sql + 070_colunas_regionais.sql).        */
 /* ------------------------------------------------------------------ */
 
 export type NotaCidade = {
@@ -1552,56 +1620,122 @@ export type NotaCidade = {
   fonte_nome: string | null;
   fonte_url: string | null;
   publicado_em: string;
+  cidade_slug: string | null;
+  cidade_nome: string | null;
 };
 
 export type PaginaNotasCidade = {
+  /** "Vozes Oeste" */
   colunaNome: string;
-  cidadeNome: string;
+  regiaoSlug: string;
+  regiaoNome: string;
+  /** Cidade do filtro (null = todas as cidades da região). */
+  cidadeSlug: string | null;
+  cidadeNome: string | null;
   notas: NotaCidade[];
   temMais: boolean;
 };
 
-/** Página de notas da coluna da cidade. `antesDe` = cursor (publicado_em da última nota exibida). */
-export const listNotasCidade = createServerFn({ method: "GET" })
-  .inputValidator((d: { citySlug: string; limit?: number; antesDe?: string | null }) => d)
+async function nomeDaCidade(slug: string | null): Promise<string | null> {
+  if (!slug) return null;
+  const { findMunicipioBySlug } = await import("./parana-municipios");
+  return findMunicipioBySlug(slug)?.name ?? cidadeFromSlug(slug);
+}
+
+/**
+ * Página de notas da coluna regional. `citySlug` filtra uma cidade da
+ * região; `antesDe` = cursor (publicado_em da última nota exibida).
+ */
+export const listNotasRegiao = createServerFn({ method: "GET" })
+  .inputValidator((d: { regionSlug: string; citySlug?: string | null; limit?: number; antesDe?: string | null }) => d)
   .handler(async ({ data }): Promise<PaginaNotasCidade> => {
     const { getExternalSupabase } = await import("./external-supabase.server");
     const sb = getExternalSupabase();
     const limit = Math.max(1, Math.min(data.limit ?? 10, 30));
-    const cidadeNome = cidadeFromSlug(data.citySlug);
-    const vazio = { colunaNome: `Vozes ${cidadeNome}`, cidadeNome, notas: [], temMais: false };
+    const cidadeSlug = data.citySlug || null;
+    const cidadeNome = await nomeDaCidade(cidadeSlug);
 
-    const { data: coluna, error: colErr } = await sb
-      .from("colunas")
-      .select("nome, cidade:cidades(nome)")
-      .eq("cidade_slug", data.citySlug)
-      .eq("ativo", true)
+    const { data: regiao, error: rErr } = await sb
+      .from("regioes")
+      .select("id, slug, nome")
+      .eq("slug", data.regionSlug)
       .maybeSingle();
-    if (colErr) {
-      if (isMissingSchema(colErr) || /cidade_slug/i.test(colErr.message)) return vazio;
-      throw new Error(colErr.message);
-    }
-    if (!coluna) return vazio;
-    const nomeCidade = (Array.isArray(coluna.cidade) ? coluna.cidade[0]?.nome : (coluna.cidade as { nome?: string } | null)?.nome) ?? cidadeNome;
+    if (rErr && !isMissingSchema(rErr)) throw new Error(rErr.message);
+    if (!regiao) throw notFound();
+    const r = regiao as { id: string; slug: string; nome: string };
+    const regiaoNome = displayRegionName(r.slug, r.nome);
+    const vazio: PaginaNotasCidade = {
+      colunaNome: `Vozes ${regiaoNome}`,
+      regiaoSlug: r.slug,
+      regiaoNome,
+      cidadeSlug,
+      cidadeNome,
+      notas: [],
+      temMais: false,
+    };
+
+    // Nome da coluna = "Vozes" + rótulo público da região (o mesmo que a
+    // 070 grava em colunas.nome).
+    const colunaNome = vazio.colunaNome;
 
     let q = sb
       .from("coluna_cidade_notas")
-      .select("id, titulo, corpo, fonte_nome, fonte_url, publicado_em")
-      .eq("cidade_slug", data.citySlug)
+      .select("id, titulo, corpo, fonte_nome, fonte_url, publicado_em, cidade_slug")
+      .eq("regiao_id", r.id)
       .eq("status", "publicado")
       .order("publicado_em", { ascending: false })
       .limit(limit + 1);
+    if (cidadeSlug) q = q.eq("cidade_slug", cidadeSlug);
     if (data.antesDe) q = q.lt("publicado_em", data.antesDe);
     const { data: rows, error } = await q;
     if (error) {
-      if (isMissingSchema(error)) return { ...vazio, colunaNome: coluna.nome, cidadeNome: nomeCidade };
+      if (isMissingSchema(error)) return { ...vazio, colunaNome };
       throw new Error(error.message);
     }
-    const notas = (rows ?? []) as NotaCidade[];
+    const { findMunicipioBySlug } = await import("./parana-municipios");
+    const notas = ((rows ?? []) as Array<Omit<NotaCidade, "cidade_nome">>).map((n) => ({
+      ...n,
+      cidade_nome: n.cidade_slug ? findMunicipioBySlug(n.cidade_slug)?.name ?? cidadeFromSlug(n.cidade_slug) : null,
+    }));
     return {
-      colunaNome: coluna.nome,
-      cidadeNome: nomeCidade,
+      ...vazio,
+      colunaNome,
       notas: notas.slice(0, limit),
       temMais: notas.length > limit,
     };
+  });
+
+/** Notas de UMA cidade, lidas da coluna da região dela (página da cidade). */
+export const listNotasCidade = createServerFn({ method: "GET" })
+  .inputValidator((d: { citySlug: string; limit?: number; antesDe?: string | null }) => d)
+  .handler(async ({ data }): Promise<PaginaNotasCidade | null> => {
+    const { findMunicipioBySlug } = await import("./parana-municipios");
+    const municipio = findMunicipioBySlug(data.citySlug);
+    if (!municipio?.region) return null;
+    try {
+      return await listNotasRegiao({
+        data: { regionSlug: municipio.region, citySlug: data.citySlug, limit: data.limit, antesDe: data.antesDe },
+      });
+    } catch {
+      return null;
+    }
+  });
+
+/** Matéria convertida em nota (070): para onde redirecionar o endereço antigo. */
+export const findNotaPorArtigoSlug = createServerFn({ method: "GET" })
+  .inputValidator((d: { slug: string }) => d)
+  .handler(async ({ data }): Promise<{ regiaoSlug: string; notaId: string } | null> => {
+    const { getExternalSupabase } = await import("./external-supabase.server");
+    const sb = getExternalSupabase();
+    const { data: row, error } = await sb
+      .from("coluna_cidade_notas")
+      .select("id, regiao:regioes(slug)")
+      .eq("artigo_origem_slug", data.slug)
+      .eq("status", "publicado")
+      .limit(1)
+      .maybeSingle();
+    if (error || !row) return null;
+    const reg = (row as { regiao?: { slug?: string } | { slug?: string }[] | null }).regiao;
+    const regiaoSlug = Array.isArray(reg) ? reg[0]?.slug : reg?.slug;
+    return regiaoSlug ? { regiaoSlug, notaId: (row as { id: string }).id } : null;
   });

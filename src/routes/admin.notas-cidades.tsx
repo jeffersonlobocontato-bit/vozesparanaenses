@@ -86,7 +86,7 @@ function AdminNotasCidades() {
       <PageHeader
         eyebrow="Colunas"
         title="Notas das cidades"
-        subtitle="Notas das colunas “Vozes {Cidade}”. As de risco baixo saem sozinhas; as que o agente de criticidade segurou esperam aqui."
+        subtitle="Releases de prefeitura que viram nota nas colunas regionais “Vozes {Região}”. As de risco baixo saem sozinhas; as que o agente de criticidade segurou esperam aqui."
       />
       <div className="flex gap-2">
         {ABAS.map((a) => (
@@ -107,7 +107,8 @@ function AdminNotasCidades() {
         {itens?.map((n) => (
           <li key={n.id} className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
             <div className="flex flex-wrap items-center gap-2 text-[11px] font-semibold uppercase tracking-wide text-slate-500">
-              <span className="text-[#12201E]">{n.coluna?.nome ?? n.cidade_slug}</span>
+              <span className="text-[#12201E]">{n.coluna?.nome ?? "Coluna"}</span>
+              {n.cidade_slug && <span>· {n.cidade_slug.replace(/-/g, " ")}</span>}
               {n.tema_crivo && <span>· {n.tema_crivo.replace("_", " ")}</span>}
               <span>· {new Date(n.criado_em).toLocaleString("pt-BR")}</span>
             </div>

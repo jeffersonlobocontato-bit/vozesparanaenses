@@ -13,7 +13,7 @@
 
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
 import { carregarCidades, cidadePorNome } from "../_shared/cidades.ts";
-import { decidirFormato, prioridadeDoTema, temaHeuristico, type Prioridade, type Tema } from "../_shared/crivo-editorial.ts";
+import { decidirFormato, prioridadeDoTema, temaHeuristico, type OrigemPauta, type Prioridade, type Tema } from "../_shared/crivo-editorial.ts";
 import { avaliarCriticidade, carregarConfigCriticidade } from "../_shared/criticidade.ts";
 import { ehDoDia } from "../_shared/data-publicacao.ts";
 import { classificarFoto, creditoParaExibir, type FotoStatus } from "../_shared/foto-credito.ts";
@@ -78,8 +78,9 @@ type RawFoto = {
   foto_status: FotoStatus | null;
   data_publicacao_original: string | null;
   coletado_em: string | null;
-  fonte: { nome: string; tipo: string } | { nome: string; tipo: string }[] | null;
+  fonte: FonteRef | FonteRef[] | null;
 };
+type FonteRef = { nome: string; tipo: string; cidade_slug?: string | null };
 
 type DnaSintatico = Record<string, string | undefined>;
 type DnaSemantico = Record<string, string | undefined>;
@@ -190,7 +191,7 @@ Deno.serve(async (req) => {
 
   const { data: cluster, error: cErr } = await sb
     .from("article_clusters")
-    .select("id, regiao_id, categoria_id, interesse_score, cidade_slug, tema_crivo, prioridade_crivo, forcar_nota, curadoria_nacional, categoria:editorial_categories(slug)")
+    .select("id, regiao_id, categoria_id, interesse_score, cidade_slug, tema_crivo, prioridade_crivo, forcar_nota, curadoria_nacional, fonte_oficial, categoria:editorial_categories(slug)")
     .eq("id", clusterId)
     .maybeSingle();
   if (cErr || !cluster) return json({ error: "cluster_not_found", detail: cErr?.message }, 404);
@@ -204,22 +205,42 @@ Deno.serve(async (req) => {
   const dados = (facts.dados ?? {}) as Record<string, unknown>;
   const cidades = await carregarCidades(sb);
   // Curadoria nacional/internacional não é reclassificada para região do PR.
-  const cidade = cluster.curadoria_nacional ? null : (
+  let cidade = cluster.curadoria_nacional ? null : (
     cidadePorNome(dados.cidade_principal as string | null, cidades)
     ?? (cluster.cidade_slug ? cidades.find((c) => c.slug === cluster.cidade_slug) ?? null : null)
   );
-  const regiaoId: string = cidade?.regiao_id ?? cluster.regiao_id;
+  let regiaoId: string = cidade?.regiao_id ?? cluster.regiao_id;
 
   const { data: caRows } = await sb.from("cluster_articles").select("raw_article_id").eq("cluster_id", clusterId);
   const rawIdsCluster = (caRows ?? []).map((r) => r.raw_article_id);
   const { data: rawsData } = rawIdsCluster.length
     ? await sb.from("raw_articles")
-      .select("id, imagem_original_url, imagem_credito, foto_status, data_publicacao_original, coletado_em, fonte:fontes(nome, tipo)")
+      .select("id, imagem_original_url, imagem_credito, foto_status, data_publicacao_original, coletado_em, fonte:fontes(nome, tipo, cidade_slug)")
       .in("id", rawIdsCluster)
     : { data: [] as RawFoto[] };
   const raws = (rawsData ?? []) as RawFoto[];
   const nomeFonte = (r: RawFoto) => (Array.isArray(r.fonte) ? r.fonte[0]?.nome : r.fonte?.nome) ?? null;
   const tipoFonte = (r: RawFoto) => (Array.isArray(r.fonte) ? r.fonte[0]?.tipo : r.fonte?.tipo) ?? null;
+  const cidadeFonte = (r: RawFoto) => (Array.isArray(r.fonte) ? r.fonte[0]?.cidade_slug : r.fonte?.cidade_slug) ?? null;
+
+  // ORIGEM da pauta decide o destino (ver _shared/crivo-editorial.ts):
+  // release de prefeitura → nota na coluna regional; portal → matéria.
+  // Cluster oficial é sempre de 1 release só (cluster-articles).
+  const origem: OrigemPauta =
+    cluster.fonte_oficial || (raws.length > 0 && raws.every((r) => tipoFonte(r) === "prefeitura"))
+      ? "prefeitura"
+      : "portal";
+  // Release de prefeitura fala da própria cidade: a cidade (e a região) é a
+  // da prefeitura que publicou, não uma cidade citada no texto (ex.: "Coronel
+  // Vivida apresenta experiência em encontro em Curitiba" é Sudoeste).
+  if (origem === "prefeitura" && !cluster.curadoria_nacional) {
+    const slugPref = raws.map(cidadeFonte).find(Boolean);
+    const cidadePref = slugPref ? cidades.find((c) => c.slug === slugPref) ?? null : null;
+    if (cidadePref) {
+      cidade = cidadePref;
+      regiaoId = cidadePref.regiao_id;
+    }
+  }
 
   // Regra da foto: só foto com crédito institucional. Coletas antigas (sem
   // foto_status) são reclassificadas aqui. Prefeitura primeiro.
@@ -254,18 +275,20 @@ Deno.serve(async (req) => {
       return json({ ok: true, ignorado: "fora_do_dia" });
     }
     const decisao = decidirFormato({
-      prioridade,
+      origem,
       valorNoticioso: true,
       fotoStatus,
       forcarNota: !!cluster.forcar_nota,
-      temCidade: !!cidade,
+      temRegiao: !!regiaoId,
     });
     if (decisao.formato === "descartar") {
       await encerrarCluster(sb, clusterId, rawIdsCluster, "descartado");
       return json({ ok: true, ignorado: decisao.motivo });
     }
-    if (decisao.formato === "nota" && cidade) {
-      const nota = await escreverNota(facts, cidade.nome, aiKey);
+    if (decisao.formato === "nota") {
+      const { data: regiaoRow } = await sb.from("regioes").select("nome").eq("id", regiaoId).maybeSingle();
+      const regiaoNome = (regiaoRow as { nome?: string } | null)?.nome ?? "Paraná";
+      const nota = await escreverNota(facts, cidade?.nome ?? regiaoNome, regiaoNome, aiKey);
       if ("error" in nota) return json(nota, 502);
       const crit = await avaliarCriticidade(
         { titulo: nota.titulo, corpo: nota.corpo, fatos: { ...facts, dados }, formato: "nota", categoria: categoriaSlug },
@@ -274,7 +297,7 @@ Deno.serve(async (req) => {
       const fonteRaw = raws[0];
       const fontesFatos = (facts.fontes ?? []) as Array<{ url?: string; veiculo?: string }>;
       const resultado = await publicarNotaNaColuna(sb, {
-        cidadeSlug: cidade.slug,
+        cidadeSlug: cidade?.slug ?? null,
         regiaoId,
         clusterId,
         titulo: nota.titulo,
@@ -451,7 +474,10 @@ Deno.serve(async (req) => {
         fotoOrigem = "fonte_autorizada";
       }
     }
-    if (fotoOrigem === "nenhuma") {
+    // Portal no automático: sem foto liberada a matéria sai SEM capa e vai
+    // para o VAPT-VUPT (decisão editorial de out/2026). A foto geral da
+    // cidade fica só para matérias escritas pelo editor.
+    if (fotoOrigem === "nenhuma" && !(automatico && origem === "portal")) {
       const { data: fotoCidade } = cidade
         ? await sb.from("cidades").select("foto_geral_url, foto_geral_credito").eq("slug", cidade.slug).maybeSingle()
         : { data: null };

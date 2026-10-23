@@ -12,9 +12,10 @@ Objetivo: o portal cobre sozinho as 399 cidades do PR, com notícias **do dia**,
 | Repetição | Nunca: hash da URL+título na coleta, agrupamento por similaridade e checagem contra tudo o que foi selecionado nas últimas 72h (`cluster_duplicado`). |
 | Região | Pela **cidade de que a notícia fala**, nunca pela cidade do jornal. Palotina em jornal de Curitiba = Oeste. |
 | Foto | Só foto com crédito de assessoria, divulgação, prefeitura/município, governo ou foto pública. Crédito pessoal, de outro veículo ou sem crédito: a foto da fonte **não** é usada. |
-| Crivo | Prioridade **alta**: serviço, utilidade pública, saúde, educação, segurança. **Baixa**: evento e propaganda de governo. **Média**: o resto. |
-| Formato | Foto liberada → **matéria** com a foto. Prioridade alta sem foto → **matéria com foto geral da cidade**. Média/baixa sem foto → **nota**. |
-| Coluna | Toda cidade tem a coluna **"Vozes {Cidade}"** (`/vozes/{cidade}`), em formato blog: notas por ordem de publicação, a mais nova no topo, com "Ver mais notas". |
+| Crivo | Prioridade **alta**: serviço, utilidade pública, saúde, educação, segurança. **Baixa**: evento e propaganda de governo. **Média**: o resto. Define a ordem da fila, a cota e a criticidade — não o formato. |
+| Destino (out/2026) | Pela **origem**: release de **prefeitura** → sempre **nota** na coluna regional. Notícia de **portal/veículo** → sempre **matéria**; com foto liberada sai com a foto, sem foto liberada sai **sem capa e vai para o VAPT-VUPT** (sem foto geral da cidade). Portal que estoura a cota é descartado (portal nunca vira nota). |
+| Coluna | Uma coluna por **região**: **"Vozes {Região}"** (`/vozes/{regiao}`), em formato blog, com as notas de todas as cidades da região. Cada nota abre com o nome da cidade, que filtra a coluna (`/vozes/{regiao}?cidade={cidade}`). A página da cidade mostra as notas dela. `/vozes/{cidade}` antigo redireciona para a região filtrada. |
+| Home | Módulo **Colunas**: Vozes Políticas fixa no primeiro card; as demais (opinião e regionais) se alternam pela que recebeu post por último. |
 | Publicação | Automática. O **agente de criticidade** manda para revisão humana tudo o que tem risco médio ou maior. |
 
 ## Fluxo
@@ -30,13 +31,15 @@ cron 11h/18h (lotes a cada 3 min, janela de 2h)
   classify-and-quota   editoria + crivo (1 chamada de IA) · repetição 72h · cota estourada → nota
   process-pending-clusters → extract-facts → generate-article (modo automático)
     ├─ cidade/região = cidade_principal apurada pela IA
-    ├─ decidirFormato: matéria | nota | descartar          _shared/crivo-editorial.ts
-    ├─ matéria: foto autorizada ou foto geral da cidade
-    ├─ nota: texto curto → coluna "Vozes {Cidade}"          _shared/nota-coluna.ts
+    ├─ decidirFormato (origem): prefeitura → nota | portal → matéria   _shared/crivo-editorial.ts
+    ├─ matéria (portal): foto autorizada ou sem capa (VAPT-VUPT)
+    ├─ nota (prefeitura): texto curto → coluna "Vozes {Região}"        _shared/nota-coluna.ts
     └─ criticidade → publica ou fila de revisão             _shared/criticidade.ts
 ```
 
-Chamadas feitas por um editor ("Escrever agora", matéria manual, tecnologia) continuam gerando **matéria em rascunho**. A regra da foto e a criticidade valem sempre. O crivo de matéria/nota e a publicação automática valem só no modo automático.
+Chamadas feitas por um editor ("Escrever agora", matéria manual, tecnologia) continuam gerando **matéria em rascunho**, com a foto geral da cidade como reserva. A regra da foto e a criticidade valem sempre. O destino por origem e a publicação automática valem só no modo automático.
+
+A migration `070_colunas_regionais.sql` cria as colunas regionais e converteu em nota as matérias de prefeitura que estavam publicadas sem foto: a matéria saiu do ar (`expirado`) e o endereço antigo redireciona para a nota (`coluna_cidade_notas.artigo_origem_slug`).
 
 ## Onde a revisão humana entra
 

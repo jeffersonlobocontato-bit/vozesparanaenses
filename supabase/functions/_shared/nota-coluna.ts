@@ -1,21 +1,25 @@
-// Vozes Paranaenses — nota na coluna "Vozes {Cidade}"
+// Vozes Paranaenses — nota na coluna regional "Vozes {Região}"
 //
-// Pauta que não vira matéria (prioridade média/baixa sem foto liberada, ou
-// cota estourada) sai como NOTA curta na coluna da cidade. A coluna é um
-// blog: cada nota é publicada sozinha, com data/hora, e empurra as
-// anteriores para baixo. A coluna é criada na primeira nota da cidade.
+// Todo release de PREFEITURA sai como NOTA curta na coluna da região da
+// cidade ("Vozes Oeste", "Vozes Campos Gerais"...). A coluna é um blog:
+// cada nota é publicada sozinha, com data/hora, e empurra as anteriores
+// para baixo. Uma coluna por região concentra as notas de todas as suas
+// cidades; cada nota guarda a cidade (cidade_slug) para o filtro e para a
+// página da cidade. Ver 070_colunas_regionais.sql.
 
 import type { ResultadoCriticidade } from "./criticidade.ts";
 
 const AI_URL = "https://ai.gateway.lovable.dev/v1/chat/completions";
 const MODEL = "google/gemini-2.5-flash";
 
-const NOTA_PROMPT = `Você escreve NOTAS curtas para a coluna "Vozes {CIDADE}" do portal regional
-"Vozes Paranaenses". Uma nota é um registro rápido e factual, não uma reportagem.
+const NOTA_PROMPT = `Você escreve NOTAS curtas para a coluna "Vozes {REGIAO}" do portal regional
+"Vozes Paranaenses". A coluna reúne notas de várias cidades da região; esta nota
+é sobre {CIDADE}. Uma nota é um registro rápido e factual, não uma reportagem.
 
 REGRAS:
 1. Use SOMENTE os fatos fornecidos — nunca invente nome, número, data, cargo ou citação.
 2. Título: até 80 caracteres, direto, com o fato central (sem "Prefeitura informa", sem clickbait).
+   Não comece o título pelo nome da cidade (ele já aparece em destaque acima da nota).
 3. Corpo: 2 a 4 frases (até 90 palavras). A primeira frase responde o quê, quem, quando e onde.
    Se houver serviço ao leitor (data, local, horário, como participar), inclua.
 4. Tom informativo, sem adjetivos, sem opinião, sem tom de propaganda: "A prefeitura
@@ -37,10 +41,11 @@ type Fatos = {
 export async function escreverNota(
   fatos: Fatos,
   cidadeNome: string,
+  regiaoNome: string,
   aiKey: string,
 ): Promise<{ titulo: string; corpo: string } | { error: string; detail?: string }> {
-  const sistema = NOTA_PROMPT.replace("{CIDADE}", cidadeNome);
-  const usuario = `Cidade: ${cidadeNome}\nFatos apurados:\n${JSON.stringify(fatos).slice(0, 5000)}`;
+  const sistema = NOTA_PROMPT.replace("{REGIAO}", regiaoNome).replace("{CIDADE}", cidadeNome);
+  const usuario = `Cidade: ${cidadeNome} (região ${regiaoNome})\nFatos apurados:\n${JSON.stringify(fatos).slice(0, 5000)}`;
   for (let tentativa = 1; tentativa <= 2; tentativa++) {
     try {
       const res = await fetch(AI_URL, {
@@ -75,8 +80,8 @@ export async function publicarNotaNaColuna(
   // deno-lint-ignore no-explicit-any
   sb: any,
   p: {
-    cidadeSlug: string;
-    regiaoId: string | null;
+    cidadeSlug: string | null;
+    regiaoId: string;
     clusterId: string;
     titulo: string;
     corpo: string;
@@ -87,8 +92,8 @@ export async function publicarNotaNaColuna(
     criticidade: ResultadoCriticidade;
   },
 ): Promise<{ id: string; status: string; coluna_id: string } | { error: string; detail?: string }> {
-  const { data: colunaId, error: colErr } = await sb.rpc("garantir_coluna_cidade", { p_cidade_slug: p.cidadeSlug });
-  if (colErr || !colunaId) return { error: "coluna_cidade_failed", detail: colErr?.message };
+  const { data: colunaId, error: colErr } = await sb.rpc("garantir_coluna_regiao", { p_regiao_id: p.regiaoId });
+  if (colErr || !colunaId) return { error: "coluna_regiao_failed", detail: colErr?.message };
 
   const publica = !p.criticidade.revisao;
   const { data, error } = await sb

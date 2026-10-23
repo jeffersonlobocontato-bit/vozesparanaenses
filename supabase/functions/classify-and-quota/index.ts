@@ -5,10 +5,12 @@
 //     ../_shared/crivo-editorial.ts.
 //  2. Descarta o que não tem valor noticioso e o que REPETE um fato já
 //     selecionado nas últimas 72h (cluster_duplicado, por centróide).
-//  3. Aplica quota_rules por região × categoria (janela 7d). Estourou o
-//     teto: a pauta não é mais descartada — vira NOTA na coluna da cidade
-//     (forcar_nota), exceto prioridade alta (serviço/saúde/educação/
-//     segurança/utilidade pública), que nunca é rebaixada.
+//  3. Aplica quota_rules por região × categoria (janela 7d) às pautas de
+//     PORTAL. Estourou o teto: marca forcar_nota e o generate-article
+//     descarta (portal nunca vira nota), exceto prioridade alta (serviço/
+//     saúde/educação/segurança/utilidade pública), que sempre passa.
+//     Release de PREFEITURA não entra na cota: vira nota na coluna
+//     regional e não ocupa espaço das matérias.
 //
 // Body opcional: { regiao_id?: string }
 
@@ -92,7 +94,7 @@ async function processClusters(
   const _serve = null; // placeholder para manter escopo
 
   // 1. Classificar cada cluster (usa título do primeiro artigo do cluster)
-  const classified: { id: string; regiao_id: string; categoria_id: string; score: number; curadoria_nacional: boolean; prioridade: string }[] = [];
+  const classified: { id: string; regiao_id: string; categoria_id: string; score: number; curadoria_nacional: boolean; fonte_oficial: boolean; prioridade: string }[] = [];
   let semValor = 0;
   for (const c of clusters) {
     // Se o cluster já está fincado em uma região do Paraná (pela detecção
@@ -167,7 +169,7 @@ async function processClusters(
       tema_crivo: crivo.tema,
       prioridade_crivo: crivo.prioridade,
     }).eq("id", c.id);
-    classified.push({ id: c.id, regiao_id: c.regiao_id, categoria_id: cat.id, score: c.prioridade_score, curadoria_nacional: !!c.curadoria_nacional, prioridade: crivo.prioridade });
+    classified.push({ id: c.id, regiao_id: c.regiao_id, categoria_id: cat.id, score: c.prioridade_score, curadoria_nacional: !!c.curadoria_nacional, fonte_oficial: !!c.fonte_oficial, prioridade: crivo.prioridade });
   }
 
   // 2. Aplicar quotas — janela 7 dias, agrupando por região × categoria
@@ -222,13 +224,14 @@ async function processClusters(
     const total = Math.max(regionTotals.get(c.regiao_id) ?? 0, 10);
     const currentPct = ((currentCounts.get(`${c.regiao_id}:${c.categoria_id}`) ?? 0) / total) * 100;
     const teto = rule?.teto ?? 100;
-    const estourou = currentPct >= teto && c.prioridade !== "alta";
+    const oficial = c.fonte_oficial;
+    const estourou = !oficial && currentPct >= teto && c.prioridade !== "alta";
     await sb.from("article_clusters")
       .update({ status: "selecionado_cota", ...(estourou ? { forcar_nota: true } : {}) })
       .eq("id", c.id);
     if (estourou) {
       viraramNota++;
-    } else {
+    } else if (!oficial) {
       currentCounts.set(`${c.regiao_id}:${c.categoria_id}`, (currentCounts.get(`${c.regiao_id}:${c.categoria_id}`) ?? 0) + 1);
       regionTotals.set(c.regiao_id, (regionTotals.get(c.regiao_id) ?? 0) + 1);
     }

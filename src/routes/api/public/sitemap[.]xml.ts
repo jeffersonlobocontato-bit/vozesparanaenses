@@ -5,6 +5,7 @@ import {
   listAllCityLandings,
   listAuthors,
   listActiveRegionCategoryPairs,
+  listColunasAtalhos,
 } from "@/lib/content.functions";
 
 export const Route = createFileRoute("/api/public/sitemap.xml")({
@@ -12,12 +13,13 @@ export const Route = createFileRoute("/api/public/sitemap.xml")({
     handlers: {
       GET: async ({ request }) => {
         const origin = new URL(request.url).origin;
-        const [regions, articles, cities, authors, categoryPairs] = await Promise.all([
+        const [regions, articles, cities, authors, categoryPairs, colunas] = await Promise.all([
           listRegions().catch(() => []),
           listLatestArticles({ data: { limit: 1000 } }).catch(() => []),
           listAllCityLandings().catch(() => []),
           listAuthors().catch(() => []),
           listActiveRegionCategoryPairs().catch(() => []),
+          listColunasAtalhos().catch(() => []),
         ]);
 
         const urls: { loc: string; lastmod?: string; priority?: string }[] = [
@@ -33,6 +35,16 @@ export const Route = createFileRoute("/api/public/sitemap.xml")({
         for (const r of regions) {
           urls.push({ loc: `${origin}/${r.slug}`, priority: "0.8" });
           urls.push({ loc: `${origin}/${r.slug}/classificados`, priority: "0.5" });
+        }
+
+        // Colunas regionais "Vozes {Região}" com nota publicada.
+        for (const c of colunas) {
+          if (!c.regiaoSlug) continue;
+          urls.push({
+            loc: `${origin}/vozes/${c.regiaoSlug}`,
+            lastmod: c.edicao?.publicado_em ?? undefined,
+            priority: "0.6",
+          });
         }
 
         for (const c of cities) {
