@@ -87,6 +87,7 @@ Deno.serve(async (req) => {
       return await processarItensDaFonte({
         sb, fonte, itens, cidades, nomesVeiculos, dentroDoOrcamento,
         buscarPagina: fetchArticleImageMeta,
+        fotoSempreLiberada: true,
       });
     } catch (e) {
       return { fonte: fonte.nome, total: 0, inseridas: 0, duplicadas: 0, sem_data: 0, fora_do_dia: 0, fotos: {}, erro: (e as Error).message };

@@ -108,6 +108,9 @@ export async function processarItensDaFonte(p: {
   nomesVeiculos: string[];
   buscarPagina: (url: string) => Promise<MetaPagina>;
   dentroDoOrcamento: () => boolean;
+  // Prefeitura: foto sempre liberada (material institucional). Veículos
+  // seguem a regra do crédito.
+  fotoSempreLiberada?: boolean;
   agora?: Date;
 }): Promise<RelatorioFonte> {
   const agora = p.agora ?? new Date();
@@ -152,7 +155,7 @@ export async function processarItensDaFonte(p: {
     if (!ehDoDia(data, agora)) { r.fora_do_dia++; continue; }
 
     const det = detectarCidade(it.titulo, corpo, p.cidades, p.fonte);
-    const fotoStatus = classificarFoto(imagem, credito, p.nomesVeiculos);
+    const fotoStatus = p.fotoSempreLiberada && imagem ? "autorizada" : classificarFoto(imagem, credito, p.nomesVeiculos);
     r.fotos[fotoStatus] = (r.fotos[fotoStatus] ?? 0) + 1;
 
     const { error } = await p.sb.from("raw_articles").insert({

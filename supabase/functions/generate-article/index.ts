@@ -225,7 +225,12 @@ Deno.serve(async (req) => {
   // foto_status) são reclassificadas aqui. Prefeitura primeiro.
   const { data: veiculosRows } = await sb.from("fontes").select("nome").eq("tipo", "veiculo");
   const nomesVeiculos = (veiculosRows ?? []).map((f: { nome: string }) => f.nome);
-  const statusFoto = (r: RawFoto): FotoStatus => r.foto_status ?? classificarFoto(r.imagem_original_url, r.imagem_credito, nomesVeiculos);
+  // Foto de PREFEITURA é sempre liberada (é material institucional); a regra
+  // do crédito vale só para veículos de imprensa.
+  const statusFoto = (r: RawFoto): FotoStatus =>
+    tipoFonte(r) === "prefeitura" && r.imagem_original_url
+      ? "autorizada"
+      : r.foto_status ?? classificarFoto(r.imagem_original_url, r.imagem_credito, nomesVeiculos);
   const rawFotoAutorizada = [...raws]
     .sort((a, b) => (tipoFonte(a) === "prefeitura" ? -1 : 0) - (tipoFonte(b) === "prefeitura" ? -1 : 0))
     .find((r) => statusFoto(r) === "autorizada" && r.imagem_original_url) ?? null;
@@ -439,7 +444,9 @@ Deno.serve(async (req) => {
           imagem_original_url: copiada,
           imagem_capa_url: copiada,
           og_image_url: copiada,
-          imagem_credito: creditoParaExibir(rawFotoAutorizada.imagem_credito ?? ""),
+          imagem_credito: rawFotoAutorizada.imagem_credito?.trim()
+            ? creditoParaExibir(rawFotoAutorizada.imagem_credito)
+            : `Foto: Divulgação/${nomeFonte(rawFotoAutorizada) ?? "Prefeitura"}`,
         }).eq("id", inserted.id);
         fotoOrigem = "fonte_autorizada";
       }

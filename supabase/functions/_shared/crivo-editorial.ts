@@ -11,7 +11,8 @@
 //                      agenda/visita de autoridade, balanço de gestão).
 //
 // FORMATO (regra da foto — nunca corremos risco com foto de terceiro):
-//   foto da fonte com crédito institucional ............ MATÉRIA com a foto
+//   foto de PREFEITURA (sempre liberada) ou de veículo
+//   com crédito institucional ............................ MATÉRIA com a foto
 //   prioridade ALTA sem foto liberada ................... MATÉRIA com foto
 //                                                         geral da cidade
 //   prioridade MÉDIA/BAIXA sem foto liberada ............ NOTA na coluna
