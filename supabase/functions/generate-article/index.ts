@@ -12,6 +12,7 @@
 // separadas e auditáveis.
 
 import { faltando5w1h, motivoVeto5w1h } from "../_shared/cinco-w.ts";
+import { candidatoDuplicata, mesmoFato } from "../_shared/duplicidade.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
 import { carregarCidades, cidadePorNome } from "../_shared/cidades.ts";
 import { decidirFormato, decidirImagem, ehAbrangenciaNacional, podeIrParaDobra, prioridadeDoTema, temaHeuristico, type DecisaoImagem, type OrigemPauta, type Prioridade, type Tema, type TipoImagem } from "../_shared/crivo-editorial.ts";
@@ -444,6 +445,39 @@ Você é repórter, não comentarista. Relate o fato; não tome partido.
   }
   const cidadePrincipal = cidade?.nome ?? (dados.cidade_principal as string | null) ?? null;
   const cidadesMencionadas = (dados.cidades_mencionadas as string[] | undefined) ?? [];
+
+  // Trava de duplicidade: duas fontes sobre o mesmo fato podem ter virado
+  // clusters diferentes. Candidatas = matérias das últimas 72h da mesma cidade
+  // (ou região, sem cidade) com termos em comum no título; um agente de IA
+  // confirma se é o MESMO fato. Se for, descarta esta em vez de publicar de novo.
+  {
+    const desde = new Date(Date.now() - 72 * 3_600_000).toISOString();
+    let q = sb.from("generated_articles")
+      .select("id, titulo, subtitulo, slug, fatos_5w1h")
+      .in("status", ["publicado", "rascunho"])
+      .gte("gerado_em", desde)
+      .neq("cluster_id", clusterId)
+      .limit(80);
+    q = cidadePrincipal ? q.eq("cidade_principal", cidadePrincipal) : q.eq("regiao_id", regiaoId);
+    const { data: recentes } = await q;
+    const tituloNovo = `${parsed.titulo} ${parsed.subtitulo ?? ""}`;
+    const textoNovo = `${parsed.titulo}\n${parsed.subtitulo ?? ""}\nO quê: ${facts.o_que ?? ""}\nQuem: ${facts.quem ?? ""}\nQuando: ${facts.quando ?? ""}\nOnde: ${facts.onde ?? ""}`;
+    type Recente = { id: string; titulo: string; subtitulo: string | null; slug: string; fatos_5w1h: Record<string, string | null> | null };
+    const candidatas = ((recentes ?? []) as Recente[])
+      .filter((a) => candidatoDuplicata(tituloNovo, `${a.titulo} ${a.subtitulo ?? ""}`))
+      .slice(0, 4);
+    for (const a of candidatas) {
+      const f = a.fatos_5w1h ?? {};
+      const textoA = `${a.titulo}\n${a.subtitulo ?? ""}\nO quê: ${f.o_que ?? ""}\nQuem: ${f.quem ?? ""}\nQuando: ${f.quando ?? ""}\nOnde: ${f.onde ?? ""}`;
+      if (await mesmoFato(textoNovo, textoA, aiKey)) {
+        const motivo = `Duplicata: o mesmo fato já está na matéria "${a.titulo}" (${a.slug}).`;
+        await encerrarCluster(sb, clusterId, rawIdsCluster, "descartado");
+        await sb.from("article_clusters").update({ descarte_motivo: motivo }).eq("id", clusterId);
+        console.log(`[generate-article] cluster ${clusterId} descartado — ${motivo}`);
+        return json({ ok: true, duplicata: true, motivo, artigo_existente: a.id });
+      }
+    }
+  }
 
   // 3. Persistir generated_articles (rascunho) — extracted_facts já existe, não regrava
   // deno-lint-ignore prefer-const

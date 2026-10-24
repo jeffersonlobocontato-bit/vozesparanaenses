@@ -7,6 +7,7 @@
 // Body opcional: { regiao_id?: string, limit?: number, threshold?: number }
 
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
+import { candidatoDuplicata, mesmoFato } from "../_shared/duplicidade.ts";
 
 const cors = {
   "Access-Control-Allow-Origin": "*",
@@ -214,6 +215,7 @@ Deno.serve(async (req) => {
   const withEmb = items.filter((r) => r.embedding && r.regiao_id);
   const groups: Raw[][] = [];
   const used = new Set<string>();
+  const aiKeyJuiz = Deno.env.get("LOVABLE_API_KEY");
   for (const r of withEmb) {
     if (used.has(r.id)) continue;
     const g: Raw[] = [r];
@@ -222,7 +224,9 @@ Deno.serve(async (req) => {
       if (used.has(o.id)) continue;
       if (o.regiao_id !== r.regiao_id) continue;
       const sim = cosine(r.embedding!, o.embedding!);
-      if (sim >= threshold) {
+      const junta = sim >= threshold ||
+        (!!aiKeyJuiz && candidatoMesmaCidade(r, o, sim) && await mesmoFato(textoJuiz(r), textoJuiz(o), aiKeyJuiz));
+      if (junta) {
         g.push(o);
         used.add(o.id);
       }
@@ -463,6 +467,21 @@ const BRASIL_RE = /\b(brasil|brasileir[oa]s?)\b/i;
 function pareceInternacional(texto: string): boolean {
   if (BRASIL_RE.test(texto)) return false;
   return PAIS_ESTRANGEIRO_RE.test(texto);
+}
+
+// Veículos diferentes escrevem o mesmo fato com palavras diferentes: o
+// cosseno fica abaixo do limiar (ex.: apreensão em Sertaneja, Bonde × Folha
+// de Londrina = 0,80). Na faixa 0,72–limiar, se for a MESMA cidade e os
+// títulos tiverem termos em comum, um agente de IA confirma se é o mesmo fato.
+const LIMIAR_MESMA_CIDADE = 0.72;
+type RawJuiz = { titulo?: string | null; corpo_limpo?: string | null; cidade_detectada_slug?: string | null };
+function textoJuiz(r: RawJuiz): string {
+  return `${r.titulo ?? ""}\n${(r.corpo_limpo ?? "").slice(0, 700)}`;
+}
+function candidatoMesmaCidade(a: RawJuiz, b: RawJuiz, sim: number): boolean {
+  if (sim < LIMIAR_MESMA_CIDADE) return false;
+  if (!a.cidade_detectada_slug || a.cidade_detectada_slug !== b.cidade_detectada_slug) return false;
+  return candidatoDuplicata(a.titulo ?? "", b.titulo ?? "");
 }
 
 function cosine(a: number[], b: number[]): number {
