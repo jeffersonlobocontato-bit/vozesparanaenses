@@ -13,6 +13,7 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
 import { resolverCidade } from "../_shared/imprensa-cidade.ts";
 import { ehDuplicata } from "../_shared/duplicidade.ts";
+import { regraTituloPrompt } from "../_shared/titulo.ts";
 
 const cors = {
   "Access-Control-Allow-Origin": "*",
@@ -107,7 +108,7 @@ Deno.serve(async (req) => {
       messages: [
         {
           role: "system",
-          content: `Você é o redator de conteúdo institucional/publieditorial do Vozes Paranaenses, editoria "${categoria.nome}". Reescreva o conteúdo enviado pelo cliente (${cliente.nome_empresa}) seguindo o padrão editorial abaixo — sem inventar fato que não esteja no material original, sem elogio vazio, mantendo tom jornalístico mesmo sendo conteúdo institucional.\n\n${dnaTexto}\n\nResponda em JSON: {"titulo": "...", "subtitulo": "...", "corpo": "..."} — corpo em parágrafos separados por \\n\\n.`,
+          content: `Você é o redator de conteúdo institucional/publieditorial do Vozes Paranaenses, editoria "${categoria.nome}". Reescreva o conteúdo enviado pelo cliente (${cliente.nome_empresa}) seguindo o padrão editorial abaixo — sem inventar fato que não esteja no material original, sem elogio vazio, mantendo tom jornalístico mesmo sendo conteúdo institucional.\n\n${dnaTexto}\n\n${regraTituloPrompt(null)}\n\nResponda em JSON: {"titulo": "...", "subtitulo": "...", "corpo": "..."} — corpo em parágrafos separados por \\n\\n.`,
         },
         { role: "user", content: body.texto_bruto },
       ],

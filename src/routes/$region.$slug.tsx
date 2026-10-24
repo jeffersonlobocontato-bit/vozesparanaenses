@@ -9,6 +9,7 @@ import {
   listCategorias,
   listAllCityLandings,
   cidadeSlug,
+  ASSINATURA_ASSESSORIA,
   type ArticleListItem,
 } from "@/lib/content.functions";
 import { buildLinkTerms, autoLinkParagraph, withLineBreaks, withInlineMarkdown } from "@/lib/auto-link";
@@ -123,7 +124,7 @@ export const Route = createFileRoute("/$region/$slug")({
       { name: "description", content: description },
       { name: "keywords", content: keywords },
       { name: "news_keywords", content: keywords },
-      { name: "author", content: a.editor_responsavel ?? "Redação Vozes Paranaenses" },
+      { name: "author", content: a.editor_responsavel ?? a.assinatura },
       { name: "ai-content-declaration", content: "assisted; editorial-review-by-human" },
       { name: "generator", content: "Vozes Paranaenses — redação assistida por IA com revisão humana" },
       { name: "robots", content: "index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1" },
@@ -232,9 +233,9 @@ export const Route = createFileRoute("/$region/$slug")({
               jobTitle: "Editor(a) responsável",
               worksFor: { "@type": "NewsMediaOrganization", name: "Vozes Paranaenses" },
             },
-            { "@type": "Organization", name: "Redação Vozes Paranaenses" },
+            { "@type": "Organization", name: a.assinatura },
           ]
-        : { "@type": "Organization", name: "Redação Vozes Paranaenses" },
+        : { "@type": "Organization", name: a.assinatura },
       publisher: {
         "@type": "NewsMediaOrganization",
         name: "Vozes Paranaenses",
@@ -707,8 +708,10 @@ function ArticlePage() {
               {article.editor_responsavel ? (
                 <>
                   Editor(a) responsável:{" "}
-                  <span className="font-bold text-[#12201E]">{article.editor_responsavel}</span> · Redação Vozes Paranaenses
+                  <span className="font-bold text-[#12201E]">{article.editor_responsavel}</span> · {article.assinatura}
                 </>
+              ) : article.assinatura === ASSINATURA_ASSESSORIA ? (
+                <><span className="font-bold text-[#12201E]">Vozes Paranaenses</span> com assessoria</>
               ) : (
                 <>Redação <span className="font-bold text-[#12201E]">Vozes Paranaenses</span></>
               )}

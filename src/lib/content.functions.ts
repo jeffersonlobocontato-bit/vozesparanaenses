@@ -79,7 +79,74 @@ export type ArticleFull = ArticleListItem & {
   imagem_galeria: GaleriaItem[] | null;
   video_legenda: string | null;
   video_credito: string | null;
+  /**
+   * Assinatura da matéria: "Vozes Paranaenses com assessoria" quando o
+   * conteúdo veio de prefeitura (release do pipeline ou Portal da Imprensa);
+   * "Redação Vozes Paranaenses" nos demais. Ver assinaturaDaMateria().
+   */
+  assinatura: string;
 };
+
+export const ASSINATURA_REDACAO = "Redação Vozes Paranaenses";
+export const ASSINATURA_ASSESSORIA = "Vozes Paranaenses com assessoria";
+
+/**
+ * Deriva a assinatura de colunas que já existem (sem coluna nova):
+ *  - origem_imprensa_cliente_id preenchido → matéria do Portal da Imprensa;
+ *  - cluster com fonte_oficial (release de prefeitura, cluster-articles) ou
+ *    cujas fontes são todas tipo "prefeitura" (mesma regra de origem do
+ *    generate-article).
+ * Tolerante: qualquer erro (coluna ausente, RLS) cai na assinatura padrão.
+ */
+async function assinaturaDaMateria(
+  // deno-lint-ignore no-explicit-any
+  sb: any,
+  articleId: string,
+): Promise<string> {
+  try {
+    const { data: art, error } = await sb
+      .from("generated_articles")
+      .select("cluster_id, origem_imprensa_cliente_id")
+      .eq("id", articleId)
+      .maybeSingle();
+    let clusterId: string | null = null;
+    if (error) {
+      // Antes da 057 não há origem_imprensa_cliente_id — tenta só o cluster.
+      const { data: soCluster } = await sb
+        .from("generated_articles")
+        .select("cluster_id")
+        .eq("id", articleId)
+        .maybeSingle();
+      clusterId = (soCluster as { cluster_id?: string | null } | null)?.cluster_id ?? null;
+    } else {
+      const a = art as { cluster_id?: string | null; origem_imprensa_cliente_id?: string | null } | null;
+      if (a?.origem_imprensa_cliente_id) return ASSINATURA_ASSESSORIA;
+      clusterId = a?.cluster_id ?? null;
+    }
+    if (!clusterId) return ASSINATURA_REDACAO;
+
+    const { data: cl } = await sb
+      .from("article_clusters")
+      .select("fonte_oficial")
+      .eq("id", clusterId)
+      .maybeSingle();
+    if ((cl as { fonte_oficial?: boolean } | null)?.fonte_oficial) return ASSINATURA_ASSESSORIA;
+
+    const { data: links } = await sb
+      .from("cluster_articles")
+      .select("raw:raw_articles(fonte:fontes(tipo))")
+      .eq("cluster_id", clusterId);
+    const tipos = ((links ?? []) as Array<{ raw: unknown }>).map((l) => {
+      const raw = (Array.isArray(l.raw) ? l.raw[0] : l.raw) as { fonte?: unknown } | null;
+      const fonte = (Array.isArray(raw?.fonte) ? raw?.fonte[0] : raw?.fonte) as { tipo?: string } | null;
+      return fonte?.tipo ?? null;
+    });
+    if (tipos.length > 0 && tipos.every((t) => t === "prefeitura")) return ASSINATURA_ASSESSORIA;
+  } catch {
+    // assinatura padrão
+  }
+  return ASSINATURA_REDACAO;
+}
 
 export type FiveWOneH = {
   quem?: string | null;
@@ -1273,6 +1340,7 @@ export const getArticle = createServerFn({ method: "GET" })
           imagem_galeria: null,
           video_legenda: null,
           video_credito: null,
+          assinatura: await assinaturaDaMateria(sb, lr.id),
         };
       }
       throw new Error(error.message);
@@ -1314,6 +1382,7 @@ export const getArticle = createServerFn({ method: "GET" })
       imagem_galeria: coerceGaleria(r.imagem_galeria),
       video_legenda: r.video_legenda && r.video_legenda.trim() ? r.video_legenda.trim() : null,
       video_credito: r.video_credito && r.video_credito.trim() ? r.video_credito.trim() : null,
+      assinatura: await assinaturaDaMateria(sb, r.id),
     };
   });
 

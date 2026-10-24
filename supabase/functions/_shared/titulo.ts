@@ -10,6 +10,8 @@
 //      como o aniversário do município).
 //   3. SEM cidade identificada (sem tag): o nome da cidade pode entrar no
 //      título quando necessário — "Prefeitura" continua proibido.
+//   4. Conteúdo de prefeitura abre pelo BENEFÍCIO/fato concreto para a
+//      população (REGRA_TITULO_BENEFICIO), não por quem fez.
 //
 // A regra vai no prompt; depois de escrito, verificarTitulo() confere e,
 // se o título violou, reescreverTitulo() pede só um título novo (chamada
@@ -25,10 +27,21 @@ export function normalizarTexto(s: string): string {
   return s.toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g, "");
 }
 
+/**
+ * Conteúdo de prefeitura (release do pipeline ou matéria do Portal da
+ * Imprensa): o título abre pelo BENEFÍCIO/fato concreto para a população,
+ * não por quem fez. Vai dentro de regraTituloPrompt (pipeline, nota da
+ * coluna, reescrita) e direto no prompt do imprensa-gerar-rascunho.
+ */
+export const REGRA_TITULO_BENEFICIO = `- Em conteúdo de prefeitura (release ou assessoria), o sujeito do título é o BENEFÍCIO ou o fato concreto para a população — a obra, o serviço, o valor, o prazo, quem é atendido —, não o órgão que fez. Sempre que possível, nada de "Prefeitura" / "Prefeitura de X" como sujeito ou centro do título.
+- Traga o dado concreto que o texto tiver (quantidade, valor, local, data, público). Ex.: "Prefeitura de Cascavel abre licitações para pavimentar estradas rurais" → "Estradas rurais de Diamante e São Salvador terão 10 km de asfalto com R$ 13,8 milhões".
+- Continue neutro: nada de adjetivo promocional ("histórico", "grande conquista", "mais uma vez"), nada de elogio à gestão, e nenhum número, local ou benefício que não esteja no material.`;
+
 /** Texto da regra para o prompt de redação. */
 export function regraTituloPrompt(cidadeTag: string | null): string {
   const base = `REGRA DO TÍTULO (obrigatória):
-- Nunca use a palavra "Prefeitura" (nem "Município de", "Administração municipal" ou "Executivo municipal") no título. Quem realizou a ação entra no texto.`;
+- Nunca use a palavra "Prefeitura" (nem "Município de", "Administração municipal" ou "Executivo municipal") no título. Quem realizou a ação entra no texto.
+${REGRA_TITULO_BENEFICIO}`;
   if (cidadeTag) {
     return `${base}
 - A cidade desta notícia é ${cidadeTag} e ela já aparece como etiqueta (tag) ao lado do título. Por isso o título NÃO menciona ${cidadeTag} nem a prefeitura: traga só o fato. O nome da cidade e de quem fez entram no lide.

@@ -46,7 +46,8 @@ REGRAS INEGOCIÁVEIS:
    O PRIMEIRO parágrafo (lide) deve responder O QUÊ + QUEM + QUANDO + ONDE em
    até 30 palavras. COMO e POR QUÊ entram no 2º parágrafo.
 4. Título: até 90 caracteres, sem clickbait, com o fato central. Nunca use
-   "Prefeitura" no título (ver REGRA DO TÍTULO no fim).
+   "Prefeitura" no título; em release de prefeitura, abra pelo benefício
+   ou fato concreto para a população (ver REGRA DO TÍTULO no fim).
 5. Subtítulo: contexto complementar, até 160 caracteres.
 6. Resumo: 2-3 frases, autocontido (para redes sociais e SEO).
 7. Corpo: profundidade condicionada ao que foi apurado — se os fatos são
