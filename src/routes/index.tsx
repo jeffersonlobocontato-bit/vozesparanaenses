@@ -344,6 +344,16 @@ function PortalHome({
   const side: Array<RankedArticle | ItemDobra> = dobra?.side.length ? dobra.side : sidePr;
   const naDobra = new Set([hero?.id, ...side.map((a) => a.id)].filter(Boolean) as string[]);
   const secondary = rest.concat(sidePr).filter((a) => !naDobra.has(a.id)).slice(0, 2);
+  // Completa a coluna da direita até a altura da manchete (foto + título longo):
+  // 3 notas compactas com miniatura, das próximas matérias com foto.
+  const usados = new Set([...naDobra, ...secondary.map((a) => a.id)]);
+  // Com anúncio na coluna, as notas encolhem na medida do espaço que ele ocupa
+  // (coluna ≈ 470px de largura no desktop; cada nota ≈ 100px de altura).
+  const [anuncioLateral, setAnuncioLateral] = useState<{ w: number; h: number } | null>(null);
+  const notasDireita = anuncioLateral
+    ? Math.max(0, 3 - Math.ceil(((470 * anuncioLateral.h) / anuncioLateral.w) / 100))
+    : 3;
+  const extrasDireita = rest.concat(sidePr).filter((a) => !usados.has(a.id)).slice(0, notasDireita);
   const cidadeLeitor = loc?.cidade ?? null;
 
   const articleByRegion = new Map<string, ArticleListItem>();
@@ -405,7 +415,30 @@ function PortalHome({
                 );
               })}
             </ul>
-            <AdSlot slot="home_sidebar_hero" className="mt-auto pt-4" />
+            {extrasDireita.length > 0 && (
+              <ul className="flex flex-col border-t border-rule">
+                {extrasDireita.map((a) => (
+                  <li key={a.id}>
+                    <Link
+                      to="/$region/$slug"
+                      params={{ region: a.region?.slug ?? "parana", slug: a.slug }}
+                      className="group flex gap-3 border-b border-rule py-3 last:border-b-0"
+                    >
+                      {a.cover_image_url && (
+                        <img src={a.cover_image_url} alt="" loading="lazy" className="h-[4.5rem] w-28 shrink-0 object-cover" />
+                      )}
+                      <span className="min-w-0">
+                        <Chapeu artigo={a} cidadeLeitor={cidadeLeitor} />
+                        <span className="mt-1 block font-display text-[1.0625rem] leading-[1.25] font-semibold text-ink line-clamp-3 group-hover:underline decoration-2 underline-offset-4">
+                          {a.title}
+                        </span>
+                      </span>
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            )}
+            <AdSlot slot="home_sidebar_hero" className="mt-auto pt-4" onPreenchido={setAnuncioLateral} />
           </div>
         </div>
 

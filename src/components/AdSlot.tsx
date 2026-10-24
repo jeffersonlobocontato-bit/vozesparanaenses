@@ -53,7 +53,10 @@ export function AdSlot({
   regiao,
   cidade,
   editoria,
+  onPreenchido,
 }: {
+  /** Avisa se o espaço foi preenchido por um anúncio (e a proporção dele), para o layout se ajustar. */
+  onPreenchido?: (anuncio: { w: number; h: number } | null) => void;
   size?: AdSize;
   slot?: AdSlotName;
   className?: string;
@@ -91,6 +94,12 @@ export function AdSlot({
       .catch(() => { if (alive) setTried(true); });
     return () => { alive = false; };
   }, [regiao, cidade, editoria, resolvedSize, slot, variante]);
+
+  const preenchido = !!real || gamFilled || (tried && houseFallback);
+  useEffect(() => {
+    onPreenchido?.(preenchido ? { w: dim.w, h: dim.h } : null);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [preenchido, dim.w, dim.h]);
 
   const creative = useMemo(
     () => CREATIVES[Math.floor(Math.abs(hash(resolvedSize + dim.w)) % CREATIVES.length)],
