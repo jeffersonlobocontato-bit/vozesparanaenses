@@ -2,6 +2,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import type { ReactNode } from "react";
 import {
   ArrowRight,
+  BookOpenText,
   Bot,
   CalendarDays,
   CheckCircle2,
@@ -9,6 +10,7 @@ import {
   Copy,
   FileText,
   ImagePlus,
+  Layers,
   Link2,
   MapPin,
   MapPinOff,
@@ -23,6 +25,7 @@ import {
   Sparkles,
   UserCheck,
   Users,
+  Waves,
 } from "lucide-react";
 import { LogoIcon } from "@/components/Logo";
 
@@ -173,6 +176,32 @@ const PASSOS: Array<{ n: string; titulo: string; texto: string; img?: string; al
   },
 ];
 
+const EDITORIAS_REDATORES = [
+  "Cidades", "Política", "Economia", "Agronegócio", "Segurança", "Saúde", "Educação",
+  "Cultura", "Esportes", "Meio Ambiente", "Tecnologia", "Eleições 2026", "Nacional", "Internacional",
+];
+
+const CAMADAS_DEL: Array<{ i: ReactNode; t: string; sub: string; d: string }> = [
+  {
+    i: <Waves className="h-5 w-5" />,
+    t: "Sintática",
+    sub: "o ritmo",
+    d: "Tamanho e cadência das frases, alternância entre contexto e impacto, e o lide que responde o quê, quem, quando e onde já nas primeiras linhas.",
+  },
+  {
+    i: <Layers className="h-5 w-5" />,
+    t: "Semântica",
+    sub: "a arquitetura do sentido",
+    d: "A ordem em que a informação aparece: o fato, o contexto, os detalhes, as evidências e o impacto para quem mora na cidade.",
+  },
+  {
+    i: <BookOpenText className="h-5 w-5" />,
+    t: "Lexical",
+    sub: "o vocabulário",
+    d: "Os termos certos de cada área, siglas, nomes de instituições do Paraná e as palavras que um bom jornalista evita: adjetivo promocional e opinião.",
+  },
+];
+
 const FAQ: Array<{ p: string; r: string }> = [
   { p: "Tem algum custo para a prefeitura?", r: "Não. O cadastro e a publicação de 1 matéria por semana pelo Portal da Imprensa são gratuitos." },
   {
@@ -222,6 +251,7 @@ function CidadesDoParana() {
             <a href="#varredura" className="hover:text-white">Como funciona</a>
             <a href="#cobertura" className="hover:text-white">Cobertura</a>
             <a href="#passo-a-passo" className="hover:text-white">Passo a passo</a>
+            <a href="#metodo" className="hover:text-white">Método</a>
             <a href="#perguntas" className="hover:text-white">Dúvidas</a>
           </nav>
           <div className="flex items-center gap-2">
@@ -481,6 +511,72 @@ function CidadesDoParana() {
                   jeffersonlobo.tech
                 </a>
               </p>
+            </div>
+          </div>
+        </section>
+
+        {/* Método editorial (DEL) */}
+        <section id="metodo" className="border-t border-white/[0.06] py-20">
+          <div className="mx-auto max-w-6xl px-4 sm:px-6">
+            <div className="grid gap-10 lg:grid-cols-[1fr_1.1fr] lg:items-start">
+              <div>
+                <Eyebrow>Método editorial</Eyebrow>
+                <h2 className="mt-3 text-3xl font-medium leading-[1.08] tracking-[-0.03em] sm:text-[2.6rem]">
+                  Não é uma IA genérica. É o Método DEL.
+                </h2>
+                <p className="mt-5 text-lg leading-relaxed text-[#b4b4b4]">
+                  Uma IA genérica escreve do mesmo jeito sobre qualquer assunto. O Vozes Paranaenses funciona com mais de 20
+                  agentes especializados (14 deles são redatores, um para cada editoria) treinados com o{" "}
+                  <strong className="font-medium text-white">Método DEL</strong>, metodologia autoral de Jefferson Lobo.
+                </p>
+                <p className="mt-4 text-lg leading-relaxed text-[#b4b4b4]">
+                  DEL é <strong className="font-medium text-white">Decomposição de Estrutura de Linguagem</strong>: o método
+                  separa o texto jornalístico em três camadas e ensina cada agente a dominar as três. Cada redator tem a sua
+                  matriz: o de Política escreve com regra de neutralidade, o de Segurança segue o rito da notícia policial, o
+                  de Agronegócio fala a língua do campo.
+                </p>
+                <div className="mt-6 flex flex-wrap gap-2">
+                  {EDITORIAS_REDATORES.map((e) => (
+                    <span key={e} className="rounded-full border border-white/[0.08] bg-white/[0.03] px-3 py-1 text-[13px] text-white/80">
+                      Redator · {e}
+                    </span>
+                  ))}
+                </div>
+              </div>
+              <div className="space-y-4">
+                {CAMADAS_DEL.map((c, i) => (
+                  <div key={c.t} className="flex gap-5 rounded-[24px] border border-white/[0.08] bg-white/[0.03] p-6">
+                    <div className="flex flex-col items-center">
+                      <span className="flex h-11 w-11 items-center justify-center rounded-xl border border-[#14B8A6]/30 bg-[#14B8A6]/[0.08] text-[#5EEAD4]">{c.i}</span>
+                      <span className="mt-2 font-[family-name:IBM_Plex_Mono,monospace] text-xs text-[#2DD4BF]">0{i + 1}</span>
+                    </div>
+                    <div>
+                      <p className="text-xl font-medium tracking-[-0.02em]">
+                        Camada {c.t} <span className="text-[#b4b4b4]">· {c.sub}</span>
+                      </p>
+                      <p className="mt-2 text-[15px] leading-relaxed text-[#b4b4b4]">{c.d}</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            <div className="mt-12 rounded-[28px] border border-[#5EEAD4]/15 bg-gradient-to-br from-[#14B8A6]/[0.08] via-white/[0.02] to-transparent p-8">
+              <p className="font-[family-name:IBM_Plex_Mono,monospace] text-[11px] uppercase tracking-[0.18em] text-[#2DD4BF]">O que o DEL faz pela sua matéria</p>
+              <div className="mt-6 grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
+                {[
+                  { t: "Padrão de redação", d: "O seu release vira notícia no formato do portal, com o tom da editoria certa." },
+                  { t: "Nada inventado", d: "Só os fatos do seu material. Se faltar o essencial (quem, o quê, quando, onde), a pauta é barrada." },
+                  { t: "Pronta para a busca", d: "Título, resumo, TL;DR e perguntas frequentes para o Google e para as IAs de busca." },
+                  { t: "Mesma qualidade sempre", d: "Às 12h ou às 18h, na capital ou na menor cidade do estado." },
+                ].map((x) => (
+                  <div key={x.t}>
+                    <CheckCircle2 className="h-5 w-5 text-[#5EEAD4]" />
+                    <p className="mt-3 font-medium text-white">{x.t}</p>
+                    <p className="mt-1 text-sm leading-relaxed text-[#b4b4b4]">{x.d}</p>
+                  </div>
+                ))}
+              </div>
             </div>
           </div>
         </section>
