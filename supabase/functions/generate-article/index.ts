@@ -271,9 +271,14 @@ Deno.serve(async (req) => {
   // Rondon") não vale. E fato de escala Brasil vai para Nacional, não para a
   // região do jornal (ex.: alerta de El Niño para o Sul do Brasil).
   if (origem === "portal" && !cidadePorNome(dados.cidade_principal as string | null, cidades)) {
+    // Fato fora do PR com vínculo paranaense (reitor da PUC-PR morto nos EUA):
+    // a região é a da cidade da pessoa/instituição (Curitiba → Metropolitana),
+    // não a do jornal que publicou.
+    // Só a região: o fato não aconteceu nessa cidade, então ela não vira tag.
+    const vinculo = cidadePorNome(dados.cidade_vinculo as string | null, cidades);
     cidade = null;
-    regiaoId = cluster.regiao_id;
-    if (ehAbrangenciaNacional(facts.onde)) {
+    regiaoId = vinculo?.regiao_id ?? cluster.regiao_id;
+    if (!vinculo && ehAbrangenciaNacional(facts.onde)) {
       const { data: nac } = await sb.from("regioes").select("id").eq("slug", "nacional").maybeSingle();
       if (nac?.id) regiaoId = nac.id;
     }

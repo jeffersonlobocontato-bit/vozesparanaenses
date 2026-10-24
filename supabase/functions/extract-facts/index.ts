@@ -47,6 +47,7 @@ type FactsPayload = {
   por_que?: string | null;
   como?: string | null;
   cidade_principal?: string | null;
+  cidade_vinculo?: string | null;
   cidades_mencionadas?: string[];
   dados?: Record<string, unknown>;
   citacoes?: Array<{ autor?: string; texto?: string }>;
@@ -176,7 +177,7 @@ Deno.serve(async (req) => {
       quando: parsed.quando ?? null,
       onde: parsed.onde ?? null,
       por_que: parsed.por_que ?? null,
-      dados: { ...(parsed.dados ?? {}), como: parsed.como ?? null, cidade_principal: parsed.cidade_principal ?? null, cidades_mencionadas: parsed.cidades_mencionadas ?? [] },
+      dados: { ...(parsed.dados ?? {}), como: parsed.como ?? null, cidade_principal: parsed.cidade_principal ?? null, cidade_vinculo: parsed.cidade_vinculo ?? null, cidades_mencionadas: parsed.cidades_mencionadas ?? [] },
       citacoes: parsed.citacoes ?? [],
       fontes: fontesResumo,
     })
@@ -223,6 +224,7 @@ function buildUserPrompt(raws: Array<{ url: string; titulo: string | null; corpo
   "por_que": "string ou null",
   "como": "string ou null",
   "cidade_principal": "nome da cidade paranaense onde o fato ocorreu, ou null",
+  "cidade_vinculo": "se o fato ocorreu FORA do Paraná mas envolve pessoa, instituição ou empresa paranaense, a cidade paranaense dessa pessoa/instituição (ex.: reitor da PUC-PR → Curitiba; cooperativa C.Vale → Palotina); senão null",
   "cidades_mencionadas": ["cidades adicionais citadas nas fontes"],
   "dados": { "chave": "valor numérico ou textual relevante" },
   "citacoes": [{ "autor": "Nome (cargo)", "texto": "citação LITERAL entre aspas, copiada da fonte" }]
