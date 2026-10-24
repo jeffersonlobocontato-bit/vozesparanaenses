@@ -11,6 +11,7 @@
 
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
 import { gerarMetadados, type Meta } from "../_shared/metadados-artigo.ts";
+import { resolverCidade } from "../_shared/imprensa-cidade.ts";
 
 const cors = {
   "Access-Control-Allow-Origin": "*",
@@ -27,40 +28,6 @@ function json(payload: unknown, status = 200) {
 function slugify(s: string): string {
   return s.normalize("NFD").replace(/[\u0300-\u036f]/g, "")
     .toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "").slice(0, 90);
-}
-
-type Cidade = { id: string; nome: string; slug: string; regiao_id: string | null };
-
-function normalizar(v: string): string {
-  return ` ${v.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().replace(/[^a-z0-9]+/g, " ")} `;
-}
-
-async function resolverCidade(
-  // deno-lint-ignore no-explicit-any
-  sb: any,
-  cliente: { cidade_id?: string | null; nome_empresa?: string | null },
-  titulo: string,
-  corpo: string,
-): Promise<Cidade | null> {
-  if (cliente.cidade_id) {
-    const { data } = await sb.from("cidades").select("id, nome, slug, regiao_id").eq("id", cliente.cidade_id).maybeSingle();
-    if (data) return data as Cidade;
-  }
-  const { data: cidades } = await sb.from("cidades").select("id, nome, slug, regiao_id");
-  // Nome mais longo primeiro: "Santa Terezinha de Itaipu" antes de "Itaipu".
-  const lista = ((cidades ?? []) as Cidade[])
-    .map((c) => ({ c, n: normalizar(c.nome) }))
-    .sort((a, b) => b.n.length - a.n.length);
-  for (const texto of [cliente.nome_empresa ?? "", titulo, corpo]) {
-    const t = normalizar(texto);
-    let melhor: { c: Cidade; pos: number } | null = null;
-    for (const { c, n } of lista) {
-      const pos = t.indexOf(n);
-      if (pos >= 0 && (!melhor || pos < melhor.pos)) melhor = { c, pos };
-    }
-    if (melhor) return melhor.c;
-  }
-  return null;
 }
 
 Deno.serve(async (req) => {

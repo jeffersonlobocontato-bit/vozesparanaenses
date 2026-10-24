@@ -11,6 +11,8 @@
 // Resposta: { ok, submissao_id, categoria_detectada, titulo, subtitulo, corpo }
 
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
+import { resolverCidade } from "../_shared/imprensa-cidade.ts";
+import { ehDuplicata } from "../_shared/duplicidade.ts";
 
 const cors = {
   "Access-Control-Allow-Origin": "*",
@@ -43,7 +45,7 @@ Deno.serve(async (req) => {
 
   const { data: cliente } = await sb
     .from("clientes_imprensa")
-    .select("id, ativo, nome_empresa, status")
+    .select("id, ativo, nome_empresa, status, cidade_id")
     .eq("user_id", userData.user.id)
     .maybeSingle();
   if (!cliente || !cliente.ativo) return json({ error: "cliente_sem_acesso" }, 403);
@@ -139,8 +141,34 @@ Deno.serve(async (req) => {
     submissaoId = nova?.id;
   }
 
+  // 5. Duplicidade: a varredura automática dos sites das prefeituras pode já
+  // ter publicado a mesma notícia. Avisa o assessor com o link da nossa.
+  let duplicata: { titulo: string; caminho: string; publicado_em: string } | null = null;
+  const cidade = await resolverCidade(sb, cliente, draft.titulo ?? "", draft.corpo ?? "");
+  if (cidade) {
+    const desde = new Date(Date.now() - 7 * 86_400_000).toISOString();
+    const { data: recentes } = await sb
+      .from("generated_articles")
+      .select("titulo, subtitulo, resumo, slug, publicado_em, origem_imprensa_cliente_id, regiao:regioes(slug)")
+      .eq("status", "publicado")
+      .gte("publicado_em", desde)
+      .or(`cidade_principal.eq.${cidade.nome},cidades_mencionadas.cs.{"${cidade.nome}"}`)
+      .order("publicado_em", { ascending: false })
+      .limit(60);
+    const enviado = `${draft.titulo ?? ""} ${draft.subtitulo ?? ""}`;
+    for (const a of (recentes ?? []) as Array<Record<string, unknown>>) {
+      const publicado = `${a.titulo ?? ""} ${a.subtitulo ?? ""} ${a.resumo ?? ""}`;
+      if (ehDuplicata(enviado, publicado)) {
+        const reg = (a.regiao as { slug?: string } | null)?.slug ?? "parana";
+        duplicata = { titulo: String(a.titulo), caminho: `/${reg}/${a.slug}`, publicado_em: String(a.publicado_em) };
+        break;
+      }
+    }
+  }
+
   return json({
     ok: true,
+    duplicata,
     submissao_id: submissaoId,
     categoria_detectada: { slug: categoria.slug, nome: categoria.nome },
     titulo: draft.titulo,

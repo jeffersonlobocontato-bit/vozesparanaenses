@@ -60,6 +60,7 @@ function ImprensaPainel() {
 
   const [submissaoId, setSubmissaoId] = useState<string | null>(null);
   const [categoriaDetectada, setCategoriaDetectada] = useState<string | null>(null);
+  const [duplicata, setDuplicata] = useState<{ titulo: string; caminho: string; publicado_em: string } | null>(null);
   const [titulo, setTitulo] = useState("");
   const [subtitulo, setSubtitulo] = useState("");
   const [corpo, setCorpo] = useState("");
@@ -106,9 +107,11 @@ function ImprensaPainel() {
       const res = await invokeImprensa<{
         submissao_id: string; categoria_detectada: { nome: string };
         titulo: string; subtitulo: string; corpo: string;
+        duplicata?: { titulo: string; caminho: string; publicado_em: string } | null;
       }>("imprensa-gerar-rascunho", { texto_bruto: textoBruto, submissao_id: submissaoId ?? undefined });
       setSubmissaoId(res.submissao_id);
       setCategoriaDetectada(res.categoria_detectada.nome);
+      setDuplicata(res.duplicata ?? null);
       setTitulo(res.titulo);
       setSubtitulo(res.subtitulo);
       setCorpo(res.corpo);
@@ -185,7 +188,7 @@ function ImprensaPainel() {
   }
 
   function novaMateria() {
-    setPublicado(null); setSubmissaoId(null); setCategoriaDetectada(null);
+    setPublicado(null); setSubmissaoId(null); setCategoriaDetectada(null); setDuplicata(null);
     setTextoBruto(""); setTitulo(""); setSubtitulo(""); setCorpo("");
     setFotos([]); setPrincipal(0); setTermoAceito(false);
   }
@@ -319,6 +322,24 @@ function ImprensaPainel() {
             <p className="text-xs font-semibold uppercase tracking-wide text-[#E29F65]">
               Editoria identificada: {categoriaDetectada}
             </p>
+          )}
+
+          {duplicata && (
+            <div role="alert" className="rounded-lg border border-[#E29F65] bg-[#E29F65]/10 p-4 text-sm text-[#12201E]">
+              <p className="font-semibold">Esta notícia já foi publicada pelo Vozes Paranaenses</p>
+              <p className="mt-1 text-slate-700">
+                Nossa varredura automática do site da prefeitura publicou em{" "}
+                {new Date(duplicata.publicado_em).toLocaleDateString("pt-BR")}:{" "}
+                <a href={duplicata.caminho} target="_blank" rel="noopener noreferrer" className="font-semibold underline">
+                  {duplicata.titulo}
+                </a>
+              </p>
+              <p className="mt-2 text-xs text-slate-600">Compartilhe a matéria que já está no ar:</p>
+              <div className="mt-1">
+                <ShareButtons url={`${typeof window !== "undefined" ? window.location.origin : ""}${duplicata.caminho}`} title={duplicata.titulo} compact />
+              </div>
+              <p className="mt-3 text-xs text-slate-600">Se for outra pauta, revise abaixo e publique normalmente.</p>
+            </div>
           )}
 
           <div className="rounded-lg border border-amber-200 bg-amber-50 p-3 text-xs text-amber-900">
