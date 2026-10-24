@@ -78,6 +78,30 @@ function AdminQueue() {
   const [bulkBusy, setBulkBusy] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [pipelineBusy, setPipelineBusy] = useState(false);
+  // Filtros da lista (aplicados no banco, não só nas 50 carregadas).
+  const [filtroCategoria, setFiltroCategoria] = useState("");
+  const [filtroRegiao, setFiltroRegiao] = useState("");
+  const [busca, setBusca] = useState("");
+  const [buscaAplicada, setBuscaAplicada] = useState("");
+  const [opcoes, setOpcoes] = useState<{ categorias: { id: string; nome: string }[]; regioes: { id: string; nome: string; slug: string }[] }>({ categorias: [], regioes: [] });
+  useEffect(() => {
+    const t = setTimeout(() => setBuscaAplicada(busca.trim()), 350);
+    return () => clearTimeout(t);
+  }, [busca]);
+  useEffect(() => {
+    (async () => {
+      const sb = await getExternalBrowser();
+      const [c, r] = await Promise.all([
+        sb.from("editorial_categories").select("id, nome").order("nome"),
+        sb.from("regioes").select("id, nome, slug").order("nome"),
+      ]);
+      setOpcoes({
+        categorias: (c.data ?? []) as { id: string; nome: string }[],
+        regioes: ((r.data ?? []) as { id: string; nome: string; slug: string }[]).map((x) => ({ ...x, nome: displayRegionName(x.slug, x.nome) })),
+      });
+    })();
+  }, []);
+  const filtrando = !!(filtroCategoria || filtroRegiao || buscaAplicada);
   const [pipelineLog, setPipelineLog] = useState<string[]>([]);
 
   const load = useCallback(async (opts?: { silent?: boolean }) => {
@@ -90,12 +114,16 @@ function AdminQueue() {
       const pinBasicSelect = "id, slug, titulo, subtitulo, resumo, corpo, seo_title, seo_description, editor_responsavel, status, gerado_em, publicado_em, imagem_capa_url, imagem_credito, imagem_legenda, imagem_original_url, publicado_automaticamente, fixado_posicao, regiao_id, categoria_id, regiao:regioes(slug, nome), categoria:editorial_categories(slug, nome)";
       const midSelect = "id, slug, titulo, subtitulo, resumo, corpo, seo_title, seo_description, editor_responsavel, status, gerado_em, publicado_em, imagem_capa_url, imagem_credito, imagem_legenda, imagem_original_url, publicado_automaticamente, regiao_id, categoria_id, regiao:regioes(slug, nome), categoria:editorial_categories(slug, nome)";
       const fallbackSelect = "id, slug, titulo, subtitulo, resumo, corpo, seo_title, seo_description, status, gerado_em, publicado_em, regiao_id, categoria_id, regiao:regioes(slug, nome), categoria:editorial_categories(slug, nome)";
-      const run = (sel: string) =>
-        sb.from("generated_articles")
-          .select(sel)
-          .eq("status", tab)
-          .order("gerado_em", { ascending: false })
-          .limit(50);
+      const run = (sel: string) => {
+        let q = sb.from("generated_articles").select(sel).eq("status", tab);
+        if (filtroCategoria) q = q.eq("categoria_id", filtroCategoria);
+        if (filtroRegiao) q = q.eq("regiao_id", filtroRegiao);
+        if (buscaAplicada) q = q.ilike("titulo", `%${buscaAplicada.replace(/[%_]/g, "")}%`);
+        // Publicadas: as mais recentes no ar primeiro.
+        return q
+          .order(tab === "publicado" ? "publicado_em" : "gerado_em", { ascending: false, nullsFirst: false })
+          .limit(filtroCategoria || filtroRegiao || buscaAplicada ? 200 : 50);
+      };
       let res = await run(fullSelect);
       if (res.error && /criticidade_|foto_origem/i.test(res.error.message)) {
         res = await run(semCriticidadeSelect);
@@ -114,7 +142,7 @@ function AdminQueue() {
     } catch (e: unknown) {
       setErr(e instanceof Error ? e.message : "Erro ao carregar");
     }
-  }, [tab]);
+  }, [tab, filtroCategoria, filtroRegiao, buscaAplicada]);
 
   // Salvar dentro do editor não deve fechar o editor nem jogar a página para
   // outro ponto: recarrega a lista sem esvaziá-la (silent) e restaura o scroll.
@@ -337,9 +365,62 @@ function AdminQueue() {
         )}
       </section>
 
+      {/* Filtros: editoria, região e título */}
+      <div className="flex flex-wrap items-end gap-3 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
+        <label className="flex min-w-[180px] flex-1 flex-col gap-1 text-xs font-semibold text-slate-600" htmlFor="filtro-busca">
+          Buscar no título
+          <input
+            id="filtro-busca"
+            type="search"
+            value={busca}
+            onChange={(e) => setBusca(e.target.value)}
+            placeholder="Ex.: Cascavel, vacinação, PUC-PR…"
+            className="rounded-lg border border-slate-300 px-3 py-2 text-sm font-normal text-slate-900"
+          />
+        </label>
+        <label className="flex min-w-[160px] flex-col gap-1 text-xs font-semibold text-slate-600" htmlFor="filtro-editoria">
+          Editoria
+          <select
+            id="filtro-editoria"
+            value={filtroCategoria}
+            onChange={(e) => setFiltroCategoria(e.target.value)}
+            className="rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm font-normal text-slate-900"
+          >
+            <option value="">Todas</option>
+            {opcoes.categorias.map((c) => <option key={c.id} value={c.id}>{c.nome}</option>)}
+          </select>
+        </label>
+        <label className="flex min-w-[160px] flex-col gap-1 text-xs font-semibold text-slate-600" htmlFor="filtro-regiao">
+          Região
+          <select
+            id="filtro-regiao"
+            value={filtroRegiao}
+            onChange={(e) => setFiltroRegiao(e.target.value)}
+            className="rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm font-normal text-slate-900"
+          >
+            <option value="">Todas</option>
+            {opcoes.regioes.map((r) => <option key={r.id} value={r.id}>{r.nome}</option>)}
+          </select>
+        </label>
+        {filtrando && (
+          <button
+            type="button"
+            onClick={() => { setFiltroCategoria(""); setFiltroRegiao(""); setBusca(""); }}
+            className="rounded-lg border border-slate-300 px-3 py-2 text-sm text-slate-700 hover:bg-slate-50"
+          >
+            Limpar filtros
+          </button>
+        )}
+        {items && (
+          <span className="ml-auto self-center text-xs text-slate-500">
+            {items.length} matéria{items.length === 1 ? "" : "s"} em «{tab}»{filtrando ? " com esses filtros" : " (as 50 mais recentes)"}
+          </span>
+        )}
+      </div>
+
       {err && <p className="rounded-xl border border-red-200 bg-red-50 p-3 text-sm text-red-700">{err}</p>}
       {!items && !err && <p className="text-sm text-slate-500">Carregando…</p>}
-      {items && items.length === 0 && <p className="text-sm text-slate-500">Nada em «{tab}».</p>}
+      {items && items.length === 0 && <p className="text-sm text-slate-500">{filtrando ? "Nenhuma matéria com esses filtros." : `Nada em «${tab}».`}</p>}
 
       {items && items.length > 0 && tab !== "publicado" && (
         <div className="flex justify-end">
