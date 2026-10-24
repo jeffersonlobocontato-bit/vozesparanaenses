@@ -10,6 +10,7 @@
 // Body: { submissao_id, titulo, subtitulo, corpo, fotos, termo_aceito: true }
 
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
+import { gerarMetadados, type Meta } from "../_shared/metadados-artigo.ts";
 
 const cors = {
   "Access-Control-Allow-Origin": "*",
@@ -28,7 +29,7 @@ function slugify(s: string): string {
     .toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "").slice(0, 90);
 }
 
-type Cidade = { id: string; nome: string; regiao_id: string | null };
+type Cidade = { id: string; nome: string; slug: string; regiao_id: string | null };
 
 function normalizar(v: string): string {
   return ` ${v.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().replace(/[^a-z0-9]+/g, " ")} `;
@@ -42,10 +43,10 @@ async function resolverCidade(
   corpo: string,
 ): Promise<Cidade | null> {
   if (cliente.cidade_id) {
-    const { data } = await sb.from("cidades").select("id, nome, regiao_id").eq("id", cliente.cidade_id).maybeSingle();
+    const { data } = await sb.from("cidades").select("id, nome, slug, regiao_id").eq("id", cliente.cidade_id).maybeSingle();
     if (data) return data as Cidade;
   }
-  const { data: cidades } = await sb.from("cidades").select("id, nome, regiao_id");
+  const { data: cidades } = await sb.from("cidades").select("id, nome, slug, regiao_id");
   // Nome mais longo primeiro: "Santa Terezinha de Itaipu" antes de "Itaipu".
   const lista = ((cidades ?? []) as Cidade[])
     .map((c) => ({ c, n: normalizar(c.nome) }))
@@ -129,6 +130,31 @@ Deno.serve(async (req) => {
     slugFinal = `${base}-${i + 2}`;
   }
 
+  // SEO/GEO/AEO (seo, resumo, tl;dr, 5W1H, FAQ, cidades): a IA só lê o
+  // texto revisado pelo cliente, não reescreve. Se falhar, publica assim mesmo
+  // com o básico tirado do título/subtítulo.
+  const aiKey = Deno.env.get("LOVABLE_API_KEY");
+  let meta: Meta = {};
+  if (aiKey) {
+    const r = await gerarMetadados(body.titulo.trim(), body.corpo.trim(), aiKey);
+    if (!("error" in r)) meta = r;
+  }
+  const cidadesMencionadas = Array.from(new Set([
+    ...(cidade ? [cidade.nome] : []),
+    ...(Array.isArray(meta.cidades_mencionadas) ? meta.cidades_mencionadas : []),
+  ]));
+  const capa = body.fotos?.[0]?.url ?? null;
+
+  // Fixação: a matéria da prefeitura fica fixada para os leitores da própria
+  // cidade (manchete se tiver foto, senão 1º da coluna da direita). A anterior
+  // do mesmo cliente sai da fixação para não acumular.
+  if (cidade) {
+    await sb.from("generated_articles")
+      .update({ fixado_posicao: null, fixado_escopo: null, fixado_cidades: [] })
+      .eq("origem_imprensa_cliente_id", cliente.id)
+      .eq("fixado_escopo", "cidades");
+  }
+
   const { data: artigo, error: insertErr } = await sb
     .from("generated_articles")
     .insert({
@@ -138,12 +164,21 @@ Deno.serve(async (req) => {
       corpo: body.corpo.trim(),
       categoria_id: submissao.categoria_detectada_id,
       regiao_id: regiaoId,
-      cidade_principal: cidade?.nome ?? null,
-      imagem_capa_url: body.fotos?.[0]?.url ?? null,
-      og_image_url: body.fotos?.[0]?.url ?? null,
+      cidade_principal: cidade?.nome ?? meta.cidade_principal ?? null,
+      cidades_mencionadas: cidadesMencionadas,
+      imagem_capa_url: capa,
+      og_image_url: capa,
+      imagem_credito: capa ? `Foto: ${cliente.nome_empresa}` : null,
       imagem_galeria: body.fotos ?? [],
-      seo_title: body.titulo.trim(),
-      seo_description: body.subtitulo?.trim() || null,
+      seo_title: meta.seo_title ?? body.titulo.trim().slice(0, 70),
+      seo_description: meta.seo_description ?? (body.subtitulo?.trim() || null),
+      resumo: meta.resumo ?? (body.subtitulo?.trim() || null),
+      tldr: meta.tldr ?? null,
+      fatos_5w1h: meta.fatos_5w1h ?? null,
+      faq: Array.isArray(meta.faq) ? meta.faq : [],
+      ...(cidade
+        ? { fixado_escopo: "cidades", fixado_cidades: [cidade.slug], fixado_regioes: [], fixado_posicao: capa ? 0 : 1 }
+        : {}),
       status: "publicado",
       publicado_em: new Date().toISOString(),
       origem_imprensa_cliente_id: cliente.id,

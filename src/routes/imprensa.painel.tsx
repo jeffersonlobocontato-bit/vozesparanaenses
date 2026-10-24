@@ -66,6 +66,7 @@ function ImprensaPainel() {
   const [fotos, setFotos] = useState<Foto[]>([]);
   const [principal, setPrincipal] = useState(0);
   const [uploadBusy, setUploadBusy] = useState(false);
+  const [erroFoto, setErroFoto] = useState<string | null>(null);
 
   const [termoAceito, setTermoAceito] = useState(false);
   const [publicando, setPublicando] = useState(false);
@@ -120,22 +121,23 @@ function ImprensaPainel() {
 
   async function onUploadFotos(files: File[]) {
     setUploadBusy(true);
-    setErro(null);
+    setErroFoto(null);
     try {
       const sb = await getExternalBrowser();
       const novas: Foto[] = [];
       for (const file of files) {
         if (!file.type.startsWith("image/")) continue;
-        if (file.size > 10 * 1024 * 1024) { setErro(`"${file.name}" passa de 10 MB e não foi enviada.`); continue; }
+        if (file.size > 10 * 1024 * 1024) { setErroFoto(`"${file.name}" passa de 10 MB e não foi enviada.`); continue; }
         const ext = file.name.split(".").pop() || "jpg";
         const path = `${crypto.randomUUID()}.${ext}`;
-        const { error } = await sb.storage.from("imprensa-imagens").upload(path, file);
-        if (error) throw error;
+        const { error } = await sb.storage.from("imprensa-imagens").upload(path, file, { contentType: file.type || "image/jpeg" });
+        if (error) throw new Error(`Não foi possível enviar "${file.name}": ${error.message}`);
         novas.push({ url: sb.storage.from("imprensa-imagens").getPublicUrl(path).data.publicUrl });
       }
       setFotos((f) => [...f, ...novas]);
     } catch (e: unknown) {
-      setErro(e instanceof Error ? e.message : "Erro ao enviar foto.");
+      console.error("upload de foto", e);
+      setErroFoto(e instanceof Error ? e.message : "Erro ao enviar foto.");
     } finally {
       setUploadBusy(false);
     }
@@ -268,6 +270,7 @@ function ImprensaPainel() {
           ))}
         </div>
       )}
+      {erroFoto && <p role="alert" className="mb-2 rounded border border-red-200 bg-red-50 p-2 text-xs text-red-700">{erroFoto}</p>}
       <label className={`inline-flex cursor-pointer items-center rounded border border-dashed border-slate-400 px-4 py-2 text-sm font-semibold text-[#12201E] hover:bg-slate-50 ${uploadBusy ? "opacity-50" : ""}`}>
         {uploadBusy ? "Enviando fotos…" : fotos.length ? "Adicionar mais fotos" : "Escolher fotos"}
         <input type="file" accept="image/*" multiple disabled={uploadBusy} className="sr-only"
@@ -347,6 +350,7 @@ function ImprensaPainel() {
             </label>
           </div>
 
+          {erro && <p role="alert" className="rounded border border-red-200 bg-red-50 p-2 text-sm text-red-700">{erro}</p>}
           <button
             onClick={publicar}
             disabled={!termoAceito || publicando || uploadBusy || !titulo.trim() || !corpo.trim()}
