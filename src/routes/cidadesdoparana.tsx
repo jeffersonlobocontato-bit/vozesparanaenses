@@ -34,26 +34,37 @@ import { LogoIcon } from "@/components/Logo";
 
 const IMG = "/cidadesdoparana";
 const INTER = "Inter, ui-sans-serif, system-ui, sans-serif";
+const URL_LP = "https://vozesparanaenses.com.br/cidadesdoparana";
+const OG_IMG = "https://vozesparanaenses.com.br/cidadesdoparana/og-compartilhar.jpg";
+// Texto-gancho da prévia de compartilhamento (WhatsApp mostra ~2 linhas).
+const GANCHO =
+  "O único portal que dá espaço às 399 cidades do Paraná. A assessoria da sua prefeitura publica a matéria da semana, com redação por IA e link pronto para o WhatsApp. Veja como em 2 minutos.";
 const CADASTRO = "/imprensa/cadastro";
 const whats = (texto: string) => `https://wa.me/5545999864213?text=${encodeURIComponent(texto)}`;
 
 export const Route = createFileRoute("/cidadesdoparana")({
   head: () => ({
     meta: [
-      { title: "Sua cidade no portal do Paraná, sem custo | Vozes Paranaenses para prefeituras" },
-      {
-        name: "description",
-        content:
-          "O único portal que dá espaço às 399 cidades do Paraná. Assessorias de prefeitura publicam direto, com redação por IA no padrão do portal, sem custo.",
-      },
-      { property: "og:title", content: "Sua cidade nas notícias do Paraná. Sem custo." },
-      {
-        property: "og:description",
-        content: "Cadastre a assessoria da sua prefeitura no Vozes Paranaenses e publique direto, com link pronto para compartilhar.",
-      },
-      { property: "og:image", content: `https://vozesparanaenses.com.br${IMG}/home.jpg` },
+      { title: "Sua cidade nas notícias do Paraná. Sem custo. | Vozes Paranaenses" },
+      { name: "description", content: GANCHO },
       { property: "og:type", content: "website" },
+      { property: "og:url", content: URL_LP },
+      { property: "og:site_name", content: "Vozes Paranaenses" },
+      { property: "og:locale", content: "pt_BR" },
+      { property: "og:title", content: "Sua cidade nas notícias do Paraná. Sem custo." },
+      { property: "og:description", content: GANCHO },
+      { property: "og:image", content: OG_IMG },
+      { property: "og:image:secure_url", content: OG_IMG },
+      { property: "og:image:type", content: "image/jpeg" },
+      { property: "og:image:width", content: "1200" },
+      { property: "og:image:height", content: "628" },
+      { property: "og:image:alt", content: "Sua cidade nas notícias do Paraná. Sem custo. Vozes Paranaenses para prefeituras." },
+      { property: "og:video", content: `https://vozesparanaenses.com.br${IMG}/apresentacao.mp4` },
+      { property: "og:video:type", content: "video/mp4" },
       { name: "twitter:card", content: "summary_large_image" },
+      { name: "twitter:title", content: "Sua cidade nas notícias do Paraná. Sem custo." },
+      { name: "twitter:description", content: GANCHO },
+      { name: "twitter:image", content: OG_IMG },
     ],
     links: [
       { rel: "canonical", href: "https://vozesparanaenses.com.br/cidadesdoparana" },
