@@ -1,4 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
+import { ArrowLeft } from "lucide-react";
 import { useState } from "react";
 import { Logo } from "@/components/Logo";
 import { PARANA_MUNICIPIOS, findMunicipio } from "@/lib/parana-municipios";
@@ -95,7 +96,11 @@ function ImprensaCadastro() {
 
   return (
     <div className="min-h-screen bg-[#12201E] px-4 py-10">
-      <form onSubmit={enviar} className="mx-auto w-full max-w-lg space-y-4 rounded-lg bg-white p-6 shadow-xl">
+      <div className="mx-auto w-full max-w-lg">
+        <Link to="/cidadesdoparana" className="mb-4 inline-flex items-center gap-1.5 text-sm font-medium text-white/75 hover:text-white">
+          <ArrowLeft className="h-4 w-4" /> Voltar
+        </Link>
+      <form onSubmit={enviar} className="w-full space-y-4 rounded-lg bg-white p-6 shadow-xl">
         <div className="flex justify-center pb-1"><Logo size="sm" variant="blue" withLink={false} /></div>
         <h1 className="text-center text-lg font-semibold text-[#12201E]">Cadastro no Portal da Imprensa</h1>
         <p className="text-center text-xs text-slate-500">
@@ -185,6 +190,7 @@ function ImprensaCadastro() {
           Já tem cadastro? <Link to="/imprensa/entrar" className="font-semibold text-[#12201E] underline">Entrar</Link>
         </p>
       </form>
+      </div>
     </div>
   );
 }

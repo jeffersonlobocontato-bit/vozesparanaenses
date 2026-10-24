@@ -204,8 +204,8 @@ function RootComponent() {
   const { queryClient } = Route.useRouteContext();
   const pathname = useRouterState({ select: (s) => s.location.pathname });
   const isAdmin = pathname.startsWith("/admin");
-  // Landing de produto: sem anúncio, sem widget de vendas de publicidade.
-  const isLanding = pathname === "/cidadesdoparana";
+  // Landing de produto e Portal da Imprensa: sem anúncio, sem widget de vendas de publicidade.
+  const isLanding = pathname === "/cidadesdoparana" || pathname.startsWith("/imprensa");
 
   useEffect(() => {
     // O AdSense nunca deve carregar em telas administrativas — são páginas

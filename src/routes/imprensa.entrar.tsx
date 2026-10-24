@@ -1,4 +1,5 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import { ArrowLeft } from "lucide-react";
 import { useState } from "react";
 import { getExternalBrowser } from "@/lib/external-supabase-browser";
 import { Logo } from "@/components/Logo";
@@ -61,12 +62,16 @@ function ImprensaLogin() {
   }
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-[#12201E] px-4">
-      <form onSubmit={onSubmit} className="w-full max-w-sm space-y-4 rounded-lg bg-white p-6 shadow-xl">
+    <div className="flex min-h-screen flex-col items-center justify-center bg-[#12201E] px-4">
+      <div className="w-full max-w-sm">
+        <Link to="/cidadesdoparana" className="mb-4 inline-flex items-center gap-1.5 text-sm font-medium text-white/75 hover:text-white">
+          <ArrowLeft className="h-4 w-4" /> Voltar
+        </Link>
+      <form onSubmit={onSubmit} className="w-full space-y-4 rounded-lg bg-white p-6 shadow-xl">
         <div className="flex justify-center pb-2"><Logo size="sm" variant="blue" withLink={false} /></div>
         <h1 className="text-center text-lg font-semibold text-[#12201E]">Portal da Imprensa</h1>
         <p className="text-center text-xs text-muted-foreground">
-          Acesso exclusivo pra assessorias e empresas parceiras
+          Acesso das assessorias de comunicação das prefeituras do Paraná
         </p>
         <label className="block text-sm">
           <span className="mb-1 block text-muted-foreground">E-mail</span>
@@ -87,6 +92,7 @@ function ImprensaLogin() {
           Primeiro acesso? <Link to="/imprensa/cadastro" className="font-semibold text-[#12201E] underline">Cadastre a sua prefeitura</Link>
         </p>
       </form>
+      </div>
     </div>
   );
 }
