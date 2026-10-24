@@ -30,8 +30,7 @@ create unique index if not exists clientes_imprensa_cpf_cidade_uidx
 create index if not exists clientes_imprensa_status_idx
   on public.clientes_imprensa(status, criado_em desc);
 
--- Fotos: só cliente aprovado envia (o pendente prepara o texto, mas a
--- publicação e as fotos ficam para depois da aprovação).
+-- Fotos: só cliente aprovado envia (o pendente só vê "cadastro em análise").
 drop policy if exists "imprensa imagens upload cliente logado" on storage.objects;
 create policy "imprensa imagens upload cliente logado" on storage.objects
   for insert to authenticated
