@@ -16,6 +16,7 @@ import {
   ErrorBanner,
   Aviso,
   Tabs,
+  StatCard,
 } from "@/components/admin/ui";
 import { FichaFonte } from "@/components/admin/FichaFonte";
 
@@ -45,7 +46,14 @@ type Fonte = {
   regiao: { slug: string; nome: string } | null;
   tipo: "veiculo" | "prefeitura";
   email_imprensa: string | null;
+  curadoria_editoria?: string | null;
 };
+
+// Fonte ativa sem coleta nas últimas 24h (curadoria tem ritmo próprio, 5h+).
+function atrasada(f: { ultimo_scrape_em: string | null }): boolean {
+  if (!f.ultimo_scrape_em) return true;
+  return Date.now() - new Date(f.ultimo_scrape_em).getTime() > 24 * 3600_000;
+}
 
 const empty: {
   nome: string;
@@ -81,6 +89,8 @@ function AdminFontes() {
   const [tab, setTab] = useState<"veiculo" | "prefeitura">("veiculo");
   const [busca, setBusca] = useState("");
   const [situacao, setSituacao] = useState<"todas" | "ativas" | "inativas">("todas");
+  // Recortes dos cartões do topo, além da aba/situação.
+  const [recorte, setRecorte] = useState<"" | "curadoria" | "portais" | "atrasadas">("");
   const [estat, setEstat] = useState<Map<string, Estat> | null>(null);
   const [fichaId, setFichaId] = useState<string | null>(null);
   const fecharFicha = useCallback(() => setFichaId(null), []);
@@ -90,7 +100,7 @@ function AdminFontes() {
     try {
       const sb = await getExternalBrowser();
       const [{ data: fontes, error: e1 }, { data: regs, error: e2 }] = await Promise.all([
-        sb.from("fontes").select("id, nome, url_base, tipo_renderizacao, protecao_antibot, frequencia_horas, ativo, ultimo_scrape_em, regiao_id, regiao:regioes(slug, nome), tipo, email_imprensa").order("nome"),
+        sb.from("fontes").select("id, nome, url_base, tipo_renderizacao, protecao_antibot, frequencia_horas, ativo, ultimo_scrape_em, regiao_id, regiao:regioes(slug, nome), tipo, email_imprensa, curadoria_editoria").order("nome"),
         sb.from("regioes").select("id, slug, nome").order("nome"),
       ]);
       if (e1) throw e1;
@@ -136,6 +146,7 @@ function AdminFontes() {
 
   function trocarAba(t: "veiculo" | "prefeitura") {
     setTab(t);
+    setRecorte("");
     resetForm();
   }
 
@@ -198,9 +209,39 @@ function AdminFontes() {
       if (situacao === "ativas" && !f.ativo) return false;
       if (situacao === "inativas" && f.ativo) return false;
       if (q && !f.nome.toLowerCase().includes(q) && !f.url_base.toLowerCase().includes(q)) return false;
+      if (recorte === "curadoria" && !f.curadoria_editoria) return false;
+      if (recorte === "portais" && (f.tipo !== "veiculo" || f.curadoria_editoria)) return false;
+      if (recorte === "atrasadas" && !(f.ativo && atrasada(f))) return false;
       return true;
     });
-  }, [items, tab, busca, situacao]);
+  }, [items, tab, busca, situacao, recorte]);
+
+  // Números do topo (sobre todas as fontes, independentes da aba).
+  const kpis = useMemo(() => {
+    const k = { prefAtivas: 0, prefInativas: 0, cidadesCobertas: 0, portaisAtivos: 0, portaisInativos: 0, curadoriaAtivas: 0, curadoriaTotal: 0, atrasadas: 0 };
+    const cidades = new Set<string>();
+    for (const f of items ?? []) {
+      if (f.tipo === "prefeitura") {
+        if (f.ativo) { k.prefAtivas++; cidades.add(f.nome.replace(/^Prefeitura de\s+/i, "").toLowerCase()); }
+        else k.prefInativas++;
+      } else if (f.curadoria_editoria) {
+        k.curadoriaTotal++;
+        if (f.ativo) k.curadoriaAtivas++;
+      } else if (f.ativo) k.portaisAtivos++;
+      else k.portaisInativos++;
+      if (f.ativo && atrasada(f)) k.atrasadas++;
+    }
+    k.cidadesCobertas = cidades.size;
+    return k;
+  }, [items]);
+
+  function aplicarRecorte(aba: "veiculo" | "prefeitura", sit: "todas" | "ativas" | "inativas", rec: typeof recorte) {
+    const mesmo = tab === aba && situacao === sit && recorte === rec;
+    if (tab !== aba) trocarAba(aba);
+    setSituacao(mesmo ? "todas" : sit);
+    setRecorte(mesmo ? "" : rec);
+  }
+  const ativo = (aba: string, sit: string, rec: string) => tab === aba && situacao === sit && recorte === rec;
 
   const totalAba = tab === "prefeitura" ? contagem.prefeitura : contagem.veiculo;
   const th = "px-4 py-2.5 text-left text-[11px] font-semibold uppercase tracking-wider text-slate-500";
@@ -224,6 +265,30 @@ function AdminFontes() {
           </>
         }
       />
+
+      {/* Big numbers — clicar aplica o filtro na tabela (clicar de novo limpa) */}
+      {items && (
+        <div className="grid grid-cols-2 gap-3 md:grid-cols-3 xl:grid-cols-6">
+          <StatCard label="Prefeituras ativas" value={kpis.prefAtivas} tom="bom"
+            detalhe={`${kpis.cidadesCobertas} de 399 cidades cobertas`}
+            onClick={() => aplicarRecorte("prefeitura", "ativas", "")} ativo={ativo("prefeitura", "ativas", "")} />
+          <StatCard label="Prefeituras inativas" value={kpis.prefInativas} tom={kpis.prefInativas ? "alerta" : "neutro"}
+            detalhe="cadastradas, precisam de ajuste"
+            onClick={() => aplicarRecorte("prefeitura", "inativas", "")} ativo={ativo("prefeitura", "inativas", "")} />
+          <StatCard label="Portais do PR ativos" value={kpis.portaisAtivos} tom="bom"
+            detalhe={`${kpis.portaisInativos} inativo${kpis.portaisInativos === 1 ? "" : "s"}`}
+            onClick={() => aplicarRecorte("veiculo", "ativas", "portais")} ativo={ativo("veiculo", "ativas", "portais")} />
+          <StatCard label="Portais inativos" value={kpis.portaisInativos}
+            detalhe="veículos do Paraná desligados"
+            onClick={() => aplicarRecorte("veiculo", "inativas", "portais")} ativo={ativo("veiculo", "inativas", "portais")} />
+          <StatCard label="Curadoria nacional" value={`${kpis.curadoriaAtivas}/${kpis.curadoriaTotal}`}
+            detalhe="ativas: política, geral, esportes, tecnologia"
+            onClick={() => aplicarRecorte("veiculo", "todas", "curadoria")} ativo={ativo("veiculo", "todas", "curadoria")} />
+          <StatCard label="Sem coleta há +24h" value={kpis.atrasadas} tom={kpis.atrasadas ? "alerta" : "bom"}
+            detalhe="fontes ativas que o robô não leu"
+            onClick={() => aplicarRecorte(tab, "todas", "atrasadas")} ativo={recorte === "atrasadas"} />
+        </div>
+      )}
 
       {/* Módulos separados de propósito — scraping, cadastro e critério de
           relevância são diferentes entre veículo de imprensa e assessoria

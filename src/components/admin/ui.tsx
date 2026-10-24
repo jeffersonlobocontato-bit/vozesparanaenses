@@ -160,6 +160,35 @@ export function StatusPill({ status, label }: { status: string; label?: string }
   );
 }
 
+/**
+ * Cartão de número grande (big number). Com onClick, vira botão (ex.: filtra
+ * a tabela abaixo). tom "alerta" destaca algo que pede atenção.
+ */
+export function StatCard({ label, value, detalhe, tom = "neutro", onClick, ativo }: {
+  label: string;
+  value: ReactNode;
+  detalhe?: ReactNode;
+  tom?: "neutro" | "bom" | "alerta";
+  onClick?: () => void;
+  ativo?: boolean;
+}) {
+  const cor = tom === "bom" ? "text-emerald-700" : tom === "alerta" ? "text-amber-700" : "text-[#12201E]";
+  const borda = ativo ? "border-[#12201E] ring-1 ring-[#12201E]" : tom === "alerta" ? "border-amber-300" : "border-slate-200";
+  const corpo = (
+    <>
+      <span className="block text-[11px] font-semibold uppercase tracking-wider text-slate-500">{label}</span>
+      <span className={`mt-1 block text-3xl font-bold tabular-nums ${cor}`}>{value}</span>
+      {detalhe && <span className="mt-0.5 block text-xs text-slate-500">{detalhe}</span>}
+    </>
+  );
+  const cls = `block w-full rounded-2xl border bg-white p-4 text-left shadow-sm ${borda}`;
+  return onClick ? (
+    <button type="button" onClick={onClick} aria-pressed={ativo} className={`${cls} transition hover:-translate-y-0.5 hover:shadow-md`}>{corpo}</button>
+  ) : (
+    <div className={cls}>{corpo}</div>
+  );
+}
+
 /** Barra de filtros acima de listas. */
 export function FilterBar({ children, resumo }: { children: ReactNode; resumo?: ReactNode }) {
   return (
