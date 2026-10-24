@@ -336,7 +336,9 @@ function parseRss(xml: string): Item[] {
       ? (b.match(/<link[^>]*href="([^"]+)"/i)?.[1] ?? "")
       : decode(match(b, /<link[^>]*>([\s\S]*?)<\/link>/));
     const descr = decode(match(b, /<description[^>]*>([\s\S]*?)<\/description>/) || match(b, /<summary[^>]*>([\s\S]*?)<\/summary>/));
-    const data = match(b, /<pubDate[^>]*>([\s\S]*?)<\/pubDate>/) || match(b, /<published[^>]*>([\s\S]*?)<\/published>/) || null;
+    // Câmara dos Deputados publica alguns itens com <pubDate> sem fechar a tag.
+    const data = match(b, /<pubDate[^>]*>([\s\S]*?)<\/pubDate>/) || match(b, /<pubDate[^>]*>([^<]+)/)
+      || match(b, /<published[^>]*>([\s\S]*?)<\/published>/) || null;
     if (!link || !titulo) continue;
     // Tenta capturar imagem: enclosure, media:content, media:thumbnail, ou <img src=""> na descrição
     const enclosure = b.match(/<enclosure[^>]+url="([^"]+)"[^>]*type="image/i)?.[1]
