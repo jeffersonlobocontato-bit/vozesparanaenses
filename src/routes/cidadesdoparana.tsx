@@ -173,6 +173,10 @@ const FAQ: Array<{ p: string; r: string }> = [
     r: "O responsável pela comunicação da prefeitura: secretário, diretor, coordenador, supervisor, assessor de imprensa ou outra função equivalente. O cadastro é pessoal, com CPF, e passa por aprovação.",
   },
   {
+    p: "Que tipo de matéria posso publicar?",
+    r: "Ações da prefeitura: obras, serviços, programas, campanhas, eventos, editais, concursos, avisos e resultados do município e das secretarias. Conteúdo de empresa, eleitoral ou partidário, da Câmara, do estado ou de outras entidades sem a prefeitura como protagonista é bloqueado automaticamente, e o painel explica o motivo.",
+  },
+  {
     p: "A IA muda o que a prefeitura disse?",
     r: "Não inventa nada. Ela reescreve o material no formato de notícia do portal (título, linha fina, texto) usando só as informações enviadas, e você revisa antes de publicar.",
   },

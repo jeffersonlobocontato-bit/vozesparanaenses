@@ -10,6 +10,7 @@
 // Body: { submissao_id, titulo, subtitulo, corpo, fotos, termo_aceito: true }
 
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
+import { avaliarPauta, clienteEhPrefeitura, mensagemPautaBloqueada } from "../_shared/imprensa-pauta.ts";
 import { mensagemLimite, situacaoLimite } from "../_shared/imprensa-limite.ts";
 import { gerarMetadados, type Meta } from "../_shared/metadados-artigo.ts";
 import { resolverCidade } from "../_shared/imprensa-cidade.ts";
@@ -82,6 +83,17 @@ Deno.serve(async (req) => {
   const regiaoId = cidade?.regiao_id ?? body.regiao_id ?? null;
   if (!regiaoId) {
     return json({ error: "cidade_nao_identificada", detail: "Não identificamos a cidade da matéria. Cite o nome do município no texto." }, 400);
+  }
+
+  // Escopo de novo, sobre o texto final revisado (o cliente pode ter mudado a pauta).
+  if (clienteEhPrefeitura(cliente)) {
+    const aiKeyPauta = Deno.env.get("LOVABLE_API_KEY");
+    if (aiKeyPauta) {
+      const pauta = await avaliarPauta(`${body.titulo}\n\n${body.subtitulo ?? ""}\n\n${body.corpo}`, cidade?.nome ?? null, aiKeyPauta);
+      if (!pauta.ok) {
+        return json({ error: "pauta_fora_do_escopo", detail: mensagemPautaBloqueada(pauta.motivo), motivo: pauta.motivo }, 422);
+      }
+    }
   }
 
   const { data: submissao, error: subErr } = await sb

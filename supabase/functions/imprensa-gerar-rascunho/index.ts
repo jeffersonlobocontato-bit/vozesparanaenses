@@ -11,6 +11,7 @@
 // Resposta: { ok, submissao_id, categoria_detectada, titulo, subtitulo, corpo }
 
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
+import { avaliarPauta, clienteEhPrefeitura, mensagemPautaBloqueada } from "../_shared/imprensa-pauta.ts";
 import { mensagemLimite, situacaoLimite } from "../_shared/imprensa-limite.ts";
 import { resolverCidade } from "../_shared/imprensa-cidade.ts";
 import { ehDuplicata } from "../_shared/duplicidade.ts";
@@ -65,6 +66,19 @@ Deno.serve(async (req) => {
   try { body = await req.json(); } catch { return json({ error: "invalid_json_body" }, 400); }
   if (!body.texto_bruto?.trim() || body.texto_bruto.trim().length < 40) {
     return json({ error: "texto_insuficiente", detail: "Cole o release ou responda com mais detalhe antes de gerar o rascunho." }, 400);
+  }
+
+  // 0. Escopo: assessoria de prefeitura só publica ação da prefeitura.
+  if (clienteEhPrefeitura(cliente)) {
+    let municipio: string | null = null;
+    if (cliente.cidade_id) {
+      const { data: cid } = await sb.from("cidades").select("nome").eq("id", cliente.cidade_id).maybeSingle();
+      municipio = cid?.nome ?? null;
+    }
+    const pauta = await avaliarPauta(body.texto_bruto, municipio, aiKey);
+    if (!pauta.ok) {
+      return json({ error: "pauta_fora_do_escopo", detail: mensagemPautaBloqueada(pauta.motivo), motivo: pauta.motivo }, 422);
+    }
   }
 
   // 1. Lista as 13 editorias pra IA escolher.
