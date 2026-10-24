@@ -4,6 +4,7 @@
 // Body opcional: { fonte_id?: string }. Sem body, processa um lote das fontes
 // ativas ainda não coletadas no ciclo aberto (portais 10h/16h/21h — ver ../_shared/coleta.ts).
 
+import { exigirInterno } from "../_shared/auth.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
 import { carregarCidades } from "../_shared/cidades.ts";
 import { carregarNomesVeiculos, CICLOS_PORTAIS, comLimiteDeTempo, fonteElegivel, ordenarPorTentativa, processarItensDaFonte, type MetaPagina, type RelatorioFonte } from "../_shared/coleta.ts";
@@ -39,6 +40,10 @@ type Item = {
 
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: cors });
+  {
+    const negado = await exigirInterno(req);
+    if (negado) return negado;
+  }
   if (req.method !== "POST") return json({ error: "method_not_allowed" }, 405);
 
   // Orçamento de tempo pra chamada síncrona inteira. Sem isso, buscar o

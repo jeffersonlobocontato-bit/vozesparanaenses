@@ -130,7 +130,12 @@ Responda SEMPRE em JSON válido, neste schema exato:
 
   const messages = [
     { role: "system", content: systemPrompt },
-    ...body.mensagens.map((m) => ({ role: m.role, content: m.content })),
+    // Só falas de visitante/assistente, últimas 12, até 2.000 caracteres cada:
+    // nada de "system" injetado nem texto gigante usando a IA de graça.
+    ...body.mensagens
+      .filter((m) => m && (m.role === "user" || m.role === "assistant") && typeof m.content === "string")
+      .slice(-12)
+      .map((m) => ({ role: m.role, content: m.content.slice(0, 2000) })),
   ];
 
   const aiRes = await fetch(AI_URL, {

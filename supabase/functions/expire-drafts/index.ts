@@ -5,6 +5,7 @@
 //   2. Expirado com mais de 7 dias é apagado de vez — o intervalo entre as
 //      duas fases é a rede de segurança contra dias sem revisar o painel.
 
+import { exigirInterno } from "../_shared/auth.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
 
 const cors = {
@@ -18,6 +19,10 @@ const DIAS_ATE_APAGAR = 7;
 
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: cors });
+  {
+    const negado = await exigirInterno(req);
+    if (negado) return negado;
+  }
   if (req.method !== "POST") return json({ error: "method_not_allowed" }, 405);
 
   const url = Deno.env.get("EXTERNAL_SUPABASE_URL");

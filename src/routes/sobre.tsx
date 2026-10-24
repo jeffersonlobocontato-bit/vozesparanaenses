@@ -1,3 +1,4 @@
+import { jsonLd } from "@/lib/json-ld";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { SiteHeader, SiteFooter } from "@/components/SiteHeader";
 import { getSobreConfig, renderRichText, DEFAULT_SOBRE } from "@/lib/sobre.functions";
@@ -29,7 +30,7 @@ export const Route = createFileRoute("/sobre")({
     scripts: [
       {
         type: "application/ld+json",
-        children: JSON.stringify({
+        children: jsonLd({
           "@context": "https://schema.org",
           "@type": "AboutPage",
           name: "Sobre — Vozes Paranaenses",

@@ -1,3 +1,4 @@
+import { headersEquipe } from "@/lib/invoke-equipe";
 import { useEffect, useState } from "react";
 import { Link2, FileText, Sparkles, Send } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
@@ -115,7 +116,7 @@ function IaRedige({ onCreated }: { onCreated?: () => void }) {
             categoria_id: agente.categoria.id,
             observacoes: obs.trim() || undefined,
           };
-      const { data, error } = await supabase.functions.invoke("manual-article", { body });
+      const { data, error } = await supabase.functions.invoke("manual-article", { headers: await headersEquipe(), body });
       clearTimeout(progressTimer);
       if (error) {
         let detail = "";
@@ -275,8 +276,7 @@ function PublicarTexto({ onCreated }: { onCreated?: () => void }) {
     setBusy(true);
     setStep("Montando SEO e GEO (o texto não será alterado)…");
     try {
-      const { data, error } = await supabase.functions.invoke("publish-article", {
-        body: {
+      const { data, error } = await supabase.functions.invoke("publish-article", { headers: await headersEquipe(), body: {
           titulo: titulo.trim(),
           texto: texto.trim(),
           subtitulo: subtitulo.trim() || undefined,

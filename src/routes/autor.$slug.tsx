@@ -1,3 +1,4 @@
+import { jsonLd } from "@/lib/json-ld";
 import { createFileRoute, Link, notFound } from "@tanstack/react-router";
 import { queryOptions, useSuspenseQuery } from "@tanstack/react-query";
 import { listArticlesByAuthor } from "@/lib/content.functions";
@@ -43,7 +44,7 @@ export const Route = createFileRoute("/autor/$slug")({
       scripts: [
         {
           type: "application/ld+json",
-          children: JSON.stringify({
+          children: jsonLd({
             "@context": "https://schema.org",
             "@type": "ProfilePage",
             mainEntity: {

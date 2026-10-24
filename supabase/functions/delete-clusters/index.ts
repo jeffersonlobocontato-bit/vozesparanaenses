@@ -2,6 +2,7 @@
 // role no Supabase externo. Necessário porque a tabela article_clusters
 // não tem política de DELETE para o usuário autenticado — via cliente
 // browser a exclusão retorna 0 linhas silenciosamente.
+import { exigirEquipe } from "../_shared/auth.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
 
 const cors = {
@@ -18,6 +19,10 @@ type Body = {
 
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: cors });
+  {
+    const negado = await exigirEquipe(req);
+    if (negado) return negado;
+  }
   if (req.method !== "POST") return json({ error: "method_not_allowed" }, 405);
 
   const url = Deno.env.get("EXTERNAL_SUPABASE_URL");

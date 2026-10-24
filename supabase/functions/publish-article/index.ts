@@ -7,6 +7,7 @@
 // seo_description, resumo, tl;dr, 5W1H, FAQ, cidade principal e cidades
 // mencionadas) a partir do texto que já veio pronto.
 
+import { exigirEquipe } from "../_shared/auth.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
 import { gerarMetadados, MODEL_METADADOS } from "../_shared/metadados-artigo.ts";
 
@@ -36,6 +37,10 @@ type Payload = {
 
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: cors });
+  {
+    const negado = await exigirEquipe(req);
+    if (negado) return negado;
+  }
   if (req.method !== "POST") return json({ error: "method_not_allowed" }, 405);
 
   const extUrl = Deno.env.get("EXTERNAL_SUPABASE_URL");

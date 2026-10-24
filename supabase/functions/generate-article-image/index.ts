@@ -9,6 +9,7 @@
 //     para o storage no momento da geração) como capa da matéria.
 // Salva em storage `article-covers` e atualiza imagem_capa_url + og_image_url + imagem_credito.
 
+import { exigirEquipe } from "../_shared/auth.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
 import { CREDITO_IA, promptIlustracao } from "../_shared/imagem.ts";
 
@@ -36,6 +37,10 @@ type Body = {
 
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: cors });
+  {
+    const negado = await exigirEquipe(req);
+    if (negado) return negado;
+  }
   if (req.method !== "POST") return json({ error: "method_not_allowed" }, 405);
 
   const url = Deno.env.get("EXTERNAL_SUPABASE_URL");
@@ -80,7 +85,11 @@ Deno.serve(async (req) => {
   if (body.mode === "upload") {
     if (!body.base64) return json({ error: "missing_base64" }, 400);
     imgBytes = base64ToBytes(body.base64);
-    mime = body.mime && /^image\//.test(body.mime) ? body.mime : "image/jpeg";
+    // Só formatos de foto: SVG pode carregar script.
+    mime = ["image/jpeg", "image/png", "image/webp"].includes(String(body.mime).toLowerCase())
+      ? String(body.mime).toLowerCase()
+      : "image/jpeg";
+    if (imgBytes.byteLength > 12 * 1024 * 1024) return json({ error: "imagem_muito_grande", detail: "Máximo de 12 MB." }, 400);
     credito = "Imagem: enviada pela redação";
   } else {
     if (!aiKey) return json({ error: "missing_lovable_api_key" }, 500);

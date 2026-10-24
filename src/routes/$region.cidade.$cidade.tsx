@@ -1,3 +1,4 @@
+import { jsonLd } from "@/lib/json-ld";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { queryOptions, useSuspenseQuery } from "@tanstack/react-query";
 import { getRegionBySlug, listArticlesByCity, listNotasCidade } from "@/lib/content.functions";
@@ -124,8 +125,8 @@ export const Route = createFileRoute("/$region/cidade/$cidade")({
         },
       ],
       scripts: [
-        { type: "application/ld+json", children: JSON.stringify(collectionPage) },
-        { type: "application/ld+json", children: JSON.stringify(breadcrumb) },
+        { type: "application/ld+json", children: jsonLd(collectionPage) },
+        { type: "application/ld+json", children: jsonLd(breadcrumb) },
       ],
     };
   },

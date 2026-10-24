@@ -27,6 +27,21 @@ function slugify(s: string): string {
     .slice(0, 90);
 }
 
+// Só o cron chama esta rota. Com CRON_SECRET configurado, exige o header
+// x-cron-secret (o cron do banco envia); sem ele, aceita (transição) e avisa.
+function autorizado(req: Request): boolean {
+  const segredo = process.env.CRON_SECRET ?? "";
+  if (!segredo) {
+    console.warn("[publicar-tecnologia] CRON_SECRET não configurado: chamada aceita sem segredo.");
+    return true;
+  }
+  const enviado = req.headers.get("x-cron-secret") ?? "";
+  if (enviado.length !== segredo.length) return false;
+  let d = 0;
+  for (let i = 0; i < segredo.length; i++) d |= enviado.charCodeAt(i) ^ segredo.charCodeAt(i);
+  return d === 0;
+}
+
 async function run(): Promise<Response> {
   const url = process.env.EXTERNAL_SUPABASE_URL;
   const serviceKey = process.env.EXTERNAL_SUPABASE_SERVICE_ROLE_KEY;
@@ -218,6 +233,7 @@ Responda em JSON com TODOS estes campos preenchidos (corpo em parágrafos separa
     headers: {
       "Content-Type": "application/json",
       Authorization: `Bearer ${selfKey}`,
+      ...(process.env.CRON_SECRET ? { "x-cron-secret": process.env.CRON_SECRET } : {}),
     },
     body: JSON.stringify({ cluster_id: cluster.id }),
   });
@@ -233,6 +249,7 @@ Responda em JSON com TODOS estes campos preenchidos (corpo em parágrafos separa
     headers: {
       "Content-Type": "application/json",
       Authorization: `Bearer ${selfKey}`,
+      ...(process.env.CRON_SECRET ? { "x-cron-secret": process.env.CRON_SECRET } : {}),
     },
     body: JSON.stringify({ cluster_id: cluster.id }),
   });
@@ -268,8 +285,8 @@ Responda em JSON com TODOS estes campos preenchidos (corpo em parágrafos separa
 export const Route = createFileRoute("/api/public/publicar-tecnologia-periodico")({
   server: {
     handlers: {
-      GET: async () => run(),
-      POST: async () => run(),
+      GET: async () => Response.json({ error: "method_not_allowed" }, { status: 405 }),
+      POST: async ({ request }) => (autorizado(request) ? run() : Response.json({ error: "unauthorized" }, { status: 401 })),
     },
   },
 });

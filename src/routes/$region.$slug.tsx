@@ -1,3 +1,4 @@
+import { jsonLd } from "@/lib/json-ld";
 import { createFileRoute, isNotFound, Link, redirect } from "@tanstack/react-router";
 import { queryOptions, useSuspenseQuery } from "@tanstack/react-query";
 import {
@@ -302,10 +303,10 @@ export const Route = createFileRoute("/$region/$slug")({
           : []),
       ],
       scripts: [
-        { type: "application/ld+json", children: JSON.stringify(newsArticle) },
-        { type: "application/ld+json", children: JSON.stringify(breadcrumb) },
+        { type: "application/ld+json", children: jsonLd(newsArticle) },
+        { type: "application/ld+json", children: jsonLd(breadcrumb) },
         ...(faqSchema
-          ? [{ type: "application/ld+json", children: JSON.stringify(faqSchema) }]
+          ? [{ type: "application/ld+json", children: jsonLd(faqSchema) }]
           : []),
       ],
     };

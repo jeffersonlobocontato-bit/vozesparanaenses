@@ -68,8 +68,11 @@ Deno.serve(async (req) => {
 
   // Remover
   if (body.remove?.length) {
-    await sb.storage.from(BUCKET).remove(body.remove);
-    atual = atual.filter((f) => !body.remove!.includes(f.path));
+    // Só apaga fotos DESTE pedido (que estão na lista dele e na pasta dele).
+    const doPedido = new Set(atual.map((f) => f.path));
+    const remover = body.remove.filter((p) => doPedido.has(p) && p.startsWith(`${pedido.id}/`));
+    if (remover.length) await sb.storage.from(BUCKET).remove(remover);
+    atual = atual.filter((f) => !remover.includes(f.path));
   }
 
   // Adicionar
@@ -82,10 +85,14 @@ Deno.serve(async (req) => {
       if (bytes.byteLength > MAX_BYTES) {
         return json({ error: "foto_muito_grande", nome: foto.name, max_bytes: MAX_BYTES }, 400);
       }
-      const ext = safeExt(foto.contentType || "");
+      const tipo = (foto.contentType || "image/jpeg").toLowerCase();
+      if (!["image/jpeg", "image/png", "image/webp"].includes(tipo)) {
+        return json({ error: "tipo_de_arquivo_invalido", detail: "Envie fotos em JPG, PNG ou WebP." }, 400);
+      }
+      const ext = safeExt(tipo);
       const path = `${pedido.id}/${crypto.randomUUID()}.${ext}`;
       const up = await sb.storage.from(BUCKET).upload(path, bytes, {
-        contentType: foto.contentType || "image/jpeg",
+        contentType: tipo,
         upsert: false,
       });
       if (up.error) return json({ error: "upload_falhou", detail: up.error.message }, 500);

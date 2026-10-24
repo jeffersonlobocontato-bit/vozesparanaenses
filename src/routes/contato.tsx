@@ -1,3 +1,4 @@
+import { jsonLd } from "@/lib/json-ld";
 import { createFileRoute } from "@tanstack/react-router";
 import { useState } from "react";
 import { getRecaptchaToken } from "@/lib/recaptcha";
@@ -30,7 +31,7 @@ export const Route = createFileRoute("/contato")({
     scripts: [
       {
         type: "application/ld+json",
-        children: JSON.stringify({
+        children: jsonLd({
           "@context": "https://schema.org",
           "@type": "ContactPage",
           name: "Contato — Vozes Paranaenses",

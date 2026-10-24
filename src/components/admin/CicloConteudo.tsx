@@ -1,3 +1,4 @@
+import { headersEquipe } from "@/lib/invoke-equipe";
 import { useEffect, useMemo, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Activity, AlertTriangle, CheckCircle2, Clock3, Play } from "lucide-react";
@@ -103,7 +104,7 @@ function LinhaFrente({ frente, jobs, agora, aoVivo, coletado, fontes, onDisparad
     setRetorno(null);
     try {
       for (const p of frente.acao.passos) {
-        const { error } = await supabase.functions.invoke(p.funcao, { body: p.body });
+        const { error } = await supabase.functions.invoke(p.funcao, { headers: await headersEquipe(), body: p.body });
         if (error) throw new Error(`${p.funcao}: ${error.message ?? "falha"}`);
       }
       setRetorno("Disparado no servidor. O processamento automático escreve o que for coletado.");

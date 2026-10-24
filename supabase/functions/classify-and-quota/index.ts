@@ -13,6 +13,7 @@
 //
 // Body opcional: { regiao_id?: string }
 
+import { exigirInterno } from "../_shared/auth.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
 import { CRIVO_PROMPT, CRIVO_SCHEMA, motivoDescartePortal, pareceReleaseDeAssessoria, parseCrivo, pesoPrioridade, type ResultadoCrivo } from "../_shared/crivo-editorial.ts";
 
@@ -27,6 +28,10 @@ const MODEL = "google/gemini-2.5-flash-lite";
 
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: cors });
+  {
+    const negado = await exigirInterno(req);
+    if (negado) return negado;
+  }
   if (req.method !== "POST") return json({ error: "method_not_allowed" }, 405);
 
   const url = Deno.env.get("EXTERNAL_SUPABASE_URL");

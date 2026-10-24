@@ -7,6 +7,7 @@
 // `fontes` (tipo = 'prefeitura').
 // Body opcional: { fonte_id?: string, force?: boolean, sync?: boolean }.
 
+import { exigirInterno } from "../_shared/auth.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
 import { carregarCidades } from "../_shared/cidades.ts";
 import { carregarNomesVeiculos, comLimiteDeTempo, fonteElegivel, ordenarPorTentativa, processarItensDaFonte, type MetaPagina, type RelatorioFonte } from "../_shared/coleta.ts";
@@ -45,6 +46,10 @@ type Item = {
 
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: cors });
+  {
+    const negado = await exigirInterno(req);
+    if (negado) return negado;
+  }
   if (req.method !== "POST") return json({ error: "method_not_allowed" }, 405);
 
   const url = Deno.env.get("EXTERNAL_SUPABASE_URL");

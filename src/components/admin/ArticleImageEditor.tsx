@@ -1,3 +1,4 @@
+import { headersEquipe } from "@/lib/invoke-equipe";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { getExternalBrowser } from "@/lib/external-supabase-browser";
@@ -233,8 +234,7 @@ export function ArticleImageEditor({ articleId, currentUrl, originalUrl, current
   async function useOriginal() {
     setBusy("original"); setMsg("Restaurando foto original…");
     try {
-      const { data, error } = await supabase.functions.invoke("generate-article-image", {
-        body: { article_id: articleId, mode: "original" },
+      const { data, error } = await supabase.functions.invoke("generate-article-image", { headers: await headersEquipe(), body: { article_id: articleId, mode: "original" },
       });
       if (error) throw error;
       const d = data as { error?: string; detail?: string };
@@ -249,8 +249,7 @@ export function ArticleImageEditor({ articleId, currentUrl, originalUrl, current
   async function generateWithAI() {
     setBusy("ai"); setMsg("Gerando imagem com IA (leve variação da original)…");
     try {
-      const { data, error } = await supabase.functions.invoke("generate-article-image", {
-        body: { article_id: articleId, mode: "ai" },
+      const { data, error } = await supabase.functions.invoke("generate-article-image", { headers: await headersEquipe(), body: { article_id: articleId, mode: "ai" },
       });
       if (error) throw error;
       const d = data as { error?: string; detail?: string; url?: string };
@@ -273,8 +272,7 @@ export function ArticleImageEditor({ articleId, currentUrl, originalUrl, current
         r.onerror = () => reject(r.error);
         r.readAsDataURL(prepared);
       });
-      const { data, error } = await supabase.functions.invoke("generate-article-image", {
-        body: { article_id: articleId, mode: "upload", base64: b64, mime: prepared.type },
+      const { data, error } = await supabase.functions.invoke("generate-article-image", { headers: await headersEquipe(), body: { article_id: articleId, mode: "upload", base64: b64, mime: prepared.type },
       });
       if (error) throw error;
       const d = data as { error?: string; detail?: string };

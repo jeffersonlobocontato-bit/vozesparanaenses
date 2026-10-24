@@ -70,6 +70,15 @@ Deno.serve(async (req) => {
   };
   try { body = await req.json(); } catch { return json({ error: "invalid_json_body" }, 400); }
 
+  // Texto do cliente vai para o site e para dados estruturados: sem HTML.
+  const semHtml = (t?: string) => (t ?? "").replace(/<[^>]*>/g, "").replace(/[<>]/g, "");
+  body.titulo = semHtml(body.titulo).slice(0, 160);
+  body.subtitulo = semHtml(body.subtitulo).slice(0, 300);
+  body.corpo = semHtml(body.corpo).slice(0, 20000);
+  body.fotos = (body.fotos ?? [])
+    .filter((f) => typeof f?.url === "string" && /^https:\/\/[a-z0-9-]+\.supabase\.co\/storage\/v1\/object\/public\/imprensa-imagens\//.test(f.url))
+    .slice(0, 12);
+
   if (!body.termo_aceito) {
     return json({ error: "termo_nao_aceito", detail: "É preciso aceitar o termo de responsabilidade antes de publicar." }, 400);
   }

@@ -6,6 +6,7 @@
 // Prompt = núcleo comum de conteúdo pago (nucleo_conteudo_pago) + o
 // diferencial específico deste agente (agente_publieditorial).
 
+import { exigirServicoOuEquipe } from "../_shared/auth.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
 
 const cors = {
@@ -21,6 +22,10 @@ type Payload = { briefing_id: string };
 
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: cors });
+  {
+    const negado = await exigirServicoOuEquipe(req);
+    if (negado) return negado;
+  }
   if (req.method !== "POST") return json({ error: "method_not_allowed" }, 405);
 
   const url = Deno.env.get("EXTERNAL_SUPABASE_URL");

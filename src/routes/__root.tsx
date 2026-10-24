@@ -1,3 +1,4 @@
+import { jsonLd } from "@/lib/json-ld";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import {
   Outlet,
@@ -132,7 +133,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       // src/lib/cookie-consent.ts e src/components/CookieConsentBanner.tsx.
       {
         type: "application/ld+json",
-        children: JSON.stringify({
+        children: jsonLd({
           "@context": "https://schema.org",
           "@type": "NewsMediaOrganization",
           name: "Vozes Paranaenses",
@@ -165,7 +166,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       },
       {
         type: "application/ld+json",
-        children: JSON.stringify({
+        children: jsonLd({
           "@context": "https://schema.org",
           "@type": "WebSite",
           name: "Vozes Paranaenses",

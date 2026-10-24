@@ -20,6 +20,7 @@
 // Agendado pela 075 (de meia em meia hora, das 8h às 22h).
 // Body opcional: { article_id?: string } — analisa só essa matéria.
 
+import { exigirInterno } from "../_shared/auth.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
 import { avaliarFotos, escolherFotoBaixoRisco, planejarImagem, type AvaliacaoFoto } from "../_shared/analista-imagem.ts";
 import { buscarCommonsTema, copiarImagemParaStorage, CREDITO_IA, gerarIlustracaoTematica, type FotoCandidata } from "../_shared/imagem.ts";
@@ -48,6 +49,10 @@ function json(body: unknown, status = 200) {
 
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: cors });
+  {
+    const negado = await exigirInterno(req);
+    if (negado) return negado;
+  }
   if (req.method !== "POST") return json({ error: "method_not_allowed" }, 405);
 
   const url = Deno.env.get("EXTERNAL_SUPABASE_URL");
