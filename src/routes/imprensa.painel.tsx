@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import { getExternalBrowser } from "@/lib/external-supabase-browser";
 import { invokeImprensa } from "@/lib/imprensa-invoke";
 import { Logo } from "@/components/Logo";
+import { ShareButtons } from "@/components/ShareButtons";
 
 export const Route = createFileRoute("/imprensa/painel")({
   head: () => ({
@@ -27,6 +28,26 @@ Conteúdo identificado como ilegal, difamatório, ou em desacordo com estes term
 
 type Foto = { url: string; legenda?: string };
 
+// A IA leva ~15–40 s. A barra avança sozinha até 90% e completa quando o
+// texto chega — é indicação de andamento, não medida exata.
+function BarraRedacao() {
+  const [pct, setPct] = useState(4);
+  useEffect(() => {
+    const t = setInterval(() => setPct((p) => (p < 90 ? p + Math.max(0.6, (90 - p) / 18) : p)), 400);
+    return () => clearInterval(t);
+  }, []);
+  const etapa = pct < 30 ? "Lendo o seu material…" : pct < 60 ? "Identificando a editoria…" : "Escrevendo no padrão do portal…";
+  return (
+    <div className="mt-8 rounded-2xl border border-slate-200 bg-white p-8 text-center shadow-sm" role="status" aria-live="polite">
+      <p className="font-display text-xl font-bold uppercase tracking-wide text-[#12201E]">Sua matéria está sendo redigida</p>
+      <div className="mx-auto mt-5 h-2.5 w-full max-w-md overflow-hidden rounded-full bg-slate-100" aria-hidden="true">
+        <div className="h-full rounded-full bg-[#E29F65] transition-[width] duration-300" style={{ width: `${pct}%` }} />
+      </div>
+      <p className="mt-3 text-sm text-slate-500">{etapa}</p>
+    </div>
+  );
+}
+
 function ImprensaPainel() {
   const nav = useNavigate();
   const [checando, setChecando] = useState(true);
@@ -42,13 +63,15 @@ function ImprensaPainel() {
   const [subtitulo, setSubtitulo] = useState("");
   const [corpo, setCorpo] = useState("");
   const [fotos, setFotos] = useState<Foto[]>([]);
+  const [principal, setPrincipal] = useState(0);
   const [uploadBusy, setUploadBusy] = useState(false);
   const [regioes, setRegioes] = useState<Array<{ id: string; nome: string }>>([]);
   const [regiaoId, setRegiaoId] = useState("");
 
   const [termoAceito, setTermoAceito] = useState(false);
   const [publicando, setPublicando] = useState(false);
-  const [publicado, setPublicado] = useState<string | null>(null);
+  const [publicado, setPublicado] = useState<{ url: string; titulo: string } | null>(null);
+  const [copiado, setCopiado] = useState(false);
 
   // Confirma sessão + acesso de cliente antes de mostrar qualquer coisa.
   useEffect(() => {
@@ -91,28 +114,38 @@ function ImprensaPainel() {
       setSubtitulo(res.subtitulo);
       setCorpo(res.corpo);
     } catch (e: unknown) {
-      const detail = (e as { context?: { body?: { detail?: string; error?: string } } })?.context?.body;
-      setErro(detail?.detail ?? detail?.error ?? (e instanceof Error ? e.message : "Erro ao gerar rascunho."));
+      setErro(e instanceof Error ? e.message : "Erro ao gerar rascunho.");
     } finally {
       setGerando(false);
     }
   }
 
-  async function onUploadFoto(file: File) {
+  async function onUploadFotos(files: FileList) {
     setUploadBusy(true);
+    setErro(null);
     try {
       const sb = await getExternalBrowser();
-      const ext = file.name.split(".").pop() || "jpg";
-      const path = `${crypto.randomUUID()}.${ext}`;
-      const { error } = await sb.storage.from("imprensa-imagens").upload(path, file);
-      if (error) throw error;
-      const { data } = sb.storage.from("imprensa-imagens").getPublicUrl(path);
-      setFotos((f) => [...f, { url: data.publicUrl }]);
+      const novas: Foto[] = [];
+      for (const file of Array.from(files)) {
+        if (!file.type.startsWith("image/")) continue;
+        if (file.size > 10 * 1024 * 1024) { setErro(`"${file.name}" passa de 10 MB e não foi enviada.`); continue; }
+        const ext = file.name.split(".").pop() || "jpg";
+        const path = `${crypto.randomUUID()}.${ext}`;
+        const { error } = await sb.storage.from("imprensa-imagens").upload(path, file);
+        if (error) throw error;
+        novas.push({ url: sb.storage.from("imprensa-imagens").getPublicUrl(path).data.publicUrl });
+      }
+      setFotos((f) => [...f, ...novas]);
     } catch (e: unknown) {
       setErro(e instanceof Error ? e.message : "Erro ao enviar foto.");
     } finally {
       setUploadBusy(false);
     }
+  }
+
+  function removerFoto(i: number) {
+    setFotos((f) => f.filter((_, j) => j !== i));
+    setPrincipal((p) => (i === p ? 0 : i < p ? p - 1 : p));
   }
 
   async function publicar() {
@@ -121,37 +154,108 @@ function ImprensaPainel() {
     if (!regiaoId) { setErro("Selecione a região da matéria antes de publicar."); return; }
     setPublicando(true);
     setErro(null);
+    // A foto principal vai na frente: é a capa da matéria.
+    const ordenadas = fotos.length ? [fotos[principal], ...fotos.filter((_, i) => i !== principal)] : [];
     try {
-      const res = await invokeImprensa<{ detail: string }>("imprensa-publicar", {
-        submissao_id: submissaoId, titulo, subtitulo, corpo, fotos, termo_aceito: true, regiao_id: regiaoId,
+      const res = await invokeImprensa<{ slug: string; regiao_slug: string | null }>("imprensa-publicar", {
+        submissao_id: submissaoId, titulo, subtitulo, corpo, fotos: ordenadas, termo_aceito: true, regiao_id: regiaoId,
       });
-      setPublicado(res.detail);
+      const url = `${window.location.origin}/${res.regiao_slug ?? "parana"}/${res.slug}`;
+      setPublicado({ url, titulo });
     } catch (e: unknown) {
-      const detail = (e as { context?: { body?: { detail?: string; error?: string } } })?.context?.body;
-      setErro(detail?.detail ?? detail?.error ?? (e instanceof Error ? e.message : "Erro ao publicar."));
+      setErro(e instanceof Error ? e.message : "Erro ao publicar.");
     } finally {
       setPublicando(false);
     }
   }
 
+  async function copiarLink() {
+    if (!publicado) return;
+    try {
+      await navigator.clipboard.writeText(publicado.url);
+      setCopiado(true);
+      setTimeout(() => setCopiado(false), 2000);
+    } catch { /* clipboard indisponível */ }
+  }
+
+  function novaMateria() {
+    setPublicado(null); setSubmissaoId(null); setCategoriaDetectada(null);
+    setTextoBruto(""); setTitulo(""); setSubtitulo(""); setCorpo("");
+    setFotos([]); setPrincipal(0); setRegiaoId(""); setTermoAceito(false);
+  }
+
   if (checando) return <p className="p-8 text-center text-sm text-muted-foreground">Carregando…</p>;
+
+  const cabecalho = (
+    <div className="mb-6 flex items-center justify-between">
+      <Logo size="sm" variant="blue" />
+      <span className="text-sm text-muted-foreground">{nomeEmpresa}</span>
+    </div>
+  );
 
   if (publicado) {
     return (
-      <div className="mx-auto max-w-lg px-4 py-16 text-center">
-        <Logo size="sm" variant="blue" />
-        <h1 className="mt-6 font-display text-2xl font-bold text-[#12201E]">Enviado!</h1>
-        <p className="mt-2 text-slate-600">{publicado}</p>
+      <div className="mx-auto max-w-2xl px-4 py-8">
+        {cabecalho}
+        <div className="rounded-2xl border border-slate-200 bg-white p-6 text-center shadow-sm">
+          <h1 className="font-display text-2xl font-bold text-[#12201E]">Matéria publicada!</h1>
+          <p className="mt-1 text-sm text-slate-600">{publicado.titulo}</p>
+          <div className="mt-5 flex flex-col gap-2 sm:flex-row">
+            <input readOnly value={publicado.url} onFocus={(e) => e.target.select()}
+              className="min-w-0 flex-1 rounded border border-slate-300 bg-slate-50 px-3 py-2 text-sm" aria-label="Link da matéria" />
+            <button onClick={copiarLink} className="rounded border border-slate-300 px-4 py-2 text-sm font-semibold text-[#12201E] hover:bg-slate-50">
+              {copiado ? "Copiado" : "Copiar link"}
+            </button>
+            <a href={publicado.url} target="_blank" rel="noopener noreferrer"
+              className="rounded bg-[#12201E] px-4 py-2 text-sm font-semibold text-white">Ver matéria</a>
+          </div>
+          <div className="mt-5 flex justify-center">
+            <ShareButtons url={publicado.url} title={publicado.titulo} />
+          </div>
+        </div>
+        <button onClick={novaMateria} className="mt-6 text-sm font-semibold text-[#B5651D] underline">Enviar outra matéria</button>
       </div>
     );
   }
 
+  const blocoFotos = (
+    <div className="text-sm">
+      <span className="mb-1 block font-medium">Fotos</span>
+      <p className="mb-2 text-xs text-slate-500">
+        Envie uma ou mais fotos e escolha a <strong>principal</strong> (vira a capa da matéria). Só use fotos que você tem direito de publicar.
+      </p>
+      {fotos.length > 0 && (
+        <div className="mb-3 grid grid-cols-3 gap-3 sm:grid-cols-4">
+          {fotos.map((f, i) => (
+            <div key={f.url} className={`relative overflow-hidden rounded-lg border-2 ${i === principal ? "border-[#E29F65]" : "border-transparent"}`}>
+              <img src={f.url} alt="" className="aspect-square w-full object-cover" />
+              {i === principal ? (
+                <span className="absolute left-1 top-1 rounded bg-[#E29F65] px-1.5 py-0.5 text-[10px] font-bold uppercase text-white">Principal</span>
+              ) : (
+                <button type="button" onClick={() => setPrincipal(i)}
+                  className="absolute left-1 top-1 rounded bg-white/90 px-1.5 py-0.5 text-[10px] font-semibold text-[#12201E] hover:bg-white">
+                  Tornar principal
+                </button>
+              )}
+              <button type="button" onClick={() => removerFoto(i)} aria-label="Remover foto"
+                className="absolute right-1 top-1 rounded bg-white/90 px-1.5 py-0.5 text-[10px] font-semibold text-red-700 hover:bg-white">
+                Remover
+              </button>
+            </div>
+          ))}
+        </div>
+      )}
+      <label className={`inline-flex cursor-pointer items-center rounded border border-dashed border-slate-400 px-4 py-2 text-sm font-semibold text-[#12201E] hover:bg-slate-50 ${uploadBusy ? "opacity-50" : ""}`}>
+        {uploadBusy ? "Enviando fotos…" : fotos.length ? "Adicionar mais fotos" : "Escolher fotos"}
+        <input type="file" accept="image/*" multiple disabled={uploadBusy} className="sr-only"
+          onChange={(e) => { if (e.target.files?.length) void onUploadFotos(e.target.files); e.target.value = ""; }} />
+      </label>
+    </div>
+  );
+
   return (
     <div className="mx-auto max-w-2xl px-4 py-8">
-      <div className="mb-6 flex items-center justify-between">
-        <Logo size="sm" variant="blue" />
-        <span className="text-sm text-muted-foreground">{nomeEmpresa}</span>
-      </div>
+      {cabecalho}
 
       <h1 className="font-display text-2xl font-bold text-[#12201E]">Portal da Imprensa</h1>
       <p className="mt-1 text-sm text-slate-600">
@@ -161,8 +265,10 @@ function ImprensaPainel() {
 
       {erro && <p className="mt-4 rounded border border-red-200 bg-red-50 p-2 text-sm text-red-700">{erro}</p>}
 
-      {!titulo && (
-        <div className="mt-6 space-y-3">
+      {gerando && <BarraRedacao />}
+
+      {!titulo && !gerando && (
+        <div className="mt-6 space-y-5">
           <textarea
             value={textoBruto}
             onChange={(e) => setTextoBruto(e.target.value)}
@@ -170,17 +276,18 @@ function ImprensaPainel() {
             placeholder="Cole aqui o release, ou responda: do que se trata, quem é a fonte, qual o fato principal, tem algum dado ou citação importante?"
             className="w-full rounded border px-3 py-2 text-sm"
           />
+          {blocoFotos}
           <button
             onClick={gerarRascunho}
-            disabled={gerando}
-            className="rounded bg-[#E29F65] px-4 py-2 text-sm font-semibold text-white disabled:opacity-60"
+            disabled={uploadBusy}
+            className="rounded bg-[#E29F65] px-5 py-2.5 text-sm font-semibold text-white disabled:opacity-60"
           >
-            {gerando ? "Gerando rascunho…" : "Gerar rascunho"}
+            Enviar e redigir matéria
           </button>
         </div>
       )}
 
-      {titulo && (
+      {titulo && !gerando && (
         <div className="mt-6 space-y-4">
           {categoriaDetectada && (
             <p className="text-xs font-semibold uppercase tracking-wide text-[#E29F65]">
@@ -188,17 +295,22 @@ function ImprensaPainel() {
             </p>
           )}
 
+          <div className="rounded-lg border border-amber-200 bg-amber-50 p-3 text-xs text-amber-900">
+            <strong>Revise as informações:</strong> corrija nomes, datas, números, cargos e locais. O texto já segue o
+            padrão editorial do portal — evite mudar o estilo, incluir opinião, adjetivos promocionais ou chamadas publicitárias.
+          </div>
+
           <label className="block text-sm">
             <span className="mb-1 block font-medium">Título</span>
-            <input value={titulo} onChange={(e) => setTitulo(e.target.value)} className="w-full rounded border px-3 py-2" />
+            <input value={titulo} maxLength={120} onChange={(e) => setTitulo(e.target.value)} className="w-full rounded border px-3 py-2" />
           </label>
           <label className="block text-sm">
             <span className="mb-1 block font-medium">Subtítulo</span>
-            <input value={subtitulo} onChange={(e) => setSubtitulo(e.target.value)} className="w-full rounded border px-3 py-2" />
+            <input value={subtitulo} maxLength={220} onChange={(e) => setSubtitulo(e.target.value)} className="w-full rounded border px-3 py-2" />
           </label>
           <label className="block text-sm">
-            <span className="mb-1 block font-medium">Texto (revise à vontade antes de publicar)</span>
-            <textarea value={corpo} onChange={(e) => setCorpo(e.target.value)} rows={12} className="w-full rounded border px-3 py-2" />
+            <span className="mb-1 block font-medium">Texto</span>
+            <textarea value={corpo} onChange={(e) => setCorpo(e.target.value)} rows={14} className="w-full rounded border px-3 py-2 leading-relaxed" />
           </label>
 
           <label className="block text-sm">
@@ -211,16 +323,7 @@ function ImprensaPainel() {
             </select>
           </label>
 
-          <div className="text-sm">
-            <span className="mb-1 block font-medium">Fotos</span>
-            <div className="mb-2 flex flex-wrap gap-2">
-              {fotos.map((f, i) => (
-                <img key={i} src={f.url} alt="" className="h-20 w-20 rounded object-cover" />
-              ))}
-            </div>
-            <input type="file" accept="image/*" disabled={uploadBusy}
-              onChange={(e) => e.target.files?.[0] && onUploadFoto(e.target.files[0])} />
-          </div>
+          {blocoFotos}
 
           <div className="rounded-lg border border-slate-200 bg-slate-50 p-3">
             <p className="max-h-32 overflow-y-auto whitespace-pre-line text-xs text-slate-600">{TERMO_RESPONSABILIDADE}</p>
@@ -232,10 +335,10 @@ function ImprensaPainel() {
 
           <button
             onClick={publicar}
-            disabled={!termoAceito || !regiaoId || publicando}
+            disabled={!termoAceito || !regiaoId || publicando || uploadBusy || !titulo.trim() || !corpo.trim()}
             className="w-full rounded bg-[#E29F65] px-4 py-3 text-sm font-semibold text-white disabled:opacity-40"
           >
-            {publicando ? "Enviando…" : "Publicar"}
+            {publicando ? "Publicando…" : "Publicar"}
           </button>
         </div>
       )}

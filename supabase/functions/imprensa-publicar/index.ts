@@ -3,9 +3,9 @@
 // de responsabilidade (registra hora, IP e o texto exato aceito) — sem
 // isso, não publica.
 //
-// Por padrão sai como "aguardando_aprovacao", não publicado direto — essa
-// é a decisão mais segura até ficar definido se algum cliente terá
-// publicação automática liberada.
+// Publica direto no ar e devolve o link da matéria (o cliente compartilha
+// em seguida). A primeira foto de `fotos` é a principal (capa); as demais
+// vão para a galeria.
 //
 // Body: { submissao_id, titulo, subtitulo, corpo, fotos, termo_aceito: true }
 
@@ -94,8 +94,12 @@ Deno.serve(async (req) => {
       categoria_id: submissao.categoria_detectada_id,
       regiao_id: body.regiao_id,
       imagem_capa_url: body.fotos?.[0]?.url ?? null,
+      og_image_url: body.fotos?.[0]?.url ?? null,
       imagem_galeria: body.fotos ?? [],
-      status: "rascunho",
+      seo_title: body.titulo.trim(),
+      seo_description: body.subtitulo?.trim() || null,
+      status: "publicado",
+      publicado_em: new Date().toISOString(),
       origem_imprensa_cliente_id: cliente.id,
       publicado_automaticamente: false,
       gerado_em: new Date().toISOString(),
@@ -113,15 +117,19 @@ Deno.serve(async (req) => {
     termo_aceito_em: new Date().toISOString(),
     termo_aceito_ip: ip,
     termo_aceito_texto: TERMO_RESPONSABILIDADE,
-    status: "aguardando_aprovacao",
+    status: "publicado",
     generated_article_id: artigo.id,
     atualizado_em: new Date().toISOString(),
   }).eq("id", submissao.id);
 
+  const { data: regiao } = await sb.from("regioes").select("slug").eq("id", body.regiao_id).maybeSingle();
+
   return json({
     ok: true,
-    status: "rascunho",
-    detail: "Conteúdo enviado e aguardando aprovação rápida da equipe editorial (fila do painel) antes de ir ao ar.",
+    status: "publicado",
+    detail: "Matéria publicada.",
     article_id: artigo.id,
+    slug: artigo.slug,
+    regiao_slug: regiao?.slug ?? null,
   });
 });
