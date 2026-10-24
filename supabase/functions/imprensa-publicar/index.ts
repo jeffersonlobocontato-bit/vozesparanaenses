@@ -10,6 +10,7 @@
 // Body: { submissao_id, titulo, subtitulo, corpo, fotos, termo_aceito: true }
 
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
+import { mensagemLimite, situacaoLimite } from "../_shared/imprensa-limite.ts";
 import { gerarMetadados, type Meta } from "../_shared/metadados-artigo.ts";
 import { resolverCidade } from "../_shared/imprensa-cidade.ts";
 
@@ -54,6 +55,12 @@ Deno.serve(async (req) => {
   if (!cliente || !cliente.ativo) return json({ error: "cliente_sem_acesso" }, 403);
   if (cliente.status !== "aprovado") {
     return json({ error: "cadastro_pendente", detail: "Seu cadastro ainda está em análise. A publicação é liberada assim que a equipe aprovar." }, 403);
+  }
+
+  // Limite semanal (padrão 1 matéria a cada 7 dias): checado antes de gastar IA.
+  const limite = await situacaoLimite(sb, cliente.id);
+  if (limite.restantes <= 0) {
+    return json({ error: "limite_semanal", detail: mensagemLimite(limite), libera_em: limite.liberaEm }, 429);
   }
 
   let body: {

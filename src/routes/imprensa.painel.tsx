@@ -28,6 +28,8 @@ Conteúdo identificado como ilegal, difamatório, ou em desacordo com estes term
 
 type Foto = { url: string; legenda?: string };
 
+const WHATSAPP_EQUIPE = `https://wa.me/5545999864213?text=${encodeURIComponent("Olá! Sou assessor(a) de prefeitura no Portal da Imprensa e quero falar sobre o limite de publicações.")}`;
+
 // A IA leva ~15–40 s. A barra avança sozinha até 90% e completa quando o
 // texto chega — é indicação de andamento, não medida exata.
 function BarraRedacao() {
@@ -292,7 +294,16 @@ function ImprensaPainel() {
         escreve o rascunho seguindo o padrão editorial do portal.
       </p>
 
-      {erro && <p className="mt-4 rounded border border-red-200 bg-red-50 p-2 text-sm text-red-700">{erro}</p>}
+      {erro && (
+        <div className="mt-4 rounded border border-red-200 bg-red-50 p-2 text-sm text-red-700">
+          <p>{erro}</p>
+          {/whatsapp/i.test(erro) && (
+            <a href={WHATSAPP_EQUIPE} target="_blank" rel="noopener noreferrer" className="mt-1 inline-block font-semibold underline">
+              Falar com a equipe no WhatsApp
+            </a>
+          )}
+        </div>
+      )}
 
       {gerando && <BarraRedacao />}
 

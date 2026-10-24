@@ -3,6 +3,7 @@ import type { ReactNode } from "react";
 import {
   ArrowRight,
   Bot,
+  CalendarDays,
   CheckCircle2,
   Clock,
   Copy,
@@ -10,9 +11,13 @@ import {
   ImagePlus,
   Link2,
   MapPin,
+  MapPinOff,
   Megaphone,
+  MessageCircle,
+  Pin,
   Radar,
   Send,
+  Search,
   Share2,
   ShieldCheck,
   Sparkles,
@@ -30,6 +35,7 @@ import { LogoIcon } from "@/components/Logo";
 const IMG = "/cidadesdoparana";
 const INTER = "Inter, ui-sans-serif, system-ui, sans-serif";
 const CADASTRO = "/imprensa/cadastro";
+const whats = (texto: string) => `https://wa.me/5545999864213?text=${encodeURIComponent(texto)}`;
 
 export const Route = createFileRoute("/cidadesdoparana")({
   head: () => ({
@@ -157,7 +163,7 @@ const PASSOS: Array<{ n: string; titulo: string; texto: string; img?: string; al
 ];
 
 const FAQ: Array<{ p: string; r: string }> = [
-  { p: "Tem algum custo para a prefeitura?", r: "Não. O cadastro e as publicações pelo Portal da Imprensa são gratuitos." },
+  { p: "Tem algum custo para a prefeitura?", r: "Não. O cadastro e a publicação de 1 matéria por semana pelo Portal da Imprensa são gratuitos." },
   {
     p: "Quem pode se cadastrar?",
     r: "O responsável pela comunicação da prefeitura: secretário, diretor, coordenador, supervisor, assessor de imprensa ou outra função equivalente. O cadastro é pessoal, com CPF, e passa por aprovação.",
@@ -474,6 +480,57 @@ function CidadesDoParana() {
                   </summary>
                   <p className="mt-3 text-[15px] leading-relaxed text-[#b4b4b4]">{f.r}</p>
                 </details>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        {/* Bom saber */}
+        <section id="bom-saber" className="border-t border-white/[0.06] py-20">
+          <div className="mx-auto max-w-6xl px-4 sm:px-6">
+            <Eyebrow>Bom saber</Eyebrow>
+            <h2 className="mt-3 text-3xl font-medium tracking-[-0.03em] sm:text-[2.6rem]">Antes de começar</h2>
+            <div className="mt-8 grid gap-4 md:grid-cols-2">
+              {[
+                {
+                  i: <MapPinOff className="h-5 w-5" />,
+                  t: "Sua prefeitura não tem página de notícias?",
+                  d: "Então a varredura automática não tem onde ler, e a sua cidade pode estar ficando de fora. O Portal da Imprensa resolve: você envia as notícias direto, sem depender de site.",
+                  cta: { rotulo: "Cadastrar minha prefeitura", to: CADASTRO },
+                },
+                {
+                  i: <Search className="h-5 w-5" />,
+                  t: "Não encontrou as notícias da sua prefeitura no portal?",
+                  d: "O endereço da página de notícias pode ter mudado. Mande o link pelo WhatsApp que a nossa equipe ajusta a leitura do site.",
+                  cta: { rotulo: "Avisar pelo WhatsApp", href: whats("Olá! Sou da comunicação de uma prefeitura e não encontrei as nossas notícias no Vozes Paranaenses. O link da nossa página de notícias é: ") },
+                },
+                {
+                  i: <CalendarDays className="h-5 w-5" />,
+                  t: "1 matéria por semana, sem custo",
+                  d: "Cada prefeitura publica gratuitamente 1 matéria a cada 7 dias pelo canal. Precisa de mais espaço para a sua agenda? Fale com a gente e combinamos um limite maior.",
+                  cta: { rotulo: "Quero publicar mais", href: whats("Olá! Sou da comunicação de uma prefeitura e quero publicar mais de 1 matéria por semana no Vozes Paranaenses.") },
+                },
+                {
+                  i: <Pin className="h-5 w-5" />,
+                  t: "Destaque no topo do portal",
+                  d: "A sua matéria já aparece em destaque para quem lê da sua cidade. Para fixá-la no topo do portal, à vista de leitores de todo o Paraná, fale com a nossa equipe.",
+                  cta: { rotulo: "Quero destaque no topo", href: whats("Olá! Sou da comunicação de uma prefeitura e quero uma matéria fixada no topo do Vozes Paranaenses.") },
+                },
+              ].map((n) => (
+                <div key={n.t} className="flex flex-col rounded-[24px] border border-white/[0.08] bg-white/[0.03] p-6">
+                  <span className="flex h-10 w-10 items-center justify-center rounded-xl border border-[#14B8A6]/30 bg-[#14B8A6]/[0.08] text-[#5EEAD4]">{n.i}</span>
+                  <h3 className="mt-4 text-xl font-medium tracking-[-0.02em]">{n.t}</h3>
+                  <p className="mt-2 flex-1 text-[15px] leading-relaxed text-[#b4b4b4]">{n.d}</p>
+                  {"to" in n.cta && n.cta.to ? (
+                    <Link to={n.cta.to} className="mt-5 inline-flex items-center gap-2 self-start text-[15px] font-medium text-[#5EEAD4] hover:underline">
+                      {n.cta.rotulo} <ArrowRight className="h-4 w-4" />
+                    </Link>
+                  ) : (
+                    <a href={(n.cta as { href: string }).href} target="_blank" rel="noopener noreferrer" className="mt-5 inline-flex items-center gap-2 self-start text-[15px] font-medium text-[#5EEAD4] hover:underline">
+                      <MessageCircle className="h-4 w-4" /> {n.cta.rotulo}
+                    </a>
+                  )}
+                </div>
               ))}
             </div>
           </div>

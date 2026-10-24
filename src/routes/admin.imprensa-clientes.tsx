@@ -41,6 +41,8 @@ function formatarCpf(c: string | null) {
 
 function AdminImprensaClientes() {
   const [clientes, setClientes] = useState<Cliente[]>([]);
+  // Limite de matérias por semana (migração 081); vazio se a coluna ainda não existe.
+  const [limites, setLimites] = useState<Record<string, number>>({});
   const [carregando, setCarregando] = useState(true);
   const [erroLista, setErroLista] = useState<string | null>(null);
   const [formAberto, setFormAberto] = useState(false);
@@ -65,6 +67,8 @@ function AdminImprensaClientes() {
         .order("criado_em", { ascending: false });
       if (error) throw error;
       setClientes((data ?? []) as unknown as Cliente[]);
+      const { data: lim, error: limErr } = await sb.from("clientes_imprensa").select("id, limite_semanal");
+      setLimites(limErr ? {} : Object.fromEntries((lim ?? []).map((l: { id: string; limite_semanal: number }) => [l.id, l.limite_semanal])));
     } catch (e: unknown) {
       setErroLista(e instanceof Error ? e.message : "Erro ao carregar a lista de clientes.");
     } finally {
@@ -124,6 +128,14 @@ function AdminImprensaClientes() {
     } catch (e: unknown) {
       setMsg(e instanceof Error ? e.message : "Não foi possível salvar a decisão.");
     }
+  }
+
+  async function mudarLimite(c: Cliente, valor: number) {
+    setMsg(null);
+    const sb = await getExternalBrowser();
+    const { error } = await sb.from("clientes_imprensa").update({ limite_semanal: valor }).eq("id", c.id);
+    if (error) setMsg(error.message);
+    else setLimites((l) => ({ ...l, [c.id]: valor }));
   }
 
   const pendentes = clientes.filter((c) => c.status === "pendente");
@@ -276,7 +288,21 @@ function AdminImprensaClientes() {
                       </ConfirmButton>
                     </>
                   ) : (
-                    <StatusPill status={c.ativo ? "ativo" : "inativo"} />
+                    <>
+                      {c.id in limites && (
+                        <label className="flex items-center gap-1.5 text-xs text-slate-500">
+                          Matérias/semana
+                          <select
+                            value={limites[c.id]}
+                            onChange={(e) => void mudarLimite(c, Number(e.target.value))}
+                            className="rounded border border-slate-300 bg-white px-1.5 py-1 text-xs text-slate-800"
+                          >
+                            {[0, 1, 2, 3, 5, 7, 10, 14].map((n) => <option key={n} value={n}>{n}</option>)}
+                          </select>
+                        </label>
+                      )}
+                      <StatusPill status={c.ativo ? "ativo" : "inativo"} />
+                    </>
                   )}
                 </div>
               </li>

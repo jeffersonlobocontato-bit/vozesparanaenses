@@ -47,7 +47,9 @@ async function mensagemDoErro(error: unknown): Promise<string> {
       : `Não foi possível criar o acesso do cliente: ${detalhe || "erro desconhecido"}.`;
   }
   if (MENSAGENS[codigo]) return MENSAGENS[codigo];
-  if (codigo) return detalhe ? `${codigo}: ${detalhe}` : codigo;
+  // As funções já devolvem `detail` em português para o usuário.
+  if (detalhe) return detalhe;
+  if (codigo) return codigo;
   return error instanceof Error ? error.message : "Erro inesperado.";
 }
 
