@@ -204,12 +204,14 @@ function RootComponent() {
   const { queryClient } = Route.useRouteContext();
   const pathname = useRouterState({ select: (s) => s.location.pathname });
   const isAdmin = pathname.startsWith("/admin");
+  // Landing de produto: sem anúncio, sem widget de vendas de publicidade.
+  const isLanding = pathname === "/cidadesdoparana";
 
   useEffect(() => {
     // O AdSense nunca deve carregar em telas administrativas — são páginas
     // sem conteúdo editorial nenhum, exatamente o que a política do Google
     // proíbe ("anúncios em telas sem conteúdo do editor").
-    if (isAdmin) return;
+    if (isAdmin || isLanding) return;
     if (document.getElementById("adsbygoogle-js")) return;
     const s = document.createElement("script");
     s.id = "adsbygoogle-js";
@@ -218,13 +220,13 @@ function RootComponent() {
     s.src =
       "https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-3867318545397573";
     document.head.appendChild(s);
-  }, [isAdmin]);
+  }, [isAdmin, isLanding]);
 
   return (
     <QueryClientProvider client={queryClient}>
       <PageviewTracker />
-      {!isAdmin && <SalesChatWidget />}
-      {!isAdmin && <AdminFloatingEditor />}
+      {!isAdmin && !isLanding && <SalesChatWidget />}
+      {!isAdmin && !isLanding && <AdminFloatingEditor />}
       {!isAdmin && <CookieConsentBanner />}
       {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
       <Outlet />

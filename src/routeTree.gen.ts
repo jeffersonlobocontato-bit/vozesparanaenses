@@ -17,6 +17,7 @@ import { Route as PrivacidadeRouteImport } from './routes/privacidade'
 import { Route as PoliticaEditorialRouteImport } from './routes/politica-editorial'
 import { Route as CorrecoesRouteImport } from './routes/correcoes'
 import { Route as ContatoRouteImport } from './routes/contato'
+import { Route as CidadesdoparanaRouteImport } from './routes/cidadesdoparana'
 import { Route as AdminRouteImport } from './routes/admin'
 import { Route as RegionRouteImport } from './routes/$region'
 import { Route as IndexRouteImport } from './routes/index'
@@ -109,6 +110,11 @@ const CorrecoesRoute = CorrecoesRouteImport.update({
 const ContatoRoute = ContatoRouteImport.update({
   id: '/contato',
   path: '/contato',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CidadesdoparanaRoute = CidadesdoparanaRouteImport.update({
+  id: '/cidadesdoparana',
+  path: '/cidadesdoparana',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AdminRoute = AdminRouteImport.update({
@@ -390,6 +396,7 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/$region': typeof RegionRouteWithChildren
   '/admin': typeof AdminRouteWithChildren
+  '/cidadesdoparana': typeof CidadesdoparanaRoute
   '/contato': typeof ContatoRoute
   '/correcoes': typeof CorrecoesRoute
   '/politica-editorial': typeof PoliticaEditorialRoute
@@ -451,6 +458,7 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/cidadesdoparana': typeof CidadesdoparanaRoute
   '/contato': typeof ContatoRoute
   '/correcoes': typeof CorrecoesRoute
   '/politica-editorial': typeof PoliticaEditorialRoute
@@ -515,6 +523,7 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/$region': typeof RegionRouteWithChildren
   '/admin': typeof AdminRouteWithChildren
+  '/cidadesdoparana': typeof CidadesdoparanaRoute
   '/contato': typeof ContatoRoute
   '/correcoes': typeof CorrecoesRoute
   '/politica-editorial': typeof PoliticaEditorialRoute
@@ -580,6 +589,7 @@ export interface FileRouteTypes {
     | '/'
     | '/$region'
     | '/admin'
+    | '/cidadesdoparana'
     | '/contato'
     | '/correcoes'
     | '/politica-editorial'
@@ -641,6 +651,7 @@ export interface FileRouteTypes {
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
+    | '/cidadesdoparana'
     | '/contato'
     | '/correcoes'
     | '/politica-editorial'
@@ -704,6 +715,7 @@ export interface FileRouteTypes {
     | '/'
     | '/$region'
     | '/admin'
+    | '/cidadesdoparana'
     | '/contato'
     | '/correcoes'
     | '/politica-editorial'
@@ -768,6 +780,7 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   RegionRoute: typeof RegionRouteWithChildren
   AdminRoute: typeof AdminRouteWithChildren
+  CidadesdoparanaRoute: typeof CidadesdoparanaRoute
   ContatoRoute: typeof ContatoRoute
   CorrecoesRoute: typeof CorrecoesRoute
   PoliticaEditorialRoute: typeof PoliticaEditorialRoute
@@ -863,6 +876,13 @@ declare module '@tanstack/react-router' {
       path: '/contato'
       fullPath: '/contato'
       preLoaderRoute: typeof ContatoRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/cidadesdoparana': {
+      id: '/cidadesdoparana'
+      path: '/cidadesdoparana'
+      fullPath: '/cidadesdoparana'
+      preLoaderRoute: typeof CidadesdoparanaRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/admin': {
@@ -1302,6 +1322,7 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   RegionRoute: RegionRouteWithChildren,
   AdminRoute: AdminRouteWithChildren,
+  CidadesdoparanaRoute: CidadesdoparanaRoute,
   ContatoRoute: ContatoRoute,
   CorrecoesRoute: CorrecoesRoute,
   PoliticaEditorialRoute: PoliticaEditorialRoute,
