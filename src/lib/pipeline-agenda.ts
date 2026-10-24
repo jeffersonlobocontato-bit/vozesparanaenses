@@ -20,6 +20,7 @@ export type JobCron = {
 
 export type FrenteId =
   | "nacional"
+  | "politica"
   | "portais"
   | "prefeituras"
   | "tecnologia"
@@ -50,6 +51,14 @@ export const FRENTES: Frente[] = [
     cor: "bg-violet-500",
     jobs: ["vozes-curadoria-geral"],
     acao: { rotulo: "Coletar agora", passos: [{ funcao: "scrape-source", body: { force: true, curadoria_editorias: ["geral"] } }] },
+  },
+  {
+    id: "politica",
+    nome: "Política nacional",
+    descricao: "Agência Brasil, Senado e Câmara",
+    cor: "bg-indigo-500",
+    jobs: ["vozes-curadoria-politica"],
+    acao: { rotulo: "Coletar agora", passos: [{ funcao: "scrape-source", body: { force: true, curadoria_editorias: ["politica"] } }] },
   },
   {
     id: "portais",
@@ -110,6 +119,7 @@ export const FRENTES: Frente[] = [
 // Grade da migration 076 (UTC) — usada só enquanto a 078 não foi aplicada.
 export const AGENDA_076: Pick<JobCron, "jobname" | "schedule">[] = [
   { jobname: "vozes-curadoria-geral", schedule: "3-59/10 10-11,17-18 * * *" },
+  { jobname: "vozes-curadoria-politica", schedule: "9-59/10 11,17,23 * * *" },
   { jobname: "vozes-scrape-source", schedule: "1-59/3 0-1,13-14,19-20 * * *" },
   { jobname: "vozes-scrape-prefeitura", schedule: "*/3 15-16,21-22 * * *" },
   { jobname: "vozes-tecnologia-scrape", schedule: "6-59/10 17-18 * * *" },

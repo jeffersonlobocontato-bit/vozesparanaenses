@@ -93,6 +93,7 @@ begin
                  when f.tipo = 'prefeitura' then 'prefeituras'
                  when f.curadoria_editoria = 'tecnologia' then 'tecnologia'
                  when f.curadoria_editoria = 'esportes' then 'esportes'
+                 when f.curadoria_editoria = 'politica' then 'politica'
                  when f.curadoria_editoria is not null then 'nacional'
                  else 'portais'
                end as frente,
@@ -128,6 +129,7 @@ begin
                  when tipo = 'prefeitura' then 'prefeituras'
                  when curadoria_editoria = 'tecnologia' then 'tecnologia'
                  when curadoria_editoria = 'esportes' then 'esportes'
+                 when curadoria_editoria = 'politica' then 'politica'
                  when curadoria_editoria is not null then 'nacional'
                  else 'portais'
                end as frente,
