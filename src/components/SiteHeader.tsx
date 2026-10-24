@@ -1,7 +1,6 @@
 import { Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
-import horizontalDark from "@/assets/vozes-horizontal-dark.png.asset.json";
-import verticalDark from "@/assets/vozes-vertical-dark.png.asset.json";
+import { Logo } from "@/components/Logo";
 import iconMark from "@/assets/vozes-icon-dark.png.asset.json";
 
 type NavItem = { label: string; to: string; params?: Record<string, string> };
@@ -93,13 +92,8 @@ export function SiteHeader() {
           aria-label="Vozes Paranaenses — Página inicial"
           className="flex shrink-0 items-center"
         >
-          {/* Marca horizontal em todos os tamanhos */}
-          <img
-            src={horizontalDark.url}
-            alt="Vozes Paranaenses — Portal de Notícias"
-            className="h-7 w-auto select-none sm:h-8 md:h-9"
-            draggable={false}
-          />
+          {/* Assinatura do design system: ícone em balão + nome (proporção áurea) */}
+          <Logo size="sm" variant="white" withLink={false} />
         </Link>
 
         {/* Editorias temáticas — desktop (subconjunto, sem rolagem lateral) */}
@@ -207,12 +201,7 @@ export function SiteFooter() {
     <footer className="mt-16 bg-[#12201E] text-white/90">
       <div className="mx-auto grid max-w-7xl grid-cols-1 gap-8 px-4 py-10 md:grid-cols-4">
         <div className="md:col-span-2">
-          <img
-            src={verticalDark.url}
-            alt="Vozes Paranaenses — Portal de Notícias"
-            className="mb-4 h-24 w-auto select-none md:h-28"
-            draggable={false}
-          />
+          <Logo size="md" variant="white" withLink={false} className="mb-4" />
           <p className="max-w-md text-xs leading-relaxed text-white/60">
             Cobertura editorial das 10 macrorregiões do Paraná — jornalismo regional,
             um só endereço.

@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" width="256" height="256">
+  <title>Vozes Paranaenses — ícone (fundo claro)</title>
+  <!-- Proporção áurea (φ = 1,618), balão 216 × 180:
+       V: largura visual = 216/φ = 133,5; altura visual = largura/φ = 82,5; centrado no balão.
+       Ponto: diâmetro = 180/φ² = 68,8. -->
+  <path fill="#1E5B45" d="M64 28h120a48 48 0 0 1 48 48v84a48 48 0 0 1-48 48H108l-52 34a6 6 0 0 1-9.2-5.6L52 206A48 48 0 0 1 16 160V76a48 48 0 0 1 48-48z"/>
+  <polyline points="72.3,91.7 124,144.3 175.7,91.7" fill="none" stroke="#FFFFFF" stroke-width="30" stroke-linecap="round" stroke-linejoin="round"/>
+  <circle cx="214" cy="46" r="34.4" fill="#E29F65"/>
+</svg>

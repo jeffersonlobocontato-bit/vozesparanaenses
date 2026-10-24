@@ -19,8 +19,27 @@
  */
 
 @theme inline {
-  --font-display: "Bebas Neue", "Barlow Condensed", system-ui, sans-serif;
+  /* Design system Vozes Paranaenses (out/2026): títulos e texto em serifa
+     (Newsreader), interface em Barlow, chapéu em Barlow Condensed, marca
+     em Fraunces. */
+  --font-display: "Newsreader", "Source Serif 4", Georgia, serif;
   --font-sans: "Barlow", system-ui, sans-serif;
+  --font-chapeu: "Barlow Condensed", "Arial Narrow", Arial, sans-serif;
+  --font-marca: "Fraunces", Georgia, serif;
+  /* Cores do design system: a proximidade da notícia é o código de cor. */
+  --color-brand: var(--vp-brand);
+  --color-ink: var(--vp-ink);
+  --color-ink-muted: var(--vp-ink-muted);
+  --color-ink-subtle: var(--vp-ink-subtle);
+  --color-rule: var(--vp-rule);
+  --color-voz: var(--vp-accent);
+  --color-link: var(--vp-link);
+  --color-alerta: var(--vp-alerta);
+  --color-escopo-cidade: var(--vp-escopo-cidade);
+  --color-escopo-regiao: var(--vp-brand);
+  --color-escopo-parana: var(--vp-escopo-parana);
+  --color-escopo-brasil: var(--vp-escopo-brasil);
+  --color-escopo-mundo: var(--vp-escopo-mundo);
   --radius-sm: calc(var(--radius) - 4px);
   --radius-md: calc(var(--radius) - 2px);
   --radius-lg: var(--radius);
@@ -65,15 +84,27 @@
 
 :root {
   --radius: 0.625rem;
-  --background: oklch(1 0 0);
-  --foreground: oklch(0.129 0.042 264.695);
+  --vp-brand: oklch(0.425 0.073 165.8);
+  --vp-ink: oklch(0.234 0.021 168.6);
+  --vp-ink-muted: oklch(0.452 0.023 167);
+  --vp-ink-subtle: oklch(0.523 0.021 165.8);
+  --vp-rule: oklch(0.895 0.013 157);
+  --vp-accent: oklch(0.755 0.109 60.9);
+  --vp-link: oklch(0.503 0.096 228.2);
+  --vp-alerta: oklch(0.509 0.185 29.3);
+  --vp-escopo-cidade: oklch(0.507 0.121 50.8);
+  --vp-escopo-parana: oklch(0.473 0.117 250);
+  --vp-escopo-brasil: oklch(0.396 0.019 165.8);
+  --vp-escopo-mundo: oklch(0.463 0.103 296.6);
+  --background: oklch(0.99 0.003 128.5);
+  --foreground: oklch(0.234 0.021 168.6);
   --card: oklch(1 0 0);
   --card-foreground: oklch(0.129 0.042 264.695);
   --popover: oklch(1 0 0);
   --popover-foreground: oklch(0.129 0.042 264.695);
-  --primary: oklch(0.24 0.08 260);
+  --primary: oklch(0.234 0.021 168.6);
   --primary-foreground: oklch(1 0 0);
-  --secondary: oklch(0.52 0.19 255);
+  --secondary: oklch(0.425 0.073 165.8);
   --secondary-foreground: oklch(1 0 0);
   --muted: oklch(0.968 0.007 247.896);
   --muted-foreground: oklch(0.554 0.046 257.417);
@@ -81,9 +112,9 @@
   --accent-foreground: oklch(0.24 0.08 260);
   --destructive: oklch(0.577 0.245 27.325);
   --destructive-foreground: oklch(0.984 0.003 247.858);
-  --border: oklch(0.9 0.01 255);
+  --border: oklch(0.895 0.013 157);
   --input: oklch(0.929 0.013 255.508);
-  --ring: oklch(0.52 0.19 255);
+  --ring: oklch(0.503 0.096 228.2);
   --chart-1: oklch(0.646 0.222 41.116);
   --chart-2: oklch(0.6 0.118 184.704);
   --chart-3: oklch(0.398 0.07 227.392);
@@ -147,6 +178,37 @@
 
   h1, h2, h3, h4, .font-display {
     font-family: var(--font-display);
-    letter-spacing: 0.01em;
+    font-weight: 700;
+    letter-spacing: -0.01em;
+    text-wrap: balance;
   }
+}
+
+/* Chapéu: proximidade · assunto (design system) */
+.vp-chapeu {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-family: var(--font-chapeu);
+  font-weight: 600;
+  font-size: 0.875rem;
+  line-height: 1;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+.vp-chapeu__ponto {
+  width: 0.5rem;
+  height: 0.5rem;
+  border-radius: 999px;
+  background: var(--vp-accent);
+  flex: none;
+}
+.vp-chapeu__assunto { color: var(--vp-ink-subtle); }
+
+/* Rótulo de seção em caixa alta: interface (Barlow), não serifa. Fora de
+   @layer de propósito: precisa vencer o utilitário font-display. */
+h1.uppercase, h2.uppercase, h3.uppercase, h4.uppercase, h5.uppercase, .font-display.uppercase {
+  font-family: var(--font-sans);
+  font-weight: 700;
+  letter-spacing: 0.06em;
 }

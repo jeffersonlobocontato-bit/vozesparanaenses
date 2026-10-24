@@ -1,6 +1,7 @@
 import { createServerFn } from "@tanstack/react-start";
 import { notFound } from "@tanstack/react-router";
 import { REGION_NAME_OVERRIDES, displayRegionName } from "./region-labels";
+import { findMunicipio } from "./parana-municipios";
 export { REGION_NAME_OVERRIDES, displayRegionName };
 
 /**
@@ -319,6 +320,8 @@ export type ViewerLocation = {
   cidade: string | null;
   regiaoSlug: string | null;
   source: "cookie" | "ip" | "none";
+  // Slug do município (lista dos 399). Nulo quando a cidade não é do PR.
+  cidadeSlug?: string | null;
 };
 
 export type RankedArticle = ArticleListItem & {
@@ -540,9 +543,13 @@ export const getViewerLocation = createServerFn({ method: "GET" }).handler(
           regiaoSlug?: string | null;
         };
         if (parsed.cidade || parsed.regiaoSlug) {
+          // Cidade sempre canônica (um dos 399 municípios) e região deduzida
+          // dela — antes, "foz do iguacu" digitado não casava com nada.
+          const m = parsed.cidade ? findMunicipio(parsed.cidade) : null;
           return {
-            cidade: parsed.cidade ?? null,
-            regiaoSlug: parsed.regiaoSlug ?? null,
+            cidade: m?.name ?? null,
+            cidadeSlug: m?.slug ?? null,
+            regiaoSlug: m?.region ?? parsed.regiaoSlug ?? null,
             source: "cookie",
           };
         }
@@ -551,9 +558,11 @@ export const getViewerLocation = createServerFn({ method: "GET" }).handler(
       }
     }
     // Cloudflare Workers: header cf-ipcity (best-effort, sem região)
+    // Só vale se for um município do Paraná; fora do estado, dobra estadual.
     const cfCity = getRequestHeader("cf-ipcity");
-    if (cfCity) {
-      return { cidade: cfCity, regiaoSlug: null, source: "ip" };
+    const m = cfCity ? findMunicipio(cfCity) : null;
+    if (m && (getRequestHeader("cf-region-code") ?? "PR").toUpperCase() === "PR") {
+      return { cidade: m.name, cidadeSlug: m.slug, regiaoSlug: m.region, source: "ip" };
     }
     return { cidade: null, regiaoSlug: null, source: "none" };
   },
@@ -566,7 +575,9 @@ export const setViewerLocation = createServerFn({ method: "POST" })
   }))
   .handler(async ({ data }): Promise<{ ok: true }> => {
     const { setCookie } = await import("@tanstack/react-start/server");
-    setCookie(LOC_COOKIE, JSON.stringify(data), {
+    const m = data.cidade ? findMunicipio(data.cidade) : null;
+    const valor = { cidade: m?.name ?? null, regiaoSlug: m?.region ?? data.regiaoSlug ?? null };
+    setCookie(LOC_COOKIE, JSON.stringify(valor), {
       httpOnly: false,
       sameSite: "lax",
       path: "/",
@@ -770,7 +781,10 @@ export const listMostReadArticles = createServerFn({ method: "GET" })
   }))
   .handler(async ({ data }): Promise<ArticleListItem[]> => {
     const { getExternalServiceRole } = await import("./external-supabase.server");
-    const sb = getExternalServiceRole();
+    // Sem a chave de serviço (ex.: ambiente local), a lista fica vazia em vez
+    // de derrubar a home inteira.
+    let sb: ReturnType<typeof getExternalServiceRole>;
+    try { sb = getExternalServiceRole(); } catch { return []; }
     const since = new Date(Date.now() - data.days * 24 * 60 * 60 * 1000).toISOString();
     // Pagina em lotes de 1000 (limite silencioso do PostgREST) para não
     // depender de amostra arbitrária quando o volume ultrapassa o cap.
@@ -872,6 +886,146 @@ export const listArticlesWithoutImage = createServerFn({ method: "GET" })
     }));
   });
 
+/** Item da primeira dobra: matéria ou nota da coluna da cidade. */
+export type ItemDobra = ArticleListItem & {
+  cidade_principal: string | null;
+  cidades_mencionadas: string[] | null;
+  /** Por que está nesta posição (ajuda o editor a entender a dobra). */
+  motivo: "fixada" | "cidade" | "nota-cidade" | "regiao" | "parana" | "brasil" | "mundo-esportes";
+  /** Nota da coluna "Vozes {Cidade}" (texto, sem página própria de matéria). */
+  nota?: { cidadeSlug: string };
+};
+
+export type PrimeiraDobra = { hero: ItemDobra | null; side: ItemDobra[] };
+
+/**
+ * Primeira dobra por proximidade (design system, out/2026):
+ *   manchete  = notícia da cidade do leitor com foto (48h) › região › Paraná
+ *   direita 1 = 2ª da cidade › nota da coluna da cidade › região
+ *   direita 2 = destaque do Paraná
+ *   direita 3 = política nacional › Brasil
+ *   direita 4 = mundo ou esportes (o mais recente)
+ * Matéria fixada pelo editor (escopo estado) vence na sua posição. Sem
+ * cidade conhecida, a dobra é estadual. Nada se repete.
+ *
+ * As notícias da cidade são buscadas DIRETO (não dependem das 100 mais
+ * recentes do estado) e ignoram destaque_home: release de prefeitura de
+ * cidade pequena aparece para o leitor DAQUELA cidade.
+ */
+export const getPrimeiraDobra = createServerFn({ method: "GET" })
+  .inputValidator((d: { cidade?: string | null; regiaoSlug?: string | null }) => ({
+    cidade: d.cidade ?? null,
+    regiaoSlug: d.regiaoSlug ?? null,
+  }))
+  .handler(async ({ data }): Promise<PrimeiraDobra> => {
+    const { getExternalSupabase } = await import("./external-supabase.server");
+    const sb = getExternalSupabase();
+    const muni = data.cidade ? findMunicipio(data.cidade) : null;
+    const cidadeNome = muni?.name ?? null;
+    const regiaoSlug = muni?.region ?? data.regiaoSlug ?? null;
+    const desde48 = new Date(Date.now() - 48 * 3600_000).toISOString();
+    const COLS = MATERIA_LIST_COLS_GEO;
+
+    type Row = MateriaRow & { cidade_principal: string | null; cidades_mencionadas: string[] | null };
+    const one = <T,>(v: T | T[] | null | undefined): T | null => (Array.isArray(v) ? v[0] ?? null : v ?? null);
+    const toItem = (r: Row, motivo: ItemDobra["motivo"]): ItemDobra => ({
+      ...mapMateria({ ...r, regiao: one(r.regiao), categoria: one(r.categoria) } as MateriaRow),
+      cidade_principal: r.cidade_principal ?? null,
+      cidades_mencionadas: r.cidades_mencionadas ?? null,
+      motivo,
+    });
+    const publicadas = () => sb.from("generated_articles").select(COLS).eq("status", "publicado");
+
+    const { data: regioesRows } = await sb.from("regioes").select("id, slug");
+    const regiaoId = (slug: string | null) => (regioesRows ?? []).find((r: { slug: string }) => r.slug === slug)?.id ?? null;
+
+    const q = (v: string) => `"${v.replace(/"/g, "")}"`;
+    const [cidadeRes, notaRes, regiaoRes, prRes, fixRes, nacionais] = await Promise.all([
+      cidadeNome
+        ? publicadas().gte("publicado_em", desde48)
+            .or(`cidade_principal.eq.${q(cidadeNome)},cidades_mencionadas.cs.{${q(cidadeNome)}}`)
+            .order("publicado_em", { ascending: false }).limit(10)
+        : Promise.resolve({ data: [] as unknown[], error: null }),
+      muni
+        ? sb.from("coluna_cidade_notas").select("id, titulo, corpo, publicado_em, cidade_slug")
+            .eq("status", "publicado").eq("cidade_slug", muni.slug).gte("publicado_em", desde48)
+            .order("publicado_em", { ascending: false }).limit(1)
+        : Promise.resolve({ data: [] as unknown[], error: null }),
+      regiaoId(regiaoSlug)
+        ? publicadas().eq("regiao_id", regiaoId(regiaoSlug)).gte("publicado_em", desde48)
+            .order("publicado_em", { ascending: false }).limit(12)
+        : Promise.resolve({ data: [] as unknown[], error: null }),
+      sb.from("generated_articles").select(`${COLS}, destaque_home`).eq("status", "publicado")
+        .gte("publicado_em", desde48).not("imagem_capa_url", "is", null)
+        .order("publicado_em", { ascending: false }).limit(60),
+      publicadas().not("fixado_posicao", "is", null).order("fixado_posicao", { ascending: true }).limit(10),
+      carregarDestaquesNacionais(sb),
+    ]);
+
+    const rows = (r: { data: unknown; error: unknown }) => (r.error ? [] : ((r.data ?? []) as Row[]));
+    const usados = new Set<string>();
+    const livre = (i: ItemDobra | null | undefined) => (i && !usados.has(i.id) ? i : null);
+    const usar = (i: ItemDobra | null) => { if (i) usados.add(i.id); return i; };
+
+    // Fixadas pelo editor no escopo estadual (posição 0 = manchete; 1–4 = direita).
+    const fixadas = new Map<number, ItemDobra>();
+    for (const r of rows(fixRes)) {
+      const pos = typeof r.fixado_posicao === "number" ? r.fixado_posicao : null;
+      const esc = (r as { fixado_escopo?: string | null }).fixado_escopo ?? "estado";
+      if (pos === null || pos > 4 || esc !== "estado" || fixadas.has(pos)) continue;
+      fixadas.set(pos, toItem(r, "fixada"));
+    }
+    fixadas.forEach((i) => usados.add(i.id));
+
+    const cidade = rows(cidadeRes).map((r) => toItem(r, "cidade"));
+    const regiao = rows(regiaoRes).map((r) => toItem(r, "regiao"));
+    const parana = rows(prRes)
+      .filter((r) => {
+        const rid = (one(r.regiao) as { slug?: string } | null)?.slug;
+        if (rid === "nacional" || rid === "internacional") return false;
+        // Fora da dobra estadual: release de prefeitura de cidade pequena (072).
+        return (r as { destaque_home?: boolean | null }).destaque_home !== false;
+      })
+      .map((r) => toItem(r, "parana"));
+    const nota = rows(notaRes as { data: unknown; error: unknown })[0] as unknown as
+      { id: string; titulo: string; corpo: string; publicado_em: string | null } | undefined;
+    const notaItem: ItemDobra | null = nota && muni ? {
+      id: `nota-${nota.id}`, slug: muni.slug, title: nota.titulo, subtitle: null,
+      summary: nota.corpo?.slice(0, 200) ?? null, cover_image_url: null, published_at: nota.publicado_em,
+      region: null, categoria: null, cidade_principal: muni.name, cidades_mencionadas: null,
+      motivo: "nota-cidade", nota: { cidadeSlug: muni.slug },
+    } : null;
+    const slot = (nome: string) => nacionais.find((n) => n.slot === nome)?.items ?? [];
+    const doSlot = (nome: string, motivo: ItemDobra["motivo"]) =>
+      slot(nome).map((a) => ({ ...a, cidade_principal: null, cidades_mencionadas: null, motivo }) as ItemDobra);
+
+    const comFoto = (l: ItemDobra[]) => l.find((i) => i.cover_image_url && !usados.has(i.id)) ?? null;
+    const primeiro = (...listas: ItemDobra[][]) => {
+      for (const l of listas) { const i = l.find((x) => !usados.has(x.id)); if (i) return i; }
+      return null;
+    };
+
+    const hero = usar(fixadas.get(0) ?? comFoto(cidade) ?? comFoto(regiao) ?? comFoto(parana));
+
+    const regras: Array<() => ItemDobra | null> = [
+      () => cidadeNome ? (primeiro(cidade) ?? livre(notaItem) ?? primeiro(regiao)) : primeiro(regiao, parana),
+      () => primeiro(parana),
+      () => primeiro(doSlot("politica", "brasil"), doSlot("nacional", "brasil")),
+      () => {
+        const opcoes = [...doSlot("internacional", "mundo-esportes"), ...doSlot("esportes", "mundo-esportes")]
+          .filter((i) => !usados.has(i.id))
+          .sort((a, b) => (b.published_at ?? "").localeCompare(a.published_at ?? ""));
+        return opcoes[0] ?? null;
+      },
+    ];
+    const side: ItemDobra[] = [];
+    regras.forEach((regra, i) => {
+      const item = fixadas.get(i + 1) ?? usar(regra()) ?? usar(primeiro(parana, regiao, cidade));
+      if (item) side.push(item);
+    });
+    return { hero, side };
+  });
+
 export type SlotNacional = "politica" | "nacional" | "internacional" | "esportes";
 
 /**
@@ -885,7 +1039,11 @@ export type SlotNacional = "politica" | "nacional" | "internacional" | "esportes
 export const listDestaquesNacionais = createServerFn({ method: "GET" })
   .handler(async (): Promise<Array<{ slot: SlotNacional; items: ArticleListItem[] }>> => {
     const { getExternalSupabase } = await import("./external-supabase.server");
-    const sb = getExternalSupabase();
+    return carregarDestaquesNacionais(getExternalSupabase());
+  });
+
+// deno-lint-ignore no-explicit-any
+async function carregarDestaquesNacionais(sb: any): Promise<Array<{ slot: SlotNacional; items: ArticleListItem[] }>> {
     const desde = new Date(Date.now() - 36 * 3600_000).toISOString();
     const { data, error } = await sb
       .from("generated_articles")
@@ -915,7 +1073,7 @@ export const listDestaquesNacionais = createServerFn({ method: "GET" })
       slot,
       items: rows.filter((m) => slotDe(m) === slot).slice(0, 3).map(mapMateria),
     }));
-  });
+}
 
 /**
  * Matérias relacionadas para cross-linking dentro de uma matéria aberta.

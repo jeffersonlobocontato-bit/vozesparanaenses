@@ -427,7 +427,7 @@ function ArticlePage() {
         </nav>
 
         {/* Headline massivo, no acento da marca */}
-        <h1 className="font-display text-4xl font-black leading-[1.02] tracking-tight text-[#12201E] md:text-6xl lg:text-7xl">
+        <h1 className="font-display text-[2rem] font-bold leading-[1.1] text-ink md:text-[2.5rem] lg:text-[2.875rem] lg:leading-[1.06]">
           {article.title}
         </h1>
 

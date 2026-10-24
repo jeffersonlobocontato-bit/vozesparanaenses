@@ -114,13 +114,14 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
         rel: "stylesheet",
         href: appCss,
       },
+      { rel: "icon", type: "image/svg+xml", href: "/favicon.svg" },
       { rel: "icon", type: "image/png", href: "/favicon.png" },
       { rel: "apple-touch-icon", href: "/favicon.png" },
       { rel: "preconnect", href: "https://fonts.googleapis.com" },
       { rel: "preconnect", href: "https://fonts.gstatic.com", crossOrigin: "anonymous" },
       {
         rel: "stylesheet",
-        href: "https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Barlow:wght@400;500;600;700;800&family=Bitter:wght@600;700&family=Playfair+Display:wght@700;900&family=Merriweather:wght@700;900&family=Oswald:wght@600;700&family=Poppins:wght@700;800&family=Rubik:wght@600;700&family=Archivo:wght@700;800&family=Space+Grotesk:wght@600;700&display=swap",
+        href: "https://fonts.googleapis.com/css2?family=Newsreader:opsz,wght@6..72,400;6..72,600;6..72,700&family=Fraunces:opsz,wght,SOFT@9..144,700,100&family=Barlow+Condensed:wght@600&family=Bebas+Neue&family=Barlow:wght@400;500;600;700;800&family=Bitter:wght@600;700&family=Playfair+Display:wght@700;900&family=Merriweather:wght@700;900&family=Oswald:wght@600;700&family=Poppins:wght@700;800&family=Rubik:wght@600;700&family=Archivo:wght@700;800&family=Space+Grotesk:wght@600;700&display=swap",
       },
     ],
     scripts: [

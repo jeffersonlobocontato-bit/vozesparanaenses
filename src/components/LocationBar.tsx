@@ -1,97 +1,89 @@
 import { useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { getViewerLocation, setViewerLocation, listRegions } from "@/lib/content.functions";
+import { getViewerLocation, setViewerLocation } from "@/lib/content.functions";
+import { PARANA_MUNICIPIOS, findMunicipio, type Municipio } from "@/lib/parana-municipios";
 
 const viewerLocQO = {
   queryKey: ["viewer-location"] as const,
   queryFn: () => getViewerLocation(),
 };
 
-const regionsQO = {
-  queryKey: ["regions"] as const,
-  queryFn: () => listRegions(),
-};
-
 export function LocationBar() {
   const { data: loc } = useQuery(viewerLocQO);
-  const { data: regions } = useQuery(regionsQO);
   const setLoc = useServerFn(setViewerLocation);
   const qc = useQueryClient();
   const [open, setOpen] = useState(false);
   const [cidade, setCidade] = useState(loc?.cidade ?? "");
-  const [regiaoSlug, setRegiaoSlug] = useState(loc?.regiaoSlug ?? "");
-
-  const label = loc?.cidade
-    ? loc.cidade
-    : loc?.regiaoSlug
-      ? (regions?.find((r) => r.slug === loc.regiaoSlug)?.name ?? "Definir região")
-      : "Definir minha região";
+  const [erro, setErro] = useState<string | null>(null);
 
   async function save(e: React.FormEvent) {
     e.preventDefault();
-    await setLoc({ data: { cidade: cidade || null, regiaoSlug: regiaoSlug || null } });
+    const m = findMunicipio(cidade);
+    if (!m) {
+      setErro("Escolha uma cidade do Paraná da lista.");
+      return;
+    }
+    setErro(null);
+    await setLoc({ data: { cidade: m.name, regiaoSlug: m.region } });
     await qc.invalidateQueries({ queryKey: ["viewer-location"] });
     await qc.invalidateQueries({ queryKey: ["articles"] });
     setOpen(false);
   }
 
   return (
-    <div className="bg-primary/5 border-b border-primary/10">
-      <div className="mx-auto max-w-7xl px-4 py-2 flex items-center gap-3 text-xs">
-        <span className="text-slate-500 uppercase tracking-wider font-bold">📍 Sua região:</span>
-        <button
-          onClick={() => setOpen((v) => !v)}
-          className="font-black text-primary hover:underline"
-        >
-          {label}
-        </button>
-        {loc?.source === "ip" && (
-          <span className="text-[10px] uppercase text-slate-400">(detectado)</span>
+    <div className="border-b border-rule bg-[oklch(0.966_0.006_153.8)]">
+      <div className="mx-auto flex max-w-7xl flex-wrap items-center gap-x-3 gap-y-1 px-4 py-2 text-[0.9375rem] font-medium text-ink">
+        {loc?.cidade ? (
+          <>
+            <span>Você está em</span>
+            <span className="inline-flex items-center gap-2 rounded-full bg-background py-0.5 pl-2 pr-3 font-semibold shadow-[inset_0_-2px_0_var(--vp-accent)]">
+              <span className="vp-chapeu__ponto" aria-hidden="true" />
+              {loc.cidade}
+            </span>
+            <button type="button" onClick={() => setOpen((v) => !v)} className="font-semibold text-link hover:underline">
+              Trocar cidade
+            </button>
+            {loc.source === "ip" && (
+              <span className="text-[0.8125rem] text-ink-subtle">Detectada pela sua conexão. Não é aqui?</span>
+            )}
+          </>
+        ) : (
+          <>
+            <span>Escolha sua cidade para ver as notícias dela primeiro</span>
+            <button
+              type="button"
+              onClick={() => setOpen((v) => !v)}
+              className="rounded bg-brand px-3 py-1 text-sm font-semibold text-white hover:opacity-90"
+            >
+              Escolher cidade
+            </button>
+          </>
         )}
-        <span className="text-slate-400 hidden md:inline">
-          — priorizamos notícias da sua cidade e do entorno
-        </span>
       </div>
       {open && (
-        <form
-          onSubmit={save}
-          className="mx-auto max-w-7xl px-4 pb-3 flex flex-col md:flex-row gap-2 items-stretch md:items-end"
-        >
-          <label className="flex-1">
-            <span className="block text-[10px] font-bold uppercase text-slate-500 mb-1">
-              Cidade
-            </span>
+        <form onSubmit={save} className="mx-auto flex max-w-7xl flex-col gap-2 px-4 pb-3 sm:flex-row sm:items-end">
+          <label className="flex-1" htmlFor="vp-cidade">
+            <span className="mb-1 block text-xs font-semibold text-ink-muted">Sua cidade</span>
             <input
+              id="vp-cidade"
+              list="vp-municipios"
               value={cidade}
               onChange={(e) => setCidade(e.target.value)}
-              placeholder="Ex.: Assis Chateaubriand"
-              className="w-full border border-slate-300 rounded px-3 py-2 text-sm"
+              placeholder="Digite e escolha: Palotina, Cascavel, Foz do Iguaçu…"
+              autoComplete="off"
+              className="w-full rounded border border-rule bg-background px-3 py-2 text-sm"
             />
-          </label>
-          <label className="flex-1">
-            <span className="block text-[10px] font-bold uppercase text-slate-500 mb-1">
-              Macrorregião
-            </span>
-            <select
-              value={regiaoSlug}
-              onChange={(e) => setRegiaoSlug(e.target.value)}
-              className="w-full border border-slate-300 rounded px-3 py-2 text-sm bg-white"
-            >
-              <option value="">— Nenhuma —</option>
-              {(regions ?? []).map((r) => (
-                <option key={r.slug} value={r.slug}>
-                  {r.name}
-                </option>
+            <datalist id="vp-municipios">
+              {(PARANA_MUNICIPIOS as unknown as Municipio[]).map((m) => (
+                <option key={m.slug} value={m.name} />
               ))}
-            </select>
+            </datalist>
           </label>
-          <button
-            type="submit"
-            className="bg-primary text-primary-foreground px-4 py-2 text-xs font-bold uppercase rounded"
-          >
+          <button type="submit" className="rounded bg-brand px-4 py-2 text-sm font-semibold text-white hover:opacity-90">
             Salvar
           </button>
+          {erro && <p className="text-sm font-medium text-alerta sm:self-center">{erro}</p>}
         </form>
       )}
     </div>

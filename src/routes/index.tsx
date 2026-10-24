@@ -4,7 +4,8 @@ import { useEffect, useState } from "react";
 import {
   listRegions,
   listRankedArticles,
-  listDestaquesNacionais,
+  getPrimeiraDobra,
+  type ItemDobra,
   getViewerLocation,
   listArticlesByCategoryGlobal,
   listArticlesWithoutImage,
@@ -25,6 +26,7 @@ import { listColunasAtalhos, type ColunaAtalho } from "@/lib/content.functions";
 import { WhatsAppCTA } from "@/components/WhatsAppCTA";
 import { WeatherWidget } from "@/components/WeatherWidget";
 import { arrangePinnedSlots } from "@/lib/pinned-layout";
+import { Chapeu } from "@/components/Chapeu";
 
 const regionsQO = queryOptions({
   queryKey: ["regions"],
@@ -70,13 +72,13 @@ const STORIES_EDITORIAS: Array<{ slug: string; name: string }> = [
   { slug: "cidades", name: "Cidades" },
 ];
 
-// Vagas da primeira dobra para política nacional, nacional, internacional e
-// esportes (coluna da direita da manchete).
-const destaquesNacionaisQO = queryOptions({
-  queryKey: ["articles", "destaques-nacionais"],
-  queryFn: () => listDestaquesNacionais(),
-  staleTime: 5 * 60 * 1000,
-});
+// Primeira dobra por proximidade do leitor (cidade › Paraná › Brasil › mundo).
+const dobraQO = (loc: ViewerLocation) =>
+  queryOptions({
+    queryKey: ["articles", "dobra", loc.cidade ?? "", loc.regiaoSlug ?? ""],
+    queryFn: () => getPrimeiraDobra({ data: { cidade: loc.cidade, regiaoSlug: loc.regiaoSlug } }),
+    staleTime: 5 * 60 * 1000,
+  });
 
 const vaptVuptQO = queryOptions({
   queryKey: ["articles", "vapt-vupt", 8],
@@ -124,7 +126,7 @@ export const Route = createFileRoute("/")({
         context.queryClient.ensureQueryData(editoriaQO(e.slug)),
       ),
     );
-    await context.queryClient.ensureQueryData(destaquesNacionaisQO);
+    await context.queryClient.ensureQueryData(dobraQO(loc));
     await context.queryClient.ensureQueryData(vaptVuptQO);
     await context.queryClient.ensureQueryData(mostReadQO);
     await context.queryClient.ensureQueryData(colunasAtalhosQO);
@@ -142,7 +144,7 @@ function Home() {
   const { data: loc } = useSuspenseQuery(viewerLocQO);
   const { data: articles } = useSuspenseQuery(rankedQO(loc));
   const { data: vaptVupt } = useSuspenseQuery(vaptVuptQO);
-  const { data: destaquesNacionais } = useSuspenseQuery(destaquesNacionaisQO);
+  const { data: dobra } = useSuspenseQuery(dobraQO(loc));
   const { data: mostRead } = useSuspenseQuery(mostReadQO);
   const { data: colunas } = useSuspenseQuery(colunasAtalhosQO);
   // Stories do mobile: reaproveita as consultas de editoria já carregadas.
@@ -157,7 +159,7 @@ function Home() {
       regions={regions}
       articles={articles}
       vaptVupt={vaptVupt}
-      destaquesNacionais={destaquesNacionais}
+      dobra={dobra}
       mostRead={mostRead}
       loc={loc}
       colunas={colunas}
@@ -300,7 +302,7 @@ function PortalHome({
   regions,
   articles,
   vaptVupt,
-  destaquesNacionais,
+  dobra,
   mostRead,
   loc,
   colunas,
@@ -309,7 +311,7 @@ function PortalHome({
   regions: Region[];
   articles: RankedArticle[];
   vaptVupt: ArticleListItem[];
-  destaquesNacionais?: Array<{ slot: string; items: ArticleListItem[] }>;
+  dobra?: { hero: ItemDobra | null; side: ItemDobra[] };
   mostRead: ArticleListItem[];
   loc?: { cidade: string | null; regiaoSlug: string | null };
   colunas?: ColunaAtalho[];
@@ -333,25 +335,15 @@ function PortalHome({
   const articlesComFoto = articles.filter((a) => !!a.cover_image_url);
   // Home estadual — só pins de escopo 'estado' aparecem como fixados;
   // pins de região/cidade caem no rest e viram matéria comum.
-  const { hero, side: sidePr, rest } = arrangePinnedSlots(articlesComFoto, 4, {});
-  const secondary = rest.slice(0, 2);
+  const { hero: heroPr, side: sidePr, rest } = arrangePinnedSlots(articlesComFoto, 4, {});
 
-  // Coluna da direita da manchete: fixadas pelo editor primeiro; depois uma
-  // vaga para cada editoria de fora do PR (política nacional, nacional,
-  // internacional, esportes) — com ou sem foto; o que sobrar, Paraná.
-  const side: RankedArticle[] = [];
-  const usados = new Set<string>(hero ? [hero.id] : []);
-  const pega = (a: RankedArticle | undefined) => {
-    if (!a || usados.has(a.id) || side.length >= 4) return;
-    usados.add(a.id);
-    side.push(a);
-  };
-  sidePr.filter((a) => typeof a.fixado_posicao === "number").forEach(pega);
-  for (const { items } of destaquesNacionais ?? []) {
-    const a = items.find((x) => !usados.has(x.id));
-    if (a) pega({ ...a, proximidade: "estado", cidade_principal: null } as RankedArticle);
-  }
-  sidePr.forEach(pega);
+  // Primeira dobra por proximidade (getPrimeiraDobra). Sem dados, cai no
+  // ranking estadual de antes.
+  const hero: RankedArticle | ItemDobra | undefined = dobra?.hero ?? heroPr;
+  const side: Array<RankedArticle | ItemDobra> = dobra?.side.length ? dobra.side : sidePr;
+  const naDobra = new Set([hero?.id, ...side.map((a) => a.id)].filter(Boolean) as string[]);
+  const secondary = rest.concat(sidePr).filter((a) => !naDobra.has(a.id)).slice(0, 2);
+  const cidadeLeitor = loc?.cidade ?? null;
 
   const articleByRegion = new Map<string, ArticleListItem>();
   for (const a of articles) {
@@ -376,40 +368,41 @@ function PortalHome({
         {/* Publicidade — Super Banner topo (oculto a pedido) */}
         {/* <AdSlot slot="home_topo" className="mb-6" /> */}
 
-        {/* Hero */}
-        <div className="grid grid-cols-12 gap-6 mb-8">
-          <div className="col-span-12 lg:col-span-8">
-            <HeroCard article={hero} />
+        {/* Primeira dobra — manchete : coluna da direita = φ : 1 */}
+        <div className="mb-10 grid grid-cols-1 gap-6 lg:grid-cols-[minmax(0,1.618fr)_minmax(0,1fr)]">
+          <div className="min-w-0">
+            <HeroCard article={hero} cidadeLeitor={cidadeLeitor} />
           </div>
-          <div className="col-span-12 lg:col-span-4 flex flex-col gap-6">
-            {[0, 1, 2, 3].map((i) => {
-              const a = side[i];
-              const fb = SIDE_FALLBACK[i];
-              const to = a?.region
-                ? { to: "/$region/$slug" as const, params: { region: a.region.slug, slug: a.slug } }
-                : null;
-              const catName = a?.categoria?.name ?? a?.region?.name ?? fb.cat;
-              const catSlug = a?.categoria?.slug ?? null;
-              const inner = (
-                <>
-                  <div className="flex items-center gap-2 flex-wrap">
-                    <CategoryTag name={catName} slug={catSlug} />
-                    <CityTag cidade={a?.cidade_principal} />
-                    {a && <ProximityBadge proximidade={a.proximidade} />}
-                  </div>
-                  <h3 className="font-display text-2xl md:text-[1.6rem] leading-tight mt-2 hover:text-secondary transition-colors">
-                    {a?.title ?? fb.title}
-                  </h3>
-                </>
-              );
-              const borderCls = i === 0 ? "border-secondary" : "border-slate-300";
-              return to ? (
-                <Link key={i} {...to} className={`block border-l-4 pl-4 py-1 ${borderCls}`}>{inner}</Link>
-              ) : (
-                <div key={i} className={`border-l-4 pl-4 py-1 ${borderCls} cursor-pointer`}>{inner}</div>
-              );
-            })}
-            <AdSlot slot="home_sidebar_hero" className="mt-auto" />
+          <div className="flex min-w-0 flex-col">
+            <ul className="flex flex-col">
+              {[0, 1, 2, 3].map((i) => {
+                const a = side[i];
+                const fb = SIDE_FALLBACK[i];
+                const nota = a && "nota" in a ? a.nota : undefined;
+                const inner = (
+                  <>
+                    {a ? <Chapeu artigo={a} cidadeLeitor={cidadeLeitor} /> : <span className="vp-chapeu text-escopo-parana">{fb.cat}</span>}
+                    <h3 className="mt-1.5 text-[1.375rem] leading-[1.22] font-semibold text-ink group-hover:underline decoration-2 underline-offset-4">
+                      {a?.title ?? fb.title}
+                    </h3>
+                    {nota && <span className="mt-1 block text-[0.8125rem] font-medium text-ink-subtle">Nota da coluna Vozes {a?.cidade_principal}</span>}
+                  </>
+                );
+                const cls = `group block py-3 ${i === 0 ? "border-t-2 border-ink" : "border-t border-rule"}`;
+                return (
+                  <li key={a?.id ?? i}>
+                    {nota ? (
+                      <Link to="/vozes/$cidade" params={{ cidade: nota.cidadeSlug }} className={cls}>{inner}</Link>
+                    ) : a?.region ? (
+                      <Link to="/$region/$slug" params={{ region: a.region.slug, slug: a.slug }} className={cls}>{inner}</Link>
+                    ) : (
+                      <div className={cls}>{inner}</div>
+                    )}
+                  </li>
+                );
+              })}
+            </ul>
+            <AdSlot slot="home_sidebar_hero" className="mt-auto pt-4" />
           </div>
         </div>
 
@@ -473,25 +466,18 @@ function PortalHome({
                 : {};
               return (
                 <Wrap key={i} {...wrapProps} className="flex flex-col gap-3 group cursor-pointer">
-                  <div className="w-full aspect-video bg-slate-200 rounded-lg overflow-hidden">
+                  <div className="w-full aspect-video bg-slate-200 overflow-hidden">
                     {a?.cover_image_url ? (
-                      <img src={a.cover_image_url} alt={a?.title ?? fb.title} className="h-full w-full object-cover group-hover:scale-105 transition-transform duration-500" loading="lazy" />
+                      <img src={a.cover_image_url} alt="" className="h-full w-full object-cover" loading="lazy" />
                     ) : (
                       <div className="h-full w-full bg-gradient-to-br from-slate-200 to-slate-300" />
                     )}
                   </div>
-                  <div className="flex items-center gap-2 flex-wrap">
-                    <CategoryTag
-                      name={a?.categoria?.name ?? a?.region?.name ?? fb.cat}
-                      slug={a?.categoria?.slug ?? null}
-                      className="self-start"
-                    />
-                    <CityTag cidade={a?.cidade_principal} />
-                  </div>
-                  <h4 className="font-display text-2xl md:text-3xl leading-tight group-hover:text-secondary">
+                  {a ? <Chapeu artigo={a} cidadeLeitor={cidadeLeitor} /> : <span className="vp-chapeu text-escopo-parana">{fb.cat}</span>}
+                  <h4 className="font-display text-2xl md:text-[1.75rem] leading-tight text-ink group-hover:underline decoration-2 underline-offset-4">
                     {a?.title ?? fb.title}
                   </h4>
-                  <p className="text-base text-slate-600 line-clamp-2">
+                  <p className="text-base text-ink-muted line-clamp-2">
                     {a?.summary ?? fb.summary}
                   </p>
                 </Wrap>
@@ -710,8 +696,8 @@ function EditoriaModule({ slug, name }: { slug: string; name: string }) {
   );
 }
 
-function HeroCard({ article }: { article: RankedArticle | undefined }) {
-  return _HeroCardImpl({ article });
+function HeroCard({ article, cidadeLeitor }: { article: RankedArticle | ItemDobra | undefined; cidadeLeitor?: string | null }) {
+  return _HeroCardImpl({ article, cidadeLeitor });
 }
 
 function VaptVuptModule({ articles }: { articles: ArticleListItem[] }) {
@@ -765,40 +751,33 @@ function VaptVuptModule({ articles }: { articles: ArticleListItem[] }) {
   );
 }
 
-function _HeroCardImpl({ article }: { article: RankedArticle | undefined }) {
+function _HeroCardImpl({ article, cidadeLeitor }: { article: RankedArticle | ItemDobra | undefined; cidadeLeitor?: string | null }) {
   const title = article?.title ?? HERO_FALLBACK.title;
-  const summary = article?.summary ?? HERO_FALLBACK.summary;
-  const catName = article?.categoria?.name ?? article?.region?.name ?? HERO_FALLBACK.category;
-  const catSlug = article?.categoria?.slug ?? null;
+  const summary = article?.subtitle ?? article?.summary ?? HERO_FALLBACK.summary;
   const to = article?.region
     ? { to: "/$region/$slug" as const, params: { region: article.region.slug, slug: article.slug } }
     : null;
 
   const Inner = (
-    <div className="group relative overflow-hidden rounded-lg h-full min-h-[420px]">
-      <div className="absolute inset-0 bg-slate-200">
-        {article?.cover_image_url ? (
-          <img src={article.cover_image_url} alt={title} className="h-full w-full object-cover" />
-        ) : (
-          <div className="h-full w-full bg-gradient-to-br from-primary/80 via-primary to-secondary/60" />
-        )}
-      </div>
-      <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/30 to-transparent" />
-      <div className="absolute bottom-0 left-0 p-6 md:p-8">
-        <div className="mb-3 flex items-center gap-2 flex-wrap">
-          <CategoryTag name={catName} slug={catSlug} className="text-xs px-3 py-1.5" />
-          <CityTag cidade={article?.cidade_principal} className="text-white/90 text-xs" />
-          {article && <ProximityBadge proximidade={article.proximidade} />}
+    <article className="group">
+      {article?.cover_image_url && (
+        <div className="aspect-video w-full overflow-hidden bg-slate-100">
+          <img src={article.cover_image_url} alt="" className="h-full w-full object-cover" />
         </div>
-        <h1 className="font-display text-3xl md:text-5xl text-white leading-tight group-hover:underline">
+      )}
+      <div className={article?.cover_image_url ? "mt-4" : ""}>
+        {article ? <Chapeu artigo={article} cidadeLeitor={cidadeLeitor} /> : <span className="vp-chapeu text-escopo-parana">{HERO_FALLBACK.category}</span>}
+        <h1 className="mt-1.5 text-[2rem] leading-[1.09] md:text-[2.875rem] md:leading-[1.04] text-ink group-hover:underline decoration-2 underline-offset-[6px]">
           {title}
         </h1>
-        <p className="mt-3 text-slate-200 text-sm md:text-base max-w-2xl line-clamp-2">
-          {summary}
-        </p>
+        {summary && (
+          <p className="mt-2 max-w-[44rem] font-display text-lg md:text-xl leading-snug font-normal text-ink-muted line-clamp-2">
+            {summary}
+          </p>
+        )}
       </div>
-    </div>
+    </article>
   );
 
-  return to ? <Link {...to} className="block h-full">{Inner}</Link> : Inner;
+  return to ? <Link {...to} className="block">{Inner}</Link> : Inner;
 }
