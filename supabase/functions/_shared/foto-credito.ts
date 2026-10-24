@@ -23,6 +23,10 @@ const AUTORIZADA: RegExp[] = [
   /\bgov(erno)?\.? ?pr\b/,
   /\baen\b/,
   /\bag[eê]ncia (estadual de not[ií]cias|de not[ií]cias do paran[aá]|brasil)\b/,
+  // Agências públicas federais (licença livre com crédito): EBC, Senado, Câmara.
+  /\bag[eê]ncia (senado|c[aâ]mara)\b/,
+  /\bsenado federal\b/,
+  /\bc[aâ]mara dos deputados\b/,
   /\bfotos? ?p[uú]blicas?\b/,
   /^p[uú]blica$/,
   /\bdom[ií]nio p[uú]blico\b/,
@@ -75,4 +79,12 @@ export function classificarFoto(
 export function creditoParaExibir(credito: string): string {
   const c = credito.trim().replace(/^(foto|fotos|imagem|cr[eé]dito)\s*[:\-–]\s*/i, "");
   return `Foto: ${c}`;
+}
+
+// Fonte que É agência pública (Agência Brasil/EBC, Agência Senado, Agência
+// Câmara): toda foto publicada por ela tem licença livre com crédito — vale
+// mesmo quando a coleta não conseguiu ler o crédito na página.
+const AGENCIA_PUBLICA = /\b(ag[eê]ncia brasil|ebc|ag[eê]ncia senado|senado federal|ag[eê]ncia c[aâ]mara|c[aâ]mara dos deputados)\b/i;
+export function ehAgenciaPublica(nomeFonte: string | null | undefined): boolean {
+  return !!nomeFonte && AGENCIA_PUBLICA.test(nomeFonte);
 }

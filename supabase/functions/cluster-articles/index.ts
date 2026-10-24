@@ -285,7 +285,7 @@ Deno.serve(async (req) => {
     }
 
     const [{ data: cats }, { data: regioesNacInt }] = await Promise.all([
-      sb.from("editorial_categories").select("id, slug").in("slug", ["seguranca", "esportes"]),
+      sb.from("editorial_categories").select("id, slug").in("slug", ["seguranca", "esportes", "politica"]),
       sb.from("regioes").select("id, slug").in("slug", ["nacional", "internacional"]),
     ]);
     const catIdBySlug = new Map((cats ?? []).map((c) => [c.slug, c.id]));
@@ -293,7 +293,8 @@ Deno.serve(async (req) => {
     const regiaoInternacionalId = (regioesNacInt ?? []).find((r) => r.slug === "internacional")?.id ?? null;
 
     const withEmbCur = rawsCuradoria.filter((r) => r.embedding);
-    for (const tag of ["seguranca", "esportes", "geral"] as const) {
+    // "politica" (Agência Brasil, Senado, Câmara) já nasce na editoria Política.
+    for (const tag of ["seguranca", "esportes", "geral", "politica"] as const) {
       // "geral" (G1, Metrópoles, R7, CNN Brasil) cobre qualquer assunto —
       // não pré-classifica; deixa null pra IA do classify-and-quota decidir
       // a editoria de verdade (mesma classificadora do Paraná). "esportes"

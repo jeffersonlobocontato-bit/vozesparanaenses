@@ -690,23 +690,9 @@ export const listRankedArticles = createServerFn({ method: "GET" })
       ({ row }) => !(typeof row.fixado_posicao === "number" && row.fixado_posicao !== null),
     );
 
-    // Primeira dobra (manchete + 4 laterais + 2 secundárias = 7) sempre com
-    // ao menos 1 matéria NACIONAL e 1 INTERNACIONAL quando houver uma com
-    // imagem nas últimas 24h — a analista de imagem (analista-imagem-
-    // curadoria) é quem dá imagem de risco baixo a essas matérias.
+    // Política/nacional/internacional/esportes têm vaga própria na coluna da
+    // direita (listDestaquesNacionais); com foto, concorrem aqui normalmente.
     const ordenado = [...pinnedScored, ...regularScored];
-    const DOBRA = 7;
-    for (const escopo of ["nacional", "internacional"]) {
-      if (ordenado.slice(0, DOBRA).some(({ row }) => row.regiao?.slug === escopo)) continue;
-      const idx = ordenado.findIndex(({ row }, i) =>
-        i >= DOBRA && row.regiao?.slug === escopo && !!row.publicado_em &&
-        Date.now() - new Date(row.publicado_em).getTime() < 24 * 3600_000,
-      );
-      if (idx < 0) continue;
-      const [item] = ordenado.splice(idx, 1);
-      // Entra numa lateral, sem tirar matéria fixada pelo editor.
-      ordenado.splice(Math.min(Math.max(pinnedScored.length, 3), ordenado.length), 0, item);
-    }
 
     const ranked = ordenado.slice(0, data.limit).map(({ row, prox }) => ({
       ...mapMateria(row),
@@ -883,6 +869,51 @@ export const listArticlesWithoutImage = createServerFn({ method: "GET" })
     return ((res.data ?? []) as unknown as Array<MateriaRow & { cidade_principal?: string | null }>).map((m) => ({
       ...mapMateria(m),
       cidade_principal: m.cidade_principal ?? null,
+    }));
+  });
+
+export type SlotNacional = "politica" | "nacional" | "internacional" | "esportes";
+
+/**
+ * Primeira dobra da home: uma vaga para cada editoria de fora do Paraná —
+ * política nacional, nacional geral, internacional e esportes. Devolve até 3
+ * candidatas por vaga (mais recente primeiro, últimas 36h), com ou sem foto:
+ * a home usa a primeira que não for a manchete principal. Sem foto, ela
+ * aparece como manchete de texto na coluna da direita; com foto, também
+ * concorre à manchete principal pelo ranking normal (destaque_home).
+ */
+export const listDestaquesNacionais = createServerFn({ method: "GET" })
+  .handler(async (): Promise<Array<{ slot: SlotNacional; items: ArticleListItem[] }>> => {
+    const { getExternalSupabase } = await import("./external-supabase.server");
+    const sb = getExternalSupabase();
+    const desde = new Date(Date.now() - 36 * 3600_000).toISOString();
+    const { data, error } = await sb
+      .from("generated_articles")
+      .select(MATERIA_LIST_COLS)
+      .eq("status", "publicado")
+      .gte("publicado_em", desde)
+      .order("publicado_em", { ascending: false })
+      .limit(200);
+    if (error) {
+      if (isMissingSchema(error)) return [];
+      throw new Error(error.message);
+    }
+    const one = <T,>(v: T | T[] | null | undefined): T | null => (Array.isArray(v) ? v[0] ?? null : v ?? null);
+    const rows = (data ?? []) as unknown as MateriaRow[];
+    const slotDe = (m: MateriaRow): SlotNacional | null => {
+      const reg = one(m.regiao as unknown as { slug?: string } | { slug?: string }[])?.slug;
+      const cat = one(m.categoria as unknown as { slug?: string } | { slug?: string }[])?.slug;
+      if (cat === "esportes") return reg === "nacional" || reg === "internacional" ? "esportes" : null;
+      if (reg === "internacional") return cat === "tecnologia" ? null : "internacional";
+      if (reg !== "nacional") return null;
+      if (cat === "politica") return "politica";
+      if (cat === "tecnologia") return null;
+      return "nacional";
+    };
+    const ordem: SlotNacional[] = ["politica", "nacional", "internacional", "esportes"];
+    return ordem.map((slot) => ({
+      slot,
+      items: rows.filter((m) => slotDe(m) === slot).slice(0, 3).map(mapMateria),
     }));
   });
 

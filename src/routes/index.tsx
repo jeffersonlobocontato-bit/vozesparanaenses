@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import {
   listRegions,
   listRankedArticles,
+  listDestaquesNacionais,
   getViewerLocation,
   listArticlesByCategoryGlobal,
   listArticlesWithoutImage,
@@ -69,6 +70,14 @@ const STORIES_EDITORIAS: Array<{ slug: string; name: string }> = [
   { slug: "cidades", name: "Cidades" },
 ];
 
+// Vagas da primeira dobra para política nacional, nacional, internacional e
+// esportes (coluna da direita da manchete).
+const destaquesNacionaisQO = queryOptions({
+  queryKey: ["articles", "destaques-nacionais"],
+  queryFn: () => listDestaquesNacionais(),
+  staleTime: 5 * 60 * 1000,
+});
+
 const vaptVuptQO = queryOptions({
   queryKey: ["articles", "vapt-vupt", 8],
   queryFn: () => listArticlesWithoutImage({ data: { limit: 8 } }),
@@ -115,6 +124,7 @@ export const Route = createFileRoute("/")({
         context.queryClient.ensureQueryData(editoriaQO(e.slug)),
       ),
     );
+    await context.queryClient.ensureQueryData(destaquesNacionaisQO);
     await context.queryClient.ensureQueryData(vaptVuptQO);
     await context.queryClient.ensureQueryData(mostReadQO);
     await context.queryClient.ensureQueryData(colunasAtalhosQO);
@@ -132,6 +142,7 @@ function Home() {
   const { data: loc } = useSuspenseQuery(viewerLocQO);
   const { data: articles } = useSuspenseQuery(rankedQO(loc));
   const { data: vaptVupt } = useSuspenseQuery(vaptVuptQO);
+  const { data: destaquesNacionais } = useSuspenseQuery(destaquesNacionaisQO);
   const { data: mostRead } = useSuspenseQuery(mostReadQO);
   const { data: colunas } = useSuspenseQuery(colunasAtalhosQO);
   // Stories do mobile: reaproveita as consultas de editoria já carregadas.
@@ -146,6 +157,7 @@ function Home() {
       regions={regions}
       articles={articles}
       vaptVupt={vaptVupt}
+      destaquesNacionais={destaquesNacionais}
       mostRead={mostRead}
       loc={loc}
       colunas={colunas}
@@ -288,6 +300,7 @@ function PortalHome({
   regions,
   articles,
   vaptVupt,
+  destaquesNacionais,
   mostRead,
   loc,
   colunas,
@@ -296,6 +309,7 @@ function PortalHome({
   regions: Region[];
   articles: RankedArticle[];
   vaptVupt: ArticleListItem[];
+  destaquesNacionais?: Array<{ slot: string; items: ArticleListItem[] }>;
   mostRead: ArticleListItem[];
   loc?: { cidade: string | null; regiaoSlug: string | null };
   colunas?: ColunaAtalho[];
@@ -319,8 +333,25 @@ function PortalHome({
   const articlesComFoto = articles.filter((a) => !!a.cover_image_url);
   // Home estadual — só pins de escopo 'estado' aparecem como fixados;
   // pins de região/cidade caem no rest e viram matéria comum.
-  const { hero, side, rest } = arrangePinnedSlots(articlesComFoto, 4, {});
+  const { hero, side: sidePr, rest } = arrangePinnedSlots(articlesComFoto, 4, {});
   const secondary = rest.slice(0, 2);
+
+  // Coluna da direita da manchete: fixadas pelo editor primeiro; depois uma
+  // vaga para cada editoria de fora do PR (política nacional, nacional,
+  // internacional, esportes) — com ou sem foto; o que sobrar, Paraná.
+  const side: RankedArticle[] = [];
+  const usados = new Set<string>(hero ? [hero.id] : []);
+  const pega = (a: RankedArticle | undefined) => {
+    if (!a || usados.has(a.id) || side.length >= 4) return;
+    usados.add(a.id);
+    side.push(a);
+  };
+  sidePr.filter((a) => typeof a.fixado_posicao === "number").forEach(pega);
+  for (const { items } of destaquesNacionais ?? []) {
+    const a = items.find((x) => !usados.has(x.id));
+    if (a) pega({ ...a, proximidade: "estado", cidade_principal: null } as RankedArticle);
+  }
+  sidePr.forEach(pega);
 
   const articleByRegion = new Map<string, ArticleListItem>();
   for (const a of articles) {

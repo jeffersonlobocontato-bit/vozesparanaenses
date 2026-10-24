@@ -18,7 +18,7 @@ import { decidirFormato, decidirImagem, podeIrParaDobra, prioridadeDoTema, temaH
 import { CREDITO_IA, fotoDaCidade, gerarIlustracaoTematica } from "../_shared/imagem.ts";
 import { avaliarCriticidade, carregarConfigCriticidade } from "../_shared/criticidade.ts";
 import { ehDoDia } from "../_shared/data-publicacao.ts";
-import { classificarFoto, creditoParaExibir, type FotoStatus } from "../_shared/foto-credito.ts";
+import { classificarFoto, creditoParaExibir, ehAgenciaPublica, type FotoStatus } from "../_shared/foto-credito.ts";
 import { escreverNota, publicarNotaNaColuna } from "../_shared/nota-coluna.ts";
 import { garantirRegraTitulo, regraTituloPrompt } from "../_shared/titulo.ts";
 
@@ -271,10 +271,10 @@ Deno.serve(async (req) => {
   // foto_status) são reclassificadas aqui. Prefeitura primeiro.
   const { data: veiculosRows } = await sb.from("fontes").select("nome").eq("tipo", "veiculo");
   const nomesVeiculos = (veiculosRows ?? []).map((f: { nome: string }) => f.nome);
-  // Foto de PREFEITURA é sempre liberada (é material institucional); a regra
-  // do crédito vale só para veículos de imprensa.
+  // Foto de PREFEITURA e de AGÊNCIA PÚBLICA (Agência Brasil, Senado, Câmara)
+  // é sempre liberada; a regra do crédito vale para os veículos de imprensa.
   const statusFoto = (r: RawFoto): FotoStatus =>
-    tipoFonte(r) === "prefeitura" && r.imagem_original_url
+    (tipoFonte(r) === "prefeitura" || ehAgenciaPublica(nomeFonte(r))) && r.imagem_original_url
       ? "autorizada"
       : r.foto_status ?? classificarFoto(r.imagem_original_url, r.imagem_credito, nomesVeiculos);
   const rawFotoAutorizada = [...raws]
@@ -347,6 +347,17 @@ Deno.serve(async (req) => {
   // estiver ativo) — o prompt-base do agente é injetado ANTES do system
   // padrão, permitindo tom/estilo por editoria (política, esporte, cidades…).
   let systemPrompt = BASE_SYSTEM_PROMPT;
+  // Política: noticiar, nunca opinar. Vem DEPOIS do agente da editoria (ver
+  // abaixo) para valer mesmo se o prompt do agente disser outra coisa.
+  const NEUTRALIDADE_POLITICA = `## POLÍTICA — NEUTRALIDADE OBRIGATÓRIA (prioridade sobre qualquer instrução de estilo)
+Você é repórter, não comentarista. Relate o fato; não tome partido.
+- Sem adjetivo ou advérbio de valor sobre pessoa, partido, governo ou proposta ("polêmico", "desastroso", "histórico", "acertadamente", "manobra", "ataque").
+- Toda afirmação, número ou crítica é atribuída a quem a fez ("segundo o senador X", "de acordo com o Ministério").
+- Use verbos neutros de atribuição: "disse", "afirmou", "declarou". Evite "admitiu", "confessou", "alegou", "rebateu".
+- Em assunto controverso, registre as posições que constam nos fatos apurados, com o mesmo peso e sem escolher a "certa". Se os fatos só trazem um lado, não invente o outro e não insinue nada.
+- Nomeie partido e cargo de forma padronizada (Nome (PARTIDO-UF), cargo), igual para todos.
+- Título descreve o fato (quem fez o quê), sem ironia, sem pergunta e sem rótulos ideológicos ("esquerda", "direita", "bolsonarista", "petista") — a menos que sejam o próprio fato e estejam atribuídos.
+- Nada de previsão, especulação ou "o que isso significa" sem fonte nos fatos.`;
   if (cluster.categoria_id) {
     const [{ data: agente }, { data: memoria }, { data: profundidade }] = await Promise.all([
       sb.from("agentes_redatores")
@@ -381,6 +392,8 @@ Deno.serve(async (req) => {
   // o título não repete a cidade — ela vai para o lide. Ver _shared/titulo.ts.
   const cidadeTag = cidade?.nome ?? null;
   systemPrompt = `${systemPrompt}\n\n---\n\n${regraTituloPrompt(cidadeTag)}`;
+
+  if (categoriaSlug === "politica") systemPrompt = `${systemPrompt}\n\n---\n\n${NEUTRALIDADE_POLITICA}`;
 
   // 2. Chamar IA — só para redação (Método DEL), a partir dos fatos já prontos
   const userPrompt = buildUserPrompt(facts, dados);
@@ -536,6 +549,9 @@ Deno.serve(async (req) => {
           og_image_url: copiada,
           imagem_credito: rawFotoAutorizada.imagem_credito?.trim()
             ? creditoParaExibir(rawFotoAutorizada.imagem_credito)
+            : ehAgenciaPublica(nomeFonte(rawFotoAutorizada))
+            // "Agência Brasil — Política" → "Foto: Agência Brasil"
+            ? `Foto: ${(nomeFonte(rawFotoAutorizada) ?? "").split(/\s+[—–-]\s+|\s*\(/)[0]}`
             : `Foto: Divulgação/${nomeFonte(rawFotoAutorizada) ?? "Prefeitura"}`,
         }).eq("id", inserted.id);
         fotoOrigem = "fonte_autorizada";
@@ -581,6 +597,15 @@ Deno.serve(async (req) => {
     }
   } catch (_) {
     // Falha na foto não bloqueia a matéria — o editor pode ajustar a capa.
+  }
+
+  // Curadoria (política, nacional, internacional, esportes) COM foto liberada
+  // concorre à manchete da home. Sem foto, a home a mostra nas manchetes da
+  // coluna da direita (listDestaquesNacionais) — não depende desta marca.
+  if (origem === "curadoria" && fotoOrigem === "fonte_autorizada") {
+    try {
+      await sb.from("generated_articles").update({ destaque_home: true }).eq("id", inserted.id);
+    } catch (_) { /* sem a coluna (antes da 072) */ }
   }
 
   // 3c. Criticidade decide se publica sozinha ou vai para a fila humana.

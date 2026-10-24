@@ -4,7 +4,7 @@
 // Sai com código 1 se algum caso falhar.
 
 import { detectarCidade, cidadePorNome } from "./cidades.ts";
-import { classificarFoto } from "./foto-credito.ts";
+import { classificarFoto, ehAgenciaPublica } from "./foto-credito.ts";
 import { ehDoDia, extrairDataPublicacao, inicioDoCiclo, diaSaoPaulo } from "./data-publicacao.ts";
 import { avaliarRegras } from "./criticidade.ts";
 import { decidirFormato, decidirImagem, motivoDescartePortal, pareceReleaseDeAssessoria, podeIrParaDobra, temaHeuristico, parseCrivo } from "./crivo-editorial.ts";
@@ -214,8 +214,10 @@ ok("descarta nacional em portal do PR", motivoDescartePortal({ origem_assessoria
 ok("descarta crítica política", motivoDescartePortal({ origem_assessoria: false, escopo: "parana", critica_politica: true }) !== null);
 ok("mantém fato paranaense", motivoDescartePortal({ origem_assessoria: false, escopo: "parana", critica_politica: false }) === null);
 const fi = (o: Partial<Parameters<typeof decidirImagem>[0]>) => decidirImagem({ origem: "portal", fotoStatus: "proibida", categoriaSlug: "cidades", tipoImagem: "fato", temCidade: true, ...o });
-ok("curadoria → só texto", fi({ origem: "curadoria", fotoStatus: "autorizada" }) === "nenhuma" && f({ origem: "curadoria" }).foto === "nenhuma");
-ok("portal esportes → só texto", fi({ categoriaSlug: "esportes", fotoStatus: "autorizada" }) === "nenhuma");
+ok("curadoria com foto liberada (Agência Brasil) → foto", fi({ origem: "curadoria", fotoStatus: "autorizada" }) === "fonte");
+ok("curadoria sem foto liberada → só texto", fi({ origem: "curadoria", fotoStatus: "proibida", tipoImagem: "tematica" }) === "nenhuma" && f({ origem: "curadoria" }).foto === "nenhuma");
+ok("portal esportes com foto liberada → foto", fi({ categoriaSlug: "esportes", fotoStatus: "autorizada" }) === "fonte");
+ok("portal esportes sem foto liberada → só texto", fi({ categoriaSlug: "esportes", fotoStatus: "proibida", tipoImagem: "tematica" }) === "nenhuma");
 ok("portal com foto institucional → foto", fi({ fotoStatus: "autorizada" }) === "fonte");
 ok("portal tema geral → ilustração IA", fi({ tipoImagem: "tematica" }) === "ilustracao_ia");
 ok("portal fala da cidade → foto da cidade", fi({ tipoImagem: "cidade" }) === "foto_cidade");
@@ -259,5 +261,15 @@ ok("policial sem por quê/quando/quem → passa", faltando5w1h({ ...completo, po
 ok("policial sem onde → veta", faltando5w1h({ ...completo, onde: null }, { policial: true }).join() === "onde");
 ok("policial tudo nulo → veta", faltando5w1h({ quem: null, o_que: null, quando: null, onde: null, por_que: null, como: null }, { policial: true }).length === 2);
 ok("motivo legível", motivoVeto5w1h(["quando", "por_que"]) === "5W1H incompleto: sem quando, por quê");
+// Política nacional
+ok("crédito Agência Brasil liberado", classificarFoto("https://x/a.jpg", "Foto: Bruno Peres/Agência Brasil") === "autorizada");
+ok("crédito Agência Senado liberado", classificarFoto("https://x/a.jpg", "Roque de Sá/Agência Senado") === "autorizada");
+ok("crédito Câmara dos Deputados liberado", classificarFoto("https://x/a.jpg", "Foto: Mario Agra/Câmara dos Deputados") === "autorizada");
+ok("fonte Agência Brasil é agência pública", ehAgenciaPublica("Agência Brasil — Política") && !ehAgenciaPublica("G1"));
+const rp = (t: string) => avaliarRegras(t, undefined, { categoria: "politica" }).nivel;
+ok("política: votação no Congresso não segura", rp("Câmara aprova em votação projeto do partido X sobre saneamento") === "baixo");
+ok("política: segundo turno segura", rp("TSE divulga regras para o segundo turno") === "alto");
+ok("política: candidato a governador segura", rp("Candidato a governador apresenta proposta") === "alto");
+ok("fora da política: partido continua segurando", avaliarRegras("Vereador troca de partido").nivel === "alto");
 console.log(falhas ? `\n${falhas} FALHA(S)` : "\nTudo certo");
 if (falhas) Deno.exit(1);

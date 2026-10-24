@@ -219,8 +219,11 @@ export type DecisaoImagem = "fonte" | "ilustracao_ia" | "foto_cidade" | "nenhuma
 /**
  * Imagem da matéria (regras de out/2026 — risco zero com foto de terceiros):
  *   prefeitura: foto da própria prefeitura (institucional) ou nenhuma
- *   curadoria (esportes, nacional, internacional, tecnologia): nenhuma
- *   portal, editoria esportes: nenhuma
+ *   qualquer origem com foto de crédito liberado (inclusive agências
+ *     públicas: Agência Brasil, Senado, Câmara): a foto
+ *   curadoria (esportes, nacional, internacional, tecnologia) sem foto
+ *     liberada: nenhuma (a analista de imagem pode completar depois)
+ *   portal, editoria esportes, sem foto liberada: nenhuma
  *   portal com foto de crédito institucional (AEN, governo): a foto
  *   portal sem foto liberada:
  *     assunto temático (meio ambiente, saúde...) → ilustração por IA,
@@ -236,10 +239,12 @@ export function decidirImagem(p: {
   tipoImagem: TipoImagem | null;
   temCidade: boolean;
 }): DecisaoImagem {
-  if (p.origem === "curadoria") return "nenhuma";
   if (p.origem === "prefeitura") return p.fotoStatus === "autorizada" ? "fonte" : "nenhuma";
-  if (p.categoriaSlug === "esportes") return "nenhuma";
+  // Foto com crédito liberado (institucional, Agência Brasil/Senado/Câmara)
+  // vale para qualquer origem — inclusive curadoria e esportes (out/2026).
   if (p.fotoStatus === "autorizada") return "fonte";
+  if (p.origem === "curadoria") return "nenhuma";
+  if (p.categoriaSlug === "esportes") return "nenhuma";
   if (p.tipoImagem === "tematica") return "ilustracao_ia";
   if (p.tipoImagem === "cidade" && p.temCidade) return "foto_cidade";
   return "nenhuma";

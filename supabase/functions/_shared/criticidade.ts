@@ -52,9 +52,13 @@ Sem risco algum: {"nivel": "baixo", "score": 0-15, "motivos": [], "pessoas_expos
 // dose" não disparam nada sozinhos.
 const POLICIAL = /\b(policia|delegacia|boletim de ocorrencia|flagrante|mandado|operacao|crime|furto|roubo|homicidio|trafico|agressao|acidente)\w*/;
 const ELEITORAL = /\b(eleic\w*|eleitora(l|is)|urnas?|tse|tre-pr|pesquisa eleitoral|propaganda eleitoral|horario eleitoral|coligac\w*|partidos?|voto|votacao)\b/;
+// Editoria de política nacional: votação no Congresso, partido e ato de
+// governo SÃO o assunto — só o que é eleitoral de fato segura o texto.
+const ELEITORAL_ESTRITO = /\b(eleic\w*|eleitora(l|is)|urnas?|tse|tre-\w{2}|pesquisa eleitoral|propaganda eleitoral|horario eleitoral|coligac\w*|(primeiro|segundo) turno|boca de urna)\b/;
 const CARGO_POLITICO = /\b(prefeit[oa]s?|vice-prefeit[oa]s?|vereador(a|es|as)?|deputad[oa]s?|governador(a|es)?|senador(a|es)?|presidente da republica)\b/;
 
-const GATILHOS: Array<{ nivel: Nivel; motivo: string; teste: (t: string) => boolean }> = [
+type OpcoesRegras = { categoria?: string | null };
+const GATILHOS: Array<{ nivel: Nivel; motivo: string; teste: (t: string, o?: OpcoesRegras) => boolean }> = [
   {
     nivel: "alto", motivo: "pessoa em contexto policial/judicial",
     teste: (t) => /\b((o|a|os|as|um|uma|dois|duas|tres) suspeit[oa]s?|acusad[oa]s?|denunciad[oa]s?|indiciad[oa]s?|reu|condenad[oa]s?|foragid[oa]s?|pres[oa]s?|detid[oa]s?|autuad[oa]s? em flagrante)\b/.test(t),
@@ -68,7 +72,7 @@ const GATILHOS: Array<{ nivel: Nivel; motivo: string; teste: (t: string) => bool
   { nivel: "critico", motivo: "violência sexual", teste: (t) => /\b(estupro|abuso sexual|importunacao sexual|assedio sexual|pedofil\w*)\b/.test(t) },
   {
     nivel: "alto", motivo: "conteúdo eleitoral/político-partidário",
-    teste: (t) => ELEITORAL.test(t) || (/\bcandidat\w*/.test(t) && CARGO_POLITICO.test(t)),
+    teste: (t, o) => (o?.categoria === "politica" ? ELEITORAL_ESTRITO : ELEITORAL).test(t) || (/\bcandidat\w*/.test(t) && CARGO_POLITICO.test(t)),
   },
   { nivel: "alto", motivo: "acusação de corrupção/improbidade", teste: (t) => /\b(corrupc\w*|improbidade|desvio de (verba|dinheiro|recurso)s?|propina|fraude|superfaturamento|lavagem de dinheiro)\b/.test(t) },
   // Morte CONCRETA de alguém — não "falecidos"/"mortos" genéricos (Finados,
@@ -97,12 +101,12 @@ function normalizar(s: string): string {
   return s.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
 }
 
-export function avaliarRegras(texto: string, cfg?: ConfigCriticidade): { nivel: Nivel; motivos: string[] } {
+export function avaliarRegras(texto: string, cfg?: ConfigCriticidade, opts?: OpcoesRegras): { nivel: Nivel; motivos: string[] } {
   const t = normalizar(texto);
   let nivel: Nivel = "baixo";
   const motivos: string[] = [];
   for (const g of GATILHOS) {
-    if (g.teste(t)) {
+    if (g.teste(t, opts)) {
       nivel = nivelMaior(nivel, g.nivel);
       motivos.push(`[regra] ${g.motivo}`);
     }
@@ -130,13 +134,14 @@ export async function avaliarCriticidade(
   cfg?: ConfigCriticidade,
 ): Promise<ResultadoCriticidade> {
   const limiar: Nivel = cfg?.limiar_revisao ?? "medio";
-  const regras = avaliarRegras(`${p.titulo}\n${p.corpo}`, cfg);
+  const regras = avaliarRegras(`${p.titulo}\n${p.corpo}`, cfg, { categoria: p.categoria });
 
   if (cfg?.ativo === false) {
     return { nivel: regras.nivel, score: 0, motivos: regras.motivos, revisao: atingeLimiar(regras.nivel, limiar), via: "regras" };
   }
 
   let sistema = RUBRICA_CRITICIDADE;
+  if (p.categoria === "politica") sistema += `\n\nEDITORIA DE POLÍTICA NACIONAL: noticiar votação no Congresso, projeto de lei, ato do governo, decisão de tribunal ou declaração de autoridade é o assunto da editoria — se o texto é factual, atribui cada afirmação a quem a fez e não toma partido, é "baixo". Suba para "medio" se houver adjetivo, juízo de valor, versão de um lado só em assunto controverso ou afirmação sem fonte. Eleição (candidato, pesquisa, voto, turno, urna) continua "alto".`;
   if (cfg?.instrucoes_extra?.trim()) sistema += `\n\nINSTRUÇÕES ATUAIS DA REDAÇÃO:\n${cfg.instrucoes_extra.trim()}`;
   const usuario = `FORMATO: ${p.formato}${p.categoria ? ` · EDITORIA: ${p.categoria}` : ""}
 FATOS APURADOS (referência de fidelidade):
