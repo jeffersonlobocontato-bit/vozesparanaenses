@@ -135,9 +135,9 @@ const PASSOS: Array<{ n: string; titulo: string; texto: string; img?: string; al
   },
   {
     n: "03",
-    titulo: "Envie o release e as fotos",
+    titulo: "Envie a matéria da semana",
     texto:
-      "Cole o release ou escreva o que quer divulgar. Envie uma ou mais fotos e escolha a principal, que vira a capa da matéria.",
+      "Escolha a pauta mais importante da semana da sua prefeitura. Cole o release ou escreva o que quer divulgar, envie uma ou mais fotos e escolha a principal, que vira a capa da matéria.",
     img: `${IMG}/p-envio.jpg`,
     alt: "Painel do assessor com release colado e duas fotos, uma marcada como principal",
     icone: <ImagePlus className="h-5 w-5" />,
@@ -164,6 +164,10 @@ const PASSOS: Array<{ n: string; titulo: string; texto: string; img?: string; al
 
 const FAQ: Array<{ p: string; r: string }> = [
   { p: "Tem algum custo para a prefeitura?", r: "Não. O cadastro e a publicação de 1 matéria por semana pelo Portal da Imprensa são gratuitos." },
+  {
+    p: "Por que só 1 matéria por semana?",
+    r: "Porque as notícias do dia a dia a varredura automática já publica, duas vezes por dia, a partir do site da prefeitura. O canal do assessor é a vitrine da semana: a pauta que vocês escolhem como a mais importante, com fotos próprias, revisão de vocês e destaque fixo para os leitores da cidade. Se precisar de mais publicações, fale com a nossa equipe.",
+  },
   {
     p: "Quem pode se cadastrar?",
     r: "O responsável pela comunicação da prefeitura: secretário, diretor, coordenador, supervisor, assessor de imprensa ou outra função equivalente. O cadastro é pessoal, com CPF, e passa por aprovação.",
@@ -285,7 +289,7 @@ function CidadesDoParana() {
               <ul className="mt-7 space-y-4">
                 {[
                   { i: <Radar className="h-5 w-5" />, t: "Varredura automática", d: "Notícia do dia no site oficial vira matéria ou nota na coluna da sua região." },
-                  { i: <Send className="h-5 w-5" />, t: "Canal direto do assessor", d: "Com o cadastro, você não espera a varredura: envia o release, com fotos, na hora em que quiser." },
+                  { i: <Send className="h-5 w-5" />, t: "A matéria da semana, escolhida por você", d: "A varredura cobre o dia a dia. Pelo canal do assessor, a prefeitura publica a pauta que considera a mais importante da semana, com as próprias fotos e destaque para quem lê da cidade." },
                   { i: <Link2 className="h-5 w-5" />, t: "Aviso de duplicidade", d: "Se a notícia já foi publicada por nós, o painel avisa e mostra o link da matéria que está no ar." },
                 ].map((x) => (
                   <li key={x.t} className="flex gap-4">
@@ -506,8 +510,8 @@ function CidadesDoParana() {
                 },
                 {
                   i: <CalendarDays className="h-5 w-5" />,
-                  t: "1 matéria por semana, sem custo",
-                  d: "Cada prefeitura publica gratuitamente 1 matéria a cada 7 dias pelo canal. Precisa de mais espaço para a sua agenda? Fale com a gente e combinamos um limite maior.",
+                  t: "A matéria mais importante da semana",
+                  d: "O dia a dia da prefeitura a varredura já publica. O canal do assessor é para a pauta que vocês consideram a principal da semana: 1 matéria a cada 7 dias, sem custo, com as suas fotos, o seu texto revisado e destaque para a sua cidade. Precisa de mais espaço? Fale com a gente.",
                   cta: { rotulo: "Quero publicar mais", href: whats("Olá! Sou da comunicação de uma prefeitura e quero publicar mais de 1 matéria por semana no Vozes Paranaenses.") },
                 },
                 {

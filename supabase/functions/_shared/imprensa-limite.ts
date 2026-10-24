@@ -41,8 +41,11 @@ export function mensagemLimite(s: SituacaoLimite): string {
   const quando = s.liberaEm
     ? new Date(s.liberaEm).toLocaleString("pt-BR", { timeZone: "America/Sao_Paulo", day: "2-digit", month: "2-digit", hour: "2-digit", minute: "2-digit" })
     : null;
-  const qtd = s.limite === 1 ? "1 matéria" : `${s.limite} matérias`;
-  return `Seu plano permite ${qtd} por semana e ela já foi usada.` +
-    (quando ? ` A próxima publicação fica liberada em ${quando}.` : "") +
+  const usada = s.limite === 1
+    ? "A matéria da semana da sua prefeitura já foi publicada."
+    : `As ${s.limite} matérias da semana da sua prefeitura já foram publicadas.`;
+  return usada +
+    (quando ? ` A próxima fica liberada em ${quando}.` : "") +
+    " As notícias do dia a dia continuam entrando pela nossa varredura do site da prefeitura." +
     " Para publicar mais, fale com a gente pelo WhatsApp.";
 }

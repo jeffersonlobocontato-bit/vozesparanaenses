@@ -6,3 +6,6 @@
 alter table public.clientes_imprensa
   add column if not exists limite_semanal smallint not null default 1
     check (limite_semanal between 0 and 50);
+
+-- Cliente de teste (PREFA TESTE, slug "teste"): liberado para testar à vontade.
+update public.clientes_imprensa set limite_semanal = 50 where slug = 'teste';

@@ -290,8 +290,9 @@ function ImprensaPainel() {
 
       <h1 className="font-display text-2xl font-bold text-[#12201E]">Portal da Imprensa</h1>
       <p className="mt-1 text-sm text-slate-600">
-        Cole seu release, ou escreva o que quer divulgar com o máximo de detalhe — a IA identifica a editoria e
-        escreve o rascunho seguindo o padrão editorial do portal.
+        Envie a matéria mais importante da semana da sua prefeitura. Cole o release, ou escreva o que quer divulgar
+        com o máximo de detalhe — a IA identifica a editoria e escreve o rascunho no padrão editorial do portal. As
+        notícias do dia a dia continuam entrando pela nossa varredura automática do site da prefeitura.
       </p>
 
       {erro && (
