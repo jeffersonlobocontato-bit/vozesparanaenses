@@ -7,7 +7,7 @@ import { detectarCidade, cidadePorNome } from "./cidades.ts";
 import { classificarFoto, ehAgenciaPublica } from "./foto-credito.ts";
 import { ehDoDia, extrairDataPublicacao, inicioDoCiclo, diaSaoPaulo } from "./data-publicacao.ts";
 import { avaliarRegras } from "./criticidade.ts";
-import { decidirFormato, decidirImagem, motivoDescartePortal, pareceReleaseDeAssessoria, podeIrParaDobra, temaHeuristico, parseCrivo } from "./crivo-editorial.ts";
+import { decidirFormato, decidirImagem, ehAbrangenciaNacional, motivoDescartePortal, pareceReleaseDeAssessoria, podeIrParaDobra, temaHeuristico, parseCrivo } from "./crivo-editorial.ts";
 import { escolherFotoCommons, filtrarCandidatasCommons, promptIlustracao } from "./imagem.ts";
 import { escolherFotoBaixoRisco, normalizarAvaliacoes, normalizarPlano } from "./analista-imagem.ts";
 import { limparPrefeituraMecanico, verificarTitulo } from "./titulo.ts";
@@ -271,5 +271,10 @@ ok("política: votação no Congresso não segura", rp("Câmara aprova em votaç
 ok("política: segundo turno segura", rp("TSE divulga regras para o segundo turno") === "alto");
 ok("política: candidato a governador segura", rp("Candidato a governador apresenta proposta") === "alto");
 ok("fora da política: partido continua segurando", avaliarRegras("Vereador troca de partido").nivel === "alto");
+// Abrangência nacional (portal sem cidade apurada)
+ok("El Niño no Sul do Brasil → nacional", ehAbrangenciaNacional("Paraná (especialmente região Oeste) e Sul do Brasil"));
+ok("todo o país → nacional", ehAbrangenciaNacional("Em todo o país"));
+ok("Oeste do Paraná → não é nacional", !ehAbrangenciaNacional("Região Oeste do Paraná"));
+ok("Cascavel → não é nacional", !ehAbrangenciaNacional("Cascavel, PR"));
 console.log(falhas ? `\n${falhas} FALHA(S)` : "\nTudo certo");
 if (falhas) Deno.exit(1);

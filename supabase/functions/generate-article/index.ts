@@ -14,7 +14,7 @@
 import { faltando5w1h, motivoVeto5w1h } from "../_shared/cinco-w.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
 import { carregarCidades, cidadePorNome } from "../_shared/cidades.ts";
-import { decidirFormato, decidirImagem, podeIrParaDobra, prioridadeDoTema, temaHeuristico, type DecisaoImagem, type OrigemPauta, type Prioridade, type Tema, type TipoImagem } from "../_shared/crivo-editorial.ts";
+import { decidirFormato, decidirImagem, ehAbrangenciaNacional, podeIrParaDobra, prioridadeDoTema, temaHeuristico, type DecisaoImagem, type OrigemPauta, type Prioridade, type Tema, type TipoImagem } from "../_shared/crivo-editorial.ts";
 import { CREDITO_IA, fotoDaCidade, gerarIlustracaoTematica } from "../_shared/imagem.ts";
 import { avaliarCriticidade, carregarConfigCriticidade } from "../_shared/criticidade.ts";
 import { ehDoDia } from "../_shared/data-publicacao.ts";
@@ -264,6 +264,18 @@ Deno.serve(async (req) => {
     if (cidadePref) {
       cidade = cidadePref;
       regiaoId = cidadePref.regiao_id;
+    }
+  }
+  // Portal: a cidade é a que a APURAÇÃO aponta. Sem ela, o palpite da coleta
+  // (que pode vir do nome do jornal ou do rodapé: "O Presente - Marechal C.
+  // Rondon") não vale. E fato de escala Brasil vai para Nacional, não para a
+  // região do jornal (ex.: alerta de El Niño para o Sul do Brasil).
+  if (origem === "portal" && !cidadePorNome(dados.cidade_principal as string | null, cidades)) {
+    cidade = null;
+    regiaoId = cluster.regiao_id;
+    if (ehAbrangenciaNacional(facts.onde)) {
+      const { data: nac } = await sb.from("regioes").select("id").eq("slug", "nacional").maybeSingle();
+      if (nac?.id) regiaoId = nac.id;
     }
   }
 

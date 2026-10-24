@@ -249,3 +249,14 @@ export function decidirImagem(p: {
   if (p.tipoImagem === "cidade" && p.temCidade) return "foto_cidade";
   return "nenhuma";
 }
+
+/**
+ * O "onde" apurado fala do Brasil (país, Sul do Brasil, vários estados)?
+ * Usado quando a apuração não achou cidade: notícia de escala nacional em
+ * portal do PR vai para Nacional, e não para a região do jornal.
+ */
+export function ehAbrangenciaNacional(onde: string | null | undefined): boolean {
+  if (!onde) return false;
+  const t = onde.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+  return /\b(brasil|pais|nacional|territorio nacional|estados brasileiros|varios estados|regiao sul|sul do brasil|centro-sul do brasil|sudeste|nordeste|norte do brasil|centro-oeste)\b/.test(t);
+}
