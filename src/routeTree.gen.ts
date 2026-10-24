@@ -37,7 +37,6 @@ import { Route as AdminSobreRouteImport } from './routes/admin.sobre'
 import { Route as AdminSenhaRouteImport } from './routes/admin.senha'
 import { Route as AdminResetPasswordRouteImport } from './routes/admin.reset-password'
 import { Route as AdminRegioesRouteImport } from './routes/admin.regioes'
-import { Route as AdminPedidosChatRouteImport } from './routes/admin.pedidos-chat'
 import { Route as AdminPainelRouteImport } from './routes/admin.painel'
 import { Route as AdminNotasCidadesRouteImport } from './routes/admin.notas-cidades'
 import { Route as AdminMemoriaEditorialRouteImport } from './routes/admin.memoria-editorial'
@@ -45,7 +44,6 @@ import { Route as AdminLoginRouteImport } from './routes/admin.login'
 import { Route as AdminImprensaClientesRouteImport } from './routes/admin.imprensa-clientes'
 import { Route as AdminFontesRouteImport } from './routes/admin.fontes'
 import { Route as AdminColunasRouteImport } from './routes/admin.colunas'
-import { Route as AdminClustersRouteImport } from './routes/admin.clusters'
 import { Route as AdminAnunciosRouteImport } from './routes/admin.anuncios'
 import { Route as AdminAnalyticsRouteImport } from './routes/admin.analytics'
 import { Route as AdminAgentesRouteImport } from './routes/admin.agentes'
@@ -212,11 +210,6 @@ const AdminRegioesRoute = AdminRegioesRouteImport.update({
   path: '/regioes',
   getParentRoute: () => AdminRoute,
 } as any)
-const AdminPedidosChatRoute = AdminPedidosChatRouteImport.update({
-  id: '/pedidos-chat',
-  path: '/pedidos-chat',
-  getParentRoute: () => AdminRoute,
-} as any)
 const AdminPainelRoute = AdminPainelRouteImport.update({
   id: '/painel',
   path: '/painel',
@@ -250,11 +243,6 @@ const AdminFontesRoute = AdminFontesRouteImport.update({
 const AdminColunasRoute = AdminColunasRouteImport.update({
   id: '/colunas',
   path: '/colunas',
-  getParentRoute: () => AdminRoute,
-} as any)
-const AdminClustersRoute = AdminClustersRouteImport.update({
-  id: '/clusters',
-  path: '/clusters',
   getParentRoute: () => AdminRoute,
 } as any)
 const AdminAnunciosRoute = AdminAnunciosRouteImport.update({
@@ -409,7 +397,6 @@ export interface FileRoutesByFullPath {
   '/admin/agentes': typeof AdminAgentesRoute
   '/admin/analytics': typeof AdminAnalyticsRoute
   '/admin/anuncios': typeof AdminAnunciosRoute
-  '/admin/clusters': typeof AdminClustersRoute
   '/admin/colunas': typeof AdminColunasRoute
   '/admin/fontes': typeof AdminFontesRoute
   '/admin/imprensa-clientes': typeof AdminImprensaClientesRoute
@@ -417,7 +404,6 @@ export interface FileRoutesByFullPath {
   '/admin/memoria-editorial': typeof AdminMemoriaEditorialRoute
   '/admin/notas-cidades': typeof AdminNotasCidadesRoute
   '/admin/painel': typeof AdminPainelRoute
-  '/admin/pedidos-chat': typeof AdminPedidosChatRoute
   '/admin/regioes': typeof AdminRegioesRoute
   '/admin/reset-password': typeof AdminResetPasswordRoute
   '/admin/senha': typeof AdminSenhaRoute
@@ -471,7 +457,6 @@ export interface FileRoutesByTo {
   '/admin/agentes': typeof AdminAgentesRoute
   '/admin/analytics': typeof AdminAnalyticsRoute
   '/admin/anuncios': typeof AdminAnunciosRoute
-  '/admin/clusters': typeof AdminClustersRoute
   '/admin/colunas': typeof AdminColunasRoute
   '/admin/fontes': typeof AdminFontesRoute
   '/admin/imprensa-clientes': typeof AdminImprensaClientesRoute
@@ -479,7 +464,6 @@ export interface FileRoutesByTo {
   '/admin/memoria-editorial': typeof AdminMemoriaEditorialRoute
   '/admin/notas-cidades': typeof AdminNotasCidadesRoute
   '/admin/painel': typeof AdminPainelRoute
-  '/admin/pedidos-chat': typeof AdminPedidosChatRoute
   '/admin/regioes': typeof AdminRegioesRoute
   '/admin/reset-password': typeof AdminResetPasswordRoute
   '/admin/senha': typeof AdminSenhaRoute
@@ -536,7 +520,6 @@ export interface FileRoutesById {
   '/admin/agentes': typeof AdminAgentesRoute
   '/admin/analytics': typeof AdminAnalyticsRoute
   '/admin/anuncios': typeof AdminAnunciosRoute
-  '/admin/clusters': typeof AdminClustersRoute
   '/admin/colunas': typeof AdminColunasRoute
   '/admin/fontes': typeof AdminFontesRoute
   '/admin/imprensa-clientes': typeof AdminImprensaClientesRoute
@@ -544,7 +527,6 @@ export interface FileRoutesById {
   '/admin/memoria-editorial': typeof AdminMemoriaEditorialRoute
   '/admin/notas-cidades': typeof AdminNotasCidadesRoute
   '/admin/painel': typeof AdminPainelRoute
-  '/admin/pedidos-chat': typeof AdminPedidosChatRoute
   '/admin/regioes': typeof AdminRegioesRoute
   '/admin/reset-password': typeof AdminResetPasswordRoute
   '/admin/senha': typeof AdminSenhaRoute
@@ -602,7 +584,6 @@ export interface FileRouteTypes {
     | '/admin/agentes'
     | '/admin/analytics'
     | '/admin/anuncios'
-    | '/admin/clusters'
     | '/admin/colunas'
     | '/admin/fontes'
     | '/admin/imprensa-clientes'
@@ -610,7 +591,6 @@ export interface FileRouteTypes {
     | '/admin/memoria-editorial'
     | '/admin/notas-cidades'
     | '/admin/painel'
-    | '/admin/pedidos-chat'
     | '/admin/regioes'
     | '/admin/reset-password'
     | '/admin/senha'
@@ -664,7 +644,6 @@ export interface FileRouteTypes {
     | '/admin/agentes'
     | '/admin/analytics'
     | '/admin/anuncios'
-    | '/admin/clusters'
     | '/admin/colunas'
     | '/admin/fontes'
     | '/admin/imprensa-clientes'
@@ -672,7 +651,6 @@ export interface FileRouteTypes {
     | '/admin/memoria-editorial'
     | '/admin/notas-cidades'
     | '/admin/painel'
-    | '/admin/pedidos-chat'
     | '/admin/regioes'
     | '/admin/reset-password'
     | '/admin/senha'
@@ -728,7 +706,6 @@ export interface FileRouteTypes {
     | '/admin/agentes'
     | '/admin/analytics'
     | '/admin/anuncios'
-    | '/admin/clusters'
     | '/admin/colunas'
     | '/admin/fontes'
     | '/admin/imprensa-clientes'
@@ -736,7 +713,6 @@ export interface FileRouteTypes {
     | '/admin/memoria-editorial'
     | '/admin/notas-cidades'
     | '/admin/painel'
-    | '/admin/pedidos-chat'
     | '/admin/regioes'
     | '/admin/reset-password'
     | '/admin/senha'
@@ -1016,13 +992,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminRegioesRouteImport
       parentRoute: typeof AdminRoute
     }
-    '/admin/pedidos-chat': {
-      id: '/admin/pedidos-chat'
-      path: '/pedidos-chat'
-      fullPath: '/admin/pedidos-chat'
-      preLoaderRoute: typeof AdminPedidosChatRouteImport
-      parentRoute: typeof AdminRoute
-    }
     '/admin/painel': {
       id: '/admin/painel'
       path: '/painel'
@@ -1070,13 +1039,6 @@ declare module '@tanstack/react-router' {
       path: '/colunas'
       fullPath: '/admin/colunas'
       preLoaderRoute: typeof AdminColunasRouteImport
-      parentRoute: typeof AdminRoute
-    }
-    '/admin/clusters': {
-      id: '/admin/clusters'
-      path: '/clusters'
-      fullPath: '/admin/clusters'
-      preLoaderRoute: typeof AdminClustersRouteImport
       parentRoute: typeof AdminRoute
     }
     '/admin/anuncios': {
@@ -1280,7 +1242,6 @@ interface AdminRouteChildren {
   AdminAgentesRoute: typeof AdminAgentesRoute
   AdminAnalyticsRoute: typeof AdminAnalyticsRoute
   AdminAnunciosRoute: typeof AdminAnunciosRoute
-  AdminClustersRoute: typeof AdminClustersRoute
   AdminColunasRoute: typeof AdminColunasRoute
   AdminFontesRoute: typeof AdminFontesRoute
   AdminImprensaClientesRoute: typeof AdminImprensaClientesRoute
@@ -1288,7 +1249,6 @@ interface AdminRouteChildren {
   AdminMemoriaEditorialRoute: typeof AdminMemoriaEditorialRoute
   AdminNotasCidadesRoute: typeof AdminNotasCidadesRoute
   AdminPainelRoute: typeof AdminPainelRoute
-  AdminPedidosChatRoute: typeof AdminPedidosChatRoute
   AdminRegioesRoute: typeof AdminRegioesRoute
   AdminResetPasswordRoute: typeof AdminResetPasswordRoute
   AdminSenhaRoute: typeof AdminSenhaRoute
@@ -1301,7 +1261,6 @@ const AdminRouteChildren: AdminRouteChildren = {
   AdminAgentesRoute: AdminAgentesRoute,
   AdminAnalyticsRoute: AdminAnalyticsRoute,
   AdminAnunciosRoute: AdminAnunciosRoute,
-  AdminClustersRoute: AdminClustersRoute,
   AdminColunasRoute: AdminColunasRoute,
   AdminFontesRoute: AdminFontesRoute,
   AdminImprensaClientesRoute: AdminImprensaClientesRoute,
@@ -1309,7 +1268,6 @@ const AdminRouteChildren: AdminRouteChildren = {
   AdminMemoriaEditorialRoute: AdminMemoriaEditorialRoute,
   AdminNotasCidadesRoute: AdminNotasCidadesRoute,
   AdminPainelRoute: AdminPainelRoute,
-  AdminPedidosChatRoute: AdminPedidosChatRoute,
   AdminRegioesRoute: AdminRegioesRoute,
   AdminResetPasswordRoute: AdminResetPasswordRoute,
   AdminSenhaRoute: AdminSenhaRoute,
