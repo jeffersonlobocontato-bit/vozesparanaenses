@@ -215,6 +215,52 @@ export async function processarItensDaFonte(p: {
   return r;
 }
 
+/**
+ * Ordem da fila: quem foi TENTADO há mais tempo vem primeiro (última
+ * tentativa = ultimo_ciclo.em, ou a última coleta concluída). Antes a fila
+ * usava só a coleta concluída: fonte que travava nunca concluía, voltava
+ * para o começo a cada chamada e bloqueava as demais (24/10/2026: 16
+ * prefeituras travadas seguraram as outras 172 por um dia inteiro).
+ */
+export function ordenarPorTentativa<T extends { ultimo_scrape_em: string | null; ultimo_ciclo?: { em?: string } | null }>(fontes: T[]): T[] {
+  const t = (f: T) => {
+    const a = f.ultimo_ciclo?.em ? Date.parse(f.ultimo_ciclo.em) : 0;
+    const b = f.ultimo_scrape_em ? Date.parse(f.ultimo_scrape_em) : 0;
+    return Math.max(a || 0, b || 0);
+  };
+  return [...fontes].sort((x, y) => t(x) - t(y));
+}
+
+export const LIMITE_POR_FONTE_MS = 45_000;
+
+/**
+ * Roda a coleta de UMA fonte com tempo-limite próprio. Estourou: registra a
+ * tentativa (com o motivo) para a fonte ir para o fim da fila.
+ */
+export async function comLimiteDeTempo<R>(
+  // deno-lint-ignore no-explicit-any
+  sb: any,
+  fonte: { id: string; nome: string },
+  tarefa: () => Promise<R>,
+  vazio: (motivo: string) => R,
+): Promise<R> {
+  let timer: ReturnType<typeof setTimeout> | undefined;
+  const limite = new Promise<"tempo">((ok) => { timer = setTimeout(() => ok("tempo"), LIMITE_POR_FONTE_MS); });
+  try {
+    const r = await Promise.race([tarefa(), limite]);
+    if (r !== "tempo") return r as R;
+  } catch (e) {
+    const motivo = (e as Error).message || "erro";
+    await sb.from("fontes").update({ ultimo_ciclo: { fonte: fonte.nome, erro: motivo, em: new Date().toISOString() } }).eq("id", fonte.id);
+    return vazio(motivo);
+  } finally {
+    if (timer) clearTimeout(timer);
+  }
+  const motivo = `tempo esgotado (${LIMITE_POR_FONTE_MS / 1000}s)`;
+  await sb.from("fontes").update({ ultimo_ciclo: { fonte: fonte.nome, erro: motivo, em: new Date().toISOString() } }).eq("id", fonte.id);
+  return vazio(motivo);
+}
+
 // deno-lint-ignore no-explicit-any
 export async function carregarNomesVeiculos(sb: any): Promise<string[]> {
   const { data } = await sb.from("fontes").select("nome").eq("tipo", "veiculo");

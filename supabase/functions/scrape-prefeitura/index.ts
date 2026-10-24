@@ -9,7 +9,7 @@
 
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
 import { carregarCidades } from "../_shared/cidades.ts";
-import { carregarNomesVeiculos, fonteElegivel, processarItensDaFonte, type MetaPagina, type RelatorioFonte } from "../_shared/coleta.ts";
+import { carregarNomesVeiculos, comLimiteDeTempo, fonteElegivel, ordenarPorTentativa, processarItensDaFonte, type MetaPagina, type RelatorioFonte } from "../_shared/coleta.ts";
 import { extrairDataPublicacao, normalizarDataRss } from "../_shared/data-publicacao.ts";
 import { ehAtendeNet, lerListaAtendeNet, lerMateriaAtendeNet } from "../_shared/atende-net.ts";
 import { ehListaJson, lerListaJson } from "../_shared/lista-json.ts";
@@ -64,7 +64,7 @@ Deno.serve(async (req) => {
   // dentro da janela do ciclo pega o próximo lote.
   let query = sb
     .from("fontes")
-    .select("id, regiao_id, nome, url_base, tipo_renderizacao, protecao_antibot, frequencia_horas, ultimo_scrape_em, cidade_slug, abrangencia")
+    .select("id, regiao_id, nome, url_base, tipo_renderizacao, protecao_antibot, frequencia_horas, ultimo_scrape_em, cidade_slug, abrangencia, ultimo_ciclo")
     .eq("ativo", true)
     .eq("tipo", "prefeitura")
     .order("ultimo_scrape_em", { ascending: true, nullsFirst: true });
@@ -75,7 +75,8 @@ Deno.serve(async (req) => {
 
   const [cidades, nomesVeiculos] = await Promise.all([carregarCidades(sb), carregarNomesVeiculos(sb)]);
 
-  const eligible = (fontes ?? []).filter((f) => body.fonte_id || body.force || fonteElegivel(f as Fonte));
+  const eligible = ordenarPorTentativa((fontes ?? []) as Array<Fonte & { ultimo_ciclo?: { em?: string } | null }>)
+    .filter((f) => body.fonte_id || body.force || fonteElegivel(f as Fonte));
 
   // Orçamento de tempo por chamada: o que não couber fica para a próxima
   // chamada do cron dentro da mesma janela do ciclo.
@@ -84,7 +85,9 @@ Deno.serve(async (req) => {
   const dentroDoOrcamento = () => Date.now() - inicioExec < ORCAMENTO_MS;
 
   async function processFonte(fonte: Fonte): Promise<RelatorioFonte> {
-    try {
+    const vazio = (erro: string): RelatorioFonte => ({ fonte: fonte.nome, total: 0, inseridas: 0, duplicadas: 0, sem_data: 0, fora_do_dia: 0, fotos: {}, erro });
+    // Tempo-limite por fonte: site travado registra a tentativa e vai para o fim da fila.
+    return comLimiteDeTempo(sb, fonte, async () => {
       const itens = await scrapeFonte(fonte);
       return await processarItensDaFonte({
         sb, fonte, itens, cidades, nomesVeiculos, dentroDoOrcamento,
@@ -92,10 +95,9 @@ Deno.serve(async (req) => {
         buscarPagina: (u: string) => (ehAtendeNet(u) ? lerMateriaAtendeNet(u) : fetchArticleImageMeta(u)),
         fotoSempreLiberada: true,
       });
-    } catch (e) {
-      return { fonte: fonte.nome, total: 0, inseridas: 0, duplicadas: 0, sem_data: 0, fora_do_dia: 0, fotos: {}, erro: (e as Error).message };
-    }
+    }, vazio);
   }
+
 
   // Se o cliente pediu explicitamente uma única fonte, roda inline e devolve
   // o relatório. Caso contrário, dispara em background e responde na hora

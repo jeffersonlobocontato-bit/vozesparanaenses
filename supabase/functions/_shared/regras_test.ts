@@ -14,7 +14,7 @@ import { limparPrefeituraMecanico, verificarTitulo } from "./titulo.ts";
 import { dataAtendeNetParaIso, ehAtendeNet, parseListaAtendeNet, parseMateriaAtendeNet } from "./atende-net.ts";
 import { ehListaJson, parseListaJson } from "./lista-json.ts";
 import { faltando5w1h, motivoVeto5w1h } from "./cinco-w.ts";
-import { CICLOS_PORTAIS, cicloAtual, fonteElegivel, imagemValida, normalizarUrl } from "./coleta.ts";
+import { CICLOS_PORTAIS, cicloAtual, fonteElegivel, imagemValida, normalizarUrl, ordenarPorTentativa } from "./coleta.ts";
 
 const src = Deno.readTextFileSync(new URL("../../../src/lib/parana-municipios.ts", import.meta.url));
 const cidades = [...src.matchAll(/\{ slug: "([^"]+)", name: "([^"]+)", region: "([^"]+)" \}/g)].map((m) => ({ slug: m[1], nome: JSON.parse(`"${m[2]}"`), regiao_id: m[3] }));
@@ -282,5 +282,12 @@ ok("miniatura ?w=200 não serve", !imagemValida("https://admin.cnnbrasil.com.br/
 ok("og:image grande serve", imagemValida("https://admin.cnnbrasil.com.br/x/foto.jpg?w=1200&h=630&crop=1"));
 ok("foto comum serve", imagemValida("https://s2-g1.glbimg.com/abc/afp-20261024.jpg"));
 ok("logo não serve", !imagemValida("https://site.com/wp-content/themes/x/logo.png"));
+// Fila pela última tentativa
+const fila = ordenarPorTentativa([
+  { id: "travada", ultimo_scrape_em: null, ultimo_ciclo: { em: "2026-10-24T15:57:00Z" } },
+  { id: "ontem", ultimo_scrape_em: "2026-10-23T21:00:00Z", ultimo_ciclo: { em: "2026-10-23T21:00:00Z" } },
+  { id: "nunca", ultimo_scrape_em: null, ultimo_ciclo: null },
+]).map((f) => f.id).join(",");
+ok("fila: nunca tentada › tentada ontem › travada que acabou de tentar", fila === "nunca,ontem,travada", fila);
 console.log(falhas ? `\n${falhas} FALHA(S)` : "\nTudo certo");
 if (falhas) Deno.exit(1);
