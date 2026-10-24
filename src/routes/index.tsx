@@ -27,6 +27,7 @@ import { WhatsAppCTA } from "@/components/WhatsAppCTA";
 import { WeatherWidget } from "@/components/WeatherWidget";
 import { arrangePinnedSlots } from "@/lib/pinned-layout";
 import { Chapeu } from "@/components/Chapeu";
+import { corDaRegiao } from "@/lib/cores-regioes";
 
 const regionsQO = queryOptions({
   queryKey: ["regions"],
@@ -359,7 +360,9 @@ function PortalHome({
 
       <LocationBar />
 
-      <main className="mx-auto max-w-7xl px-4 py-6">
+      <main>
+        {/* Faixa 1 — primeira dobra, fundo base */}
+        <div className="mx-auto max-w-7xl px-4 py-6">
         {/* CTA WhatsApp no topo */}
         <div className="mb-6 flex justify-start">
           <WhatsAppCTA variant="button" />
@@ -411,8 +414,11 @@ function PortalHome({
           <AdsenseSlot slot="9449330789" />
         </div>
 
-        {/* Notícias das Regiões */}
-        <section className="mb-10">
+        </div>
+
+        {/* Faixa 2 — Notícias das Regiões, fundo frio */}
+        <div className="border-y border-rule bg-surface-raised">
+        <section className="mx-auto max-w-7xl px-4 py-10">
           <div className="flex items-center gap-4 mb-6">
             <h2 className="font-display text-3xl md:text-4xl text-primary uppercase tracking-tight shrink-0">
               Notícias das Regiões
@@ -433,7 +439,7 @@ function PortalHome({
                   params={a ? { region: r.slug, slug: a.slug } : { region: r.slug }}
                   className="bg-white p-6 hover:bg-accent transition-colors group block"
                 >
-                  <p className="text-xs md:text-sm font-bold text-secondary mb-2 uppercase tracking-wider">
+                  <p className="text-xs md:text-sm font-bold mb-2 uppercase tracking-wider" style={{ color: corDaRegiao(r.slug) }}>
                     {r.name}
                   </p>
                   <h4 className="font-display text-2xl md:text-xl xl:text-2xl leading-tight group-hover:underline text-slate-900">
@@ -445,8 +451,19 @@ function PortalHome({
           </div>
         </section>
 
-        {/* Colunas — atalhos para as colunas do portal, logo abaixo das regiões */}
-        <ColumnsShortcut colunas={colunas ?? []} />
+        </div>
+
+        {/* Faixa 3 — Colunas, fundo quente (opinião e voz) */}
+        {(colunas ?? []).length > 0 && (
+          <div className="border-b border-rule bg-surface-warm">
+            <div className="mx-auto max-w-7xl px-4 pt-10 pb-0">
+              <ColumnsShortcut colunas={colunas ?? []} />
+            </div>
+          </div>
+        )}
+
+        {/* Faixa 4 — destaques, editorias e mais lidas, fundo base */}
+        <div className="mx-auto max-w-7xl px-4 py-10">
 
         {/* AdSense — Grupo 2 (antes das secundárias) */}
         <div className="mb-8 empty:hidden">
@@ -556,6 +573,7 @@ function PortalHome({
         {/* CTA — Comunidade WhatsApp (rodapé da home) */}
         <div className="mt-10 flex justify-start">
           <WhatsAppCTA variant="button" />
+        </div>
         </div>
       </main>
 

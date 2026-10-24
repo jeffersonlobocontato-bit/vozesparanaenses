@@ -27,6 +27,8 @@
   --font-chapeu: "Barlow Condensed", "Arial Narrow", Arial, sans-serif;
   --font-marca: "Fraunces", Georgia, serif;
   /* Cores do design system: a proximidade da notícia é o código de cor. */
+  --color-surface-raised: var(--vp-surface-raised);
+  --color-surface-warm: var(--vp-surface-warm);
   --color-brand: var(--vp-brand);
   --color-ink: var(--vp-ink);
   --color-ink-muted: var(--vp-ink-muted);
@@ -84,6 +86,9 @@
 
 :root {
   --radius: 0.625rem;
+  /* Faixas de fundo da home: base › frio (regiões) › quente (colunas) › base */
+  --vp-surface-raised: oklch(0.966 0.006 153.8);
+  --vp-surface-warm: oklch(0.959 0.016 76);
   --vp-brand: oklch(0.425 0.073 165.8);
   --vp-ink: oklch(0.234 0.021 168.6);
   --vp-ink-muted: oklch(0.452 0.023 167);
