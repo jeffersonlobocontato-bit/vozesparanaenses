@@ -6,6 +6,7 @@ import {
   PageHeader,
   Section,
   StatusPill,
+  ConfirmButton,
   EmptyState,
   ErrorBanner,
   Aviso,
@@ -26,7 +27,17 @@ type Cliente = {
   slug: string;
   ativo: boolean;
   criado_em: string;
+  status: "pendente" | "aprovado" | "recusado";
+  origem: string;
+  cpf: string | null;
+  funcao: string | null;
+  cidade: { nome: string } | null;
 };
+
+function formatarCpf(c: string | null) {
+  if (!c) return "—";
+  return c.replace(/^(\d{3})(\d{3})(\d{3})(\d{2})$/, "$1.$2.$3-$4");
+}
 
 function AdminImprensaClientes() {
   const [clientes, setClientes] = useState<Cliente[]>([]);
@@ -50,10 +61,10 @@ function AdminImprensaClientes() {
       const sb = await getExternalBrowser();
       const { data, error } = await sb
         .from("clientes_imprensa")
-        .select("id, nome_empresa, nome_contato, email, slug, ativo, criado_em")
+        .select("id, nome_empresa, nome_contato, email, slug, ativo, criado_em, status, origem, cpf, funcao, cidade:cidades(nome)")
         .order("criado_em", { ascending: false });
       if (error) throw error;
-      setClientes((data ?? []) as Cliente[]);
+      setClientes((data ?? []) as unknown as Cliente[]);
     } catch (e: unknown) {
       setErroLista(e instanceof Error ? e.message : "Erro ao carregar a lista de clientes.");
     } finally {
@@ -97,6 +108,27 @@ function AdminImprensaClientes() {
     }
   }
 
+  async function decidir(c: Cliente, status: "aprovado" | "recusado") {
+    setMsg(null);
+    try {
+      const sb = await getExternalBrowser();
+      const { data: sess } = await sb.auth.getSession();
+      const patch: Record<string, unknown> = { status };
+      if (status === "aprovado") {
+        patch.aprovado_em = new Date().toISOString();
+        patch.aprovado_por = sess.session?.user.id ?? null;
+      }
+      const { error } = await sb.from("clientes_imprensa").update(patch).eq("id", c.id);
+      if (error) throw error;
+      await load();
+    } catch (e: unknown) {
+      setMsg(e instanceof Error ? e.message : "Não foi possível salvar a decisão.");
+    }
+  }
+
+  const pendentes = clientes.filter((c) => c.status === "pendente");
+  const demais = clientes.filter((c) => c.status !== "pendente");
+
   async function copiarAcesso() {
     if (!ultimaSenha) return;
     const texto = `E-mail: ${ultimaSenha.email}\nSenha temporária: ${ultimaSenha.senha}\nLink de acesso: ${ultimaSenha.link}`;
@@ -113,7 +145,7 @@ function AdminImprensaClientes() {
       <PageHeader
         eyebrow="Portal da Imprensa"
         title="Clientes"
-        subtitle="Crie o acesso de login de cada assessoria ou empresa. O cliente entra com e-mail e senha no próprio chat de geração de conteúdo."
+        subtitle="Prefeituras se cadastram sozinhas em /imprensa/cadastro (com a própria senha) e só publicam depois da sua aprovação aqui. Você também pode criar um acesso manualmente."
         actions={
           !formAberto && (
             <button type="button" onClick={() => { setFormAberto(true); setMsg(null); }} className={btn("primary")}>
@@ -182,24 +214,71 @@ function AdminImprensaClientes() {
         </Section>
       )}
 
+      {pendentes.length > 0 && (
+        <Section
+          title={`Cadastros aguardando aprovação (${pendentes.length})`}
+          subtitle="Confira se a pessoa é mesmo a responsável pela comunicação da prefeitura antes de aprovar."
+        >
+          <ul className="divide-y divide-slate-100">
+            {pendentes.map((c) => (
+              <li key={c.id} className="flex flex-wrap items-start justify-between gap-3 py-3 text-sm">
+                <dl className="grid min-w-0 gap-x-4 gap-y-0.5 sm:grid-cols-[110px_1fr]">
+                  <dt className="text-slate-500">Prefeitura</dt>
+                  <dd className="font-semibold text-[#12201E]">{c.cidade?.nome ?? c.nome_empresa}</dd>
+                  <dt className="text-slate-500">Nome</dt>
+                  <dd>{c.nome_contato}</dd>
+                  <dt className="text-slate-500">CPF</dt>
+                  <dd className="font-mono">{formatarCpf(c.cpf)}</dd>
+                  <dt className="text-slate-500">Função</dt>
+                  <dd>{c.funcao ?? "—"}</dd>
+                  <dt className="text-slate-500">E-mail</dt>
+                  <dd>{c.email}</dd>
+                  <dt className="text-slate-500">Enviado em</dt>
+                  <dd>{new Date(c.criado_em).toLocaleString("pt-BR")}</dd>
+                </dl>
+                <div className="flex gap-2">
+                  <ConfirmButton variante="success" confirmLabel="Confirmar aprovação" onConfirm={() => decidir(c, "aprovado")}>
+                    Aprovar
+                  </ConfirmButton>
+                  <ConfirmButton confirmLabel="Confirmar recusa" onConfirm={() => decidir(c, "recusado")}>
+                    Recusar
+                  </ConfirmButton>
+                </div>
+              </li>
+            ))}
+          </ul>
+        </Section>
+      )}
+
       <Section
-        title={`Clientes cadastrados (${clientes.length})`}
+        title={`Clientes cadastrados (${demais.length})`}
         aside={<button type="button" onClick={load} className={btn("ghost", "sm")}>Atualizar</button>}
       >
         {erroLista && <div className="mb-3"><ErrorBanner>Não foi possível carregar os clientes: {erroLista}</ErrorBanner></div>}
         {carregando ? (
           <p className="text-sm text-slate-500">Carregando…</p>
-        ) : clientes.length === 0 ? (
+        ) : demais.length === 0 ? (
           !erroLista && <EmptyState title="Nenhum cliente cadastrado ainda.">Use “Novo cliente” para criar o primeiro acesso.</EmptyState>
         ) : (
           <ul className="divide-y divide-slate-100">
-            {clientes.map((c) => (
+            {demais.map((c) => (
               <li key={c.id} className="flex flex-wrap items-center justify-between gap-2 py-2.5 text-sm">
                 <div className="min-w-0">
-                  <p className="font-semibold text-[#12201E]">{c.nome_empresa} <span className="font-normal text-slate-500">· {c.nome_contato}</span></p>
-                  <p className="text-xs text-slate-500">{c.email} · /imprensa/{c.slug}</p>
+                  <p className="font-semibold text-[#12201E]">{c.nome_empresa} <span className="font-normal text-slate-500">· {c.nome_contato}{c.funcao ? ` · ${c.funcao}` : ""}</span></p>
+                  <p className="text-xs text-slate-500">{c.email}{c.origem === "autocadastro" ? " · autocadastro" : ""}</p>
                 </div>
-                <StatusPill status={c.ativo ? "ativo" : "inativo"} />
+                <div className="flex items-center gap-2">
+                  {c.status === "recusado" ? (
+                    <>
+                      <StatusPill status="recusado" />
+                      <ConfirmButton variante="secondary" confirmLabel="Confirmar aprovação" onConfirm={() => decidir(c, "aprovado")}>
+                        Aprovar
+                      </ConfirmButton>
+                    </>
+                  ) : (
+                    <StatusPill status={c.ativo ? "ativo" : "inativo"} />
+                  )}
+                </div>
               </li>
             ))}
           </ul>

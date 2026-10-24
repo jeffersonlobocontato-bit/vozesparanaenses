@@ -1,4 +1,4 @@
-import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
 import { getExternalBrowser } from "@/lib/external-supabase-browser";
 import { Logo } from "@/components/Logo";
@@ -45,7 +45,7 @@ function ImprensaLogin() {
 
       if (!cliente) {
         await sb.auth.signOut();
-        throw new Error("Este login não tem acesso ao Portal da Imprensa. Fale com quem te enviou o convite.");
+        throw new Error("Este login não tem acesso ao Portal da Imprensa. Se você é da comunicação de uma prefeitura, faça o seu cadastro.");
       }
       if (!cliente.ativo) {
         await sb.auth.signOut();
@@ -83,6 +83,9 @@ function ImprensaLogin() {
           className="w-full rounded bg-[#E29F65] px-3 py-2 text-sm font-semibold text-white hover:bg-[#0055aa] disabled:opacity-60">
           {busy ? "Entrando…" : "Entrar"}
         </button>
+        <p className="text-center text-xs text-muted-foreground">
+          Primeiro acesso? <Link to="/imprensa/cadastro" className="font-semibold text-[#12201E] underline">Cadastre a sua prefeitura</Link>
+        </p>
       </form>
     </div>
   );

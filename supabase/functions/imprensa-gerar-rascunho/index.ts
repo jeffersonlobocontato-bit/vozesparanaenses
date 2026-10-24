@@ -43,10 +43,13 @@ Deno.serve(async (req) => {
 
   const { data: cliente } = await sb
     .from("clientes_imprensa")
-    .select("id, ativo, nome_empresa")
+    .select("id, ativo, nome_empresa, status")
     .eq("user_id", userData.user.id)
     .maybeSingle();
   if (!cliente || !cliente.ativo) return json({ error: "cliente_sem_acesso" }, 403);
+  if (cliente.status !== "aprovado") {
+    return json({ error: "cadastro_pendente", detail: "Seu cadastro ainda está em análise. A publicação é liberada assim que a equipe aprovar." }, 403);
+  }
 
   let body: { texto_bruto?: string; submissao_id?: string };
   try { body = await req.json(); } catch { return json({ error: "invalid_json_body" }, 400); }

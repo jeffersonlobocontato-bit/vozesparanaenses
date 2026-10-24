@@ -52,6 +52,7 @@ function ImprensaPainel() {
   const nav = useNavigate();
   const [checando, setChecando] = useState(true);
   const [nomeEmpresa, setNomeEmpresa] = useState("");
+  const [statusCadastro, setStatusCadastro] = useState<"pendente" | "aprovado" | "recusado">("aprovado");
 
   const [textoBruto, setTextoBruto] = useState("");
   const [gerando, setGerando] = useState(false);
@@ -81,7 +82,7 @@ function ImprensaPainel() {
       if (!sess.session) { nav({ to: "/imprensa/entrar", replace: true }); return; }
       const { data: cliente } = await sb
         .from("clientes_imprensa")
-        .select("nome_empresa, ativo")
+        .select("nome_empresa, ativo, status")
         .eq("user_id", sess.session.user.id)
         .maybeSingle();
       if (!cliente || !cliente.ativo) {
@@ -90,6 +91,7 @@ function ImprensaPainel() {
         return;
       }
       setNomeEmpresa(cliente.nome_empresa);
+      setStatusCadastro((cliente.status ?? "aprovado") as "pendente" | "aprovado" | "recusado");
       const { data: rs } = await sb.from("regioes").select("id, nome").order("nome");
       setRegioes((rs ?? []) as Array<{ id: string; nome: string }>);
       setChecando(false);
@@ -178,6 +180,12 @@ function ImprensaPainel() {
     } catch { /* clipboard indisponível */ }
   }
 
+  async function sair() {
+    const sb = await getExternalBrowser();
+    await sb.auth.signOut();
+    nav({ to: "/imprensa/entrar", replace: true });
+  }
+
   function novaMateria() {
     setPublicado(null); setSubmissaoId(null); setCategoriaDetectada(null);
     setTextoBruto(""); setTitulo(""); setSubtitulo(""); setCorpo("");
@@ -192,6 +200,25 @@ function ImprensaPainel() {
       <span className="text-sm text-muted-foreground">{nomeEmpresa}</span>
     </div>
   );
+
+  if (statusCadastro !== "aprovado") {
+    return (
+      <div className="mx-auto max-w-2xl px-4 py-8">
+        {cabecalho}
+        <div className="rounded-2xl border border-slate-200 bg-white p-6 text-center shadow-sm">
+          <h1 className="font-display text-2xl font-bold text-[#12201E]">
+            {statusCadastro === "pendente" ? "Cadastro em análise" : "Cadastro não aprovado"}
+          </h1>
+          <p className="mt-2 text-sm text-slate-600">
+            {statusCadastro === "pendente"
+              ? "Estamos conferindo os seus dados. Assim que o cadastro for aprovado, esta página libera o envio e a publicação de matérias — é só voltar e entrar de novo."
+              : "Não foi possível confirmar o seu cadastro. Fale com a equipe pelo e-mail contato@vozesparanaenses.com.br."}
+          </p>
+          <button onClick={sair} className="mt-5 text-sm font-semibold text-[#B5651D] underline">Sair</button>
+        </div>
+      </div>
+    );
+  }
 
   if (publicado) {
     return (

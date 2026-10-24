@@ -50,3 +50,10 @@ async function mensagemDoErro(error: unknown): Promise<string> {
   if (codigo) return detalhe ? `${codigo}: ${detalhe}` : codigo;
   return error instanceof Error ? error.message : "Erro inesperado.";
 }
+
+/** Chamada sem login (ex.: autocadastro). Mesmo tratamento de erro. */
+export async function invokeImprensaPublico<T>(name: string, body: Record<string, unknown>): Promise<T> {
+  const { data, error } = await supabase.functions.invoke(name, { body });
+  if (error) throw new Error(await mensagemDoErro(error));
+  return data as T;
+}

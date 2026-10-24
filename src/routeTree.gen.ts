@@ -29,6 +29,7 @@ import { Route as RIdRouteImport } from './routes/r.$id'
 import { Route as PublieditorialTokenRouteImport } from './routes/publieditorial.$token'
 import { Route as ImprensaPainelRouteImport } from './routes/imprensa.painel'
 import { Route as ImprensaEntrarRouteImport } from './routes/imprensa.entrar'
+import { Route as ImprensaCadastroRouteImport } from './routes/imprensa.cadastro'
 import { Route as EmailUnsubscribeRouteImport } from './routes/email/unsubscribe'
 import { Route as EditoriaCategoriaRouteImport } from './routes/editoria.$categoria'
 import { Route as AutorSlugRouteImport } from './routes/autor.$slug'
@@ -168,6 +169,11 @@ const ImprensaPainelRoute = ImprensaPainelRouteImport.update({
 const ImprensaEntrarRoute = ImprensaEntrarRouteImport.update({
   id: '/imprensa/entrar',
   path: '/imprensa/entrar',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ImprensaCadastroRoute = ImprensaCadastroRouteImport.update({
+  id: '/imprensa/cadastro',
+  path: '/imprensa/cadastro',
   getParentRoute: () => rootRouteImport,
 } as any)
 const EmailUnsubscribeRoute = EmailUnsubscribeRouteImport.update({
@@ -412,6 +418,7 @@ export interface FileRoutesByFullPath {
   '/autor/$slug': typeof AutorSlugRoute
   '/editoria/$categoria': typeof EditoriaCategoriaRoute
   '/email/unsubscribe': typeof EmailUnsubscribeRoute
+  '/imprensa/cadastro': typeof ImprensaCadastroRoute
   '/imprensa/entrar': typeof ImprensaEntrarRoute
   '/imprensa/painel': typeof ImprensaPainelRoute
   '/publieditorial/$token': typeof PublieditorialTokenRoute
@@ -472,6 +479,7 @@ export interface FileRoutesByTo {
   '/autor/$slug': typeof AutorSlugRoute
   '/editoria/$categoria': typeof EditoriaCategoriaRoute
   '/email/unsubscribe': typeof EmailUnsubscribeRoute
+  '/imprensa/cadastro': typeof ImprensaCadastroRoute
   '/imprensa/entrar': typeof ImprensaEntrarRoute
   '/imprensa/painel': typeof ImprensaPainelRoute
   '/publieditorial/$token': typeof PublieditorialTokenRoute
@@ -535,6 +543,7 @@ export interface FileRoutesById {
   '/autor/$slug': typeof AutorSlugRoute
   '/editoria/$categoria': typeof EditoriaCategoriaRoute
   '/email/unsubscribe': typeof EmailUnsubscribeRoute
+  '/imprensa/cadastro': typeof ImprensaCadastroRoute
   '/imprensa/entrar': typeof ImprensaEntrarRoute
   '/imprensa/painel': typeof ImprensaPainelRoute
   '/publieditorial/$token': typeof PublieditorialTokenRoute
@@ -599,6 +608,7 @@ export interface FileRouteTypes {
     | '/autor/$slug'
     | '/editoria/$categoria'
     | '/email/unsubscribe'
+    | '/imprensa/cadastro'
     | '/imprensa/entrar'
     | '/imprensa/painel'
     | '/publieditorial/$token'
@@ -659,6 +669,7 @@ export interface FileRouteTypes {
     | '/autor/$slug'
     | '/editoria/$categoria'
     | '/email/unsubscribe'
+    | '/imprensa/cadastro'
     | '/imprensa/entrar'
     | '/imprensa/painel'
     | '/publieditorial/$token'
@@ -721,6 +732,7 @@ export interface FileRouteTypes {
     | '/autor/$slug'
     | '/editoria/$categoria'
     | '/email/unsubscribe'
+    | '/imprensa/cadastro'
     | '/imprensa/entrar'
     | '/imprensa/painel'
     | '/publieditorial/$token'
@@ -767,6 +779,7 @@ export interface RootRouteChildren {
   AutorSlugRoute: typeof AutorSlugRoute
   EditoriaCategoriaRoute: typeof EditoriaCategoriaRoute
   EmailUnsubscribeRoute: typeof EmailUnsubscribeRoute
+  ImprensaCadastroRoute: typeof ImprensaCadastroRoute
   ImprensaEntrarRoute: typeof ImprensaEntrarRoute
   ImprensaPainelRoute: typeof ImprensaPainelRoute
   PublieditorialTokenRoute: typeof PublieditorialTokenRoute
@@ -934,6 +947,13 @@ declare module '@tanstack/react-router' {
       path: '/imprensa/entrar'
       fullPath: '/imprensa/entrar'
       preLoaderRoute: typeof ImprensaEntrarRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/imprensa/cadastro': {
+      id: '/imprensa/cadastro'
+      path: '/imprensa/cadastro'
+      fullPath: '/imprensa/cadastro'
+      preLoaderRoute: typeof ImprensaCadastroRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/email/unsubscribe': {
@@ -1293,6 +1313,7 @@ const rootRouteChildren: RootRouteChildren = {
   AutorSlugRoute: AutorSlugRoute,
   EditoriaCategoriaRoute: EditoriaCategoriaRoute,
   EmailUnsubscribeRoute: EmailUnsubscribeRoute,
+  ImprensaCadastroRoute: ImprensaCadastroRoute,
   ImprensaEntrarRoute: ImprensaEntrarRoute,
   ImprensaPainelRoute: ImprensaPainelRoute,
   PublieditorialTokenRoute: PublieditorialTokenRoute,
