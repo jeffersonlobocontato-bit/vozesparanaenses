@@ -1,5 +1,6 @@
 import { Link } from "@tanstack/react-router";
 import type { ArticleListItem, ColunaAtalho } from "@/lib/content.functions";
+import { corDaRegiao } from "@/lib/cores-regioes";
 
 export type StoryTopic = {
   label: string;
@@ -13,11 +14,13 @@ type StoryItem = {
   image: string | null;
   to: string;
   params: Record<string, string>;
+  /** Cor da região (colunas "Vozes {Região}"): anel e fundo do avatar. */
+  cor?: string;
 };
 
 function initials(text: string) {
   return text
-    .split(/\s+/)
+    .split(/[\s-]+/)
     .slice(0, 2)
     .map((w) => w[0]?.toUpperCase() ?? "")
     .join("");
@@ -50,6 +53,18 @@ export function StoriesBar({
 
   for (const c of colunas) {
     if (!c.edicao) continue;
+    if (c.regiaoSlug) {
+      // Coluna regional: abre a página "Vozes {Região}", com a cor da região.
+      items.push({
+        key: `col-${c.slug}`,
+        label: c.nome,
+        image: c.foto_colunista_url ?? null,
+        to: "/vozes/$cidade",
+        params: { cidade: c.regiaoSlug },
+        cor: corDaRegiao(c.regiaoSlug),
+      });
+      continue;
+    }
     items.push({
       key: `col-${c.slug}`,
       label: c.nome,
@@ -71,7 +86,10 @@ export function StoriesBar({
               params={s.params as never}
               className="flex w-[72px] flex-col items-center gap-1.5"
             >
-              <span className="block rounded-full bg-gradient-to-tr from-[#12201E] to-[#2E6DA4] p-[2px]">
+              <span
+                className={`block rounded-full p-[2px] ${s.cor ? "" : "bg-gradient-to-tr from-[#12201E] to-[#2E6DA4]"}`}
+                style={s.cor ? { backgroundColor: s.cor } : undefined}
+              >
                 <span className="block rounded-full bg-white p-[2px]">
                   {s.image ? (
                     <img
@@ -81,8 +99,11 @@ export function StoriesBar({
                       className="h-14 w-14 rounded-full object-cover"
                     />
                   ) : (
-                    <span className="flex h-14 w-14 items-center justify-center rounded-full bg-[#12201E] text-sm font-bold text-white">
-                      {initials(s.label)}
+                    <span
+                      className="flex h-14 w-14 items-center justify-center rounded-full bg-[#12201E] text-sm font-bold text-white"
+                      style={s.cor ? { backgroundColor: s.cor } : undefined}
+                    >
+                      {initials(s.cor ? s.label.replace(/^Vozes\s+/i, "") : s.label)}
                     </span>
                   )}
                 </span>

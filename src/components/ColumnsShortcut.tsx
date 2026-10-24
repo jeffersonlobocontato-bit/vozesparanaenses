@@ -1,9 +1,10 @@
 import { Link } from "@tanstack/react-router";
 import type { ColunaAtalho } from "@/lib/content.functions";
+import { corDaRegiao } from "@/lib/cores-regioes";
 
 function iniciais(nome: string) {
   return nome
-    .split(/\s+/)
+    .split(/[\s-]+/)
     .slice(0, 2)
     .map((p) => p[0])
     .join("")
@@ -62,6 +63,8 @@ export function ColumnsShortcut({ colunas }: { colunas: ColunaAtalho[] }) {
 }
 
 function CardConteudo({ c }: { c: ColunaAtalho }) {
+  // Coluna regional: avatar e nome na cor da região (mapa de mesorregiões).
+  const cor = c.regiaoSlug ? corDaRegiao(c.regiaoSlug) : null;
   return (
     <>
       <div className="flex min-w-0 items-center gap-3">
@@ -70,14 +73,21 @@ function CardConteudo({ c }: { c: ColunaAtalho }) {
             src={c.foto_colunista_url}
             alt={c.nome}
             loading="lazy"
-            className="h-12 w-12 shrink-0 rounded-full object-cover ring-2 ring-secondary"
+            className={`h-12 w-12 shrink-0 rounded-full object-cover ring-2 ${cor ? "" : "ring-secondary"}`}
+            style={cor ? { boxShadow: `0 0 0 2px ${cor}` } : undefined}
           />
         ) : (
-          <span className="grid h-12 w-12 shrink-0 place-items-center rounded-full bg-primary text-sm font-bold text-primary-foreground ring-2 ring-secondary">
-            {iniciais(c.nome)}
+          <span
+            className={`grid h-12 w-12 shrink-0 place-items-center rounded-full text-sm font-bold text-white ${cor ? "" : "bg-primary ring-2 ring-secondary"}`}
+            style={cor ? { backgroundColor: cor } : undefined}
+          >
+            {cor ? iniciais(c.nome.replace(/^Vozes\s+/i, "")) : iniciais(c.nome)}
           </span>
         )}
-        <p className="min-w-0 truncate text-sm font-bold uppercase tracking-wider text-secondary">
+        <p
+          className={`min-w-0 truncate text-sm font-bold uppercase tracking-wider ${cor ? "" : "text-secondary"}`}
+          style={cor ? { color: cor } : undefined}
+        >
           {c.nome}
         </p>
       </div>
