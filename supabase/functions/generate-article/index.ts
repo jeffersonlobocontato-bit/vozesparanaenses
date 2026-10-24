@@ -11,6 +11,7 @@
 // fatos aqui, propositalmente, para manter as duas etapas realmente
 // separadas e auditáveis.
 
+import { faltando5w1h, motivoVeto5w1h } from "../_shared/cinco-w.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
 import { carregarCidades, cidadePorNome } from "../_shared/cidades.ts";
 import { decidirFormato, decidirImagem, podeIrParaDobra, prioridadeDoTema, temaHeuristico, type DecisaoImagem, type OrigemPauta, type Prioridade, type Tema, type TipoImagem } from "../_shared/crivo-editorial.ts";
@@ -216,6 +217,20 @@ Deno.serve(async (req) => {
 
   const { data: caRows } = await sb.from("cluster_articles").select("raw_article_id").eq("cluster_id", clusterId);
   const rawIdsCluster = (caRows ?? []).map((r) => r.raw_article_id);
+
+  // Veto 5W1H: sem as seis respostas nos fatos apurados, não escreve nada —
+  // nem matéria nem nota. Vale também para o "Escrever agora" do editor.
+  const faltando = faltando5w1h({
+    quem: facts.quem, o_que: facts.o_que, quando: facts.quando, onde: facts.onde,
+    por_que: facts.por_que, como: dados.como,
+  });
+  if (faltando.length) {
+    const motivo = motivoVeto5w1h(faltando);
+    await encerrarCluster(sb, clusterId, rawIdsCluster, "descartado");
+    await sb.from("article_clusters").update({ descarte_motivo: motivo }).eq("id", clusterId);
+    console.log(`[generate-article] cluster ${clusterId} vetado — ${motivo}`);
+    return json({ ok: true, vetado: true, motivo, faltando });
+  }
   const { data: rawsData } = rawIdsCluster.length
     ? await sb.from("raw_articles")
       .select("id, imagem_original_url, imagem_credito, foto_status, data_publicacao_original, coletado_em, fonte:fontes(nome, tipo, cidade_slug, curadoria_editoria)")

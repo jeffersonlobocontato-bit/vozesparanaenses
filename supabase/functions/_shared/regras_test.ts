@@ -13,6 +13,7 @@ import { escolherFotoBaixoRisco, normalizarAvaliacoes, normalizarPlano } from ".
 import { limparPrefeituraMecanico, verificarTitulo } from "./titulo.ts";
 import { dataAtendeNetParaIso, ehAtendeNet, parseListaAtendeNet, parseMateriaAtendeNet } from "./atende-net.ts";
 import { ehListaJson, parseListaJson } from "./lista-json.ts";
+import { faltando5w1h, motivoVeto5w1h } from "./cinco-w.ts";
 import { CICLOS_PORTAIS, cicloAtual, fonteElegivel, normalizarUrl } from "./coleta.ts";
 
 const src = Deno.readTextFileSync(new URL("../../../src/lib/parana-municipios.ts", import.meta.url));
@@ -245,5 +246,15 @@ const cands = filtrarCandidatasCommons([
   pag("File:Esplanada.png", 4000, 2600, "CC0", "Brasília"),
 ]);
 ok("Commons por tema: só JPEG livre e sem brasão", cands.length === 1 && cands[0].titulo === "Palácio do Planalto.jpg", JSON.stringify(cands.map((c) => c.titulo)));
+// Veto 5W1H
+const completo = { quem: "Prefeitura de Toledo", o_que: "entrega placas", quando: "quinta-feira (22)", onde: "Toledo", por_que: "fomentar o turismo rural", como: "em cerimônia na Secretaria" };
+ok("5W1H completo → escreve", faltando5w1h(completo).length === 0);
+ok("5W1H tudo nulo → veta", faltando5w1h({ quem: null, o_que: null, quando: null, onde: null, por_que: null, como: null }).length === 6);
+ok("5W1H sem por quê → veta", faltando5w1h({ ...completo, por_que: null }).join() === "por_que");
+ok("'Não informado' conta como vazio", faltando5w1h({ ...completo, quando: "Não informado." }).join() === "quando");
+ok("'Sem informações' conta como vazio", faltando5w1h({ ...completo, onde: "Sem informações oficiais" }).join() === "onde");
+ok("'não há registro' conta como vazio", faltando5w1h({ ...completo, quem: "Não há registro de envolvidos" }).join() === "quem");
+ok("resposta que começa com 'Não' mas é fato → passa", faltando5w1h({ ...completo, o_que: "Nova lei proíbe fogos com estampido" }).length === 0);
+ok("motivo legível", motivoVeto5w1h(["quando", "por_que"]) === "5W1H incompleto: sem quando, por quê");
 console.log(falhas ? `\n${falhas} FALHA(S)` : "\nTudo certo");
 if (falhas) Deno.exit(1);
