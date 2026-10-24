@@ -278,7 +278,7 @@ function ImprensaPainel() {
       {erroFoto && <p role="alert" className="mb-2 rounded border border-red-200 bg-red-50 p-2 text-xs text-red-700">{erroFoto}</p>}
       <label className={`inline-flex cursor-pointer items-center rounded border border-dashed border-slate-400 px-4 py-2 text-sm font-semibold text-[#12201E] hover:bg-slate-50 ${uploadBusy ? "opacity-50" : ""}`}>
         {uploadBusy ? "Enviando fotos…" : fotos.length ? "Adicionar mais fotos" : "Escolher fotos"}
-        <input type="file" accept="image/*" multiple disabled={uploadBusy} className="sr-only"
+        <input type="file" accept="image/jpeg,image/png,image/webp" multiple disabled={uploadBusy} className="sr-only"
           onChange={(e) => { const lista = Array.from(e.target.files ?? []); e.target.value = ""; if (lista.length) void onUploadFotos(lista); }} />
       </label>
     </div>
