@@ -222,7 +222,10 @@ async function scrapeFonte(fonte: Fonte): Promise<Item[]> {
   // Normaliza: se o usuário cadastrou já uma URL de feed, tenta ela primeiro;
   // caso contrário, monta candidatos comuns a partir do host raiz.
   const origin = new URL(fonte.url_base).origin;
-  const looksLikeFeed = /\/(feed|rss)(\.xml)?\/?$/i.test(fonte.url_base) || /feed=/.test(fonte.url_base);
+  // Feed: termina em /feed ou /rss, tem ".xml", "feed=" ou um segmento /rss/
+  // no caminho (ex.: G1 por editoria, https://g1.globo.com/rss/g1/mundo/).
+  const looksLikeFeed = /\/(feed|rss)(\.xml)?\/?$/i.test(fonte.url_base) || /feed=/.test(fonte.url_base)
+    || /\.xml(\?|$)/i.test(fonte.url_base) || /\/rss\//i.test(new URL(fonte.url_base).pathname);
   const rssCandidates = looksLikeFeed
     ? [fonte.url_base]
     : [
