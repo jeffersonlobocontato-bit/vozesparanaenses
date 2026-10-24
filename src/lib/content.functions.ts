@@ -386,7 +386,8 @@ export const listLatestArticles = createServerFn({ method: "GET" })
 export type ViewerLocation = {
   cidade: string | null;
   regiaoSlug: string | null;
-  source: "cookie" | "ip" | "none";
+  // "off": o leitor desligou a proximidade (navegação normal, sem cidade).
+  source: "cookie" | "ip" | "none" | "off";
   // Slug do município (lista dos 399). Nulo quando a cidade não é do PR.
   cidadeSlug?: string | null;
 };
@@ -608,7 +609,10 @@ export const getViewerLocation = createServerFn({ method: "GET" }).handler(
         const parsed = JSON.parse(raw) as {
           cidade?: string | null;
           regiaoSlug?: string | null;
+          desligado?: boolean;
         };
+        // Leitor clicou no X: navegação normal, sem cair na detecção por IP.
+        if (parsed.desligado) return { cidade: null, cidadeSlug: null, regiaoSlug: null, source: "off" };
         if (parsed.cidade || parsed.regiaoSlug) {
           // Cidade sempre canônica (um dos 399 municípios) e região deduzida
           // dela — antes, "foz do iguacu" digitado não casava com nada.
@@ -636,14 +640,17 @@ export const getViewerLocation = createServerFn({ method: "GET" }).handler(
 );
 
 export const setViewerLocation = createServerFn({ method: "POST" })
-  .inputValidator((d: { cidade?: string | null; regiaoSlug?: string | null }) => ({
+  .inputValidator((d: { cidade?: string | null; regiaoSlug?: string | null; desligar?: boolean }) => ({
     cidade: d.cidade ? String(d.cidade).slice(0, 80) : null,
     regiaoSlug: d.regiaoSlug ? String(d.regiaoSlug).slice(0, 60) : null,
+    desligar: d.desligar === true,
   }))
   .handler(async ({ data }): Promise<{ ok: true }> => {
     const { setCookie } = await import("@tanstack/react-start/server");
     const m = data.cidade ? findMunicipio(data.cidade) : null;
-    const valor = { cidade: m?.name ?? null, regiaoSlug: m?.region ?? data.regiaoSlug ?? null };
+    const valor = data.desligar
+      ? { cidade: null, regiaoSlug: null, desligado: true }
+      : { cidade: m?.name ?? null, regiaoSlug: m?.region ?? data.regiaoSlug ?? null };
     setCookie(LOC_COOKIE, JSON.stringify(valor), {
       httpOnly: false,
       sameSite: "lax",

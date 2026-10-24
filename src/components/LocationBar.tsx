@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { X } from "lucide-react";
 import { useServerFn } from "@tanstack/react-start";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { getViewerLocation, setViewerLocation } from "@/lib/content.functions";
@@ -31,15 +32,33 @@ export function LocationBar() {
     setOpen(false);
   }
 
+  // X ao lado da cidade: volta à navegação normal (sem priorizar a cidade).
+  async function desligar() {
+    await setLoc({ data: { desligar: true } });
+    setCidade("");
+    await qc.invalidateQueries({ queryKey: ["viewer-location"] });
+    await qc.invalidateQueries({ queryKey: ["articles"] });
+    setOpen(false);
+  }
+
   return (
     <div className="border-b border-rule bg-[oklch(0.966_0.006_153.8)]">
       <div className="mx-auto flex max-w-7xl flex-wrap items-center gap-x-3 gap-y-1 px-4 py-2 text-[0.9375rem] font-medium text-ink">
         {loc?.cidade ? (
           <>
             <span>Você está em</span>
-            <span className="inline-flex items-center gap-2 rounded-full bg-background py-0.5 pl-2 pr-3 font-semibold shadow-[inset_0_-2px_0_var(--vp-accent)]">
+            <span className="inline-flex items-center gap-2 rounded-full bg-background py-0.5 pl-2 pr-1 font-semibold shadow-[inset_0_-2px_0_var(--vp-accent)]">
               <span className="vp-chapeu__ponto" aria-hidden="true" />
               {loc.cidade}
+              <button
+                type="button"
+                onClick={() => void desligar()}
+                aria-label={`Deixar de priorizar ${loc.cidade} e ver a navegação normal`}
+                title="Ver a navegação normal, sem priorizar a cidade"
+                className="flex h-5 w-5 items-center justify-center rounded-full text-ink-subtle hover:bg-[oklch(0.92_0.006_153.8)] hover:text-ink"
+              >
+                <X className="h-3.5 w-3.5" />
+              </button>
             </span>
             <button type="button" onClick={() => setOpen((v) => !v)} className="font-semibold text-link hover:underline">
               Trocar cidade
