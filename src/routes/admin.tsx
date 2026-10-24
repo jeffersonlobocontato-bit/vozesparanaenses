@@ -1,5 +1,6 @@
 import { createFileRoute, Outlet, Link, useNavigate, useLocation } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
+import { Home, Inbox, NotebookPen, Columns3, Radio, Map as MapIcon, Bot, BookOpen, Megaphone, UserRound, Newspaper, BarChart3, Info, ExternalLink, KeyRound, LogOut, LayoutDashboard } from "lucide-react";
 import { getExternalBrowser } from "@/lib/external-supabase-browser";
 import { Logo } from "@/components/Logo";
 
@@ -70,66 +71,130 @@ function AdminLayout() {
   if (state !== "ok") return null;
 
   return (
-    <div className="min-h-screen bg-[#F4F7FB]">
-      <header className="sticky top-0 z-30 border-b border-slate-200/70 bg-white/90 backdrop-blur">
-        <div className="mx-auto flex max-w-7xl items-center justify-between gap-4 px-6 py-3">
-          <div className="flex items-center gap-8">
-            <div className="flex items-center gap-2">
-              <div className="rounded-lg bg-[#12201E] px-2 py-1.5">
-                <Logo size="sm" variant="white" withLink={false} />
-              </div>
-            </div>
-            <nav className="hidden items-center gap-1 rounded-full bg-slate-100/80 p-1 text-sm md:flex">
-              {[
-                { to: "/admin/painel", label: "Painel" },
-                { to: "/admin", label: "Fila", exact: true },
-                { to: "/admin/analytics", label: "Analytics" },
-                { to: "/admin/fontes", label: "Fontes" },
-                { to: "/admin/regioes", label: "Regiões" },
-                { to: "/admin/anuncios", label: "Anúncios" },
-                { to: "/admin/vitrine-pessoal", label: "Vitrine Pessoal" },
-                { to: "/admin/pedidos-chat", label: "Pedidos (chat)" },
-                { to: "/admin/agentes", label: "Agentes IA" },
-                { to: "/admin/colunas", label: "Colunas" },
-                { to: "/admin/notas-cidades", label: "Notas das cidades" },
-                { to: "/admin/imprensa-clientes", label: "Portal Imprensa" },
-                { to: "/admin/memoria-editorial", label: "Memória" },
-                { to: "/admin/sobre", label: "Sobre" },
-              ].map((it) => (
-                <Link
-                  key={it.to}
-                  to={it.to}
-                  activeOptions={it.exact ? { exact: true } : undefined}
-                  className="rounded-full px-3 py-1.5 text-slate-600 transition hover:text-[#12201E] [&.active]:bg-white [&.active]:font-semibold [&.active]:text-[#12201E] [&.active]:shadow-sm"
-                >
-                  {it.label}
-                </Link>
-              ))}
-              <a
-                href="/"
-                target="_blank"
-                rel="noreferrer"
-                className="rounded-full px-3 py-1.5 text-slate-600 transition hover:text-[#12201E]"
-                title="Abrir o site em outra aba (modo editor: mostra atalho «Editar matéria» em cada notícia)"
-              >
-                🏠 Ver site
-              </a>
-            </nav>
+    <div className="min-h-screen bg-[#F4F7FB] md:flex">
+      <AdminSidebar email={email} onSair={async () => { const sb = await getExternalBrowser(); await sb.auth.signOut(); nav({ to: "/admin/login", replace: true }); }} />
+      <main className="min-w-0 flex-1 px-4 py-6 sm:px-6 md:py-8 lg:px-10"><div className="mx-auto max-w-6xl"><Outlet /></div></main>
+    </div>
+  );
+}
+
+type ItemNav = { to: string; label: string; icon: React.ComponentType<{ className?: string }>; exact?: boolean; badge?: "materias" | "notas" };
+
+// Menu agrupado pelo trabalho do dia: primeiro o que pede decisão (revisão),
+// depois a configuração do pipeline, os produtos pagos e o site.
+const GRUPOS: { titulo: string; itens: ItemNav[] }[] = [
+  {
+    titulo: "Redação",
+    itens: [
+      { to: "/admin/painel", label: "Painel", icon: LayoutDashboard },
+      { to: "/admin", label: "Matérias", icon: Inbox, exact: true, badge: "materias" },
+      { to: "/admin/notas-cidades", label: "Notas das cidades", icon: NotebookPen, badge: "notas" },
+      { to: "/admin/colunas", label: "Colunas", icon: Columns3 },
+    ],
+  },
+  {
+    titulo: "Pipeline",
+    itens: [
+      { to: "/admin/fontes", label: "Fontes", icon: Radio },
+      { to: "/admin/regioes", label: "Regiões e cotas", icon: MapIcon },
+      { to: "/admin/agentes", label: "Agentes IA", icon: Bot },
+      { to: "/admin/memoria-editorial", label: "Memória editorial", icon: BookOpen },
+    ],
+  },
+  {
+    titulo: "Negócios",
+    itens: [
+      { to: "/admin/anuncios", label: "Anúncios", icon: Megaphone },
+      { to: "/admin/vitrine-pessoal", label: "Vitrine Pessoal", icon: UserRound },
+      { to: "/admin/imprensa-clientes", label: "Portal Imprensa", icon: Newspaper },
+    ],
+  },
+  {
+    titulo: "Site",
+    itens: [
+      { to: "/admin/analytics", label: "Analytics", icon: BarChart3 },
+      { to: "/admin/sobre", label: "Página Sobre", icon: Info },
+    ],
+  },
+];
+
+function AdminSidebar({ email, onSair }: { email: string | null; onSair: () => void }) {
+  const loc = useLocation();
+  const [badges, setBadges] = useState<{ materias: number; notas: number }>({ materias: 0, notas: 0 });
+
+  // Contadores da revisão: atualiza ao trocar de página e a cada 2 min.
+  useEffect(() => {
+    let alive = true;
+    const carregar = async () => {
+      const sb = await getExternalBrowser();
+      const [m, n] = await Promise.all([
+        sb.from("generated_articles").select("*", { count: "exact", head: true }).eq("status", "rascunho"),
+        sb.from("coluna_cidade_notas").select("*", { count: "exact", head: true }).eq("status", "revisao"),
+      ]);
+      if (alive) setBadges({ materias: m.count ?? 0, notas: n.count ?? 0 });
+    };
+    carregar();
+    const t = setInterval(carregar, 120_000);
+    return () => { alive = false; clearInterval(t); };
+  }, [loc.pathname]);
+
+  return (
+    <aside className="sticky top-0 z-30 border-b border-slate-200/70 bg-white md:h-screen md:w-60 md:shrink-0 md:border-b-0 md:border-r">
+      <div className="flex h-full flex-col">
+        <div className="flex items-center justify-between gap-2 px-4 py-3 md:py-5">
+          <div className="rounded-lg bg-[#12201E] px-2 py-1.5">
+            <Logo size="sm" variant="white" withLink={false} />
           </div>
-          <div className="flex items-center gap-2 text-xs">
-            <div className="hidden items-center gap-2 rounded-full bg-slate-100 px-3 py-1.5 text-slate-600 sm:flex">
-              <span className="h-2 w-2 rounded-full bg-emerald-500" />
-              <span className="max-w-[180px] truncate">{email}</span>
+          <a href="/" target="_blank" rel="noreferrer" title="Abrir o site (modo editor)"
+            className="inline-flex items-center gap-1 rounded-full px-2 py-1 text-xs text-slate-500 hover:text-[#12201E]">
+            <Home className="h-3.5 w-3.5" /> Site <ExternalLink className="h-3 w-3" />
+          </a>
+        </div>
+
+        <nav className="flex gap-4 overflow-x-auto px-3 pb-3 text-sm md:flex-1 md:flex-col md:gap-5 md:overflow-y-auto md:pb-6">
+          {GRUPOS.map((g) => (
+            <div key={g.titulo} className="flex shrink-0 gap-1 md:flex-col">
+              <p className="hidden px-3 pb-1 text-[10px] font-semibold uppercase tracking-[0.16em] text-slate-400 md:block">{g.titulo}</p>
+              {g.itens.map((it) => {
+                const n = it.badge ? badges[it.badge] : 0;
+                const Icon = it.icon;
+                return (
+                  <Link
+                    key={it.to}
+                    to={it.to}
+                    activeOptions={it.exact ? { exact: true } : undefined}
+                    className="flex items-center gap-2.5 whitespace-nowrap rounded-lg px-3 py-1.5 text-slate-600 transition hover:bg-slate-50 hover:text-[#12201E] [&.active]:bg-[#12201E] [&.active]:font-semibold [&.active]:text-white"
+                  >
+                    <Icon className="h-4 w-4 shrink-0" />
+                    <span className="flex-1">{it.label}</span>
+                    {n > 0 && (
+                      <span className="rounded-full bg-[#E29F65] px-1.5 text-[10px] font-bold tabular-nums text-white">{n}</span>
+                    )}
+                  </Link>
+                );
+              })}
             </div>
-            <Link to="/admin/senha" className="rounded-full border border-slate-200 bg-white px-3 py-1.5 text-slate-700 hover:border-[#12201E] hover:text-[#12201E]">Senha</Link>
-            <button
-              onClick={async () => { const sb = await getExternalBrowser(); await sb.auth.signOut(); nav({ to: "/admin/login", replace: true }); }}
-              className="rounded-full bg-[#12201E] px-3 py-1.5 font-semibold text-white transition hover:bg-[#0d2f52]"
-            >Sair</button>
+          ))}
+          <button onClick={onSair} className="flex shrink-0 items-center gap-1.5 rounded-lg px-3 py-1.5 text-slate-600 md:hidden">
+            <LogOut className="h-4 w-4" /> Sair
+          </button>
+        </nav>
+
+        <div className="hidden border-t border-slate-100 p-3 text-xs md:block">
+          <div className="mb-2 flex items-center gap-2 px-1 text-slate-500">
+            <span className="h-2 w-2 shrink-0 rounded-full bg-emerald-500" />
+            <span className="truncate">{email}</span>
+          </div>
+          <div className="flex gap-2">
+            <Link to="/admin/senha" className="inline-flex flex-1 items-center justify-center gap-1 rounded-lg border border-slate-200 px-2 py-1.5 text-slate-700 hover:border-[#12201E]">
+              <KeyRound className="h-3.5 w-3.5" /> Senha
+            </Link>
+            <button onClick={onSair} className="inline-flex flex-1 items-center justify-center gap-1 rounded-lg bg-[#12201E] px-2 py-1.5 font-semibold text-white hover:bg-[#0d2f52]">
+              <LogOut className="h-3.5 w-3.5" /> Sair
+            </button>
           </div>
         </div>
-      </header>
-      <main className="mx-auto max-w-7xl px-6 py-8"><Outlet /></main>
-    </div>
+      </div>
+    </aside>
   );
 }

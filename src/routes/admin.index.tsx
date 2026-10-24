@@ -1,13 +1,12 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useState, useCallback } from "react";
 import { getExternalBrowser } from "@/lib/external-supabase-browser";
-import { supabase } from "@/integrations/supabase/client";
 import { ArticleImageEditor } from "@/components/admin/ArticleImageEditor";
 import { ArticleEditor } from "@/components/admin/ArticleEditor";
 import { ArticleVideoEditor } from "@/components/admin/ArticleVideoEditor";
 import { displayRegionName } from "@/lib/region-labels";
 import { ManualWriterBox } from "@/components/admin/ManualWriterBox";
-import { PageHeader, primaryBtnClass, tabPillsWrapClass, tabPillClass } from "@/components/admin/ui";
+import { PageHeader, tabPillsWrapClass, tabPillClass } from "@/components/admin/ui";
 
 type AdminQueueSearch = { edit?: string };
 
@@ -64,7 +63,10 @@ type Draft = {
   foto_origem?: string | null;
 };
 
-const STATUS_TABS: Draft["status"][] = ["rascunho", "aprovado", "publicado", "expirado", "rejeitado"];
+// "aprovado" não é mais usado: o fluxo automático publica direto ou deixa
+// em revisão (rascunho) pela criticidade.
+const STATUS_TABS: Draft["status"][] = ["rascunho", "publicado", "expirado", "rejeitado"];
+const STATUS_ROTULO: Partial<Record<Draft["status"], string>> = { rascunho: "Em revisão" };
 
 function AdminQueue() {
   const editSlug = Route.useSearch({ select: (s) => s.edit });
@@ -77,8 +79,6 @@ function AdminQueue() {
   const [deleteBusyId, setDeleteBusyId] = useState<string | null>(null);
   const [bulkBusy, setBulkBusy] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
-  const [pipelineBusy, setPipelineBusy] = useState(false);
-  const [pipelineLog, setPipelineLog] = useState<string[]>([]);
 
   const load = useCallback(async (opts?: { silent?: boolean }) => {
     if (!opts?.silent) setItems(null);
@@ -176,38 +176,6 @@ function AdminQueue() {
     }
   }
 
-  async function runPipeline() {
-    setPipelineBusy(true);
-    setPipelineLog([
-      "Rodando pipeline completo…",
-      "  · scrape-source → cluster-articles → classify-and-quota → process-pending-clusters",
-    ]);
-    const steps: Array<{ name: string; body?: Record<string, unknown> }> = [
-      // sync:true força cada função a rodar até o fim antes de devolver a
-      // resposta — sem isso o scrape-source volta na hora (background) e os
-      // passos seguintes rodam em cima de raw_articles ainda vazia, então
-      // nenhuma matéria é redigida e tudo fica parado em "pautas / clusters".
-      { name: "scrape-source", body: { force: true, sync: true } },
-      { name: "cluster-articles", body: { sync: true } },
-      { name: "classify-and-quota", body: { sync: true } },
-      { name: "process-pending-clusters", body: { limit: 50, sync: true } },
-    ];
-    for (const step of steps) {
-      setPipelineLog((l) => [...l, `→ ${step.name}…`]);
-      try {
-        const { data, error } = await supabase.functions.invoke(step.name, { body: step.body ?? {} });
-        if (error) throw error;
-        const summary = data && typeof data === "object" ? JSON.stringify(data).slice(0, 240) : "ok";
-        setPipelineLog((l) => [...l, `  ✓ ${summary}`]);
-      } catch (e: unknown) {
-        setPipelineLog((l) => [...l, `  ✗ ${e instanceof Error ? e.message : "erro"}`]);
-        break;
-      }
-    }
-    setPipelineBusy(false);
-    await load();
-  }
-
   async function updateStatus(id: string, next: Draft["status"]) {
     setBusyId(id);
     try {
@@ -263,33 +231,21 @@ function AdminQueue() {
   return (
     <div className="space-y-6">
       <PageHeader
-        eyebrow="Fila"
-        title="Fila editorial"
-        subtitle="Rascunhos, aprovações e matérias publicadas."
+        eyebrow="Redação"
+        title="Matérias"
+        subtitle="O que a criticidade segurou para revisão e o que já está no ar."
         actions={
           <>
-            <button onClick={runPipeline} disabled={pipelineBusy} className={primaryBtnClass()}>
-              {pipelineBusy ? "Rodando pipeline…" : "▶ Rodar pipeline agora"}
-            </button>
             <div className={tabPillsWrapClass()}>
               {STATUS_TABS.map((s) => (
                 <button key={s} onClick={() => setTab(s)} className={`capitalize ${tabPillClass(tab === s)}`}>
-                  {s}
+                  {STATUS_ROTULO[s] ?? s}
                 </button>
               ))}
             </div>
           </>
         }
       />
-
-      {pipelineLog.length > 0 && (
-        <div className="rounded-2xl border border-slate-200 bg-slate-950 p-4 shadow-sm">
-          <div className="mb-2 text-xs font-semibold text-emerald-400">Log do pipeline</div>
-          <pre className="max-h-48 overflow-auto text-[11px] leading-tight text-emerald-200/90">
-{pipelineLog.join("\n")}
-          </pre>
-        </div>
-      )}
 
       <ManualWriterBox onCreated={load} />
 
@@ -448,12 +404,6 @@ function AdminQueue() {
                 <button disabled={busyId === it.id} onClick={() => updateStatus(it.id, "publicado")}
                   className="rounded bg-green-600 px-3 py-1 text-xs font-semibold text-white hover:bg-green-700 disabled:opacity-60">
                   Publicar
-                </button>
-              )}
-              {it.status === "rascunho" && (
-                <button disabled={busyId === it.id} onClick={() => updateStatus(it.id, "aprovado")}
-                  className="rounded bg-[#E29F65] px-3 py-1 text-xs font-semibold text-white hover:bg-[#0055aa] disabled:opacity-60">
-                  Aprovar
                 </button>
               )}
               {it.status !== "rejeitado" && it.status !== "publicado" && (

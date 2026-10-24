@@ -149,11 +149,12 @@ function RegionEditor({ r, cats, quotas, onSaveTema, onSaveQuota }: {
           className="rounded bg-[#E29F65] px-3 py-1.5 text-xs font-semibold text-white hover:bg-[#0055aa]">Salvar tema</button>
       </div>
 
-      <h3 className="mb-2 mt-6 text-sm font-semibold">Cotas por editoria (% do total regional)</h3>
+      <h3 className="mb-1 mt-6 text-sm font-semibold">Teto por editoria (% das matérias da região em 7 dias)</h3>
+      <p className="mb-2 text-xs text-muted-foreground">Passou do teto, a pauta não é descartada: vira nota na coluna da cidade. Serviço, saúde, educação e segurança nunca são rebaixados.</p>
       <div className="overflow-x-auto">
         <table className="w-full text-sm">
           <thead className="bg-muted text-xs uppercase text-muted-foreground">
-            <tr><th className="px-2 py-1 text-left">Editoria</th><th className="px-2 py-1">Piso %</th><th className="px-2 py-1">Teto %</th><th className="px-2 py-1"></th></tr>
+            <tr><th className="px-2 py-1 text-left">Editoria</th><th className="px-2 py-1">Teto %</th><th className="px-2 py-1"></th></tr>
           </thead>
           <tbody>
             {cats.map((c) => {
@@ -171,12 +172,12 @@ function QuotaRow({ regiaoId, categoria, initial, onSave }: {
   regiaoId: string; categoria: Categoria; initial?: Quota;
   onSave: (regiaoId: string, categoriaId: string, piso: number, teto: number) => void;
 }) {
-  const [piso, setPiso] = useState<number>(initial?.piso_pct ?? 0);
+  // Piso não é usado pelo crivo; preservado como está ao salvar.
+  const piso = initial?.piso_pct ?? 0;
   const [teto, setTeto] = useState<number>(initial?.teto_pct ?? 100);
   return (
     <tr className="border-t">
       <td className="px-2 py-1">{categoria.nome}</td>
-      <td className="px-2 py-1"><input type="number" min={0} max={100} value={piso} onChange={(e) => setPiso(Number(e.target.value))} className="w-20 rounded border px-1 py-0.5 text-right" /></td>
       <td className="px-2 py-1"><input type="number" min={0} max={100} value={teto} onChange={(e) => setTeto(Number(e.target.value))} className="w-20 rounded border px-1 py-0.5 text-right" /></td>
       <td className="px-2 py-1 text-right"><button onClick={() => onSave(regiaoId, categoria.id, piso, teto)}
         className="text-xs text-[#E29F65] hover:underline">salvar</button></td>

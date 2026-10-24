@@ -9,112 +9,70 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
-import { Route as WhatsappRouteImport } from './routes/whatsapp'
-import { Route as UnsubscribeRouteImport } from './routes/unsubscribe'
-import { Route as TermosRouteImport } from './routes/termos'
-import { Route as SobreRouteImport } from './routes/sobre'
-import { Route as PrivacidadeRouteImport } from './routes/privacidade'
-import { Route as PoliticaEditorialRouteImport } from './routes/politica-editorial'
-import { Route as CorrecoesRouteImport } from './routes/correcoes'
-import { Route as ContatoRouteImport } from './routes/contato'
-import { Route as AdminRouteImport } from './routes/admin'
-import { Route as RegionRouteImport } from './routes/$region'
 import { Route as IndexRouteImport } from './routes/index'
-import { Route as AdminIndexRouteImport } from './routes/admin.index'
+import { Route as RegionRouteImport } from './routes/$region'
+import { Route as AdminRouteImport } from './routes/admin'
+import { Route as ContatoRouteImport } from './routes/contato'
+import { Route as CorrecoesRouteImport } from './routes/correcoes'
+import { Route as PoliticaEditorialRouteImport } from './routes/politica-editorial'
+import { Route as PrivacidadeRouteImport } from './routes/privacidade'
+import { Route as SobreRouteImport } from './routes/sobre'
+import { Route as TermosRouteImport } from './routes/termos'
+import { Route as UnsubscribeRouteImport } from './routes/unsubscribe'
+import { Route as WhatsappRouteImport } from './routes/whatsapp'
 import { Route as RegionIndexRouteImport } from './routes/$region.index'
-import { Route as VozesCidadeRouteImport } from './routes/vozes.$cidade'
-import { Route as VitrineTokenRouteImport } from './routes/vitrine.$token'
-import { Route as VitrinePessoalNovoRouteImport } from './routes/vitrine-pessoal.novo'
-import { Route as RIdRouteImport } from './routes/r.$id'
-import { Route as PublieditorialTokenRouteImport } from './routes/publieditorial.$token'
-import { Route as ImprensaPainelRouteImport } from './routes/imprensa.painel'
-import { Route as ImprensaEntrarRouteImport } from './routes/imprensa.entrar'
-import { Route as EmailUnsubscribeRouteImport } from './routes/email/unsubscribe'
-import { Route as EditoriaCategoriaRouteImport } from './routes/editoria.$categoria'
-import { Route as AutorSlugRouteImport } from './routes/autor.$slug'
-import { Route as AdminVitrinePessoalRouteImport } from './routes/admin.vitrine-pessoal'
-import { Route as AdminSobreRouteImport } from './routes/admin.sobre'
-import { Route as AdminSenhaRouteImport } from './routes/admin.senha'
-import { Route as AdminResetPasswordRouteImport } from './routes/admin.reset-password'
-import { Route as AdminRegioesRouteImport } from './routes/admin.regioes'
-import { Route as AdminPedidosChatRouteImport } from './routes/admin.pedidos-chat'
-import { Route as AdminPainelRouteImport } from './routes/admin.painel'
-import { Route as AdminNotasCidadesRouteImport } from './routes/admin.notas-cidades'
-import { Route as AdminMemoriaEditorialRouteImport } from './routes/admin.memoria-editorial'
-import { Route as AdminLoginRouteImport } from './routes/admin.login'
-import { Route as AdminImprensaClientesRouteImport } from './routes/admin.imprensa-clientes'
-import { Route as AdminFontesRouteImport } from './routes/admin.fontes'
-import { Route as AdminColunasRouteImport } from './routes/admin.colunas'
-import { Route as AdminClustersRouteImport } from './routes/admin.clusters'
-import { Route as AdminAnunciosRouteImport } from './routes/admin.anuncios'
-import { Route as AdminAnalyticsRouteImport } from './routes/admin.analytics'
-import { Route as AdminAgentesRouteImport } from './routes/admin.agentes'
-import { Route as RegionClassificadosRouteImport } from './routes/$region.classificados'
 import { Route as RegionSlugRouteImport } from './routes/$region.$slug'
-import { Route as LovableEmailSuppressionRouteImport } from './routes/lovable/email/suppression'
-import { Route as ColunaSlugArquivoRouteImport } from './routes/coluna.$slug.arquivo'
-import { Route as ColunaSlugEdicaoIdRouteImport } from './routes/coluna.$slug.$edicaoId'
-import { Route as ApiPublicSitemapDotxmlRouteImport } from './routes/api/public/sitemap[.]xml'
-import { Route as ApiPublicSitemapNewsDotxmlRouteImport } from './routes/api/public/sitemap-news[.]xml'
-import { Route as ApiPublicRssDotxmlRouteImport } from './routes/api/public/rss[.]xml'
-import { Route as ApiPublicPublicarTecnologiaPeriodicoRouteImport } from './routes/api/public/publicar-tecnologia-periodico'
-import { Route as ApiPublicLlmsDottxtRouteImport } from './routes/api/public/llms[.]txt'
-import { Route as ApiPublicLlmsFullDottxtRouteImport } from './routes/api/public/llms-full[.]txt'
-import { Route as ApiPublicContactRouteImport } from './routes/api/public/contact'
-import { Route as RegionEditoriaCategoriaRouteImport } from './routes/$region.editoria.$categoria'
+import { Route as RegionClassificadosRouteImport } from './routes/$region.classificados'
+import { Route as AdminIndexRouteImport } from './routes/admin.index'
+import { Route as AdminAgentesRouteImport } from './routes/admin.agentes'
+import { Route as AdminAnalyticsRouteImport } from './routes/admin.analytics'
+import { Route as AdminAnunciosRouteImport } from './routes/admin.anuncios'
+import { Route as AdminColunasRouteImport } from './routes/admin.colunas'
+import { Route as AdminFontesRouteImport } from './routes/admin.fontes'
+import { Route as AdminImprensaClientesRouteImport } from './routes/admin.imprensa-clientes'
+import { Route as AdminLoginRouteImport } from './routes/admin.login'
+import { Route as AdminMemoriaEditorialRouteImport } from './routes/admin.memoria-editorial'
+import { Route as AdminNotasCidadesRouteImport } from './routes/admin.notas-cidades'
+import { Route as AdminPainelRouteImport } from './routes/admin.painel'
+import { Route as AdminRegioesRouteImport } from './routes/admin.regioes'
+import { Route as AdminResetPasswordRouteImport } from './routes/admin.reset-password'
+import { Route as AdminSenhaRouteImport } from './routes/admin.senha'
+import { Route as AdminSobreRouteImport } from './routes/admin.sobre'
+import { Route as AdminVitrinePessoalRouteImport } from './routes/admin.vitrine-pessoal'
+import { Route as AutorSlugRouteImport } from './routes/autor.$slug'
+import { Route as EditoriaCategoriaRouteImport } from './routes/editoria.$categoria'
+import { Route as EmailUnsubscribeRouteImport } from './routes/email/unsubscribe'
+import { Route as ImprensaEntrarRouteImport } from './routes/imprensa.entrar'
+import { Route as ImprensaPainelRouteImport } from './routes/imprensa.painel'
+import { Route as PublieditorialTokenRouteImport } from './routes/publieditorial.$token'
+import { Route as RIdRouteImport } from './routes/r.$id'
+import { Route as VitrinePessoalNovoRouteImport } from './routes/vitrine-pessoal.novo'
+import { Route as VitrineTokenRouteImport } from './routes/vitrine.$token'
+import { Route as VozesCidadeRouteImport } from './routes/vozes.$cidade'
 import { Route as RegionCidadeCidadeRouteImport } from './routes/$region.cidade.$cidade'
-import { Route as LovableEmailTransactionalSendRouteImport } from './routes/lovable/email/transactional/send'
-import { Route as LovableEmailTransactionalPreviewRouteImport } from './routes/lovable/email/transactional/preview'
-import { Route as LovableEmailQueueProcessRouteImport } from './routes/lovable/email/queue/process'
-import { Route as ApiPublicIndexnowKeyRouteImport } from './routes/api/public/indexnow.$key'
+import { Route as RegionEditoriaCategoriaRouteImport } from './routes/$region.editoria.$categoria'
+import { Route as ApiPublicContactRouteImport } from './routes/api/public/contact'
+import { Route as ApiPublicLlmsFullDottxtRouteImport } from './routes/api/public/llms-full[.]txt'
+import { Route as ApiPublicLlmsDottxtRouteImport } from './routes/api/public/llms[.]txt'
+import { Route as ApiPublicPublicarTecnologiaPeriodicoRouteImport } from './routes/api/public/publicar-tecnologia-periodico'
+import { Route as ApiPublicRssDotxmlRouteImport } from './routes/api/public/rss[.]xml'
+import { Route as ApiPublicSitemapNewsDotxmlRouteImport } from './routes/api/public/sitemap-news[.]xml'
+import { Route as ApiPublicSitemapDotxmlRouteImport } from './routes/api/public/sitemap[.]xml'
+import { Route as ColunaSlugEdicaoIdRouteImport } from './routes/coluna.$slug.$edicaoId'
+import { Route as ColunaSlugArquivoRouteImport } from './routes/coluna.$slug.arquivo'
+import { Route as LovableEmailSuppressionRouteImport } from './routes/lovable/email/suppression'
 import { Route as ApiPublicHooksIndexnowPingRouteImport } from './routes/api/public/hooks.indexnow-ping'
-import { Route as ApiPublicRssRegiaoRegionRouteImport } from './routes/api/public/rss.regiao.$region'
+import { Route as ApiPublicIndexnowKeyRouteImport } from './routes/api/public/indexnow.$key'
+import { Route as LovableEmailQueueProcessRouteImport } from './routes/lovable/email/queue/process'
+import { Route as LovableEmailTransactionalPreviewRouteImport } from './routes/lovable/email/transactional/preview'
+import { Route as LovableEmailTransactionalSendRouteImport } from './routes/lovable/email/transactional/send'
 import { Route as ApiPublicRssCategoriaSlugRouteImport } from './routes/api/public/rss.categoria.$slug'
+import { Route as ApiPublicRssRegiaoRegionRouteImport } from './routes/api/public/rss.regiao.$region'
 import { Route as ApiPublicRssCidadeRegionCidadeRouteImport } from './routes/api/public/rss.cidade.$region.$cidade'
 
-const WhatsappRoute = WhatsappRouteImport.update({
-  id: '/whatsapp',
-  path: '/whatsapp',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const UnsubscribeRoute = UnsubscribeRouteImport.update({
-  id: '/unsubscribe',
-  path: '/unsubscribe',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const TermosRoute = TermosRouteImport.update({
-  id: '/termos',
-  path: '/termos',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const SobreRoute = SobreRouteImport.update({
-  id: '/sobre',
-  path: '/sobre',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const PrivacidadeRoute = PrivacidadeRouteImport.update({
-  id: '/privacidade',
-  path: '/privacidade',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const PoliticaEditorialRoute = PoliticaEditorialRouteImport.update({
-  id: '/politica-editorial',
-  path: '/politica-editorial',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const CorrecoesRoute = CorrecoesRouteImport.update({
-  id: '/correcoes',
-  path: '/correcoes',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ContatoRoute = ContatoRouteImport.update({
-  id: '/contato',
-  path: '/contato',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const AdminRoute = AdminRouteImport.update({
-  id: '/admin',
-  path: '/admin',
+const IndexRoute = IndexRouteImport.update({
+  id: '/',
+  path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
 const RegionRoute = RegionRouteImport.update({
@@ -122,159 +80,54 @@ const RegionRoute = RegionRouteImport.update({
   path: '/$region',
   getParentRoute: () => rootRouteImport,
 } as any)
-const IndexRoute = IndexRouteImport.update({
-  id: '/',
-  path: '/',
+const AdminRoute = AdminRouteImport.update({
+  id: '/admin',
+  path: '/admin',
   getParentRoute: () => rootRouteImport,
 } as any)
-const AdminIndexRoute = AdminIndexRouteImport.update({
-  id: '/',
-  path: '/',
-  getParentRoute: () => AdminRoute,
+const ContatoRoute = ContatoRouteImport.update({
+  id: '/contato',
+  path: '/contato',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CorrecoesRoute = CorrecoesRouteImport.update({
+  id: '/correcoes',
+  path: '/correcoes',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PoliticaEditorialRoute = PoliticaEditorialRouteImport.update({
+  id: '/politica-editorial',
+  path: '/politica-editorial',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PrivacidadeRoute = PrivacidadeRouteImport.update({
+  id: '/privacidade',
+  path: '/privacidade',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SobreRoute = SobreRouteImport.update({
+  id: '/sobre',
+  path: '/sobre',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const TermosRoute = TermosRouteImport.update({
+  id: '/termos',
+  path: '/termos',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const UnsubscribeRoute = UnsubscribeRouteImport.update({
+  id: '/unsubscribe',
+  path: '/unsubscribe',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const WhatsappRoute = WhatsappRouteImport.update({
+  id: '/whatsapp',
+  path: '/whatsapp',
+  getParentRoute: () => rootRouteImport,
 } as any)
 const RegionIndexRoute = RegionIndexRouteImport.update({
   id: '/',
   path: '/',
-  getParentRoute: () => RegionRoute,
-} as any)
-const VozesCidadeRoute = VozesCidadeRouteImport.update({
-  id: '/vozes/$cidade',
-  path: '/vozes/$cidade',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const VitrineTokenRoute = VitrineTokenRouteImport.update({
-  id: '/vitrine/$token',
-  path: '/vitrine/$token',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const VitrinePessoalNovoRoute = VitrinePessoalNovoRouteImport.update({
-  id: '/vitrine-pessoal/novo',
-  path: '/vitrine-pessoal/novo',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const RIdRoute = RIdRouteImport.update({
-  id: '/r/$id',
-  path: '/r/$id',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const PublieditorialTokenRoute = PublieditorialTokenRouteImport.update({
-  id: '/publieditorial/$token',
-  path: '/publieditorial/$token',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ImprensaPainelRoute = ImprensaPainelRouteImport.update({
-  id: '/imprensa/painel',
-  path: '/imprensa/painel',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ImprensaEntrarRoute = ImprensaEntrarRouteImport.update({
-  id: '/imprensa/entrar',
-  path: '/imprensa/entrar',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const EmailUnsubscribeRoute = EmailUnsubscribeRouteImport.update({
-  id: '/email/unsubscribe',
-  path: '/email/unsubscribe',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const EditoriaCategoriaRoute = EditoriaCategoriaRouteImport.update({
-  id: '/editoria/$categoria',
-  path: '/editoria/$categoria',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const AutorSlugRoute = AutorSlugRouteImport.update({
-  id: '/autor/$slug',
-  path: '/autor/$slug',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const AdminVitrinePessoalRoute = AdminVitrinePessoalRouteImport.update({
-  id: '/vitrine-pessoal',
-  path: '/vitrine-pessoal',
-  getParentRoute: () => AdminRoute,
-} as any)
-const AdminSobreRoute = AdminSobreRouteImport.update({
-  id: '/sobre',
-  path: '/sobre',
-  getParentRoute: () => AdminRoute,
-} as any)
-const AdminSenhaRoute = AdminSenhaRouteImport.update({
-  id: '/senha',
-  path: '/senha',
-  getParentRoute: () => AdminRoute,
-} as any)
-const AdminResetPasswordRoute = AdminResetPasswordRouteImport.update({
-  id: '/reset-password',
-  path: '/reset-password',
-  getParentRoute: () => AdminRoute,
-} as any)
-const AdminRegioesRoute = AdminRegioesRouteImport.update({
-  id: '/regioes',
-  path: '/regioes',
-  getParentRoute: () => AdminRoute,
-} as any)
-const AdminPedidosChatRoute = AdminPedidosChatRouteImport.update({
-  id: '/pedidos-chat',
-  path: '/pedidos-chat',
-  getParentRoute: () => AdminRoute,
-} as any)
-const AdminPainelRoute = AdminPainelRouteImport.update({
-  id: '/painel',
-  path: '/painel',
-  getParentRoute: () => AdminRoute,
-} as any)
-const AdminNotasCidadesRoute = AdminNotasCidadesRouteImport.update({
-  id: '/notas-cidades',
-  path: '/notas-cidades',
-  getParentRoute: () => AdminRoute,
-} as any)
-const AdminMemoriaEditorialRoute = AdminMemoriaEditorialRouteImport.update({
-  id: '/memoria-editorial',
-  path: '/memoria-editorial',
-  getParentRoute: () => AdminRoute,
-} as any)
-const AdminLoginRoute = AdminLoginRouteImport.update({
-  id: '/login',
-  path: '/login',
-  getParentRoute: () => AdminRoute,
-} as any)
-const AdminImprensaClientesRoute = AdminImprensaClientesRouteImport.update({
-  id: '/imprensa-clientes',
-  path: '/imprensa-clientes',
-  getParentRoute: () => AdminRoute,
-} as any)
-const AdminFontesRoute = AdminFontesRouteImport.update({
-  id: '/fontes',
-  path: '/fontes',
-  getParentRoute: () => AdminRoute,
-} as any)
-const AdminColunasRoute = AdminColunasRouteImport.update({
-  id: '/colunas',
-  path: '/colunas',
-  getParentRoute: () => AdminRoute,
-} as any)
-const AdminClustersRoute = AdminClustersRouteImport.update({
-  id: '/clusters',
-  path: '/clusters',
-  getParentRoute: () => AdminRoute,
-} as any)
-const AdminAnunciosRoute = AdminAnunciosRouteImport.update({
-  id: '/anuncios',
-  path: '/anuncios',
-  getParentRoute: () => AdminRoute,
-} as any)
-const AdminAnalyticsRoute = AdminAnalyticsRouteImport.update({
-  id: '/analytics',
-  path: '/analytics',
-  getParentRoute: () => AdminRoute,
-} as any)
-const AdminAgentesRoute = AdminAgentesRouteImport.update({
-  id: '/agentes',
-  path: '/agentes',
-  getParentRoute: () => AdminRoute,
-} as any)
-const RegionClassificadosRoute = RegionClassificadosRouteImport.update({
-  id: '/classificados',
-  path: '/classificados',
   getParentRoute: () => RegionRoute,
 } as any)
 const RegionSlugRoute = RegionSlugRouteImport.update({
@@ -282,35 +135,164 @@ const RegionSlugRoute = RegionSlugRouteImport.update({
   path: '/$slug',
   getParentRoute: () => RegionRoute,
 } as any)
-const LovableEmailSuppressionRoute = LovableEmailSuppressionRouteImport.update({
-  id: '/lovable/email/suppression',
-  path: '/lovable/email/suppression',
+const RegionClassificadosRoute = RegionClassificadosRouteImport.update({
+  id: '/classificados',
+  path: '/classificados',
+  getParentRoute: () => RegionRoute,
+} as any)
+const AdminIndexRoute = AdminIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminAgentesRoute = AdminAgentesRouteImport.update({
+  id: '/agentes',
+  path: '/agentes',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminAnalyticsRoute = AdminAnalyticsRouteImport.update({
+  id: '/analytics',
+  path: '/analytics',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminAnunciosRoute = AdminAnunciosRouteImport.update({
+  id: '/anuncios',
+  path: '/anuncios',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminColunasRoute = AdminColunasRouteImport.update({
+  id: '/colunas',
+  path: '/colunas',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminFontesRoute = AdminFontesRouteImport.update({
+  id: '/fontes',
+  path: '/fontes',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminImprensaClientesRoute = AdminImprensaClientesRouteImport.update({
+  id: '/imprensa-clientes',
+  path: '/imprensa-clientes',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminLoginRoute = AdminLoginRouteImport.update({
+  id: '/login',
+  path: '/login',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminMemoriaEditorialRoute = AdminMemoriaEditorialRouteImport.update({
+  id: '/memoria-editorial',
+  path: '/memoria-editorial',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminNotasCidadesRoute = AdminNotasCidadesRouteImport.update({
+  id: '/notas-cidades',
+  path: '/notas-cidades',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminPainelRoute = AdminPainelRouteImport.update({
+  id: '/painel',
+  path: '/painel',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminRegioesRoute = AdminRegioesRouteImport.update({
+  id: '/regioes',
+  path: '/regioes',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminResetPasswordRoute = AdminResetPasswordRouteImport.update({
+  id: '/reset-password',
+  path: '/reset-password',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminSenhaRoute = AdminSenhaRouteImport.update({
+  id: '/senha',
+  path: '/senha',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminSobreRoute = AdminSobreRouteImport.update({
+  id: '/sobre',
+  path: '/sobre',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminVitrinePessoalRoute = AdminVitrinePessoalRouteImport.update({
+  id: '/vitrine-pessoal',
+  path: '/vitrine-pessoal',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AutorSlugRoute = AutorSlugRouteImport.update({
+  id: '/autor/$slug',
+  path: '/autor/$slug',
   getParentRoute: () => rootRouteImport,
 } as any)
-const ColunaSlugArquivoRoute = ColunaSlugArquivoRouteImport.update({
-  id: '/coluna/$slug/arquivo',
-  path: '/coluna/$slug/arquivo',
+const EditoriaCategoriaRoute = EditoriaCategoriaRouteImport.update({
+  id: '/editoria/$categoria',
+  path: '/editoria/$categoria',
   getParentRoute: () => rootRouteImport,
 } as any)
-const ColunaSlugEdicaoIdRoute = ColunaSlugEdicaoIdRouteImport.update({
-  id: '/coluna/$slug/$edicaoId',
-  path: '/coluna/$slug/$edicaoId',
+const EmailUnsubscribeRoute = EmailUnsubscribeRouteImport.update({
+  id: '/email/unsubscribe',
+  path: '/email/unsubscribe',
   getParentRoute: () => rootRouteImport,
 } as any)
-const ApiPublicSitemapDotxmlRoute = ApiPublicSitemapDotxmlRouteImport.update({
-  id: '/api/public/sitemap.xml',
-  path: '/api/public/sitemap.xml',
+const ImprensaEntrarRoute = ImprensaEntrarRouteImport.update({
+  id: '/imprensa/entrar',
+  path: '/imprensa/entrar',
   getParentRoute: () => rootRouteImport,
 } as any)
-const ApiPublicSitemapNewsDotxmlRoute =
-  ApiPublicSitemapNewsDotxmlRouteImport.update({
-    id: '/api/public/sitemap-news.xml',
-    path: '/api/public/sitemap-news.xml',
-    getParentRoute: () => rootRouteImport,
-  } as any)
-const ApiPublicRssDotxmlRoute = ApiPublicRssDotxmlRouteImport.update({
-  id: '/api/public/rss.xml',
-  path: '/api/public/rss.xml',
+const ImprensaPainelRoute = ImprensaPainelRouteImport.update({
+  id: '/imprensa/painel',
+  path: '/imprensa/painel',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PublieditorialTokenRoute = PublieditorialTokenRouteImport.update({
+  id: '/publieditorial/$token',
+  path: '/publieditorial/$token',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const RIdRoute = RIdRouteImport.update({
+  id: '/r/$id',
+  path: '/r/$id',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const VitrinePessoalNovoRoute = VitrinePessoalNovoRouteImport.update({
+  id: '/vitrine-pessoal/novo',
+  path: '/vitrine-pessoal/novo',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const VitrineTokenRoute = VitrineTokenRouteImport.update({
+  id: '/vitrine/$token',
+  path: '/vitrine/$token',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const VozesCidadeRoute = VozesCidadeRouteImport.update({
+  id: '/vozes/$cidade',
+  path: '/vozes/$cidade',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const RegionCidadeCidadeRoute = RegionCidadeCidadeRouteImport.update({
+  id: '/cidade/$cidade',
+  path: '/cidade/$cidade',
+  getParentRoute: () => RegionRoute,
+} as any)
+const RegionEditoriaCategoriaRoute = RegionEditoriaCategoriaRouteImport.update({
+  id: '/editoria/$categoria',
+  path: '/editoria/$categoria',
+  getParentRoute: () => RegionRoute,
+} as any)
+const ApiPublicContactRoute = ApiPublicContactRouteImport.update({
+  id: '/api/public/contact',
+  path: '/api/public/contact',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiPublicLlmsFullDottxtRoute = ApiPublicLlmsFullDottxtRouteImport.update({
+  id: '/api/public/llms-full.txt',
+  path: '/api/public/llms-full.txt',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiPublicLlmsDottxtRoute = ApiPublicLlmsDottxtRouteImport.update({
+  id: '/api/public/llms.txt',
+  path: '/api/public/llms.txt',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ApiPublicPublicarTecnologiaPeriodicoRoute =
@@ -319,52 +301,35 @@ const ApiPublicPublicarTecnologiaPeriodicoRoute =
     path: '/api/public/publicar-tecnologia-periodico',
     getParentRoute: () => rootRouteImport,
   } as any)
-const ApiPublicLlmsDottxtRoute = ApiPublicLlmsDottxtRouteImport.update({
-  id: '/api/public/llms.txt',
-  path: '/api/public/llms.txt',
+const ApiPublicRssDotxmlRoute = ApiPublicRssDotxmlRouteImport.update({
+  id: '/api/public/rss.xml',
+  path: '/api/public/rss.xml',
   getParentRoute: () => rootRouteImport,
 } as any)
-const ApiPublicLlmsFullDottxtRoute = ApiPublicLlmsFullDottxtRouteImport.update({
-  id: '/api/public/llms-full.txt',
-  path: '/api/public/llms-full.txt',
+const ApiPublicSitemapNewsDotxmlRoute =
+  ApiPublicSitemapNewsDotxmlRouteImport.update({
+    id: '/api/public/sitemap-news.xml',
+    path: '/api/public/sitemap-news.xml',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const ApiPublicSitemapDotxmlRoute = ApiPublicSitemapDotxmlRouteImport.update({
+  id: '/api/public/sitemap.xml',
+  path: '/api/public/sitemap.xml',
   getParentRoute: () => rootRouteImport,
 } as any)
-const ApiPublicContactRoute = ApiPublicContactRouteImport.update({
-  id: '/api/public/contact',
-  path: '/api/public/contact',
+const ColunaSlugEdicaoIdRoute = ColunaSlugEdicaoIdRouteImport.update({
+  id: '/coluna/$slug/$edicaoId',
+  path: '/coluna/$slug/$edicaoId',
   getParentRoute: () => rootRouteImport,
 } as any)
-const RegionEditoriaCategoriaRoute = RegionEditoriaCategoriaRouteImport.update({
-  id: '/editoria/$categoria',
-  path: '/editoria/$categoria',
-  getParentRoute: () => RegionRoute,
+const ColunaSlugArquivoRoute = ColunaSlugArquivoRouteImport.update({
+  id: '/coluna/$slug/arquivo',
+  path: '/coluna/$slug/arquivo',
+  getParentRoute: () => rootRouteImport,
 } as any)
-const RegionCidadeCidadeRoute = RegionCidadeCidadeRouteImport.update({
-  id: '/cidade/$cidade',
-  path: '/cidade/$cidade',
-  getParentRoute: () => RegionRoute,
-} as any)
-const LovableEmailTransactionalSendRoute =
-  LovableEmailTransactionalSendRouteImport.update({
-    id: '/lovable/email/transactional/send',
-    path: '/lovable/email/transactional/send',
-    getParentRoute: () => rootRouteImport,
-  } as any)
-const LovableEmailTransactionalPreviewRoute =
-  LovableEmailTransactionalPreviewRouteImport.update({
-    id: '/lovable/email/transactional/preview',
-    path: '/lovable/email/transactional/preview',
-    getParentRoute: () => rootRouteImport,
-  } as any)
-const LovableEmailQueueProcessRoute =
-  LovableEmailQueueProcessRouteImport.update({
-    id: '/lovable/email/queue/process',
-    path: '/lovable/email/queue/process',
-    getParentRoute: () => rootRouteImport,
-  } as any)
-const ApiPublicIndexnowKeyRoute = ApiPublicIndexnowKeyRouteImport.update({
-  id: '/api/public/indexnow/$key',
-  path: '/api/public/indexnow/$key',
+const LovableEmailSuppressionRoute = LovableEmailSuppressionRouteImport.update({
+  id: '/lovable/email/suppression',
+  path: '/lovable/email/suppression',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ApiPublicHooksIndexnowPingRoute =
@@ -373,16 +338,39 @@ const ApiPublicHooksIndexnowPingRoute =
     path: '/api/public/hooks/indexnow-ping',
     getParentRoute: () => rootRouteImport,
   } as any)
-const ApiPublicRssRegiaoRegionRoute =
-  ApiPublicRssRegiaoRegionRouteImport.update({
-    id: '/api/public/rss/regiao/$region',
-    path: '/api/public/rss/regiao/$region',
+const ApiPublicIndexnowKeyRoute = ApiPublicIndexnowKeyRouteImport.update({
+  id: '/api/public/indexnow/$key',
+  path: '/api/public/indexnow/$key',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const LovableEmailQueueProcessRoute =
+  LovableEmailQueueProcessRouteImport.update({
+    id: '/lovable/email/queue/process',
+    path: '/lovable/email/queue/process',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const LovableEmailTransactionalPreviewRoute =
+  LovableEmailTransactionalPreviewRouteImport.update({
+    id: '/lovable/email/transactional/preview',
+    path: '/lovable/email/transactional/preview',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const LovableEmailTransactionalSendRoute =
+  LovableEmailTransactionalSendRouteImport.update({
+    id: '/lovable/email/transactional/send',
+    path: '/lovable/email/transactional/send',
     getParentRoute: () => rootRouteImport,
   } as any)
 const ApiPublicRssCategoriaSlugRoute =
   ApiPublicRssCategoriaSlugRouteImport.update({
     id: '/api/public/rss/categoria/$slug',
     path: '/api/public/rss/categoria/$slug',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const ApiPublicRssRegiaoRegionRoute =
+  ApiPublicRssRegiaoRegionRouteImport.update({
+    id: '/api/public/rss/regiao/$region',
+    path: '/api/public/rss/regiao/$region',
     getParentRoute: () => rootRouteImport,
   } as any)
 const ApiPublicRssCidadeRegionCidadeRoute =
@@ -409,7 +397,6 @@ export interface FileRoutesByFullPath {
   '/admin/agentes': typeof AdminAgentesRoute
   '/admin/analytics': typeof AdminAnalyticsRoute
   '/admin/anuncios': typeof AdminAnunciosRoute
-  '/admin/clusters': typeof AdminClustersRoute
   '/admin/colunas': typeof AdminColunasRoute
   '/admin/fontes': typeof AdminFontesRoute
   '/admin/imprensa-clientes': typeof AdminImprensaClientesRoute
@@ -417,7 +404,6 @@ export interface FileRoutesByFullPath {
   '/admin/memoria-editorial': typeof AdminMemoriaEditorialRoute
   '/admin/notas-cidades': typeof AdminNotasCidadesRoute
   '/admin/painel': typeof AdminPainelRoute
-  '/admin/pedidos-chat': typeof AdminPedidosChatRoute
   '/admin/regioes': typeof AdminRegioesRoute
   '/admin/reset-password': typeof AdminResetPasswordRoute
   '/admin/senha': typeof AdminSenhaRoute
@@ -471,7 +457,6 @@ export interface FileRoutesByTo {
   '/admin/agentes': typeof AdminAgentesRoute
   '/admin/analytics': typeof AdminAnalyticsRoute
   '/admin/anuncios': typeof AdminAnunciosRoute
-  '/admin/clusters': typeof AdminClustersRoute
   '/admin/colunas': typeof AdminColunasRoute
   '/admin/fontes': typeof AdminFontesRoute
   '/admin/imprensa-clientes': typeof AdminImprensaClientesRoute
@@ -479,7 +464,6 @@ export interface FileRoutesByTo {
   '/admin/memoria-editorial': typeof AdminMemoriaEditorialRoute
   '/admin/notas-cidades': typeof AdminNotasCidadesRoute
   '/admin/painel': typeof AdminPainelRoute
-  '/admin/pedidos-chat': typeof AdminPedidosChatRoute
   '/admin/regioes': typeof AdminRegioesRoute
   '/admin/reset-password': typeof AdminResetPasswordRoute
   '/admin/senha': typeof AdminSenhaRoute
@@ -536,7 +520,6 @@ export interface FileRoutesById {
   '/admin/agentes': typeof AdminAgentesRoute
   '/admin/analytics': typeof AdminAnalyticsRoute
   '/admin/anuncios': typeof AdminAnunciosRoute
-  '/admin/clusters': typeof AdminClustersRoute
   '/admin/colunas': typeof AdminColunasRoute
   '/admin/fontes': typeof AdminFontesRoute
   '/admin/imprensa-clientes': typeof AdminImprensaClientesRoute
@@ -544,7 +527,6 @@ export interface FileRoutesById {
   '/admin/memoria-editorial': typeof AdminMemoriaEditorialRoute
   '/admin/notas-cidades': typeof AdminNotasCidadesRoute
   '/admin/painel': typeof AdminPainelRoute
-  '/admin/pedidos-chat': typeof AdminPedidosChatRoute
   '/admin/regioes': typeof AdminRegioesRoute
   '/admin/reset-password': typeof AdminResetPasswordRoute
   '/admin/senha': typeof AdminSenhaRoute
@@ -602,7 +584,6 @@ export interface FileRouteTypes {
     | '/admin/agentes'
     | '/admin/analytics'
     | '/admin/anuncios'
-    | '/admin/clusters'
     | '/admin/colunas'
     | '/admin/fontes'
     | '/admin/imprensa-clientes'
@@ -610,7 +591,6 @@ export interface FileRouteTypes {
     | '/admin/memoria-editorial'
     | '/admin/notas-cidades'
     | '/admin/painel'
-    | '/admin/pedidos-chat'
     | '/admin/regioes'
     | '/admin/reset-password'
     | '/admin/senha'
@@ -664,7 +644,6 @@ export interface FileRouteTypes {
     | '/admin/agentes'
     | '/admin/analytics'
     | '/admin/anuncios'
-    | '/admin/clusters'
     | '/admin/colunas'
     | '/admin/fontes'
     | '/admin/imprensa-clientes'
@@ -672,7 +651,6 @@ export interface FileRouteTypes {
     | '/admin/memoria-editorial'
     | '/admin/notas-cidades'
     | '/admin/painel'
-    | '/admin/pedidos-chat'
     | '/admin/regioes'
     | '/admin/reset-password'
     | '/admin/senha'
@@ -728,7 +706,6 @@ export interface FileRouteTypes {
     | '/admin/agentes'
     | '/admin/analytics'
     | '/admin/anuncios'
-    | '/admin/clusters'
     | '/admin/colunas'
     | '/admin/fontes'
     | '/admin/imprensa-clientes'
@@ -736,7 +713,6 @@ export interface FileRouteTypes {
     | '/admin/memoria-editorial'
     | '/admin/notas-cidades'
     | '/admin/painel'
-    | '/admin/pedidos-chat'
     | '/admin/regioes'
     | '/admin/reset-password'
     | '/admin/senha'
@@ -820,67 +796,11 @@ export interface RootRouteChildren {
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
-    '/whatsapp': {
-      id: '/whatsapp'
-      path: '/whatsapp'
-      fullPath: '/whatsapp'
-      preLoaderRoute: typeof WhatsappRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/unsubscribe': {
-      id: '/unsubscribe'
-      path: '/unsubscribe'
-      fullPath: '/unsubscribe'
-      preLoaderRoute: typeof UnsubscribeRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/termos': {
-      id: '/termos'
-      path: '/termos'
-      fullPath: '/termos'
-      preLoaderRoute: typeof TermosRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/sobre': {
-      id: '/sobre'
-      path: '/sobre'
-      fullPath: '/sobre'
-      preLoaderRoute: typeof SobreRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/privacidade': {
-      id: '/privacidade'
-      path: '/privacidade'
-      fullPath: '/privacidade'
-      preLoaderRoute: typeof PrivacidadeRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/politica-editorial': {
-      id: '/politica-editorial'
-      path: '/politica-editorial'
-      fullPath: '/politica-editorial'
-      preLoaderRoute: typeof PoliticaEditorialRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/correcoes': {
-      id: '/correcoes'
-      path: '/correcoes'
-      fullPath: '/correcoes'
-      preLoaderRoute: typeof CorrecoesRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/contato': {
-      id: '/contato'
-      path: '/contato'
-      fullPath: '/contato'
-      preLoaderRoute: typeof ContatoRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/admin': {
-      id: '/admin'
-      path: '/admin'
-      fullPath: '/admin'
-      preLoaderRoute: typeof AdminRouteImport
+    '/': {
+      id: '/'
+      path: '/'
+      fullPath: '/'
+      preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/$region': {
@@ -890,221 +810,74 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof RegionRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/': {
-      id: '/'
-      path: '/'
-      fullPath: '/'
-      preLoaderRoute: typeof IndexRouteImport
+    '/admin': {
+      id: '/admin'
+      path: '/admin'
+      fullPath: '/admin'
+      preLoaderRoute: typeof AdminRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/admin/': {
-      id: '/admin/'
-      path: '/'
-      fullPath: '/admin/'
-      preLoaderRoute: typeof AdminIndexRouteImport
-      parentRoute: typeof AdminRoute
+    '/contato': {
+      id: '/contato'
+      path: '/contato'
+      fullPath: '/contato'
+      preLoaderRoute: typeof ContatoRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/correcoes': {
+      id: '/correcoes'
+      path: '/correcoes'
+      fullPath: '/correcoes'
+      preLoaderRoute: typeof CorrecoesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/politica-editorial': {
+      id: '/politica-editorial'
+      path: '/politica-editorial'
+      fullPath: '/politica-editorial'
+      preLoaderRoute: typeof PoliticaEditorialRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/privacidade': {
+      id: '/privacidade'
+      path: '/privacidade'
+      fullPath: '/privacidade'
+      preLoaderRoute: typeof PrivacidadeRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/sobre': {
+      id: '/sobre'
+      path: '/sobre'
+      fullPath: '/sobre'
+      preLoaderRoute: typeof SobreRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/termos': {
+      id: '/termos'
+      path: '/termos'
+      fullPath: '/termos'
+      preLoaderRoute: typeof TermosRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/unsubscribe': {
+      id: '/unsubscribe'
+      path: '/unsubscribe'
+      fullPath: '/unsubscribe'
+      preLoaderRoute: typeof UnsubscribeRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/whatsapp': {
+      id: '/whatsapp'
+      path: '/whatsapp'
+      fullPath: '/whatsapp'
+      preLoaderRoute: typeof WhatsappRouteImport
+      parentRoute: typeof rootRouteImport
     }
     '/$region/': {
       id: '/$region/'
       path: '/'
       fullPath: '/$region/'
       preLoaderRoute: typeof RegionIndexRouteImport
-      parentRoute: typeof RegionRoute
-    }
-    '/vozes/$cidade': {
-      id: '/vozes/$cidade'
-      path: '/vozes/$cidade'
-      fullPath: '/vozes/$cidade'
-      preLoaderRoute: typeof VozesCidadeRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/vitrine/$token': {
-      id: '/vitrine/$token'
-      path: '/vitrine/$token'
-      fullPath: '/vitrine/$token'
-      preLoaderRoute: typeof VitrineTokenRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/vitrine-pessoal/novo': {
-      id: '/vitrine-pessoal/novo'
-      path: '/vitrine-pessoal/novo'
-      fullPath: '/vitrine-pessoal/novo'
-      preLoaderRoute: typeof VitrinePessoalNovoRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/r/$id': {
-      id: '/r/$id'
-      path: '/r/$id'
-      fullPath: '/r/$id'
-      preLoaderRoute: typeof RIdRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/publieditorial/$token': {
-      id: '/publieditorial/$token'
-      path: '/publieditorial/$token'
-      fullPath: '/publieditorial/$token'
-      preLoaderRoute: typeof PublieditorialTokenRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/imprensa/painel': {
-      id: '/imprensa/painel'
-      path: '/imprensa/painel'
-      fullPath: '/imprensa/painel'
-      preLoaderRoute: typeof ImprensaPainelRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/imprensa/entrar': {
-      id: '/imprensa/entrar'
-      path: '/imprensa/entrar'
-      fullPath: '/imprensa/entrar'
-      preLoaderRoute: typeof ImprensaEntrarRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/email/unsubscribe': {
-      id: '/email/unsubscribe'
-      path: '/email/unsubscribe'
-      fullPath: '/email/unsubscribe'
-      preLoaderRoute: typeof EmailUnsubscribeRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/editoria/$categoria': {
-      id: '/editoria/$categoria'
-      path: '/editoria/$categoria'
-      fullPath: '/editoria/$categoria'
-      preLoaderRoute: typeof EditoriaCategoriaRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/autor/$slug': {
-      id: '/autor/$slug'
-      path: '/autor/$slug'
-      fullPath: '/autor/$slug'
-      preLoaderRoute: typeof AutorSlugRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/admin/vitrine-pessoal': {
-      id: '/admin/vitrine-pessoal'
-      path: '/vitrine-pessoal'
-      fullPath: '/admin/vitrine-pessoal'
-      preLoaderRoute: typeof AdminVitrinePessoalRouteImport
-      parentRoute: typeof AdminRoute
-    }
-    '/admin/sobre': {
-      id: '/admin/sobre'
-      path: '/sobre'
-      fullPath: '/admin/sobre'
-      preLoaderRoute: typeof AdminSobreRouteImport
-      parentRoute: typeof AdminRoute
-    }
-    '/admin/senha': {
-      id: '/admin/senha'
-      path: '/senha'
-      fullPath: '/admin/senha'
-      preLoaderRoute: typeof AdminSenhaRouteImport
-      parentRoute: typeof AdminRoute
-    }
-    '/admin/reset-password': {
-      id: '/admin/reset-password'
-      path: '/reset-password'
-      fullPath: '/admin/reset-password'
-      preLoaderRoute: typeof AdminResetPasswordRouteImport
-      parentRoute: typeof AdminRoute
-    }
-    '/admin/regioes': {
-      id: '/admin/regioes'
-      path: '/regioes'
-      fullPath: '/admin/regioes'
-      preLoaderRoute: typeof AdminRegioesRouteImport
-      parentRoute: typeof AdminRoute
-    }
-    '/admin/pedidos-chat': {
-      id: '/admin/pedidos-chat'
-      path: '/pedidos-chat'
-      fullPath: '/admin/pedidos-chat'
-      preLoaderRoute: typeof AdminPedidosChatRouteImport
-      parentRoute: typeof AdminRoute
-    }
-    '/admin/painel': {
-      id: '/admin/painel'
-      path: '/painel'
-      fullPath: '/admin/painel'
-      preLoaderRoute: typeof AdminPainelRouteImport
-      parentRoute: typeof AdminRoute
-    }
-    '/admin/notas-cidades': {
-      id: '/admin/notas-cidades'
-      path: '/notas-cidades'
-      fullPath: '/admin/notas-cidades'
-      preLoaderRoute: typeof AdminNotasCidadesRouteImport
-      parentRoute: typeof AdminRoute
-    }
-    '/admin/memoria-editorial': {
-      id: '/admin/memoria-editorial'
-      path: '/memoria-editorial'
-      fullPath: '/admin/memoria-editorial'
-      preLoaderRoute: typeof AdminMemoriaEditorialRouteImport
-      parentRoute: typeof AdminRoute
-    }
-    '/admin/login': {
-      id: '/admin/login'
-      path: '/login'
-      fullPath: '/admin/login'
-      preLoaderRoute: typeof AdminLoginRouteImport
-      parentRoute: typeof AdminRoute
-    }
-    '/admin/imprensa-clientes': {
-      id: '/admin/imprensa-clientes'
-      path: '/imprensa-clientes'
-      fullPath: '/admin/imprensa-clientes'
-      preLoaderRoute: typeof AdminImprensaClientesRouteImport
-      parentRoute: typeof AdminRoute
-    }
-    '/admin/fontes': {
-      id: '/admin/fontes'
-      path: '/fontes'
-      fullPath: '/admin/fontes'
-      preLoaderRoute: typeof AdminFontesRouteImport
-      parentRoute: typeof AdminRoute
-    }
-    '/admin/colunas': {
-      id: '/admin/colunas'
-      path: '/colunas'
-      fullPath: '/admin/colunas'
-      preLoaderRoute: typeof AdminColunasRouteImport
-      parentRoute: typeof AdminRoute
-    }
-    '/admin/clusters': {
-      id: '/admin/clusters'
-      path: '/clusters'
-      fullPath: '/admin/clusters'
-      preLoaderRoute: typeof AdminClustersRouteImport
-      parentRoute: typeof AdminRoute
-    }
-    '/admin/anuncios': {
-      id: '/admin/anuncios'
-      path: '/anuncios'
-      fullPath: '/admin/anuncios'
-      preLoaderRoute: typeof AdminAnunciosRouteImport
-      parentRoute: typeof AdminRoute
-    }
-    '/admin/analytics': {
-      id: '/admin/analytics'
-      path: '/analytics'
-      fullPath: '/admin/analytics'
-      preLoaderRoute: typeof AdminAnalyticsRouteImport
-      parentRoute: typeof AdminRoute
-    }
-    '/admin/agentes': {
-      id: '/admin/agentes'
-      path: '/agentes'
-      fullPath: '/admin/agentes'
-      preLoaderRoute: typeof AdminAgentesRouteImport
-      parentRoute: typeof AdminRoute
-    }
-    '/$region/classificados': {
-      id: '/$region/classificados'
-      path: '/classificados'
-      fullPath: '/$region/classificados'
-      preLoaderRoute: typeof RegionClassificadosRouteImport
       parentRoute: typeof RegionRoute
     }
     '/$region/$slug': {
@@ -1114,60 +887,214 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof RegionSlugRouteImport
       parentRoute: typeof RegionRoute
     }
-    '/lovable/email/suppression': {
-      id: '/lovable/email/suppression'
-      path: '/lovable/email/suppression'
-      fullPath: '/lovable/email/suppression'
-      preLoaderRoute: typeof LovableEmailSuppressionRouteImport
+    '/$region/classificados': {
+      id: '/$region/classificados'
+      path: '/classificados'
+      fullPath: '/$region/classificados'
+      preLoaderRoute: typeof RegionClassificadosRouteImport
+      parentRoute: typeof RegionRoute
+    }
+    '/admin/': {
+      id: '/admin/'
+      path: '/'
+      fullPath: '/admin/'
+      preLoaderRoute: typeof AdminIndexRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/agentes': {
+      id: '/admin/agentes'
+      path: '/agentes'
+      fullPath: '/admin/agentes'
+      preLoaderRoute: typeof AdminAgentesRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/analytics': {
+      id: '/admin/analytics'
+      path: '/analytics'
+      fullPath: '/admin/analytics'
+      preLoaderRoute: typeof AdminAnalyticsRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/anuncios': {
+      id: '/admin/anuncios'
+      path: '/anuncios'
+      fullPath: '/admin/anuncios'
+      preLoaderRoute: typeof AdminAnunciosRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/colunas': {
+      id: '/admin/colunas'
+      path: '/colunas'
+      fullPath: '/admin/colunas'
+      preLoaderRoute: typeof AdminColunasRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/fontes': {
+      id: '/admin/fontes'
+      path: '/fontes'
+      fullPath: '/admin/fontes'
+      preLoaderRoute: typeof AdminFontesRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/imprensa-clientes': {
+      id: '/admin/imprensa-clientes'
+      path: '/imprensa-clientes'
+      fullPath: '/admin/imprensa-clientes'
+      preLoaderRoute: typeof AdminImprensaClientesRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/login': {
+      id: '/admin/login'
+      path: '/login'
+      fullPath: '/admin/login'
+      preLoaderRoute: typeof AdminLoginRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/memoria-editorial': {
+      id: '/admin/memoria-editorial'
+      path: '/memoria-editorial'
+      fullPath: '/admin/memoria-editorial'
+      preLoaderRoute: typeof AdminMemoriaEditorialRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/notas-cidades': {
+      id: '/admin/notas-cidades'
+      path: '/notas-cidades'
+      fullPath: '/admin/notas-cidades'
+      preLoaderRoute: typeof AdminNotasCidadesRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/painel': {
+      id: '/admin/painel'
+      path: '/painel'
+      fullPath: '/admin/painel'
+      preLoaderRoute: typeof AdminPainelRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/regioes': {
+      id: '/admin/regioes'
+      path: '/regioes'
+      fullPath: '/admin/regioes'
+      preLoaderRoute: typeof AdminRegioesRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/reset-password': {
+      id: '/admin/reset-password'
+      path: '/reset-password'
+      fullPath: '/admin/reset-password'
+      preLoaderRoute: typeof AdminResetPasswordRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/senha': {
+      id: '/admin/senha'
+      path: '/senha'
+      fullPath: '/admin/senha'
+      preLoaderRoute: typeof AdminSenhaRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/sobre': {
+      id: '/admin/sobre'
+      path: '/sobre'
+      fullPath: '/admin/sobre'
+      preLoaderRoute: typeof AdminSobreRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/vitrine-pessoal': {
+      id: '/admin/vitrine-pessoal'
+      path: '/vitrine-pessoal'
+      fullPath: '/admin/vitrine-pessoal'
+      preLoaderRoute: typeof AdminVitrinePessoalRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/autor/$slug': {
+      id: '/autor/$slug'
+      path: '/autor/$slug'
+      fullPath: '/autor/$slug'
+      preLoaderRoute: typeof AutorSlugRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/coluna/$slug/arquivo': {
-      id: '/coluna/$slug/arquivo'
-      path: '/coluna/$slug/arquivo'
-      fullPath: '/coluna/$slug/arquivo'
-      preLoaderRoute: typeof ColunaSlugArquivoRouteImport
+    '/editoria/$categoria': {
+      id: '/editoria/$categoria'
+      path: '/editoria/$categoria'
+      fullPath: '/editoria/$categoria'
+      preLoaderRoute: typeof EditoriaCategoriaRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/coluna/$slug/$edicaoId': {
-      id: '/coluna/$slug/$edicaoId'
-      path: '/coluna/$slug/$edicaoId'
-      fullPath: '/coluna/$slug/$edicaoId'
-      preLoaderRoute: typeof ColunaSlugEdicaoIdRouteImport
+    '/email/unsubscribe': {
+      id: '/email/unsubscribe'
+      path: '/email/unsubscribe'
+      fullPath: '/email/unsubscribe'
+      preLoaderRoute: typeof EmailUnsubscribeRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/api/public/sitemap.xml': {
-      id: '/api/public/sitemap.xml'
-      path: '/api/public/sitemap.xml'
-      fullPath: '/api/public/sitemap.xml'
-      preLoaderRoute: typeof ApiPublicSitemapDotxmlRouteImport
+    '/imprensa/entrar': {
+      id: '/imprensa/entrar'
+      path: '/imprensa/entrar'
+      fullPath: '/imprensa/entrar'
+      preLoaderRoute: typeof ImprensaEntrarRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/api/public/sitemap-news.xml': {
-      id: '/api/public/sitemap-news.xml'
-      path: '/api/public/sitemap-news.xml'
-      fullPath: '/api/public/sitemap-news.xml'
-      preLoaderRoute: typeof ApiPublicSitemapNewsDotxmlRouteImport
+    '/imprensa/painel': {
+      id: '/imprensa/painel'
+      path: '/imprensa/painel'
+      fullPath: '/imprensa/painel'
+      preLoaderRoute: typeof ImprensaPainelRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/api/public/rss.xml': {
-      id: '/api/public/rss.xml'
-      path: '/api/public/rss.xml'
-      fullPath: '/api/public/rss.xml'
-      preLoaderRoute: typeof ApiPublicRssDotxmlRouteImport
+    '/publieditorial/$token': {
+      id: '/publieditorial/$token'
+      path: '/publieditorial/$token'
+      fullPath: '/publieditorial/$token'
+      preLoaderRoute: typeof PublieditorialTokenRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/api/public/publicar-tecnologia-periodico': {
-      id: '/api/public/publicar-tecnologia-periodico'
-      path: '/api/public/publicar-tecnologia-periodico'
-      fullPath: '/api/public/publicar-tecnologia-periodico'
-      preLoaderRoute: typeof ApiPublicPublicarTecnologiaPeriodicoRouteImport
+    '/r/$id': {
+      id: '/r/$id'
+      path: '/r/$id'
+      fullPath: '/r/$id'
+      preLoaderRoute: typeof RIdRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/api/public/llms.txt': {
-      id: '/api/public/llms.txt'
-      path: '/api/public/llms.txt'
-      fullPath: '/api/public/llms.txt'
-      preLoaderRoute: typeof ApiPublicLlmsDottxtRouteImport
+    '/vitrine-pessoal/novo': {
+      id: '/vitrine-pessoal/novo'
+      path: '/vitrine-pessoal/novo'
+      fullPath: '/vitrine-pessoal/novo'
+      preLoaderRoute: typeof VitrinePessoalNovoRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/vitrine/$token': {
+      id: '/vitrine/$token'
+      path: '/vitrine/$token'
+      fullPath: '/vitrine/$token'
+      preLoaderRoute: typeof VitrineTokenRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/vozes/$cidade': {
+      id: '/vozes/$cidade'
+      path: '/vozes/$cidade'
+      fullPath: '/vozes/$cidade'
+      preLoaderRoute: typeof VozesCidadeRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/$region/cidade/$cidade': {
+      id: '/$region/cidade/$cidade'
+      path: '/cidade/$cidade'
+      fullPath: '/$region/cidade/$cidade'
+      preLoaderRoute: typeof RegionCidadeCidadeRouteImport
+      parentRoute: typeof RegionRoute
+    }
+    '/$region/editoria/$categoria': {
+      id: '/$region/editoria/$categoria'
+      path: '/editoria/$categoria'
+      fullPath: '/$region/editoria/$categoria'
+      preLoaderRoute: typeof RegionEditoriaCategoriaRouteImport
+      parentRoute: typeof RegionRoute
+    }
+    '/api/public/contact': {
+      id: '/api/public/contact'
+      path: '/api/public/contact'
+      fullPath: '/api/public/contact'
+      preLoaderRoute: typeof ApiPublicContactRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/api/public/llms-full.txt': {
@@ -1177,53 +1104,60 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicLlmsFullDottxtRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/api/public/contact': {
-      id: '/api/public/contact'
-      path: '/api/public/contact'
-      fullPath: '/api/public/contact'
-      preLoaderRoute: typeof ApiPublicContactRouteImport
+    '/api/public/llms.txt': {
+      id: '/api/public/llms.txt'
+      path: '/api/public/llms.txt'
+      fullPath: '/api/public/llms.txt'
+      preLoaderRoute: typeof ApiPublicLlmsDottxtRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/$region/editoria/$categoria': {
-      id: '/$region/editoria/$categoria'
-      path: '/editoria/$categoria'
-      fullPath: '/$region/editoria/$categoria'
-      preLoaderRoute: typeof RegionEditoriaCategoriaRouteImport
-      parentRoute: typeof RegionRoute
-    }
-    '/$region/cidade/$cidade': {
-      id: '/$region/cidade/$cidade'
-      path: '/cidade/$cidade'
-      fullPath: '/$region/cidade/$cidade'
-      preLoaderRoute: typeof RegionCidadeCidadeRouteImport
-      parentRoute: typeof RegionRoute
-    }
-    '/lovable/email/transactional/send': {
-      id: '/lovable/email/transactional/send'
-      path: '/lovable/email/transactional/send'
-      fullPath: '/lovable/email/transactional/send'
-      preLoaderRoute: typeof LovableEmailTransactionalSendRouteImport
+    '/api/public/publicar-tecnologia-periodico': {
+      id: '/api/public/publicar-tecnologia-periodico'
+      path: '/api/public/publicar-tecnologia-periodico'
+      fullPath: '/api/public/publicar-tecnologia-periodico'
+      preLoaderRoute: typeof ApiPublicPublicarTecnologiaPeriodicoRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/lovable/email/transactional/preview': {
-      id: '/lovable/email/transactional/preview'
-      path: '/lovable/email/transactional/preview'
-      fullPath: '/lovable/email/transactional/preview'
-      preLoaderRoute: typeof LovableEmailTransactionalPreviewRouteImport
+    '/api/public/rss.xml': {
+      id: '/api/public/rss.xml'
+      path: '/api/public/rss.xml'
+      fullPath: '/api/public/rss.xml'
+      preLoaderRoute: typeof ApiPublicRssDotxmlRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/lovable/email/queue/process': {
-      id: '/lovable/email/queue/process'
-      path: '/lovable/email/queue/process'
-      fullPath: '/lovable/email/queue/process'
-      preLoaderRoute: typeof LovableEmailQueueProcessRouteImport
+    '/api/public/sitemap-news.xml': {
+      id: '/api/public/sitemap-news.xml'
+      path: '/api/public/sitemap-news.xml'
+      fullPath: '/api/public/sitemap-news.xml'
+      preLoaderRoute: typeof ApiPublicSitemapNewsDotxmlRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/api/public/indexnow/$key': {
-      id: '/api/public/indexnow/$key'
-      path: '/api/public/indexnow/$key'
-      fullPath: '/api/public/indexnow/$key'
-      preLoaderRoute: typeof ApiPublicIndexnowKeyRouteImport
+    '/api/public/sitemap.xml': {
+      id: '/api/public/sitemap.xml'
+      path: '/api/public/sitemap.xml'
+      fullPath: '/api/public/sitemap.xml'
+      preLoaderRoute: typeof ApiPublicSitemapDotxmlRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/coluna/$slug/$edicaoId': {
+      id: '/coluna/$slug/$edicaoId'
+      path: '/coluna/$slug/$edicaoId'
+      fullPath: '/coluna/$slug/$edicaoId'
+      preLoaderRoute: typeof ColunaSlugEdicaoIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/coluna/$slug/arquivo': {
+      id: '/coluna/$slug/arquivo'
+      path: '/coluna/$slug/arquivo'
+      fullPath: '/coluna/$slug/arquivo'
+      preLoaderRoute: typeof ColunaSlugArquivoRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/lovable/email/suppression': {
+      id: '/lovable/email/suppression'
+      path: '/lovable/email/suppression'
+      fullPath: '/lovable/email/suppression'
+      preLoaderRoute: typeof LovableEmailSuppressionRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/api/public/hooks/indexnow-ping': {
@@ -1233,11 +1167,32 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicHooksIndexnowPingRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/api/public/rss/regiao/$region': {
-      id: '/api/public/rss/regiao/$region'
-      path: '/api/public/rss/regiao/$region'
-      fullPath: '/api/public/rss/regiao/$region'
-      preLoaderRoute: typeof ApiPublicRssRegiaoRegionRouteImport
+    '/api/public/indexnow/$key': {
+      id: '/api/public/indexnow/$key'
+      path: '/api/public/indexnow/$key'
+      fullPath: '/api/public/indexnow/$key'
+      preLoaderRoute: typeof ApiPublicIndexnowKeyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/lovable/email/queue/process': {
+      id: '/lovable/email/queue/process'
+      path: '/lovable/email/queue/process'
+      fullPath: '/lovable/email/queue/process'
+      preLoaderRoute: typeof LovableEmailQueueProcessRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/lovable/email/transactional/preview': {
+      id: '/lovable/email/transactional/preview'
+      path: '/lovable/email/transactional/preview'
+      fullPath: '/lovable/email/transactional/preview'
+      preLoaderRoute: typeof LovableEmailTransactionalPreviewRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/lovable/email/transactional/send': {
+      id: '/lovable/email/transactional/send'
+      path: '/lovable/email/transactional/send'
+      fullPath: '/lovable/email/transactional/send'
+      preLoaderRoute: typeof LovableEmailTransactionalSendRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/api/public/rss/categoria/$slug': {
@@ -1245,6 +1200,13 @@ declare module '@tanstack/react-router' {
       path: '/api/public/rss/categoria/$slug'
       fullPath: '/api/public/rss/categoria/$slug'
       preLoaderRoute: typeof ApiPublicRssCategoriaSlugRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/public/rss/regiao/$region': {
+      id: '/api/public/rss/regiao/$region'
+      path: '/api/public/rss/regiao/$region'
+      fullPath: '/api/public/rss/regiao/$region'
+      preLoaderRoute: typeof ApiPublicRssRegiaoRegionRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/api/public/rss/cidade/$region/$cidade': {
@@ -1280,7 +1242,6 @@ interface AdminRouteChildren {
   AdminAgentesRoute: typeof AdminAgentesRoute
   AdminAnalyticsRoute: typeof AdminAnalyticsRoute
   AdminAnunciosRoute: typeof AdminAnunciosRoute
-  AdminClustersRoute: typeof AdminClustersRoute
   AdminColunasRoute: typeof AdminColunasRoute
   AdminFontesRoute: typeof AdminFontesRoute
   AdminImprensaClientesRoute: typeof AdminImprensaClientesRoute
@@ -1288,7 +1249,6 @@ interface AdminRouteChildren {
   AdminMemoriaEditorialRoute: typeof AdminMemoriaEditorialRoute
   AdminNotasCidadesRoute: typeof AdminNotasCidadesRoute
   AdminPainelRoute: typeof AdminPainelRoute
-  AdminPedidosChatRoute: typeof AdminPedidosChatRoute
   AdminRegioesRoute: typeof AdminRegioesRoute
   AdminResetPasswordRoute: typeof AdminResetPasswordRoute
   AdminSenhaRoute: typeof AdminSenhaRoute
@@ -1301,7 +1261,6 @@ const AdminRouteChildren: AdminRouteChildren = {
   AdminAgentesRoute: AdminAgentesRoute,
   AdminAnalyticsRoute: AdminAnalyticsRoute,
   AdminAnunciosRoute: AdminAnunciosRoute,
-  AdminClustersRoute: AdminClustersRoute,
   AdminColunasRoute: AdminColunasRoute,
   AdminFontesRoute: AdminFontesRoute,
   AdminImprensaClientesRoute: AdminImprensaClientesRoute,
@@ -1309,7 +1268,6 @@ const AdminRouteChildren: AdminRouteChildren = {
   AdminMemoriaEditorialRoute: AdminMemoriaEditorialRoute,
   AdminNotasCidadesRoute: AdminNotasCidadesRoute,
   AdminPainelRoute: AdminPainelRoute,
-  AdminPedidosChatRoute: AdminPedidosChatRoute,
   AdminRegioesRoute: AdminRegioesRoute,
   AdminResetPasswordRoute: AdminResetPasswordRoute,
   AdminSenhaRoute: AdminSenhaRoute,
