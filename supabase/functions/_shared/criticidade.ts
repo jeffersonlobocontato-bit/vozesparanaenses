@@ -159,7 +159,9 @@ ${p.corpo.slice(0, 9000)}`;
       body: JSON.stringify({
         model: MODEL,
         temperature: 0,
-        max_tokens: 500,
+        // 500 cortava o JSON quando havia vários motivos → "agente
+        // indisponível" e revisão por precaução em matéria sem risco real.
+        max_tokens: 1200,
         response_format: { type: "json_object" },
         messages: [{ role: "system", content: sistema }, { role: "user", content: usuario }],
       }),

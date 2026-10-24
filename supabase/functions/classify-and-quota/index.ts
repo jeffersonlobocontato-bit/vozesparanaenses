@@ -272,6 +272,13 @@ function json(body: unknown, status = 200) {
   });
 }
 
+// Sem resposta válida da IA: editoria neutra, nunca a 1ª da lista (que podia
+// ser "agro" ou "eleicoes-2026").
+function fallbackSlug(categorias: { slug: string }[]): string {
+  for (const s of ["cidades", "nacional"]) if (categorias.some((c) => c.slug === s)) return s;
+  return categorias[0].slug;
+}
+
 async function classify(
   excerpt: string,
   categorias: { slug: string; nome: string }[],
@@ -280,15 +287,17 @@ async function classify(
   const slugs = categorias.map((c) => c.slug).join(", ");
   const sys = `Você é um editor de um portal do Paraná (Brasil). Classifique o excerto em UMA editoria dentre: ${slugs}.
 
-Regras de escopo geográfico (aplicar ANTES de escolher a editoria temática):
-- Se o fato NÃO menciona o Paraná nem cidade/pessoa/instituição do Paraná, e ocorre em outro estado brasileiro ou tem escopo nacional (Brasil, governo federal, Congresso, STF, seleção brasileira, etc.), responda "nacional".
+POLÍTICA PRIMEIRO (vale para fato nacional, paranaense ou local): eleição, segundo turno, candidato, campanha, pesquisa eleitoral, partido, Congresso, Câmara, Senado, Assembleia, câmara de vereadores, votação de projeto de lei, governo/ministro/presidente/governador/prefeito em ato político, plebiscito → responda "politica". Serviço ao eleitor ligado à eleição (documentos, locais de votação, transporte no dia da votação) também é "politica".
+
+Regras de escopo geográfico (para o que NÃO é política):
+- Se o fato NÃO menciona o Paraná nem cidade/pessoa/instituição do Paraná, e ocorre em outro estado brasileiro ou tem escopo nacional (Brasil, órgãos federais, STF, seleção brasileira, etc.), responda "nacional".
 - Se o fato ocorre fora do Brasil (outro país, órgãos internacionais, esportes/política/economia estrangeiros) e não tem ligação direta com o Paraná, responda "internacional".
-- Caso contrário (fato paranaense OU com impacto direto no Paraná), escolha a editoria temática apropriada (politica, economia, agro, seguranca, educacao, esportes, cultura, saude, cidades, meio-ambiente).
+- Caso contrário (fato paranaense OU com impacto direto no Paraná), escolha a editoria temática apropriada (economia, agro, seguranca, educacao, esportes, cultura, saude, cidades, meio-ambiente).
 
 ${CRIVO_PROMPT}
 
 Responda APENAS com JSON: ${CRIVO_SCHEMA}`;
-  const fallback = (): ResultadoCrivo => ({ ...parseCrivo("", excerpt), categoria: categorias[0].slug });
+  const fallback = (): ResultadoCrivo => ({ ...parseCrivo("", excerpt), categoria: fallbackSlug(categorias) });
   try {
     const res = await fetch(AI_URL, {
       method: "POST",
@@ -296,7 +305,9 @@ Responda APENAS com JSON: ${CRIVO_SCHEMA}`;
       body: JSON.stringify({
         model: MODEL,
         messages: [{ role: "system", content: sys }, { role: "user", content: excerpt }],
-        max_tokens: 150,
+        // 150 cortava o JSON do crivo no meio → a pauta caía na 1ª editoria
+        // da lista (ex.: previsão do tempo em "Eleições 2026").
+        max_tokens: 600,
         temperature: 0,
         response_format: { type: "json_object" },
       }),
@@ -310,7 +321,9 @@ Responda APENAS com JSON: ${CRIVO_SCHEMA}`;
     const ordered = [...categorias].sort((a, b) => b.slug.length - a.slug.length);
     const alvo = (crivo.categoria ?? raw).toLowerCase();
     const found = ordered.find((c) => alvo.includes(c.slug));
-    return { ...crivo, categoria: found?.slug ?? categorias[0].slug };
+    // Eleição é assunto da editoria Política (decisão de 24/10/2026).
+    const slug = found?.slug === "eleicoes-2026" && categorias.some((c) => c.slug === "politica") ? "politica" : found?.slug;
+    return { ...crivo, categoria: slug ?? fallbackSlug(categorias) };
   } catch {
     return fallback();
   }
