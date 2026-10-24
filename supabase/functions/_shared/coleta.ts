@@ -69,6 +69,15 @@ export function fonteElegivel(f: FonteColeta, agora: Date = new Date(), ciclos: 
 }
 
 /** Remove parâmetros de rastreio para a mesma matéria não entrar duas vezes. */
+/** Descarta o que não é foto de matéria: emoji, ícone, logo, avatar, pixel, SVG. */
+export function imagemValida(u: string | null | undefined): boolean {
+  if (!u) return false;
+  if (/s\.w\.org\/images\/core\/emoji|\/emoji\/|gravatar\.com|\/(sprite|logo|icon|favicon|avatar|blank|placeholder)[^/]*$|1x1|pixel\.|\.svg(\?|$)/i.test(u)) return false;
+  // Miniatura explícita (?w=200, -150x150) não serve de capa.
+  if (/[?&]w=(\d{1,2}|1\d\d|2[0-4]\d)(&|$)|-\d{2,3}x\d{2,3}\.(jpe?g|png|webp)/i.test(u)) return false;
+  return true;
+}
+
 export function normalizarUrl(u: string): string {
   try {
     const url = new URL(u.trim());
@@ -139,7 +148,7 @@ export async function processarItensDaFonte(p: {
     const { data: jaExiste } = await p.sb.from("raw_articles").select("id").eq("hash_conteudo", hash).maybeSingle();
     if (jaExiste) { r.duplicadas++; continue; }
 
-    let imagem = it.imagem ?? null;
+    let imagem = imagemValida(it.imagem) ? it.imagem! : null;
     let credito = it.credito ?? null;
     let corpo = it.corpo ?? "";
     const precisaPagina = !data || !imagem || !credito || corpo.length < 400;
@@ -147,7 +156,12 @@ export async function processarItensDaFonte(p: {
       try {
         if (paginasBaixadas++ > 0) await new Promise((ok) => setTimeout(ok, PAUSA_ENTRE_PAGINAS_MS));
         const meta = await p.buscarPagina(it.url);
-        if (!imagem && meta.imagem) imagem = meta.imagem;
+        // A imagem da PÁGINA (og:image) é a da matéria; a da listagem pode ser
+        // de outra notícia ao lado (caso Gaza/CNN, 24/10) ou um emoji (Gazeta).
+        if (imagemValida(meta.imagem)) {
+          if (meta.imagem !== imagem) credito = meta.credito ?? null;
+          imagem = meta.imagem;
+        }
         if (!credito && meta.credito) credito = meta.credito;
         if (meta.corpoCompleto.length > corpo.length) corpo = meta.corpoCompleto;
         // Data da própria página da matéria tem precedência sobre a da URL.

@@ -14,7 +14,7 @@ import { limparPrefeituraMecanico, verificarTitulo } from "./titulo.ts";
 import { dataAtendeNetParaIso, ehAtendeNet, parseListaAtendeNet, parseMateriaAtendeNet } from "./atende-net.ts";
 import { ehListaJson, parseListaJson } from "./lista-json.ts";
 import { faltando5w1h, motivoVeto5w1h } from "./cinco-w.ts";
-import { CICLOS_PORTAIS, cicloAtual, fonteElegivel, normalizarUrl } from "./coleta.ts";
+import { CICLOS_PORTAIS, cicloAtual, fonteElegivel, imagemValida, normalizarUrl } from "./coleta.ts";
 
 const src = Deno.readTextFileSync(new URL("../../../src/lib/parana-municipios.ts", import.meta.url));
 const cidades = [...src.matchAll(/\{ slug: "([^"]+)", name: "([^"]+)", region: "([^"]+)" \}/g)].map((m) => ({ slug: m[1], nome: JSON.parse(`"${m[2]}"`), regiao_id: m[3] }));
@@ -276,5 +276,11 @@ ok("El Niño no Sul do Brasil → nacional", ehAbrangenciaNacional("Paraná (esp
 ok("todo o país → nacional", ehAbrangenciaNacional("Em todo o país"));
 ok("Oeste do Paraná → não é nacional", !ehAbrangenciaNacional("Região Oeste do Paraná"));
 ok("Cascavel → não é nacional", !ehAbrangenciaNacional("Cascavel, PR"));
+// Imagem válida para capa
+ok("emoji do WordPress não é foto", !imagemValida("https://s.w.org/images/core/emoji/17.0.2/72x72/1f534.png"));
+ok("miniatura ?w=200 não serve", !imagemValida("https://admin.cnnbrasil.com.br/x/foto.jpg?w=200"));
+ok("og:image grande serve", imagemValida("https://admin.cnnbrasil.com.br/x/foto.jpg?w=1200&h=630&crop=1"));
+ok("foto comum serve", imagemValida("https://s2-g1.glbimg.com/abc/afp-20261024.jpg"));
+ok("logo não serve", !imagemValida("https://site.com/wp-content/themes/x/logo.png"));
 console.log(falhas ? `\n${falhas} FALHA(S)` : "\nTudo certo");
 if (falhas) Deno.exit(1);
