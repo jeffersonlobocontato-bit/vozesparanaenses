@@ -220,10 +220,13 @@ Deno.serve(async (req) => {
 
   // Veto 5W1H: sem as seis respostas nos fatos apurados, não escreve nada —
   // nem matéria nem nota. Vale também para o "Escrever agora" do editor.
+  // Exceção: notícia policial passa com o mínimo (o quê e onde).
+  const policial = cluster.tema_crivo === "seguranca" || categoriaSlug === "seguranca"
+    || (!cluster.tema_crivo && temaHeuristico(`${facts.o_que ?? ""} ${facts.quem ?? ""}`) === "seguranca");
   const faltando = faltando5w1h({
     quem: facts.quem, o_que: facts.o_que, quando: facts.quando, onde: facts.onde,
     por_que: facts.por_que, como: dados.como,
-  });
+  }, { policial });
   if (faltando.length) {
     const motivo = motivoVeto5w1h(faltando);
     await encerrarCluster(sb, clusterId, rawIdsCluster, "descartado");

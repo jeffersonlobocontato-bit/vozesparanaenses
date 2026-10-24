@@ -34,9 +34,21 @@ export function respostaVazia(v: unknown): boolean {
   return NAO_RESPONDE.test(t);
 }
 
-/** Perguntas do 5W1H que os fatos NÃO respondem (vazio = pode escrever). */
-export function faltando5w1h(fatos: Partial<Record<Pergunta5w1h, unknown>>): Pergunta5w1h[] {
-  return PERGUNTAS_5W1H.filter((p) => respostaVazia(fatos[p]));
+// Exceção da notícia POLICIAL (decisão editorial de 24/10/2026): ocorrência
+// costuma sair sem motivo, horário exato ou nome dos envolvidos, e ainda
+// assim é notícia. Basta o fato e o lugar — sem eles é texto vazio.
+export const MINIMO_POLICIAL: Pergunta5w1h[] = ["o_que", "onde"];
+
+/**
+ * Perguntas que bloqueiam a publicação (vazio = pode escrever).
+ * Regra geral: as seis. Policial: só o mínimo (o quê e onde).
+ */
+export function faltando5w1h(
+  fatos: Partial<Record<Pergunta5w1h, unknown>>,
+  opts: { policial?: boolean } = {},
+): Pergunta5w1h[] {
+  const exigidas = opts.policial ? MINIMO_POLICIAL : PERGUNTAS_5W1H;
+  return exigidas.filter((p) => respostaVazia(fatos[p]));
 }
 
 export function motivoVeto5w1h(faltando: Pergunta5w1h[]): string {

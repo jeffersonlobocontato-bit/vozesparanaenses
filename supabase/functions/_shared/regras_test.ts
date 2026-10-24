@@ -255,6 +255,9 @@ ok("'Não informado' conta como vazio", faltando5w1h({ ...completo, quando: "Nã
 ok("'Sem informações' conta como vazio", faltando5w1h({ ...completo, onde: "Sem informações oficiais" }).join() === "onde");
 ok("'não há registro' conta como vazio", faltando5w1h({ ...completo, quem: "Não há registro de envolvidos" }).join() === "quem");
 ok("resposta que começa com 'Não' mas é fato → passa", faltando5w1h({ ...completo, o_que: "Nova lei proíbe fogos com estampido" }).length === 0);
+ok("policial sem por quê/quando/quem → passa", faltando5w1h({ ...completo, por_que: null, quando: null, quem: "Não identificado" }, { policial: true }).length === 0);
+ok("policial sem onde → veta", faltando5w1h({ ...completo, onde: null }, { policial: true }).join() === "onde");
+ok("policial tudo nulo → veta", faltando5w1h({ quem: null, o_que: null, quando: null, onde: null, por_que: null, como: null }, { policial: true }).length === 2);
 ok("motivo legível", motivoVeto5w1h(["quando", "por_que"]) === "5W1H incompleto: sem quando, por quê");
 console.log(falhas ? `\n${falhas} FALHA(S)` : "\nTudo certo");
 if (falhas) Deno.exit(1);
