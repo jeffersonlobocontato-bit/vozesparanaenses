@@ -63,7 +63,7 @@ function ResetPassword() {
         {err && <p className="text-xs text-red-600">{err}</p>}
         {msg && <p className="text-xs text-green-700">{msg}</p>}
         <button disabled={busy || !ready} type="submit"
-          className="w-full rounded bg-[#E29F65] px-3 py-2 text-sm font-semibold text-white hover:bg-[#0055aa] disabled:opacity-60">
+          className="w-full rounded bg-[#E29F65] px-3 py-2 text-sm font-semibold text-white hover:bg-[#1e3531] disabled:opacity-60">
           {busy ? "Salvando…" : "Salvar nova senha"}
         </button>
       </form>

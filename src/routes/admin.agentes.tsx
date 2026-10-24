@@ -1,7 +1,19 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useMemo, useState, useCallback } from "react";
+import { ChevronDown, RefreshCw } from "lucide-react";
 import { getExternalBrowser } from "@/lib/external-supabase-browser";
-import { PageHeader, refreshBtnClass } from "@/components/admin/ui";
+import {
+  PageHeader,
+  Section,
+  btn,
+  StatusPill,
+  ErrorBanner,
+  Aviso,
+  Tabs,
+  SaveBar,
+  campoClass,
+  rotuloClass,
+} from "@/components/admin/ui";
 
 export const Route = createFileRoute("/admin/agentes")({
   component: AdminAgentes,
@@ -93,7 +105,7 @@ function AdminAgentes() {
 
   useEffect(() => { load(); }, [load]);
 
-  async function save(cat: Categoria, next: Agente) {
+  async function save(cat: Categoria, next: Agente): Promise<boolean> {
     setMsg(null);
     try {
       const sb = await getExternalBrowser();
@@ -117,22 +129,36 @@ function AdminAgentes() {
         if (error) throw error;
       }
       setMsg(`Agente de ${cat.nome} salvo.`);
-      load();
+      await load();
+      return true;
     } catch (e: unknown) {
       setMsg("Falha: " + (e instanceof Error ? e.message : "erro"));
+      return false;
     }
   }
 
   return (
     <div className="space-y-6">
       <PageHeader
-        eyebrow="Agentes IA"
-        title="Agentes redatores por editoria (Método DEL)"
-        subtitle='Cada editoria tem um redator especializado, treinado por camadas: Sintática, Semântica e Lexical. Camadas vazias caem no "Prompt livre".'
-        actions={<button onClick={load} className={refreshBtnClass()}>Atualizar</button>}
+        eyebrow="Redação"
+        title="Agentes IA"
+        subtitle="Um redator especializado por editoria, configurado pelo Método DEL (camadas Sintática, Semântica e Lexical)."
+        actions={
+          <button type="button" onClick={load} className={btn("secondary")}>
+            <RefreshCw className="h-4 w-4" aria-hidden /> Atualizar
+          </button>
+        }
       />
-      {msg && <p className="rounded border bg-muted p-2 text-xs">{msg}</p>}
-      {err && <p className="rounded border border-red-200 bg-red-50 p-3 text-sm text-red-700">{err}</p>}
+
+      <Section title="O que os agentes fazem">
+        <p className="text-sm text-slate-600">
+          Quando a IA escreve uma matéria, ela segue as instruções do agente da editoria: estrutura do texto, perguntas que precisa responder e vocabulário.
+          Camadas vazias são ignoradas e, se todas estiverem vazias, vale só o prompt livre.
+        </p>
+      </Section>
+
+      {msg && <Aviso tipo={msg.startsWith("Falha") ? "erro" : "ok"}>{msg}</Aviso>}
+      {err && <ErrorBanner>{err}</ErrorBanner>}
 
       <ul className="space-y-2">
         {cats.map((c) => {
@@ -149,17 +175,23 @@ function AdminAgentes() {
             Object.keys(a.matriz_editorial ?? {}).length,
           ].filter((n) => n > 0).length;
           return (
-            <li key={c.id} className="rounded-2xl border border-slate-200 bg-white shadow-sm">
-              <button onClick={() => setOpenId(open ? null : c.id)}
-                className="flex w-full items-center justify-between px-4 py-3 text-left hover:bg-accent/40">
-                <div className="flex items-center gap-3">
-                  <span className={`inline-block h-2 w-2 rounded-full ${a.ativo ? "bg-green-500" : "bg-gray-300"}`} />
-                  <span className="font-semibold">{c.nome}</span>
-                  <span className="text-xs text-muted-foreground">
-                    {agentes[c.id] ? `${camadas}/4 camadas DEL · prompt livre ${(a.instrucoes_base ?? "").length} chars` : "sem agente configurado"}
-                  </span>
+            <li key={c.id} className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
+              <button type="button" aria-expanded={open} onClick={() => setOpenId(open ? null : c.id)}
+                className="flex w-full items-center justify-between gap-3 px-4 py-3 text-left hover:bg-slate-50">
+                <div className="flex min-w-0 flex-wrap items-center gap-3">
+                  <span className="font-semibold text-[#12201E]">{c.nome}</span>
+                  {agentes[c.id] ? (
+                    <>
+                      <StatusPill status={a.ativo ? "ativo" : "inativo"} />
+                      <span className="text-xs text-slate-500">
+                        {camadas}/4 camadas DEL · prompt livre {(a.instrucoes_base ?? "").length} caracteres
+                      </span>
+                    </>
+                  ) : (
+                    <span className="text-xs text-slate-500">Sem agente configurado</span>
+                  )}
                 </div>
-                <span className="text-xs text-muted-foreground">{open ? "fechar" : "editar"}</span>
+                <ChevronDown className={`h-4 w-4 shrink-0 text-slate-500 transition ${open ? "rotate-180" : ""}`} aria-hidden />
               </button>
               {open && <AgenteEditor cat={c} inicial={a} onSave={save} />}
             </li>
@@ -172,11 +204,35 @@ function AdminAgentes() {
 
 type Tab = "sintatico" | "semantico" | "lexical" | "matriz" | "livre" | "exemplo";
 
+const preenchido = (v: unknown) => typeof v === "string" && v.trim() !== "";
+const contar = (o: object, chaves: string[]) =>
+  chaves.filter((k) => preenchido((o as Record<string, unknown>)[k])).length;
+
+const CHAVES_SINT = ["titulo_padrao", "subtitulo_padrao", "ordem_informacoes", "tamanho_paragrafos", "ritmo", "uso_listas", "uso_intertitulos"];
+const CHAVES_SEM = ["eixo_narrativo", "enfases", "perguntas_obrigatorias", "conflitos_tipicos"];
+const CHAVES_LEX = ["palavras_preferidas", "palavras_proibidas", "verbos_predominantes", "adjetivos_evitados", "expressoes_recorrentes", "tom", "formalidade", "nivel_tecnico"];
+const CHAVES_MAT = ["objetivo", "publico", "fontes_prioritarias", "fontes_proibidas", "indicadores", "cta"];
+
+function editavel(a: Agente) {
+  return JSON.stringify({
+    nome: a.nome, ativo: a.ativo, instrucoes_base: a.instrucoes_base ?? "", exemplo_texto: a.exemplo_texto ?? "",
+    s: a.dna_sintatico, se: a.dna_semantico, l: a.dna_lexical, m: a.matriz_editorial,
+  });
+}
+
 function AgenteEditor({ cat, inicial, onSave }: {
-  cat: Categoria; inicial: Agente; onSave: (cat: Categoria, next: Agente) => void;
+  cat: Categoria; inicial: Agente; onSave: (cat: Categoria, next: Agente) => Promise<boolean>;
 }) {
   const [state, setState] = useState<Agente>(inicial);
   const [tab, setTab] = useState<Tab>("sintatico");
+  const [salvando, setSalvando] = useState(false);
+
+  // Depois de salvar, a lista recarrega e o agente volta do banco.
+  // Chave estável: o agente padrão (sem registro) é recriado a cada render do pai.
+  const versao = `${inicial.id ?? "novo"}:${inicial.atualizado_em ?? ""}`;
+  useEffect(() => { setState(inicial); }, [versao]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  const sujo = useMemo(() => editavel(state) !== editavel(inicial), [state, inicial]);
 
   function upd<T>(patch: Partial<Agente>) { setState({ ...state, ...patch } as Agente & T); }
   function updSint(patch: Partial<DnaSintatico>) { setState({ ...state, dna_sintatico: { ...state.dna_sintatico, ...patch } }); }
@@ -184,37 +240,34 @@ function AgenteEditor({ cat, inicial, onSave }: {
   function updLex(patch: Partial<DnaLexical>) { setState({ ...state, dna_lexical: { ...state.dna_lexical, ...patch } }); }
   function updMat(patch: Partial<Matriz>) { setState({ ...state, matriz_editorial: { ...state.matriz_editorial, ...patch } }); }
 
-  const tabs: { id: Tab; label: string }[] = [
-    { id: "sintatico", label: "D — Sintático" },
-    { id: "semantico", label: "E — Semântico" },
-    { id: "lexical", label: "L — Lexical" },
-    { id: "matriz", label: "Matriz" },
-    { id: "livre", label: "Prompt livre" },
-    { id: "exemplo", label: "Exemplo" },
+  const tabs: { value: Tab; label: string; count: number }[] = [
+    { value: "sintatico", label: "D — Sintático", count: contar(state.dna_sintatico, CHAVES_SINT) },
+    { value: "semantico", label: "E — Semântico", count: contar(state.dna_semantico, CHAVES_SEM) },
+    { value: "lexical", label: "L — Lexical", count: contar(state.dna_lexical, CHAVES_LEX) },
+    { value: "matriz", label: "Matriz", count: contar(state.matriz_editorial, CHAVES_MAT) },
+    { value: "livre", label: "Prompt livre", count: preenchido(state.instrucoes_base) ? 1 : 0 },
+    { value: "exemplo", label: "Exemplo", count: preenchido(state.exemplo_texto) ? 1 : 0 },
   ];
 
+  async function salvar() {
+    setSalvando(true);
+    try { await onSave(cat, state); } finally { setSalvando(false); }
+  }
+
   return (
-    <div className="space-y-3 border-t px-4 py-4">
-      <div className="flex flex-wrap items-center gap-3">
-        <label className="flex-1 text-xs">
-          <span className="mb-1 block font-semibold">Nome do agente</span>
-          <input value={state.nome} onChange={(e) => upd({ nome: e.target.value })} className="w-full rounded border px-2 py-1 text-sm" />
+    <div className="space-y-4 border-t border-slate-100 px-4 pt-4">
+      <div className="flex flex-wrap items-end gap-4">
+        <label className={rotuloClass + " min-w-[16rem] flex-1"}>
+          Nome do agente
+          <input value={state.nome} onChange={(e) => upd({ nome: e.target.value })} className={campoClass} />
         </label>
-        <label className="flex items-center gap-2 text-xs">
+        <label className="flex items-center gap-2 pb-2 text-sm text-slate-700">
           <input type="checkbox" checked={state.ativo} onChange={(e) => upd({ ativo: e.target.checked })} />
           Ativo (aplicar ao gerar matéria)
         </label>
       </div>
 
-      <div className="flex flex-wrap gap-1 border-b">
-        {tabs.map((t) => (
-          <button key={t.id} onClick={() => setTab(t.id)}
-            className={`rounded-t px-3 py-1.5 text-xs ${tab === t.id ? "border border-b-white bg-background font-semibold" : "text-muted-foreground hover:bg-accent"}`}>
-            {t.label}
-          </button>
-        ))}
-      </div>
-
+      <Tabs value={tab} onChange={setTab} items={tabs} />
       {tab === "sintatico" && (
         <div className="grid gap-3 md:grid-cols-2">
           <TA label="Padrão de título" hint="Ex.: Verbo + personagem + consequência" v={state.dna_sintatico.titulo_padrao ?? ""} onC={(v) => updSint({ titulo_padrao: v })} />
@@ -262,11 +315,11 @@ function AgenteEditor({ cat, inicial, onSave }: {
 
       {tab === "livre" && (
         <label className="block text-xs">
-          <span className="mb-1 block font-semibold">Prompt livre (override / instruções complementares)</span>
+          <span className="mb-1 block font-semibold text-slate-600">Prompt livre (instruções complementares)</span>
           <textarea value={state.instrucoes_base} onChange={(e) => upd({ instrucoes_base: e.target.value })}
-            rows={16} className="w-full rounded border px-2 py-2 font-mono text-xs leading-relaxed"
+            rows={16} className={campoClass + " w-full font-mono text-xs leading-relaxed"}
             placeholder="Este bloco é acrescentado APÓS as 4 camadas DEL. Use para overrides finais ou instruções que não cabem nas camadas." />
-          <span className="mt-1 block text-[10px] text-muted-foreground">
+          <span className="mt-1 block text-[11px] text-slate-500">
             Retrocompatível: se as 4 camadas estiverem vazias, este texto sozinho vira o prompt do agente (comportamento atual).
           </span>
         </label>
@@ -274,22 +327,35 @@ function AgenteEditor({ cat, inicial, onSave }: {
 
       {tab === "exemplo" && (
         <label className="block text-xs">
-          <span className="mb-1 block font-semibold">Exemplo de lide (opcional — referência de tom)</span>
+          <span className="mb-1 block font-semibold text-slate-600">Exemplo de lide (opcional, referência de tom)</span>
           <textarea value={state.exemplo_texto ?? ""} onChange={(e) => upd({ exemplo_texto: e.target.value })}
-            rows={6} className="w-full rounded border px-2 py-2 text-xs leading-relaxed"
+            rows={6} className={campoClass + " w-full text-xs leading-relaxed"}
             placeholder="Ex.: A Câmara de Curitiba aprovou, nesta terça (12), por 24 votos a 9, o projeto que..." />
         </label>
       )}
 
-      <div className="flex items-center justify-between border-t pt-3">
-        <p className="text-[10px] text-muted-foreground">
-          {state.atualizado_em ? `Atualizado em ${new Date(state.atualizado_em).toLocaleString("pt-BR")}` : "Nunca salvo"}
-        </p>
-        <button
-          onClick={() => onSave(cat, state)}
-          className="rounded bg-[#E29F65] px-4 py-1.5 text-xs font-semibold text-white hover:bg-[#0055aa]"
-        >Salvar agente</button>
-      </div>
+      <SaveBar
+        aviso={
+          <span className="text-xs text-slate-500">
+            {sujo ? (
+              <span className="font-semibold text-[#B5651D]">Alterações não salvas</span>
+            ) : state.atualizado_em ? (
+              `Atualizado em ${new Date(state.atualizado_em).toLocaleString("pt-BR")}`
+            ) : (
+              "Nunca salvo"
+            )}
+          </span>
+        }
+      >
+        {sujo && (
+          <button type="button" onClick={() => setState(inicial)} className={btn("ghost")} disabled={salvando}>
+            Descartar
+          </button>
+        )}
+        <button type="button" onClick={salvar} className={btn("primary")} disabled={salvando || (!sujo && !!inicial.id)}>
+          {salvando ? "Salvando…" : "Salvar agente"}
+        </button>
+      </SaveBar>
     </div>
   );
 }
@@ -297,10 +363,10 @@ function AgenteEditor({ cat, inicial, onSave }: {
 function TA({ label, hint, v, onC, rows = 2 }: { label: string; hint?: string; v: string; onC: (v: string) => void; rows?: number }) {
   return (
     <label className="block text-xs">
-      <span className="mb-1 block font-semibold">{label}</span>
+      <span className="mb-1 block font-semibold text-slate-600">{label}</span>
       <textarea value={v} onChange={(e) => onC(e.target.value)} rows={rows}
-        className="w-full rounded border px-2 py-1.5 text-xs leading-relaxed" placeholder={hint} />
-      {hint && <span className="mt-0.5 block text-[10px] text-muted-foreground">{hint}</span>}
+        className={campoClass + " w-full text-xs leading-relaxed"} placeholder={hint} />
+      {hint && <span className="mt-0.5 block text-[11px] text-slate-500">{hint}</span>}
     </label>
   );
 }

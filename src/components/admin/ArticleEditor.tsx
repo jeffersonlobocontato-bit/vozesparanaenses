@@ -7,6 +7,10 @@ import {
   findMunicipioBySlug,
   type Municipio,
 } from "@/lib/parana-municipios";
+import { Plus, Save, X } from "lucide-react";
+import { Tabs, btn, campoClass } from "@/components/admin/ui";
+
+type Aba = "conteudo" | "estrutura" | "seo" | "fixacao";
 
 type PinScope = "estado" | "regiao" | "cidades";
 
@@ -260,392 +264,402 @@ export function ArticleEditor({ articleId, initial, onSaved, onCancel }: Props) 
     }
   }
 
-  const inputCls = "w-full rounded border bg-background px-2 py-1.5 text-sm";
-  const labelCls = "text-[11px] font-semibold uppercase tracking-wide text-muted-foreground";
+  const inputCls = `${campoClass} w-full`;
+  const labelCls = "text-[11px] font-semibold uppercase tracking-wide text-slate-500";
+  const ajudaCls = "mt-1 text-[11px] text-slate-500";
   const pinned = form.fixado_posicao !== "";
+  const [aba, setAba] = useState<Aba>("conteudo");
 
   return (
-    <div className="mt-3 space-y-3 rounded-lg border bg-muted/30 p-3">
-      <div>
-        <label className={labelCls}>Título</label>
-        <input className={inputCls} value={form.titulo} onChange={(e) => set("titulo", e.target.value)} />
-      </div>
-      <div>
-        <label className={labelCls}>Data e hora da publicação (horário de Brasília)</label>
-        <div className="flex flex-wrap items-center gap-2">
-          <input
-            type="datetime-local"
-            className={inputCls + " sm:max-w-[260px]"}
-            value={form.publicado_em}
-            onChange={(e) => set("publicado_em", e.target.value)}
-          />
-          <button
-            type="button"
-            onClick={() => set("publicado_em", isoParaCampoSP(new Date().toISOString()))}
-            className="rounded border px-2 py-1 text-xs font-semibold hover:bg-accent"
-          >
-            Agora
-          </button>
-          {form.publicado_em && (
-            <button
-              type="button"
-              onClick={() => set("publicado_em", "")}
-              className="rounded border px-2 py-1 text-xs font-semibold hover:bg-accent"
-            >
-              Limpar
-            </button>
-          )}
-        </div>
-        <p className="mt-1 text-[11px] text-muted-foreground">
-          Altera a data exibida na matéria e a ordem nas listagens.
-        </p>
-      </div>
-      <div>
-        <label className={labelCls}>Subtítulo</label>
-        <input className={inputCls} value={form.subtitulo} onChange={(e) => set("subtitulo", e.target.value)} />
-      </div>
-      <div>
-        <label className={labelCls}>Resumo</label>
-        <textarea className={inputCls} rows={2} value={form.resumo} onChange={(e) => set("resumo", e.target.value)} />
-      </div>
-      <div className="rounded-md border border-sky-200 bg-sky-50/60 p-3 dark:border-sky-500/40 dark:bg-sky-500/10">
-        <label className={labelCls}>TL;DR (resumo curto exibido no topo da matéria)</label>
-        <textarea
-          className={inputCls}
-          rows={3}
-          value={form.tldr}
-          onChange={(e) => set("tldr", e.target.value)}
-          placeholder="2–3 frases resumindo o essencial (aparece na caixa azul acima do corpo)."
-        />
-      </div>
-      <div className="rounded-md border bg-background p-3">
-        <label className={labelCls}>Fatos (5W1H) — bloco estruturado exibido na matéria</label>
-        <div className="mt-2 grid gap-2 sm:grid-cols-2">
-          {([
-            ["quem", "Quem"],
-            ["o_que", "O quê"],
-            ["quando", "Quando"],
-            ["onde", "Onde"],
-            ["por_que", "Por quê"],
-            ["como", "Como"],
-          ] as const).map(([k, label]) => (
-            <div key={k}>
-              <label className={labelCls}>{label}</label>
-              <textarea
-                className={inputCls}
-                rows={2}
-                value={form[k]}
-                onChange={(e) => set(k, e.target.value)}
-              />
-            </div>
-          ))}
-        </div>
-      </div>
-      <div className="rounded-md border bg-background p-3">
-        <div className="flex items-center justify-between">
-          <label className={labelCls}>FAQ (perguntas frequentes)</label>
-          <button
-            type="button"
-            onClick={() => setFaq((prev) => [...prev, { pergunta: "", resposta: "" }])}
-            className="rounded border px-2 py-0.5 text-xs hover:bg-accent"
-          >
-            + Adicionar
-          </button>
-        </div>
-        {faq.length === 0 && (
-          <p className="mt-1 text-[10px] text-muted-foreground">Nenhuma pergunta cadastrada.</p>
-        )}
-        <div className="mt-2 space-y-2">
-          {faq.map((f, i) => (
-            <div key={i} className="rounded border bg-muted/30 p-2">
-              <div className="flex items-center justify-between">
-                <span className="text-[10px] font-semibold text-muted-foreground">#{i + 1}</span>
-                <button
-                  type="button"
-                  onClick={() => setFaq((prev) => prev.filter((_, j) => j !== i))}
-                  className="text-[10px] text-red-600 hover:underline"
-                >
-                  Remover
-                </button>
+    <div className="space-y-4">
+      <Tabs<Aba>
+        value={aba}
+        onChange={setAba}
+        items={[
+          { value: "conteudo", label: "Conteúdo" },
+          { value: "estrutura", label: "Estrutura" },
+          { value: "seo", label: "SEO e classificação" },
+          { value: "fixacao", label: pinned ? "Fixação (ativa)" : "Fixação" },
+        ]}
+      />
+
+      {aba === "conteudo" && (
+        <div className="space-y-3">
+          <div>
+            <label className={labelCls}>Título</label>
+            <input className={inputCls} value={form.titulo} onChange={(e) => set("titulo", e.target.value)} />
+          </div>
+          <div>
+            <label className={labelCls}>Subtítulo</label>
+            <input className={inputCls} value={form.subtitulo} onChange={(e) => set("subtitulo", e.target.value)} />
+          </div>
+          <div>
+            <label className={labelCls}>Resumo</label>
+            <textarea className={inputCls} rows={2} value={form.resumo} onChange={(e) => set("resumo", e.target.value)} />
+          </div>
+          <div>
+            <div className="flex flex-wrap items-center justify-between gap-2">
+              <label className={labelCls}>Corpo da matéria</label>
+              <div className="flex gap-1">
+                <button type="button" title="Negrito" onClick={() => insertAtCursor("**")} className={`${btn("secondary", "sm")} font-bold`}>B</button>
+                <button type="button" title="Itálico" onClick={() => insertAtCursor("*")} className={`${btn("secondary", "sm")} italic`}>I</button>
+                <button type="button" title="Intertítulo" onClick={() => insertAtCursor("\n\n## ", "")} className={btn("secondary", "sm")}>H2</button>
+                <button type="button" title="Subintertítulo" onClick={() => insertAtCursor("\n\n### ", "")} className={btn("secondary", "sm")}>H3</button>
+                <button type="button" title="Link" onClick={() => insertAtCursor("[", "](https://)")} className={btn("secondary", "sm")}>Link</button>
+                <button type="button" title="Citação" onClick={() => insertAtCursor("\n\n> ", "")} className={btn("secondary", "sm")}>"</button>
               </div>
-              <input
-                className={inputCls}
-                placeholder="Pergunta"
-                value={f.pergunta}
-                onChange={(e) =>
-                  setFaq((prev) => prev.map((x, j) => (j === i ? { ...x, pergunta: e.target.value } : x)))
-                }
-              />
-              <textarea
-                className={`${inputCls} mt-1`}
-                rows={2}
-                placeholder="Resposta"
-                value={f.resposta}
-                onChange={(e) =>
-                  setFaq((prev) => prev.map((x, j) => (j === i ? { ...x, resposta: e.target.value } : x)))
-                }
-              />
             </div>
-          ))}
-        </div>
-      </div>
-      <div>
-        <div className="flex items-center justify-between">
-          <label className={labelCls}>Corpo da matéria</label>
-          <div className="flex gap-1 text-xs">
-            <button type="button" onClick={() => insertAtCursor("**")}
-              className="rounded border px-2 py-0.5 font-bold hover:bg-accent">B</button>
-            <button type="button" onClick={() => insertAtCursor("*")}
-              className="rounded border px-2 py-0.5 italic hover:bg-accent">I</button>
-            <button type="button" onClick={() => insertAtCursor("\n\n## ", "")}
-              className="rounded border px-2 py-0.5 hover:bg-accent">H2</button>
-            <button type="button" onClick={() => insertAtCursor("\n\n### ", "")}
-              className="rounded border px-2 py-0.5 hover:bg-accent">H3</button>
-            <button type="button" onClick={() => insertAtCursor("[", "](https://)")}
-              className="rounded border px-2 py-0.5 hover:bg-accent">Link</button>
-            <button type="button" onClick={() => insertAtCursor("\n\n> ", "")}
-              className="rounded border px-2 py-0.5 hover:bg-accent">"</button>
+            <textarea
+              id={`corpo-${articleId}`}
+              className={`${inputCls} mt-1 font-mono text-[13px] leading-relaxed`}
+              rows={18}
+              value={form.corpo}
+              onChange={(e) => set("corpo", e.target.value)}
+            />
+            <p className={ajudaCls}>
+              {form.corpo.length} caracteres · {form.corpo.trim().split(/\s+/).filter(Boolean).length} palavras
+            </p>
+          </div>
+          <div>
+            <label className={labelCls}>Data e hora da publicação (horário de Brasília)</label>
+            <div className="flex flex-wrap items-center gap-2">
+              <input
+                type="datetime-local"
+                className={inputCls + " sm:max-w-[260px]"}
+                value={form.publicado_em}
+                onChange={(e) => set("publicado_em", e.target.value)}
+              />
+              <button
+                type="button"
+                onClick={() => set("publicado_em", isoParaCampoSP(new Date().toISOString()))}
+                className={btn("secondary", "sm")}
+              >
+                Agora
+              </button>
+              {form.publicado_em && (
+                <button type="button" onClick={() => set("publicado_em", "")} className={btn("ghost", "sm")}>
+                  Limpar
+                </button>
+              )}
+            </div>
+            <p className={ajudaCls}>Altera a data exibida na matéria e a ordem nas listagens.</p>
           </div>
         </div>
-        <textarea
-          id={`corpo-${articleId}`}
-          className={`${inputCls} font-mono text-[13px] leading-relaxed`}
-          rows={18}
-          value={form.corpo}
-          onChange={(e) => set("corpo", e.target.value)}
-        />
-        <p className="mt-1 text-[10px] text-muted-foreground">
-          {form.corpo.length} caracteres · {form.corpo.trim().split(/\s+/).filter(Boolean).length} palavras
-        </p>
-      </div>
-      <div className="grid gap-3 sm:grid-cols-2">
-        <div>
-          <label className={labelCls}>Slug</label>
-          <input className={inputCls} value={form.slug} onChange={(e) => set("slug", e.target.value)} />
-        </div>
-        <div>
-          <label className={labelCls}>SEO title</label>
-          <input className={inputCls} value={form.seo_title} onChange={(e) => set("seo_title", e.target.value)} />
-        </div>
-      </div>
-      <div>
-        <label className={labelCls}>SEO description</label>
-        <textarea className={inputCls} rows={2} value={form.seo_description} onChange={(e) => set("seo_description", e.target.value)} />
-      </div>
-      <div className="grid gap-3 sm:grid-cols-2">
-        <div>
-          <label className={labelCls}>Região (taxonomia)</label>
-          <select
-            className={inputCls}
-            value={form.regiao_id}
-            onChange={(e) => set("regiao_id", e.target.value)}
-          >
-            {regioesFull.length === 0 && <option value="">Carregando…</option>}
-            {regioesFull.length > 0 && !form.regiao_id && (
-              <option value="">— Selecione uma região —</option>
-            )}
-            {regioesFull.map((r) => (
-              <option key={r.id} value={r.id}>{r.nome}</option>
-            ))}
-          </select>
-          <p className="mt-1 text-[10px] text-muted-foreground">
-            Corrija aqui se o scraping classificou a matéria na região errada.
-          </p>
-        </div>
-        <div>
-          <label className={labelCls}>Editoria</label>
-          <select
-            className={inputCls}
-            value={form.categoria_id}
-            onChange={(e) => set("categoria_id", e.target.value)}
-          >
-            <option value="">— Sem editoria —</option>
-            {categorias.map((c) => (
-              <option key={c.id} value={c.id}>{c.nome}</option>
-            ))}
-          </select>
-          <p className="mt-1 text-[10px] text-muted-foreground">
-            Ex.: Política, Economia, Esportes, Cultura.
-          </p>
-        </div>
-      </div>
-      <div>
-        <label className={labelCls}>Editor(a) responsável</label>
-        <input
-          className={inputCls}
-          placeholder="Ex.: Maria Silva"
-          value={form.editor_responsavel}
-          onChange={(e) => set("editor_responsavel", e.target.value)}
-        />
-        <p className="mt-1 text-[10px] text-muted-foreground">
-          Aparece como byline visível e como author Person no JSON-LD (E-E-A-T / Google News).
-        </p>
-      </div>
-      <div className="rounded-md border border-amber-300 bg-amber-50/60 p-3 dark:border-amber-500/40 dark:bg-amber-500/10">
-        <label className={labelCls}>📌 Fixar na home / região</label>
-        <select
-          className={inputCls}
-          value={form.fixado_posicao}
-          onChange={(e) => set("fixado_posicao", e.target.value)}
-        >
-          <option value="">Não fixar — ordem automática por data</option>
-          <option value="0">Manchete principal (capa)</option>
-          <option value="1">Destaque lateral · posição 1</option>
-          <option value="2">Destaque lateral · posição 2</option>
-          <option value="3">Destaque lateral · posição 3</option>
-          <option value="4">Destaque lateral · posição 4</option>
-        </select>
-        <p className="mt-1 text-[10px] text-muted-foreground">
-          Sem fixação, novas matérias publicadas assumem a manchete automaticamente.
-          Ao fixar, a matéria trava nessa posição até ser desfixada.
-        </p>
+      )}
 
-        {pinned && (
-          <div className="mt-3 space-y-2 border-t border-amber-300/60 pt-3 dark:border-amber-500/30">
-            <label className={labelCls}>🎯 Aparecer para</label>
-            <div className="flex flex-wrap gap-3 text-xs">
-              {(["estado", "regiao", "cidades"] as PinScope[]).map((opt) => (
-                <label key={opt} className="flex cursor-pointer items-center gap-1.5">
-                  <input
-                    type="radio"
-                    name={`escopo-${articleId}`}
-                    checked={escopo === opt}
-                    onChange={() => setEscopo(opt)}
+      {aba === "estrutura" && (
+        <div className="space-y-3">
+          <div>
+            <label className={labelCls}>TL;DR (resumo curto exibido no topo da matéria)</label>
+            <textarea
+              className={inputCls}
+              rows={3}
+              value={form.tldr}
+              onChange={(e) => set("tldr", e.target.value)}
+              placeholder="2 a 3 frases com o essencial (aparece na caixa de destaque acima do corpo)."
+            />
+          </div>
+          <div className="rounded-xl border border-slate-200 p-3">
+            <label className={labelCls}>Fatos (5W1H): bloco estruturado exibido na matéria</label>
+            <div className="mt-2 grid gap-2 sm:grid-cols-2">
+              {([
+                ["quem", "Quem"],
+                ["o_que", "O quê"],
+                ["quando", "Quando"],
+                ["onde", "Onde"],
+                ["por_que", "Por quê"],
+                ["como", "Como"],
+              ] as const).map(([k, label]) => (
+                <div key={k}>
+                  <label className={labelCls}>{label}</label>
+                  <textarea
+                    className={inputCls}
+                    rows={2}
+                    value={form[k]}
+                    onChange={(e) => set(k, e.target.value)}
                   />
-                  <span>
-                    {opt === "estado" && "Todo o estado"}
-                    {opt === "regiao" && "Regiões específicas"}
-                    {opt === "cidades" && "Cidades específicas"}
-                  </span>
-                </label>
+                </div>
               ))}
             </div>
-
-            {escopo === "regiao" && (
-              <div className="rounded border bg-background p-2">
-                <p className="mb-1 text-[10px] text-muted-foreground">
-                  Selecione uma ou mais regiões editoriais em que essa fixação deve aparecer:
-                </p>
-                <div className="flex flex-wrap gap-1.5">
-                  {availableRegions.length === 0 && (
-                    <span className="text-[10px] text-muted-foreground">
-                      Carregando regiões…
-                    </span>
-                  )}
-                  {availableRegions.map((r) => {
-                    const on = regioes.includes(r.slug);
-                    return (
-                      <button
-                        key={r.slug}
-                        type="button"
-                        onClick={() => toggleRegion(r.slug)}
-                        className={`rounded-full border px-2 py-0.5 text-[11px] font-medium transition-colors ${
-                          on
-                            ? "border-[#12201E] bg-[#12201E] text-white"
-                            : "border-slate-300 bg-white text-slate-700 hover:bg-accent"
-                        }`}
-                      >
-                        {r.nome}
-                      </button>
-                    );
-                  })}
-                </div>
-              </div>
-            )}
-
-            {escopo === "cidades" && (
-              <div className="rounded border bg-background p-2">
-                <p className="mb-1 text-[10px] text-muted-foreground">
-                  Digite cidades do Paraná separadas por vírgula
-                  (ex.: <em>Cascavel, Toledo, Santa Tereza do Oeste, Medianeira</em>).
-                  Pressione Enter para adicionar.
-                </p>
-                <div className="flex flex-wrap items-center gap-1.5 rounded border bg-white px-2 py-1.5">
-                  {cidades.map((slug) => {
-                    const m = findMunicipioBySlug(slug);
-                    return (
-                      <span
-                        key={slug}
-                        className="inline-flex items-center gap-1 rounded-full bg-[#12201E] px-2 py-0.5 text-[11px] font-medium text-white"
-                      >
-                        {m?.name ?? slug}
-                        <button
-                          type="button"
-                          onClick={() => removeCity(slug)}
-                          className="ml-0.5 text-white/80 hover:text-white"
-                          aria-label={`Remover ${m?.name ?? slug}`}
-                        >
-                          ×
-                        </button>
-                      </span>
-                    );
-                  })}
-                  <input
-                    list={`munic-${articleId}`}
-                    value={cityInput}
-                    onChange={(e) => setCityInput(e.target.value)}
-                    onKeyDown={(e) => {
-                      if (e.key === "Enter" || e.key === ",") {
-                        e.preventDefault();
-                        addCitiesFromInput();
-                      } else if (
-                        e.key === "Backspace" &&
-                        !cityInput &&
-                        cidades.length > 0
-                      ) {
-                        setCidades((prev) => prev.slice(0, -1));
-                      }
-                    }}
-                    onBlur={addCitiesFromInput}
-                    placeholder={cidades.length === 0 ? "Cascavel, Toledo, …" : ""}
-                    className="min-w-[140px] flex-1 bg-transparent px-1 py-0.5 text-xs outline-none"
-                  />
-                  <datalist id={`munic-${articleId}`}>
-                    {PARANA_MUNICIPIOS.slice(0, 399).map((m) => (
-                      <option key={m.slug} value={m.name} />
-                    ))}
-                  </datalist>
-                </div>
-                {suggestions.length > 0 && (
-                  <div className="mt-1 flex flex-wrap gap-1">
-                    {suggestions.map((s) => (
-                      <button
-                        key={s.slug}
-                        type="button"
-                        onClick={() => {
-                          setCidades((prev) =>
-                            prev.includes(s.slug) ? prev : [...prev, s.slug],
-                          );
-                          setCityInput("");
-                        }}
-                        className="rounded border border-slate-200 bg-white px-2 py-0.5 text-[11px] hover:bg-accent"
-                      >
-                        + {s.name}
-                      </button>
-                    ))}
-                  </div>
-                )}
-                {cityMsg && (
-                  <p className="mt-1 text-[10px] text-amber-700 dark:text-amber-400">{cityMsg}</p>
-                )}
-                <p className="mt-1 text-[10px] text-muted-foreground">
-                  {cidades.length} cidade(s) selecionada(s). Quem estiver fora dessas cidades verá a home/região normal, sem essa fixação.
-                </p>
-              </div>
-            )}
           </div>
-        )}
-      </div>
-      <div className="sticky bottom-2 z-20 flex flex-wrap items-center gap-2 rounded-lg border bg-background/95 p-2 shadow-md backdrop-blur">
-        <button onClick={save} disabled={saving}
-          className="rounded bg-[#12201E] px-3 py-1.5 text-xs font-semibold text-white hover:bg-[#0d2f52] disabled:opacity-60">
-          {saving ? "Salvando…" : "💾 Salvar alterações"}
+          <div className="rounded-xl border border-slate-200 p-3">
+            <div className="flex items-center justify-between">
+              <label className={labelCls}>FAQ (perguntas frequentes)</label>
+              <button
+                type="button"
+                onClick={() => setFaq((prev) => [...prev, { pergunta: "", resposta: "" }])}
+                className={btn("secondary", "sm")}
+              >
+                <Plus className="h-3.5 w-3.5" /> Adicionar pergunta
+              </button>
+            </div>
+            {faq.length === 0 && <p className={ajudaCls}>Nenhuma pergunta cadastrada.</p>}
+            <div className="mt-2 space-y-2">
+              {faq.map((f, i) => (
+                <div key={i} className="rounded-lg border border-slate-200 bg-slate-50 p-2">
+                  <div className="flex items-center justify-between">
+                    <span className="text-[11px] font-semibold text-slate-500">Pergunta {i + 1}</span>
+                    <button
+                      type="button"
+                      onClick={() => setFaq((prev) => prev.filter((_, j) => j !== i))}
+                      className={btn("ghost", "sm")}
+                    >
+                      Remover
+                    </button>
+                  </div>
+                  <input
+                    className={inputCls}
+                    placeholder="Pergunta"
+                    value={f.pergunta}
+                    onChange={(e) =>
+                      setFaq((prev) => prev.map((x, j) => (j === i ? { ...x, pergunta: e.target.value } : x)))
+                    }
+                  />
+                  <textarea
+                    className={`${inputCls} mt-1`}
+                    rows={2}
+                    placeholder="Resposta"
+                    value={f.resposta}
+                    onChange={(e) =>
+                      setFaq((prev) => prev.map((x, j) => (j === i ? { ...x, resposta: e.target.value } : x)))
+                    }
+                  />
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {aba === "seo" && (
+        <div className="space-y-3">
+          <div className="grid gap-3 sm:grid-cols-2">
+            <div>
+              <label className={labelCls}>Slug</label>
+              <input className={inputCls} value={form.slug} onChange={(e) => set("slug", e.target.value)} />
+            </div>
+            <div>
+              <label className={labelCls}>Título para buscadores (SEO)</label>
+              <input className={inputCls} value={form.seo_title} onChange={(e) => set("seo_title", e.target.value)} />
+            </div>
+          </div>
+          <div>
+            <label className={labelCls}>Descrição para buscadores (SEO)</label>
+            <textarea className={inputCls} rows={2} value={form.seo_description} onChange={(e) => set("seo_description", e.target.value)} />
+          </div>
+          <div className="grid gap-3 sm:grid-cols-2">
+            <div>
+              <label className={labelCls}>Região (taxonomia)</label>
+              <select
+                className={inputCls}
+                value={form.regiao_id}
+                onChange={(e) => set("regiao_id", e.target.value)}
+              >
+                {regioesFull.length === 0 && <option value="">Carregando…</option>}
+                {regioesFull.length > 0 && !form.regiao_id && (
+                  <option value="">Selecione uma região</option>
+                )}
+                {regioesFull.map((r) => (
+                  <option key={r.id} value={r.id}>{r.nome}</option>
+                ))}
+              </select>
+              <p className={ajudaCls}>Corrija aqui se a coleta classificou a matéria na região errada.</p>
+            </div>
+            <div>
+              <label className={labelCls}>Editoria</label>
+              <select
+                className={inputCls}
+                value={form.categoria_id}
+                onChange={(e) => set("categoria_id", e.target.value)}
+              >
+                <option value="">Sem editoria</option>
+                {categorias.map((c) => (
+                  <option key={c.id} value={c.id}>{c.nome}</option>
+                ))}
+              </select>
+              <p className={ajudaCls}>Ex.: Política, Economia, Esportes, Cultura.</p>
+            </div>
+          </div>
+          <div>
+            <label className={labelCls}>Editor(a) responsável</label>
+            <input
+              className={inputCls}
+              placeholder="Ex.: Maria Silva"
+              value={form.editor_responsavel}
+              onChange={(e) => set("editor_responsavel", e.target.value)}
+            />
+            <p className={ajudaCls}>
+              Aparece como assinatura na matéria e como autor nos dados estruturados (Google News).
+            </p>
+          </div>
+        </div>
+      )}
+
+      {aba === "fixacao" && (
+        <div className="space-y-3">
+          <div>
+            <label className={labelCls}>Fixar na home ou na região</label>
+            <select
+              className={inputCls}
+              value={form.fixado_posicao}
+              onChange={(e) => set("fixado_posicao", e.target.value)}
+            >
+              <option value="">Não fixar: ordem automática por data</option>
+              <option value="0">Manchete principal (capa)</option>
+              <option value="1">Destaque lateral · posição 1</option>
+              <option value="2">Destaque lateral · posição 2</option>
+              <option value="3">Destaque lateral · posição 3</option>
+              <option value="4">Destaque lateral · posição 4</option>
+            </select>
+            <p className={ajudaCls}>
+              Sem fixação, novas matérias publicadas assumem a manchete automaticamente.
+              Ao fixar, a matéria fica nessa posição até ser desfixada.
+            </p>
+          </div>
+
+          {pinned && (
+            <div className="space-y-2 rounded-xl border border-slate-200 p-3">
+              <label className={labelCls}>Aparecer para</label>
+              <div className="flex flex-wrap gap-3 text-xs">
+                {(["estado", "regiao", "cidades"] as PinScope[]).map((opt) => (
+                  <label key={opt} className="flex cursor-pointer items-center gap-1.5">
+                    <input
+                      type="radio"
+                      name={`escopo-${articleId}`}
+                      checked={escopo === opt}
+                      onChange={() => setEscopo(opt)}
+                    />
+                    <span>
+                      {opt === "estado" && "Todo o estado"}
+                      {opt === "regiao" && "Regiões específicas"}
+                      {opt === "cidades" && "Cidades específicas"}
+                    </span>
+                  </label>
+                ))}
+              </div>
+
+              {escopo === "regiao" && (
+                <div className="rounded-lg border border-slate-200 bg-slate-50 p-2">
+                  <p className="mb-1 text-[11px] text-slate-500">
+                    Selecione uma ou mais regiões em que essa fixação deve aparecer:
+                  </p>
+                  <div className="flex flex-wrap gap-1.5">
+                    {availableRegions.length === 0 && (
+                      <span className="text-[11px] text-slate-500">Carregando regiões…</span>
+                    )}
+                    {availableRegions.map((r) => {
+                      const on = regioes.includes(r.slug);
+                      return (
+                        <button
+                          key={r.slug}
+                          type="button"
+                          onClick={() => toggleRegion(r.slug)}
+                          className={`rounded-full border px-2 py-0.5 text-[11px] font-medium transition-colors ${
+                            on
+                              ? "border-[#12201E] bg-[#12201E] text-white"
+                              : "border-slate-300 bg-white text-slate-700 hover:border-[#12201E]"
+                          }`}
+                        >
+                          {r.nome}
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
+
+              {escopo === "cidades" && (
+                <div className="rounded-lg border border-slate-200 bg-slate-50 p-2">
+                  <p className="mb-1 text-[11px] text-slate-500">
+                    Digite cidades do Paraná separadas por vírgula
+                    (ex.: <em>Cascavel, Toledo, Santa Tereza do Oeste, Medianeira</em>).
+                    Pressione Enter para adicionar.
+                  </p>
+                  <div className="flex flex-wrap items-center gap-1.5 rounded-lg border border-slate-300 bg-white px-2 py-1.5">
+                    {cidades.map((slug) => {
+                      const m = findMunicipioBySlug(slug);
+                      return (
+                        <span
+                          key={slug}
+                          className="inline-flex items-center gap-1 rounded-full bg-[#12201E] px-2 py-0.5 text-[11px] font-medium text-white"
+                        >
+                          {m?.name ?? slug}
+                          <button
+                            type="button"
+                            onClick={() => removeCity(slug)}
+                            className="ml-0.5 text-white/80 hover:text-white"
+                            aria-label={`Remover ${m?.name ?? slug}`}
+                          >
+                            <X className="h-3 w-3" />
+                          </button>
+                        </span>
+                      );
+                    })}
+                    <input
+                      list={`munic-${articleId}`}
+                      value={cityInput}
+                      onChange={(e) => setCityInput(e.target.value)}
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter" || e.key === ",") {
+                          e.preventDefault();
+                          addCitiesFromInput();
+                        } else if (
+                          e.key === "Backspace" &&
+                          !cityInput &&
+                          cidades.length > 0
+                        ) {
+                          setCidades((prev) => prev.slice(0, -1));
+                        }
+                      }}
+                      onBlur={addCitiesFromInput}
+                      placeholder={cidades.length === 0 ? "Cascavel, Toledo, …" : ""}
+                      className="min-w-[140px] flex-1 bg-transparent px-1 py-0.5 text-xs outline-none"
+                    />
+                    <datalist id={`munic-${articleId}`}>
+                      {PARANA_MUNICIPIOS.slice(0, 399).map((m) => (
+                        <option key={m.slug} value={m.name} />
+                      ))}
+                    </datalist>
+                  </div>
+                  {suggestions.length > 0 && (
+                    <div className="mt-1 flex flex-wrap gap-1">
+                      {suggestions.map((s) => (
+                        <button
+                          key={s.slug}
+                          type="button"
+                          onClick={() => {
+                            setCidades((prev) =>
+                              prev.includes(s.slug) ? prev : [...prev, s.slug],
+                            );
+                            setCityInput("");
+                          }}
+                          className={btn("secondary", "sm")}
+                        >
+                          <Plus className="h-3 w-3" /> {s.name}
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                  {cityMsg && <p className="mt-1 text-[11px] text-amber-700">{cityMsg}</p>}
+                  <p className="mt-1 text-[11px] text-slate-500">
+                    {cidades.length} cidade(s) selecionada(s). Quem estiver fora dessas cidades verá a home ou a região normal, sem essa fixação.
+                  </p>
+                </div>
+              )}
+            </div>
+          )}
+        </div>
+      )}
+
+      <div className="sticky bottom-2 z-20 flex flex-wrap items-center gap-2 rounded-xl border border-slate-200 bg-white/95 p-2 shadow-md backdrop-blur">
+        <button onClick={save} disabled={saving} className={btn("primary", "sm")}>
+          <Save className="h-3.5 w-3.5" />
+          {saving ? "Salvando…" : "Salvar alterações"}
         </button>
-        <button onClick={onCancel} disabled={saving}
-          className="rounded border px-3 py-1.5 text-xs hover:bg-accent disabled:opacity-60">
-          Cancelar
+        <button onClick={onCancel} disabled={saving} className={btn("ghost", "sm")}>
+          Fechar sem salvar
         </button>
-        {msg && <span className="text-xs text-muted-foreground">{msg}</span>}
+        {msg && <span className={`text-xs ${msg.startsWith("Falha") ? "text-red-700" : "text-emerald-700"}`}>{msg}</span>}
       </div>
     </div>
   );

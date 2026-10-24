@@ -1,7 +1,19 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useCallback, useEffect, useState } from "react";
 import { getExternalBrowser } from "@/lib/external-supabase-browser";
-import { PageHeader } from "@/components/admin/ui";
+import {
+  PageHeader,
+  Section,
+  Tabs,
+  SaveBar,
+  StatusPill,
+  ConfirmButton,
+  EmptyState,
+  Aviso,
+  btn,
+  campoClass,
+  rotuloClass,
+} from "@/components/admin/ui";
 
 export const Route = createFileRoute("/admin/colunas")({
   component: AdminColunas,
@@ -34,6 +46,7 @@ function novaNota(ordem: number): Nota {
 }
 
 function AdminColunas() {
+  const [aba, setAba] = useState<"edicao" | "comentarios" | "identidade">("edicao");
   const [colunaId, setColunaId] = useState<string | null>(null);
   const [edicoes, setEdicoes] = useState<Edicao[]>([]);
   const [edicaoAtivaId, setEdicaoAtivaId] = useState<string | null>(null);
@@ -243,150 +256,190 @@ function AdminColunas() {
     }
   }
 
-  if (carregando) return <p className="p-6 text-sm text-muted-foreground">Carregando…</p>;
+  if (carregando) return <p className="p-6 text-sm text-slate-500">Carregando…</p>;
+
+  const msgErro = !!msg && /^(Erro|Preencha|Toda nota|Coluna não)/.test(msg);
+  const edicaoAtiva = edicoes.find((e) => e.id === edicaoAtivaId) ?? null;
 
   return (
     <div className="space-y-6">
       <PageHeader
         eyebrow="Colunas"
-        title="Vozes Políticas"
-        subtitle="Cada publicação vira uma edição — a mais recente publicada aparece na home; as demais ficam no arquivo."
+        title="Colunas"
+        subtitle="Editando a coluna Vozes Políticas. Cada publicação vira uma edição: a mais recente publicada aparece na home; as demais ficam no arquivo."
+        actions={<button type="button" onClick={novaEdicaoEmBranco} className={btn("primary")}>Nova edição</button>}
       />
-
-      {msg && <p className="rounded border bg-muted p-2 text-xs">{msg}</p>}
-
-      {/* Identidade da coluna */}
-      <div className="flex flex-wrap items-center gap-4 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
-        <span className="h-16 w-16 shrink-0 overflow-hidden rounded-full bg-slate-200">
-          {fotoColunista && <img src={fotoColunista} alt="" className="h-full w-full object-cover" />}
-        </span>
-        <div className="text-sm">
-          <p className="font-semibold text-slate-800">Foto / avatar da coluna</p>
-          <p className="mb-2 text-xs text-muted-foreground">Aparece no módulo de colunas da home, na lateral e no topo da coluna aberta.</p>
-          <input type="file" accept="image/*" disabled={uploadAvatarBusy}
-            onChange={(e) => e.target.files?.[0] && onUploadAvatar(e.target.files[0])} />
-          {fotoColunista && (
-            <button onClick={removerAvatar} className="ml-2 rounded border px-2 py-1 text-xs">Remover</button>
-          )}
-        </div>
-      </div>
 
       <div className="grid gap-6 lg:grid-cols-[280px_1fr]">
         {/* Lista de edições */}
-        <div className="space-y-2">
-          <button
-            onClick={novaEdicaoEmBranco}
-            className="w-full rounded-lg bg-[#E29F65] px-3 py-2 text-sm font-semibold text-white"
-          >
-            + Nova edição
-          </button>
-          {edicoes.map((e) => (
-            <button
-              key={e.id}
-              onClick={() => abrirEdicao(e.id)}
-              className={`block w-full rounded-lg border p-2 text-left text-xs ${edicaoAtivaId === e.id ? "border-[#E29F65] bg-[#E29F65]/5" : "border-slate-200 bg-white"}`}
-            >
-              <span className={`mb-1 inline-block rounded px-1.5 py-0.5 text-[10px] font-bold uppercase ${e.status === "publicado" ? "bg-emerald-100 text-emerald-800" : "bg-amber-100 text-amber-800"}`}>
-                {e.status}
-              </span>
-              <p className="line-clamp-2 font-medium text-slate-700">{e.titulo}</p>
-            </button>
-          ))}
-          {edicoes.length === 0 && <p className="text-xs text-muted-foreground">Nenhuma edição ainda.</p>}
-        </div>
+        <Section title="Edições" subtitle="Vozes Políticas" padded={false} className="self-start">
+          <div className="space-y-2 p-3">
+            {edicoes.map((e) => (
+              <button
+                key={e.id}
+                type="button"
+                onClick={() => abrirEdicao(e.id)}
+                className={`block w-full rounded-lg border p-2.5 text-left text-xs transition ${edicaoAtivaId === e.id ? "border-[#E29F65] bg-[#E29F65]/10" : "border-slate-200 bg-white hover:border-[#12201E]"}`}
+              >
+                <StatusPill status={e.status} label={e.status === "publicado" ? "Publicada" : "Rascunho"} />
+                <p className="mt-1 line-clamp-2 font-medium text-slate-700">{e.titulo}</p>
+              </button>
+            ))}
+            {edicoes.length === 0 && <p className="p-2 text-xs text-slate-500">Nenhuma edição ainda.</p>}
+          </div>
+        </Section>
 
         {/* Editor */}
-        <div className="space-y-5 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
-          <label className="block text-sm">
-            <span className="mb-1 block font-medium">Título da edição</span>
-            <input value={titulo} onChange={(e) => setTitulo(e.target.value)} className="w-full rounded border px-3 py-2" />
-          </label>
-          <label className="block text-sm">
-            <span className="mb-1 block font-medium">Subtítulo / linha fina</span>
-            <textarea value={subtitulo} onChange={(e) => setSubtitulo(e.target.value)} rows={2} className="w-full rounded border px-3 py-2" />
-          </label>
-          <div className="text-sm">
-            <span className="mb-1 block font-medium">Imagem principal</span>
-            {imagemPrincipal && <img src={imagemPrincipal} alt="" className="mb-2 h-32 w-full max-w-sm rounded object-cover" />}
-            <input type="file" accept="image/*" disabled={uploadPrincipalBusy}
-              onChange={(e) => e.target.files?.[0] && onUploadPrincipal(e.target.files[0])} />
+        <div className="min-w-0 space-y-4">
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <p className="text-sm text-slate-600">
+              {edicaoAtiva ? <>Editando: <strong className="text-[#12201E]">{edicaoAtiva.titulo}</strong></> : "Nova edição (ainda não salva)"}
+            </p>
+            <Tabs
+              value={aba}
+              onChange={setAba}
+              items={[
+                { value: "edicao", label: "Edição" },
+                { value: "comentarios", label: "Comentários", count: edicaoAtivaId ? comentarios.length : undefined },
+                { value: "identidade", label: "Identidade" },
+              ]}
+            />
           </div>
 
-          <div className="border-t pt-4">
-            <p className="mb-3 text-sm font-semibold">Notas ({notas.length})</p>
-            <div className="space-y-4">
-              {notas.map((n, i) => (
-                <div key={i} className="rounded-xl border border-slate-200 p-3">
-                  <div className="mb-2 flex items-center justify-between">
-                    <span className="text-xs font-bold text-muted-foreground">Nota {i + 1}</span>
-                    <div className="flex gap-1">
-                      <button onClick={() => moverNota(i, -1)} className="rounded border px-2 text-xs">↑</button>
-                      <button onClick={() => moverNota(i, 1)} className="rounded border px-2 text-xs">↓</button>
-                      <button onClick={() => removeNota(i)} className="rounded border border-red-300 px-2 text-xs text-red-600">remover</button>
-                    </div>
+          {aba === "edicao" && (
+            <>
+              <Section title="Capa da edição">
+                <div className="space-y-4">
+                  <label className={rotuloClass}>
+                    Título da edição
+                    <input value={titulo} onChange={(e) => setTitulo(e.target.value)} className={campoClass} />
+                  </label>
+                  <label className={rotuloClass}>
+                    Subtítulo / linha fina
+                    <textarea value={subtitulo} onChange={(e) => setSubtitulo(e.target.value)} rows={2} className={campoClass} />
+                  </label>
+                  <div className={rotuloClass}>
+                    Imagem principal
+                    {imagemPrincipal && <img src={imagemPrincipal} alt="" className="h-32 w-full max-w-sm rounded-lg object-cover" />}
+                    <input type="file" accept="image/*" disabled={uploadPrincipalBusy} className="text-sm font-normal"
+                      onChange={(e) => e.target.files?.[0] && onUploadPrincipal(e.target.files[0])} />
+                    {uploadPrincipalBusy && <span className="font-normal text-slate-500">Enviando imagem…</span>}
                   </div>
-                  <input
-                    value={n.titulo_gatilho}
-                    onChange={(e) => setNotas((ns) => ns.map((x, j) => (j === i ? { ...x, titulo_gatilho: e.target.value } : x)))}
-                    placeholder="Título-gatilho"
-                    className="mb-2 w-full rounded border px-3 py-1.5 text-sm font-semibold"
-                  />
-                  <textarea
-                    value={n.corpo}
-                    onChange={(e) => setNotas((ns) => ns.map((x, j) => (j === i ? { ...x, corpo: e.target.value } : x)))}
-                    rows={4}
-                    placeholder="Corpo da nota"
-                    className="mb-2 w-full rounded border px-3 py-2 text-sm"
-                  />
-                  {n.imagem_url && <img src={n.imagem_url} alt="" className="mb-2 h-24 w-full max-w-xs rounded object-cover" />}
-                  <input type="file" accept="image/*" disabled={n._uploading}
-                    onChange={(e) => e.target.files?.[0] && onUploadNota(i, e.target.files[0])} />
                 </div>
-              ))}
-            </div>
-            <button onClick={addNota} className="mt-3 rounded border px-3 py-1.5 text-sm">+ Adicionar nota</button>
-          </div>
+              </Section>
 
-          <label className="block text-sm">
-            <span className="mb-1 block font-medium">Pergunta de engajamento (opcional)</span>
-            <input value={perguntaEngajamento} onChange={(e) => setPerguntaEngajamento(e.target.value)} className="w-full rounded border px-3 py-2" />
-          </label>
-
-          <div className="flex gap-2 border-t pt-4">
-            <button onClick={() => salvar(false)} disabled={salvando} className="rounded border px-4 py-2 text-sm font-semibold disabled:opacity-60">
-              {salvando ? "Salvando…" : "Salvar rascunho"}
-            </button>
-            <button onClick={() => salvar(true)} disabled={salvando} className="rounded bg-[#E29F65] px-4 py-2 text-sm font-semibold text-white disabled:opacity-60">
-              {salvando ? "Publicando…" : "Publicar (vira a edição atual da home)"}
-            </button>
-          </div>
-
-          {edicaoAtivaId && (
-            <div className="border-t pt-4">
-              <p className="mb-2 text-sm font-semibold">Comentários dos leitores ({comentarios.length})</p>
-              <div className="space-y-2">
-                {comentarios.map((c) => (
-                  <div key={c.id} className="rounded-lg border border-slate-200 p-2 text-xs">
-                    <div className="flex items-center justify-between gap-2">
-                      <span className="font-semibold text-slate-700">
-                        {c.nome} · {new Date(c.criado_em).toLocaleString("pt-BR")}
-                        {!c.aprovado && <span className="ml-2 rounded bg-amber-100 px-1 py-0.5 text-amber-800">oculto</span>}
-                      </span>
-                      <span className="flex gap-1">
-                        <button onClick={() => moderarComentario(c.id, c.aprovado ? "ocultar" : "mostrar")} className="rounded border px-2 py-0.5">
-                          {c.aprovado ? "Ocultar" : "Mostrar"}
-                        </button>
-                        <button onClick={() => moderarComentario(c.id, "excluir")} className="rounded border border-red-200 px-2 py-0.5 text-red-600">
-                          Excluir
-                        </button>
-                      </span>
+              <Section
+                title={`Notas (${notas.length})`}
+                aside={<button type="button" onClick={addNota} className={btn("secondary", "sm")}>Adicionar nota</button>}
+              >
+                <div className="space-y-4">
+                  {notas.map((n, i) => (
+                    <div key={i} className="rounded-xl border border-slate-200 p-3">
+                      <div className="mb-2 flex items-center justify-between gap-2">
+                        <span className="text-xs font-bold text-slate-500">Nota {i + 1}</span>
+                        <div className="flex flex-wrap gap-1">
+                          <button type="button" onClick={() => moverNota(i, -1)} disabled={i === 0} className={btn("ghost", "sm")} title="Subir nota">Subir</button>
+                          <button type="button" onClick={() => moverNota(i, 1)} disabled={i === notas.length - 1} className={btn("ghost", "sm")} title="Descer nota">Descer</button>
+                          <ConfirmButton onConfirm={() => removeNota(i)} confirmLabel="Remover nota">Remover</ConfirmButton>
+                        </div>
+                      </div>
+                      <input
+                        value={n.titulo_gatilho}
+                        onChange={(e) => setNotas((ns) => ns.map((x, j) => (j === i ? { ...x, titulo_gatilho: e.target.value } : x)))}
+                        placeholder="Título-gatilho"
+                        className={`${campoClass} mb-2 w-full font-semibold`}
+                      />
+                      <textarea
+                        value={n.corpo}
+                        onChange={(e) => setNotas((ns) => ns.map((x, j) => (j === i ? { ...x, corpo: e.target.value } : x)))}
+                        rows={4}
+                        placeholder="Corpo da nota"
+                        className={`${campoClass} mb-2 w-full`}
+                      />
+                      {n.imagem_url && <img src={n.imagem_url} alt="" className="mb-2 h-24 w-full max-w-xs rounded-lg object-cover" />}
+                      <input type="file" accept="image/*" disabled={n._uploading} className="text-sm"
+                        onChange={(e) => e.target.files?.[0] && onUploadNota(i, e.target.files[0])} />
+                      {n._uploading && <span className="ml-2 text-xs text-slate-500">Enviando imagem…</span>}
                     </div>
-                    <p className="mt-1 whitespace-pre-line text-slate-600">{c.comentario}</p>
-                  </div>
-                ))}
-                {comentarios.length === 0 && <p className="text-xs text-muted-foreground">Nenhum comentário nesta edição.</p>}
+                  ))}
+                </div>
+              </Section>
+
+              <Section title="Engajamento">
+                <label className={rotuloClass}>
+                  Pergunta de engajamento (opcional)
+                  <input value={perguntaEngajamento} onChange={(e) => setPerguntaEngajamento(e.target.value)} className={campoClass} />
+                </label>
+              </Section>
+
+              <SaveBar aviso={msg ? <Aviso tipo={msgErro ? "erro" : "ok"}>{msg}</Aviso> : undefined}>
+                <button type="button" onClick={() => salvar(false)} disabled={salvando} className={btn("secondary")}>
+                  {salvando ? "Salvando…" : "Salvar rascunho"}
+                </button>
+                <ConfirmButton
+                  variante="primary"
+                  tamanho="md"
+                  disabled={salvando}
+                  confirmLabel="Publicar na home"
+                  onConfirm={() => salvar(true)}
+                >
+                  {salvando ? "Publicando…" : "Publicar (vira a edição atual da home)"}
+                </ConfirmButton>
+              </SaveBar>
+            </>
+          )}
+
+          {aba === "comentarios" && (
+            <Section title={`Comentários dos leitores${edicaoAtivaId ? ` (${comentarios.length})` : ""}`}>
+              {!edicaoAtivaId ? (
+                <EmptyState title="Abra uma edição salva">Os comentários aparecem depois que a edição existe. Escolha uma na lista ao lado.</EmptyState>
+              ) : comentarios.length === 0 ? (
+                <EmptyState title="Nenhum comentário nesta edição." />
+              ) : (
+                <div className="space-y-2">
+                  {comentarios.map((c) => (
+                    <div key={c.id} className="rounded-lg border border-slate-200 p-3 text-sm">
+                      <div className="flex flex-wrap items-center justify-between gap-2">
+                        <span className="flex flex-wrap items-center gap-2 text-xs font-semibold text-slate-700">
+                          {c.nome} · {new Date(c.criado_em).toLocaleString("pt-BR")}
+                          {!c.aprovado && <StatusPill status="oculto" label="Oculto" />}
+                        </span>
+                        <span className="flex gap-1">
+                          <button type="button" onClick={() => moderarComentario(c.id, c.aprovado ? "ocultar" : "mostrar")} className={btn("secondary", "sm")}>
+                            {c.aprovado ? "Ocultar" : "Mostrar"}
+                          </button>
+                          <ConfirmButton onConfirm={() => moderarComentario(c.id, "excluir")} confirmLabel="Excluir de vez">
+                            Excluir
+                          </ConfirmButton>
+                        </span>
+                      </div>
+                      <p className="mt-1 whitespace-pre-line text-slate-600">{c.comentario}</p>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </Section>
+          )}
+
+          {aba === "identidade" && (
+            <Section title="Foto da coluna" subtitle="Aparece no módulo de colunas da home, na lateral e no topo da coluna aberta.">
+              <div className="flex flex-wrap items-center gap-4">
+                <span className="h-20 w-20 shrink-0 overflow-hidden rounded-full bg-slate-200">
+                  {fotoColunista && <img src={fotoColunista} alt="Foto da coluna Vozes Políticas" className="h-full w-full object-cover" />}
+                </span>
+                <div className="space-y-2 text-sm">
+                  <input type="file" accept="image/*" disabled={uploadAvatarBusy}
+                    onChange={(e) => e.target.files?.[0] && onUploadAvatar(e.target.files[0])} />
+                  {uploadAvatarBusy && <p className="text-xs text-slate-500">Enviando foto…</p>}
+                  {fotoColunista && (
+                    <div>
+                      <ConfirmButton onConfirm={removerAvatar} confirmLabel="Remover foto">Remover foto</ConfirmButton>
+                    </div>
+                  )}
+                </div>
               </div>
-            </div>
+              {msg && aba === "identidade" && <div className="mt-4"><Aviso tipo={msgErro ? "erro" : "ok"}>{msg}</Aviso></div>}
+            </Section>
           )}
         </div>
       </div>

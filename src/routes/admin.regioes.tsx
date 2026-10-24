@@ -1,7 +1,18 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useMemo, useState, useCallback } from "react";
+import { RefreshCw } from "lucide-react";
 import { getExternalBrowser } from "@/lib/external-supabase-browser";
-import { PageHeader, refreshBtnClass } from "@/components/admin/ui";
+import {
+  PageHeader,
+  Section,
+  btn,
+  StatusPill,
+  ErrorBanner,
+  Aviso,
+  Tabs,
+  SaveBar,
+  EmptyState,
+} from "@/components/admin/ui";
 
 export const Route = createFileRoute("/admin/regioes")({
   component: AdminRegioes,
@@ -19,13 +30,18 @@ type Regiao = {
 type Categoria = { id: string; slug: string; nome: string };
 type Quota = { id?: string; regiao_id: string; categoria_id: string; piso_pct: number; teto_pct: number };
 
+const TETO_PADRAO = 100;
+const chave = (regiaoId: string, categoriaId: string) => `${regiaoId}:${categoriaId}`;
+
 function AdminRegioes() {
   const [regs, setRegs] = useState<Regiao[] | null>(null);
   const [cats, setCats] = useState<Categoria[]>([]);
-  const [quotas, setQuotas] = useState<Record<string, Quota[]>>({});
+  const [quotas, setQuotas] = useState<Record<string, Quota>>({});
+  const [rascunho, setRascunho] = useState<Record<string, string>>({});
   const [err, setErr] = useState<string | null>(null);
   const [msg, setMsg] = useState<string | null>(null);
-  const [openId, setOpenId] = useState<string | null>(null);
+  const [salvando, setSalvando] = useState(false);
+  const [aba, setAba] = useState<"cotas" | "tema">("cotas");
 
   const load = useCallback(async () => {
     setRegs(null); setErr(null);
@@ -41,17 +57,28 @@ function AdminRegioes() {
       if (r3.error) throw r3.error;
       setRegs((r1.data ?? []) as Regiao[]);
       setCats((r2.data ?? []) as Categoria[]);
-      const byReg: Record<string, Quota[]> = {};
-      for (const q of (r3.data ?? []) as Quota[]) {
-        (byReg[q.regiao_id] ??= []).push(q);
-      }
-      setQuotas(byReg);
+      const porChave: Record<string, Quota> = {};
+      for (const q of (r3.data ?? []) as Quota[]) porChave[chave(q.regiao_id, q.categoria_id)] = q;
+      setQuotas(porChave);
+      setRascunho({});
     } catch (e: unknown) {
       setErr(e instanceof Error ? e.message : "Erro ao carregar");
     }
   }, []);
 
   useEffect(() => { load(); }, [load]);
+
+  const tetoOriginal = useCallback(
+    (k: string) => quotas[k]?.teto_pct ?? TETO_PADRAO,
+    [quotas],
+  );
+
+  // Células alteradas: valor digitado diferente do que está no banco.
+  const alteradas = useMemo(
+    () =>
+      Object.entries(rascunho).filter(([k, v]) => v.trim() !== "" && Number(v) !== tetoOriginal(k)),
+    [rascunho, tetoOriginal],
+  );
 
   async function saveTema(r: Regiao, primaria: string, destaque: string) {
     setMsg(null);
@@ -68,119 +95,187 @@ function AdminRegioes() {
     }
   }
 
-  async function saveQuota(regiaoId: string, categoriaId: string, piso: number, teto: number) {
-    setMsg(null);
+  async function salvarCotas() {
+    if (!alteradas.length) return;
+    setMsg(null); setSalvando(true);
     try {
       const sb = await getExternalBrowser();
-      const existing = (quotas[regiaoId] ?? []).find((q) => q.categoria_id === categoriaId);
-      if (existing?.id) {
-        const { error } = await sb.from("quota_rules").update({ piso_pct: piso, teto_pct: teto }).eq("id", existing.id);
-        if (error) throw error;
-      } else {
-        const { error } = await sb.from("quota_rules").insert({ regiao_id: regiaoId, categoria_id: categoriaId, piso_pct: piso, teto_pct: teto });
+      const novas: Quota[] = [];
+      for (const [k, v] of alteradas) {
+        const teto = Math.max(0, Math.min(100, Number(v)));
+        const existing = quotas[k];
+        if (existing?.id) {
+          // Piso não é usado pelo crivo; preservado como está.
+          const { error } = await sb.from("quota_rules")
+            .update({ piso_pct: existing.piso_pct, teto_pct: teto })
+            .eq("id", existing.id);
+          if (error) throw error;
+        } else {
+          const [regiaoId, categoriaId] = k.split(":");
+          novas.push({ regiao_id: regiaoId, categoria_id: categoriaId, piso_pct: 0, teto_pct: teto });
+        }
+      }
+      if (novas.length) {
+        const { error } = await sb.from("quota_rules").insert(novas);
         if (error) throw error;
       }
-      setMsg("Cota salva.");
-      load();
+      setMsg(alteradas.length === 1 ? "1 cota salva." : `${alteradas.length} cotas salvas.`);
+      await load();
     } catch (e: unknown) {
       setMsg("Falha: " + (e instanceof Error ? e.message : "erro"));
+    } finally {
+      setSalvando(false);
     }
   }
+
+  const aviso = msg ? <Aviso tipo={msg.startsWith("Falha") ? "erro" : "ok"}>{msg}</Aviso> : null;
 
   return (
     <div className="space-y-6">
       <PageHeader
         eyebrow="Regiões"
-        title="Regiões, tema e cotas"
-        subtitle="Configurações visuais e distribuição editorial por regional."
-        actions={<button onClick={load} className={refreshBtnClass()}>Atualizar</button>}
+        title="Regiões e cotas"
+        subtitle="Teto de publicação por editoria e cores de cada regional."
+        actions={
+          <button type="button" onClick={load} className={btn("secondary")}>
+            <RefreshCw className="h-4 w-4" aria-hidden /> Atualizar
+          </button>
+        }
       />
-      {msg && <p className="rounded border bg-muted p-2 text-xs">{msg}</p>}
-      {err && <p className="rounded border border-red-200 bg-red-50 p-3 text-sm text-red-700">{err}</p>}
-      {!regs && !err && <p className="text-sm text-muted-foreground">Carregando…</p>}
 
-      <ul className="space-y-2">
-        {regs?.map((r) => {
-          const open = openId === r.id;
-          const primaria = r.tema_config?.cor_primaria ?? "#12201E";
-          const destaque = r.tema_config?.cor_destaque ?? "#E29F65";
-          return (
-            <li key={r.id} className="rounded-2xl border border-slate-200 bg-white shadow-sm">
-              <button onClick={() => setOpenId(open ? null : r.id)}
-                className="flex w-full items-center justify-between px-4 py-3 text-left hover:bg-accent/40">
-                <div className="flex items-center gap-3">
-                  <span className="inline-block h-4 w-4 rounded" style={{ background: primaria }} />
-                  <span className="inline-block h-4 w-4 rounded" style={{ background: destaque }} />
-                  <span className="font-semibold">{r.nome}</span>
-                  <span className="text-xs text-muted-foreground">/{r.slug} · {r.cidade_principal}</span>
-                </div>
-                <span className="text-xs text-muted-foreground">{open ? "fechar" : "editar"}</span>
+      <Tabs
+        value={aba}
+        onChange={setAba}
+        items={[
+          { value: "cotas", label: "Cotas", count: alteradas.length || undefined },
+          { value: "tema", label: "Tema visual" },
+        ]}
+      />
+
+      {err && <ErrorBanner>{err}</ErrorBanner>}
+      {!regs && !err && <p className="text-sm text-slate-500">Carregando…</p>}
+      {regs && regs.length === 0 && <EmptyState title="Nenhuma região cadastrada" />}
+
+      {regs && regs.length > 0 && aba === "cotas" && (
+        <>
+          <Section
+            title="Teto por editoria"
+            subtitle="% máximo das matérias da região em 7 dias."
+            padded={false}
+          >
+            <p className="border-b border-slate-100 px-5 py-3 text-xs text-slate-600">
+              Acima do teto, a pauta vira nota na coluna da cidade; serviço, saúde, educação e segurança nunca são rebaixados.
+            </p>
+            <div className="overflow-x-auto">
+              <table className="w-full text-sm">
+                <thead className="border-b border-slate-200 bg-slate-50">
+                  <tr>
+                    <th className="sticky left-0 z-[1] bg-slate-50 px-4 py-2.5 text-left text-[11px] font-semibold uppercase tracking-wider text-slate-500">
+                      Região
+                    </th>
+                    {cats.map((c) => (
+                      <th key={c.id} className="px-2 py-2.5 text-center text-[11px] font-semibold uppercase tracking-wider text-slate-500">
+                        {c.nome}
+                      </th>
+                    ))}
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-slate-100">
+                  {regs.map((r) => (
+                    <tr key={r.id}>
+                      <td className="sticky left-0 z-[1] whitespace-nowrap bg-white px-4 py-2 font-semibold text-[#12201E]">
+                        {r.nome}
+                      </td>
+                      {cats.map((c) => {
+                        const k = chave(r.id, c.id);
+                        const valor = rascunho[k] ?? String(tetoOriginal(k));
+                        const mudou = rascunho[k] !== undefined && rascunho[k].trim() !== "" && Number(rascunho[k]) !== tetoOriginal(k);
+                        return (
+                          <td key={c.id} className="px-2 py-1.5 text-center">
+                            <input
+                              type="number"
+                              min={0}
+                              max={100}
+                              aria-label={`Teto de ${c.nome} em ${r.nome}`}
+                              value={valor}
+                              onChange={(e) => setRascunho((d) => ({ ...d, [k]: e.target.value }))}
+                              className={`w-16 rounded-md border px-1.5 py-1 text-right text-sm tabular-nums focus:border-[#12201E] focus:outline-none ${
+                                mudou ? "border-[#E29F65] bg-[#E29F65]/10" : "border-slate-300 bg-white"
+                              }`}
+                            />
+                          </td>
+                        );
+                      })}
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </Section>
+          <SaveBar
+            aviso={
+              aviso ?? (alteradas.length ? (
+                <span className="text-xs font-semibold text-[#B5651D]">
+                  {alteradas.length === 1 ? "1 cota alterada" : `${alteradas.length} cotas alteradas`}
+                </span>
+              ) : null)
+            }
+          >
+            {alteradas.length > 0 && (
+              <button type="button" onClick={() => setRascunho({})} className={btn("ghost")} disabled={salvando}>
+                Descartar
               </button>
-              {open && <RegionEditor r={r} cats={cats} quotas={quotas[r.id] ?? []}
-                onSaveTema={saveTema} onSaveQuota={saveQuota} />}
-            </li>
-          );
-        })}
-      </ul>
+            )}
+            <button type="button" onClick={salvarCotas} className={btn("primary")} disabled={salvando || !alteradas.length}>
+              {salvando ? "Salvando…" : "Salvar cotas"}
+            </button>
+          </SaveBar>
+        </>
+      )}
+
+      {regs && regs.length > 0 && aba === "tema" && (
+        <>
+          {aviso}
+          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+            {regs.map((r) => (
+              <TemaCard key={r.id} r={r} onSave={saveTema} />
+            ))}
+          </div>
+        </>
+      )}
     </div>
   );
 }
 
-function RegionEditor({ r, cats, quotas, onSaveTema, onSaveQuota }: {
-  r: Regiao; cats: Categoria[]; quotas: Quota[];
-  onSaveTema: (r: Regiao, p: string, d: string) => void;
-  onSaveQuota: (regiaoId: string, categoriaId: string, piso: number, teto: number) => void;
-}) {
-  const [primaria, setPrimaria] = useState(r.tema_config?.cor_primaria ?? "#12201E");
-  const [destaque, setDestaque] = useState(r.tema_config?.cor_destaque ?? "#E29F65");
+function TemaCard({ r, onSave }: { r: Regiao; onSave: (r: Regiao, p: string, d: string) => void }) {
+  const origP = r.tema_config?.cor_primaria ?? "#12201E";
+  const origD = r.tema_config?.cor_destaque ?? "#E29F65";
+  const [primaria, setPrimaria] = useState(origP);
+  const [destaque, setDestaque] = useState(origD);
+  const mudou = primaria !== origP || destaque !== origD;
   return (
-    <div className="border-t px-4 py-4">
-      <h3 className="mb-2 text-sm font-semibold">Tema visual</h3>
-      <div className="flex flex-wrap items-end gap-3">
-        <label className="text-xs">
-          <span className="mb-1 block">Cor primária</span>
-          <input type="color" value={primaria} onChange={(e) => setPrimaria(e.target.value)} className="h-9 w-16 rounded border" />
-        </label>
-        <label className="text-xs">
-          <span className="mb-1 block">Cor de destaque</span>
-          <input type="color" value={destaque} onChange={(e) => setDestaque(e.target.value)} className="h-9 w-16 rounded border" />
-        </label>
-        <button onClick={() => onSaveTema(r, primaria, destaque)}
-          className="rounded bg-[#E29F65] px-3 py-1.5 text-xs font-semibold text-white hover:bg-[#0055aa]">Salvar tema</button>
+    <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
+      <div className="flex items-start justify-between gap-2">
+        <div className="min-w-0">
+          <p className="truncate font-semibold text-[#12201E]">{r.nome}</p>
+          <p className="truncate text-xs text-slate-500">/{r.slug} · {r.cidade_principal}</p>
+        </div>
+        {!r.ativa && <StatusPill status="inativa" />}
       </div>
-
-      <h3 className="mb-1 mt-6 text-sm font-semibold">Teto por editoria (% das matérias da região em 7 dias)</h3>
-      <p className="mb-2 text-xs text-muted-foreground">Passou do teto, a pauta não é descartada: vira nota na coluna da cidade. Serviço, saúde, educação e segurança nunca são rebaixados.</p>
-      <div className="overflow-x-auto">
-        <table className="w-full text-sm">
-          <thead className="bg-muted text-xs uppercase text-muted-foreground">
-            <tr><th className="px-2 py-1 text-left">Editoria</th><th className="px-2 py-1">Teto %</th><th className="px-2 py-1"></th></tr>
-          </thead>
-          <tbody>
-            {cats.map((c) => {
-              const existing = quotas.find((q) => q.categoria_id === c.id);
-              return <QuotaRow key={c.id} regiaoId={r.id} categoria={c} initial={existing} onSave={onSaveQuota} />;
-            })}
-          </tbody>
-        </table>
+      <div className="mt-3 h-2 overflow-hidden rounded-full" style={{ background: `linear-gradient(90deg, ${primaria} 70%, ${destaque} 70%)` }} />
+      <div className="mt-3 flex items-end gap-3">
+        <label className="flex flex-col gap-1 text-[11px] font-semibold text-slate-600">
+          Primária
+          <input type="color" value={primaria} onChange={(e) => setPrimaria(e.target.value)} className="h-8 w-12 cursor-pointer rounded border border-slate-300" />
+        </label>
+        <label className="flex flex-col gap-1 text-[11px] font-semibold text-slate-600">
+          Destaque
+          <input type="color" value={destaque} onChange={(e) => setDestaque(e.target.value)} className="h-8 w-12 cursor-pointer rounded border border-slate-300" />
+        </label>
+        <button type="button" onClick={() => onSave(r, primaria, destaque)} disabled={!mudou} className={btn(mudou ? "primary" : "secondary", "sm") + " ml-auto"}>
+          Salvar tema
+        </button>
       </div>
     </div>
-  );
-}
-
-function QuotaRow({ regiaoId, categoria, initial, onSave }: {
-  regiaoId: string; categoria: Categoria; initial?: Quota;
-  onSave: (regiaoId: string, categoriaId: string, piso: number, teto: number) => void;
-}) {
-  // Piso não é usado pelo crivo; preservado como está ao salvar.
-  const piso = initial?.piso_pct ?? 0;
-  const [teto, setTeto] = useState<number>(initial?.teto_pct ?? 100);
-  return (
-    <tr className="border-t">
-      <td className="px-2 py-1">{categoria.nome}</td>
-      <td className="px-2 py-1"><input type="number" min={0} max={100} value={teto} onChange={(e) => setTeto(Number(e.target.value))} className="w-20 rounded border px-1 py-0.5 text-right" /></td>
-      <td className="px-2 py-1 text-right"><button onClick={() => onSave(regiaoId, categoria.id, piso, teto)}
-        className="text-xs text-[#E29F65] hover:underline">salvar</button></td>
-    </tr>
   );
 }

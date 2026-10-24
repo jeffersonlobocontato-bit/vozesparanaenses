@@ -1,6 +1,8 @@
 import { useEffect, useState } from "react";
 import { getExternalBrowser } from "@/lib/external-supabase-browser";
 import { parseVideoEmbed } from "@/lib/video-embed";
+import { Save, Trash2, Upload, Video } from "lucide-react";
+import { btn, campoClass } from "@/components/admin/ui";
 
 type Props = {
   articleId: string;
@@ -105,11 +107,14 @@ export function ArticleVideoEditor({ articleId, currentUrl, currentLegenda, curr
     }
   }
 
+  const rotulo = "text-[11px] font-semibold uppercase tracking-wide text-slate-500";
+  const campo = `${campoClass} w-full text-xs`;
+
   return (
-    <div className="mt-3 flex flex-col gap-2 rounded border bg-muted/40 p-2">
+    <div className="flex flex-col gap-3">
       <div className="flex items-center justify-between">
-        <span className="text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">
-          🎬 Vídeo da matéria
+        <span className={`inline-flex items-center gap-1.5 ${rotulo}`}>
+          <Video className="h-3.5 w-3.5" /> Vídeo da matéria
         </span>
         {currentUrl && (
           <button
@@ -119,9 +124,9 @@ export function ArticleVideoEditor({ articleId, currentUrl, currentLegenda, curr
               save(null);
             }}
             disabled={busy !== null}
-            className="text-[11px] text-red-600 hover:underline disabled:opacity-60"
+            className={btn("danger", "sm")}
           >
-            Remover
+            <Trash2 className="h-3.5 w-3.5" /> Remover vídeo
           </button>
         )}
       </div>
@@ -130,20 +135,22 @@ export function ArticleVideoEditor({ articleId, currentUrl, currentLegenda, curr
           type="url"
           value={url}
           onChange={(e) => setUrl(e.target.value)}
-          placeholder="Cole URL do YouTube, Vimeo ou MP4"
-          className="min-w-[240px] flex-1 rounded border bg-background px-2 py-1.5 text-sm"
+          placeholder="Cole o link do YouTube, Vimeo ou de um arquivo MP4"
+          className={`${campoClass} min-w-[240px] flex-1`}
           disabled={busy !== null}
         />
         <button
           type="button"
           onClick={() => save(url.trim() || null)}
           disabled={busy !== null || url.trim() === (currentUrl ?? "")}
-          className="rounded bg-[#12201E] px-3 py-1.5 text-xs font-semibold text-white hover:bg-[#0d2f52] disabled:opacity-60"
+          className={btn("primary")}
         >
-          {busy === "save" ? "Salvando…" : "Salvar URL"}
+          <Save className="h-4 w-4" />
+          {busy === "save" ? "Salvando…" : "Salvar link"}
         </button>
-        <label className="cursor-pointer rounded border px-3 py-1.5 text-xs hover:bg-accent">
-          {busy === "upload" ? "Enviando…" : "⬆ Upload de vídeo"}
+        <label className={`${btn("secondary")} cursor-pointer`}>
+          <Upload className="h-4 w-4" />
+          {busy === "upload" ? "Enviando…" : "Enviar vídeo"}
           <input
             type="file"
             accept="video/mp4,video/webm,video/ogg,video/quicktime"
@@ -158,7 +165,7 @@ export function ArticleVideoEditor({ articleId, currentUrl, currentLegenda, curr
         </label>
       </div>
       {preview && preview.kind !== "file" && (
-        <div className="aspect-video w-full max-w-md overflow-hidden rounded border bg-black">
+        <div className="aspect-video w-full max-w-md overflow-hidden rounded-lg border border-slate-200 bg-black">
           <iframe
             src={preview.embedUrl}
             title="Prévia do vídeo"
@@ -171,35 +178,31 @@ export function ArticleVideoEditor({ articleId, currentUrl, currentLegenda, curr
       {preview && preview.kind === "file" && (
         <video
           controls
-          className="w-full max-w-md rounded border bg-black"
+          className="w-full max-w-md rounded-lg border border-slate-200 bg-black"
           src={preview.src}
         />
       )}
       {url && !preview && (
         <p className="text-[11px] text-amber-700">
-          URL não reconhecida. Use YouTube, Vimeo ou um arquivo .mp4/.webm/.ogg/.mov.
+          Link não reconhecido. Use YouTube, Vimeo ou um arquivo .mp4, .webm, .ogg ou .mov.
         </p>
       )}
       <div className="grid gap-2 sm:grid-cols-[1fr_auto] sm:items-end">
         <div className="flex flex-col gap-1">
-          <label className="text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">
-            Legenda do vídeo
-          </label>
+          <label className={rotulo}>Legenda do vídeo</label>
           <input
             value={legenda}
             onChange={(e) => setLegenda(e.target.value)}
             placeholder="Ex.: Momento em que a equipe da PRF aborda o veículo suspeito."
-            className="rounded border bg-background px-2 py-1 text-xs"
+            className={campo}
             disabled={busy !== null}
           />
-          <label className="mt-1 text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">
-            Crédito do vídeo
-          </label>
+          <label className={`mt-1 ${rotulo}`}>Crédito do vídeo</label>
           <input
             value={credito}
             onChange={(e) => setCredito(e.target.value)}
             placeholder="Ex.: Vídeo: PRF / Divulgação"
-            className="rounded border bg-background px-2 py-1 text-xs"
+            className={campo}
             disabled={busy !== null}
           />
         </div>
@@ -207,15 +210,16 @@ export function ArticleVideoEditor({ articleId, currentUrl, currentLegenda, curr
           type="button"
           onClick={saveMeta}
           disabled={busy !== null || !metaDirty}
-          className="rounded bg-[#12201E] px-3 py-1.5 text-[11px] font-semibold text-white hover:bg-[#0d2f52] disabled:opacity-60"
+          className={btn("primary", "sm")}
         >
-          {busy === "meta" ? "Salvando…" : "💾 Salvar legenda/crédito"}
+          <Save className="h-3.5 w-3.5" />
+          {busy === "meta" ? "Salvando…" : "Salvar legenda e crédito"}
         </button>
       </div>
-      <p className="text-[10px] text-muted-foreground">
-        Recomendado: hospede vídeos longos no YouTube/Vimeo e cole a URL. Upload direto só para clipes curtos (até 200MB).
+      <p className="text-[11px] text-slate-500">
+        Vídeos longos: hospede no YouTube ou Vimeo e cole o link. Envio direto só para clipes curtos (até 200 MB).
       </p>
-      {msg && <span className="text-[11px] text-muted-foreground">{msg}</span>}
+      {msg && <span className={`text-[11px] ${msg.startsWith("Falha") ? "text-red-700" : "text-slate-600"}`}>{msg}</span>}
     </div>
   );
 }

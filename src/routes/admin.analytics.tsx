@@ -5,7 +5,8 @@ import {
   ResponsiveContainer, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip,
   LineChart, Line, PieChart, Pie, Cell, Legend,
 } from "recharts";
-import { PageHeader } from "@/components/admin/ui";
+import { Lightbulb } from "lucide-react";
+import { PageHeader, Section, Tabs, ErrorBanner, EmptyState, campoClass } from "@/components/admin/ui";
 
 export const Route = createFileRoute("/admin/analytics")({
   component: AdminAnalytics,
@@ -27,7 +28,17 @@ type ArtigoRow = {
   categoria: { nome: string } | { nome: string }[] | null;
 };
 
-const CORES = ["#12201E", "#E29F65", "#B42318", "#C4650A", "#5B2A86", "#0F766E", "#946800", "#BE185D", "#4D7C0F"];
+// Paleta dos gráficos: cores da marca, nomeadas, em vez de hex soltos.
+const PALETA = {
+  tinta: "#12201E",
+  verde: "#1E5B45",
+  laranja: "#E29F65",
+  azul: "#1B5E9A",
+  ardosia: "#64748B",
+} as const;
+// Ordem das fatias da pizza de origem (repete se houver mais categorias).
+const CORES = [PALETA.tinta, PALETA.laranja, PALETA.verde, PALETA.azul, PALETA.ardosia];
+const GRADE = "#E2E8F0";
 const PERIODOS = [
   { label: "Hoje", dias: 1 },
   { label: "Últimos 7 dias", dias: 7 },
@@ -264,32 +275,23 @@ function AdminAnalytics() {
         subtitle="Tráfego cruzado das 10 regiões — página, editoria, origem e tendência, com comparação ao período anterior."
         actions={
           <div className="flex flex-wrap items-center gap-2">
-            <div className="inline-flex rounded-full border border-slate-200 bg-white p-0.5 text-xs font-medium shadow-sm">
-              {([
-                { v: "publico", label: "Leitores" },
-                { v: "admin", label: "Admin (eu)" },
-                { v: "tudo", label: "Tudo" },
-              ] as const).map((s) => (
-                <button
-                  key={s.v}
-                  onClick={() => setSegmento(s.v)}
-                  className={`rounded-full px-3 py-1.5 transition-colors ${
-                    segmento === s.v ? "bg-[#12201E] text-white" : "text-slate-600 hover:text-slate-900"
-                  }`}
-                >
-                  {s.label}
-                </button>
-              ))}
-            </div>
-            <select value={periodo} onChange={(e) => setPeriodo(Number(e.target.value))}
-              className="rounded-full border border-slate-200 bg-white px-3.5 py-2 text-xs font-medium text-slate-700 shadow-sm">
+            <Tabs<"publico" | "admin" | "tudo">
+              value={segmento}
+              onChange={setSegmento}
+              items={[
+                { value: "publico", label: "Leitores" },
+                { value: "admin", label: "Uso interno" },
+                { value: "tudo", label: "Tudo" },
+              ]}
+            />
+            <select aria-label="Período" value={periodo} onChange={(e) => setPeriodo(Number(e.target.value))} className={campoClass}>
               {PERIODOS.map((p) => <option key={p.dias} value={p.dias}>{p.label}</option>)}
             </select>
           </div>
         }
       />
 
-      {err && <p className="rounded-xl border border-red-200 bg-red-50 p-3 text-sm text-red-700">{err}</p>}
+      {err && <ErrorBanner>{err}</ErrorBanner>}
       {!rows && !err && <p className="text-sm text-slate-500">Carregando…</p>}
 
       {rows && (
@@ -304,73 +306,71 @@ function AdminAnalytics() {
           </div>
 
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-            <KpiCard label="Pageviews no período" valor={total} variacao={variacaoTotal} />
+            <KpiCard label="Acessos no período" valor={total} variacao={variacaoTotal} />
             <KpiCard label="Regiões com tráfego" valor={regioesComTrafego} variacao={pct(regioesComTrafego, porRegiaoAnteriorCount(rowsAnteriorFiltradas))} />
             <KpiCard label="Editorias com tráfego" valor={porEditoria.length} variacao={{ valor: 0, texto: "", positivo: true }} semComparacao />
             <div className="rounded-2xl border border-slate-200 bg-white shadow-sm p-4">
-              <p className="text-xs text-muted-foreground">Vindos de IA (ChatGPT/Perplexity/Gemini)</p>
-              <p className="text-3xl font-bold text-[#5B2A86]">{totalIA} <span className="text-sm font-normal text-muted-foreground">({total ? Math.round((totalIA / total) * 100) : 0}%)</span></p>
+              <p className="text-xs text-slate-500">Vindos de IA (ChatGPT, Perplexity, Gemini)</p>
+              <p className="text-3xl font-bold" style={{ color: PALETA.azul }}>{totalIA} <span className="text-sm font-normal text-slate-500">({total ? Math.round((totalIA / total) * 100) : 0}%)</span></p>
             </div>
           </div>
 
           {total === 0 && (
-            <p className="rounded border bg-muted p-3 text-sm text-muted-foreground">
-              Nenhum evento registrado ainda neste período — normal se o portal for novo ou tiver pouco tráfego.
-              O rastreamento dispara automaticamente a cada página visitada no site público.
-            </p>
+            <EmptyState title="Nenhum acesso registrado neste período">
+              É normal se o portal for novo ou tiver pouco tráfego. O rastreamento registra cada página visitada no site público.
+            </EmptyState>
           )}
 
           {insights.length > 0 && (
-            <div className="rounded-2xl border border-blue-200 bg-blue-50 p-4">
-              <h2 className="mb-2 text-sm font-bold uppercase tracking-wide text-blue-900">💡 Insights do período</h2>
-              <ul className="space-y-1.5 text-sm text-blue-900">
-                {insights.map((texto, i) => <li key={i}>• {texto}</li>)}
+            <section className="rounded-2xl border border-[#E29F65]/40 bg-[#E29F65]/10 p-5">
+              <h2 className="mb-2 flex items-center gap-2 text-sm font-bold uppercase tracking-[0.12em] text-[#12201E]">
+                <Lightbulb className="h-4 w-4 text-[#B5651D]" aria-hidden />
+                Destaques do período
+              </h2>
+              <ul className="list-disc space-y-1.5 pl-5 text-sm text-[#12201E]">
+                {insights.map((texto, i) => <li key={i}>{texto}</li>)}
               </ul>
-            </div>
+            </section>
           )}
 
           <div className="grid gap-6 lg:grid-cols-2">
-            <div className="rounded-2xl border border-slate-200 bg-white shadow-sm p-4">
-              <h2 className="mb-3 text-sm font-semibold">Pageviews por dia</h2>
+            <Section title="Acessos por dia">
               <ResponsiveContainer width="100%" height={220}>
                 <LineChart data={porDia}>
-                  <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis dataKey="dia" fontSize={11} />
-                  <YAxis fontSize={11} allowDecimals={false} />
+                  <CartesianGrid strokeDasharray="3 3" stroke={GRADE} />
+                  <XAxis dataKey="dia" fontSize={11} stroke={PALETA.ardosia} />
+                  <YAxis fontSize={11} allowDecimals={false} stroke={PALETA.ardosia} />
                   <Tooltip />
-                  <Line type="monotone" dataKey="total" stroke="#E29F65" strokeWidth={2} dot={false} />
+                  <Line type="monotone" dataKey="total" name="Acessos" stroke={PALETA.laranja} strokeWidth={2} dot={false} />
                 </LineChart>
               </ResponsiveContainer>
-            </div>
+            </Section>
 
-            <div className="rounded-2xl border border-slate-200 bg-white shadow-sm p-4">
-              <h2 className="mb-3 text-sm font-semibold">Pageviews por editoria</h2>
+            <Section title="Acessos por editoria">
               <ResponsiveContainer width="100%" height={220}>
                 <BarChart data={porEditoria} layout="vertical" margin={{ left: 24 }}>
-                  <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis type="number" fontSize={11} allowDecimals={false} />
-                  <YAxis dataKey="categoria" type="category" fontSize={11} width={100} tickFormatter={cap} />
+                  <CartesianGrid strokeDasharray="3 3" stroke={GRADE} />
+                  <XAxis type="number" fontSize={11} allowDecimals={false} stroke={PALETA.ardosia} />
+                  <YAxis dataKey="categoria" type="category" fontSize={11} width={100} tickFormatter={cap} stroke={PALETA.ardosia} />
                   <Tooltip />
-                  <Bar dataKey="total" fill="#0F766E" radius={[0, 4, 4, 0]} />
+                  <Bar dataKey="total" name="Acessos" fill={PALETA.verde} radius={[0, 4, 4, 0]} />
                 </BarChart>
               </ResponsiveContainer>
-            </div>
+            </Section>
 
-            <div className="rounded-2xl border border-slate-200 bg-white shadow-sm p-4">
-              <h2 className="mb-3 text-sm font-semibold">Pageviews por região</h2>
+            <Section title="Acessos por região">
               <ResponsiveContainer width="100%" height={220}>
                 <BarChart data={porRegiao} layout="vertical" margin={{ left: 24 }}>
-                  <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis type="number" fontSize={11} allowDecimals={false} />
-                  <YAxis dataKey="nome" type="category" fontSize={11} width={110} />
+                  <CartesianGrid strokeDasharray="3 3" stroke={GRADE} />
+                  <XAxis type="number" fontSize={11} allowDecimals={false} stroke={PALETA.ardosia} />
+                  <YAxis dataKey="nome" type="category" fontSize={11} width={110} stroke={PALETA.ardosia} />
                   <Tooltip />
-                  <Bar dataKey="total" fill="#12201E" radius={[0, 4, 4, 0]} />
+                  <Bar dataKey="total" name="Acessos" fill={PALETA.tinta} radius={[0, 4, 4, 0]} />
                 </BarChart>
               </ResponsiveContainer>
-            </div>
+            </Section>
 
-            <div className="rounded-2xl border border-slate-200 bg-white shadow-sm p-4">
-              <h2 className="mb-3 text-sm font-semibold">Origem do tráfego</h2>
+            <Section title="Origem do tráfego">
               <ResponsiveContainer width="100%" height={220}>
                 <PieChart>
                   <Pie data={porOrigem} dataKey="total" nameKey="origem" cx="50%" cy="50%" outerRadius={80} label>
@@ -380,66 +380,65 @@ function AdminAnalytics() {
                   <Legend />
                 </PieChart>
               </ResponsiveContainer>
-            </div>
+            </Section>
 
-            <div className="rounded-2xl border border-slate-200 bg-white shadow-sm p-4 lg:col-span-2">
-              <h2 className="mb-3 text-sm font-semibold">Matérias mais acessadas — ranking do período</h2>
+            <Section title="Matérias mais acessadas" subtitle="Ranking do período." className="lg:col-span-2">
               <table className="w-full text-sm">
                 <thead>
-                  <tr className="border-b text-left text-[11px] uppercase tracking-wide text-muted-foreground">
+                  <tr className="border-b border-slate-200 text-left text-[11px] uppercase tracking-wide text-slate-500">
                     <th className="w-8 py-1.5 font-medium">#</th>
                     <th className="py-1.5 font-medium">Matéria</th>
                     <th className="py-1.5 font-medium">Editoria</th>
-                    <th className="py-1.5 text-right font-medium">Views</th>
+                    <th className="py-1.5 text-right font-medium">Acessos</th>
                   </tr>
                 </thead>
                 <tbody>
                   {porPagina.map((p, i) => (
-                    <tr key={p.pagina} className="border-b last:border-0">
-                      <td className="py-1.5 text-muted-foreground">{i + 1}</td>
+                    <tr key={p.pagina} className="border-b border-slate-100 last:border-0">
+                      <td className="py-1.5 text-slate-500">{i + 1}</td>
                       <td className="py-1.5">
                         {p.meta ? (
-                          <a href={p.pagina} target="_blank" rel="noreferrer" className="text-[#E29F65] hover:underline">{p.meta.titulo}</a>
+                          <a href={p.pagina} target="_blank" rel="noreferrer" className="font-medium text-[#12201E] underline-offset-2 hover:underline">{p.meta.titulo}</a>
                         ) : (
-                          <span className="truncate text-muted-foreground">{p.pagina}</span>
+                          <span className="truncate text-slate-500">{p.pagina}</span>
                         )}
                       </td>
-                      <td className="py-1.5 text-xs text-muted-foreground">{p.meta?.categoria ?? "—"}</td>
-                      <td className="py-1.5 text-right font-semibold">{p.total}</td>
+                      <td className="py-1.5 text-xs text-slate-500">{p.meta?.categoria ?? "—"}</td>
+                      <td className="py-1.5 text-right font-semibold tabular-nums">{p.total}</td>
                     </tr>
                   ))}
                   {porPagina.length === 0 && (
-                    <tr><td colSpan={4} className="py-3 text-center text-muted-foreground">Sem dados.</td></tr>
+                    <tr><td colSpan={4} className="py-3 text-center text-slate-500">Sem acessos a matérias no período.</td></tr>
                   )}
                 </tbody>
               </table>
-            </div>
+            </Section>
 
-            <div className="rounded-2xl border border-slate-200 bg-white shadow-sm p-4 lg:col-span-2">
-              <h2 className="mb-3 text-sm font-semibold">De onde vêm os leitores (cidade)</h2>
-              <p className="mb-3 text-[11px] text-muted-foreground">
-                Aproximado por geolocalização de IP — o IP em si nunca é armazenado, só a cidade resultante.
-              </p>
+            <Section
+              title="De onde vêm os leitores"
+              subtitle="Cidade aproximada pela geolocalização do IP. O IP nunca é armazenado, só a cidade."
+              className="lg:col-span-2"
+            >
               <div className="grid gap-x-6 sm:grid-cols-2">
                 <ul className="space-y-1 text-sm">
                   {porCidadeLeitor.slice(0, 5).map((c, i) => (
-                    <li key={c.cidade} className="flex items-center justify-between gap-2 border-b py-1 last:border-0">
-                      <span className="truncate text-muted-foreground">{i + 1}. {c.cidade}</span>
-                      <span className="font-semibold">{c.total}</span>
+                    <li key={c.cidade} className="flex items-center justify-between gap-2 border-b border-slate-100 py-1 last:border-0">
+                      <span className="truncate text-slate-600">{i + 1}. {c.cidade}</span>
+                      <span className="font-semibold tabular-nums">{c.total}</span>
                     </li>
                   ))}
                 </ul>
                 <ul className="space-y-1 text-sm">
                   {porCidadeLeitor.slice(5, 10).map((c, i) => (
-                    <li key={c.cidade} className="flex items-center justify-between gap-2 border-b py-1 last:border-0">
-                      <span className="truncate text-muted-foreground">{i + 6}. {c.cidade}</span>
-                      <span className="font-semibold">{c.total}</span>
+                    <li key={c.cidade} className="flex items-center justify-between gap-2 border-b border-slate-100 py-1 last:border-0">
+                      <span className="truncate text-slate-600">{i + 6}. {c.cidade}</span>
+                      <span className="font-semibold tabular-nums">{c.total}</span>
                     </li>
                   ))}
                 </ul>
-                {porCidadeLeitor.length === 0 && <p className="text-muted-foreground">Sem dados ainda.</p>}
+                {porCidadeLeitor.length === 0 && <p className="text-sm text-slate-500">Sem cidade identificada no período.</p>}
               </div>
-            </div>
+            </Section>
           </div>
         </>
       )}
@@ -466,16 +465,16 @@ function KpiCard({ label, valor, variacao, semComparacao }: {
 }) {
   return (
     <div className="rounded-2xl border border-slate-200 bg-white shadow-sm p-4">
-      <p className="text-xs text-muted-foreground">{label}</p>
+      <p className="text-xs text-slate-500">{label}</p>
       <div className="flex items-baseline gap-2">
         <p className="text-3xl font-bold text-[#12201E]">{valor}</p>
         {!semComparacao && variacao.texto && (
-          <span className={`text-xs font-semibold ${variacao.positivo ? "text-emerald-600" : "text-red-600"}`}>
+          <span className={`text-xs font-semibold ${variacao.positivo ? "text-emerald-700" : "text-red-700"}`}>
             {variacao.texto}
           </span>
         )}
       </div>
-      {!semComparacao && <p className="text-[10px] text-muted-foreground">vs. período anterior</p>}
+      {!semComparacao && <p className="text-[10px] text-slate-500">em relação ao período anterior</p>}
     </div>
   );
 }

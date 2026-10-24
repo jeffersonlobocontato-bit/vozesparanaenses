@@ -101,17 +101,19 @@ export const pickAd = createServerFn({ method: "POST" })
       const capByTarget = new Map<string, number>();
       for (const t of targets) capByTarget.set(t.id, t.cap_impressoes_dia);
 
-      const { data: impsToday } = await sb
-        .from("ad_impressions")
-        .select("target_id")
-        .in("target_id", targets.map((t) => t.id))
-        .gte("servido_em", startOfDay.toISOString());
-
-      const countByTarget = new Map<string, number>();
-      for (const row of impsToday ?? []) {
-        if (!row.target_id) continue;
-        countByTarget.set(row.target_id, (countByTarget.get(row.target_id) ?? 0) + 1);
-      }
+      // Contagem exata no banco, por alvo (baixar as linhas parava em 1.000
+      // e o limite diário deixava de valer em alvos movimentados).
+      const contagens = await Promise.all(
+        targets.map(async (t) => {
+          const { count } = await sb
+            .from("ad_impressions")
+            .select("id", { count: "exact", head: true })
+            .eq("target_id", t.id)
+            .gte("servido_em", startOfDay.toISOString());
+          return [t.id, count ?? 0] as const;
+        }),
+      );
+      const countByTarget = new Map<string, number>(contagens);
 
       // Junta creative -> primeiro target disponível daquela campanha ainda com cap
       const withCap = eligible

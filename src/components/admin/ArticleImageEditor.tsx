@@ -1,6 +1,10 @@
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { getExternalBrowser } from "@/lib/external-supabase-browser";
+import {
+  ArrowDown, ArrowUp, Check, Image as ImageIcon, ImageOff, Plus, Save, Sparkles, Star, Trash2, Upload,
+} from "lucide-react";
+import { btn, campoClass } from "@/components/admin/ui";
 
 type Props = {
   articleId: string;
@@ -282,53 +286,61 @@ export function ArticleImageEditor({ articleId, currentUrl, originalUrl, current
     } finally { setBusy(null); }
   }
 
+  const rotulo = "text-[11px] font-semibold uppercase tracking-wide text-slate-500";
+  const campo = `${campoClass} w-full text-xs`;
+
   return (
-    <div className="mt-3 flex flex-col gap-2 rounded border bg-muted/40 p-2">
+    <div className="flex flex-col gap-3">
       <div className="flex flex-wrap items-start gap-3">
         <div className="flex flex-col items-center gap-1">
-          <div className="relative h-20 w-32 shrink-0 overflow-hidden rounded border bg-muted">
+          <div className="relative h-20 w-32 shrink-0 overflow-hidden rounded-lg border border-slate-200 bg-slate-100">
             {currentUrl ? (
-              <img src={currentUrl} alt="capa atual" className="h-full w-full object-cover" />
+              <img src={currentUrl} alt="Capa atual" className="h-full w-full object-cover" />
             ) : (
-              <div className="flex h-full w-full items-center justify-center text-[10px] text-muted-foreground">sem imagem</div>
+              <div className="flex h-full w-full items-center justify-center text-[11px] text-slate-500">Sem imagem</div>
             )}
           </div>
-          <span className="text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">Capa atual</span>
+          <span className={rotulo}>Capa atual</span>
         </div>
         {originalUrl && (
           <div className="flex flex-col items-center gap-1">
-            <div className={`relative h-20 w-32 shrink-0 overflow-hidden rounded border bg-muted ${usingOriginal ? "ring-2 ring-[#12201E]" : ""}`}>
-              <img src={originalUrl} alt="foto original scraping" className="h-full w-full object-cover" />
+            <div className={`relative h-20 w-32 shrink-0 overflow-hidden rounded-lg border border-slate-200 bg-slate-100 ${usingOriginal ? "ring-2 ring-[#12201E]" : ""}`}>
+              <img src={originalUrl} alt="Foto original da fonte" className="h-full w-full object-cover" />
               {usingOriginal && (
                 <span className="absolute right-1 top-1 rounded bg-[#12201E] px-1.5 py-0.5 text-[9px] font-bold text-white">EM USO</span>
               )}
             </div>
-            <span className="text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">Foto original (fonte)</span>
+            <span className={rotulo}>Foto original (fonte)</span>
           </div>
         )}
       </div>
-      <div className="flex flex-col gap-1 text-xs">
+      <div className="flex flex-col gap-2 text-xs">
         <div className="flex flex-wrap gap-2">
           {originalUrl && (
             <button
+              type="button"
               onClick={useOriginal}
               disabled={busy !== null || usingOriginal}
-              className="rounded border border-[#12201E] px-3 py-1 font-semibold text-[#12201E] hover:bg-[#12201E]/10 disabled:opacity-60"
+              className={btn("secondary", "sm")}
               title="Usa a foto original da fonte já copiada para o storage"
             >
-              {busy === "original" ? "Aplicando…" : usingOriginal ? "✓ Usando original" : "📷 Usar original"}
+              {usingOriginal ? <Check className="h-3.5 w-3.5" /> : <ImageIcon className="h-3.5 w-3.5" />}
+              {busy === "original" ? "Aplicando…" : usingOriginal ? "Usando a original" : "Usar a original"}
             </button>
           )}
           <button
+            type="button"
             onClick={generateWithAI}
             disabled={busy !== null}
-            className="rounded bg-[#12201E] px-3 py-1 font-semibold text-white hover:bg-[#0d2f52] disabled:opacity-60"
+            className={btn("primary", "sm")}
             title={originalUrl ? "Gera uma variação com IA a partir da foto original" : "Gera uma imagem editorial com IA"}
           >
-            {busy === "ai" ? "Gerando…" : originalUrl ? "🎨 Variação IA da original" : "🎨 Gerar com IA"}
+            <Sparkles className="h-3.5 w-3.5" />
+            {busy === "ai" ? "Gerando…" : originalUrl ? "Variação por IA da original" : "Gerar com IA"}
           </button>
-          <label className="cursor-pointer rounded border px-3 py-1 hover:bg-accent">
-            {busy === "upload" ? "Enviando…" : "⬆ Upload"}
+          <label className={`${btn("secondary", "sm")} cursor-pointer`}>
+            <Upload className="h-3.5 w-3.5" />
+            {busy === "upload" ? "Enviando…" : "Enviar foto"}
             <input
               type="file"
               accept="image/*"
@@ -346,33 +358,30 @@ export function ArticleImageEditor({ articleId, currentUrl, originalUrl, current
               type="button"
               onClick={removeCover}
               disabled={busy !== null}
-              className="rounded border border-red-600 px-3 py-1 font-semibold text-red-600 hover:bg-red-50 disabled:opacity-60"
-              title="Publica a matéria sem foto de capa"
+              className={btn("danger", "sm")}
+              title="Remove a capa: a matéria fica sem foto"
             >
-              {busy === "remove" ? "Removendo…" : "🗑 Publicar sem foto"}
+              <ImageOff className="h-3.5 w-3.5" />
+              {busy === "remove" ? "Removendo…" : "Publicar sem foto"}
             </button>
           )}
         </div>
-        <div className="mt-2 grid gap-2 sm:grid-cols-[1fr_auto]">
+        <div className="grid gap-2 sm:grid-cols-[1fr_auto]">
           <div className="flex flex-col gap-1">
-            <label className="text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">
-              Legenda da foto
-            </label>
+            <label className={rotulo}>Legenda da foto</label>
             <input
               value={legenda}
               onChange={(e) => setLegenda(e.target.value)}
               placeholder="Ex.: Bombeiros combatem incêndio em Cascavel na manhã desta segunda-feira."
-              className="rounded border bg-background px-2 py-1 text-xs"
+              className={campo}
               disabled={busy !== null}
             />
-            <label className="mt-1 text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">
-              Crédito da foto
-            </label>
+            <label className={`mt-1 ${rotulo}`}>Crédito da foto</label>
             <input
               value={credito}
               onChange={(e) => setCredito(e.target.value)}
               placeholder="Ex.: Foto: João Silva / Prefeitura de Cascavel"
-              className="rounded border bg-background px-2 py-1 text-xs"
+              className={campo}
               disabled={busy !== null}
             />
           </div>
@@ -381,28 +390,30 @@ export function ArticleImageEditor({ articleId, currentUrl, originalUrl, current
               type="button"
               onClick={saveMeta}
               disabled={busy !== null || !metaDirty}
-              className="rounded bg-[#12201E] px-3 py-1.5 text-[11px] font-semibold text-white hover:bg-[#0d2f52] disabled:opacity-60"
+              className={btn("primary", "sm")}
             >
-              {busy === "meta" ? "Salvando…" : "💾 Salvar legenda/crédito"}
+              <Save className="h-3.5 w-3.5" />
+              {busy === "meta" ? "Salvando…" : "Salvar legenda e crédito"}
             </button>
           </div>
         </div>
         {!originalUrl && (
-          <span className="text-[10px] italic text-muted-foreground">
-            Sem foto original — a fonte não trouxe imagem no scraping.
+          <span className="text-[11px] italic text-slate-500">
+            Sem foto original: a fonte não trouxe imagem na coleta.
           </span>
         )}
-        {msg && <span className="text-muted-foreground">{msg}</span>}
+        {msg && <span className={msg.startsWith("Falha") ? "text-red-700" : "text-slate-600"}>{msg}</span>}
       </div>
 
       {/* Galeria de fotos */}
-      <div className="mt-3 rounded border border-[#12201E]/20 bg-white p-2">
+      <div className="rounded-xl border border-slate-200 bg-white p-3">
         <div className="mb-2 flex items-center justify-between">
           <span className="text-[11px] font-bold uppercase tracking-wide text-[#12201E]">
             Galeria ({galeria.length})
           </span>
-          <label className="cursor-pointer rounded bg-[#12201E] px-2 py-1 text-[10px] font-semibold text-white hover:bg-[#0d2f52]">
-            {busy === "gal-add" ? "Enviando…" : "+ Adicionar fotos"}
+          <label className={`${btn("secondary", "sm")} cursor-pointer`}>
+            <Plus className="h-3.5 w-3.5" />
+            {busy === "gal-add" ? "Enviando…" : "Adicionar fotos"}
             <input
               type="file"
               accept="image/*"
@@ -418,17 +429,17 @@ export function ArticleImageEditor({ articleId, currentUrl, originalUrl, current
           </label>
         </div>
         {galeria.length === 0 ? (
-          <p className="text-[10px] italic text-muted-foreground">
-            Nenhuma foto na galeria. A foto #1 sempre será o destaque (capa da matéria).
+          <p className="text-[11px] italic text-slate-500">
+            Nenhuma foto na galeria. A foto 1 sempre é o destaque (capa da matéria).
           </p>
         ) : (
           <div className="grid gap-2 sm:grid-cols-2 md:grid-cols-3">
             {galeria.map((g, i) => (
-              <div key={g.url + i} className="flex flex-col gap-1 rounded border bg-muted/30 p-1">
-                <div className="relative h-24 w-full overflow-hidden rounded bg-muted">
+              <div key={g.url + i} className="flex flex-col gap-1 rounded-lg border border-slate-200 bg-slate-50 p-1.5">
+                <div className="relative h-24 w-full overflow-hidden rounded bg-slate-100">
                   <img src={g.url} alt={g.legenda ?? `Foto ${i + 1}`} className="h-full w-full object-cover" />
                   <span className="absolute left-1 top-1 rounded bg-[#12201E] px-1.5 py-0.5 text-[9px] font-bold text-white">
-                    #{i + 1}{i === 0 ? " (destaque)" : ""}
+                    {i + 1}{i === 0 ? " (destaque)" : ""}
                   </span>
                 </div>
                 <input
@@ -440,7 +451,7 @@ export function ArticleImageEditor({ articleId, currentUrl, originalUrl, current
                   }}
                   onBlur={() => saveGaleria(galeria)}
                   placeholder="Legenda"
-                  className="rounded border bg-white px-1.5 py-1 text-[10px]"
+                  className="rounded border border-slate-300 bg-white px-1.5 py-1 text-[11px]"
                   disabled={busy !== null}
                 />
                 <input
@@ -452,7 +463,7 @@ export function ArticleImageEditor({ articleId, currentUrl, originalUrl, current
                   }}
                   onBlur={() => saveGaleria(galeria)}
                   placeholder="Crédito"
-                  className="rounded border bg-white px-1.5 py-1 text-[10px]"
+                  className="rounded border border-slate-300 bg-white px-1.5 py-1 text-[11px]"
                   disabled={busy !== null}
                 />
                 <div className="flex flex-wrap gap-1">
@@ -460,29 +471,33 @@ export function ArticleImageEditor({ articleId, currentUrl, originalUrl, current
                     type="button"
                     onClick={() => moveGaleria(i, -1)}
                     disabled={busy !== null || i === 0}
-                    className="rounded border px-1.5 py-0.5 text-[10px] disabled:opacity-40"
+                    className={btn("ghost", "sm")}
                     title="Mover para cima"
-                  >↑</button>
+                    aria-label="Mover para cima"
+                  ><ArrowUp className="h-3.5 w-3.5" /></button>
                   <button
                     type="button"
                     onClick={() => moveGaleria(i, 1)}
                     disabled={busy !== null || i === galeria.length - 1}
-                    className="rounded border px-1.5 py-0.5 text-[10px] disabled:opacity-40"
+                    className={btn("ghost", "sm")}
                     title="Mover para baixo"
-                  >↓</button>
+                    aria-label="Mover para baixo"
+                  ><ArrowDown className="h-3.5 w-3.5" /></button>
                   <button
                     type="button"
                     onClick={() => setAsCover(i)}
                     disabled={busy !== null}
-                    className="rounded border border-[#12201E] px-1.5 py-0.5 text-[10px] font-semibold text-[#12201E] disabled:opacity-40"
+                    className={btn("secondary", "sm")}
                     title="Definir esta foto como capa"
-                  >★ Capa</button>
+                  ><Star className="h-3.5 w-3.5" /> Capa</button>
                   <button
                     type="button"
                     onClick={() => removeGaleriaItem(i)}
                     disabled={busy !== null}
-                    className="rounded border border-red-600 px-1.5 py-0.5 text-[10px] font-semibold text-red-600 disabled:opacity-40"
-                  >🗑</button>
+                    className={btn("danger", "sm")}
+                    title="Remover da galeria"
+                    aria-label="Remover da galeria"
+                  ><Trash2 className="h-3.5 w-3.5" /></button>
                 </div>
               </div>
             ))}

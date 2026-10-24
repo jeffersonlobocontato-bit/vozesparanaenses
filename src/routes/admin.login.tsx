@@ -86,7 +86,7 @@ function AdminLogin() {
         {err && <p className="text-xs text-red-600">{err}</p>}
         {resetMsg && <p className="text-xs text-green-700">{resetMsg}</p>}
         <button disabled={busy} type="submit"
-          className="w-full rounded bg-[#E29F65] px-3 py-2 text-sm font-semibold text-white hover:bg-[#0055aa] disabled:opacity-60">
+          className="w-full rounded bg-[#E29F65] px-3 py-2 text-sm font-semibold text-white hover:bg-[#1e3531] disabled:opacity-60">
           {busy ? "Entrando…" : "Entrar"}
         </button>
         <button type="button" onClick={onReset} disabled={resetBusy}

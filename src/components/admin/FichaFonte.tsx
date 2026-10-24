@@ -10,7 +10,9 @@ import {
   XAxis,
   YAxis,
 } from "recharts";
+import { X } from "lucide-react";
 import { getExternalBrowser } from "@/lib/external-supabase-browser";
+import { btn, ErrorBanner, StatusPill } from "@/components/admin/ui";
 
 /**
  * Ficha da fonte (painel admin → Fontes monitoradas): big numbers, série
@@ -93,22 +95,8 @@ const quando = (iso: string | null | undefined) =>
       })
     : "—";
 
-const STATUS_COR: Record<string, string> = {
-  publicado: "bg-emerald-100 text-emerald-800",
-  rascunho: "bg-amber-100 text-amber-800",
-  revisao: "bg-amber-100 text-amber-800",
-  rejeitado: "bg-slate-200 text-slate-700",
-  expirado: "bg-slate-200 text-slate-700",
-};
-
 function Status({ s }: { s: string }) {
-  return (
-    <span
-      className={`rounded px-1.5 py-0.5 text-[10px] font-semibold uppercase ${STATUS_COR[s] ?? "bg-slate-100 text-slate-700"}`}
-    >
-      {s}
-    </span>
-  );
+  return <StatusPill status={s} />;
 }
 
 function BigNumber({
@@ -200,7 +188,7 @@ export function FichaFonte({ fonteId, onClose }: { fonteId: string; onClose: () 
       <aside className="relative h-full w-full max-w-3xl overflow-y-auto bg-slate-50 shadow-2xl">
         <header className="sticky top-0 z-10 flex items-start justify-between gap-4 border-b border-slate-200 bg-white px-5 py-4">
           <div className="min-w-0">
-            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[#E29F65]">
+            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[#B5651D]">
               Ficha da fonte
             </p>
             <h2 className="mt-0.5 truncate text-xl font-bold text-[#12201E]">
@@ -208,13 +196,12 @@ export function FichaFonte({ fonteId, onClose }: { fonteId: string; onClose: () 
             </h2>
             {ficha?.fonte && (
               <p className="mt-1 flex flex-wrap items-center gap-x-2 gap-y-1 text-xs text-slate-500">
-                <span className="rounded bg-slate-100 px-1.5 py-0.5 font-semibold uppercase">
-                  {ficha.fonte.tipo}
-                </span>
+                <StatusPill
+                  status={ficha.fonte.tipo}
+                  label={ficha.fonte.tipo === "prefeitura" ? "Prefeitura" : "Veículo"}
+                />
+                <StatusPill status={ficha.fonte.ativo ? "ativa" : "inativa"} />
                 {ficha.fonte.regiao && <span>{ficha.fonte.regiao}</span>}
-                <span className={ficha.fonte.ativo ? "text-emerald-700" : "text-slate-500"}>
-                  {ficha.fonte.ativo ? "ativa" : "inativa"}
-                </span>
                 <a
                   href={ficha.fonte.url_base}
                   target="_blank"
@@ -226,21 +213,14 @@ export function FichaFonte({ fonteId, onClose }: { fonteId: string; onClose: () 
               </p>
             )}
           </div>
-          <button
-            type="button"
-            onClick={onClose}
-            className="rounded-full border border-slate-200 px-3 py-1 text-xs font-semibold text-slate-700 hover:border-[#E29F65]"
-          >
+          <button type="button" onClick={onClose} className={btn("secondary", "sm")}>
+            <X className="h-3.5 w-3.5" aria-hidden />
             Fechar
           </button>
         </header>
 
         <div className="space-y-6 p-5">
-          {erro && (
-            <p className="rounded border border-red-200 bg-red-50 p-3 text-sm text-red-700">
-              {erro}
-            </p>
-          )}
+          {erro && <ErrorBanner>{erro}</ErrorBanner>}
           {!ficha && !erro && <p className="text-sm text-slate-500">Carregando…</p>}
 
           {ficha && n && (

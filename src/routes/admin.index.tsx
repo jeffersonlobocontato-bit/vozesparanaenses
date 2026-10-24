@@ -5,8 +5,12 @@ import { ArticleImageEditor } from "@/components/admin/ArticleImageEditor";
 import { ArticleEditor } from "@/components/admin/ArticleEditor";
 import { ArticleVideoEditor } from "@/components/admin/ArticleVideoEditor";
 import { displayRegionName } from "@/lib/region-labels";
-import { ManualWriterBox } from "@/components/admin/ManualWriterBox";
-import { PageHeader, tabPillsWrapClass, tabPillClass } from "@/components/admin/ui";
+import { NovaMateria } from "@/components/admin/NovaMateria";
+import {
+  PageHeader, Section, btn, ConfirmButton, StatusPill, FilterBar, campoClass, rotuloClass,
+  EmptyState, ErrorBanner, Tabs,
+} from "@/components/admin/ui";
+import { ChevronDown, ExternalLink, Pencil, Pin, Plus, Trash2, X, Zap } from "lucide-react";
 
 type AdminQueueSearch = { edit?: string };
 
@@ -66,7 +70,14 @@ type Draft = {
 // "aprovado" não é mais usado: o fluxo automático publica direto ou deixa
 // em revisão (rascunho) pela criticidade.
 const STATUS_TABS: Draft["status"][] = ["rascunho", "publicado", "expirado", "rejeitado"];
-const STATUS_ROTULO: Partial<Record<Draft["status"], string>> = { rascunho: "Em revisão" };
+const STATUS_ROTULO: Record<Draft["status"], string> = {
+  rascunho: "Em revisão",
+  aprovado: "Aprovadas",
+  publicado: "Publicadas",
+  expirado: "Expiradas",
+  rejeitado: "Rejeitadas",
+};
+type AbaEdicao = "texto" | "imagem" | "video";
 
 function AdminQueue() {
   const editSlug = Route.useSearch({ select: (s) => s.edit });
@@ -79,6 +90,9 @@ function AdminQueue() {
   const [deleteBusyId, setDeleteBusyId] = useState<string | null>(null);
   const [bulkBusy, setBulkBusy] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
+  const [abaEdicao, setAbaEdicao] = useState<AbaEdicao>("texto");
+  const [novaAberta, setNovaAberta] = useState(false);
+  const [fixadasAbertas, setFixadasAbertas] = useState(false);
   // Filtros da lista (aplicados no banco, não só nas 50 carregadas).
   const [filtroCategoria, setFiltroCategoria] = useState("");
   const [filtroRegiao, setFiltroRegiao] = useState("");
@@ -188,7 +202,6 @@ function AdminQueue() {
   }, [editSlug, items]);
 
   async function unpin(id: string) {
-    if (!confirm("Desfixar esta matéria?")) return;
     setUnpinBusyId(id);
     try {
       const sb = await getExternalBrowser();
@@ -198,7 +211,7 @@ function AdminQueue() {
       if (error) throw error;
       await Promise.all([loadPinned(), load()]);
     } catch (e: unknown) {
-      alert(e instanceof Error ? e.message : "Falha ao desfixar");
+      setErr(e instanceof Error ? e.message : "Falha ao desfixar");
     } finally {
       setUnpinBusyId(null);
     }
@@ -214,14 +227,13 @@ function AdminQueue() {
       if (error) throw error;
       await Promise.all([load(), loadPinned()]);
     } catch (e: unknown) {
-      alert(e instanceof Error ? e.message : "Falha ao atualizar");
+      setErr(e instanceof Error ? e.message : "Falha ao atualizar");
     } finally {
       setBusyId(null);
     }
   }
 
   async function deleteOne(id: string) {
-    if (!confirm("Apagar esta matéria definitivamente? Esta ação não pode ser desfeita.")) return;
     setDeleteBusyId(id);
     try {
       const sb = await getExternalBrowser();
@@ -229,7 +241,7 @@ function AdminQueue() {
       if (error) throw error;
       await Promise.all([load(), loadPinned()]);
     } catch (e: unknown) {
-      alert(e instanceof Error ? e.message : "Falha ao apagar");
+      setErr(e instanceof Error ? e.message : "Falha ao apagar");
     } finally {
       setDeleteBusyId(null);
     }
@@ -238,10 +250,9 @@ function AdminQueue() {
   async function deleteAllInTab() {
     if (!items || items.length === 0) return;
     if (tab === "publicado") {
-      alert("Não é possível apagar em massa matérias publicadas. Despublique antes.");
+      setErr("Não é possível apagar em massa matérias publicadas. Despublique antes.");
       return;
     }
-    if (!confirm(`Apagar TODAS as ${items.length} matérias em «${tab}»? Esta ação não pode ser desfeita.`)) return;
     setBulkBusy(true);
     try {
       const sb = await getExternalBrowser();
@@ -250,11 +261,22 @@ function AdminQueue() {
       if (error) throw error;
       await load();
     } catch (e: unknown) {
-      alert(e instanceof Error ? e.message : "Falha ao apagar em massa");
+      setErr(e instanceof Error ? e.message : "Falha ao apagar em massa");
     } finally {
       setBulkBusy(false);
     }
   }
+
+  function abrirEditor(id: string) {
+    if (editingId === id) {
+      setEditingId(null);
+    } else {
+      setEditingId(id);
+      setAbaEdicao("texto");
+    }
+  }
+
+  const rotuloTab = STATUS_ROTULO[tab] ?? tab;
 
   return (
     <div className="space-y-6">
@@ -264,66 +286,81 @@ function AdminQueue() {
         subtitle="O que a criticidade segurou para revisão e o que já está no ar."
         actions={
           <>
-            <div className={tabPillsWrapClass()}>
-              {STATUS_TABS.map((s) => (
-                <button key={s} onClick={() => setTab(s)} className={`capitalize ${tabPillClass(tab === s)}`}>
-                  {STATUS_ROTULO[s] ?? s}
-                </button>
-              ))}
-            </div>
+            <Tabs<Draft["status"]>
+              value={tab}
+              onChange={setTab}
+              items={STATUS_TABS.map((s) => ({ value: s, label: STATUS_ROTULO[s] ?? s }))}
+            />
+            <button type="button" onClick={() => setNovaAberta((v) => !v)} className={btn("primary")} aria-expanded={novaAberta}>
+              {novaAberta ? <X className="h-4 w-4" /> : <Plus className="h-4 w-4" />}
+              {novaAberta ? "Fechar" : "Nova matéria"}
+            </button>
           </>
         }
       />
 
-      <ManualWriterBox onCreated={load} />
+      {novaAberta && (
+        <Section title="Nova matéria" subtitle="Fora do pipeline automático: a IA redige a partir de uma fonte, ou você publica o seu texto.">
+          <NovaMateria onCreated={load} />
+        </Section>
+      )}
 
-      <section className="rounded-2xl border-2 border-amber-300 bg-amber-50/70 p-4 shadow-sm">
-        <div className="mb-2 flex items-center justify-between">
-          <h2 className="text-sm font-bold text-amber-900">📌 Matérias fixadas ({pinned?.length ?? 0})</h2>
-          <span className="text-[11px] text-amber-800">Publicadas em destaque na home</span>
-        </div>
-        {pinned === null && <p className="text-xs text-amber-800">Carregando…</p>}
-        {pinned && pinned.length === 0 && (
-          <p className="text-xs text-amber-800">
-            Nenhuma matéria fixada. Abra uma matéria publicada, clique em «✎ Editar matéria» e escolha a posição de fixação (Manchete ou Lateral).
-          </p>
+      <Section
+        title={`Fixadas na home (${pinned?.length ?? 0})`}
+        padded={fixadasAbertas}
+        aside={
+          <button type="button" onClick={() => setFixadasAbertas((v) => !v)} className={btn("ghost", "sm")} aria-expanded={fixadasAbertas}>
+            <ChevronDown className={`h-3.5 w-3.5 transition ${fixadasAbertas ? "rotate-180" : ""}`} />
+            {fixadasAbertas ? "Recolher" : "Mostrar"}
+          </button>
+        }
+      >
+        {fixadasAbertas && (
+          <>
+            {pinned === null && <p className="text-xs text-slate-500">Carregando…</p>}
+            {pinned && pinned.length === 0 && (
+              <p className="text-xs text-slate-500">
+                Nenhuma matéria fixada. Abra uma matéria publicada, clique em «Editar», vá na aba «Fixação» e escolha Manchete ou Lateral.
+              </p>
+            )}
+            {pinned && pinned.length > 0 && (
+              <ul className="divide-y divide-slate-100">
+                {pinned.map((p) => (
+                  <li key={p.id} className="flex flex-wrap items-center gap-2 py-2 text-sm">
+                    <span className="inline-flex shrink-0 items-center gap-1 rounded-full bg-[#E29F65]/20 px-2 py-0.5 text-[11px] font-semibold text-[#12201E]">
+                      <Pin className="h-3 w-3" />
+                      {p.fixado_posicao === 0 ? "Manchete" : `Lateral ${p.fixado_posicao}`}
+                    </span>
+                    <span className="shrink-0 text-[11px] text-slate-500">{escopoFixacao(p)}</span>
+                    <span className="min-w-0 flex-1 truncate font-medium text-[#12201E]">{p.titulo}</span>
+                    {p.regiao && (
+                      <a href={`/${p.regiao.slug}/${p.slug}`} target="_blank" rel="noreferrer" className={btn("ghost", "sm")}>
+                        <ExternalLink className="h-3.5 w-3.5" /> Ver
+                      </a>
+                    )}
+                    <ConfirmButton
+                      onConfirm={() => unpin(p.id)}
+                      disabled={unpinBusyId === p.id}
+                      confirmLabel="Desfixar"
+                    >
+                      {unpinBusyId === p.id ? "Desfixando…" : "Desfixar"}
+                    </ConfirmButton>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </>
         )}
-        {pinned && pinned.length > 0 && (
-          <ul className="space-y-1.5">
-            {pinned.map((p) => {
-              const esc = p.fixado_escopo ?? "estado";
-              const escLabel = esc === "estado"
-                ? "Estado"
-                : esc === "regiao"
-                ? `Regiões: ${(p.fixado_regioes ?? []).slice(0, 2).join(", ") || "—"}${(p.fixado_regioes ?? []).length > 2 ? ` (+${(p.fixado_regioes ?? []).length - 2})` : ""}`
-                : `Cidades: ${(p.fixado_cidades ?? []).slice(0, 2).join(", ") || "—"}${(p.fixado_cidades ?? []).length > 2 ? ` (+${(p.fixado_cidades ?? []).length - 2})` : ""}`;
-              return (
-                <li key={p.id} className="flex items-center gap-2 rounded border border-amber-200 bg-white px-2 py-1.5 text-sm">
-                  <span className="shrink-0 rounded bg-amber-500 px-2 py-0.5 text-[11px] font-semibold text-white">
-                    {p.fixado_posicao === 0 ? "Manchete" : `Lateral ${p.fixado_posicao}`}
-                  </span>
-                  <span className="shrink-0 text-[11px] text-amber-900">{escLabel}</span>
-                  <span className="min-w-0 flex-1 truncate font-medium">{p.titulo}</span>
-                  {p.regiao && (
-                    <a href={`/${p.regiao.slug}/${p.slug}`} target="_blank" rel="noreferrer"
-                      className="shrink-0 rounded border px-2 py-0.5 text-[11px] hover:bg-accent">Ver</a>
-                  )}
-                  <button
-                    disabled={unpinBusyId === p.id}
-                    onClick={() => unpin(p.id)}
-                    className="shrink-0 rounded bg-red-600 px-2 py-0.5 text-[11px] font-semibold text-white hover:bg-red-700 disabled:opacity-60">
-                    {unpinBusyId === p.id ? "…" : "✕ Desfixar"}
-                  </button>
-                </li>
-              );
-            })}
-          </ul>
-        )}
-      </section>
+      </Section>
 
-      {/* Filtros: editoria, região e título */}
-      <div className="flex flex-wrap items-end gap-3 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
-        <label className="flex min-w-[180px] flex-1 flex-col gap-1 text-xs font-semibold text-slate-600" htmlFor="filtro-busca">
+      <FilterBar
+        resumo={items && (
+          <>
+            {items.length} matéria{items.length === 1 ? "" : "s"} em «{rotuloTab}»{filtrando ? " com esses filtros" : " (as 50 mais recentes)"}
+          </>
+        )}
+      >
+        <label className={`${rotuloClass} min-w-[180px] flex-1`} htmlFor="filtro-busca">
           Buscar no título
           <input
             id="filtro-busca"
@@ -331,28 +368,28 @@ function AdminQueue() {
             value={busca}
             onChange={(e) => setBusca(e.target.value)}
             placeholder="Ex.: Cascavel, vacinação, PUC-PR…"
-            className="rounded-lg border border-slate-300 px-3 py-2 text-sm font-normal text-slate-900"
+            className={`${campoClass} font-normal`}
           />
         </label>
-        <label className="flex min-w-[160px] flex-col gap-1 text-xs font-semibold text-slate-600" htmlFor="filtro-editoria">
+        <label className={`${rotuloClass} min-w-[160px]`} htmlFor="filtro-editoria">
           Editoria
           <select
             id="filtro-editoria"
             value={filtroCategoria}
             onChange={(e) => setFiltroCategoria(e.target.value)}
-            className="rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm font-normal text-slate-900"
+            className={`${campoClass} font-normal`}
           >
             <option value="">Todas</option>
             {opcoes.categorias.map((c) => <option key={c.id} value={c.id}>{c.nome}</option>)}
           </select>
         </label>
-        <label className="flex min-w-[160px] flex-col gap-1 text-xs font-semibold text-slate-600" htmlFor="filtro-regiao">
+        <label className={`${rotuloClass} min-w-[160px]`} htmlFor="filtro-regiao">
           Região
           <select
             id="filtro-regiao"
             value={filtroRegiao}
             onChange={(e) => setFiltroRegiao(e.target.value)}
-            className="rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm font-normal text-slate-900"
+            className={`${campoClass} font-normal`}
           >
             <option value="">Todas</option>
             {opcoes.regioes.map((r) => <option key={r.id} value={r.id}>{r.nome}</option>)}
@@ -362,159 +399,198 @@ function AdminQueue() {
           <button
             type="button"
             onClick={() => { setFiltroCategoria(""); setFiltroRegiao(""); setBusca(""); }}
-            className="rounded-lg border border-slate-300 px-3 py-2 text-sm text-slate-700 hover:bg-slate-50"
+            className={btn("ghost")}
           >
             Limpar filtros
           </button>
         )}
-        {items && (
-          <span className="ml-auto self-center text-xs text-slate-500">
-            {items.length} matéria{items.length === 1 ? "" : "s"} em «{tab}»{filtrando ? " com esses filtros" : " (as 50 mais recentes)"}
-          </span>
-        )}
-      </div>
+      </FilterBar>
 
-      {err && <p className="rounded-xl border border-red-200 bg-red-50 p-3 text-sm text-red-700">{err}</p>}
+      {err && <ErrorBanner>{err}</ErrorBanner>}
       {!items && !err && <p className="text-sm text-slate-500">Carregando…</p>}
-      {items && items.length === 0 && <p className="text-sm text-slate-500">{filtrando ? "Nenhuma matéria com esses filtros." : `Nada em «${tab}».`}</p>}
+      {items && items.length === 0 && (
+        <EmptyState title={filtrando ? "Nenhuma matéria com esses filtros." : `Nenhuma matéria em «${rotuloTab}».`}>
+          {filtrando ? "Mude ou limpe os filtros para ver mais." : null}
+        </EmptyState>
+      )}
 
       {items && items.length > 0 && tab !== "publicado" && (
         <div className="flex justify-end">
-          <button
-            onClick={deleteAllInTab}
+          <ConfirmButton
+            onConfirm={deleteAllInTab}
             disabled={bulkBusy}
-            className="rounded-full border border-red-300 bg-red-50 px-3.5 py-1.5 text-xs font-semibold text-red-700 hover:bg-red-100 disabled:opacity-60"
+            confirmLabel={`Sim, apagar ${items.length} definitivamente`}
+            title="Apaga só as matérias que aparecem na lista abaixo. Não pode ser desfeito."
           >
-            {bulkBusy ? "Apagando…" : `🗑 Apagar todas as ${items.length} em «${tab}»`}
-          </button>
+            <Trash2 className="h-3.5 w-3.5" />
+            {bulkBusy
+              ? "Apagando…"
+              : `Apagar as ${items.length} matérias desta lista (${rotuloTab}${filtrando ? ", com os filtros atuais" : ""})`}
+          </ConfirmButton>
         </div>
       )}
 
       <ul className="space-y-3">
-        {items?.map((it) => (
-          <li key={it.id} className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
-            <div className="mb-1 flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
-              {it.regiao && <span className="rounded bg-[#12201E] px-2 py-0.5 font-semibold text-white">{displayRegionName(it.regiao.slug, it.regiao.nome)}</span>}
-              {it.categoria && <span className="rounded bg-[#E29F65] px-2 py-0.5 font-semibold text-white">{it.categoria.nome}</span>}
-              {it.publicado_automaticamente && (
-                <span className="rounded bg-emerald-600 px-2 py-0.5 font-semibold text-white" title="Sem foto real da fonte e interesse alto o bastante — publicou sozinha, sem espera por decisão">
-                  ⚡ Publicação automática
-                </span>
-              )}
-              {typeof it.fixado_posicao === "number" && it.fixado_posicao !== null && (
-                <span className="rounded bg-amber-500 px-2 py-0.5 font-semibold text-white">
-                  📌 {it.fixado_posicao === 0 ? "Manchete" : `Lateral ${it.fixado_posicao}`}
-                  {" · "}
-                  {(() => {
-                    const esc = it.fixado_escopo ?? "estado";
-                    if (esc === "estado") return "Estado";
-                    if (esc === "regiao") {
-                      const list = it.fixado_regioes ?? [];
-                      if (list.length === 0) return "Regiões";
-                      const first = list.slice(0, 2).join(", ");
-                      const extra = list.length > 2 ? ` (+${list.length - 2})` : "";
-                      return `Regiões: ${first}${extra}`;
-                    }
-                    const list = it.fixado_cidades ?? [];
-                    if (list.length === 0) return "Cidades";
-                    const first = list.slice(0, 2).join(", ");
-                    const extra = list.length > 2 ? ` (+${list.length - 2})` : "";
-                    return `Cidades: ${first}${extra}`;
-                  })()}
-                </span>
-              )}
-              <span>{new Date(it.gerado_em).toLocaleString("pt-BR")}</span>
-            </div>
-            <h2 className="text-lg font-semibold leading-snug">{it.titulo}</h2>
-            <CriticidadeAviso nivel={it.criticidade_nivel} motivos={it.criticidade_motivos} />
-            {it.subtitulo && <p className="mt-1 text-sm text-muted-foreground">{it.subtitulo}</p>}
-            {it.resumo && <p className="mt-2 text-sm">{it.resumo}</p>}
-            <ArticleImageEditor
-              articleId={it.id}
-              currentUrl={it.imagem_capa_url}
-              originalUrl={it.imagem_original_url}
-              currentCredito={it.imagem_credito}
-              currentLegenda={it.imagem_legenda}
-              currentGaleria={it.imagem_galeria}
-              onUpdated={load}
-            />
-            <ArticleVideoEditor
-              articleId={it.id}
-              currentUrl={it.video_embed_url}
-              currentLegenda={it.video_legenda}
-              currentCredito={it.video_credito}
-              onUpdated={load}
-            />
-            {editingId === it.id ? (
-              <ArticleEditor
-                articleId={it.id}
-                initial={{
-                  titulo: it.titulo,
-                  subtitulo: it.subtitulo,
-                  resumo: it.resumo,
-                  corpo: it.corpo,
-                  slug: it.slug,
-                  seo_title: it.seo_title,
-                  seo_description: it.seo_description,
-                  editor_responsavel: it.editor_responsavel,
-                  fixado_posicao: it.fixado_posicao ?? null,
-                  fixado_escopo: it.fixado_escopo ?? null,
-                  fixado_regioes: it.fixado_regioes ?? null,
-                  fixado_cidades: it.fixado_cidades ?? null,
-                  regiao_id: it.regiao_id ?? null,
-                  categoria_id: it.categoria_id ?? null,
-                  tldr: it.tldr ?? null,
-                  fatos_5w1h: it.fatos_5w1h ?? null,
-                  faq: it.faq ?? null,
-                  publicado_em: it.publicado_em ?? null,
-                }}
-                onSaved={() => { saveAndStay(); }}
-                onCancel={() => setEditingId(null)}
-              />
-            ) : null}
-            <div className="mt-3 flex flex-wrap gap-2">
-              <button onClick={() => setEditingId(editingId === it.id ? null : it.id)}
-                className="rounded border px-3 py-1 text-xs font-semibold hover:bg-accent">
-                {editingId === it.id ? "Fechar editor" : "✎ Editar matéria"}
-              </button>
-              {it.status === "publicado" && it.regiao && (
-                <a href={`/${it.regiao.slug}/${it.slug}`} target="_blank" rel="noreferrer"
-                  className="rounded border px-3 py-1 text-xs hover:bg-accent">Ver no site</a>
-              )}
-              {it.status !== "publicado" && (
-                <button disabled={busyId === it.id} onClick={() => updateStatus(it.id, "publicado")}
-                  className="rounded bg-green-600 px-3 py-1 text-xs font-semibold text-white hover:bg-green-700 disabled:opacity-60">
-                  Publicar
+        {items?.map((it) => {
+          const editando = editingId === it.id;
+          const quando = it.status === "publicado" && it.publicado_em
+            ? `Publicada em ${new Date(it.publicado_em).toLocaleString("pt-BR")}`
+            : `Gerada em ${new Date(it.gerado_em).toLocaleString("pt-BR")}`;
+          return (
+            <li key={it.id} className={`rounded-2xl border bg-white p-4 shadow-sm ${editando ? "border-[#12201E]" : "border-slate-200"}`}>
+              <div className="flex flex-wrap items-center gap-2 text-xs text-slate-500">
+                <StatusPill status={it.status} />
+                {it.regiao && <span className="font-semibold text-[#12201E]">{displayRegionName(it.regiao.slug, it.regiao.nome)}</span>}
+                {it.categoria && <span className="rounded-full bg-[#E29F65]/20 px-2 py-0.5 font-semibold text-[#12201E]">{it.categoria.nome}</span>}
+                {it.publicado_automaticamente && (
+                  <span className="inline-flex items-center gap-1 text-emerald-700" title="Sem foto real da fonte e interesse alto o bastante: publicou sozinha, sem esperar decisão">
+                    <Zap className="h-3 w-3" /> Publicação automática
+                  </span>
+                )}
+                {typeof it.fixado_posicao === "number" && it.fixado_posicao !== null && (
+                  <span className="inline-flex items-center gap-1 rounded-full bg-[#E29F65]/20 px-2 py-0.5 font-semibold text-[#12201E]">
+                    <Pin className="h-3 w-3" />
+                    {it.fixado_posicao === 0 ? "Manchete" : `Lateral ${it.fixado_posicao}`}
+                    {" · "}
+                    {escopoFixacao(it)}
+                  </span>
+                )}
+                <span className="ml-auto">{quando}</span>
+              </div>
+              <h2 className="mt-1.5 text-base font-semibold leading-snug text-[#12201E]">{it.titulo}</h2>
+              <CriticidadeAviso nivel={it.criticidade_nivel} motivos={it.criticidade_motivos} />
+
+              <div className="mt-3 flex flex-wrap items-center gap-2">
+                <button type="button" onClick={() => abrirEditor(it.id)} className={btn("secondary", "sm")} aria-expanded={editando}>
+                  {editando ? <X className="h-3.5 w-3.5" /> : <Pencil className="h-3.5 w-3.5" />}
+                  {editando ? "Fechar editor" : "Editar"}
                 </button>
+                {it.status === "publicado" && it.regiao && (
+                  <a href={`/${it.regiao.slug}/${it.slug}`} target="_blank" rel="noreferrer" className={btn("ghost", "sm")}>
+                    <ExternalLink className="h-3.5 w-3.5" /> Ver no site
+                  </a>
+                )}
+                {it.status !== "publicado" && (
+                  <ConfirmButton
+                    variante="success"
+                    confirmLabel="Publicar agora"
+                    disabled={busyId === it.id}
+                    onConfirm={() => updateStatus(it.id, "publicado")}
+                  >
+                    Publicar
+                  </ConfirmButton>
+                )}
+                {it.status !== "rejeitado" && it.status !== "publicado" && (
+                  <ConfirmButton
+                    confirmLabel="Rejeitar matéria"
+                    disabled={busyId === it.id}
+                    onConfirm={() => updateStatus(it.id, "rejeitado")}
+                  >
+                    Rejeitar
+                  </ConfirmButton>
+                )}
+                {it.status === "publicado" && (
+                  <ConfirmButton
+                    confirmLabel="Tirar do ar"
+                    disabled={busyId === it.id}
+                    onConfirm={() => updateStatus(it.id, "rascunho")}
+                    title="Volta a matéria para «Em revisão»"
+                  >
+                    Despublicar
+                  </ConfirmButton>
+                )}
+                {it.status !== "publicado" && (
+                  <span className="ml-auto">
+                    <ConfirmButton
+                      confirmLabel="Apagar definitivamente"
+                      disabled={deleteBusyId === it.id}
+                      onConfirm={() => deleteOne(it.id)}
+                      title="Apagar definitivamente. Não pode ser desfeito."
+                    >
+                      <Trash2 className="h-3.5 w-3.5" />
+                      {deleteBusyId === it.id ? "Apagando…" : "Apagar"}
+                    </ConfirmButton>
+                  </span>
+                )}
+              </div>
+
+              {editando && (
+                <div className="mt-4 space-y-4 border-t border-slate-100 pt-4">
+                  <Tabs<AbaEdicao>
+                    value={abaEdicao}
+                    onChange={setAbaEdicao}
+                    items={[
+                      { value: "texto", label: "Texto" },
+                      { value: "imagem", label: "Imagem" },
+                      { value: "video", label: "Vídeo" },
+                    ]}
+                  />
+                  {abaEdicao === "texto" && (
+                    <ArticleEditor
+                      articleId={it.id}
+                      initial={{
+                        titulo: it.titulo,
+                        subtitulo: it.subtitulo,
+                        resumo: it.resumo,
+                        corpo: it.corpo,
+                        slug: it.slug,
+                        seo_title: it.seo_title,
+                        seo_description: it.seo_description,
+                        editor_responsavel: it.editor_responsavel,
+                        fixado_posicao: it.fixado_posicao ?? null,
+                        fixado_escopo: it.fixado_escopo ?? null,
+                        fixado_regioes: it.fixado_regioes ?? null,
+                        fixado_cidades: it.fixado_cidades ?? null,
+                        regiao_id: it.regiao_id ?? null,
+                        categoria_id: it.categoria_id ?? null,
+                        tldr: it.tldr ?? null,
+                        fatos_5w1h: it.fatos_5w1h ?? null,
+                        faq: it.faq ?? null,
+                        publicado_em: it.publicado_em ?? null,
+                      }}
+                      onSaved={() => { saveAndStay(); }}
+                      onCancel={() => setEditingId(null)}
+                    />
+                  )}
+                  {abaEdicao === "imagem" && (
+                    <ArticleImageEditor
+                      articleId={it.id}
+                      currentUrl={it.imagem_capa_url}
+                      originalUrl={it.imagem_original_url}
+                      currentCredito={it.imagem_credito}
+                      currentLegenda={it.imagem_legenda}
+                      currentGaleria={it.imagem_galeria}
+                      onUpdated={saveAndStay}
+                    />
+                  )}
+                  {abaEdicao === "video" && (
+                    <ArticleVideoEditor
+                      articleId={it.id}
+                      currentUrl={it.video_embed_url}
+                      currentLegenda={it.video_legenda}
+                      currentCredito={it.video_credito}
+                      onUpdated={saveAndStay}
+                    />
+                  )}
+                </div>
               )}
-              {it.status !== "rejeitado" && it.status !== "publicado" && (
-                <button disabled={busyId === it.id} onClick={() => updateStatus(it.id, "rejeitado")}
-                  className="rounded border border-red-300 px-3 py-1 text-xs text-red-700 hover:bg-red-50 disabled:opacity-60">
-                  Rejeitar
-                </button>
-              )}
-              {it.status === "publicado" && (
-                <button disabled={busyId === it.id} onClick={() => updateStatus(it.id, "rascunho")}
-                  className="rounded border px-3 py-1 text-xs hover:bg-accent disabled:opacity-60">
-                  Despublicar
-                </button>
-              )}
-              {it.status !== "publicado" && (
-                <button
-                  disabled={deleteBusyId === it.id}
-                  onClick={() => deleteOne(it.id)}
-                  className="ml-auto rounded border border-red-300 px-3 py-1 text-xs font-semibold text-red-700 hover:bg-red-50 disabled:opacity-60"
-                  title="Apagar definitivamente"
-                >
-                  {deleteBusyId === it.id ? "Apagando…" : "🗑 Apagar"}
-                </button>
-              )}
-            </div>
-          </li>
-        ))}
+            </li>
+          );
+        })}
       </ul>
     </div>
   );
+}
+
+// Texto curto do escopo de uma fixação (estado, regiões ou cidades).
+function escopoFixacao(p: Pick<Draft, "fixado_escopo" | "fixado_regioes" | "fixado_cidades">): string {
+  const esc = p.fixado_escopo ?? "estado";
+  if (esc === "estado") return "Estado";
+  const list = (esc === "regiao" ? p.fixado_regioes : p.fixado_cidades) ?? [];
+  const nome = esc === "regiao" ? "Regiões" : "Cidades";
+  if (list.length === 0) return nome;
+  const extra = list.length > 2 ? ` (+${list.length - 2})` : "";
+  return `${nome}: ${list.slice(0, 2).join(", ")}${extra}`;
 }
 
 // Por que o agente de criticidade segurou a matéria (só aparece se houver risco).
@@ -525,7 +601,7 @@ function CriticidadeAviso({ nivel, motivos }: { nivel?: Draft["criticidade_nivel
     : nivel === "alto" ? "border-orange-300 bg-orange-50 text-orange-800"
     : "border-amber-300 bg-amber-50 text-amber-800";
   return (
-    <div className={`mt-2 rounded border px-3 py-2 text-xs ${cor}`}>
+    <div className={`mt-2 rounded-lg border px-3 py-2 text-xs ${cor}`}>
       <span className="font-bold uppercase tracking-wide">Criticidade {nivel}</span>
       {motivos?.length ? (
         <ul className="mt-1 list-disc pl-4">

@@ -2,7 +2,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useCallback, useEffect, useState } from "react";
 import { getExternalBrowser } from "@/lib/external-supabase-browser";
 import { displayRegionName } from "@/lib/region-labels";
-import { PublishArticleBox } from "@/components/admin/PublishArticleBox";
+import { NovaMateria } from "@/components/admin/NovaMateria";
 import { CicloConteudo } from "@/components/admin/CicloConteudo";
 import { PageHeader, refreshBtnClass } from "@/components/admin/ui";
 import { AGENDA_076, type JobCron } from "@/lib/pipeline-agenda";
@@ -233,13 +233,13 @@ function AdminDashboard() {
       <details className="group rounded-2xl border border-slate-200 bg-white shadow-sm">
         <summary className="flex cursor-pointer list-none items-center justify-between px-5 py-4">
           <div>
-            <h2 className="text-sm font-bold uppercase tracking-[0.14em] text-[#12201E]">Publicar matéria manualmente</h2>
-            <p className="text-xs text-slate-500">Texto próprio ou de parceiro. A IA completa SEO, TL;DR, 5W1H e FAQ.</p>
+            <h2 className="text-sm font-bold uppercase tracking-[0.14em] text-[#12201E]">Nova matéria</h2>
+            <p className="text-xs text-slate-500">A IA redige a partir de um link ou texto, ou você publica o seu texto e a IA completa SEO, TL;DR, 5W1H e FAQ.</p>
           </div>
           <ChevronDown className="h-4 w-4 text-slate-400 transition group-open:rotate-180" />
         </summary>
         <div className="border-t border-slate-100 p-5">
-          <PublishArticleBox />
+          <NovaMateria />
         </div>
       </details>
     </div>

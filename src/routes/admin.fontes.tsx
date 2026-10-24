@@ -1,8 +1,22 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useMemo, useState, useCallback } from "react";
+import { Pencil, Plus, RefreshCw, Trash2, X } from "lucide-react";
 import { getExternalBrowser } from "@/lib/external-supabase-browser";
 import { displayRegionName } from "@/lib/region-labels";
-import { PageHeader, refreshBtnClass, tabPillsWrapClass, tabPillClass } from "@/components/admin/ui";
+import {
+  PageHeader,
+  Section,
+  btn,
+  ConfirmButton,
+  StatusPill,
+  FilterBar,
+  campoClass,
+  rotuloClass,
+  EmptyState,
+  ErrorBanner,
+  Aviso,
+  Tabs,
+} from "@/components/admin/ui";
 import { FichaFonte } from "@/components/admin/FichaFonte";
 
 export const Route = createFileRoute("/admin/fontes")({
@@ -62,8 +76,11 @@ function AdminFontes() {
   const [msg, setMsg] = useState<string | null>(null);
   const [form, setForm] = useState(empty);
   const [editingId, setEditingId] = useState<string | null>(null);
+  const [formAberto, setFormAberto] = useState(false);
   const [busy, setBusy] = useState(false);
   const [tab, setTab] = useState<"veiculo" | "prefeitura">("veiculo");
+  const [busca, setBusca] = useState("");
+  const [situacao, setSituacao] = useState<"todas" | "ativas" | "inativas">("todas");
   const [estat, setEstat] = useState<Map<string, Estat> | null>(null);
   const [fichaId, setFichaId] = useState<string | null>(null);
   const fecharFicha = useCallback(() => setFichaId(null), []);
@@ -103,10 +120,24 @@ function AdminFontes() {
       ativo: f.ativo,
       email_imprensa: f.email_imprensa ?? "",
     });
+    setMsg(null);
+    setFormAberto(true);
     window.scrollTo({ top: 0, behavior: "smooth" });
   }
 
-  function resetForm() { setEditingId(null); setForm(empty); }
+  function novaFonte() {
+    setEditingId(null);
+    setForm(empty);
+    setMsg(null);
+    setFormAberto(true);
+  }
+
+  function resetForm() { setEditingId(null); setForm(empty); setFormAberto(false); }
+
+  function trocarAba(t: "veiculo" | "prefeitura") {
+    setTab(t);
+    resetForm();
+  }
 
   async function save(e: React.FormEvent) {
     e.preventDefault();
@@ -147,175 +178,238 @@ function AdminFontes() {
   }
 
   async function remove(f: Fonte) {
-    if (!confirm(`Remover fonte "${f.nome}"? Isso apaga também os artigos brutos coletados dela.`)) return;
     const sb = await getExternalBrowser();
     const { error } = await sb.from("fontes").delete().eq("id", f.id);
-    if (error) { alert(error.message); return; }
+    if (error) { setMsg("Falha: " + error.message); return; }
     load();
   }
+
+  const contagem = useMemo(() => {
+    const c = { veiculo: 0, prefeitura: 0 };
+    for (const f of items ?? []) c[(f.tipo ?? "veiculo") as "veiculo" | "prefeitura"]++;
+    return c;
+  }, [items]);
+
+  const filtered = useMemo(() => {
+    if (!items) return null;
+    const q = busca.trim().toLowerCase();
+    return items.filter((f) => {
+      if ((f.tipo ?? "veiculo") !== tab) return false;
+      if (situacao === "ativas" && !f.ativo) return false;
+      if (situacao === "inativas" && f.ativo) return false;
+      if (q && !f.nome.toLowerCase().includes(q) && !f.url_base.toLowerCase().includes(q)) return false;
+      return true;
+    });
+  }, [items, tab, busca, situacao]);
+
+  const totalAba = tab === "prefeitura" ? contagem.prefeitura : contagem.veiculo;
+  const th = "px-4 py-2.5 text-left text-[11px] font-semibold uppercase tracking-wider text-slate-500";
+  const td = "px-4 py-2.5 align-top";
+  const ehPref = tab === "prefeitura";
 
   return (
     <div className="space-y-6">
       <PageHeader
-        eyebrow="Fontes"
-        title="Fontes monitoradas"
-        subtitle="Veículos de imprensa e assessorias oficiais das prefeituras."
-        actions={<button onClick={load} className={refreshBtnClass()}>Atualizar</button>}
+        eyebrow="Coleta"
+        title="Fontes"
+        subtitle="Veículos de imprensa e assessorias oficiais das prefeituras que o robô lê."
+        actions={
+          <>
+            <button type="button" onClick={load} className={btn("secondary")}>
+              <RefreshCw className="h-4 w-4" aria-hidden /> Atualizar
+            </button>
+            <button type="button" onClick={novaFonte} className={btn("primary")}>
+              <Plus className="h-4 w-4" aria-hidden /> {ehPref ? "Nova prefeitura" : "Nova fonte"}
+            </button>
+          </>
+        }
       />
 
       {/* Módulos separados de propósito — scraping, cadastro e critério de
           relevância são diferentes entre veículo de imprensa e assessoria
           de prefeitura (ver 024_fontes_prefeitura.sql). */}
-      <div className={tabPillsWrapClass() + " w-fit"}>
-        <button onClick={() => { setTab("veiculo"); resetForm(); }} className={tabPillClass(tab === "veiculo")}>
-          Veículos de imprensa
-        </button>
-        <button onClick={() => { setTab("prefeitura"); resetForm(); }} className={tabPillClass(tab === "prefeitura")}>
-          🏛️ Prefeituras
-        </button>
-      </div>
-      {tab === "prefeitura" && (
-        <p className="rounded border bg-muted p-3 text-xs text-muted-foreground">
-          Fonte oficial: o scraping roda numa função separada (<code>scrape-prefeitura</code>) e a matéria não precisa de outro veículo cobrindo o mesmo fato pra ser relevante — é elegível sozinha, por ser primária.
+      <Tabs
+        value={tab}
+        onChange={trocarAba}
+        items={[
+          { value: "veiculo", label: "Veículos", count: items ? contagem.veiculo : undefined },
+          { value: "prefeitura", label: "Prefeituras", count: items ? contagem.prefeitura : undefined },
+        ]}
+      />
+      {ehPref && (
+        <p className="text-xs text-slate-500">
+          Fonte oficial e primária: coletada pela função <code>scrape-prefeitura</code> e elegível mesmo sem outro veículo cobrindo o fato.
         </p>
       )}
 
-      <form onSubmit={save} className="grid gap-3 rounded-2xl border border-slate-200 bg-white shadow-sm p-4 md:grid-cols-2">
-        <div className="md:col-span-2 flex items-center justify-between">
-          <h2 className="font-semibold">
-            {editingId ? "Editar fonte" : tab === "prefeitura" ? "Nova prefeitura" : "Nova fonte"}
-          </h2>
-          {editingId && <button type="button" onClick={resetForm} className="text-xs text-muted-foreground hover:underline">cancelar edição</button>}
-        </div>
-        <label className="text-sm">
-          <span className="mb-1 block text-xs font-medium">Nome</span>
-          <input required value={form.nome} onChange={(e) => setForm({ ...form, nome: e.target.value })}
-            className="w-full rounded border px-2 py-1.5" placeholder={tab === "prefeitura" ? "Ex: Prefeitura de Cascavel" : "Ex: Catve"} />
-        </label>
-        <label className="text-sm">
-          <span className="mb-1 block text-xs font-medium">URL base (RSS ou home de notícias)</span>
-          <input required type="url" value={form.url_base} onChange={(e) => setForm({ ...form, url_base: e.target.value })}
-            className="w-full rounded border px-2 py-1.5" placeholder={tab === "prefeitura" ? "https://cidade.pr.gov.br/noticias/" : "https://catve.com/rss"} />
-        </label>
-        <label className="text-sm">
-          <span className="mb-1 block text-xs font-medium">Região</span>
-          <select value={form.regiao_id} onChange={(e) => setForm({ ...form, regiao_id: e.target.value })}
-            className="w-full rounded border px-2 py-1.5">
-            <option value="">— sem região —</option>
-            {regioes.map((r) => <option key={r.id} value={r.id}>{r.nome}</option>)}
-          </select>
-        </label>
-        <label className="text-sm">
-          <span className="mb-1 block text-xs font-medium">Renderização</span>
-          <select value={form.tipo_renderizacao} onChange={(e) => setForm({ ...form, tipo_renderizacao: e.target.value as "estatico" | "spa_js" })}
-            className="w-full rounded border px-2 py-1.5">
-            <option value="estatico">Estático (RSS/HTML)</option>
-            <option value="spa_js">SPA com JS</option>
-          </select>
-        </label>
-        <label className="text-sm">
-          <span className="mb-1 block text-xs font-medium">Frequência (horas) — deixe vazio para seguir os ciclos fixos da frente</span>
-          <input type="number" min={1} value={form.frequencia_horas} placeholder="ciclos fixos"
-            onChange={(e) => setForm({ ...form, frequencia_horas: e.target.value })}
-            className="w-full rounded border px-2 py-1.5" />
-        </label>
-        {tab === "prefeitura" && (
-          <label className="text-sm">
-            <span className="mb-1 block text-xs font-medium">E-mail da assessoria de imprensa</span>
-            <input type="email" value={form.email_imprensa} onChange={(e) => setForm({ ...form, email_imprensa: e.target.value })}
-              className="w-full rounded border px-2 py-1.5" placeholder="imprensa@cidade.pr.gov.br" />
-          </label>
-        )}
-        <div className="flex items-center gap-6 pt-4 md:pt-6">
-          <label className="flex items-center gap-2 text-sm">
-            <input type="checkbox" checked={form.ativo} onChange={(e) => setForm({ ...form, ativo: e.target.checked })} />
-            Ativa
-          </label>
-          <label className="flex items-center gap-2 text-sm">
-            <input type="checkbox" checked={form.protecao_antibot} onChange={(e) => setForm({ ...form, protecao_antibot: e.target.checked })} />
-            Proteção antibot
-          </label>
-        </div>
-        <div className="md:col-span-2">
-          <button disabled={busy} className="rounded bg-[#E29F65] px-4 py-2 text-sm font-semibold text-white hover:bg-[#0055aa] disabled:opacity-60">
-            {busy ? "Salvando…" : editingId ? "Salvar alterações" : tab === "prefeitura" ? "Adicionar prefeitura" : "Adicionar fonte"}
-          </button>
-          {msg && <span className="ml-3 text-xs text-muted-foreground">{msg}</span>}
-        </div>
-      </form>
-
-      {err && <p className="rounded border border-red-200 bg-red-50 p-3 text-sm text-red-700">{err}</p>}
-      {!items && !err && <p className="text-sm text-muted-foreground">Carregando…</p>}
-
-      {(() => {
-        const filtered = items?.filter((f) => (f.tipo ?? "veiculo") === tab) ?? null;
-        return (
-          <>
-            {filtered && filtered.length === 0 && (
-              <p className="text-sm text-muted-foreground">
-                {tab === "prefeitura" ? "Nenhuma prefeitura cadastrada ainda." : "Nenhuma fonte cadastrada."}
-              </p>
+      {formAberto && (
+        <Section
+          title={editingId ? "Editar fonte" : ehPref ? "Nova prefeitura" : "Nova fonte"}
+          aside={
+            <button type="button" onClick={resetForm} className={btn("ghost", "sm")}>
+              <X className="h-3.5 w-3.5" aria-hidden /> Cancelar
+            </button>
+          }
+        >
+          <form onSubmit={save} className="grid gap-4 md:grid-cols-2">
+            <label className={rotuloClass}>
+              Nome
+              <input required value={form.nome} onChange={(e) => setForm({ ...form, nome: e.target.value })}
+                className={campoClass} placeholder={ehPref ? "Ex: Prefeitura de Cascavel" : "Ex: Catve"} />
+            </label>
+            <label className={rotuloClass}>
+              URL base (RSS ou página de notícias)
+              <input required type="url" value={form.url_base} onChange={(e) => setForm({ ...form, url_base: e.target.value })}
+                className={campoClass} placeholder={ehPref ? "https://cidade.pr.gov.br/noticias/" : "https://catve.com/rss"} />
+            </label>
+            <label className={rotuloClass}>
+              Região
+              <select value={form.regiao_id} onChange={(e) => setForm({ ...form, regiao_id: e.target.value })} className={campoClass}>
+                <option value="">Sem região</option>
+                {regioes.map((r) => <option key={r.id} value={r.id}>{r.nome}</option>)}
+              </select>
+            </label>
+            <label className={rotuloClass}>
+              Renderização
+              <select value={form.tipo_renderizacao} onChange={(e) => setForm({ ...form, tipo_renderizacao: e.target.value as "estatico" | "spa_js" })} className={campoClass}>
+                <option value="estatico">Estático (RSS/HTML)</option>
+                <option value="spa_js">SPA com JavaScript</option>
+              </select>
+            </label>
+            {ehPref && (
+              <label className={rotuloClass}>
+                E-mail da assessoria de imprensa
+                <input type="email" value={form.email_imprensa} onChange={(e) => setForm({ ...form, email_imprensa: e.target.value })}
+                  className={campoClass} placeholder="imprensa@cidade.pr.gov.br" />
+              </label>
             )}
-            <div className="overflow-x-auto rounded-lg border">
-              <table className="w-full text-sm">
-                <thead className="bg-muted text-xs uppercase text-muted-foreground">
-                  <tr>
-                    <th className="px-3 py-2 text-left">Fonte</th>
-                    <th className="px-3 py-2 text-left">Região</th>
-                    <th className="px-3 py-2 text-left">Tipo</th>
-                    <th className="px-3 py-2 text-left">Freq.</th>
-                    <th className="px-3 py-2 text-right" title="Matérias + notas publicadas geradas desta fonte">Notícias</th>
-                    <th className="px-3 py-2 text-left">Último scrape</th>
-                    {tab === "prefeitura" && <th className="px-3 py-2 text-left">E-mail imprensa</th>}
-                    <th className="px-3 py-2 text-left">Status</th>
-                    <th className="px-3 py-2"></th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {filtered?.map((f) => (
-                    <tr key={f.id} className="border-t">
-                      <td className="px-3 py-2">
-                        <button type="button" onClick={() => setFichaId(f.id)} className="text-left font-medium text-[#12201E] underline-offset-2 hover:text-[#E29F65] hover:underline" title="Abrir ficha da fonte">
-                          {f.nome}
-                        </button>
-                        <a href={f.url_base} target="_blank" rel="noreferrer" className="text-xs text-muted-foreground hover:underline">{f.url_base}</a>
-                      </td>
-                      <td className="px-3 py-2 text-xs">{f.regiao ? displayRegionName(f.regiao.slug, f.regiao.nome) : "—"}</td>
-                      <td className="px-3 py-2 text-xs">{f.tipo_renderizacao === "spa_js" ? "SPA" : "Estático"}{f.protecao_antibot ? " · antibot" : ""}</td>
-                      <td className="px-3 py-2 text-xs">{f.frequencia_horas == null ? "ciclos" : `${f.frequencia_horas}h`}</td>
-                      <td className="px-3 py-2 text-right">
-                        {(() => {
-                          const e = estat?.get(f.id);
-                          if (!e) return <span className="text-xs text-muted-foreground">—</span>;
-                          const total = e.materias_publicadas + e.notas_publicadas;
-                          return (
-                            <button type="button" onClick={() => setFichaId(f.id)} className="text-right" title={`${e.materias_publicadas} matérias · ${e.notas_publicadas} notas · ${e.coletadas} coletadas`}>
-                              <div className="font-semibold tabular-nums">{total}</div>
-                              <div className="text-[10px] text-muted-foreground tabular-nums">{e.coletadas} coletadas</div>
-                            </button>
-                          );
-                        })()}
-                      </td>
-                      <td className="px-3 py-2 text-xs">{f.ultimo_scrape_em ? new Date(f.ultimo_scrape_em).toLocaleString("pt-BR") : "nunca"}</td>
-                      {tab === "prefeitura" && <td className="px-3 py-2 text-xs">{f.email_imprensa ?? "—"}</td>}
-                      <td className="px-3 py-2">
-                        <button onClick={() => toggleAtivo(f)}
-                          className={`rounded px-2 py-0.5 text-xs font-semibold ${f.ativo ? "bg-green-100 text-green-800" : "bg-gray-200 text-gray-700"}`}>
-                          {f.ativo ? "ativa" : "inativa"}
-                        </button>
-                      </td>
-                      <td className="px-3 py-2 text-right">
-                        <button onClick={() => startEdit(f)} className="mr-2 text-xs text-[#E29F65] hover:underline">editar</button>
-                        <button onClick={() => remove(f)} className="text-xs text-red-600 hover:underline">excluir</button>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
+            <div className="flex items-center gap-6 text-sm text-slate-700 md:col-span-2">
+              <label className="flex items-center gap-2">
+                <input type="checkbox" checked={form.ativo} onChange={(e) => setForm({ ...form, ativo: e.target.checked })} />
+                Ativa
+              </label>
+              <label className="flex items-center gap-2">
+                <input type="checkbox" checked={form.protecao_antibot} onChange={(e) => setForm({ ...form, protecao_antibot: e.target.checked })} />
+                Proteção antibot
+              </label>
             </div>
-          </>
-        );
-      })()}
+            <details className="rounded-lg border border-slate-200 px-3 py-2 md:col-span-2">
+              <summary className="cursor-pointer text-xs font-semibold text-slate-600">Avançado</summary>
+              <label className={rotuloClass + " mt-3 max-w-xs"}>
+                Frequência própria (horas)
+                <input type="number" min={1} value={form.frequencia_horas} placeholder="Ciclos fixos"
+                  onChange={(e) => setForm({ ...form, frequencia_horas: e.target.value })} className={campoClass} />
+              </label>
+              <p className="mt-2 text-xs text-slate-500">
+                A coleta agora roda em ciclos fixos. Deixe vazio; preencher tira a fonte dos ciclos e só faz sentido para fontes de curadoria.
+              </p>
+            </details>
+            <div className="flex flex-wrap items-center gap-3 md:col-span-2">
+              <button type="submit" disabled={busy} className={btn("primary")}>
+                {busy ? "Salvando…" : editingId ? "Salvar alterações" : ehPref ? "Adicionar prefeitura" : "Adicionar fonte"}
+              </button>
+              <button type="button" onClick={resetForm} className={btn("ghost")}>Cancelar</button>
+            </div>
+          </form>
+        </Section>
+      )}
+
+      {msg && <Aviso tipo={msg.startsWith("Falha") ? "erro" : "ok"}>{msg}</Aviso>}
+
+      <FilterBar resumo={filtered ? `${filtered.length} de ${totalAba}` : undefined}>
+        <label className={rotuloClass}>
+          Buscar
+          <input value={busca} onChange={(e) => setBusca(e.target.value)} placeholder="Nome ou URL" className={campoClass + " w-64"} />
+        </label>
+        <label className={rotuloClass}>
+          Situação
+          <select value={situacao} onChange={(e) => setSituacao(e.target.value as "todas" | "ativas" | "inativas")} className={campoClass}>
+            <option value="todas">Todas</option>
+            <option value="ativas">Ativas</option>
+            <option value="inativas">Inativas</option>
+          </select>
+        </label>
+      </FilterBar>
+
+      {err && <ErrorBanner>{err}</ErrorBanner>}
+      {!items && !err && <p className="text-sm text-slate-500">Carregando…</p>}
+
+      {filtered && filtered.length === 0 && (
+        <EmptyState title={totalAba === 0 ? (ehPref ? "Nenhuma prefeitura cadastrada" : "Nenhuma fonte cadastrada") : "Nenhuma fonte encontrada"}>
+          {totalAba === 0 ? "Use “" + (ehPref ? "Nova prefeitura" : "Nova fonte") + "” para cadastrar." : "Ajuste a busca ou a situação."}
+        </EmptyState>
+      )}
+
+      {filtered && filtered.length > 0 && (
+        <Section padded={false}>
+          <div className="overflow-x-auto">
+            <table className="w-full text-sm">
+              <thead className="border-b border-slate-200 bg-slate-50">
+                <tr>
+                  <th className={th}>Fonte</th>
+                  <th className={th}>Região</th>
+                  <th className={th}>Tipo</th>
+                  <th className={th}>Freq.</th>
+                  <th className={th + " text-right"} title="Matérias + notas publicadas geradas desta fonte">Notícias</th>
+                  <th className={th}>Última coleta</th>
+                  {ehPref && <th className={th}>E-mail imprensa</th>}
+                  <th className={th}>Status</th>
+                  <th className={th}><span className="sr-only">Ações</span></th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-slate-100">
+                {filtered.map((f) => (
+                  <tr key={f.id} className="hover:bg-slate-50/60">
+                    <td className={td}>
+                      <button type="button" onClick={() => setFichaId(f.id)} className="block text-left font-semibold text-[#12201E] underline-offset-2 hover:underline" title="Abrir ficha da fonte">
+                        {f.nome}
+                      </button>
+                      <a href={f.url_base} target="_blank" rel="noreferrer" className="break-all text-xs text-slate-500 hover:underline">{f.url_base}</a>
+                    </td>
+                    <td className={td + " text-xs text-slate-700"}>{f.regiao ? displayRegionName(f.regiao.slug, f.regiao.nome) : "—"}</td>
+                    <td className={td + " text-xs text-slate-700"}>{f.tipo_renderizacao === "spa_js" ? "SPA" : "Estático"}{f.protecao_antibot ? " · antibot" : ""}</td>
+                    <td className={td + " text-xs text-slate-700"}>{f.frequencia_horas == null ? "ciclos" : `${f.frequencia_horas}h`}</td>
+                    <td className={td + " text-right"}>
+                      {(() => {
+                        const e = estat?.get(f.id);
+                        if (!e) return <span className="text-xs text-slate-400">—</span>;
+                        const total = e.materias_publicadas + e.notas_publicadas;
+                        return (
+                          <button type="button" onClick={() => setFichaId(f.id)} className="text-right" title={`${e.materias_publicadas} matérias · ${e.notas_publicadas} notas · ${e.coletadas} coletadas`}>
+                            <div className="font-semibold tabular-nums text-[#12201E]">{total}</div>
+                            <div className="text-[10px] tabular-nums text-slate-500">{e.coletadas} coletadas</div>
+                          </button>
+                        );
+                      })()}
+                    </td>
+                    <td className={td + " text-xs text-slate-700"}>{f.ultimo_scrape_em ? new Date(f.ultimo_scrape_em).toLocaleString("pt-BR") : "nunca"}</td>
+                    {ehPref && <td className={td + " text-xs text-slate-700"}>{f.email_imprensa ?? "—"}</td>}
+                    <td className={td}>
+                      <button type="button" onClick={() => toggleAtivo(f)} title={f.ativo ? "Clique para desativar" : "Clique para ativar"}>
+                        <StatusPill status={f.ativo ? "ativa" : "inativa"} />
+                      </button>
+                    </td>
+                    <td className={td + " whitespace-nowrap text-right"}>
+                      <span className="inline-flex items-center gap-1">
+                        <button type="button" onClick={() => startEdit(f)} className={btn("ghost", "sm")}>
+                          <Pencil className="h-3.5 w-3.5" aria-hidden /> Editar
+                        </button>
+                        <ConfirmButton
+                          onConfirm={() => remove(f)}
+                          confirmLabel="Excluir fonte e coletas"
+                          title="Apaga também os artigos brutos coletados desta fonte"
+                        >
+                          <Trash2 className="h-3.5 w-3.5" aria-hidden /> Excluir
+                        </ConfirmButton>
+                      </span>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </Section>
+      )}
 
       {fichaId && <FichaFonte fonteId={fichaId} onClose={fecharFicha} />}
     </div>

@@ -1,7 +1,19 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useCallback, useEffect, useState } from "react";
+import { Plus, Trash2 } from "lucide-react";
 import { getExternalBrowser } from "@/lib/external-supabase-browser";
-import { PageHeader } from "@/components/admin/ui";
+import {
+  PageHeader,
+  Section,
+  btn,
+  ErrorBanner,
+  Aviso,
+  Tabs,
+  SaveBar,
+  EmptyState,
+  campoClass,
+  rotuloClass,
+} from "@/components/admin/ui";
 
 export const Route = createFileRoute("/admin/memoria-editorial")({
   component: AdminMemoria,
@@ -30,11 +42,15 @@ const EMPTY: Memoria = {
   glossario: [], siglas: [], pessoas: [], instituicoes: [],
 };
 
+type Aba = "identidade" | "glossario" | "siglas" | "pessoas" | "instituicoes";
+
 function AdminMemoria() {
   const [m, setM] = useState<Memoria>(EMPTY);
   const [msg, setMsg] = useState<string | null>(null);
   const [err, setErr] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
+  const [salvando, setSalvando] = useState(false);
+  const [aba, setAba] = useState<Aba>("identidade");
 
   const load = useCallback(async () => {
     setErr(null);
@@ -71,6 +87,7 @@ function AdminMemoria() {
 
   async function save() {
     setMsg(null);
+    setSalvando(true);
     try {
       const sb = await getExternalBrowser();
       const payload = {
@@ -93,99 +110,148 @@ function AdminMemoria() {
         if (error) throw error;
       }
       setMsg("Memória editorial salva.");
-      load();
+      await load();
     } catch (e: unknown) {
       setMsg("Falha: " + (e instanceof Error ? e.message : "erro"));
+    } finally {
+      setSalvando(false);
     }
   }
 
   if (loading) return <p className="text-sm text-slate-500">Carregando…</p>;
 
+  const identidadePreenchida = [m.missao, m.valores, m.posicionamento, m.manual_estilo].filter((v) => v.trim()).length;
+
   return (
     <div className="space-y-6">
       <PageHeader
-        eyebrow="Memória"
-        title="Memória Editorial"
-        subtitle="Identidade global do portal + glossário, siglas, pessoas e instituições injetados no prompt de todo agente redator."
+        eyebrow="Redação"
+        title="Memória editorial"
+        subtitle="Identidade do portal e listas de referência (glossário, siglas, pessoas e instituições) enviadas a todo agente redator."
       />
-      {err && <p className="rounded border border-red-200 bg-red-50 p-3 text-sm text-red-700">{err}</p>}
-      {msg && <p className="rounded border bg-muted p-2 text-xs">{msg}</p>}
+      {err && <ErrorBanner>{err}</ErrorBanner>}
 
-      <section className="space-y-3 rounded-2xl border border-slate-200 bg-white shadow-sm p-4">
-        <h2 className="text-sm font-semibold">Identidade</h2>
-        <TextField label="Missão" rows={2} value={m.missao} onChange={(v) => setM({ ...m, missao: v })} />
-        <TextField label="Valores" rows={2} value={m.valores} onChange={(v) => setM({ ...m, valores: v })} />
-        <TextField label="Posicionamento" rows={2} value={m.posicionamento} onChange={(v) => setM({ ...m, posicionamento: v })} />
-        <TextField label="Manual de estilo (regras curtas de linguagem)" rows={4} value={m.manual_estilo} onChange={(v) => setM({ ...m, manual_estilo: v })} />
-      </section>
-
-      <ListEditor
-        title="Glossário"
-        items={m.glossario}
-        fields={["termo", "definicao"]}
-        onChange={(items) => setM({ ...m, glossario: items as Glossario[] })}
-        blank={{ termo: "", definicao: "" }}
-      />
-      <ListEditor
-        title="Siglas"
-        items={m.siglas}
-        fields={["sigla", "significado"]}
-        onChange={(items) => setM({ ...m, siglas: items as Sigla[] })}
-        blank={{ sigla: "", significado: "" }}
-      />
-      <ListEditor
-        title="Pessoas recorrentes"
-        items={m.pessoas}
-        fields={["nome", "cargo", "partido", "estado"]}
-        onChange={(items) => setM({ ...m, pessoas: items as Pessoa[] })}
-        blank={{ nome: "", cargo: "", partido: "", estado: "" }}
-      />
-      <ListEditor
-        title="Instituições"
-        items={m.instituicoes}
-        fields={["nome", "tipo"]}
-        onChange={(items) => setM({ ...m, instituicoes: items as Instituicao[] })}
-        blank={{ nome: "", tipo: "" }}
+      <Tabs
+        value={aba}
+        onChange={setAba}
+        items={[
+          { value: "identidade", label: "Identidade", count: identidadePreenchida },
+          { value: "glossario", label: "Glossário", count: m.glossario.length },
+          { value: "siglas", label: "Siglas", count: m.siglas.length },
+          { value: "pessoas", label: "Pessoas", count: m.pessoas.length },
+          { value: "instituicoes", label: "Instituições", count: m.instituicoes.length },
+        ]}
       />
 
-      <div className="flex items-center justify-between">
-        <p className="text-[10px] text-muted-foreground">
-          {m.atualizado_em ? `Atualizado em ${new Date(m.atualizado_em).toLocaleString("pt-BR")}` : "Nunca salvo"}
-        </p>
-        <button onClick={save} className="inline-flex items-center gap-1.5 rounded-full bg-gradient-to-r from-[#12201E] to-[#0d3a6e] px-4 py-2 text-xs font-semibold text-white shadow-sm transition hover:shadow-md">
-          Salvar memória editorial
+      {aba === "identidade" && (
+        <Section title="Identidade">
+          <div className="space-y-4">
+            <TextField label="Missão" rows={2} value={m.missao} onChange={(v) => setM({ ...m, missao: v })} />
+            <TextField label="Valores" rows={2} value={m.valores} onChange={(v) => setM({ ...m, valores: v })} />
+            <TextField label="Posicionamento" rows={2} value={m.posicionamento} onChange={(v) => setM({ ...m, posicionamento: v })} />
+            <TextField label="Manual de estilo (regras curtas de linguagem)" rows={4} value={m.manual_estilo} onChange={(v) => setM({ ...m, manual_estilo: v })} />
+          </div>
+        </Section>
+      )}
+
+      {aba === "glossario" && (
+        <ListEditor
+          title="Glossário"
+          items={m.glossario}
+          fields={["termo", "definicao"]}
+          onChange={(items) => setM({ ...m, glossario: items as Glossario[] })}
+          blank={{ termo: "", definicao: "" }}
+        />
+      )}
+      {aba === "siglas" && (
+        <ListEditor
+          title="Siglas"
+          items={m.siglas}
+          fields={["sigla", "significado"]}
+          onChange={(items) => setM({ ...m, siglas: items as Sigla[] })}
+          blank={{ sigla: "", significado: "" }}
+        />
+      )}
+      {aba === "pessoas" && (
+        <ListEditor
+          title="Pessoas recorrentes"
+          items={m.pessoas}
+          fields={["nome", "cargo", "partido", "estado"]}
+          onChange={(items) => setM({ ...m, pessoas: items as Pessoa[] })}
+          blank={{ nome: "", cargo: "", partido: "", estado: "" }}
+        />
+      )}
+      {aba === "instituicoes" && (
+        <ListEditor
+          title="Instituições"
+          items={m.instituicoes}
+          fields={["nome", "tipo"]}
+          onChange={(items) => setM({ ...m, instituicoes: items as Instituicao[] })}
+          blank={{ nome: "", tipo: "" }}
+        />
+      )}
+
+      <SaveBar
+        aviso={
+          msg ? (
+            <Aviso tipo={msg.startsWith("Falha") ? "erro" : "ok"}>{msg}</Aviso>
+          ) : (
+            <span className="text-xs text-slate-500">
+              {m.atualizado_em ? `Atualizado em ${new Date(m.atualizado_em).toLocaleString("pt-BR")}` : "Nunca salvo"}
+            </span>
+          )
+        }
+      >
+        <button type="button" onClick={save} disabled={salvando} className={btn("primary")}>
+          {salvando ? "Salvando…" : "Salvar memória editorial"}
         </button>
-      </div>
+      </SaveBar>
     </div>
   );
 }
 
 function TextField({ label, value, onChange, rows = 2 }: { label: string; value: string; onChange: (v: string) => void; rows?: number }) {
   return (
-    <label className="block text-xs">
-      <span className="mb-1 block font-semibold">{label}</span>
+    <label className={rotuloClass}>
+      {label}
       <textarea value={value} onChange={(e) => onChange(e.target.value)} rows={rows}
-        className="w-full rounded border px-2 py-2 text-xs leading-relaxed" />
+        className={campoClass + " w-full font-normal leading-relaxed"} />
     </label>
   );
 }
+
+const ROTULO_CAMPO: Record<string, string> = {
+  termo: "Termo",
+  definicao: "Definição",
+  sigla: "Sigla",
+  significado: "Significado",
+  nome: "Nome",
+  cargo: "Cargo",
+  partido: "Partido",
+  estado: "Estado",
+  tipo: "Tipo",
+};
 
 function ListEditor<T extends Record<string, string>>({
   title, items, fields, onChange, blank,
 }: { title: string; items: T[]; fields: (keyof T & string)[]; onChange: (items: T[]) => void; blank: T }) {
   return (
-    <section className="space-y-2 rounded-2xl border border-slate-200 bg-white shadow-sm p-4">
-      <div className="flex items-center justify-between">
-        <h2 className="text-sm font-semibold">{title} <span className="ml-2 text-xs text-muted-foreground">({items.length})</span></h2>
-        <button onClick={() => onChange([...items, { ...blank }])} className="rounded border px-2 py-1 text-xs hover:bg-accent">+ adicionar</button>
-      </div>
-      {items.length === 0 && <p className="text-xs text-muted-foreground">Nenhum item.</p>}
+    <Section
+      title={title}
+      subtitle={items.length === 1 ? "1 item" : `${items.length} itens`}
+      aside={
+        <button type="button" onClick={() => onChange([...items, { ...blank }])} className={btn("secondary", "sm")}>
+          <Plus className="h-3.5 w-3.5" aria-hidden /> Adicionar
+        </button>
+      }
+    >
+      {items.length === 0 && <EmptyState title="Nenhum item ainda">Use “Adicionar” para incluir o primeiro.</EmptyState>}
       <ul className="space-y-2">
         {items.map((it, idx) => (
-          <li key={idx} className="flex flex-wrap items-start gap-2 rounded border bg-background p-2">
+          <li key={idx} className="flex flex-wrap items-end gap-2 rounded-xl border border-slate-200 bg-slate-50/60 p-3">
             {fields.map((f) => (
-              <label key={f} className="flex-1 text-[10px]">
-                <span className="mb-0.5 block font-semibold text-muted-foreground">{f}</span>
+              <label key={f} className={rotuloClass + " min-w-32 flex-1"}>
+                {ROTULO_CAMPO[f] ?? f}
                 <input
                   value={it[f] ?? ""}
                   onChange={(e) => {
@@ -193,17 +259,21 @@ function ListEditor<T extends Record<string, string>>({
                     next[idx] = { ...next[idx], [f]: e.target.value } as T;
                     onChange(next);
                   }}
-                  className="w-full min-w-32 rounded border px-2 py-1 text-xs"
+                  className={campoClass + " w-full font-normal"}
                 />
               </label>
             ))}
             <button
+              type="button"
               onClick={() => onChange(items.filter((_, i) => i !== idx))}
-              className="mt-4 rounded border border-red-200 px-2 py-1 text-[10px] text-red-600 hover:bg-red-50"
-            >remover</button>
+              className={btn("danger", "sm") + " mb-1"}
+              aria-label="Remover item"
+            >
+              <Trash2 className="h-3.5 w-3.5" aria-hidden /> Remover
+            </button>
           </li>
         ))}
       </ul>
-    </section>
+    </Section>
   );
 }
