@@ -71,7 +71,7 @@ function AdminDashboard() {
         sb.from("ad_clicks").select("*", { count: "exact", head: true }).gte("clicado_em", desde),
       ]);
 
-      // Grade: cron ao vivo (077) ou a de referência do 076.
+      // Grade: cron ao vivo (078) ou a de referência do 076.
       if (!agenda.error && Array.isArray(agenda.data)) {
         setJobs(agenda.data as JobCron[]);
         setAoVivo(true);
@@ -86,7 +86,7 @@ function AdminDashboard() {
       if (!res.error && res.data) {
         setResumo(res.data as Resumo);
       } else {
-        // Sem a 077: números essenciais direto das tabelas.
+        // Sem a 078: números essenciais direto das tabelas.
         const [pub, rev, nPub, nRev, ult] = await Promise.all([
           sb.from("generated_articles").select("*", { count: "exact", head: true }).eq("status", "publicado").gte("publicado_em", desde),
           sb.from("generated_articles").select("*", { count: "exact", head: true }).eq("status", "rascunho"),

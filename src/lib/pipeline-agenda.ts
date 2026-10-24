@@ -2,7 +2,7 @@
 // para as "frentes" que o painel mostra, em horário de Brasília.
 //
 // A fonte da verdade é o próprio cron, lido pela RPC pipeline_agenda()
-// (077). Enquanto ela não existir no banco, o painel usa AGENDA_076 — a grade
+// (078). Enquanto ela não existir no banco, o painel usa AGENDA_076 — a grade
 // da migration 076 — e avisa que está mostrando a grade de referência.
 
 export type JobCron = {
@@ -107,7 +107,7 @@ export const FRENTES: Frente[] = [
   },
 ];
 
-// Grade da migration 076 (UTC) — usada só enquanto a 077 não foi aplicada.
+// Grade da migration 076 (UTC) — usada só enquanto a 078 não foi aplicada.
 export const AGENDA_076: Pick<JobCron, "jobname" | "schedule">[] = [
   { jobname: "vozes-curadoria-geral", schedule: "3-59/10 10-11,17-18 * * *" },
   { jobname: "vozes-scrape-source", schedule: "1-59/3 0-1,13-14,19-20 * * *" },

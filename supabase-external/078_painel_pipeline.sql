@@ -1,5 +1,5 @@
 -- =====================================================================
--- Vozes Paranaenses — 077_painel_pipeline.sql
+-- Vozes Paranaenses — 078_painel_pipeline.sql
 --
 -- Dá ao painel admin a grade REAL do ciclo de conteúdo (lida do pg_cron)
 -- e o resumo do dia, em vez de horários escritos à mão na tela — que

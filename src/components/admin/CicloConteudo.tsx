@@ -7,7 +7,7 @@ import {
 
 type Props = {
   jobs: JobCron[];
-  // true = jobs vieram do cron (077); false = grade de referência do 076.
+  // true = jobs vieram do cron (078); false = grade de referência do 076.
   aoVivo: boolean;
   coletadoHoje: Record<string, number>;
   fontesAtivas: Record<string, number>;
@@ -73,7 +73,7 @@ export function CicloConteudo({ jobs, aoVivo, coletadoHoje, fontesAtivas, onDisp
         <span>Horário de Brasília.</span>
         {!aoVivo && (
           <span className="inline-flex items-center gap-1 font-medium text-amber-700">
-            <AlertTriangle className="h-3 w-3" /> Grade de referência (076). Aplique a migration 077 para ler o cron ao vivo.
+            <AlertTriangle className="h-3 w-3" /> Grade de referência (076). Aplique a migration 078 para ler o cron ao vivo.
           </span>
         )}
       </div>
