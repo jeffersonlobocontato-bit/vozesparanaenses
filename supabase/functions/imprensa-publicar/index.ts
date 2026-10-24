@@ -28,6 +28,40 @@ function slugify(s: string): string {
     .toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "").slice(0, 90);
 }
 
+type Cidade = { id: string; nome: string; regiao_id: string | null };
+
+function normalizar(v: string): string {
+  return ` ${v.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().replace(/[^a-z0-9]+/g, " ")} `;
+}
+
+async function resolverCidade(
+  // deno-lint-ignore no-explicit-any
+  sb: any,
+  cliente: { cidade_id?: string | null; nome_empresa?: string | null },
+  titulo: string,
+  corpo: string,
+): Promise<Cidade | null> {
+  if (cliente.cidade_id) {
+    const { data } = await sb.from("cidades").select("id, nome, regiao_id").eq("id", cliente.cidade_id).maybeSingle();
+    if (data) return data as Cidade;
+  }
+  const { data: cidades } = await sb.from("cidades").select("id, nome, regiao_id");
+  // Nome mais longo primeiro: "Santa Terezinha de Itaipu" antes de "Itaipu".
+  const lista = ((cidades ?? []) as Cidade[])
+    .map((c) => ({ c, n: normalizar(c.nome) }))
+    .sort((a, b) => b.n.length - a.n.length);
+  for (const texto of [cliente.nome_empresa ?? "", titulo, corpo]) {
+    const t = normalizar(texto);
+    let melhor: { c: Cidade; pos: number } | null = null;
+    for (const { c, n } of lista) {
+      const pos = t.indexOf(n);
+      if (pos >= 0 && (!melhor || pos < melhor.pos)) melhor = { c, pos };
+    }
+    if (melhor) return melhor.c;
+  }
+  return null;
+}
+
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: cors });
   if (req.method !== "POST") return json({ error: "method_not_allowed" }, 405);
@@ -46,7 +80,7 @@ Deno.serve(async (req) => {
 
   const { data: cliente } = await sb
     .from("clientes_imprensa")
-    .select("id, ativo, status")
+    .select("id, ativo, status, nome_empresa, cidade_id")
     .eq("user_id", userData.user.id)
     .maybeSingle();
   if (!cliente || !cliente.ativo) return json({ error: "cliente_sem_acesso" }, 403);
@@ -63,8 +97,16 @@ Deno.serve(async (req) => {
   if (!body.termo_aceito) {
     return json({ error: "termo_nao_aceito", detail: "É preciso aceitar o termo de responsabilidade antes de publicar." }, 400);
   }
-  if (!body.submissao_id || !body.titulo?.trim() || !body.corpo?.trim() || !body.regiao_id) {
-    return json({ error: "campos_obrigatorios_faltando", detail: "Falta título, corpo ou região." }, 400);
+  if (!body.submissao_id || !body.titulo?.trim() || !body.corpo?.trim()) {
+    return json({ error: "campos_obrigatorios_faltando", detail: "Falta título ou texto." }, 400);
+  }
+
+  // Região automática: a cidade da prefeitura do cadastro; sem ela (cliente
+  // criado à mão), a cidade citada no nome do cliente, no título ou no texto.
+  const cidade = await resolverCidade(sb, cliente, body.titulo!, body.corpo!);
+  const regiaoId = cidade?.regiao_id ?? body.regiao_id ?? null;
+  if (!regiaoId) {
+    return json({ error: "cidade_nao_identificada", detail: "Não identificamos a cidade da matéria. Cite o nome do município no texto." }, 400);
   }
 
   const { data: submissao, error: subErr } = await sb
@@ -95,7 +137,8 @@ Deno.serve(async (req) => {
       slug: slugFinal,
       corpo: body.corpo.trim(),
       categoria_id: submissao.categoria_detectada_id,
-      regiao_id: body.regiao_id,
+      regiao_id: regiaoId,
+      cidade_principal: cidade?.nome ?? null,
       imagem_capa_url: body.fotos?.[0]?.url ?? null,
       og_image_url: body.fotos?.[0]?.url ?? null,
       imagem_galeria: body.fotos ?? [],
@@ -125,7 +168,7 @@ Deno.serve(async (req) => {
     atualizado_em: new Date().toISOString(),
   }).eq("id", submissao.id);
 
-  const { data: regiao } = await sb.from("regioes").select("slug").eq("id", body.regiao_id).maybeSingle();
+  const { data: regiao } = await sb.from("regioes").select("slug").eq("id", regiaoId).maybeSingle();
 
   return json({
     ok: true,

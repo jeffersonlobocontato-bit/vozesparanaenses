@@ -66,8 +66,6 @@ function ImprensaPainel() {
   const [fotos, setFotos] = useState<Foto[]>([]);
   const [principal, setPrincipal] = useState(0);
   const [uploadBusy, setUploadBusy] = useState(false);
-  const [regioes, setRegioes] = useState<Array<{ id: string; nome: string }>>([]);
-  const [regiaoId, setRegiaoId] = useState("");
 
   const [termoAceito, setTermoAceito] = useState(false);
   const [publicando, setPublicando] = useState(false);
@@ -92,8 +90,6 @@ function ImprensaPainel() {
       }
       setNomeEmpresa(cliente.nome_empresa);
       setStatusCadastro((cliente.status ?? "aprovado") as "pendente" | "aprovado" | "recusado");
-      const { data: rs } = await sb.from("regioes").select("id, nome").order("nome");
-      setRegioes((rs ?? []) as Array<{ id: string; nome: string }>);
       setChecando(false);
     })();
   }, [nav]);
@@ -122,13 +118,13 @@ function ImprensaPainel() {
     }
   }
 
-  async function onUploadFotos(files: FileList) {
+  async function onUploadFotos(files: File[]) {
     setUploadBusy(true);
     setErro(null);
     try {
       const sb = await getExternalBrowser();
       const novas: Foto[] = [];
-      for (const file of Array.from(files)) {
+      for (const file of files) {
         if (!file.type.startsWith("image/")) continue;
         if (file.size > 10 * 1024 * 1024) { setErro(`"${file.name}" passa de 10 MB e não foi enviada.`); continue; }
         const ext = file.name.split(".").pop() || "jpg";
@@ -153,16 +149,16 @@ function ImprensaPainel() {
   async function publicar() {
     if (!submissaoId) return;
     if (!termoAceito) { setErro("Aceite o termo de responsabilidade antes de publicar."); return; }
-    if (!regiaoId) { setErro("Selecione a região da matéria antes de publicar."); return; }
     setPublicando(true);
     setErro(null);
     // A foto principal vai na frente: é a capa da matéria.
     const ordenadas = fotos.length ? [fotos[principal], ...fotos.filter((_, i) => i !== principal)] : [];
     try {
       const res = await invokeImprensa<{ slug: string; regiao_slug: string | null }>("imprensa-publicar", {
-        submissao_id: submissaoId, titulo, subtitulo, corpo, fotos: ordenadas, termo_aceito: true, regiao_id: regiaoId,
+        submissao_id: submissaoId, titulo, subtitulo, corpo, fotos: ordenadas, termo_aceito: true,
       });
-      const url = `${window.location.origin}/${res.regiao_slug ?? "parana"}/${res.slug}`;
+      if (!res.slug || !res.regiao_slug) throw new Error("A matéria foi recebida, mas o link não foi gerado. Avise a equipe do Vozes Paranaenses.");
+      const url = `${window.location.origin}/${res.regiao_slug}/${res.slug}`;
       setPublicado({ url, titulo });
     } catch (e: unknown) {
       setErro(e instanceof Error ? e.message : "Erro ao publicar.");
@@ -189,7 +185,7 @@ function ImprensaPainel() {
   function novaMateria() {
     setPublicado(null); setSubmissaoId(null); setCategoriaDetectada(null);
     setTextoBruto(""); setTitulo(""); setSubtitulo(""); setCorpo("");
-    setFotos([]); setPrincipal(0); setRegiaoId(""); setTermoAceito(false);
+    setFotos([]); setPrincipal(0); setTermoAceito(false);
   }
 
   if (checando) return <p className="p-8 text-center text-sm text-muted-foreground">Carregando…</p>;
@@ -275,7 +271,7 @@ function ImprensaPainel() {
       <label className={`inline-flex cursor-pointer items-center rounded border border-dashed border-slate-400 px-4 py-2 text-sm font-semibold text-[#12201E] hover:bg-slate-50 ${uploadBusy ? "opacity-50" : ""}`}>
         {uploadBusy ? "Enviando fotos…" : fotos.length ? "Adicionar mais fotos" : "Escolher fotos"}
         <input type="file" accept="image/*" multiple disabled={uploadBusy} className="sr-only"
-          onChange={(e) => { if (e.target.files?.length) void onUploadFotos(e.target.files); e.target.value = ""; }} />
+          onChange={(e) => { const lista = Array.from(e.target.files ?? []); e.target.value = ""; if (lista.length) void onUploadFotos(lista); }} />
       </label>
     </div>
   );
@@ -340,15 +336,6 @@ function ImprensaPainel() {
             <textarea value={corpo} onChange={(e) => setCorpo(e.target.value)} rows={14} className="w-full rounded border px-3 py-2 leading-relaxed" />
           </label>
 
-          <label className="block text-sm">
-            <span className="mb-1 block font-medium">Região da matéria</span>
-            <select value={regiaoId} onChange={(e) => setRegiaoId(e.target.value)} className="w-full rounded border px-3 py-2">
-              <option value="">Selecione a região mais relevante para este conteúdo</option>
-              {regioes.map((r) => (
-                <option key={r.id} value={r.id}>{r.nome}</option>
-              ))}
-            </select>
-          </label>
 
           {blocoFotos}
 
@@ -362,7 +349,7 @@ function ImprensaPainel() {
 
           <button
             onClick={publicar}
-            disabled={!termoAceito || !regiaoId || publicando || uploadBusy || !titulo.trim() || !corpo.trim()}
+            disabled={!termoAceito || publicando || uploadBusy || !titulo.trim() || !corpo.trim()}
             className="w-full rounded bg-[#E29F65] px-4 py-3 text-sm font-semibold text-white disabled:opacity-40"
           >
             {publicando ? "Publicando…" : "Publicar"}
