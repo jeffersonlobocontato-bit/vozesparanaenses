@@ -20,6 +20,7 @@ export const listInstagramPublicados = createServerFn({ method: "GET" }).handler
       .select("id, tipo, publicado_em, imagens, links")
       .eq("status", "publicado")
       .gte("publicado_em", new Date(Date.now() - 30 * 86_400_000).toISOString())
+      .lte("publicado_em", new Date().toISOString()) // agendado no Zernio: só aparece depois de ir ao ar
       .order("publicado_em", { ascending: false })
       .limit(60);
     if (error) return []; // tabela ainda não criada (086): página vazia, sem erro
