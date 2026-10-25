@@ -90,7 +90,12 @@ async function motivoDoErro(error: unknown): Promise<string> {
 
 /** A coluna nova (085) ainda não existe no banco? */
 function faltaColuna(e: { code?: string; message?: string } | null | undefined): boolean {
-  return !!e && (e.code === "42703" || /column .* does not exist/i.test(e.message ?? ""));
+  // Leitura: 42703 "column ... does not exist". Gravação: PGRST204
+  // "Could not find the 'pautas' column of 'coluna_edicoes' in the schema cache".
+  return !!e && (
+    e.code === "42703" || e.code === "PGRST204" ||
+    /column .* does not exist|could not find the '.*' column/i.test(e.message ?? "")
+  );
 }
 
 function AdminColunas() {
