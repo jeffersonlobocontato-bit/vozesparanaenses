@@ -68,7 +68,7 @@ export async function gerarIlustracaoTematica(p: {
     if (!url?.startsWith("data:image")) return null;
     const mime = url.slice(5, url.indexOf(";")) || "image/png";
     const ext = mime.split("/")[1]?.split("+")[0] ?? "png";
-    const path = `${p.articleId}/ilustracao-ia.${ext}`;
+    const path = `${p.articleId}/ilustracao-ia-${Date.now().toString(36)}.${ext}`;
     const { error } = await p.sb.storage.from("article-covers").upload(path, base64ToBytes(url), { contentType: mime, upsert: true });
     if (error) return null;
     return p.sb.storage.from("article-covers").getPublicUrl(path).data.publicUrl as string;

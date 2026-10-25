@@ -33,7 +33,7 @@ export async function fotoLivrePorTema(p: {
   const i = escolherFotoBaixoRisco(await avaliarFotos(p.aiKey, { titulo: p.titulo, resumo: p.resumo }, fotos));
   if (i === null) return null;
   const foto = fotos[i];
-  const url = await copiarImagemParaStorage(p.sb, foto.url, `${p.articleId}/commons.jpg`);
+  const url = await copiarImagemParaStorage(p.sb, foto.url, `${p.articleId}/commons-${Date.now().toString(36)}.jpg`);
   if (!url) return null;
   return {
     url,

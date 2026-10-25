@@ -61,10 +61,28 @@ Deno.serve(async (req) => {
   if (!url || !key) return json({ error: "missing_external_supabase_env" }, 500);
   if (!aiKey) return json({ error: "missing_lovable_api_key" }, 500);
 
-  let body: { article_id?: string } = {};
+  let body: { article_id?: string; refazer?: boolean } = {};
   try { body = await req.json(); } catch { body = {}; }
 
   const sb = createClient(url, key, { auth: { persistSession: false } });
+
+  // Refazer a capa de UMA matéria (qualquer região), ex.: trocar a ilustração
+  // antiga de IA pela regra nova (foto livre do tema › imagem realista de IA).
+  if (body.article_id && body.refazer) {
+    const { data: m } = await sb.from("generated_articles")
+      .select("id, titulo, resumo, regiao_id, categoria:editorial_categories(slug), imagem_capa_url, og_image_url, imagem_credito, imagem_legenda")
+      .eq("id", body.article_id).maybeSingle();
+    if (!m) return json({ error: "materia_nao_encontrada" }, 404);
+    const catRel = (m as unknown as Materia).categoria;
+    const cat = Array.isArray(catRel) ? catRel[0]?.slug : catRel?.slug;
+    const anterior = { imagem_capa_url: m.imagem_capa_url, og_image_url: m.og_image_url, imagem_credito: m.imagem_credito, imagem_legenda: m.imagem_legenda };
+    const resultado = await analisarMateria(sb, aiKey, m as unknown as Materia, cat ?? "geral");
+    if (resultado.decisao === "sem_imagem") {
+      // Não deixa a matéria sem capa: mantém a anterior.
+      await sb.from("generated_articles").update(anterior).eq("id", m.id);
+    }
+    return json({ ok: true, id: m.id, titulo: m.titulo, ...resultado });
+  }
   const desde = new Date(Date.now() - JANELA_MS).toISOString();
   const relatorio: Record<string, unknown> = {};
 
@@ -139,7 +157,7 @@ async function analisarMateria(
     const i = escolherFotoBaixoRisco(avaliacoes);
     if (i !== null) {
       const foto = fotos[i];
-      const capa = await copiarImagemParaStorage(sb, foto.url, `${m.id}/commons.jpg`);
+      const capa = await copiarImagemParaStorage(sb, foto.url, `${m.id}/commons-${Date.now().toString(36)}.jpg`);
       if (capa) {
         await sb.from("generated_articles").update({
           imagem_capa_url: capa,
