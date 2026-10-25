@@ -169,7 +169,7 @@ declare
   agora timestamptz := now();
   hoje timestamptz := date_trunc('day', agora at time zone 'America/Sao_Paulo') at time zone 'America/Sao_Paulo';
   mes timestamptz := date_trunc('month', agora at time zone 'America/Sao_Paulo') at time zone 'America/Sao_Paulo';
-  inicio timestamptz;
+  v_inicio timestamptz;
   serie jsonb;
 begin
   if not (public.has_role(auth.uid(), 'admin') or public.has_role(auth.uid(), 'editor')) then
@@ -178,7 +178,7 @@ begin
   select least(
     coalesce((select min(coletado_em) from public.raw_articles), agora),
     coalesce((select min(inicio)::timestamptz from public.assinaturas where ativo), agora)
-  ) into inicio;
+  ) into v_inicio;
 
   select coalesce(jsonb_agg(jsonb_build_object('dia', d::date, 'total_brl', (public.custos_periodo(d, d + interval '1 day')->>'total_brl')::numeric) order by d), '[]'::jsonb)
   into serie
@@ -187,8 +187,8 @@ begin
   return jsonb_build_object(
     'hoje', public.custos_periodo(hoje, agora) || jsonb_build_object('fixo_dia_usd', (public.custos_periodo(hoje, hoje + interval '1 day')->>'fixo_usd')::numeric),
     'mes', public.custos_periodo(mes, agora),
-    'total', public.custos_periodo(inicio, agora),
-    'inicio', inicio,
+    'total', public.custos_periodo(v_inicio, agora),
+    'inicio', v_inicio,
     'dias_no_mes', extract(day from (mes + interval '1 month' - interval '1 day')),
     'dia_do_mes', extract(day from agora at time zone 'America/Sao_Paulo'),
     'serie_30d', serie
