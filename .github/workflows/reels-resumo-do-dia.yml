@@ -19,6 +19,9 @@ on:
   schedule:
     - cron: "35 20 * * *" # 17h35 em Brasília: render ~15 min, posta perto das 18h
 
+permissions:
+  contents: write
+
 concurrency:
   group: reels-resumo
   cancel-in-progress: false
@@ -61,6 +64,14 @@ jobs:
             reels/out/resumo.mp4
             reels/public/roteiro.json
           retention-days: 14
+      - name: Prévia no branch reels-previas (só o último vídeo)
+        run: |
+          mkdir -p /tmp/previa && cp out/resumo.mp4 public/roteiro.json /tmp/previa/
+          cd /tmp/previa
+          git init -q -b reels-previas
+          git config user.name "vozes-reels" && git config user.email "reels@vozesparanaenses.com.br"
+          git add . && git commit -qm "Prévia do Reels $(date -u +%F)"
+          git push -qf "https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git" reels-previas
       - name: Publica no Instagram
         if: ${{ github.event.inputs.publicar == 'true' || (github.event_name == 'schedule' && vars.REELS_PUBLICAR_AUTO == 'sim') }}
         env:
