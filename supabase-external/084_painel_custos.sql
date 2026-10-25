@@ -23,7 +23,8 @@ insert into public.custos_parametros (chave, valor, descricao, unidade) values
   ('ia_imagem',      0.04,    'Por imagem gerada por IA', 'US$'),
   ('ia_nota',        0.003,   'Por nota de coluna das cidades', 'US$'),
   ('ia_imprensa',    0.008,   'Por rascunho do Portal da Imprensa', 'US$'),
-  ('ia_coluna',      0.06,    'Por edição da Vozes Políticas escrita pela IA (modelo pro, com leitura dos links)', 'US$')
+  ('ia_coluna',      0.06,    'Por edição da Vozes Políticas escrita pela IA (modelo pro, com leitura dos links)', 'US$'),
+  ('ia_instagram',   0.002,   'Por post do Instagram (legenda e campos do card pela IA)', 'US$')
 on conflict (chave) do nothing;
 
 -- Escritas da coluna Vozes Políticas pela IA (função coluna-escrever, 085).
@@ -120,7 +121,10 @@ begin
     'ia_imagem',   (select count(*) from public.generated_articles where gerado_em >= p_inicio and gerado_em < p_fim and imagem_credito ilike '%gerada por IA%'),
     'ia_nota',     (select count(*) from public.coluna_cidade_notas where criado_em >= p_inicio and criado_em < p_fim),
     'ia_imprensa', (select count(*) from public.imprensa_submissoes where criado_em >= p_inicio and criado_em < p_fim),
-    'ia_coluna',   (select count(*) from public.coluna_escritas_ia where criado_em >= p_inicio and criado_em < p_fim)
+    'ia_coluna',   (select count(*) from public.coluna_escritas_ia where criado_em >= p_inicio and criado_em < p_fim),
+    -- Robô do Instagram (086): só os posts que ele mesmo gerou (os manuais não passam pela IA).
+    'ia_instagram', case when to_regclass('public.instagram_posts') is null then 0 else
+      (select count(*) from public.instagram_posts where criado_em >= p_inicio and criado_em < p_fim and coalesce(motivo, '') not like 'primeiro ciclo%') end
   );
 
   itens := '[]'::jsonb;
