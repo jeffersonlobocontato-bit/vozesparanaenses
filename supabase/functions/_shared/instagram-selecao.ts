@@ -68,10 +68,18 @@ const norm = (s: string) => s.toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g,
 
 const RE_ALERTA = /\b(alertas?|defesa civil|tempora(?:l|is)|tempestades?|granizo|vendava(?:l|is)|ciclones?|interdi\w*|bloquei\w*|evacua\w*|falta d.?agua|desabastec\w*|racionamento|vacina\w*|risco de|avisos? meteorolog\w*|alagamentos?|enchentes?|deslizamentos?|queda de barreiras?)\b/;
 const RE_TRAGEDIA = /\b(morre\w*|morte|mortos?|obito|vitimas? fata\w*|desaba\w*|soterr\w*|tragedia|calamidade|afoga\w*|incendio)\b/;
+// Segurança vai sozinha para o feed só com fato de interesse público (operação,
+// apreensão, prisão, crime grave). Briga, ameaça e furto miúdo ficam para o Giro.
+const RE_SEGURANCA_IMPACTO = /\b(operac\w*|apreen\w*|apreend\w*|pres[oa]s?|prisao|prisoes|quadrilha|faccao|trafico|contrabando\w*|descaminho|homicidio|latrocinio|policia federal|receita federal|gaeco|mandados?)\b/;
+// Alerta só vale enquanto é atual: depois disso o "alerta" já é notícia velha.
+export const ALERTA_VALIDADE_H = 6;
+// Matéria marcada como "nacional" que na verdade é do Paraná (ex.: Cataratas).
+const RE_PARANA = /\b(parana|paranaense\w*|curitiba|foz do iguacu|cataratas do iguacu|londrina|maringa|cascavel|ponta grossa)\b/;
+
 const RE_VITIMA = /\b(morre\w*|morte|mortos?|obito|vitima\w*|ferid\w*|corpo|afoga\w*|soterr\w*)\b/;
 
 /** Em que classe a matéria cai, e por quê (o motivo aparece no painel). */
-export function classificar(m: MateriaIG, cfg: ConfigIG = CONFIG_PADRAO): { classe: Classe; motivo: string } {
+export function classificar(m: MateriaIG, cfg: ConfigIG = CONFIG_PADRAO, agora?: Date): { classe: Classe; motivo: string } {
   const cat = m.categoria_slug ?? "";
   const texto = norm(`${m.titulo} ${m.subtitulo ?? ""}`);
   const crit = m.criticidade_nivel ?? "";
@@ -81,10 +89,11 @@ export function classificar(m: MateriaIG, cfg: ConfigIG = CONFIG_PADRAO): { clas
   if (cat === "esportes" || cat === "tecnologia") return { classe: "fora", motivo: `editoria ${cat} fora do feed` };
 
   if (RE_TRAGEDIA.test(texto) && m.prioridade_crivo === "alta") return { classe: "tragedia", motivo: "calamidade/tragédia" };
-  if (RE_ALERTA.test(texto) && (m.tema_crivo === "utilidade_publica" || m.prioridade_crivo === "alta")) return { classe: "alerta", motivo: "alerta de utilidade pública" };
+  const horas = agora ? (agora.getTime() - new Date(m.publicado_em).getTime()) / 3_600_000 : 0;
+  if (RE_ALERTA.test(texto) && (m.tema_crivo === "utilidade_publica" || m.prioridade_crivo === "alta") && horas <= ALERTA_VALIDADE_H) return { classe: "alerta", motivo: "alerta de utilidade pública" };
   if (m.regiao_slug === "internacional" || cat === "internacional") return { classe: "internacional", motivo: "internacional" };
   if (m.regiao_slug === "nacional") return { classe: "nacional", motivo: "nacional" };
-  if (m.tema_crivo === "seguranca" || cat === "seguranca") return { classe: "seguranca", motivo: "segurança" };
+  if ((m.tema_crivo === "seguranca" || cat === "seguranca") && RE_SEGURANCA_IMPACTO.test(texto)) return { classe: "seguranca", motivo: "segurança" };
   if (m.regiao_slug && REGIOES_PR.has(m.regiao_slug)) return { classe: "regional", motivo: "regional" };
   return { classe: "fora", motivo: "sem região" };
 }
@@ -132,7 +141,7 @@ export function escolherAvulsos(
 ): Escolha[] {
   const avaliadas = candidatas
     .map((m) => {
-      const { classe } = classificar(m, cfg);
+      const { classe } = classificar(m, cfg, ctx.agora);
       return { materia: m, classe, score: pontuar(m, classe, ctx) };
     })
     .filter((e) => e.classe !== "fora" && e.classe !== "regional")
@@ -163,7 +172,7 @@ export function montarGiro(
 ): Escolha[] {
   const porRegiao = new Map<string, Escolha>();
   for (const m of candidatas) {
-    const { classe } = classificar(m, cfg);
+    const { classe } = classificar(m, cfg, ctx.agora);
     if (classe !== "regional" || !m.regiao_slug) continue;
     const e = { materia: m, classe, score: pontuar(m, classe, ctx) };
     if (e.score < scoreMinimo) continue;
@@ -228,9 +237,11 @@ export function agendar(
 /** Chapéu e escopo do card a partir da matéria. */
 export function chapeuDe(m: MateriaIG, nomeEditoria: string | null, nomeRegiao: string | null): { texto: string; escopo: "cidade" | "regiao" | "brasil" | "mundo" | "parana" } {
   if (m.regiao_slug === "internacional" || m.categoria_slug === "internacional") return { texto: ["Mundo", nomeEditoria && nomeEditoria !== "Internacional" ? nomeEditoria : null].filter(Boolean).join(" · "), escopo: "mundo" };
-  if (m.regiao_slug === "nacional") return { texto: ["Brasil", nomeEditoria].filter(Boolean).join(" · "), escopo: "brasil" };
+  const doPR = RE_PARANA.test(norm(`${m.titulo} ${m.subtitulo ?? ""}`));
+  if (m.regiao_slug === "nacional" && !doPR) return { texto: ["Brasil", nomeEditoria].filter(Boolean).join(" · "), escopo: "brasil" };
   if (m.cidade_principal) return { texto: [m.cidade_principal, nomeEditoria].filter(Boolean).join(" · "), escopo: "cidade" };
-  if (nomeRegiao) return { texto: [nomeRegiao, nomeEditoria].filter(Boolean).join(" · "), escopo: "regiao" };
+  // Sem cidade e falando do estado todo ("no Paraná"): o chapéu é Paraná, não a região do cadastro.
+  if (nomeRegiao && REGIOES_PR.has(m.regiao_slug ?? "") && !/\bno parana\b/.test(norm(m.titulo))) return { texto: [nomeRegiao, nomeEditoria].filter(Boolean).join(" · "), escopo: "regiao" };
   return { texto: ["Paraná", nomeEditoria].filter(Boolean).join(" · "), escopo: "parana" };
 }
 

@@ -13,7 +13,7 @@ import { escolherFotoBaixoRisco, normalizarAvaliacoes, normalizarPlano } from ".
 import { limparPrefeituraMecanico, verificarTitulo } from "./titulo.ts";
 import { dataAtendeNetParaIso, ehAtendeNet, parseListaAtendeNet, parseMateriaAtendeNet } from "./atende-net.ts";
 import { ehListaJson, parseListaJson } from "./lista-json.ts";
-import { agendar, classificar, CONFIG_PADRAO, escolherAvulsos, montarGiro, numerosConferem, proximoHorario, temFotoUtilizavel, type MateriaIG } from "./instagram-selecao.ts";
+import { agendar, chapeuDe, classificar, CONFIG_PADRAO, escolherAvulsos, montarGiro, numerosConferem, proximoHorario, temFotoUtilizavel, type MateriaIG } from "./instagram-selecao.ts";
 import { corpoTitulo, limitar } from "./instagram-cards.ts";
 import { normalizarColuna, separarPautas, textoDaPagina, urlPermitida } from "./coluna-politica.ts";
 import { faltando5w1h, motivoVeto5w1h } from "./cinco-w.ts";
@@ -122,6 +122,13 @@ ok("sem data → null", extrairDataPublicacao("<p>nada</p>", "https://a.com/noti
   ok("IG: esporte fica fora", c({ categoria_slug: "esportes", regiao_slug: "nacional" }) === "fora");
   ok("IG: internacional e nacional", c({ regiao_slug: "nacional", categoria_slug: "internacional" }) === "internacional" && c({ regiao_slug: "nacional", categoria_slug: "economia" }) === "nacional");
   ok("IG: regional vai para o giro", c({ regiao_slug: "litoral" }) === "regional");
+  const tarde = new Date("2026-10-25T16:40:00-03:00");
+  ok("IG: alerta de 8h atrás não é mais alerta", classificar(base({ titulo: "Temporal deixa 5,4 mil imóveis sem energia", tema_crivo: "utilidade_publica", prioridade_crivo: "alta", publicado_em: "2026-10-25T08:00:00-03:00" }), CONFIG_PADRAO, tarde).classe !== "alerta");
+  ok("IG: alerta recente segue alerta", classificar(base({ titulo: "Temporal deixa 5,4 mil imóveis sem energia", tema_crivo: "utilidade_publica", prioridade_crivo: "alta", publicado_em: "2026-10-25T14:00:00-03:00" }), CONFIG_PADRAO, tarde).classe === "alerta");
+  ok("IG: briga pessoal não vai sozinha como segurança", c({ titulo: "Mulher procura a PM após receber ameaças e ofensas por aplicativo", tema_crivo: "seguranca", categoria_slug: "seguranca", prioridade_crivo: "alta" }) === "regional");
+  ok("IG: apreensão é segurança", c({ titulo: "Receita Federal apreende 86 iPhones", tema_crivo: "seguranca", prioridade_crivo: "alta" }) === "seguranca");
+  ok("IG: chapéu do estado todo é Paraná", chapeuDe(base({ titulo: "Temporal deixa 5,4 mil imóveis sem energia no Paraná", cidade_principal: null }), "Cidades", "Oeste").texto === "Paraná · Cidades");
+  ok("IG: Cataratas marcada como nacional não vira Brasil", chapeuDe(base({ titulo: "Vazão nas Cataratas do Iguaçu atinge 13,7 milhões de l/s", regiao_slug: "nacional", cidade_principal: null }), "Meio Ambiente", null).escopo === "parana");
   ok("IG: tragédia nunca leva foto", !temFotoUtilizavel(base({ imagem_capa_url: "x" }), "tragedia") && !temFotoUtilizavel(base({ imagem_capa_url: "x", titulo: "Vítima é socorrida" }), "regional") && temFotoUtilizavel(base({ imagem_capa_url: "x" }), "regional"));
 
   const ctx = { agora: new Date("2026-10-25T14:00:00-03:00"), maxVisitas: 0, trafegoDia: 0 };
