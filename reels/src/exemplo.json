@@ -1,0 +1,539 @@
+{
+ "fps": 30,
+ "audio": null,
+ "cenas": [
+  {
+   "tipo": "abertura",
+   "dur": 3.6,
+   "data": "Domingo, 25 de outubro",
+   "chamadas": [
+    "Tempestades no Paraná",
+    "Cataratas cheias",
+    "Receita apreende 86 iPhones",
+    "França detém quase mil"
+   ]
+  },
+  {
+   "tipo": "noticia",
+   "dur": 7.2,
+   "estilo": "alerta",
+   "chapeu": "Paraná · Tempo",
+   "cor": "#FFFFFF",
+   "titulo": "Alertas de tempestade com ventos acima de 100 km/h no Paraná",
+   "linhaFina": null,
+   "dados": [
+    {
+     "valor": "100",
+     "unidade": "km/h",
+     "rotulo": "rajadas de vento"
+    },
+    {
+     "valor": "150",
+     "unidade": "mm",
+     "rotulo": "acumulado máximo"
+    },
+    {
+     "valor": "Granizo",
+     "rotulo": "risco em várias regiões"
+    }
+   ],
+   "palavras": [
+    {
+     "t": 0.5,
+     "fim": 0.68,
+     "texto": "O"
+    },
+    {
+     "t": 0.74,
+     "fim": 1.13,
+     "texto": "Paraná"
+    },
+    {
+     "t": 1.19,
+     "fim": 1.45,
+     "texto": "está"
+    },
+    {
+     "t": 1.51,
+     "fim": 1.71,
+     "texto": "sob"
+    },
+    {
+     "t": 1.77,
+     "fim": 2.16,
+     "texto": "alerta"
+    },
+    {
+     "t": 2.22,
+     "fim": 2.4,
+     "texto": "de"
+    },
+    {
+     "t": 2.46,
+     "fim": 3.17,
+     "texto": "tempestade,"
+    },
+    {
+     "t": 3.23,
+     "fim": 3.43,
+     "texto": "com"
+    },
+    {
+     "t": 3.49,
+     "fim": 3.94,
+     "texto": "rajadas"
+    },
+    {
+     "t": 4.0,
+     "fim": 4.33,
+     "texto": "acima"
+    },
+    {
+     "t": 4.38,
+     "fim": 4.56,
+     "texto": "de"
+    },
+    {
+     "t": 4.62,
+     "fim": 4.82,
+     "texto": "cem"
+    },
+    {
+     "t": 4.88,
+     "fim": 5.59,
+     "texto": "quilômetros"
+    },
+    {
+     "t": 5.66,
+     "fim": 5.85,
+     "texto": "por"
+    },
+    {
+     "t": 5.91,
+     "fim": 6.17,
+     "texto": "hora"
+    },
+    {
+     "t": 6.23,
+     "fim": 6.41,
+     "texto": "e"
+    },
+    {
+     "t": 6.47,
+     "fim": 6.8,
+     "texto": "risco"
+    },
+    {
+     "t": 6.86,
+     "fim": 7.04,
+     "texto": "de"
+    },
+    {
+     "t": 7.1,
+     "fim": 7.62,
+     "texto": "granizo."
+    }
+   ],
+   "transicao": "glitch"
+  },
+  {
+   "tipo": "noticia",
+   "dur": 6.8,
+   "estilo": "numero",
+   "chapeu": "Pato Branco · Sudoeste",
+   "cor": "#F0B07A",
+   "titulo": "Chuva recorde em Pato Branco bloqueia a BR-277 e cinco rodovias",
+   "linhaFina": "O temporal de sábado causou deslizamentos e interdições na região.",
+   "numero": {
+    "valor": "201,4",
+    "rotulo": "mm de chuva em um dia"
+   },
+   "palavras": [
+    {
+     "t": 0.5,
+     "fim": 0.68,
+     "texto": "Em"
+    },
+    {
+     "t": 0.74,
+     "fim": 1.0,
+     "texto": "Pato"
+    },
+    {
+     "t": 1.06,
+     "fim": 1.52,
+     "texto": "Branco,"
+    },
+    {
+     "t": 1.58,
+     "fim": 1.9,
+     "texto": "foram"
+    },
+    {
+     "t": 1.96,
+     "fim": 2.16,
+     "texto": "201"
+    },
+    {
+     "t": 2.22,
+     "fim": 2.87,
+     "texto": "milímetros"
+    },
+    {
+     "t": 2.93,
+     "fim": 3.11,
+     "texto": "de"
+    },
+    {
+     "t": 3.17,
+     "fim": 3.49,
+     "texto": "chuva"
+    },
+    {
+     "t": 3.55,
+     "fim": 3.73,
+     "texto": "em"
+    },
+    {
+     "t": 3.79,
+     "fim": 3.97,
+     "texto": "um"
+    },
+    {
+     "t": 4.03,
+     "fim": 4.29,
+     "texto": "dia,"
+    },
+    {
+     "t": 4.35,
+     "fim": 4.81,
+     "texto": "recorde"
+    },
+    {
+     "t": 4.87,
+     "fim": 5.52,
+     "texto": "histórico."
+    }
+   ],
+   "transicao": "balao"
+  },
+  {
+   "tipo": "noticia",
+   "dur": 6.6,
+   "estilo": "foto",
+   "chapeu": "Londrina · Cidades",
+   "cor": "#F0B07A",
+   "titulo": "Vento de até 54,7 km/h derruba 33 árvores em Londrina",
+   "linhaFina": "Não houve feridos nem vias interditadas.",
+   "foto": "fotos/londrina.jpg",
+   "credito": "Divulgação/Defesa Civil de Londrina",
+   "palavras": [
+    {
+     "t": 0.5,
+     "fim": 0.68,
+     "texto": "Em"
+    },
+    {
+     "t": 0.74,
+     "fim": 1.32,
+     "texto": "Londrina,"
+    },
+    {
+     "t": 1.39,
+     "fim": 1.56,
+     "texto": "o"
+    },
+    {
+     "t": 1.62,
+     "fim": 1.95,
+     "texto": "vento"
+    },
+    {
+     "t": 2.01,
+     "fim": 2.53,
+     "texto": "derrubou"
+    },
+    {
+     "t": 2.59,
+     "fim": 2.77,
+     "texto": "33"
+    },
+    {
+     "t": 2.83,
+     "fim": 3.29,
+     "texto": "árvores"
+    },
+    {
+     "t": 3.35,
+     "fim": 3.53,
+     "texto": "e"
+    },
+    {
+     "t": 3.58,
+     "fim": 4.17,
+     "texto": "destelhou"
+    },
+    {
+     "t": 4.23,
+     "fim": 4.62,
+     "texto": "casas."
+    }
+   ],
+   "transicao": "chicote"
+  },
+  {
+   "tipo": "noticia",
+   "dur": 6.8,
+   "estilo": "foto",
+   "chapeu": "Foz do Iguaçu · Meio ambiente",
+   "cor": "#F0B07A",
+   "titulo": "Cataratas do Iguaçu chegam a 13,7 milhões de litros por segundo",
+   "linhaFina": "A passarela foi fechada; trilha e mirantes seguem abertos.",
+   "foto": "fotos/cataratas.jpg",
+   "credito": "Divulgação",
+   "palavras": [
+    {
+     "t": 0.5,
+     "fim": 0.68,
+     "texto": "As"
+    },
+    {
+     "t": 0.74,
+     "fim": 1.32,
+     "texto": "Cataratas"
+    },
+    {
+     "t": 1.39,
+     "fim": 1.56,
+     "texto": "do"
+    },
+    {
+     "t": 1.62,
+     "fim": 2.02,
+     "texto": "Iguaçu"
+    },
+    {
+     "t": 2.08,
+     "fim": 2.6,
+     "texto": "chegaram"
+    },
+    {
+     "t": 2.66,
+     "fim": 2.84,
+     "texto": "a"
+    },
+    {
+     "t": 2.9,
+     "fim": 3.22,
+     "texto": "treze"
+    },
+    {
+     "t": 3.28,
+     "fim": 3.74,
+     "texto": "vírgula"
+    },
+    {
+     "t": 3.8,
+     "fim": 4.06,
+     "texto": "sete"
+    },
+    {
+     "t": 4.12,
+     "fim": 4.57,
+     "texto": "milhões"
+    },
+    {
+     "t": 4.63,
+     "fim": 4.81,
+     "texto": "de"
+    },
+    {
+     "t": 4.87,
+     "fim": 5.26,
+     "texto": "litros"
+    },
+    {
+     "t": 5.32,
+     "fim": 5.52,
+     "texto": "por"
+    },
+    {
+     "t": 5.58,
+     "fim": 6.1,
+     "texto": "segundo."
+    }
+   ],
+   "transicao": "iris"
+  },
+  {
+   "tipo": "noticia",
+   "dur": 6.4,
+   "estilo": "foto",
+   "chapeu": "BR-277 · Oeste",
+   "cor": "#6FBF98",
+   "titulo": "Receita acha 86 iPhones escondidos no assoalho de um carro",
+   "linhaFina": null,
+   "foto": "fotos/iphones.jpg",
+   "credito": "Divulgação/RFB",
+   "palavras": [
+    {
+     "t": 0.5,
+     "fim": 0.68,
+     "texto": "Na"
+    },
+    {
+     "t": 0.74,
+     "fim": 1.2,
+     "texto": "BR-277,"
+    },
+    {
+     "t": 1.25,
+     "fim": 1.43,
+     "texto": "a"
+    },
+    {
+     "t": 1.49,
+     "fim": 1.95,
+     "texto": "Receita"
+    },
+    {
+     "t": 2.01,
+     "fim": 2.33,
+     "texto": "achou"
+    },
+    {
+     "t": 2.39,
+     "fim": 2.57,
+     "texto": "86"
+    },
+    {
+     "t": 2.63,
+     "fim": 3.09,
+     "texto": "iPhones"
+    },
+    {
+     "t": 3.15,
+     "fim": 3.8,
+     "texto": "escondidos"
+    },
+    {
+     "t": 3.86,
+     "fim": 4.04,
+     "texto": "no"
+    },
+    {
+     "t": 4.1,
+     "fim": 4.62,
+     "texto": "assoalho"
+    },
+    {
+     "t": 4.68,
+     "fim": 4.86,
+     "texto": "de"
+    },
+    {
+     "t": 4.92,
+     "fim": 5.1,
+     "texto": "um"
+    },
+    {
+     "t": 5.16,
+     "fim": 5.55,
+     "texto": "carro."
+    }
+   ],
+   "transicao": "luz"
+  },
+  {
+   "tipo": "noticia",
+   "dur": 6.6,
+   "estilo": "numero",
+   "chapeu": "Mundo · França",
+   "cor": "#C3B2EC",
+   "titulo": "França detém quase 1.000 pessoas em protestos contra o custo de vida",
+   "linhaFina": "Mais de 410 mil foram às ruas.",
+   "numero": {
+    "valor": "1.000",
+    "rotulo": "quase mil detidos"
+   },
+   "palavras": [
+    {
+     "t": 0.5,
+     "fim": 0.68,
+     "texto": "Na"
+    },
+    {
+     "t": 0.74,
+     "fim": 1.2,
+     "texto": "França,"
+    },
+    {
+     "t": 1.25,
+     "fim": 1.58,
+     "texto": "quase"
+    },
+    {
+     "t": 1.64,
+     "fim": 1.83,
+     "texto": "mil"
+    },
+    {
+     "t": 1.9,
+     "fim": 2.35,
+     "texto": "pessoas"
+    },
+    {
+     "t": 2.41,
+     "fim": 2.74,
+     "texto": "foram"
+    },
+    {
+     "t": 2.79,
+     "fim": 3.25,
+     "texto": "detidas"
+    },
+    {
+     "t": 3.31,
+     "fim": 3.49,
+     "texto": "em"
+    },
+    {
+     "t": 3.55,
+     "fim": 4.13,
+     "texto": "protestos"
+    },
+    {
+     "t": 4.2,
+     "fim": 4.58,
+     "texto": "contra"
+    },
+    {
+     "t": 4.65,
+     "fim": 4.83,
+     "texto": "o"
+    },
+    {
+     "t": 4.89,
+     "fim": 5.21,
+     "texto": "custo"
+    },
+    {
+     "t": 5.27,
+     "fim": 5.45,
+     "texto": "de"
+    },
+    {
+     "t": 5.51,
+     "fim": 5.84,
+     "texto": "vida."
+    }
+   ],
+   "transicao": "glitch"
+  },
+  {
+   "tipo": "assinatura",
+   "dur": 6.4,
+   "transicao": "balao"
+  }
+ ]
+}

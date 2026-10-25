@@ -1,0 +1,6 @@
+node_modules
+out
+public/fotos/*
+!public/fotos/.gitkeep
+public/audio
+public/roteiro.json

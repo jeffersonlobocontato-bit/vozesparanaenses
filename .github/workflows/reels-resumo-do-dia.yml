@@ -1,0 +1,68 @@
+# Reels "Resumo do dia" do @vozesparanaenses.
+# Monta o roteiro com os posts publicados no dia, gera a narração (pt-BR),
+# compõe a trilha, renderiza com Remotion e guarda o MP4 como artefato.
+# Publica no Instagram SÓ quando pedido (entrada `publicar`) ou quando a
+# variável do repositório REELS_PUBLICAR_AUTO = "sim" (agenda das 18h).
+name: Reels Resumo do Dia
+
+on:
+  workflow_dispatch:
+    inputs:
+      data:
+        description: "Dia (AAAA-MM-DD). Vazio = hoje"
+        required: false
+        default: ""
+      publicar:
+        description: "Publicar no Instagram depois de renderizar?"
+        type: boolean
+        default: false
+  schedule:
+    - cron: "35 20 * * *" # 17h35 em Brasília: render ~15 min, posta perto das 18h
+
+concurrency:
+  group: reels-resumo
+  cancel-in-progress: false
+
+jobs:
+  reels:
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    defaults:
+      run:
+        working-directory: reels
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+          cache-dependency-path: reels/package-lock.json
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Dependências
+        run: |
+          sudo apt-get update -qq && sudo apt-get install -y -qq ffmpeg fonts-noto-color-emoji > /dev/null
+          npm ci --no-audit --no-fund
+          pip install --quiet "edge-tts>=7.2" numpy scipy
+      - name: Roteiro do dia
+        run: node scripts/montar.mjs ${{ github.event.inputs.data }}
+      - name: Narração
+        run: python scripts/voz.py
+      - name: Trilha e efeitos
+        run: python scripts/trilha.py
+      - name: Render
+        run: npx remotion render ResumoDoDia out/resumo.mp4 --props=public/roteiro.json --concurrency=4 --crf=20
+      - name: Guarda o vídeo
+        uses: actions/upload-artifact@v4
+        with:
+          name: resumo-do-dia
+          path: |
+            reels/out/resumo.mp4
+            reels/public/roteiro.json
+          retention-days: 14
+      - name: Publica no Instagram
+        if: ${{ github.event.inputs.publicar == 'true' || (github.event_name == 'schedule' && vars.REELS_PUBLICAR_AUTO == 'sim') }}
+        env:
+          ZERNIO_API_KEY: ${{ secrets.ZERNIO_API_KEY }}
+        run: node scripts/publicar.mjs
