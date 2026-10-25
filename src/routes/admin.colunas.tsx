@@ -60,6 +60,34 @@ type RespostaEscrita = {
   pautas?: Array<{ ordem: number; texto: string; fontes: Array<{ url: string; titulo: string; erro: string | null }> }>;
 };
 
+/**
+ * Motivo legível de um erro de supabase.functions.invoke. Em erro HTTP o
+ * `context` costuma ser a Response (com o JSON da função), mas nem sempre —
+ * por isso tudo é checado antes de usar.
+ */
+async function motivoDoErro(error: unknown): Promise<string> {
+  const e = error as { message?: string; context?: unknown };
+  const ctx = e?.context as { status?: number; json?: () => Promise<unknown>; text?: () => Promise<string> } | undefined;
+  const status = typeof ctx?.status === "number" ? ctx.status : null;
+  let corpo: { error?: string; detail?: string; code?: string; message?: string } | null = null;
+  try {
+    if (ctx && typeof ctx.text === "function") {
+      const t = await ctx.text();
+      try { corpo = JSON.parse(t); } catch { corpo = { message: t.slice(0, 200) }; }
+    } else if (ctx && typeof ctx.json === "function") {
+      corpo = (await ctx.json()) as typeof corpo;
+    }
+  } catch { /* corpo já lido ou indisponível */ }
+  if (status === 404 || corpo?.code === "NOT_FOUND") {
+    return "a função coluna-escrever ainda não foi publicada no servidor (a Lovable precisa publicar as funções novas). Tente de novo depois da publicação.";
+  }
+  if (!status && /failed to send|failed to fetch|network/i.test(e?.message ?? "")) {
+    return "não foi possível falar com a função coluna-escrever — ela pode ainda não ter sido publicada pela Lovable, ou a conexão caiu.";
+  }
+  if (status === 401 || status === 403) return "sua sessão do painel expirou ou não tem permissão. Entre de novo no painel.";
+  return corpo?.detail || corpo?.error || corpo?.message || e?.message || "falha desconhecida";
+}
+
 /** A coluna nova (085) ainda não existe no banco? */
 function faltaColuna(e: { code?: string; message?: string } | null | undefined): boolean {
   return !!e && (e.code === "42703" || /column .* does not exist/i.test(e.message ?? ""));
@@ -224,12 +252,7 @@ function AdminColunas() {
         body: { pautas, coluna_slug: COLUNA_SLUG },
       });
       let resp = data as RespostaEscrita | null;
-      if (error) {
-        // Erro HTTP: a função manda o motivo no corpo.
-        const ctx = (error as { context?: Response }).context;
-        resp = ctx ? ((await ctx.json().catch(() => null)) as RespostaEscrita | null) : null;
-        throw new Error(resp?.detail || resp?.error || error.message);
-      }
+      if (error) throw new Error(await motivoDoErro(error));
       if (!resp?.coluna) throw new Error(resp?.detail || "A IA não devolveu a coluna.");
       const c = resp.coluna;
       const fontesDaPauta = (n: number | null) => resp?.pautas?.find((p) => p.ordem === n)?.fontes ?? [];
