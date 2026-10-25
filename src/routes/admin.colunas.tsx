@@ -88,6 +88,16 @@ async function motivoDoErro(error: unknown): Promise<string> {
   return corpo?.detail || corpo?.error || corpo?.message || e?.message || "falha desconhecida";
 }
 
+/** Mensagem de qualquer erro — os do Supabase são objetos simples, não Error. */
+function textoDoErro(e: unknown): string {
+  if (e instanceof Error && e.message) return e.message;
+  const o = e as { message?: string; details?: string; hint?: string; code?: string } | null;
+  if (o && (o.message || o.details || o.code)) {
+    return [o.message, o.details, o.hint, o.code && `(código ${o.code})`].filter(Boolean).join(" — ");
+  }
+  try { return JSON.stringify(e); } catch { return String(e); }
+}
+
 /** A coluna nova (085) ainda não existe no banco? */
 function faltaColuna(e: { code?: string; message?: string } | null | undefined): boolean {
   // Leitura: 42703 "column ... does not exist". Gravação: PGRST204
@@ -349,7 +359,9 @@ function AdminColunas() {
         atualizado_em: new Date().toISOString(),
         ...(publicar ? { status: "publicado", publicado_em: new Date().toISOString() } : {}),
       };
-      const comPautas = { ...base, pautas: pautas.trim() || null };
+      // Só manda as pautas se a 085 já foi aplicada (detectado ao abrir a
+      // tela, pela coluna agente_instrucoes da mesma migração).
+      const comPautas = agenteDisponivel ? { ...base, pautas: pautas.trim() || null } : base;
 
       let edId = edicaoAtivaId;
       if (edId) {
@@ -380,7 +392,7 @@ function AdminColunas() {
       setEdicaoAtivaId(edId);
       await load();
     } catch (e: unknown) {
-      setMsg("Erro ao salvar: " + (e instanceof Error ? e.message : "desconhecido"));
+      setMsg("Erro ao salvar: " + textoDoErro(e));
     } finally {
       setSalvando(false);
     }
