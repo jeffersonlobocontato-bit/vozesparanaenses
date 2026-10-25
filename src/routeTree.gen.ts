@@ -15,6 +15,7 @@ import { Route as TermosRouteImport } from './routes/termos'
 import { Route as SobreRouteImport } from './routes/sobre'
 import { Route as PrivacidadeRouteImport } from './routes/privacidade'
 import { Route as PoliticaEditorialRouteImport } from './routes/politica-editorial'
+import { Route as InstagramRouteImport } from './routes/instagram'
 import { Route as CorrecoesRouteImport } from './routes/correcoes'
 import { Route as ContatoRouteImport } from './routes/contato'
 import { Route as CidadesdoparanaRouteImport } from './routes/cidadesdoparana'
@@ -43,6 +44,7 @@ import { Route as AdminPainelRouteImport } from './routes/admin.painel'
 import { Route as AdminNotasCidadesRouteImport } from './routes/admin.notas-cidades'
 import { Route as AdminMemoriaEditorialRouteImport } from './routes/admin.memoria-editorial'
 import { Route as AdminLoginRouteImport } from './routes/admin.login'
+import { Route as AdminInstagramRouteImport } from './routes/admin.instagram'
 import { Route as AdminImprensaClientesRouteImport } from './routes/admin.imprensa-clientes'
 import { Route as AdminFontesRouteImport } from './routes/admin.fontes'
 import { Route as AdminCustosRouteImport } from './routes/admin.custos'
@@ -101,6 +103,11 @@ const PrivacidadeRoute = PrivacidadeRouteImport.update({
 const PoliticaEditorialRoute = PoliticaEditorialRouteImport.update({
   id: '/politica-editorial',
   path: '/politica-editorial',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const InstagramRoute = InstagramRouteImport.update({
+  id: '/instagram',
+  path: '/instagram',
   getParentRoute: () => rootRouteImport,
 } as any)
 const CorrecoesRoute = CorrecoesRouteImport.update({
@@ -241,6 +248,11 @@ const AdminMemoriaEditorialRoute = AdminMemoriaEditorialRouteImport.update({
 const AdminLoginRoute = AdminLoginRouteImport.update({
   id: '/login',
   path: '/login',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminInstagramRoute = AdminInstagramRouteImport.update({
+  id: '/instagram',
+  path: '/instagram',
   getParentRoute: () => AdminRoute,
 } as any)
 const AdminImprensaClientesRoute = AdminImprensaClientesRouteImport.update({
@@ -405,6 +417,7 @@ export interface FileRoutesByFullPath {
   '/cidadesdoparana': typeof CidadesdoparanaRoute
   '/contato': typeof ContatoRoute
   '/correcoes': typeof CorrecoesRoute
+  '/instagram': typeof InstagramRoute
   '/politica-editorial': typeof PoliticaEditorialRoute
   '/privacidade': typeof PrivacidadeRoute
   '/sobre': typeof SobreRoute
@@ -420,6 +433,7 @@ export interface FileRoutesByFullPath {
   '/admin/custos': typeof AdminCustosRoute
   '/admin/fontes': typeof AdminFontesRoute
   '/admin/imprensa-clientes': typeof AdminImprensaClientesRoute
+  '/admin/instagram': typeof AdminInstagramRoute
   '/admin/login': typeof AdminLoginRoute
   '/admin/memoria-editorial': typeof AdminMemoriaEditorialRoute
   '/admin/notas-cidades': typeof AdminNotasCidadesRoute
@@ -468,6 +482,7 @@ export interface FileRoutesByTo {
   '/cidadesdoparana': typeof CidadesdoparanaRoute
   '/contato': typeof ContatoRoute
   '/correcoes': typeof CorrecoesRoute
+  '/instagram': typeof InstagramRoute
   '/politica-editorial': typeof PoliticaEditorialRoute
   '/privacidade': typeof PrivacidadeRoute
   '/sobre': typeof SobreRoute
@@ -483,6 +498,7 @@ export interface FileRoutesByTo {
   '/admin/custos': typeof AdminCustosRoute
   '/admin/fontes': typeof AdminFontesRoute
   '/admin/imprensa-clientes': typeof AdminImprensaClientesRoute
+  '/admin/instagram': typeof AdminInstagramRoute
   '/admin/login': typeof AdminLoginRoute
   '/admin/memoria-editorial': typeof AdminMemoriaEditorialRoute
   '/admin/notas-cidades': typeof AdminNotasCidadesRoute
@@ -534,6 +550,7 @@ export interface FileRoutesById {
   '/cidadesdoparana': typeof CidadesdoparanaRoute
   '/contato': typeof ContatoRoute
   '/correcoes': typeof CorrecoesRoute
+  '/instagram': typeof InstagramRoute
   '/politica-editorial': typeof PoliticaEditorialRoute
   '/privacidade': typeof PrivacidadeRoute
   '/sobre': typeof SobreRoute
@@ -549,6 +566,7 @@ export interface FileRoutesById {
   '/admin/custos': typeof AdminCustosRoute
   '/admin/fontes': typeof AdminFontesRoute
   '/admin/imprensa-clientes': typeof AdminImprensaClientesRoute
+  '/admin/instagram': typeof AdminInstagramRoute
   '/admin/login': typeof AdminLoginRoute
   '/admin/memoria-editorial': typeof AdminMemoriaEditorialRoute
   '/admin/notas-cidades': typeof AdminNotasCidadesRoute
@@ -601,6 +619,7 @@ export interface FileRouteTypes {
     | '/cidadesdoparana'
     | '/contato'
     | '/correcoes'
+    | '/instagram'
     | '/politica-editorial'
     | '/privacidade'
     | '/sobre'
@@ -616,6 +635,7 @@ export interface FileRouteTypes {
     | '/admin/custos'
     | '/admin/fontes'
     | '/admin/imprensa-clientes'
+    | '/admin/instagram'
     | '/admin/login'
     | '/admin/memoria-editorial'
     | '/admin/notas-cidades'
@@ -664,6 +684,7 @@ export interface FileRouteTypes {
     | '/cidadesdoparana'
     | '/contato'
     | '/correcoes'
+    | '/instagram'
     | '/politica-editorial'
     | '/privacidade'
     | '/sobre'
@@ -679,6 +700,7 @@ export interface FileRouteTypes {
     | '/admin/custos'
     | '/admin/fontes'
     | '/admin/imprensa-clientes'
+    | '/admin/instagram'
     | '/admin/login'
     | '/admin/memoria-editorial'
     | '/admin/notas-cidades'
@@ -729,6 +751,7 @@ export interface FileRouteTypes {
     | '/cidadesdoparana'
     | '/contato'
     | '/correcoes'
+    | '/instagram'
     | '/politica-editorial'
     | '/privacidade'
     | '/sobre'
@@ -744,6 +767,7 @@ export interface FileRouteTypes {
     | '/admin/custos'
     | '/admin/fontes'
     | '/admin/imprensa-clientes'
+    | '/admin/instagram'
     | '/admin/login'
     | '/admin/memoria-editorial'
     | '/admin/notas-cidades'
@@ -795,6 +819,7 @@ export interface RootRouteChildren {
   CidadesdoparanaRoute: typeof CidadesdoparanaRoute
   ContatoRoute: typeof ContatoRoute
   CorrecoesRoute: typeof CorrecoesRoute
+  InstagramRoute: typeof InstagramRoute
   PoliticaEditorialRoute: typeof PoliticaEditorialRoute
   PrivacidadeRoute: typeof PrivacidadeRoute
   SobreRoute: typeof SobreRoute
@@ -874,6 +899,13 @@ declare module '@tanstack/react-router' {
       path: '/politica-editorial'
       fullPath: '/politica-editorial'
       preLoaderRoute: typeof PoliticaEditorialRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/instagram': {
+      id: '/instagram'
+      path: '/instagram'
+      fullPath: '/instagram'
+      preLoaderRoute: typeof InstagramRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/correcoes': {
@@ -1070,6 +1102,13 @@ declare module '@tanstack/react-router' {
       path: '/login'
       fullPath: '/admin/login'
       preLoaderRoute: typeof AdminLoginRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/instagram': {
+      id: '/admin/instagram'
+      path: '/instagram'
+      fullPath: '/admin/instagram'
+      preLoaderRoute: typeof AdminInstagramRouteImport
       parentRoute: typeof AdminRoute
     }
     '/admin/imprensa-clientes': {
@@ -1305,6 +1344,7 @@ interface AdminRouteChildren {
   AdminCustosRoute: typeof AdminCustosRoute
   AdminFontesRoute: typeof AdminFontesRoute
   AdminImprensaClientesRoute: typeof AdminImprensaClientesRoute
+  AdminInstagramRoute: typeof AdminInstagramRoute
   AdminLoginRoute: typeof AdminLoginRoute
   AdminMemoriaEditorialRoute: typeof AdminMemoriaEditorialRoute
   AdminNotasCidadesRoute: typeof AdminNotasCidadesRoute
@@ -1325,6 +1365,7 @@ const AdminRouteChildren: AdminRouteChildren = {
   AdminCustosRoute: AdminCustosRoute,
   AdminFontesRoute: AdminFontesRoute,
   AdminImprensaClientesRoute: AdminImprensaClientesRoute,
+  AdminInstagramRoute: AdminInstagramRoute,
   AdminLoginRoute: AdminLoginRoute,
   AdminMemoriaEditorialRoute: AdminMemoriaEditorialRoute,
   AdminNotasCidadesRoute: AdminNotasCidadesRoute,
@@ -1346,6 +1387,7 @@ const rootRouteChildren: RootRouteChildren = {
   CidadesdoparanaRoute: CidadesdoparanaRoute,
   ContatoRoute: ContatoRoute,
   CorrecoesRoute: CorrecoesRoute,
+  InstagramRoute: InstagramRoute,
   PoliticaEditorialRoute: PoliticaEditorialRoute,
   PrivacidadeRoute: PrivacidadeRoute,
   SobreRoute: SobreRoute,

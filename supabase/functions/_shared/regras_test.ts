@@ -13,6 +13,8 @@ import { escolherFotoBaixoRisco, normalizarAvaliacoes, normalizarPlano } from ".
 import { limparPrefeituraMecanico, verificarTitulo } from "./titulo.ts";
 import { dataAtendeNetParaIso, ehAtendeNet, parseListaAtendeNet, parseMateriaAtendeNet } from "./atende-net.ts";
 import { ehListaJson, parseListaJson } from "./lista-json.ts";
+import { agendar, classificar, CONFIG_PADRAO, escolherAvulsos, montarGiro, numerosConferem, proximoHorario, temFotoUtilizavel, type MateriaIG } from "./instagram-selecao.ts";
+import { corpoTitulo, limitar } from "./instagram-cards.ts";
 import { normalizarColuna, separarPautas, textoDaPagina, urlPermitida } from "./coluna-politica.ts";
 import { faltando5w1h, motivoVeto5w1h } from "./cinco-w.ts";
 import { CICLOS_PORTAIS, cicloAtual, fonteElegivel, imagemValida, normalizarUrl, ordenarPorTentativa } from "./coleta.ts";
@@ -107,6 +109,51 @@ ok("sem data → null", extrairDataPublicacao("<p>nada</p>", "https://a.com/noti
   ok("bloqueia rede interna", !urlPermitida("http://localhost/x") && !urlPermitida("http://192.168.0.1/") && !urlPermitida("file:///etc") && urlPermitida("https://www.bemparana.com.br/noticia"));
   const pg2 = textoDaPagina('<head><meta property="og:title" content="Título &amp; tal"></head><article><p>Parágrafo curto</p><p>Este é um parágrafo longo o bastante para entrar no texto da fonte.</p></article>');
   ok("texto da página: og:title e parágrafos longos", pg2.titulo === "Título & tal" && pg2.texto.startsWith("Este é"), JSON.stringify(pg2));
+}
+// Robô do Instagram — classes, peso, giro e horários
+{
+  const base = (o: Partial<MateriaIG>): MateriaIG => ({ id: crypto.randomUUID(), titulo: "x", regiao_slug: "oeste", categoria_slug: "cidades", publicado_em: "2026-10-25T12:00:00-03:00", prioridade_crivo: "media", tema_crivo: "geral", criticidade_nivel: "baixo", ...o });
+  const c = (o: Partial<MateriaIG>) => classificar(base(o)).classe;
+  ok("IG: alerta de tempestade", c({ titulo: "Alertas indicam tempestades com ventos de 100 km/h", tema_crivo: "utilidade_publica", prioridade_crivo: "alta" }) === "alerta");
+  ok("IG: deslizamento bloqueia rodovia é alerta", c({ titulo: "Chuvas provocam deslizamentos e bloqueiam rodovias", prioridade_crivo: "alta" }) === "alerta");
+  ok("IG: morte em acidente é tragédia", c({ titulo: "Homem morre em acidente na PR-317", prioridade_crivo: "alta", criticidade_nivel: "medio" }) === "tragedia");
+  ok("IG: criticidade alta fica fora", c({ titulo: "Suspeito é preso", criticidade_nivel: "alto" }) === "fora");
+  ok("IG: política fica fora do automático", c({ titulo: "Urnas", categoria_slug: "eleicoes-2026" }) === "fora" && c({ titulo: "x", categoria_slug: "politica" }) === "fora");
+  ok("IG: esporte fica fora", c({ categoria_slug: "esportes", regiao_slug: "nacional" }) === "fora");
+  ok("IG: internacional e nacional", c({ regiao_slug: "nacional", categoria_slug: "internacional" }) === "internacional" && c({ regiao_slug: "nacional", categoria_slug: "economia" }) === "nacional");
+  ok("IG: regional vai para o giro", c({ regiao_slug: "litoral" }) === "regional");
+  ok("IG: tragédia nunca leva foto", !temFotoUtilizavel(base({ imagem_capa_url: "x" }), "tragedia") && !temFotoUtilizavel(base({ imagem_capa_url: "x", titulo: "Vítima é socorrida" }), "regional") && temFotoUtilizavel(base({ imagem_capa_url: "x" }), "regional"));
+
+  const ctx = { agora: new Date("2026-10-25T14:00:00-03:00"), maxVisitas: 0, trafegoDia: 0 };
+  const cands = [
+    base({ titulo: "Defesa Civil emite alerta de granizo", tema_crivo: "utilidade_publica", prioridade_crivo: "alta" }),
+    base({ titulo: "Receita apreende iPhones", tema_crivo: "seguranca", prioridade_crivo: "alta" }),
+    base({ titulo: "PM prende quadrilha", tema_crivo: "seguranca", prioridade_crivo: "alta" }),
+    base({ titulo: "Operação apreende cigarros", tema_crivo: "seguranca", prioridade_crivo: "media" }),
+    base({ titulo: "França detém mil", regiao_slug: "nacional", categoria_slug: "internacional", prioridade_crivo: "alta" }),
+    base({ titulo: "Tiroteio nos EUA", regiao_slug: "nacional", categoria_slug: "internacional", prioridade_crivo: "media" }),
+  ];
+  const esc = escolherAvulsos(cands, {}, CONFIG_PADRAO, ctx);
+  ok("IG: cotas — 1 alerta, 2 segurança, 1 internacional", esc.filter((e) => e.classe === "seguranca").length === 2 && esc.filter((e) => e.classe === "internacional").length === 1 && esc[0].classe === "alerta", JSON.stringify(esc.map((e) => e.classe)));
+  const cheio = escolherAvulsos(cands, { total: 7 }, CONFIG_PADRAO, ctx);
+  ok("IG: teto do dia cheio — só alerta fura", cheio.length === 1 && cheio[0].classe === "alerta", JSON.stringify(cheio.map((e) => e.classe)));
+
+  const giro = montarGiro([
+    base({ regiao_slug: "oeste", titulo: "a", prioridade_crivo: "baixa" }),
+    base({ regiao_slug: "oeste", titulo: "b", prioridade_crivo: "alta" }),
+    base({ regiao_slug: "litoral", titulo: "c", prioridade_crivo: "media" }),
+    base({ regiao_slug: "nacional", titulo: "d", prioridade_crivo: "alta" }),
+  ], CONFIG_PADRAO, ctx);
+  ok("IG: giro — a mais forte de cada região, só PR", giro.length === 2 && giro.find((g) => g.materia.regiao_slug === "oeste")?.materia.titulo === "b", JSON.stringify(giro.map((g) => g.materia.titulo)));
+
+  const agora = new Date("2026-10-25T14:00:00-03:00");
+  const ag = agendar([{ chave: "a", alerta: false, score: 50 }, { chave: "b", alerta: true, score: 10 }, { chave: "c", alerta: false, score: 30 }], new Date("2026-10-25T13:40:00-03:00"), agora, CONFIG_PADRAO);
+  ok("IG: alerta primeiro, 30 min após o último", ag.get("b")?.toISOString() === "2026-10-25T17:10:00.000Z", String(ag.get("b")?.toISOString()));
+  ok("IG: depois 75 min entre posts", ag.get("a")?.toISOString() === "2026-10-25T18:25:00.000Z" && ag.get("c")?.toISOString() === "2026-10-25T19:40:00.000Z", `${ag.get("a")?.toISOString()} ${ag.get("c")?.toISOString()}`);
+  ok("IG: fora da janela não agenda", proximoHorario(new Date("2026-10-25T21:30:00-03:00"), agora, CONFIG_PADRAO) === null);
+  ok("IG: antes das 7h começa às 7h", proximoHorario(null, new Date("2026-10-25T05:10:00-03:00"), CONFIG_PADRAO)?.toISOString() === "2026-10-25T10:00:00.000Z");
+  ok("IG: números do card conferem com o texto", numerosConferem("150 mm", "chuva de até 150 mm") && !numerosConferem("200 mm", "chuva de até 150 mm") && numerosConferem("1.000", "quase 1.000 pessoas"));
+  ok("IG: título longo diminui o corpo", corpoTitulo("x".repeat(95), 84) < 84 && limitar("uma frase longa demais aqui", 14) === "uma frase…");
 }
 // Lista em JSON (DataTables) — Paranaguá
 {

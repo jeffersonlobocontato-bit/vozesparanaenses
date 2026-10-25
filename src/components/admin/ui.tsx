@@ -146,6 +146,11 @@ const TOM_STATUS: Record<string, string> = {
   pausada: "bg-slate-100 text-slate-600",
   expirado: "bg-slate-100 text-slate-600",
   encerrada: "bg-slate-100 text-slate-600",
+  agendado: "bg-sky-100 text-sky-800",
+  publicando: "bg-sky-100 text-sky-800",
+  erro: "bg-rose-100 text-rose-800",
+  vetado: "bg-slate-100 text-slate-600",
+  descartado: "bg-slate-100 text-slate-600",
 };
 const ROTULO_STATUS: Record<string, string> = { rascunho: "Em revisão", revisao: "Em revisão" };
 

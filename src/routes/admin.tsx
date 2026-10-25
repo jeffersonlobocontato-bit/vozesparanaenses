@@ -1,6 +1,6 @@
 import { createFileRoute, Outlet, Link, useNavigate, useLocation } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
-import { Wallet, Home, Inbox, NotebookPen, Columns3, Radio, Map as MapIcon, Bot, BookOpen, Megaphone, UserRound, Newspaper, BarChart3, Info, ExternalLink, KeyRound, LogOut, LayoutDashboard } from "lucide-react";
+import { Wallet, Home, Inbox, NotebookPen, Columns3, Radio, Map as MapIcon, Bot, BookOpen, Megaphone, UserRound, Newspaper, BarChart3, Info, ExternalLink, KeyRound, LogOut, LayoutDashboard, Instagram } from "lucide-react";
 import { getExternalBrowser } from "@/lib/external-supabase-browser";
 import { Logo } from "@/components/Logo";
 import { situacao, type Assinatura } from "@/lib/custos";
@@ -113,6 +113,7 @@ const GRUPOS: { titulo: string; itens: ItemNav[] }[] = [
   {
     titulo: "Operação",
     itens: [
+      { to: "/admin/instagram", label: "Instagram", icon: Instagram },
       { to: "/admin/custos", label: "Custos", icon: Wallet, badge: "custos" },
     ],
   },
