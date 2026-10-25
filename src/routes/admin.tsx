@@ -1,8 +1,9 @@
 import { createFileRoute, Outlet, Link, useNavigate, useLocation } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
-import { Home, Inbox, NotebookPen, Columns3, Radio, Map as MapIcon, Bot, BookOpen, Megaphone, UserRound, Newspaper, BarChart3, Info, ExternalLink, KeyRound, LogOut, LayoutDashboard } from "lucide-react";
+import { Wallet, Home, Inbox, NotebookPen, Columns3, Radio, Map as MapIcon, Bot, BookOpen, Megaphone, UserRound, Newspaper, BarChart3, Info, ExternalLink, KeyRound, LogOut, LayoutDashboard } from "lucide-react";
 import { getExternalBrowser } from "@/lib/external-supabase-browser";
 import { Logo } from "@/components/Logo";
+import { situacao, type Assinatura } from "@/lib/custos";
 
 export const Route = createFileRoute("/admin")({
   ssr: false,
@@ -78,7 +79,7 @@ function AdminLayout() {
   );
 }
 
-type ItemNav = { to: string; label: string; icon: React.ComponentType<{ className?: string }>; exact?: boolean; badge?: "materias" | "notas" };
+type ItemNav = { to: string; label: string; icon: React.ComponentType<{ className?: string }>; exact?: boolean; badge?: "materias" | "notas" | "custos" };
 
 // Menu agrupado pelo trabalho do dia: primeiro o que pede decisão (revisão),
 // depois a configuração do pipeline, os produtos pagos e o site.
@@ -110,6 +111,12 @@ const GRUPOS: { titulo: string; itens: ItemNav[] }[] = [
     ],
   },
   {
+    titulo: "Operação",
+    itens: [
+      { to: "/admin/custos", label: "Custos", icon: Wallet, badge: "custos" },
+    ],
+  },
+  {
     titulo: "Site",
     itens: [
       { to: "/admin/analytics", label: "Analytics", icon: BarChart3 },
@@ -120,18 +127,21 @@ const GRUPOS: { titulo: string; itens: ItemNav[] }[] = [
 
 function AdminSidebar({ email, onSair }: { email: string | null; onSair: () => void }) {
   const loc = useLocation();
-  const [badges, setBadges] = useState<{ materias: number; notas: number }>({ materias: 0, notas: 0 });
+  const [badges, setBadges] = useState<{ materias: number; notas: number; custos: number }>({ materias: 0, notas: 0, custos: 0 });
 
   // Contadores da revisão: atualiza ao trocar de página e a cada 2 min.
   useEffect(() => {
     let alive = true;
     const carregar = async () => {
       const sb = await getExternalBrowser();
-      const [m, n] = await Promise.all([
+      const [m, n, a] = await Promise.all([
         sb.from("generated_articles").select("*", { count: "exact", head: true }).eq("status", "rascunho"),
         sb.from("coluna_cidade_notas").select("*", { count: "exact", head: true }).eq("status", "revisao"),
+        sb.from("assinaturas").select("*"),
       ]);
-      if (alive) setBadges({ materias: m.count ?? 0, notas: n.count ?? 0 });
+      // Custos: assinaturas vencidas, com saldo baixo ou vencendo em até 7 dias.
+      const custos = a.error ? 0 : ((a.data ?? []) as Assinatura[]).filter((x) => situacao(x).nivel <= 2).length;
+      if (alive) setBadges({ materias: m.count ?? 0, notas: n.count ?? 0, custos });
     };
     carregar();
     const t = setInterval(carregar, 120_000);

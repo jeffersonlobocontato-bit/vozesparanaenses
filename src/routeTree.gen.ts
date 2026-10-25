@@ -45,6 +45,7 @@ import { Route as AdminMemoriaEditorialRouteImport } from './routes/admin.memori
 import { Route as AdminLoginRouteImport } from './routes/admin.login'
 import { Route as AdminImprensaClientesRouteImport } from './routes/admin.imprensa-clientes'
 import { Route as AdminFontesRouteImport } from './routes/admin.fontes'
+import { Route as AdminCustosRouteImport } from './routes/admin.custos'
 import { Route as AdminColunasRouteImport } from './routes/admin.colunas'
 import { Route as AdminAnunciosRouteImport } from './routes/admin.anuncios'
 import { Route as AdminAnalyticsRouteImport } from './routes/admin.analytics'
@@ -252,6 +253,11 @@ const AdminFontesRoute = AdminFontesRouteImport.update({
   path: '/fontes',
   getParentRoute: () => AdminRoute,
 } as any)
+const AdminCustosRoute = AdminCustosRouteImport.update({
+  id: '/custos',
+  path: '/custos',
+  getParentRoute: () => AdminRoute,
+} as any)
 const AdminColunasRoute = AdminColunasRouteImport.update({
   id: '/colunas',
   path: '/colunas',
@@ -411,6 +417,7 @@ export interface FileRoutesByFullPath {
   '/admin/analytics': typeof AdminAnalyticsRoute
   '/admin/anuncios': typeof AdminAnunciosRoute
   '/admin/colunas': typeof AdminColunasRoute
+  '/admin/custos': typeof AdminCustosRoute
   '/admin/fontes': typeof AdminFontesRoute
   '/admin/imprensa-clientes': typeof AdminImprensaClientesRoute
   '/admin/login': typeof AdminLoginRoute
@@ -473,6 +480,7 @@ export interface FileRoutesByTo {
   '/admin/analytics': typeof AdminAnalyticsRoute
   '/admin/anuncios': typeof AdminAnunciosRoute
   '/admin/colunas': typeof AdminColunasRoute
+  '/admin/custos': typeof AdminCustosRoute
   '/admin/fontes': typeof AdminFontesRoute
   '/admin/imprensa-clientes': typeof AdminImprensaClientesRoute
   '/admin/login': typeof AdminLoginRoute
@@ -538,6 +546,7 @@ export interface FileRoutesById {
   '/admin/analytics': typeof AdminAnalyticsRoute
   '/admin/anuncios': typeof AdminAnunciosRoute
   '/admin/colunas': typeof AdminColunasRoute
+  '/admin/custos': typeof AdminCustosRoute
   '/admin/fontes': typeof AdminFontesRoute
   '/admin/imprensa-clientes': typeof AdminImprensaClientesRoute
   '/admin/login': typeof AdminLoginRoute
@@ -604,6 +613,7 @@ export interface FileRouteTypes {
     | '/admin/analytics'
     | '/admin/anuncios'
     | '/admin/colunas'
+    | '/admin/custos'
     | '/admin/fontes'
     | '/admin/imprensa-clientes'
     | '/admin/login'
@@ -666,6 +676,7 @@ export interface FileRouteTypes {
     | '/admin/analytics'
     | '/admin/anuncios'
     | '/admin/colunas'
+    | '/admin/custos'
     | '/admin/fontes'
     | '/admin/imprensa-clientes'
     | '/admin/login'
@@ -730,6 +741,7 @@ export interface FileRouteTypes {
     | '/admin/analytics'
     | '/admin/anuncios'
     | '/admin/colunas'
+    | '/admin/custos'
     | '/admin/fontes'
     | '/admin/imprensa-clientes'
     | '/admin/login'
@@ -1074,6 +1086,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminFontesRouteImport
       parentRoute: typeof AdminRoute
     }
+    '/admin/custos': {
+      id: '/admin/custos'
+      path: '/custos'
+      fullPath: '/admin/custos'
+      preLoaderRoute: typeof AdminCustosRouteImport
+      parentRoute: typeof AdminRoute
+    }
     '/admin/colunas': {
       id: '/admin/colunas'
       path: '/colunas'
@@ -1283,6 +1302,7 @@ interface AdminRouteChildren {
   AdminAnalyticsRoute: typeof AdminAnalyticsRoute
   AdminAnunciosRoute: typeof AdminAnunciosRoute
   AdminColunasRoute: typeof AdminColunasRoute
+  AdminCustosRoute: typeof AdminCustosRoute
   AdminFontesRoute: typeof AdminFontesRoute
   AdminImprensaClientesRoute: typeof AdminImprensaClientesRoute
   AdminLoginRoute: typeof AdminLoginRoute
@@ -1302,6 +1322,7 @@ const AdminRouteChildren: AdminRouteChildren = {
   AdminAnalyticsRoute: AdminAnalyticsRoute,
   AdminAnunciosRoute: AdminAnunciosRoute,
   AdminColunasRoute: AdminColunasRoute,
+  AdminCustosRoute: AdminCustosRoute,
   AdminFontesRoute: AdminFontesRoute,
   AdminImprensaClientesRoute: AdminImprensaClientesRoute,
   AdminLoginRoute: AdminLoginRoute,
