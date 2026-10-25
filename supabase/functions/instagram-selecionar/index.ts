@@ -20,6 +20,7 @@ import { exigirInterno } from "../_shared/auth.ts";
 import { COR_REGIAO, ESCOPO, limitar, NOME_REGIAO, type Card } from "../_shared/instagram-cards.ts";
 import { imagemComoDataUri, renderizarCard } from "../_shared/instagram-render.ts";
 import { limparCredito, montarLegenda, redigir } from "../_shared/instagram-redator.ts";
+import { fotoLivrePorTema } from "../_shared/foto-tema.ts";
 import {
   agendar,
   chapeuDe,
@@ -194,7 +195,7 @@ Deno.serve(async (req) => {
     return urls;
   }
 
-  async function cardDaMateria(l: Linha, classe: Classe, lamina?: { atual: number; total: number }): Promise<{ card: Card; red: Awaited<ReturnType<typeof redigir>> | null }> {
+  async function cardDaMateria(l: Linha, classe: Classe, lamina?: { atual: number; total: number }): Promise<{ card: Card; red: Awaited<ReturnType<typeof redigir>> | null; fotoUrl?: string | null; credito?: string | null }> {
     const m = paraMateria(l);
     const ch = chapeuDe(m, l.categoria?.nome ?? null, l.regiao ? (NOME_REGIAO[l.regiao.slug] ?? l.regiao.nome) : null);
     const red = lamina ? null : await redigir({ apiKey: aiKey, classe, titulo: l.titulo, subtitulo: l.subtitulo, texto: [l.tldr, l.resumo].filter(Boolean).join("\n") || l.subtitulo || "" });
@@ -203,16 +204,36 @@ Deno.serve(async (req) => {
     if (classe === "alerta") {
       return { card: { formato: "alerta", chapeu: ch.texto, titulo, quando: red?.quando ?? null, dados: red?.dados ?? [], orientacao: red?.orientacao ?? null }, red };
     }
-    const foto = temFotoUtilizavel(m, classe) && l.imagem_capa_url ? await imagemComoDataUri(l.imagem_capa_url) : null;
+    let foto = temFotoUtilizavel(m, classe) && l.imagem_capa_url ? await imagemComoDataUri(l.imagem_capa_url) : null;
+    let creditoFoto = limparCredito(l.imagem_credito);
+    let fotoUrl = l.imagem_capa_url;
+    // Matéria sem foto (post avulso): tenta uma foto real de licença livre do
+    // lugar/tema no Wikimedia Commons, aprovada pela analista de imagem só
+    // com risco baixo (ex.: Cataratas do Iguaçu). Nunca em alerta/tragédia.
+    if (!foto && !lamina && aiKey && classe !== "tragedia" && Date.now() - inicio < ORCAMENTO_MS - 40_000) {
+      try {
+        const livre = await fotoLivrePorTema({
+          sb, aiKey, articleId: l.id, titulo: l.titulo,
+          resumo: [l.tldr, l.resumo].filter(Boolean).join(" ") || l.subtitulo,
+          escopo: l.categoria?.nome ?? l.regiao?.nome ?? "geral",
+        });
+        if (livre && !("sensivel" in livre)) {
+          foto = await imagemComoDataUri(livre.url);
+          if (foto) { creditoFoto = limparCredito(livre.credito); fotoUrl = livre.url; }
+        }
+      } catch { /* sem foto livre: segue no tipográfico */ }
+    }
     const corLamina = lamina && l.regiao ? COR_REGIAO[l.regiao.slug] : null;
     if (foto) {
       return {
         card: {
           formato: "foto", chapeu: lamina ? [l.cidade_principal, NOME_REGIAO[l.regiao?.slug ?? ""] ?? l.regiao?.nome].filter(Boolean).join(" · ") : ch.texto,
-          cor: corLamina ?? ESCOPO[ch.escopo].claro, titulo, linhaFina, foto, credito: limparCredito(l.imagem_credito),
+          cor: corLamina ?? ESCOPO[ch.escopo].claro, titulo, linhaFina, foto, credito: creditoFoto,
           lamina: lamina ? { ...lamina, rotulo: "Giro pelo Paraná" } : undefined,
         },
         red,
+        fotoUrl,
+        credito: fotoUrl === l.imagem_capa_url ? l.imagem_credito : creditoFoto,
       };
     }
     return {
@@ -231,21 +252,21 @@ Deno.serve(async (req) => {
     if (!quando) { resultado.push({ id: a.materia.id, pulado: "fora da janela de hoje" }); continue; }
     const l = porId.get(a.materia.id)!;
     try {
-      const { card, red } = await cardDaMateria(l, a.classe);
+      const { card, red, fotoUrl, credito } = await cardDaMateria(l, a.classe);
       const png = await renderizarCard(card);
       const postId = crypto.randomUUID();
       const imagens = await subir(postId, [png]);
       const nomeRegiao = l.regiao ? (NOME_REGIAO[l.regiao.slug] ?? l.regiao.nome) : null;
       const local = [l.cidade_principal, nomeRegiao && l.regiao?.slug !== "nacional" && l.regiao?.slug !== "internacional" ? nomeRegiao : null].filter(Boolean).join(" · ") || null;
       const legenda = montarLegenda({
-        texto: red?.legenda ?? l.titulo, local, credito: card.formato === "foto" ? l.imagem_credito : null,
+        texto: red?.legenda ?? l.titulo, local, credito: card.formato === "foto" ? credito : null,
         chamada: a.classe === "alerta" ? "Mais informações no link da bio." : undefined,
         hashtags: hashtags(a.materia, nomeRegiao),
       });
       const { error } = await sb.from("instagram_posts").insert({
         id: postId, tipo: card.formato === "foto" ? "foto" : card.formato, classe: a.classe, status: "agendado",
         artigos: [l.id], score: a.score, motivo: `${a.classe} · peso ${a.score}`, // guarda a URL da foto (não o data URI) para poder renderizar de novo
-        card: card.formato === "foto" ? { ...card, foto: l.imagem_capa_url } : card,
+        card: card.formato === "foto" ? { ...card, foto: fotoUrl } : card,
         legenda, imagens, links: [{ titulo: l.titulo, url: `${SITE}/${l.regiao?.slug}/${l.slug}` }], agendado_para: quando.toISOString(),
       });
       if (error) throw new Error(error.message);
