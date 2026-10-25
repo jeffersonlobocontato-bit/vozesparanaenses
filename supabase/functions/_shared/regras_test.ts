@@ -13,6 +13,7 @@ import { escolherFotoBaixoRisco, normalizarAvaliacoes, normalizarPlano } from ".
 import { limparPrefeituraMecanico, verificarTitulo } from "./titulo.ts";
 import { dataAtendeNetParaIso, ehAtendeNet, parseListaAtendeNet, parseMateriaAtendeNet } from "./atende-net.ts";
 import { ehListaJson, parseListaJson } from "./lista-json.ts";
+import { normalizarColuna, separarPautas, textoDaPagina, urlPermitida } from "./coluna-politica.ts";
 import { faltando5w1h, motivoVeto5w1h } from "./cinco-w.ts";
 import { CICLOS_PORTAIS, cicloAtual, fonteElegivel, imagemValida, normalizarUrl, ordenarPorTentativa } from "./coleta.ts";
 
@@ -91,6 +92,22 @@ ok("data de HOJE no cabeçalho NÃO conta", x === null, JSON.stringify(x));
 x = extrairDataPublicacao("<p>Versão do sistema: 2.0.0 - 22/10/2026 . Data: 22 de outubro de 2026</p>", "https://a/b");
 ok("versão do sistema / Data: solto NÃO contam", x === null, JSON.stringify(x));
 ok("sem data → null", extrairDataPublicacao("<p>nada</p>", "https://a.com/noticia") === null);
+// Coluna Vozes Políticas — pautas na ordem
+{
+  const p1 = separarPautas("https://a.com/x helicóptero\n\nTRE-PR e Moro: https://b.com/y.\n\nFechamento sobre o Senado");
+  ok("pautas por linha em branco, na ordem", p1.length === 3 && p1[0].urls[0] === "https://a.com/x" && p1[1].urls[0] === "https://b.com/y" && p1[2].urls.length === 0, JSON.stringify(p1));
+  const p2 = separarPautas("1. https://a.com/1\n2) https://a.com/2\n- tema solto");
+  ok("uma pauta por linha, sem numeração", p2.length === 3 && p2[2].texto === "tema solto" && p2[0].texto === "https://a.com/1", JSON.stringify(p2));
+  ok("pauta vazia", separarPautas("  \n ").length === 0);
+  const c = normalizarColuna({ titulo: "T", subtitulo: "S", pergunta_engajamento: "", notas: [
+    { pauta: 2, titulo_gatilho: "B", corpo: "b" }, { pauta: null, fechamento: true, titulo_gatilho: "Fim", corpo: "f" }, { pauta: 1, titulo_gatilho: "A", corpo: "a" },
+  ] }, 2);
+  ok("notas na ordem das pautas, fechamento no fim", c?.notas.map((n) => n.titulo_gatilho).join(",") === "A,B,Fim" && c?.pergunta_engajamento === null, JSON.stringify(c));
+  ok("resposta sem notas é inválida", normalizarColuna({ titulo: "T", notas: [] }, 2) === null);
+  ok("bloqueia rede interna", !urlPermitida("http://localhost/x") && !urlPermitida("http://192.168.0.1/") && !urlPermitida("file:///etc") && urlPermitida("https://www.bemparana.com.br/noticia"));
+  const pg2 = textoDaPagina('<head><meta property="og:title" content="Título &amp; tal"></head><article><p>Parágrafo curto</p><p>Este é um parágrafo longo o bastante para entrar no texto da fonte.</p></article>');
+  ok("texto da página: og:title e parágrafos longos", pg2.titulo === "Título & tal" && pg2.texto.startsWith("Este é"), JSON.stringify(pg2));
+}
 // Lista em JSON (DataTables) — Paranaguá
 {
   const js = JSON.stringify({ success: true, aaData: [["6318", "23/10/2026", "<a href='/noticias/noticia6318.html'>Projeto Leme prepara jovens de Paranaguá</a>"], ["6317", "22/10/2026", "<a href='/noticias/noticia6317.html'>Prefeitura reforça sinalização viária</a>"]] });

@@ -22,8 +22,18 @@ insert into public.custos_parametros (chave, valor, descricao, unidade) values
   ('ia_materia',     0.0105,  'Por matéria redigida (redação, criticidade, SEO, duplicidade)', 'US$'),
   ('ia_imagem',      0.04,    'Por imagem gerada por IA', 'US$'),
   ('ia_nota',        0.003,   'Por nota de coluna das cidades', 'US$'),
-  ('ia_imprensa',    0.008,   'Por rascunho do Portal da Imprensa', 'US$')
+  ('ia_imprensa',    0.008,   'Por rascunho do Portal da Imprensa', 'US$'),
+  ('ia_coluna',      0.06,    'Por edição da Vozes Políticas escrita pela IA (modelo pro, com leitura dos links)', 'US$')
 on conflict (chave) do nothing;
+
+-- Escritas da coluna Vozes Políticas pela IA (função coluna-escrever, 085).
+create table if not exists public.coluna_escritas_ia (
+  id uuid primary key default gen_random_uuid(),
+  coluna_id uuid references public.colunas(id) on delete cascade,
+  pautas int not null default 0,
+  criado_em timestamptz not null default now()
+);
+alter table public.coluna_escritas_ia enable row level security;
 
 create table if not exists public.assinaturas (
   id uuid primary key default gen_random_uuid(),
@@ -109,7 +119,8 @@ begin
     'ia_materia',  (select count(*) from public.generated_articles where gerado_em >= p_inicio and gerado_em < p_fim),
     'ia_imagem',   (select count(*) from public.generated_articles where gerado_em >= p_inicio and gerado_em < p_fim and imagem_credito ilike '%gerada por IA%'),
     'ia_nota',     (select count(*) from public.coluna_cidade_notas where criado_em >= p_inicio and criado_em < p_fim),
-    'ia_imprensa', (select count(*) from public.imprensa_submissoes where criado_em >= p_inicio and criado_em < p_fim)
+    'ia_imprensa', (select count(*) from public.imprensa_submissoes where criado_em >= p_inicio and criado_em < p_fim),
+    'ia_coluna',   (select count(*) from public.coluna_escritas_ia where criado_em >= p_inicio and criado_em < p_fim)
   );
 
   itens := '[]'::jsonb;
