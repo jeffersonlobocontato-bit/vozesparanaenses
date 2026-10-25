@@ -38,16 +38,19 @@ export type PlanoImagem = {
 
 export type AvaliacaoFoto = { indice: number; risco: Risco; motivos: string[] };
 
-const PLANO_PROMPT = `Você é a analista de imagens de um portal de notícias. Para a matéria abaixo (editoria nacional ou internacional), planeje uma imagem ILUSTRATIVA de baixo risco jurídico.
-- "tema_sensivel": true se a matéria trata de morte, guerra, ataque, crime, acidente, tragédia, vítimas, abuso ou doença grave de pessoa identificada.
-- "buscas": até 2 termos de busca para o Wikimedia Commons que mostrem o LUGAR ou a INSTITUIÇÃO do assunto (ex.: "Palácio do Planalto", "Congresso Nacional Brasília", "Supremo Tribunal Federal building", "Kremlin Moscow", "United Nations headquarters New York", "Buenos Aires Casa Rosada"). Prefira prédios, fachadas, monumentos, paisagens e sedes oficiais. NÃO busque pessoas, rostos, multidões, crianças, eventos específicos ou cenas do fato.
+const PLANO_PROMPT = `Você é a analista de imagens de um portal de notícias. Para a matéria abaixo, planeje uma imagem ILUSTRATIVA de baixo risco jurídico.
+- "tema_sensivel": true se a matéria trata de morte, guerra, ataque, crime, acidente, tragédia com vítimas, abuso ou doença grave de pessoa identificada.
+- "buscas": até 2 termos de busca para o Wikimedia Commons (prefira inglês, que tem mais resultado), escolhendo o tipo certo:
+  • matéria sobre governo, órgão ou instituição → o LUGAR ou a SEDE (ex.: "Palácio do Planalto", "Congresso Nacional Brasília", "Supremo Tribunal Federal building", "United Nations headquarters New York");
+  • matéria de TEMA geral (clima, chuva, enchente, seca, frio, agricultura, safra, energia, trânsito, rodovia, saúde pública, educação, economia) → uma CENA GENÉRICA do tema, sem pessoas em destaque (ex.: "heavy rain street Brazil", "flooded street", "storm clouds sky", "soybean field Paraná", "highway traffic Brazil", "hospital corridor", "classroom empty", "hydroelectric dam").
+  NÃO busque pessoas, rostos, crianças, multidões nem o registro do próprio fato da matéria.
 - "motivo": até 15 palavras.
 Retorne APENAS JSON: {"tema_sensivel": true|false, "buscas": ["..."], "motivo": "..."}`;
 
 const AVALIACAO_PROMPT = `Você é a analista de risco de imagens de um portal de notícias. Avalie cada foto candidata (todas com licença livre do Wikimedia Commons) para ilustrar a matéria indicada. Dê "risco":
-- "alto" se houver: criança; vítima, ferido, morto, violência ou arma; pessoa identificável que não seja figura pública no papel público dela; pessoa associada a acusação, crime ou escândalo; marca comercial em destaque; cena que pareça ser o registro do próprio fato (enganaria o leitor); ou se a foto não tiver relação com o tema.
-- "medio" se houver pessoas reconhecíveis ao fundo, multidão, ou relação fraca com o tema.
-- "baixo" só se for um lugar, prédio, monumento, paisagem ou símbolo institucional claramente ligado ao assunto, sem pessoas em destaque.
+- "alto" se houver: criança; vítima, ferido, morto, violência ou arma; pessoa identificável que não seja figura pública no papel público dela; pessoa associada a acusação, crime ou escândalo; marca comercial em destaque; texto/placa que identifique outro lugar ou data como se fosse o fato da matéria; ou se a foto não tiver relação com o tema.
+- "medio" se houver pessoas reconhecíveis ao fundo, multidão, baixa qualidade (escura, borrada, pequena) ou relação fraca com o tema.
+- "baixo" se for um lugar, prédio, monumento ou símbolo institucional ligado ao assunto, OU uma cena genérica do tema (chuva, rua alagada, céu de tempestade, lavoura, rodovia, sala de aula, hospital), de boa qualidade, sem pessoas em destaque.
 Retorne APENAS JSON: {"avaliacoes": [{"indice": 0, "risco": "baixo"|"medio"|"alto", "motivos": ["..."]}]}`;
 
 async function chamarIa(apiKey: string, messages: unknown[], maxTokens = 400): Promise<string | null> {

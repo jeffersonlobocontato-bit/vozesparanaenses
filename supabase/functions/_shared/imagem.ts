@@ -2,12 +2,14 @@
 //
 // Duas fontes de imagem para matéria de PORTAL que veio sem foto liberada:
 //
-// 1. ilustração temática por IA — para assunto geral (meio ambiente,
-//    saúde preventiva, clima...). Gerada SÓ a partir do tema: nunca a
-//    partir da foto de outro veículo (recriar foto de terceiro com
-//    "pequenas variações" continua sendo obra derivada). Estilo de
-//    ilustração editorial, sem pessoas identificáveis, sem crianças, sem
-//    marcas, sem reproduzir o fato. Sempre identificada como IA.
+// 1. imagem temática por IA — último recurso para assunto geral (clima,
+//    meio ambiente, saúde preventiva...), depois de tentar uma foto real
+//    de licença livre do tema (_shared/foto-tema.ts). Gerada SÓ a partir do
+//    tema: nunca a partir da foto de outro veículo (recriar foto de
+//    terceiro com "pequenas variações" continua sendo obra derivada).
+//    Estilo fotográfico realista de cena genérica, sem pessoas
+//    identificáveis, sem crianças, sem marcas, sem reproduzir o fato.
+//    Sempre identificada como IA.
 //
 // 2. foto real da cidade — quando a notícia fala da cidade como um todo.
 //    Buscada no Wikimedia Commons, só com licença livre (CC0, domínio
@@ -25,9 +27,10 @@ const UA = "VozesParanaensesBot/1.0 (+https://vozesparanaenses.com.br; contato@v
 export const CREDITO_IA = "Imagem ilustrativa gerada por IA (Vozes Paranaenses)";
 
 export function promptIlustracao(tema: string): string {
-  return `Ilustração editorial para jornal, estilo ilustração digital (NÃO fotografia), traço limpo, cores sóbrias, composição simples e conceitual.
-Regras: sem pessoas identificáveis, sem rostos, sem crianças, sem texto, sem letras, sem logotipos, sem marcas, sem bandeiras, sem violência, sem armas, sem sangue.
-Não represente um acontecimento específico nem um lugar real reconhecível: represente o TEMA de forma genérica e simbólica.
+  return `Fotografia editorial realista, estilo fotojornalismo de jornal brasileiro: luz natural, profundidade de campo, cores naturais, enquadramento 16:9, aparência de foto de câmera profissional (NÃO ilustração, NÃO desenho, NÃO ícones, NÃO 3D estilizado).
+Mostre uma CENA GENÉRICA e plausível do tema no contexto do Paraná/Brasil (ex.: chuva forte numa rua, céu de tempestade, lavoura, rodovia, fachada de escola, corredor de hospital).
+Regras: sem pessoas identificáveis (se houver gente, distante, de costas ou desfocada), sem rostos, sem crianças, sem texto, sem letras, sem placas legíveis, sem logotipos, sem marcas, sem bandeiras, sem violência, sem armas, sem sangue, sem vítimas.
+Não represente o acontecimento específico da notícia nem um lugar real reconhecível: é uma imagem ilustrativa do TEMA.
 Tema: ${tema.slice(0, 400)}`;
 }
 

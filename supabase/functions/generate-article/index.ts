@@ -17,6 +17,7 @@ import { exigirInterno } from "../_shared/auth.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
 import { carregarCidades, cidadePorNome } from "../_shared/cidades.ts";
 import { decidirFormato, decidirImagem, ehAbrangenciaNacional, podeIrParaDobra, prioridadeDoTema, temaHeuristico, type DecisaoImagem, type OrigemPauta, type Prioridade, type Tema, type TipoImagem } from "../_shared/crivo-editorial.ts";
+import { fotoLivrePorTema } from "../_shared/foto-tema.ts";
 import { CREDITO_IA, fotoDaCidade, gerarIlustracaoTematica } from "../_shared/imagem.ts";
 import { avaliarCriticidade, carregarConfigCriticidade } from "../_shared/criticidade.ts";
 import { ehDoDia } from "../_shared/data-publicacao.ts";
@@ -588,7 +589,7 @@ Você é repórter, não comentarista. Relate o fato; não tome partido.
   //     específico sem foto liberada → nenhuma (VAPT-VUPT)
   // Matéria do editor (fora do automático) mantém a foto geral da cidade/
   // região como reserva — exceto curadoria e esportes, que são só texto.
-  let fotoOrigem: "fonte_autorizada" | "cidade_geral" | "regiao_geral" | "ilustracao_ia" | "nenhuma" = "nenhuma";
+  let fotoOrigem: "fonte_autorizada" | "cidade_geral" | "regiao_geral" | "commons_tema" | "ilustracao_ia" | "nenhuma" = "nenhuma";
   try {
     const { data: imgRow } = await sb.from("article_clusters").select("imagem_tipo").eq("id", clusterId).maybeSingle();
     const tipoImagem = ((imgRow as { imagem_tipo?: string } | null)?.imagem_tipo ?? null) as TipoImagem | null;
@@ -614,8 +615,23 @@ Você é repórter, não comentarista. Relate o fato; não tome partido.
         fotoOrigem = "fonte_autorizada";
       }
     } else if (decisaoImagem === "ilustracao_ia") {
+      // 1º foto real de licença livre do tema (Commons/Agência Brasil);
+      // 2º imagem realista de IA, só do tema. Tema sensível: sem imagem.
+      const livre = await fotoLivrePorTema({
+        sb, aiKey, articleId: inserted.id,
+        titulo: parsed.titulo, resumo: parsed.resumo ?? null, escopo: categoriaSlug ?? "geral",
+      });
+      if (livre && !("sensivel" in livre)) {
+        await sb.from("generated_articles").update({
+          imagem_capa_url: livre.url,
+          og_image_url: livre.url,
+          imagem_credito: livre.credito,
+          imagem_legenda: livre.legenda,
+        }).eq("id", inserted.id);
+        fotoOrigem = "commons_tema";
+      }
       const tema = `${parsed.titulo}. ${parsed.resumo ?? ""}`;
-      const url = await gerarIlustracaoTematica({ sb, aiKey, articleId: inserted.id, tema });
+      const url = livre ? null : await gerarIlustracaoTematica({ sb, aiKey, articleId: inserted.id, tema });
       if (url) {
         await sb.from("generated_articles").update({
           imagem_capa_url: url,
