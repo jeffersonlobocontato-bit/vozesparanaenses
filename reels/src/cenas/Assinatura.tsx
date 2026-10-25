@@ -1,7 +1,7 @@
 import React from "react";
 import { AbsoluteFill, Easing, interpolate, random, spring, useCurrentFrame, useVideoConfig } from "remotion";
 import { COR, FONTE } from "../marca";
-import { Grao, IconeMarca } from "../pecas";
+import { Grao, IconeMarca, MapaParana } from "../pecas";
 
 const clamp = { extrapolateLeft: "clamp", extrapolateRight: "clamp" } as const;
 const SAIDA = Easing.bezier(0.16, 1, 0.3, 1);
@@ -39,18 +39,19 @@ export const Assinatura: React.FC = () => {
 
   return (
     <AbsoluteFill style={{ background: COR.tinta, overflow: "hidden" }}>
-      <AbsoluteFill style={{ background: `radial-gradient(60% 40% at 50% 38%, rgba(226,159,101,${0.18 + brilho * 0.08}), transparent 70%)` }} />
-      {/* raios girando atrás do balão */}
-      <AbsoluteFill style={{ display: "grid", placeItems: "center", opacity: 0.12 * balao }}>
-        <div
-          style={{
-            width: 2400,
-            height: 2400,
-            background: `repeating-conic-gradient(from ${f * 0.6}deg, ${COR.laranja} 0deg 6deg, transparent 6deg 24deg)`,
-            borderRadius: "50%",
-            translate: `0px ${-200 + iconeY * 0.4}px`,
-          }}
-        />
+      <AbsoluteFill style={{ background: `radial-gradient(95% 65% at 50% 40%, ${COR.verde} 0%, #173F33 45%, ${COR.tinta} 100%)` }} />
+      <AbsoluteFill style={{ background: `radial-gradient(50% 30% at 50% 30%, rgba(226,159,101,${0.12 + brilho * 0.06}), transparent 70%)` }} />
+      {/* Paraná em marca d'água: o contorno se desenha e as cidades acendem */}
+      <AbsoluteFill style={{ display: "grid", placeItems: "center" }}>
+        <div style={{ translate: `0px ${-170 + iconeY * 0.15}px`, scale: String(1 + f / fps / 80) }}>
+          <MapaParana
+            largura={1000}
+            traco={interpolate(f, [0, 1.6 * fps], [0, 1], { ...clamp, easing: Easing.bezier(0.45, 0, 0.2, 1) })}
+            preenche={interpolate(f, [1.0 * fps, 2.0 * fps], [0, 1], clamp)}
+            pontos={interpolate(f, [1.2 * fps, 3.2 * fps], [0, 1], clamp)}
+            opacidade={0.42}
+          />
+        </div>
       </AbsoluteFill>
 
       <AbsoluteFill style={{ display: "grid", placeItems: "center" }}>
@@ -77,8 +78,8 @@ export const Assinatura: React.FC = () => {
             paranaenses
           </div>
         </div>
-        <div style={{ fontFamily: FONTE.titulo, fontStyle: "italic", fontWeight: 400, fontSize: 46, color: COR.laranja, marginTop: 30, opacity: slogan, translate: `0px ${(1 - slogan) * 20}px` }}>
-          As notícias do Paraná, todo dia.
+        <div style={{ fontFamily: FONTE.titulo, fontStyle: "italic", fontWeight: 400, fontSize: 44, color: COR.laranja, marginTop: 30, textAlign: "center", maxWidth: 900, opacity: slogan, translate: `0px ${(1 - slogan) * 20}px` }}>
+          O portal com sotaque de todas as regiões
         </div>
       </AbsoluteFill>
 

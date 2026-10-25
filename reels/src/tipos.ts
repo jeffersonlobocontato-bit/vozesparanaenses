@@ -21,6 +21,8 @@ export type CenaNoticia = {
   titulo: string;
   linhaFina?: string | null;
   foto?: string | null; // caminho em public/ (fotos/1.jpg)
+  video?: string | null; // vídeo de fundo em public/ (mudo), no lugar da foto
+  videoDur?: number | null; // duração do vídeo (s), para esticar até o fim da cena
   credito?: string | null;
   numero?: { valor: string; rotulo: string } | null; // contador
   dados?: Array<{ valor: string; unidade?: string; rotulo: string }>; // alerta

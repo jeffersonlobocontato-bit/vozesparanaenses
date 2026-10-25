@@ -1,7 +1,7 @@
 import React from "react";
 import { AbsoluteFill, Easing, interpolate, spring, useCurrentFrame, useVideoConfig } from "remotion";
 import { COR, FONTE } from "../marca";
-import { Grao, IconeMarca } from "../pecas";
+import { Grao, IconeMarca, MapaParana } from "../pecas";
 import type { CenaAbertura } from "../tipos";
 
 const clamp = { extrapolateLeft: "clamp", extrapolateRight: "clamp" } as const;
@@ -28,20 +28,17 @@ export const Abertura: React.FC<CenaAbertura> = ({ data, chamadas }) => {
   const dataTxt = data.slice(0, Math.max(0, Math.floor((f - 34) * 1.6)));
   const tremor = f >= 16 && f < 24 ? Math.sin(f * 2.4) * (24 - f) * 1.4 : 0;
 
-  // Grade de redação ao fundo, andando devagar
-  const grade = (f * 0.6) % 120;
   const ticker = chamadas.join("   •   ");
 
   return (
     <AbsoluteFill style={{ background: COR.tinta, overflow: "hidden" }}>
-      <AbsoluteFill
-        style={{
-          backgroundImage:
-            "linear-gradient(rgba(255,255,255,0.045) 2px, transparent 2px), linear-gradient(90deg, rgba(255,255,255,0.045) 2px, transparent 2px)",
-          backgroundSize: "120px 120px",
-          backgroundPosition: `${grade}px ${grade}px`,
-        }}
-      />
+      {/* cores da identidade: verde do Vozes ao centro, tinta nas bordas, Paraná ao fundo */}
+      <AbsoluteFill style={{ background: `radial-gradient(90% 60% at 50% 42%, ${COR.verde} 0%, #173F33 45%, ${COR.tinta} 100%)` }} />
+      <AbsoluteFill style={{ display: "grid", placeItems: "center" }}>
+        <div style={{ translate: "230px -330px", scale: String(1 + f / 900) }}>
+          <MapaParana largura={1050} traco={interpolate(f, [20, 70], [0, 1], clamp)} preenche={0.6} pontos={interpolate(f, [40, 100], [0, 1], clamp)} cor={COR.laranja} opacidade={0.3} />
+        </div>
+      </AbsoluteFill>
       {/* disco laranja da explosão do ponto */}
       <AbsoluteFill style={{ display: "grid", placeItems: "center" }}>
         <div

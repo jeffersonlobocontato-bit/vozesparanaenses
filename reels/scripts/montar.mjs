@@ -8,7 +8,7 @@
 // baixa as fotos para public/fotos/. Só usa foto real com crédito (nunca a
 // ilustração de IA) e nunca política/eleição (o robô já não posta).
 
-import { mkdir, writeFile } from "node:fs/promises";
+import { mkdir, readFile, writeFile } from "node:fs/promises";
 import { execFileSync } from "node:child_process";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
@@ -101,7 +101,7 @@ async function main() {
   const ids = [...new Set(posts.flatMap((p) => p.artigos ?? []))];
   const artigos = ids.length
     ? await rest(
-        `generated_articles?select=id,titulo,subtitulo,tldr,imagem_capa_url,imagem_credito,foto_origem,cidade_principal,criticidade_nivel,regiao:regioes(slug,nome),categoria:editorial_categories(slug,nome)&id=in.(${ids.join(",")})`,
+        `generated_articles?select=id,slug,titulo,subtitulo,tldr,imagem_capa_url,imagem_credito,foto_origem,cidade_principal,criticidade_nivel,regiao:regioes(slug,nome),categoria:editorial_categories(slug,nome)&id=in.(${ids.join(",")})`,
       )
     : [];
   const porId = new Map(artigos.map((a) => [a.id, a]));
@@ -128,6 +128,12 @@ async function main() {
   }).slice(0, MAX_NOTICIAS);
 
   await mkdir(path.join(PUBLIC, "fotos"), { recursive: true });
+  // Mídia escolhida pela equipe para o dia (public/extras/AAAA-MM-DD.json):
+  // { "<slug da matéria>": { "foto"?: "extras/...jpg", "video"?: "extras/...mp4", "videoDur"?: 7.6, "credito"?: "..." } }
+  let extras = {};
+  try {
+    extras = JSON.parse(await readFile(path.join(PUBLIC, "extras", `${hoje}.json`), "utf8"));
+  } catch { /* sem extras no dia */ }
   const TRANS = ["balao", "chicote", "iris", "luz", "glitch"];
   const cenas = [];
   let tr = 0;
@@ -141,7 +147,15 @@ async function main() {
     let estilo = alerta ? "alerta" : "numero";
     let foto = null;
     let credito = null;
-    if (!alerta) {
+    const ex = extras[a.slug] ?? null;
+    let video = null;
+    let videoDur = null;
+    if (!alerta && ex) {
+      if (ex.video) { video = ex.video; videoDur = ex.videoDur ?? null; estilo = "foto"; }
+      if (ex.foto) { foto = ex.foto; estilo = "foto"; }
+      credito = ex.credito ?? null;
+    }
+    if (!alerta && !ex) {
       const urlFoto = typeof card.foto === "string" && card.foto.startsWith("http") ? card.foto : a.imagem_capa_url;
       const fotoReal = urlFoto && (FOTO_OK.has(a.foto_origem ?? "") || card.formato === "foto") && !/gerada por ia/i.test(a.imagem_credito ?? "");
       if (fotoReal) {
@@ -165,6 +179,8 @@ async function main() {
       titulo,
       linhaFina: linhaFina && linhaFina.length < 120 ? linhaFina : null,
       foto,
+      video,
+      videoDur,
       credito,
       numero,
       dados: alerta ? card.dados ?? [] : undefined,
@@ -182,7 +198,7 @@ async function main() {
     cenas: [
       { tipo: "abertura", dur: 3.6, data: dataExtenso, chamadas, narracao: "Resumo do dia. Vozes Paranaenses." },
       ...cenas,
-      { tipo: "assinatura", dur: 6.6, transicao: "balao", narracao: "Siga o perfil Vozes Paranaenses e acompanhe as notícias do Paraná, todo dia." },
+      { tipo: "assinatura", dur: 6.6, transicao: "balao", narracao: "Vozes Paranaenses: o portal com sotaque de todas as regiões. Siga o perfil e acompanhe o Paraná todo dia." },
     ],
   };
   await writeFile(path.join(PUBLIC, "roteiro.json"), JSON.stringify(roteiro, null, 1));

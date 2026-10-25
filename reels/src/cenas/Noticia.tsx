@@ -1,5 +1,5 @@
 import React from "react";
-import { AbsoluteFill, Easing, Img, interpolate, spring, staticFile, useCurrentFrame, useVideoConfig } from "remotion";
+import { AbsoluteFill, Easing, Img, interpolate, OffthreadVideo, spring, staticFile, useCurrentFrame, useVideoConfig } from "remotion";
 import { COR, FONTE } from "../marca";
 import { ChapeuBalao, Contador, Grao, LinhaFina, TituloSincronizado, agendaDasPalavras } from "../pecas";
 import type { CenaNoticia } from "../tipos";
@@ -20,10 +20,10 @@ function instanteDoNumero(c: CenaNoticia): number {
   return p ? p.t : 0.9;
 }
 
-const Credito: React.FC<{ texto?: string | null }> = ({ texto }) =>
+const Credito: React.FC<{ texto?: string | null; video?: boolean }> = ({ texto, video }) =>
   texto ? (
     <div style={{ position: "absolute", right: 150, top: 1548, fontFamily: FONTE.ui, fontWeight: 500, fontSize: 22, color: "rgba(255,255,255,0.7)", textAlign: "right", maxWidth: 620 }}>
-      {/^foto|^ilustra/i.test(texto) ? texto : `Foto: ${texto}`}
+      {/^(foto|vídeo|video|ilustra)/i.test(texto) ? texto : `${video ? "Vídeo" : "Foto"}: ${texto}`}
     </div>
   ) : null;
 
@@ -37,7 +37,14 @@ const ComFoto: React.FC<CenaNoticia> = (c) => {
   const deriva = interpolate(f, [0, durationInFrames], [-2, 2]);
   return (
     <AbsoluteFill style={{ background: COR.tinta, overflow: "hidden" }}>
-      {c.foto && (
+      {c.video ? (
+        <OffthreadVideo
+          src={staticFile(c.video)}
+          muted
+          playbackRate={c.videoDur ? Math.min(1, Math.max(0.5, c.videoDur / c.dur)) : 1}
+          style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "cover", scale: String(1.02 + (zoom - 1.06) * 0.4) }}
+        />
+      ) : c.foto && (
         <Img
           src={staticFile(c.foto)}
           style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "cover", scale: String(zoom), translate: `${deriva}% 0%` }}
@@ -50,7 +57,7 @@ const ComFoto: React.FC<CenaNoticia> = (c) => {
         }}
       />
       <Corpo c={c} topo={c.titulo.length > 60 ? 800 : 880} />
-      <Credito texto={c.credito} />
+      <Credito texto={c.credito} video={!!c.video} />
       <Grao forca={0.05} />
     </AbsoluteFill>
   );
@@ -191,6 +198,6 @@ const Alerta: React.FC<CenaNoticia> = (c) => {
 
 export const Noticia: React.FC<CenaNoticia> = (c) => {
   if (c.estilo === "alerta") return <Alerta {...c} />;
-  if (c.estilo === "foto" && c.foto) return <ComFoto {...c} />;
+  if (c.estilo === "foto" && (c.foto || c.video)) return <ComFoto {...c} />;
   return <ComNumero {...c} />;
 };

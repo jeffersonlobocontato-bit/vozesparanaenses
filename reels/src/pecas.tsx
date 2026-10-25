@@ -2,6 +2,7 @@ import React from "react";
 import { AbsoluteFill, Easing, interpolate, random, spring, useCurrentFrame, useVideoConfig } from "remotion";
 import { BALAO_D, COR, FONTE, PONTO, V_PONTOS, textoSobre } from "./marca";
 import type { Palavra } from "./tipos";
+import { CIDADES_PR, PARANA_D, PARANA_VIEWBOX } from "./parana";
 
 const clamp = { extrapolateLeft: "clamp", extrapolateRight: "clamp" } as const;
 export const SAIDA = Easing.bezier(0.16, 1, 0.3, 1);
@@ -305,3 +306,45 @@ export function faixasGlitch(seed: number, n = 7) {
     desloca: (random(`d${seed}-${i}`) - 0.5) * 160,
   }));
 }
+
+/**
+ * Contorno do Paraná em marca d'água: o traço se desenha, o preenchimento
+ * aparece leve e as cidades-polo acendem uma a uma (as "vozes" do estado).
+ */
+export const MapaParana: React.FC<{
+  largura: number;
+  traco?: number; // 0..1 desenho do contorno
+  preenche?: number; // 0..1
+  pontos?: number; // 0..1 cidades acesas
+  cor?: string;
+  opacidade?: number;
+}> = ({ largura, traco = 1, preenche = 1, pontos = 0, cor = COR.laranja, opacidade = 1 }) => {
+  const f = useCurrentFrame();
+  const altura = largura * (79 / 108);
+  return (
+    <svg width={largura} height={altura} viewBox={PARANA_VIEWBOX} style={{ overflow: "visible", opacity: opacidade }}>
+      <path d={PARANA_D} fill={`rgba(255,255,255,${0.05 * preenche})`} stroke="none" />
+      <path
+        d={PARANA_D}
+        fill="none"
+        stroke={cor}
+        strokeWidth={0.45}
+        strokeLinejoin="round"
+        pathLength={1}
+        strokeDasharray="1"
+        strokeDashoffset={1 - traco}
+        opacity={0.85}
+      />
+      {CIDADES_PR.map((c, i) => {
+        const k = Math.max(0, Math.min(1, pontos * CIDADES_PR.length - i));
+        const pulso = 1 + 0.5 * Math.max(0, Math.sin((f - i * 4) / 6));
+        return (
+          <g key={c.nome} opacity={k}>
+            <circle cx={c.x} cy={c.y} r={2.4 * pulso * k} fill={cor} opacity={0.18} />
+            <circle cx={c.x} cy={c.y} r={1.05 * k} fill={cor} />
+          </g>
+        );
+      })}
+    </svg>
+  );
+};
