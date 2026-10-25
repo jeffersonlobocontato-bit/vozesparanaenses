@@ -148,7 +148,7 @@ async function main() {
         foto = await baixarFoto(urlFoto, `n${n}`);
         if (foto) {
           estilo = "foto";
-          credito = (card.credito ?? a.imagem_credito ?? "").replace(/<[^>]+>/g, "").replace(/^\s*(foto|imagem)\s*:\s*/i, "").replace(/[()]/g, "").trim() || null;
+          credito = limparCredito(card.credito ?? a.imagem_credito ?? "");
         }
       }
     }
@@ -188,6 +188,15 @@ async function main() {
   await writeFile(path.join(PUBLIC, "roteiro.json"), JSON.stringify(roteiro, null, 1));
   console.log(`roteiro: ${cenas.length} notícias de ${posts.length} posts (${hoje})`);
   for (const c of cenas) console.log(` - [${c.estilo}] ${c.chapeu}: ${c.titulo}`);
+}
+
+/** Crédito limpo: só o autor/fonte, sem legenda colada ("... Imagem: Assessoria"). */
+function limparCredito(c) {
+  let t = String(c).replace(/&lt;/gi, "<").replace(/&gt;/gi, ">").replace(/&#0?38;|&amp;/gi, "&").replace(/<[^>]*>?/g, " ").replace(/&[a-z#0-9]+;/gi, " ");
+  const partes = t.split(/\b(?:foto|imagem|crédito)\s*:\s*/i).map((x) => x.replace(/[()\[\]]/g, "").trim()).filter(Boolean);
+  t = partes[partes.length - 1] ?? "";
+  if (t.length > 60) return null;
+  return t || null;
 }
 
 /** Rótulo curto do contador a partir do título (o que vem depois do número). */

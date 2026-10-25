@@ -49,7 +49,7 @@ const ComFoto: React.FC<CenaNoticia> = (c) => {
             "linear-gradient(180deg, rgba(12,22,20,0.55) 0%, rgba(12,22,20,0) 22%, rgba(12,22,20,0) 40%, rgba(12,22,20,0.82) 62%, rgba(12,22,20,0.96) 100%)",
         }}
       />
-      <Corpo c={c} topo={940} />
+      <Corpo c={c} topo={c.titulo.length > 60 ? 800 : 880} />
       <Credito texto={c.credito} />
       <Grao forca={0.05} />
     </AbsoluteFill>
@@ -111,7 +111,7 @@ const ComNumero: React.FC<CenaNoticia> = (c) => {
       <div style={{ position: "absolute", left: 64, top: 470, right: 120 }}>
         {c.numero && (
           <>
-            <Contador valor={c.numero.valor} aos={tNum} tamanho={c.numero.valor.length > 6 ? 230 : 290} cor={COR.branco} />
+            <Contador valor={c.numero.valor} aos={tNum} tamanho={Math.min(290, Math.floor(1700 / Math.max(4, c.numero.valor.length)))} cor={COR.branco} />
             <div
               style={{
                 fontFamily: FONTE.chapeu,
@@ -163,7 +163,7 @@ const Alerta: React.FC<CenaNoticia> = (c) => {
           ALERTA
         </div>
       </div>
-      <Corpo c={c} topo={520} tamanho={78} />
+      <Corpo c={{ ...c, linhaFina: null }} topo={520} tamanho={78} />
       <div style={{ position: "absolute", left: 64, right: 150, top: 1060, display: "flex", gap: 18 }}>
         {(c.dados ?? []).slice(0, 3).map((d, i) => {
           const aos = 1.6 + i * 0.35;
