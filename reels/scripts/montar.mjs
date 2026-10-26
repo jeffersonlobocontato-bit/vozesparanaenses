@@ -188,7 +188,8 @@ async function main() {
       estilo = "foto";
       credito = limparCredito(card.credito ?? a.imagem_credito ?? "");
     }
-    const m = (card.destaque?.valor ? card.destaque.valor : titulo.match(RE_NUM)?.[0]) ?? null;
+    // Número grande só quando é dado de verdade (nunca "456" de PR-456).
+    const m = (card.destaque?.valor ? card.destaque.valor : RE_DADO.test(titulo) ? titulo.match(RE_NUM)?.[0] : null) ?? null;
     const numero = estilo === "numero" && m ? { valor: m.trim(), rotulo: card.destaque?.rotulo ?? linhaRotulo(titulo, m) } : null;
     const lugar = ch.texto.split("·")[0].trim();
     const abre = titulo.toLowerCase().includes(lugar.toLowerCase()) || /^(mundo|brasil|paraná)$/i.test(lugar) ? "" : `${lugar}. `;
