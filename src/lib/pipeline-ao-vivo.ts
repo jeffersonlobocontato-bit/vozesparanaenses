@@ -57,7 +57,16 @@ export function ciclosDoDia(jobs: Pick<JobCron, "jobname" | "schedule">[]): Cicl
   }
   return [...porInicio.entries()]
     .map(([inicio, v]) => ({ inicio, fim: v.fim, nome: v.nomes.join(" e ") }))
-    .sort((a, b) => a.inicio - b.inicio);
+    .sort((a, b) => a.inicio - b.inicio)
+    // Janela que começa dentro da anterior vira um ciclo só (ex.: nacional 7h–9h + política 8h).
+    .reduce<Ciclo[]>((acc, c) => {
+      const ult = acc[acc.length - 1];
+      if (ult && c.inicio < ult.fim) {
+        ult.fim = Math.max(ult.fim, c.fim);
+        for (const n of c.nome.split(" e ")) if (!ult.nome.split(" e ").includes(n)) ult.nome += ` e ${n}`;
+      } else acc.push({ ...c });
+      return acc;
+    }, []);
 }
 
 /** Data (Date) de uma hora BRT de hoje. */

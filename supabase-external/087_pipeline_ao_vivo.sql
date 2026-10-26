@@ -159,6 +159,19 @@ begin
       'http_ultima_falha', (select left(coalesce(error_msg, content::text, ''), 160) from net._http_response
                             where created >= now() - interval '1 hour' and (status_code is null or status_code >= 400)
                             order by created desc limit 1),
+      'http_total_1h', (select count(*) from net._http_response where created >= now() - interval '1 hour'),
+      -- A resposta não diz qual função foi chamada: os jobs que dispararam no
+      -- mesmo segundo são os suspeitos. DNS ≥ 9 s = o banco nem achou o
+      -- endereço da função (instabilidade de rede, não erro do código).
+      'http_ultima_jobs', (select string_agg(distinct j.jobname, ', ')
+                           from (select created from net._http_response
+                                 where created >= now() - interval '1 hour' and (status_code is null or status_code >= 400)
+                                 order by created desc limit 1) r
+                           join cron.job_run_details d on d.start_time between r.created - interval '3 seconds' and r.created + interval '1 second'
+                           join cron.job j on j.jobid = d.jobid),
+      'http_ultima_dns', (select coalesce(substring(error_msg from 'DNS time: ([0-9.]+)')::numeric >= 9000, false) from net._http_response
+                          where created >= now() - interval '1 hour' and (status_code is null or status_code >= 400)
+                          order by created desc limit 1),
       'cron_falhas_24h', (select coalesce(jsonb_agg(jsonb_build_object('job', jobname, 'n', n)), '[]'::jsonb) from (
                             select j.jobname, count(*) n from cron.job_run_details d join cron.job j on j.jobid = d.jobid
                             where d.start_time >= now() - interval '24 hours' and d.status = 'failed'

@@ -34,6 +34,10 @@ const ESTILOS = `
 .vz-entra{animation:vzEntra .6s cubic-bezier(.16,1,.3,1) both}
 .vz-novo{animation:vzNovo 2.4s ease-out both}
 .vz-tv-oculto{cursor:none}
+.vz-mono{font-family:"JetBrains Mono",ui-monospace,monospace}
+.vz-cond{font-family:"Barlow Condensed",Barlow,sans-serif}
+.vz-palco{font-family:Barlow,system-ui,sans-serif}
+.vz-palco h1,.vz-palco h2,.vz-palco h3{font-family:Barlow,system-ui,sans-serif}
 @media (prefers-reduced-motion: reduce){.vz-pulse,.vz-blink,.vz-scan,.vz-entra,.vz-novo{animation:none}}
 `;
 
@@ -44,7 +48,7 @@ type Painel = {
   instagram: { ativo: boolean | null; proximo: string | null; na_fila: number; grade: { tipo: string; classe: string | null; fundo: string | null; formato: string | null }[] };
   leitores: { agora: number; cidades_hoje: number; top: string[] };
   alertas: {
-    http_falhas_1h: number; http_ultima_falha: string | null;
+    http_falhas_1h: number; http_ultima_falha: string | null; http_total_1h?: number; http_ultima_jobs?: string | null; http_ultima_dns?: boolean;
     cron_falhas_24h: { job: string; n: number }[];
     fontes_paradas: { nome: string; ultimo: string | null }[]; fontes_paradas_total: number;
   };
@@ -83,6 +87,9 @@ function PipelineAoVivo() {
   const [cascata, setCascata] = useState(0);
   const [relatorio, setRelatorio] = useState<Relatorio | null>(null);
   const raiz = useRef<HTMLDivElement>(null);
+  // Palco fixo 1920×1080 (a mesma proporção da maquete), escalado para caber
+  // na largura do admin ou na tela inteira da TV.
+  const [escala, setEscala] = useState(0.6);
   const audio = useRef<AudioContext | null>(null);
   const vistos = useRef<Set<string> | null>(null);
   const primeiraVista = useRef(new Map<string, number>());
@@ -253,6 +260,19 @@ function PipelineAoVivo() {
     }
   };
   useEffect(() => {
+    const el = raiz.current;
+    if (!el) return;
+    const medir = () => {
+      const w = el.clientWidth;
+      const h = tv ? el.clientHeight : Infinity;
+      setEscala(Math.max(0.2, Math.min(w / 1920, h / 1080)));
+    };
+    medir();
+    const ro = new ResizeObserver(medir);
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, [tv]);
+  useEffect(() => {
     const sair = () => { if (!document.fullscreenElement) setTv(false); };
     document.addEventListener("fullscreenchange", sair);
     return () => document.removeEventListener("fullscreenchange", sair);
@@ -291,18 +311,22 @@ function PipelineAoVivo() {
   const conteudo = (
     <div
       ref={raiz}
-      className={`flex flex-col gap-4 p-4 md:p-6 ${cursorOculto ? "vz-tv-oculto" : ""} ${tv ? "fixed inset-0 z-[200] overflow-auto" : "min-h-[calc(100vh-2rem)] rounded-2xl"}`}
-      style={{ background: C.fundo, color: C.txt, fontFamily: "Barlow, system-ui, sans-serif" }}
+      className={`${cursorOculto ? "vz-tv-oculto" : ""} ${tv ? "fixed inset-0 z-[200] flex items-center justify-center" : "w-full overflow-hidden rounded-2xl"}`}
+      style={{ background: C.fundo }}
     >
       <style>{ESTILOS}</style>
+      <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600;700&family=Barlow+Condensed:wght@500;600;700&family=Newsreader:opsz,wght@6..72,500;6..72,600&family=JetBrains+Mono:wght@400;500&display=swap" />
+      <div style={{ width: 1920 * escala, height: 1080 * escala, position: "relative", overflow: "hidden", flex: "none" }}>
+      <div className="vz-palco flex flex-col gap-4"
+        style={{ width: 1920, height: 1080, padding: 28, boxSizing: "border-box", transform: `scale(${escala})`, transformOrigin: "top left", background: C.fundo, color: C.txt, position: "absolute", left: 0, top: 0 }}>
 
       {/* Cabeçalho */}
-      <header className="flex flex-wrap items-center gap-4">
+      <header className="flex flex-none items-center gap-6" style={{ height: 64 }}>
         <div className="flex items-center gap-3">
           <svg width="40" height="40" viewBox="0 0 44 44" aria-hidden="true"><path d="M8 6h28a4 4 0 0 1 4 4v18a4 4 0 0 1-4 4H20l-9 7v-7H8a4 4 0 0 1-4-4V10a4 4 0 0 1 4-4z" fill="#1E3B33" /><path d="M14 15l8 10 8-10" fill="none" stroke={C.txt} strokeWidth="3.2" strokeLinecap="round" strokeLinejoin="round" /><circle cx="36" cy="8" r="4.5" fill={C.laranja} /></svg>
           <div className="flex flex-col leading-none">
             <span style={{ fontFamily: "Newsreader, Georgia, serif", fontSize: 24, fontWeight: 600 }}>vozes <span style={{ color: C.mut, fontWeight: 500 }}>paranaenses</span></span>
-            <span className="mt-1.5 uppercase" style={{ fontSize: 13, letterSpacing: ".22em", color: C.mut }}>Sala de controle do pipeline</span>
+            <span className="vz-cond mt-1.5 uppercase" style={{ fontSize: 13, letterSpacing: ".22em", color: C.mut }}>Sala de controle do pipeline</span>
           </div>
         </div>
         <div className="flex items-center gap-2 rounded-full px-3 py-1.5" style={{ border: `1px solid ${C.borda}`, background: C.painel }}>
@@ -311,7 +335,7 @@ function PipelineAoVivo() {
           <span style={{ fontSize: 13, color: C.mut }}>{replay ? "ciclo real, em velocidade acelerada" : "atualiza a cada 5 s"}</span>
         </div>
         <div className="flex-grow" />
-        <div className="flex flex-wrap gap-2">
+        <div className="flex gap-2">
           {replay ? (
             <BotaoTela onClick={voltarAoVivo} icone={<Radio className="h-4 w-4" />} ativo>Voltar ao vivo</BotaoTela>
           ) : (
@@ -328,7 +352,7 @@ function PipelineAoVivo() {
           <BotaoTela onClick={alternarTv} icone={tv ? <Minimize2 className="h-4 w-4" /> : <Maximize2 className="h-4 w-4" />}>{tv ? "Sair da tela cheia" : "Tela cheia"}</BotaoTela>
         </div>
         <div className="flex flex-col items-end leading-none">
-          <span className="font-mono" style={{ fontSize: 30 }}>{fmtHms(agoraTela)}</span>
+          <span className="vz-mono" style={{ fontSize: 30 }}>{fmtHms(agoraTela)}</span>
           <span className="mt-1.5" style={{ fontSize: 13, color: C.mut }}>{agoraTela.toLocaleDateString("pt-BR", { timeZone: "America/Sao_Paulo", weekday: "long", day: "numeric", month: "long" })} · Brasília</span>
         </div>
       </header>
@@ -338,18 +362,18 @@ function PipelineAoVivo() {
       )}
 
       {/* Linha do dia */}
-      <section aria-label="Ciclos do dia" className="flex flex-col gap-3 lg:flex-row">
-        <div className="flex flex-col justify-center rounded-2xl px-5 py-3 lg:w-[360px] lg:flex-none"
+      <section aria-label="Ciclos do dia" className="flex flex-none flex-row gap-4" style={{ height: 96 }}>
+        <div className="flex w-[360px] flex-none flex-col justify-center rounded-2xl px-5 py-3"
           style={{ background: contagemTom === "laranja" ? "rgba(226,159,101,.08)" : C.painel, border: `1px solid ${contagemTom === "laranja" ? "rgba(226,159,101,.6)" : C.borda}` }}>
-          <span className="uppercase" style={{ fontSize: 13, letterSpacing: ".16em", color: contagemTom === "laranja" ? C.laranja : contagemTom === "verde" ? C.verde : C.mut }}>{contagemRotulo}</span>
-          <span className="font-mono" style={{ fontSize: 36, lineHeight: 1.1 }}>{contagem}</span>
+          <span className="vz-cond uppercase" style={{ fontSize: 13, letterSpacing: ".16em", color: contagemTom === "laranja" ? C.laranja : contagemTom === "verde" ? C.verde : C.mut }}>{contagemRotulo}</span>
+          <span className="vz-mono" style={{ fontSize: 36, lineHeight: 1.1 }}>{contagem}</span>
         </div>
         <LinhaDoDia ciclos={ciclos} agoraH={horaBrtAgora(agoraTela)} />
       </section>
 
       {/* Área principal */}
-      <div className="flex min-h-0 flex-grow flex-col gap-4 xl:flex-row">
-        <div key={cascata} className="grid min-w-0 flex-grow grid-cols-1 gap-4 md:grid-cols-2 2xl:grid-cols-4">
+      <div className="flex min-h-0 flex-grow flex-row gap-4">
+        <div key={cascata} className="grid min-h-0 min-w-0 flex-grow grid-cols-4 grid-rows-2 gap-4">
           <CardColeta n={0} e={estados.coleta} fontes={painel?.fontes_ativas ?? 0} vistos={primeiraVista.current} agora={agora} />
           <CardCrivo n={1} e={estados.crivo} />
           <CardApuracao n={2} e={estados.apuracao} />
@@ -360,9 +384,9 @@ function PipelineAoVivo() {
           <CardRedes n={7} e={estados.redes} painel={painel} agora={agora} />
         </div>
 
-        <aside className="flex flex-col gap-4 xl:w-[400px] xl:flex-none">
+        <aside className="flex min-h-0 w-[420px] flex-none flex-col gap-4">
           <section aria-label="Horas poupadas" className="rounded-2xl px-5 py-4" style={{ background: C.painel, border: `1px solid ${C.borda}` }}>
-            <span className="uppercase" style={{ fontSize: 13, letterSpacing: ".16em", color: C.mut }}>Trabalho humano poupado hoje</span>
+            <span className="vz-cond uppercase" style={{ fontSize: 13, letterSpacing: ".16em", color: C.mut }}>Trabalho humano poupado hoje</span>
             <div className="flex items-baseline gap-2">
               <ContadorAnimado valor={horas} className="font-semibold" style={{ fontSize: 88, lineHeight: 1, color: C.laranja, fontFamily: "'Barlow Condensed', Barlow, sans-serif" }} />
               <span style={{ fontSize: 28, color: C.laranja, fontWeight: 600 }}>horas</span>
@@ -378,8 +402,8 @@ function PipelineAoVivo() {
 
           <section aria-label="Alertas" className="flex min-h-0 flex-grow flex-col gap-2.5 overflow-hidden rounded-2xl px-5 py-4" style={{ background: C.painel, border: `1px solid ${C.borda}` }}>
             <div className="flex items-center">
-              <span className="uppercase" style={{ fontSize: 13, letterSpacing: ".16em", color: C.mut }}>Alertas e orientação</span>
-              <span className="ml-auto font-mono" style={{ fontSize: 12, color: C.mut }}>{alertas.filter((a) => a.tom !== "ok").length} abertos</span>
+              <span className="vz-cond uppercase" style={{ fontSize: 13, letterSpacing: ".16em", color: C.mut }}>Alertas e orientação</span>
+              <span className="ml-auto vz-mono" style={{ fontSize: 12, color: C.mut }}>{alertas.filter((a) => a.tom !== "ok").length} abertos</span>
             </div>
             {alertas.map((a, i) => (
               <div key={i} className="flex gap-2.5 rounded-xl px-3 py-2.5" style={{ background: a.tom === "erro" ? "rgba(240,114,106,.1)" : a.tom === "aviso" ? "rgba(233,196,106,.08)" : "rgba(92,199,158,.08)", border: `1px solid ${a.tom === "erro" ? "rgba(240,114,106,.5)" : a.tom === "aviso" ? "rgba(233,196,106,.4)" : "rgba(92,199,158,.35)"}` }}>
@@ -395,7 +419,7 @@ function PipelineAoVivo() {
 
           <section aria-label="Leitores agora" className="flex items-center gap-4 rounded-2xl px-5 py-3" style={{ background: C.painel, border: `1px solid ${C.borda}` }}>
             <div className="flex flex-col">
-              <span className="uppercase" style={{ fontSize: 13, letterSpacing: ".16em", color: C.mut }}>Leituras · 5 min</span>
+              <span className="vz-cond uppercase" style={{ fontSize: 13, letterSpacing: ".16em", color: C.mut }}>Leituras · 5 min</span>
               <span style={{ fontSize: 40, fontWeight: 700, lineHeight: 1, fontFamily: "'Barlow Condensed', Barlow, sans-serif" }}>{painel?.leitores.agora ?? "—"}</span>
             </div>
             <div className="ml-auto flex flex-col gap-0.5 text-right" style={{ fontSize: 13 }}>
@@ -407,7 +431,7 @@ function PipelineAoVivo() {
       </div>
 
       {/* Registro */}
-      <footer className="flex h-11 flex-none items-center gap-6 overflow-hidden whitespace-nowrap rounded-xl px-4 font-mono" style={{ background: C.fundo2, border: `1px solid ${C.borda}`, fontSize: 13 }}>
+      <footer className="flex h-11 flex-none items-center gap-6 overflow-hidden whitespace-nowrap rounded-xl px-4 vz-mono" style={{ background: C.fundo2, border: `1px solid ${C.borda}`, fontSize: 13 }}>
         <span className="flex-none" style={{ color: C.laranja }}>REGISTRO</span>
         {[...evsTela].slice(-6).reverse().map((e) => (
           <span key={e.etapa + e.id} className="flex-none" style={{ color: e.etapa === "publicacao" ? "#9ED9C1" : C.mut }}>
@@ -417,6 +441,8 @@ function PipelineAoVivo() {
         {!evsTela.length && <span style={{ color: C.mut }}>sem atividade no ciclo até agora</span>}
       </footer>
 
+      </div>
+      </div>
       {vinheta && <Vinheta nome={vinheta.nome} desde={vinheta.desde} agora={agora} />}
       {relatorio && <ModalRelatorio r={relatorio} onFechar={() => setRelatorio(null)} />}
     </div>
@@ -434,8 +460,20 @@ function montarAlertas(p: Painel | null, assinaturas: Assinatura[]): Alerta[] {
   const out: Alerta[] = [];
   const a = p.alertas;
   if (a.http_falhas_1h > 0) {
-    out.push({ tom: "erro", titulo: `${a.http_falhas_1h} chamada${a.http_falhas_1h === 1 ? "" : "s"} de função falharam na última hora`,
-      nota: `${a.http_ultima_falha ? `Última: ${a.http_ultima_falha.slice(0, 90)}. ` : ""}Veja os logs da função no Supabase; se for tempo esgotado, a próxima rodada tenta de novo.` });
+    // Uma ou duas por hora é instabilidade normal de rede (o cron chama de novo
+    // minutos depois); vermelho só quando a taxa sobe.
+    const n = a.http_falhas_1h;
+    const total = a.http_total_1h ?? 0;
+    const grave = n >= 3 || (total > 0 && n / total > 0.1);
+    const suspeitos = a.http_ultima_jobs ? ` Na hora rodavam: ${a.http_ultima_jobs.replace(/vozes-/g, "")}.` : "";
+    const causa = a.http_ultima_dns
+      ? "O banco não achou o endereço da função em 10 s (instabilidade de rede do Supabase, não erro do código)."
+      : "A função demorou mais de 10 s para responder; ela costuma terminar o trabalho mesmo assim.";
+    out.push({
+      tom: grave ? "erro" : "aviso",
+      titulo: `${n} de ${total || "?"} chamada${total === 1 ? "" : "s"} sem resposta na última hora`,
+      nota: `${causa}${suspeitos} ${grave ? "Se continuar, veja os logs da função no Supabase." : "A próxima rodada do agendador tenta de novo."}`,
+    });
   }
   for (const j of a.cron_falhas_24h) {
     out.push({ tom: "erro", titulo: `Agendamento ${j.job} falhou ${j.n}× em 24 h`, nota: "Confira o job no cron do banco externo (migrações 076 e 083).", link: "/admin/painel" });
@@ -511,16 +549,16 @@ function LinhaDoDia({ ciclos, agoraH }: { ciclos: Ciclo[]; agoraH: number }) {
                 background: atual ? "rgba(226,159,101,.2)" : feito ? "rgba(92,199,158,.12)" : "transparent",
                 border: `1px solid ${atual ? C.laranja : feito ? "rgba(92,199,158,.45)" : C.borda2}` }}>
               <div className="whitespace-nowrap" style={{ fontSize: 12, fontWeight: 700, color: atual ? "#F2B98A" : feito ? "#9ED9C1" : C.mut }}>{rotuloHora(c.inicio)}</div>
-              <div className="whitespace-nowrap" style={{ fontSize: 11, color: atual ? "#F2B98A" : feito ? "#9ED9C1" : C.mut }}>{c.nome}</div>
+              <div className="truncate" style={{ fontSize: 11, color: atual ? "#F2B98A" : feito ? "#9ED9C1" : C.mut }}>{c.nome}</div>
             </div>
           );
         })}
         <div className="absolute -bottom-1.5 -top-1" style={{ left: X(agoraH), width: 2, background: C.vermelho }} />
-        <div className="absolute -top-2.5 -translate-x-1/2 rounded px-1.5 font-mono" style={{ left: X(agoraH), fontSize: 11, background: C.vermelho, color: "#12201E" }}>agora</div>
+        <div className="absolute -top-2.5 -translate-x-1/2 rounded px-1.5 vz-mono" style={{ left: X(agoraH), fontSize: 11, background: C.vermelho, color: "#12201E" }}>agora</div>
       </div>
       <div className="relative mt-1 h-4">
         {[6, 8, 10, 12, 14, 16, 18, 20, 22, 24].map((h) => (
-          <span key={h} className="absolute -translate-x-1/2 font-mono" style={{ left: X(h), fontSize: 11, color: C.mut }}>{String(h % 24).padStart(2, "0")}h</span>
+          <span key={h} className="absolute -translate-x-1/2 vz-mono" style={{ left: X(h), fontSize: 11, color: C.mut }}>{String(h % 24).padStart(2, "0")}h</span>
         ))}
       </div>
     </div>
@@ -534,17 +572,17 @@ function Card({ n, e, id, children, alerta }: { n: number; e: EstadoEtapa; id: E
   const etapa = ETAPAS.find((x) => x.id === id)!;
   const cor = COR_STATUS[e.status];
   return (
-    <article className="vz-entra relative flex min-h-[340px] flex-col gap-2.5 overflow-hidden rounded-2xl px-4 py-4"
+    <article className="vz-entra relative flex min-h-0 flex-col gap-2.5 overflow-hidden rounded-2xl px-[18px] py-4"
       style={{ animationDelay: `${n * 110}ms`, background: C.painel,
         border: `1px solid ${alerta ? "rgba(240,114,106,.6)" : e.status === "rodando" ? "rgba(226,159,101,.55)" : e.status === "concluido" ? "rgba(92,199,158,.35)" : C.borda}` }}>
       <div className="absolute left-0 top-0 h-[3px] transition-all duration-1000" style={{ width: `${Math.round(e.progresso * 100)}%`, background: cor }} />
       <div className="flex items-center gap-2.5">
         <span className={`h-3 w-3 rounded-full ${e.status === "rodando" ? "vz-pulse" : ""}`} style={{ background: cor }} />
-        <span style={{ fontSize: 12, letterSpacing: ".14em", color: C.mut }}>{String(n + 1).padStart(2, "0")}</span>
-        <h2 style={{ margin: 0, fontSize: 19, fontWeight: 700 }}>{etapa.nome}</h2>
-        <span className="ml-auto uppercase" style={{ fontSize: 12, fontWeight: 700, letterSpacing: ".1em", color: cor }}>{ROTULO_STATUS[e.status]}</span>
+        <span className="vz-cond" style={{ fontSize: 13, letterSpacing: ".14em", color: C.mut }}>{String(n + 1).padStart(2, "0")}</span>
+        <h2 className="truncate" style={{ margin: 0, fontSize: 20, fontWeight: 700 }}>{etapa.nome}</h2>
+        <span className="vz-cond ml-auto flex-none uppercase" style={{ fontSize: 13, fontWeight: 700, letterSpacing: ".1em", color: cor }}>{ROTULO_STATUS[e.status]}</span>
       </div>
-      <div className="font-mono" style={{ fontSize: 11, color: C.mut }}>{etapa.funcao}{e.ultimo ? ` · último ${fmtHm(e.ultimo.t)}` : ""}</div>
+      <div className="vz-mono truncate" style={{ fontSize: 11, color: C.mut }}>{etapa.funcao}{e.ultimo ? ` · último ${fmtHm(e.ultimo.t)}` : ""}</div>
       {children}
     </article>
   );
@@ -564,7 +602,7 @@ function Vazio({ children }: { children: ReactNode }) {
 }
 
 function CardColeta({ n, e, fontes, vistos, agora }: { n: number; e: EstadoEtapa; fontes: number; vistos: Map<string, number>; agora: number }) {
-  const ultimos = e.eventos.slice(-4).reverse();
+  const ultimos = e.eventos.slice(-3).reverse();
   const fontesLidas = new Set(e.eventos.map((x) => txt(x.d.fonte))).size;
   return (
     <Card n={n} e={e} id="coleta">
@@ -574,7 +612,7 @@ function CardColeta({ n, e, fontes, vistos, agora }: { n: number; e: EstadoEtapa
           const novo = agora - (vistos.get("coleta" + x.id) ?? 0) < 2500;
           return (
             <div key={x.id} className={`flex flex-col rounded-lg px-2.5 py-1.5 ${novo ? "vz-novo" : ""}`} style={{ background: C.fundo2 }}>
-              <span className="font-mono" style={{ fontSize: 11, color: C.laranja }}>{txt(x.d.fonte)}</span>
+              <span className="vz-mono" style={{ fontSize: 11, color: C.laranja }}>{txt(x.d.fonte)}</span>
               <span className="truncate" style={{ fontSize: 13 }}>{txt(x.d.titulo)}</span>
             </div>
           );
@@ -605,14 +643,14 @@ function CardCrivo({ n, e }: { n: number; e: EstadoEtapa }) {
         </div>
       )}
       <div className="mt-auto flex flex-col gap-1.5">
-        <span className="uppercase" style={{ fontSize: 12, letterSpacing: ".12em", color: C.mut }}>Motivos de descarte</span>
+        <span className="vz-cond uppercase" style={{ fontSize: 12, letterSpacing: ".12em", color: C.mut }}>Motivos de descarte</span>
         {top.map(([m, k]) => (
           <div key={m} className="flex items-center gap-2">
             <div className="relative h-[22px] flex-grow overflow-hidden rounded-md" style={{ background: C.fundo2 }}>
               <div className="absolute inset-y-0 left-0 transition-all duration-1000" style={{ width: `${(k / max) * 100}%`, background: "rgba(159,179,173,.28)" }} />
               <span className="relative block truncate pl-2" style={{ fontSize: 12, lineHeight: "22px" }}>{m}</span>
             </div>
-            <span className="w-7 text-right font-mono" style={{ fontSize: 12 }}>{k}</span>
+            <span className="w-7 text-right vz-mono" style={{ fontSize: 12 }}>{k}</span>
           </div>
         ))}
         {!top.length && <Vazio>Nenhum descarte neste ciclo.</Vazio>}
@@ -627,7 +665,7 @@ function CardApuracao({ n, e }: { n: number; e: EstadoEtapa }) {
   const completas = e.eventos.filter((x) => x.d.quem && x.d.oque && x.d.quando && x.d.onde && x.d.porque).length;
   return (
     <Card n={n} e={e} id="apuracao">
-      <div className="min-h-[48px]" style={{ fontFamily: "Newsreader, Georgia, serif", fontSize: 18, fontWeight: 500, lineHeight: 1.25 }}>
+      <div className="line-clamp-2 min-h-[46px] flex-none" style={{ fontFamily: "Newsreader, Georgia, serif", fontSize: 18, fontWeight: 500, lineHeight: 1.25 }}>
         {u ? txt(u.d.titulo) || "Pauta sem título" : "Aguardando pautas do crivo…"}
       </div>
       <div className="grid grid-cols-2 gap-2">
@@ -666,7 +704,7 @@ function CardRedacao({ n, e, vistos, agora }: { n: number; e: EstadoEtapa; visto
           <span style={{ fontSize: 12, color: C.mut }}>{u ? [txt(u.d.editoria), txt(u.d.cidade)].filter(Boolean).join(" · ") : "14 redatores, um por editoria"}</span>
         </div>
       </div>
-      <div className="min-h-[84px]" style={{ fontFamily: "Newsreader, Georgia, serif", fontSize: 22, fontWeight: 600, lineHeight: 1.2 }}>
+      <div className="line-clamp-3 min-h-[80px] flex-none" style={{ fontFamily: "Newsreader, Georgia, serif", fontSize: 22, fontWeight: 600, lineHeight: 1.2 }}>
         {titulo.slice(0, chars)}{u && chars < titulo.length && <span className="vz-blink" style={{ color: C.laranja }}>▍</span>}
       </div>
       <div className="flex flex-wrap gap-1.5">
@@ -688,9 +726,9 @@ function CardCriticidade({ n, e }: { n: number; e: EstadoEtapa }) {
   const autos = e.eventos.filter((x) => x.d.auto).length;
   return (
     <Card n={n} e={e} id="criticidade">
-      <div className="min-h-[40px]" style={{ fontSize: 15, lineHeight: 1.3 }}>{u ? txt(u.d.titulo) : "Aguardando matérias…"}</div>
+      <div className="line-clamp-2 min-h-[40px] flex-none" style={{ fontSize: 15, lineHeight: 1.3 }}>{u ? txt(u.d.titulo) : "Aguardando matérias…"}</div>
       <div className="flex flex-col gap-1.5">
-        <div className="flex justify-between" style={{ fontSize: 13, color: C.mut }}><span>Risco</span><span className="font-mono" style={{ color: cor }}>{score}/100</span></div>
+        <div className="flex justify-between" style={{ fontSize: 13, color: C.mut }}><span>Risco</span><span className="vz-mono" style={{ color: cor }}>{score}/100</span></div>
         <div className="relative h-3.5 rounded-full" style={{ background: `linear-gradient(90deg, ${C.verde} 0%, ${C.ambar} 50%, ${C.vermelho} 100%)` }}>
           <div className="absolute -top-1 h-[22px] w-1 -translate-x-0.5 rounded-sm transition-all duration-700" style={{ left: `${score}%`, background: C.txt }} />
         </div>
@@ -723,7 +761,7 @@ function CardImagem({ n, e }: { n: number; e: EstadoEtapa }) {
       <div className="relative grid h-28 place-items-center overflow-hidden rounded-xl" style={{ background: C.fundo2, border: `1px solid ${C.borda}` }}>
         <svg width="64" height="48" viewBox="0 0 64 48" aria-hidden="true"><rect x="1" y="1" width="62" height="46" rx="6" fill="none" stroke={C.borda2} strokeWidth="2" /><circle cx="20" cy="16" r="5" fill={C.borda2} /><path d="M4 42l18-16 12 10 10-8 16 14" fill="none" stroke={C.borda2} strokeWidth="2" /></svg>
         {e.status === "rodando" && <div className="vz-scan absolute inset-y-0 left-0 w-2/5" style={{ background: "linear-gradient(90deg, rgba(226,159,101,0), rgba(226,159,101,.22), rgba(226,159,101,0))" }} />}
-        {u && <span className="absolute bottom-2 left-2.5 font-mono" style={{ fontSize: 11, color: "#C9D6D2" }}>{txt(u.d.credito) || (origem === "nenhuma" ? "sem foto: vai como texto" : "")}</span>}
+        {u && <span className="absolute bottom-2 left-2.5 vz-mono" style={{ fontSize: 11, color: "#C9D6D2" }}>{txt(u.d.credito) || (origem === "nenhuma" ? "sem foto: vai como texto" : "")}</span>}
       </div>
       <div className="flex flex-col gap-1.5">
         {ORIGENS.map((o) => {
@@ -766,7 +804,7 @@ function CardPublicacao({ n, e }: { n: number; e: EstadoEtapa }) {
       <div className="flex flex-col gap-1">
         {ultimas.map((x) => (
           <div key={x.id} className="flex items-baseline gap-2" style={{ fontSize: 13 }}>
-            <span className="flex-none font-mono" style={{ fontSize: 11, color: C.verde }}>{fmtHm(x.t)}</span>
+            <span className="flex-none vz-mono" style={{ fontSize: 11, color: C.verde }}>{fmtHm(x.t)}</span>
             <span className="flex-none font-semibold">{txt(x.d.cidade) || "Paraná"}</span>
             <span className="truncate" style={{ color: C.mut }}>{txt(x.d.titulo)}</span>
           </div>
@@ -802,7 +840,7 @@ function CardRedes({ n, e, painel, agora }: { n: number; e: EstadoEtapa; painel:
           const [fundo, rotulo] = corDoPost(p);
           const claro = fundo === "#F3EFE6" || fundo === "#E2D3B5";
           return (
-            <div key={i} className="relative overflow-hidden rounded-md" style={{ aspectRatio: "4 / 5", background: fundo, border: `1px solid ${i === 0 && publicados ? C.laranja : C.borda2}` }}>
+            <div key={i} className="relative overflow-hidden rounded-md" style={{ aspectRatio: "1 / 1", background: fundo, border: `1px solid ${i === 0 && publicados ? C.laranja : C.borda2}` }}>
               <span className="absolute left-1.5 top-1.5 h-1.5 w-1.5 rounded-full" style={{ background: C.laranja }} />
               <span className="absolute right-1 top-0.5" style={{ fontSize: 9, fontWeight: 700, color: claro ? "#12201E" : C.txt }}>{rotulo}</span>
               <span className="absolute bottom-1.5 left-1.5 right-1.5 h-1 rounded-sm" style={{ background: claro ? "rgba(18,32,30,.5)" : "rgba(233,241,238,.55)" }} />
@@ -813,14 +851,14 @@ function CardRedes({ n, e, painel, agora }: { n: number; e: EstadoEtapa; painel:
         {!grade.length && <div className="col-span-4"><Vazio>Nenhum post publicado ainda.</Vazio></div>}
       </div>
       <div className="flex items-center gap-2.5 rounded-lg px-3 py-2" style={{ background: C.fundo2, border: `1px solid ${C.borda}` }}>
-        <span style={{ fontSize: 13, color: C.mut }}>Próximo post</span>
-        <span className="font-mono" style={{ fontSize: 18, color: C.laranja }}>{prox ? (prox > agora ? dur(prox - agora) : "publicando…") : "fila vazia"}</span>
-        <span className="ml-auto" style={{ fontSize: 12, color: C.mut }}>{painel?.instagram.na_fila ?? 0} na fila · nunca 2 cores iguais</span>
+        <span className="flex-none whitespace-nowrap" style={{ fontSize: 13, color: C.mut }}>Próximo post</span>
+        <span className="vz-mono flex-none whitespace-nowrap" style={{ fontSize: 16, color: C.laranja }}>{prox ? (prox > agora ? dur(prox - agora) : "publicando…") : "fila vazia"}</span>
+        <span className="ml-auto truncate" style={{ fontSize: 12, color: C.mut }}>{painel?.instagram.na_fila ?? 0} na fila</span>
       </div>
       <div className="mt-auto flex flex-col gap-1">
         <div className="flex justify-between" style={{ fontSize: 13 }}>
           <span>Reels “Resumo do dia” · 18h</span>
-          <span className="font-mono" style={{ color: C.mut }}>{reels > agora ? `em ${dur(reels - agora)}` : "saiu às 18h"}</span>
+          <span className="vz-mono" style={{ color: C.mut }}>{reels > agora ? `em ${dur(reels - agora)}` : "saiu às 18h"}</span>
         </div>
         <div className="h-2 overflow-hidden rounded" style={{ background: C.fundo2 }}>
           <div className="h-full" style={{ width: `${Math.max(4, Math.min(100, 100 - (reels - agora) / (12 * 3600_000) * 100))}%`, background: C.laranja }} />
@@ -838,10 +876,10 @@ function Vinheta({ nome, desde, agora }: { nome: string; desde: number; agora: n
   return (
     <div className="fixed inset-0 z-[300] grid place-items-center" style={{ background: "rgba(5,10,9,.92)", animation: "vzVinheta 4.2s ease both" }} role="status" aria-live="polite">
       <div className="flex flex-col items-center gap-4 text-center">
-        <span className="uppercase" style={{ fontSize: 18, letterSpacing: ".3em", color: C.laranja }}>Começa agora</span>
+        <span className="vz-cond uppercase" style={{ fontSize: 18, letterSpacing: ".3em", color: C.laranja }}>Começa agora</span>
         <span style={{ fontFamily: "Newsreader, Georgia, serif", fontSize: 64, fontWeight: 600, color: C.txt }}>{nome}</span>
         {numero != null ? (
-          <span key={numero} className="font-mono" style={{ fontSize: 160, lineHeight: 1, color: C.laranja, animation: "vzNumero 1s ease both" }}>{numero}</span>
+          <span key={numero} className="vz-mono" style={{ fontSize: 160, lineHeight: 1, color: C.laranja, animation: "vzNumero 1s ease both" }}>{numero}</span>
         ) : (
           <span style={{ fontSize: 28, color: C.verde, fontWeight: 600 }}>coleta → crivo → apuração → redação → criticidade → imagem → publicação → redes</span>
         )}
@@ -856,9 +894,9 @@ function ModalRelatorio({ r, onFechar }: { r: Relatorio; onFechar: () => void })
       <div className="vz-entra flex max-h-full w-full max-w-4xl flex-col gap-5 overflow-auto rounded-3xl p-6 md:p-8" style={{ background: C.painel, border: `1px solid ${C.borda2}`, color: C.txt }}>
         <div className="flex items-start gap-4">
           <div className="flex flex-col">
-            <span className="uppercase" style={{ fontSize: 14, letterSpacing: ".2em", color: C.laranja }}>Relatório do ciclo</span>
+            <span className="vz-cond uppercase" style={{ fontSize: 14, letterSpacing: ".2em", color: C.laranja }}>Relatório do ciclo</span>
             <span style={{ fontFamily: "Newsreader, Georgia, serif", fontSize: 36, fontWeight: 600 }}>{r.ciclo}</span>
-            <span className="font-mono" style={{ fontSize: 14, color: C.mut }}>{r.janela}</span>
+            <span className="vz-mono" style={{ fontSize: 14, color: C.mut }}>{r.janela}</span>
           </div>
           <button type="button" onClick={onFechar} aria-label="Fechar o relatório" className="ml-auto grid h-11 w-11 place-items-center rounded-xl" style={{ border: `1px solid ${C.borda}`, background: C.fundo2, color: C.txt }}>
             <X className="h-5 w-5" />
@@ -873,16 +911,16 @@ function ModalRelatorio({ r, onFechar }: { r: Relatorio; onFechar: () => void })
         <div className="grid grid-cols-1 gap-2 md:grid-cols-2">
           {r.etapas.map((e, i) => (
             <div key={e.nome} className="flex items-center gap-3 rounded-xl px-3 py-2" style={{ background: C.fundo2, border: `1px solid ${C.borda}` }}>
-              <span className="font-mono" style={{ fontSize: 12, color: C.mut }}>{String(i + 1).padStart(2, "0")}</span>
+              <span className="vz-mono" style={{ fontSize: 12, color: C.mut }}>{String(i + 1).padStart(2, "0")}</span>
               <span className="font-semibold" style={{ fontSize: 15 }}>{e.nome}</span>
-              <span className="ml-auto font-mono" style={{ fontSize: 14 }}>{e.n}</span>
-              <span className="w-24 text-right font-mono" style={{ fontSize: 12, color: C.mut }}>{e.duracao}</span>
+              <span className="ml-auto vz-mono" style={{ fontSize: 14 }}>{e.n}</span>
+              <span className="w-24 text-right vz-mono" style={{ fontSize: 12, color: C.mut }}>{e.duracao}</span>
             </div>
           ))}
         </div>
         {r.publicadas.length > 0 && (
           <div className="flex flex-col gap-1.5">
-            <span className="uppercase" style={{ fontSize: 13, letterSpacing: ".16em", color: C.mut }}>Últimas publicadas</span>
+            <span className="vz-cond uppercase" style={{ fontSize: 13, letterSpacing: ".16em", color: C.mut }}>Últimas publicadas</span>
             {r.publicadas.map((p, i) => (
               <div key={i} className="flex gap-2" style={{ fontSize: 14 }}>
                 <span className="flex-none font-semibold" style={{ color: C.verde }}>{p.cidade ?? "Paraná"}</span>
