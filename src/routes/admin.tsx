@@ -1,6 +1,6 @@
 import { createFileRoute, Outlet, Link, useNavigate, useLocation } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
-import { Wallet, Home, Inbox, NotebookPen, Columns3, Radio, Map as MapIcon, Bot, BookOpen, Megaphone, UserRound, Newspaper, BarChart3, Info, ExternalLink, KeyRound, LogOut, LayoutDashboard, Instagram } from "lucide-react";
+import { Wallet, Home, Inbox, NotebookPen, Columns3, Radio, Map as MapIcon, Bot, BookOpen, Megaphone, UserRound, Newspaper, BarChart3, Info, ExternalLink, KeyRound, LogOut, LayoutDashboard, Instagram, Activity } from "lucide-react";
 import { getExternalBrowser } from "@/lib/external-supabase-browser";
 import { Logo } from "@/components/Logo";
 import { situacao, type Assinatura } from "@/lib/custos";
@@ -96,6 +96,7 @@ const GRUPOS: { titulo: string; itens: ItemNav[] }[] = [
   {
     titulo: "Pipeline",
     itens: [
+      { to: "/admin/pipeline", label: "Pipeline ao vivo", icon: Activity },
       { to: "/admin/fontes", label: "Fontes", icon: Radio },
       { to: "/admin/regioes", label: "Regiões e cotas", icon: MapIcon },
       { to: "/admin/agentes", label: "Agentes IA", icon: Bot },

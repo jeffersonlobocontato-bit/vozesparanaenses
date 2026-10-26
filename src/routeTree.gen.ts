@@ -40,6 +40,7 @@ import { Route as AdminSobreRouteImport } from './routes/admin.sobre'
 import { Route as AdminSenhaRouteImport } from './routes/admin.senha'
 import { Route as AdminResetPasswordRouteImport } from './routes/admin.reset-password'
 import { Route as AdminRegioesRouteImport } from './routes/admin.regioes'
+import { Route as AdminPipelineRouteImport } from './routes/admin.pipeline'
 import { Route as AdminPainelRouteImport } from './routes/admin.painel'
 import { Route as AdminNotasCidadesRouteImport } from './routes/admin.notas-cidades'
 import { Route as AdminMemoriaEditorialRouteImport } from './routes/admin.memoria-editorial'
@@ -228,6 +229,11 @@ const AdminResetPasswordRoute = AdminResetPasswordRouteImport.update({
 const AdminRegioesRoute = AdminRegioesRouteImport.update({
   id: '/regioes',
   path: '/regioes',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminPipelineRoute = AdminPipelineRouteImport.update({
+  id: '/pipeline',
+  path: '/pipeline',
   getParentRoute: () => AdminRoute,
 } as any)
 const AdminPainelRoute = AdminPainelRouteImport.update({
@@ -438,6 +444,7 @@ export interface FileRoutesByFullPath {
   '/admin/memoria-editorial': typeof AdminMemoriaEditorialRoute
   '/admin/notas-cidades': typeof AdminNotasCidadesRoute
   '/admin/painel': typeof AdminPainelRoute
+  '/admin/pipeline': typeof AdminPipelineRoute
   '/admin/regioes': typeof AdminRegioesRoute
   '/admin/reset-password': typeof AdminResetPasswordRoute
   '/admin/senha': typeof AdminSenhaRoute
@@ -503,6 +510,7 @@ export interface FileRoutesByTo {
   '/admin/memoria-editorial': typeof AdminMemoriaEditorialRoute
   '/admin/notas-cidades': typeof AdminNotasCidadesRoute
   '/admin/painel': typeof AdminPainelRoute
+  '/admin/pipeline': typeof AdminPipelineRoute
   '/admin/regioes': typeof AdminRegioesRoute
   '/admin/reset-password': typeof AdminResetPasswordRoute
   '/admin/senha': typeof AdminSenhaRoute
@@ -571,6 +579,7 @@ export interface FileRoutesById {
   '/admin/memoria-editorial': typeof AdminMemoriaEditorialRoute
   '/admin/notas-cidades': typeof AdminNotasCidadesRoute
   '/admin/painel': typeof AdminPainelRoute
+  '/admin/pipeline': typeof AdminPipelineRoute
   '/admin/regioes': typeof AdminRegioesRoute
   '/admin/reset-password': typeof AdminResetPasswordRoute
   '/admin/senha': typeof AdminSenhaRoute
@@ -640,6 +649,7 @@ export interface FileRouteTypes {
     | '/admin/memoria-editorial'
     | '/admin/notas-cidades'
     | '/admin/painel'
+    | '/admin/pipeline'
     | '/admin/regioes'
     | '/admin/reset-password'
     | '/admin/senha'
@@ -705,6 +715,7 @@ export interface FileRouteTypes {
     | '/admin/memoria-editorial'
     | '/admin/notas-cidades'
     | '/admin/painel'
+    | '/admin/pipeline'
     | '/admin/regioes'
     | '/admin/reset-password'
     | '/admin/senha'
@@ -772,6 +783,7 @@ export interface FileRouteTypes {
     | '/admin/memoria-editorial'
     | '/admin/notas-cidades'
     | '/admin/painel'
+    | '/admin/pipeline'
     | '/admin/regioes'
     | '/admin/reset-password'
     | '/admin/senha'
@@ -1076,6 +1088,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminRegioesRouteImport
       parentRoute: typeof AdminRoute
     }
+    '/admin/pipeline': {
+      id: '/admin/pipeline'
+      path: '/pipeline'
+      fullPath: '/admin/pipeline'
+      preLoaderRoute: typeof AdminPipelineRouteImport
+      parentRoute: typeof AdminRoute
+    }
     '/admin/painel': {
       id: '/admin/painel'
       path: '/painel'
@@ -1349,6 +1368,7 @@ interface AdminRouteChildren {
   AdminMemoriaEditorialRoute: typeof AdminMemoriaEditorialRoute
   AdminNotasCidadesRoute: typeof AdminNotasCidadesRoute
   AdminPainelRoute: typeof AdminPainelRoute
+  AdminPipelineRoute: typeof AdminPipelineRoute
   AdminRegioesRoute: typeof AdminRegioesRoute
   AdminResetPasswordRoute: typeof AdminResetPasswordRoute
   AdminSenhaRoute: typeof AdminSenhaRoute
@@ -1370,6 +1390,7 @@ const AdminRouteChildren: AdminRouteChildren = {
   AdminMemoriaEditorialRoute: AdminMemoriaEditorialRoute,
   AdminNotasCidadesRoute: AdminNotasCidadesRoute,
   AdminPainelRoute: AdminPainelRoute,
+  AdminPipelineRoute: AdminPipelineRoute,
   AdminRegioesRoute: AdminRegioesRoute,
   AdminResetPasswordRoute: AdminResetPasswordRoute,
   AdminSenhaRoute: AdminSenhaRoute,
