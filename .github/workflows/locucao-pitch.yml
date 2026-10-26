@@ -1,0 +1,16 @@
+# Gera a locução do vídeo-pitch (edge-tts, voz Antonio) a partir da branch locucao-pitch
+# e devolve locucao.mp3 + locucao.json (tempo de cada palavra) na mesma branch.
+name: Locução do pitch
+on: workflow_dispatch
+jobs:
+  locucao:
+    runs-on: ubuntu-latest
+    permissions: { contents: write }
+    steps:
+      - uses: actions/checkout@v4
+        with: { ref: locucao-pitch }
+      - run: pip install edge-tts && sudo apt-get install -y -qq ffmpeg >/dev/null
+      - run: python gerar.py
+      - run: |
+          git config user.name "vozes-locucao" && git config user.email "reels@vozesparanaenses.com.br"
+          git add locucao.mp3 locucao.json && git commit -qm "Locução gerada" && git push -q origin HEAD:locucao-pitch
