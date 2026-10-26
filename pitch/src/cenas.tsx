@@ -234,3 +234,68 @@ export const CenaAssinatura: React.FC = () => {
     </AbsoluteFill>
   );
 };
+
+// ------------------------------------------------------------------ busca simulada (buscador genérico + resposta de IA citando o portal)
+export type PropsBusca = { pill: string; titulo: string[]; consulta: string; resposta: string; materia: { titulo: string; url: string; trecho: string } };
+export const CenaBusca: React.FC<PropsBusca> = ({ pill, titulo, consulta, resposta, materia }) => {
+  const f = useCurrentFrame();
+  const { fps } = useVideoConfig();
+  const e = entrada(f, 0, 16);
+  const nDig = Math.floor(interpolate(f, [10, 10 + 1.6 * fps], [0, consulta.length], clamp));
+  const cursor = Math.floor(f / 8) % 2 === 0;
+  const fase2 = 10 + 1.9 * fps; // resultados aparecem
+  const r = entrada(f, fase2, 14);
+  const nResp = Math.floor(interpolate(f, [fase2 + 8, fase2 + 8 + 2.6 * fps], [0, resposta.length], clamp));
+  const fonte = entrada(f, fase2 + 8 + 2.6 * fps, 12);
+  const brilho = interpolate(f, [fase2 + 8 + 2.8 * fps, fase2 + 8 + 3.4 * fps], [0, 1], clamp);
+  const ui = FONTE.ui;
+  const brilhoIA = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="26" height="26"><path d="M12 2l2.2 6.3L20.5 10l-6.3 2.2L12 18.5l-2.2-6.3L3.5 10l6.3-1.7z" fill="#2ED3B7"/></svg>`;
+  return (
+    <AbsoluteFill>
+      <Fundo />
+      <AbsoluteFill style={{ flexDirection: "row", alignItems: "center", padding: "0 110px 60px 130px", gap: 80 }}>
+        <div style={{ width: 520, display: "flex", flexDirection: "column", gap: 34 }}>
+          <div style={{ display: "flex" }}><Pill entra={entrada(f, 2)}>{pill}</Pill></div>
+          <Titulo linhas={titulo.map((t) => ({ t }))} tamanho={68} />
+        </div>
+        <div style={{ flex: 1, height: 720, borderRadius: 22, overflow: "hidden", background: "#FFFFFF", border: `1px solid ${COR.borda}`, boxShadow: "0 40px 120px rgba(0,0,0,0.65)", opacity: e, translate: `0px ${(1 - e) * 60}px`, display: "flex", flexDirection: "column" }}>
+          <div style={{ height: 52, display: "flex", alignItems: "center", gap: 10, padding: "0 20px", background: "#1A1F1E" }}>
+            {[0, 1, 2].map((i) => <span key={i} style={{ width: 13, height: 13, borderRadius: "50%", background: "#3A403F" }} />)}
+            <span style={{ marginLeft: 14, padding: "6px 16px", borderRadius: 10, background: "#252B2A", fontFamily: FONTE.mono, fontSize: 19, color: "#C8D0CE" }}>busca · {consulta.slice(0, nDig)}</span>
+          </div>
+          <div style={{ padding: "34px 54px", display: "flex", flexDirection: "column", gap: 26, fontFamily: ui, color: "#1F2421" }}>
+            <div style={{ display: "flex", alignItems: "center", gap: 18, padding: "16px 26px", borderRadius: 999, border: "1px solid #DADFDC", boxShadow: "0 2px 10px rgba(0,0,0,0.06)", fontSize: 28 }}>
+              <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#5F6763" strokeWidth="2.4" strokeLinecap="round"><circle cx="11" cy="11" r="7" /><path d="M20 20l-3.5-3.5" /></svg>
+              <span>{consulta.slice(0, nDig)}{f < fase2 && cursor ? <span style={{ color: "#2ED3B7" }}>|</span> : null}</span>
+            </div>
+            <div style={{ opacity: r, translate: `0px ${(1 - r) * 20}px`, display: "flex", flexDirection: "column", gap: 24 }}>
+              <div style={{ borderRadius: 18, background: "#F1F7F5", border: "1px solid #D5E9E3", padding: "24px 28px", display: "flex", flexDirection: "column", gap: 14 }}>
+                <div style={{ display: "flex", alignItems: "center", gap: 10, fontSize: 21, fontWeight: 600, color: "#3B4440" }}>
+                  <img src={`data:image/svg+xml;utf8,${encodeURIComponent(brilhoIA)}`} width={26} height={26} /> Resposta gerada por IA
+                </div>
+                <div style={{ fontSize: 25, lineHeight: 1.45, minHeight: 150 }}>{resposta.slice(0, nResp)}</div>
+                <div style={{ display: "flex", alignItems: "center", gap: 12, opacity: fonte }}>
+                  <span style={{ fontSize: 18, color: "#5F6763", fontWeight: 600 }}>Fonte</span>
+                  <div style={{ display: "flex", alignItems: "center", gap: 10, padding: "8px 16px 8px 10px", borderRadius: 999, background: "#FFFFFF", border: `2px solid ${brilho > 0 ? COR.agua : "#DADFDC"}`, boxShadow: `0 0 ${24 * brilho}px rgba(46,211,183,${0.55 * brilho})` }}>
+                    <svg width="26" height="26" viewBox="0 0 44 44"><path d="M8 6h28a4 4 0 0 1 4 4v18a4 4 0 0 1-4 4H20l-9 7v-7H8a4 4 0 0 1-4-4V10a4 4 0 0 1 4-4z" fill="#1E5C4A" /><path d="M14 15l8 10 8-10" fill="none" stroke="#FFF" strokeWidth="3.2" strokeLinecap="round" strokeLinejoin="round" /></svg>
+                    <span style={{ fontSize: 19, fontWeight: 600 }}>Vozes Paranaenses</span>
+                  </div>
+                </div>
+              </div>
+              <div style={{ display: "flex", flexDirection: "column", gap: 6, opacity: entrada(f, fase2 + 20, 14) }}>
+                <div style={{ display: "flex", alignItems: "center", gap: 12, fontSize: 18, color: "#3B4440" }}>
+                  <span style={{ width: 30, height: 30, borderRadius: "50%", background: "#E8F0ED", display: "grid", placeItems: "center" }}>
+                    <svg width="20" height="20" viewBox="0 0 44 44"><path d="M8 6h28a4 4 0 0 1 4 4v18a4 4 0 0 1-4 4H20l-9 7v-7H8a4 4 0 0 1-4-4V10a4 4 0 0 1 4-4z" fill="#1E5C4A" /></svg>
+                  </span>
+                  <span><b>Vozes Paranaenses</b> · {materia.url}</span>
+                </div>
+                <div style={{ fontSize: 28, color: "#1A4FA0", fontWeight: 500 }}>{materia.titulo}</div>
+                <div style={{ fontSize: 20, color: "#4D5551", lineHeight: 1.4 }}>{materia.trecho}</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </AbsoluteFill>
+    </AbsoluteFill>
+  );
+};

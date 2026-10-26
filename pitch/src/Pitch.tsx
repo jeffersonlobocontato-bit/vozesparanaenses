@@ -1,6 +1,6 @@
 import React from "react";
 import { AbsoluteFill, Audio, Sequence, interpolate, staticFile, useCurrentFrame } from "remotion";
-import { CenaAbertura, CenaAssinatura, CenaCartoes, CenaNumeros, CenaPergunta, CenaPipeline, CenaReels, CenaTela, CenaTitulo } from "./cenas";
+import { CenaAbertura, CenaAssinatura, CenaBusca, CenaCartoes, CenaNumeros, CenaPergunta, CenaPipeline, CenaReels, CenaTela, CenaTitulo } from "./cenas";
 import { FPS, INTRO_S, OUTRO_S } from "./marca";
 import { Legenda } from "./pecas";
 import { ROTEIRO, type Cena } from "./roteiro";
@@ -26,6 +26,7 @@ function renderCena(c: Cena, quadros: string[]) {
     case "numeros": return <CenaNumeros {...c.p} />;
     case "reels": return <CenaReels {...c.p} />;
     case "pergunta": return <CenaPergunta {...c.p} />;
+    case "busca": return <CenaBusca {...c.p} />;
     case "pipeline": return <CenaPipeline quadros={fatia(quadros, c.p.de, c.p.ate).map((n) => staticFile(n))} zooms={c.p.zooms} />;
   }
 }

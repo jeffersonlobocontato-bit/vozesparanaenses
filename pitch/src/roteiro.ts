@@ -1,6 +1,6 @@
 // Roteiro visual do vídeo-pitch: cada cena começa na frase-âncora da locução
 // (resolvida pelas legendas) e vai até a próxima. Capturas reais em public/telas/.
-import type { PropsCartoes, PropsNumeros, PropsPipeline, PropsTela, PropsTitulo } from "./cenas";
+import type { PropsBusca, PropsCartoes, PropsNumeros, PropsPipeline, PropsTela, PropsTitulo } from "./cenas";
 
 export type Cena =
   | { ancora: string; tipo: "titulo"; p: PropsTitulo }
@@ -9,7 +9,8 @@ export type Cena =
   | { ancora: string; tipo: "pipeline"; p: Omit<PropsPipeline, "quadros"> & { de: number; ate: number } }
   | { ancora: string; tipo: "numeros"; p: PropsNumeros }
   | { ancora: string; tipo: "reels"; p: { pill: string; titulo: string[]; video: string } }
-  | { ancora: string; tipo: "pergunta"; p: { linhas: string[] } };
+  | { ancora: string; tipo: "pergunta"; p: { linhas: string[] } }
+  | { ancora: string; tipo: "busca"; p: PropsBusca };
 
 const T = (n: string) => `telas/${n}.jpg`;
 // Cards do palco 1920×1080 do Pipeline ao vivo (x, y, largura, altura)
@@ -58,7 +59,12 @@ export const ROTEIRO: Cena[] = [
   { ancora: "O leitor vê primeiro", tipo: "tela", p: { img: T("pub-oeste"), url: "vozesparanaenses.com.br/oeste", imgAltura: 3000, de: 0, ate: 500, pill: "Proximidade", titulo: ["A notícia da", "cidade do leitor", "vem primeiro."] } },
   { ancora: "No Instagram, um robô", tipo: "tela", p: { img: T("adm-instagram"), url: "…/admin/instagram", imgAltura: 1080, de: 0, ate: 0, zoom: [1, 1.1], pill: "Robô do Instagram", titulo: ["Escolhe, desenha", "e publica."] } },
   { ancora: "e às seis da tarde monta o Reels", tipo: "reels", p: { pill: "Reels diário · 18h", titulo: ["Resumo do dia,", "narrado e editado."], video: "reels.mp4" } },
-  { ancora: "para ser encontrado e citado", tipo: "tela", p: { img: T("pub-materia"), url: "vozesparanaenses.com.br/oeste/…", imgAltura: 5352, de: 2300, ate: 3100, pill: "Busca por IA", titulo: ["Feito para ser", "citado pelos", "buscadores de IA."] } },
+  { ancora: "E todo conteúdo já nasce estruturado", tipo: "busca", p: {
+    pill: "Busca por IA", titulo: ["Feito para ser", "encontrado e", "citado pela IA."],
+    consulta: "exportação de frango porto de Paranaguá 2026",
+    resposta: "Entre janeiro e setembro de 2026, o Porto de Paranaguá escoou 1,87 milhão de toneladas de frango congelado, 47% do volume exportado pelo Brasil, e respondeu por 65,1% do crescimento das vendas da proteína no período.",
+    materia: { titulo: "Exportações de frango congelado somam 1,87 milhão de toneladas", url: "vozesparanaenses.com.br/litoral/…", trecho: "Paranaguá concentra 47% do volume nacional exportado de carne de frango congelada entre janeiro e setembro." },
+  } },
   // ---- 55 · Pipeline ao vivo
   { ancora: "E tudo isso pode ser acompanhado ao vivo", tipo: "pipeline", p: { de: 0, ate: 1, zooms: [
     { aos: 0, rect: R("inteiro") },
