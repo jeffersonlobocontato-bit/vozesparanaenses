@@ -58,7 +58,7 @@ export const ROTEIRO: Cena[] = [
   { ancora: "O leitor vê primeiro", tipo: "tela", p: { img: T("pub-oeste"), url: "vozesparanaenses.com.br/oeste", imgAltura: 3000, de: 0, ate: 500, pill: "Proximidade", titulo: ["A notícia da", "cidade do leitor", "vem primeiro."] } },
   { ancora: "No Instagram, um robô", tipo: "tela", p: { img: T("adm-instagram"), url: "…/admin/instagram", imgAltura: 1080, de: 0, ate: 0, zoom: [1, 1.1], pill: "Robô do Instagram", titulo: ["Escolhe, desenha", "e publica."] } },
   { ancora: "e às seis da tarde monta o Reels", tipo: "reels", p: { pill: "Reels diário · 18h", titulo: ["Resumo do dia,", "narrado e editado."], video: "reels.mp4" } },
-  { ancora: "para ser encontrado e citado", tipo: "tela", p: { img: T("pub-llms"), url: "vozesparanaenses.com.br/llms.txt", imgAltura: 1080, de: 0, ate: 0, zoom: [1, 1.12], foco: [0, 0], pill: "Busca por IA", titulo: ["Feito para ser", "citado pelos", "buscadores de IA."] } },
+  { ancora: "para ser encontrado e citado", tipo: "tela", p: { img: T("pub-materia"), url: "vozesparanaenses.com.br/oeste/…", imgAltura: 5352, de: 2300, ate: 3100, pill: "Busca por IA", titulo: ["Feito para ser", "citado pelos", "buscadores de IA."] } },
   // ---- 55 · Pipeline ao vivo
   { ancora: "E tudo isso pode ser acompanhado ao vivo", tipo: "pipeline", p: { de: 0, ate: 1, zooms: [
     { aos: 0, rect: R("inteiro") },
