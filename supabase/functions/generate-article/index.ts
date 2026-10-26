@@ -77,7 +77,7 @@ Retorne APENAS JSON válido, sem markdown, no schema fornecido.`;
 // o crivo (matéria/nota/descarte), o validador do dia e a publicação
 // automática pela criticidade. Sem modo = chamado por editor (Escrever
 // agora, matéria manual, tecnologia): sempre gera matéria em rascunho.
-type Payload = { cluster_id?: string; extracted_facts_id?: string; extra_instructions?: string; modo?: "automatico" };
+type Payload = { cluster_id?: string; extracted_facts_id?: string; extra_instructions?: string; modo?: "automatico"; origem?: "manual" };
 
 type RawFoto = {
   id: string;
@@ -235,7 +235,13 @@ Deno.serve(async (req) => {
     quem: facts.quem, o_que: facts.o_que, quando: facts.quando, onde: facts.onde,
     por_que: facts.por_que, como: dados.como,
   }, { policial });
-  if (faltando.length) {
+  // Matéria criada pelo editor (Nova matéria): a decisão é dele — o 5W1H
+  // incompleto não descarta, só fica registrado no log; o texto vai para revisão.
+  const manual = body.origem === "manual";
+  if (faltando.length && manual) {
+    console.log(`[generate-article] cluster ${clusterId} manual com 5W1H incompleto (${faltando.join(", ")}) — segue para rascunho`);
+  }
+  if (faltando.length && !manual) {
     const motivo = motivoVeto5w1h(faltando);
     await encerrarCluster(sb, clusterId, rawIdsCluster, "descartado");
     await sb.from("article_clusters").update({ descarte_motivo: motivo }).eq("id", clusterId);
@@ -475,7 +481,7 @@ Você é repórter, não comentarista. Relate o fato; não tome partido.
     for (const a of candidatas) {
       const f = a.fatos_5w1h ?? {};
       const textoA = `${a.titulo}\n${a.subtitulo ?? ""}\nO quê: ${f.o_que ?? ""}\nQuem: ${f.quem ?? ""}\nQuando: ${f.quando ?? ""}\nOnde: ${f.onde ?? ""}`;
-      if (await mesmoFato(textoNovo, textoA, aiKey)) {
+      if (body.origem !== "manual" && await mesmoFato(textoNovo, textoA, aiKey)) {
         const motivo = `Duplicata: o mesmo fato já está na matéria "${a.titulo}" (${a.slug}).`;
         await encerrarCluster(sb, clusterId, rawIdsCluster, "descartado");
         await sb.from("article_clusters").update({ descarte_motivo: motivo }).eq("id", clusterId);

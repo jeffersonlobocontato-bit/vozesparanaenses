@@ -245,6 +245,7 @@ Deno.serve(async (req) => {
     body: JSON.stringify({
       cluster_id: clusterId,
       extra_instructions: (body.observacoes ?? "").trim() || undefined,
+      origem: "manual",
     }),
   });
   if (!ga.ok) {
@@ -254,7 +255,16 @@ Deno.serve(async (req) => {
   const gaJson = await ga.json();
 
   const newArticleId = gaJson?.article?.id as string | undefined;
-  if (newArticleId) await finalize(sb, newArticleId, body);
+  if (!newArticleId) {
+    // Sem matéria: devolve o motivo em vez de um "rascunho criado" falso.
+    return json({
+      ok: false,
+      error: "sem_materia",
+      hint: gaJson?.motivo ? `A matéria não foi criada: ${gaJson.motivo}` : "A redação não devolveu matéria. Tente de novo.",
+      cluster_id: clusterId,
+    }, 422);
+  }
+  await finalize(sb, newArticleId, body);
 
   return json({
     ok: true,
