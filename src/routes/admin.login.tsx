@@ -1,6 +1,7 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
 import { getExternalBrowser } from "@/lib/external-supabase-browser";
+import { erroAuth } from "@/lib/erros-auth";
 import { Logo } from "@/components/Logo";
 
 const PUBLIC_PASSWORD_RESET_URL = "https://vozesparanaenses.lovable.app/admin/reset-password";
@@ -44,7 +45,7 @@ function AdminLogin() {
       if (error) throw error;
       nav({ to: "/admin", replace: true });
     } catch (e: unknown) {
-      setErr(e instanceof Error ? e.message : "Falha ao entrar");
+      setErr(erroAuth(e, "Falha ao entrar"));
     } finally {
       setBusy(false);
     }
@@ -62,7 +63,7 @@ function AdminLogin() {
       if (error) throw error;
       setResetMsg("Se o e-mail existir, um link de redefinição foi enviado.");
     } catch (e: unknown) {
-      setErr(e instanceof Error ? e.message : "Falha ao enviar link");
+      setErr(erroAuth(e, "Falha ao enviar link"));
     } finally {
       setResetBusy(false);
     }

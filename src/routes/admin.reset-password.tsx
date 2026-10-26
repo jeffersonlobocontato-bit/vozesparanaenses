@@ -1,6 +1,7 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { getExternalBrowser } from "@/lib/external-supabase-browser";
+import { erroAuth } from "@/lib/erros-auth";
 import { Logo } from "@/components/Logo";
 
 export const Route = createFileRoute("/admin/reset-password")({
@@ -49,7 +50,7 @@ function ResetPassword() {
           window.history.replaceState(null, "", window.location.pathname);
         }
       } catch (e: unknown) {
-        setErr("Link inválido ou expirado: " + (e instanceof Error ? e.message : "") + " — peça um novo no login.");
+        setErr(erroAuth(e, "Link inválido ou expirado. Peça um novo no login."));
       }
       setReady(true);
     })();
@@ -68,7 +69,7 @@ function ResetPassword() {
       setMsg("Senha redefinida. Redirecionando…");
       setTimeout(() => nav({ to: "/admin", replace: true }), 900);
     } catch (e: unknown) {
-      setErr(e instanceof Error ? e.message : "Falha ao atualizar");
+      setErr(erroAuth(e, "Falha ao atualizar"));
     } finally {
       setBusy(false);
     }

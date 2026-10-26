@@ -209,6 +209,16 @@ function RootComponent() {
   const isLanding = pathname === "/cidadesdoparana" || pathname.startsWith("/imprensa");
 
   useEffect(() => {
+    // Link de "Esqueci minha senha": se o Supabase devolver para a raiz do site
+    // (endereço de retorno fora da lista permitida), leva para a tela de nova
+    // senha com o token — senão o link "não funciona" e a pessoa cai na home.
+    const h = window.location.hash;
+    if (/type=recovery/.test(h) && /access_token=/.test(h) && !pathname.startsWith("/admin/reset-password") && !pathname.startsWith("/imprensa")) {
+      window.location.replace(`/admin/reset-password${h}`);
+    }
+  }, [pathname]);
+
+  useEffect(() => {
     // O AdSense nunca deve carregar em telas administrativas — são páginas
     // sem conteúdo editorial nenhum, exatamente o que a política do Google
     // proíbe ("anúncios em telas sem conteúdo do editor").
