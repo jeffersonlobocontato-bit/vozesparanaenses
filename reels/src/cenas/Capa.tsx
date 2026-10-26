@@ -20,10 +20,18 @@ export const Capa: React.FC<Roteiro> = (r) => {
     { left: 560, top: 270 },
     { left: 300, top: 470 },
   ];
-  const manchetes = noticias.slice(0, 3).map((c) => {
-    const p = c.titulo.split(/\s+/);
-    return p.length > 11 ? `${p.slice(0, 10).join(" ")}…` : c.titulo;
-  });
+  // Manchete curta: até ~52 caracteres, cortando em palavra e sem terminar em preposição.
+  const curta = (t: string) => {
+    if (t.length <= 56) return t;
+    const out: string[] = [];
+    for (const w of t.split(/\s+/)) {
+      if ([...out, w].join(" ").length > 52) break;
+      out.push(w);
+    }
+    while (out.length > 3 && /^(a|o|as|os|da|de|do|das|dos|e|em|no|na|nos|nas|com|para|por|ao|à|é|um|uma)$/i.test(out[out.length - 1])) out.pop();
+    return `${out.join(" ")}…`;
+  };
+  const manchetes = noticias.slice(0, 3).map((c) => curta(c.titulo));
   return (
     <AbsoluteFill style={{ background: `radial-gradient(95% 65% at 50% 48%, ${COR.verde} 0%, #173F33 48%, ${COR.tinta} 100%)`, overflow: "hidden" }}>
       <AbsoluteFill style={{ display: "grid", placeItems: "center" }}>
