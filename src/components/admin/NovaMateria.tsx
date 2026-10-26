@@ -125,7 +125,9 @@ function IaRedige({ onCreated }: { onCreated?: () => void }) {
           const resp = errWithCtx.context?.response;
           if (resp) detail = await resp.clone().text();
         } catch { /* ignore */ }
-        throw new Error(detail || error.message);
+        let legivel = detail;
+        try { const j = JSON.parse(detail) as { hint?: string; error?: string; detail?: string }; legivel = j.hint ?? j.detail ?? j.error ?? detail; } catch { /* texto puro */ }
+        throw new Error(legivel || error.message);
       }
       const payload = data as { ok?: boolean; error?: string; hint?: string; titulo?: string };
       if (!payload?.ok) throw new Error(payload?.hint ?? payload?.error ?? "Falha desconhecida");
@@ -295,7 +297,9 @@ function PublicarTexto({ onCreated }: { onCreated?: () => void }) {
           const resp = (error as { context?: { response?: Response } }).context?.response;
           if (resp) detail = await resp.clone().text();
         } catch { /* ignore */ }
-        throw new Error(detail || error.message);
+        let legivel = detail;
+        try { const j = JSON.parse(detail) as { hint?: string; error?: string; detail?: string }; legivel = j.hint ?? j.detail ?? j.error ?? detail; } catch { /* texto puro */ }
+        throw new Error(legivel || error.message);
       }
       const payload = data as { ok?: boolean; error?: string; hint?: string; titulo?: string; publicado?: boolean };
       if (!payload?.ok) throw new Error(payload?.hint ?? payload?.error ?? "Falha desconhecida");
