@@ -1,27 +1,20 @@
-import asyncio, json, edge_tts, subprocess, os, wave
+# Baixa os trechos da locução (Magnific/ElevenLabs, voz Tiago Macedo) e monta locucao.mp3:
+# trechos do mesmo bloco seguidos com 0,35 s; entre blocos, 0,7 s.
+import os, subprocess, urllib.request, wave, json
 FF=os.environ.get("FFMPEG","ffmpeg")
-V="pt-BR-AntonioNeural"
-blocos=[l.strip() for l in open("blocos.txt",encoding="utf-8") if l.strip()]
-async def um(i,t):
-    c=edge_tts.Communicate(t,V,boundary="WordBoundary"); ws=[]
-    with open(f"b{i:02d}.mp3","wb") as f:
-        async for ch in c.stream():
-            if ch["type"]=="audio": f.write(ch["data"])
-            elif ch["type"]=="WordBoundary": ws.append({"w":ch["text"],"s":ch["offset"]/1e7,"e":(ch["offset"]+ch["duration"])/1e7})
-    return ws
-async def main():
-    pal=[];t0=0.0;lst=[]
-    pausa=0.7
-    subprocess.run([FF,"-v","error","-y","-f","lavfi","-i","anullsrc=r=24000:cl=mono","-t",str(pausa),"sil.wav"],check=True)
-    for i,t in enumerate(blocos):
-        ws=await um(i,t)
-        subprocess.run([FF,"-v","error","-y","-i",f"b{i:02d}.mp3","-ac","1","-ar","24000",f"b{i:02d}.wav"],check=True)
-        w_=wave.open(f"b{i:02d}.wav"); d=w_.getnframes()/w_.getframerate(); w_.close()
-        for w in ws: pal.append({"w":w["w"],"s":round(w["s"]+t0,3),"e":round(w["e"]+t0,3),"bloco":i})
-        lst.append(f"file b{i:02d}.wav"); t0+=d
-        if i<len(blocos)-1: lst.append("file sil.wav"); t0+=pausa
-    open("lista.txt","w").write("\n".join(lst))
-    subprocess.run([FF,"-v","error","-y","-f","concat","-safe","0","-i","lista.txt","-c:a","libmp3lame","-b:a","160k","locucao.mp3"],check=True)
-    json.dump({"voz":V,"duracao":round(t0,2),"palavras":pal},open("locucao.json","w"),ensure_ascii=False)
-    print("duracao",t0)
-asyncio.run(main())
+itens=[l.split() for l in open("urls.txt") if l.strip()]
+def sil(n,t): subprocess.run([FF,"-v","error","-y","-f","lavfi","-i","anullsrc=r=44100:cl=mono","-t",str(t),n],check=True)
+sil("s_curta.wav",0.35); sil("s_bloco.wav",0.7)
+lista=[]; t0=0.0; trechos=[]; ant=None
+for i,(b,u) in enumerate(itens):
+    urllib.request.urlretrieve(u,f"p{i:02d}.mp3")
+    subprocess.run([FF,"-v","error","-y","-i",f"p{i:02d}.mp3","-ac","1","-ar","44100",f"p{i:02d}.wav"],check=True)
+    w=wave.open(f"p{i:02d}.wav"); d=w.getnframes()/w.getframerate(); w.close()
+    if ant is not None:
+        p="s_curta.wav" if b==ant else "s_bloco.wav"; lista.append(f"file {p}"); t0+=0.35 if b==ant else 0.7
+    trechos.append({"bloco":int(b),"inicio":round(t0,3),"duracao":round(d,3)})
+    lista.append(f"file p{i:02d}.wav"); t0+=d; ant=b
+open("lista.txt","w").write("\n".join(lista))
+subprocess.run([FF,"-v","error","-y","-f","concat","-safe","0","-i","lista.txt","-c:a","libmp3lame","-b:a","192k","locucao.mp3"],check=True)
+json.dump({"voz":"Tiago Macedo (ElevenLabs v4, Magnific)","duracao":round(t0,2),"trechos":trechos},open("locucao.json","w"),ensure_ascii=False)
+print("duracao",t0)
