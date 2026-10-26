@@ -19,9 +19,38 @@ function ResetPassword() {
 
   useEffect(() => {
     (async () => {
-      // Supabase entrega o token no hash (#access_token=...&type=recovery).
-      // O cliente detecta e cria sessão temporária de recuperação.
-      await getExternalBrowser();
+      // O link pode chegar como #access_token=... (implícito), ?code=... (PKCE)
+      // ou ?token_hash=...&type=recovery. Tratamos os três.
+      const sb = await getExternalBrowser();
+      try {
+        const qs = new URLSearchParams(window.location.search);
+        const hash = new URLSearchParams(window.location.hash.replace(/^#/, ""));
+        const code = qs.get("code");
+        const tokenHash = qs.get("token_hash");
+        const errDesc = qs.get("error_description") || hash.get("error_description");
+        if (errDesc) throw new Error(errDesc);
+        if (code) {
+          const { error } = await sb.auth.exchangeCodeForSession(code);
+          if (error) throw error;
+        } else if (tokenHash) {
+          const { error } = await sb.auth.verifyOtp({ token_hash: tokenHash, type: "recovery" });
+          if (error) throw error;
+        } else if (hash.get("access_token") && hash.get("refresh_token")) {
+          const { error } = await sb.auth.setSession({
+            access_token: hash.get("access_token")!,
+            refresh_token: hash.get("refresh_token")!,
+          });
+          if (error) throw error;
+        }
+        const { data } = await sb.auth.getSession();
+        if (!data.session) {
+          setErr("Link inválido ou expirado. Volte ao login e peça um novo em \"Esqueci minha senha\".");
+        } else {
+          window.history.replaceState(null, "", window.location.pathname);
+        }
+      } catch (e: unknown) {
+        setErr("Link inválido ou expirado: " + (e instanceof Error ? e.message : "") + " — peça um novo no login.");
+      }
       setReady(true);
     })();
   }, []);
