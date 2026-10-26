@@ -17,7 +17,7 @@
 
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
 import { exigirInterno } from "../_shared/auth.ts";
-import { COR_REGIAO, ESCOPO, limitar, NOME_REGIAO, type Card } from "../_shared/instagram-cards.ts";
+import { chaveVisual, COR_REGIAO, escolherFundo, ESCOPO, limitar, NOME_REGIAO, type Card } from "../_shared/instagram-cards.ts";
 import { imagemComoDataUri, renderizarCard } from "../_shared/instagram-render.ts";
 import { limparCredito, montarLegenda, redigir } from "../_shared/instagram-redator.ts";
 import { fotoLivrePorTema } from "../_shared/foto-tema.ts";
@@ -93,9 +93,9 @@ Deno.serve(async (req) => {
 
   // Posts de hoje (cotas e teto) e o último horário ocupado.
   const { data: postsRecentes } = await sb.from("instagram_posts")
-    .select("id, tipo, classe, status, artigos, edicao_id, agendado_para, publicado_em, criado_em")
+    .select("id, tipo, classe, status, artigos, edicao_id, agendado_para, publicado_em, criado_em, card")
     .gte("criado_em", new Date(agora.getTime() - 3 * 86_400_000).toISOString());
-  const recentes = (postsRecentes ?? []) as Array<{ tipo: string; classe: string | null; status: string; artigos: string[]; edicao_id: string | null; agendado_para: string | null; publicado_em: string | null; criado_em: string }>;
+  const recentes = (postsRecentes ?? []) as Array<{ card: { formato?: string; fundo?: string } | null; tipo: string; classe: string | null; status: string; artigos: string[]; edicao_id: string | null; agendado_para: string | null; publicado_em: string | null; criado_em: string }>;
   const jaUsados = new Set(recentes.filter((p) => p.status !== "descartado").flatMap((p) => p.artigos ?? []));
   const hoje = recentes.filter((p) => new Date(p.criado_em) >= inicioDoDiaSP(agora) && !["vetado", "descartado", "erro"].includes(p.status));
   const usadosHoje: Partial<Record<Classe, number>> & { total?: number } = { total: hoje.length };
@@ -106,6 +106,19 @@ Deno.serve(async (req) => {
     .map((t) => new Date(t as string).getTime());
   let ultimo: Date | null = ocupados.length ? new Date(Math.max(...ocupados)) : null;
   const giroHoje = hoje.some((p) => p.tipo === "giro");
+
+  // Grade do perfil: a "cor" de cada post (publicado ou na fila), para nunca
+  // pôr dois cards da mesma cor lado a lado.
+  const linhaTempo = recentes
+    .filter((p) => !["vetado", "descartado", "erro"].includes(p.status))
+    .map((p) => ({ t: new Date((p.publicado_em ?? p.agendado_para ?? p.criado_em) as string).getTime(), chave: chaveVisual(p.card, p.tipo) }));
+  const vizinhos = (quando: Date | null): string[] => {
+    if (!quando) return [];
+    const t = quando.getTime();
+    const antes = linhaTempo.filter((x) => x.t < t).sort((a, b) => b.t - a.t)[0];
+    const depois = linhaTempo.filter((x) => x.t > t).sort((a, b) => a.t - b.t)[0];
+    return [antes?.chave, depois?.chave].filter(Boolean) as string[];
+  };
 
   // Audiência: visitas por página (48h) e tráfego do dia.
   const { data: eventos } = await sb.from("analytics_events").select("pagina, ts")
@@ -195,7 +208,7 @@ Deno.serve(async (req) => {
     return urls;
   }
 
-  async function cardDaMateria(l: Linha, classe: Classe, lamina?: { atual: number; total: number }): Promise<{ card: Card; red: Awaited<ReturnType<typeof redigir>> | null; fotoUrl?: string | null; credito?: string | null }> {
+  async function cardDaMateria(l: Linha, classe: Classe, lamina?: { atual: number; total: number }, quando?: Date): Promise<{ card: Card; red: Awaited<ReturnType<typeof redigir>> | null; fotoUrl?: string | null; credito?: string | null }> {
     const m = paraMateria(l);
     const ch = chapeuDe(m, l.categoria?.nome ?? null, l.regiao ? (NOME_REGIAO[l.regiao.slug] ?? l.regiao.nome) : null);
     const red = lamina ? null : await redigir({ apiKey: aiKey, classe, titulo: l.titulo, subtitulo: l.subtitulo, texto: [l.tldr, l.resumo].filter(Boolean).join("\n") || l.subtitulo || "" });
@@ -230,6 +243,7 @@ Deno.serve(async (req) => {
           formato: "foto", chapeu: lamina ? [l.cidade_principal, NOME_REGIAO[l.regiao?.slug ?? ""] ?? l.regiao?.nome].filter(Boolean).join(" · ") : ch.texto,
           cor: corLamina ?? ESCOPO[ch.escopo].claro, titulo, linhaFina, foto, credito: creditoFoto,
           lamina: lamina ? { ...lamina, rotulo: "Giro pelo Paraná" } : undefined,
+          tag: lamina ? null : (l.categoria?.nome ?? null),
         },
         red,
         fotoUrl,
@@ -239,7 +253,9 @@ Deno.serve(async (req) => {
     return {
       card: {
         formato: "tipografico", chapeu: lamina ? [l.cidade_principal, NOME_REGIAO[l.regiao?.slug ?? ""] ?? l.regiao?.nome].filter(Boolean).join(" · ") : ch.texto,
-        cor: corLamina ? "#f0b07a" : ESCOPO[ch.escopo].escuro, titulo, linhaFina, destaque: lamina ? null : red?.destaque ?? null,
+        cor: corLamina ? "#f0b07a" : ESCOPO[ch.escopo].escuro, corClara: ESCOPO[ch.escopo].claro, titulo, linhaFina, destaque: lamina ? null : red?.destaque ?? null,
+        fundo: lamina ? "tinta" : escolherFundo(vizinhos(quando ?? null)),
+        tag: lamina ? null : (l.categoria?.nome ?? null),
       },
       red,
     };
@@ -252,7 +268,7 @@ Deno.serve(async (req) => {
     if (!quando) { resultado.push({ id: a.materia.id, pulado: "fora da janela de hoje" }); continue; }
     const l = porId.get(a.materia.id)!;
     try {
-      const { card, red, fotoUrl, credito } = await cardDaMateria(l, a.classe);
+      const { card, red, fotoUrl, credito } = await cardDaMateria(l, a.classe, undefined, quando);
       const png = await renderizarCard(card);
       const postId = crypto.randomUUID();
       const imagens = await subir(postId, [png]);
@@ -271,6 +287,7 @@ Deno.serve(async (req) => {
       });
       if (error) throw new Error(error.message);
       ultimo = quando;
+      linhaTempo.push({ t: quando.getTime(), chave: chaveVisual(card) });
       resultado.push({ id: l.id, post: postId, classe: a.classe, agendado_para: quando.toISOString() });
     } catch (e) {
       resultado.push({ id: a.materia.id, erro: (e as Error).message });

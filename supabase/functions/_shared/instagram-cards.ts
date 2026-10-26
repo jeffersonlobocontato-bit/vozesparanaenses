@@ -177,12 +177,86 @@ export type CardFoto = {
   cta?: string;
   // Lâmina de carrossel (Giro): posição atual e total.
   lamina?: { atual: number; total: number; rotulo: string };
+  tag?: string | null; // editoria, no canto superior direito
 };
+
+/**
+ * Fundos do card tipográfico. Dois posts seguidos nunca saem com a mesma cor:
+ * o robô escolhe o fundo olhando o post anterior e o seguinte da fila.
+ */
+export type Fundo = "tinta" | "verde" | "papel" | "areia";
+const TOM: Record<Fundo, { bg: string; ink: string; muted: string; rule: string; escuro: boolean; ponto: string }> = {
+  tinta: { bg: COR.dark, ink: COR.darkInk, muted: COR.darkMuted, rule: COR.darkRule, escuro: true, ponto: "#e9a973" },
+  verde: { bg: COR.brand, ink: "#ffffff", muted: "#cfe3d8", rule: "rgba(255,255,255,0.22)", escuro: true, ponto: COR.accent },
+  papel: { bg: COR.surface, ink: COR.ink, muted: COR.inkMuted, rule: COR.rule, escuro: false, ponto: COR.accent },
+  areia: { bg: COR.surfaceWarm, ink: COR.ink, muted: COR.inkMuted, rule: "#e6d8c6", escuro: false, ponto: "#d9823f" },
+};
+
+/** "Cor" do post na grade do perfil, para comparar vizinhos. */
+export function chaveVisual(card: { formato?: string; fundo?: string } | null | undefined, tipo?: string): string {
+  const f = card?.formato ?? tipo;
+  if (f === "foto") return "foto";
+  if (f === "alerta") return "alerta";
+  if (f === "giro-capa" || f === "giro" || f === "coluna") return "claro";
+  if (f === "tipografico") {
+    const fu = (card?.fundo ?? "tinta") as Fundo;
+    return fu === "verde" ? "verde" : fu === "papel" || fu === "areia" ? "claro" : "escuro";
+  }
+  return f ?? "escuro";
+}
+
+/** Fundo diferente dos vizinhos (anterior e seguinte na grade). */
+export function escolherFundo(vizinhos: Array<string | null | undefined>, ordem: Fundo[] = ["tinta", "verde", "papel", "areia"]): Fundo {
+  const proibidas = new Set(vizinhos.filter(Boolean));
+  return ordem.find((f) => !proibidas.has(chaveVisual({ formato: "tipografico", fundo: f }))) ?? "verde";
+}
+
+// Tag da editoria (canto do card): ícone + nome, para diferenciar cards vizinhos.
+const ICONES: Record<string, string> = {
+  seguranca: '<path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>',
+  mundo: '<circle cx="12" cy="12" r="10"/><path d="M2 12h20"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/>',
+  ambiente: '<path d="M11 20A7 7 0 0 1 9.8 6.1C15.5 5 17 4.48 19 2c1 2 2 4.18 2 8 0 5.5-4.78 10-10 10Z"/><path d="M2 21c0-3 1.85-5.36 5.08-6C9.5 14.52 12 13 13 12"/>',
+  economia: '<line x1="12" x2="12" y1="2" y2="22"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>',
+  saude: '<path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/>',
+  educacao: '<path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/>',
+  transito: '<path d="M19 17h2c.6 0 1-.4 1-1v-3c0-.9-.7-1.7-1.5-1.9C18.7 10.6 16 10 16 10s-1.3-1.4-2.2-2.3c-.5-.4-1.1-.7-1.8-.7H5c-.6 0-1.1.4-1.4.9l-1.4 2.9A3.7 3.7 0 0 0 2 12v4c0 .6.4 1 1 1h2"/><circle cx="7" cy="17" r="2"/><circle cx="17" cy="17" r="2"/>',
+  clima: '<path d="M4 14.9A7 7 0 1 1 15.7 8h1.8a4.5 4.5 0 0 1 2.5 8.2"/><path d="M16 14v6M8 14v6M12 16v6"/>',
+  cultura: '<path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/>',
+  brasil: '<path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"/><line x1="4" x2="4" y1="22" y2="15"/>',
+  cidades: '<path d="M6 22V4a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v18Z"/><path d="M6 12H4a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2h2"/><path d="M18 9h2a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2h-2"/><path d="M10 6h4M10 10h4M10 14h4M10 18h4"/>',
+  geral: '<path d="M4 22h16a2 2 0 0 0 2-2V4a2 2 0 0 0-2-2H8a2 2 0 0 0-2 2v16a2 2 0 0 1-2 2Zm0 0a2 2 0 0 1-2-2v-9c0-1.1.9-2 2-2h2"/><path d="M18 14h-8M15 18h-5M10 6h8v4h-8V6Z"/>',
+};
+/** Ícone da tag a partir do nome da editoria. */
+export function iconeDaEditoria(nome: string): string {
+  const n = nome.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+  if (/segur|polic/.test(n)) return "seguranca";
+  if (/mundo|internac/.test(n)) return "mundo";
+  if (/ambient|clima|tempo/.test(n)) return /tempo|clima/.test(n) ? "clima" : "ambiente";
+  if (/econ|agro|negoc/.test(n)) return "economia";
+  if (/saude/.test(n)) return "saude";
+  if (/educa/.test(n)) return "educacao";
+  if (/transit|rodov/.test(n)) return "transito";
+  if (/cultur|evento|lazer/.test(n)) return "cultura";
+  if (/brasil|nacional/.test(n)) return "brasil";
+  if (/cidade/.test(n)) return "cidades";
+  return "geral";
+}
+function tagEditoria(texto: string, cor: string, fundoTag: string): No {
+  const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="${cor}" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">${ICONES[iconeDaEditoria(texto)]}</svg>`;
+  return div(
+    { alignItems: "center", gap: 12, padding: "10px 20px 10px 14px", border: `2px solid ${cor}`, borderRadius: 999, background: fundoTag },
+    h("img", { src: svgDataUri(svg), width: 34, height: 34 }),
+    h("span", { style: { fontFamily: F.chapeu, fontWeight: 700, fontSize: 28, letterSpacing: "0.12em", textTransform: "uppercase", color: cor } }, texto),
+  );
+}
 
 export type CardTipografico = {
   formato: "tipografico";
   chapeu: string;
   cor: string; // cor de escopo para fundo escuro
+  corClara?: string; // cor de escopo para fundo claro
+  fundo?: Fundo;
+  tag?: string | null; // editoria, no canto superior direito
   titulo: string;
   linhaFina?: string | null;
   destaque?: { valor: string; rotulo: string } | null;
@@ -236,7 +310,7 @@ function cardFoto(c: CardFoto): No {
         h("span", { style: { fontFamily: F.chapeu, fontWeight: 700, fontSize: 28, letterSpacing: "0.1em", textTransform: "uppercase", color: "#ffffff" } }, c.lamina.rotulo),
         div({ gap: 8 }, ...Array.from({ length: c.lamina.total }, (_, i) => div({ width: c.lamina!.total > 6 ? 32 : 56, height: 6, background: i + 1 === c.lamina!.atual ? "#ffffff" : "rgba(255,255,255,0.35)" }))),
       )
-      : null,
+      : c.tag ? div({ position: "absolute", top: 48, right: 56 }, tagEditoria(c.tag, "#ffffff", "rgba(15,23,20,0.45)")) : null,
     div(
       { position: "absolute", left: 72, right: 72, bottom: 168, flexDirection: "column" },
       chapeuBalao(c.chapeu, c.cor),
@@ -252,20 +326,23 @@ function cardFoto(c: CardFoto): No {
 
 function cardTipografico(c: CardTipografico): No {
   const tam = corpoTitulo(c.titulo, c.destaque ? 74 : 96);
+  const t = TOM[c.fundo ?? "tinta"];
+  const corEscopo = c.fundo === "verde" ? COR.accent : t.escuro ? c.cor : (c.corClara ?? COR.brand);
   return div(
-    { width: W, height: H, padding: "112px 72px 56px 72px", background: COR.dark, flexDirection: "column" },
-    chapeuBalao(c.chapeu, c.cor),
+    { width: W, height: H, padding: "112px 72px 56px 72px", background: t.bg, flexDirection: "column", position: "relative" },
+    c.tag ? div({ position: "absolute", top: 40, right: 56 }, tagEditoria(c.tag, t.escuro ? "#ffffff" : COR.brand, t.escuro ? "rgba(255,255,255,0.06)" : "rgba(30,91,69,0.06)")) : null,
+    div({ marginTop: c.tag ? 30 : 0 }, chapeuBalao(c.chapeu, corEscopo)),
     c.destaque
       ? div(
         { flexDirection: "column", marginTop: 64 },
-        h("span", { style: { fontFamily: F.titulo, fontWeight: 700, fontSize: c.destaque.valor.length > 6 ? 200 : 300, lineHeight: 0.86, letterSpacing: -8, color: COR.darkInk } }, c.destaque.valor),
-        h("span", { style: { marginTop: 18, fontFamily: F.chapeu, fontWeight: 600, fontSize: 34, letterSpacing: "0.08em", textTransform: "uppercase", color: c.cor } }, c.destaque.rotulo),
+        h("span", { style: { fontFamily: F.titulo, fontWeight: 700, fontSize: c.destaque.valor.length > 8 ? 150 : c.destaque.valor.length > 6 ? 200 : 300, lineHeight: 0.86, letterSpacing: -8, color: t.ink } }, c.destaque.valor),
+        h("span", { style: { marginTop: 18, fontFamily: F.chapeu, fontWeight: 600, fontSize: 34, letterSpacing: "0.08em", textTransform: "uppercase", color: corEscopo } }, c.destaque.rotulo),
       )
       : null,
-    tituloComPonto(c.titulo, { marginTop: c.destaque ? 64 : 56, fontFamily: F.titulo, fontWeight: 700, fontSize: tam, lineHeight: 1.06, letterSpacing: -0.6, color: COR.darkInk }, "#e9a973", Math.round(tam * 0.21)),
-    c.linhaFina ? h("span", { style: { marginTop: 28, fontFamily: F.titulo, fontSize: 34, lineHeight: 1.32, color: COR.darkMuted } }, limitar(c.linhaFina, 170)) : null,
+    tituloComPonto(c.titulo, { marginTop: c.destaque ? 64 : 56, fontFamily: F.titulo, fontWeight: 700, fontSize: tam, lineHeight: 1.06, letterSpacing: -0.6, color: t.ink }, t.ponto, Math.round(tam * 0.21)),
+    c.linhaFina ? h("span", { style: { marginTop: 28, fontFamily: F.titulo, fontSize: 34, lineHeight: 1.32, color: t.muted } }, limitar(c.linhaFina, 170)) : null,
     div({ flexGrow: 1 }),
-    rodape(true, [CTA(c.cta ?? "Leia no link da bio", COR.darkInk)], COR.darkRule),
+    rodape(t.escuro, [CTA(c.cta ?? "Leia no link da bio", t.ink)], t.rule),
   );
 }
 

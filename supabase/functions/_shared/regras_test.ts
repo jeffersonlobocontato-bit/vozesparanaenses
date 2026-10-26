@@ -13,6 +13,7 @@ import { escolherFotoBaixoRisco, normalizarAvaliacoes, normalizarPlano } from ".
 import { limparPrefeituraMecanico, verificarTitulo } from "./titulo.ts";
 import { dataAtendeNetParaIso, ehAtendeNet, parseListaAtendeNet, parseMateriaAtendeNet } from "./atende-net.ts";
 import { ehListaJson, parseListaJson } from "./lista-json.ts";
+import { chaveVisual, escolherFundo } from "./instagram-cards.ts";
 import { agendar, chapeuDe, classificar, CONFIG_PADRAO, escolherAvulsos, montarGiro, numerosConferem, proximoHorario, temFotoUtilizavel, type MateriaIG } from "./instagram-selecao.ts";
 import { corpoTitulo, limitar } from "./instagram-cards.ts";
 import { normalizarColuna, separarPautas, textoDaPagina, urlPermitida } from "./coluna-politica.ts";
@@ -122,6 +123,8 @@ ok("sem data → null", extrairDataPublicacao("<p>nada</p>", "https://a.com/noti
   ok("IG: esporte fica fora", c({ categoria_slug: "esportes", regiao_slug: "nacional" }) === "fora");
   ok("IG: internacional e nacional", c({ regiao_slug: "nacional", categoria_slug: "internacional" }) === "internacional" && c({ regiao_slug: "nacional", categoria_slug: "economia" }) === "nacional");
   ok("IG: regional vai para o giro", c({ regiao_slug: "litoral" }) === "regional");
+  ok("IG: dois tipográficos vizinhos nunca com a mesma cor", escolherFundo(["escuro"]) === "verde" && escolherFundo(["escuro", "verde"]) === "papel" && chaveVisual({ formato: "tipografico", fundo: escolherFundo([chaveVisual({ formato: "tipografico" })]) }) !== "escuro");
+  ok("IG: cor da grade por formato", chaveVisual(null, "giro") === "claro" && chaveVisual({ formato: "foto" }) === "foto" && chaveVisual({ formato: "tipografico", fundo: "areia" }) === "claro");
   const tarde = new Date("2026-10-25T16:40:00-03:00");
   ok("IG: alerta de 8h atrás não é mais alerta", classificar(base({ titulo: "Temporal deixa 5,4 mil imóveis sem energia", tema_crivo: "utilidade_publica", prioridade_crivo: "alta", publicado_em: "2026-10-25T08:00:00-03:00" }), CONFIG_PADRAO, tarde).classe !== "alerta");
   ok("IG: alerta recente segue alerta", classificar(base({ titulo: "Temporal deixa 5,4 mil imóveis sem energia", tema_crivo: "utilidade_publica", prioridade_crivo: "alta", publicado_em: "2026-10-25T14:00:00-03:00" }), CONFIG_PADRAO, tarde).classe === "alerta");

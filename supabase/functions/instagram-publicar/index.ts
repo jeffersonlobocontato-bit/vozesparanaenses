@@ -15,6 +15,7 @@
 
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
 import { exigirInterno } from "../_shared/auth.ts";
+import { chaveVisual } from "../_shared/instagram-cards.ts";
 
 const cors = {
   "Access-Control-Allow-Origin": "*",
@@ -31,7 +32,7 @@ function json(body: unknown, status = 200) {
 const horaSP = (d: Date) => Number(new Intl.DateTimeFormat("pt-BR", { timeZone: "America/Sao_Paulo", hour: "2-digit", hour12: false }).format(d));
 const inicioDoDiaSP = (d: Date) => new Date(`${new Intl.DateTimeFormat("en-CA", { timeZone: "America/Sao_Paulo" }).format(d)}T00:00:00-03:00`);
 
-type Post = { id: string; tipo: string; classe: string | null; legenda: string; imagens: string[]; agendado_para: string | null };
+type Post = { id: string; tipo: string; classe: string | null; legenda: string; imagens: string[]; agendado_para: string | null; card: { formato?: string; fundo?: string } | null };
 
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: cors });
@@ -68,12 +69,19 @@ Deno.serve(async (req) => {
     .eq("status", "publicando").lt("atualizado_em", new Date(agora.getTime() - 20 * 60_000).toISOString());
 
   // Próximo post.
-  let q = sb.from("instagram_posts").select("id, tipo, classe, legenda, imagens, agendado_para").eq("status", "agendado");
+  let q = sb.from("instagram_posts").select("id, tipo, classe, legenda, imagens, agendado_para, card").eq("status", "agendado");
   q = manual ? q.eq("id", body.post_id!) : q.lte("agendado_para", agora.toISOString());
   const { data: fila } = await q.order("agendado_para", { ascending: true }).limit(5);
   const candidatos = (fila ?? []) as Post[];
-  // Alerta vencido passa à frente.
-  const post = candidatos.find((p) => p.classe === "alerta") ?? candidatos[0];
+  // Alerta vencido passa à frente; fora isso, nunca dois cards da mesma cor
+  // seguidos na grade: se o próximo repete a cor do último publicado, vai
+  // outro da fila no lugar (quando houver).
+  const { data: ultimoPub } = await sb.from("instagram_posts").select("tipo, card").eq("status", "publicado")
+    .order("publicado_em", { ascending: false }).limit(1).maybeSingle();
+  const corUltimo = ultimoPub ? chaveVisual(ultimoPub.card, ultimoPub.tipo) : null;
+  const post = candidatos.find((p) => p.classe === "alerta")
+    ?? candidatos.find((p) => chaveVisual(p.card, p.tipo) !== corUltimo)
+    ?? candidatos[0];
   if (!post) return json({ ok: true, parado: manual ? "post_nao_esta_agendado" : "nada_vencido" });
   if (!post.imagens?.length) {
     await sb.from("instagram_posts").update({ status: "erro", erro: "sem imagens", atualizado_em: agora.toISOString() }).eq("id", post.id);
