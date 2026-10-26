@@ -759,9 +759,9 @@ function CardImagem({ n, e }: { n: number; e: EstadoEtapa }) {
   return (
     <Card n={n} e={e} id="imagem">
       <div className="relative grid h-28 place-items-center overflow-hidden rounded-xl" style={{ background: C.fundo2, border: `1px solid ${C.borda}` }}>
-        <svg width="64" height="48" viewBox="0 0 64 48" aria-hidden="true"><rect x="1" y="1" width="62" height="46" rx="6" fill="none" stroke={C.borda2} strokeWidth="2" /><circle cx="20" cy="16" r="5" fill={C.borda2} /><path d="M4 42l18-16 12 10 10-8 16 14" fill="none" stroke={C.borda2} strokeWidth="2" /></svg>
+        <svg width="64" height="48" viewBox="0 0 64 48" aria-hidden="true" style={{ translate: u ? "0px -12px" : undefined }}><rect x="1" y="1" width="62" height="46" rx="6" fill="none" stroke={C.borda2} strokeWidth="2" /><circle cx="20" cy="16" r="5" fill={C.borda2} /><path d="M4 42l18-16 12 10 10-8 16 14" fill="none" stroke={C.borda2} strokeWidth="2" /></svg>
         {e.status === "rodando" && <div className="vz-scan absolute inset-y-0 left-0 w-2/5" style={{ background: "linear-gradient(90deg, rgba(226,159,101,0), rgba(226,159,101,.22), rgba(226,159,101,0))" }} />}
-        {u && <span className="absolute bottom-2 left-2.5 vz-mono" style={{ fontSize: 11, color: "#C9D6D2" }}>{txt(u.d.credito) || (origem === "nenhuma" ? "sem foto: vai como texto" : "")}</span>}
+        {u && <span className="absolute inset-x-0 bottom-0 truncate px-2.5 py-1.5 vz-mono" style={{ fontSize: 11, color: "#C9D6D2", background: C.fundo2, borderTop: `1px solid ${C.borda}` }}>{txt(u.d.credito) || (origem === "nenhuma" ? "sem foto: vai como texto" : "")}</span>}
       </div>
       <div className="flex flex-col gap-1.5">
         {ORIGENS.map((o) => {
