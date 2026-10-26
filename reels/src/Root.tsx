@@ -1,6 +1,7 @@
 import React from "react";
 import { Composition, delayRender, continueRender } from "remotion";
 import { ResumoDoDia, duracaoTotal } from "./ResumoDoDia";
+import { Capa } from "./cenas/Capa";
 import { fontesProntas } from "./marca";
 import exemplo from "./exemplo.json";
 import type { Roteiro } from "./tipos";
@@ -9,6 +10,16 @@ const h = delayRender("fontes");
 fontesProntas.then(() => continueRender(h)).catch(() => continueRender(h));
 
 export const RemotionRoot: React.FC = () => (
+  <>
+  <Composition
+    id="CapaResumo"
+    component={Capa}
+    width={1080}
+    height={1920}
+    fps={30}
+    durationInFrames={1}
+    defaultProps={exemplo as unknown as Roteiro}
+  />
   <Composition
     id="ResumoDoDia"
     component={ResumoDoDia}
@@ -22,4 +33,5 @@ export const RemotionRoot: React.FC = () => (
       fps: props.fps,
     })}
   />
+  </>
 );

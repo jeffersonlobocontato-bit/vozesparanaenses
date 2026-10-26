@@ -13,6 +13,10 @@ on:
         description: "Dia (AAAA-MM-DD). Vazio = hoje"
         required: false
         default: ""
+      ate:
+        description: "Só posts publicados até HH:MM (vazio = o dia todo)"
+        required: false
+        default: ""
       publicar:
         description: "Publicar no Instagram depois de renderizar?"
         type: boolean
@@ -52,24 +56,29 @@ jobs:
           npm ci --no-audit --no-fund
           pip install --quiet "edge-tts>=7.2" numpy scipy
       - name: Roteiro do dia
+        env:
+          REELS_ATE: ${{ github.event.inputs.ate }}
         run: node scripts/montar.mjs ${{ github.event.inputs.data }}
       - name: Narração
         run: python scripts/voz.py
       - name: Trilha e efeitos
         run: python scripts/trilha.py
       - name: Render
-        run: npx remotion render ResumoDoDia out/resumo.mp4 --props=public/roteiro.json --concurrency=4 --crf=20
+        run: |
+          npx remotion render ResumoDoDia out/resumo.mp4 --props=public/roteiro.json --concurrency=4 --crf=20
+          npx remotion still CapaResumo out/capa.jpg --props=public/roteiro.json --jpeg-quality=92
       - name: Guarda o vídeo
         uses: actions/upload-artifact@v4
         with:
           name: resumo-do-dia
           path: |
             reels/out/resumo.mp4
+            reels/out/capa.jpg
             reels/public/roteiro.json
           retention-days: 14
       - name: Prévia no branch reels-previas (só o último vídeo)
         run: |
-          mkdir -p /tmp/previa && cp out/resumo.mp4 public/roteiro.json /tmp/previa/
+          mkdir -p /tmp/previa && cp out/resumo.mp4 out/capa.jpg public/roteiro.json /tmp/previa/
           cd /tmp/previa
           git init -q -b reels-previas
           git config user.name "vozes-reels" && git config user.email "reels@vozesparanaenses.com.br"

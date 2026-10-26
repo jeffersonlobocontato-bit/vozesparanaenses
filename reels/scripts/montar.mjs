@@ -91,7 +91,8 @@ const FOTO_OK = new Set(["fonte_autorizada", "commons_analista", "agencia_public
 
 async function main() {
   const ini = new Date(`${hoje}T00:00:00-03:00`).toISOString();
-  const fim = new Date(`${hoje}T23:59:59-03:00`).toISOString();
+  // REELS_ATE=HH:MM limita aos posts publicados até essa hora (refazer um dia já aprovado)
+  const fim = new Date(`${hoje}T${process.env.REELS_ATE ? `${process.env.REELS_ATE}:00` : "23:59:59"}-03:00`).toISOString();
   const posts = await rest(
     `instagram_posts?select=id,tipo,classe,score,card,artigos,publicado_em&status=eq.publicado&publicado_em=gte.${ini}&publicado_em=lte.${fim}&order=publicado_em.asc`,
   );

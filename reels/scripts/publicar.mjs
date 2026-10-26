@@ -37,6 +37,15 @@ async function main() {
   const up = await fetch(pre.uploadUrl, { method: "PUT", headers: { "Content-Type": "video/mp4" }, body: await readFile(VIDEO) });
   if (!up.ok) throw new Error(`upload: ${up.status}`);
 
+  // Capa (thumb) do Reels: out/capa.jpg, renderizada pela composição CapaResumo
+  let capa = null;
+  try {
+    const img = await readFile(path.join(AQUI, "..", "out", "capa.jpg"));
+    const pc = await api("/media/presign", { method: "POST", body: JSON.stringify({ filename: `resumo-${roteiro.data}-capa.jpg`, contentType: "image/jpeg", size: img.length }) });
+    const upc = await fetch(pc.uploadUrl, { method: "PUT", headers: { "Content-Type": "image/jpeg" }, body: img });
+    if (upc.ok) capa = pc.publicUrl;
+  } catch { /* sem capa: o Instagram usa o quadro do thumbOffset */ }
+
   const noticias = roteiro.cenas.filter((c) => c.tipo === "noticia");
   const [a, m, d] = roteiro.data.split("-");
   const legenda = [
@@ -52,7 +61,7 @@ async function main() {
     body: JSON.stringify({
       content: legenda,
       mediaItems: [{ url: pre.publicUrl, type: "video" }],
-      platforms: [{ platform: "instagram", accountId: CONTA, platformSpecificData: { thumbOffset: 1800, audioName: "Resumo do dia · Vozes Paranaenses" } }],
+      platforms: [{ platform: "instagram", accountId: CONTA, platformSpecificData: { ...(capa ? { instagramThumbnail: capa } : { thumbOffset: 1800 }), audioName: "Resumo do dia · Vozes Paranaenses" } }],
       publishNow: true,
     }),
   });
