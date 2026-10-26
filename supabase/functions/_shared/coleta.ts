@@ -27,6 +27,12 @@ export const MAX_POR_FONTE = 15;
 // Pausa entre páginas de matéria do MESMO site: sites de prefeitura são
 // pequenos e alguns pedem crawl-delay no robots.txt.
 export const PAUSA_ENTRE_PAGINAS_MS = 1000;
+// Listagens vêm da mais nova para a mais antiga: depois de N matérias seguidas
+// de outro dia, o resto também é velho — para de baixar páginas.
+export const PARAR_APOS_VELHAS = 3;
+// Teto de páginas de matéria por fonte num ciclo, para quem passa `maxPaginas`
+// (prefeituras: listagem sem data obriga a abrir cada matéria).
+export const MAX_PAGINAS_PREFEITURA = 10;
 
 export type FonteColeta = {
   id: string;
@@ -127,21 +133,24 @@ export async function processarItensDaFonte(p: {
   // Prefeitura: foto sempre liberada (material institucional). Veículos
   // seguem a regra do crédito.
   fotoSempreLiberada?: boolean;
+  maxPaginas?: number;
   agora?: Date;
 }): Promise<RelatorioFonte> {
   const agora = p.agora ?? new Date();
   const r: RelatorioFonte = { fonte: p.fonte.nome, total: p.itens.length, inseridas: 0, duplicadas: 0, sem_data: 0, fora_do_dia: 0, fotos: {} };
 
   let paginasBaixadas = 0;
+  let velhasSeguidas = 0;
   for (const it of p.itens) {
     if (r.inseridas >= MAX_POR_FONTE) break;
+    if (velhasSeguidas >= PARAR_APOS_VELHAS) break;
     if (!p.dentroDoOrcamento()) { r.orcamento_estourou = true; break; }
 
     // Data da listagem (RSS) ou do caminho da URL: se já prova que é de
     // outro dia, descarta antes de baixar a página.
     let data = it.data ?? extrairDataDaUrl(it.url);
     let dataOrigem: string | null = it.data ? "listagem" : data ? "url" : null;
-    if (data && !ehDoDia(data, agora)) { r.fora_do_dia++; continue; }
+    if (data && !ehDoDia(data, agora)) { r.fora_do_dia++; velhasSeguidas++; continue; }
 
     const url = normalizarUrl(it.url);
     const hash = await sha256(url + "|" + it.titulo.trim().toLowerCase());
@@ -152,6 +161,7 @@ export async function processarItensDaFonte(p: {
     let credito = it.credito ?? null;
     let corpo = it.corpo ?? "";
     const precisaPagina = !data || !imagem || !credito || corpo.length < 400;
+    if (precisaPagina && paginasBaixadas >= (p.maxPaginas ?? Infinity)) break;
     if (precisaPagina) {
       try {
         if (paginasBaixadas++ > 0) await new Promise((ok) => setTimeout(ok, PAUSA_ENTRE_PAGINAS_MS));
@@ -173,7 +183,8 @@ export async function processarItensDaFonte(p: {
 
     // Validador do dia: sem data = não publica (não dá pra garantir que é de hoje).
     if (!data) { r.sem_data++; continue; }
-    if (!ehDoDia(data, agora)) { r.fora_do_dia++; continue; }
+    if (!ehDoDia(data, agora)) { r.fora_do_dia++; velhasSeguidas++; continue; }
+    velhasSeguidas = 0;
 
     const det = detectarCidade(it.titulo, corpo, p.cidades, p.fonte);
     const fotoStatus = p.fotoSempreLiberada && imagem ? "autorizada" : classificarFoto(imagem, credito, p.nomesVeiculos);

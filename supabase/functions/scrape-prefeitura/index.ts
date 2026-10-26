@@ -10,7 +10,7 @@
 import { exigirInterno } from "../_shared/auth.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
 import { carregarCidades } from "../_shared/cidades.ts";
-import { carregarNomesVeiculos, comLimiteDeTempo, fonteElegivel, ordenarPorTentativa, processarItensDaFonte, type MetaPagina, type RelatorioFonte } from "../_shared/coleta.ts";
+import { carregarNomesVeiculos, comLimiteDeTempo, MAX_PAGINAS_PREFEITURA, fonteElegivel, ordenarPorTentativa, processarItensDaFonte, type MetaPagina, type RelatorioFonte } from "../_shared/coleta.ts";
 import { extrairDataPublicacao, normalizarDataRss } from "../_shared/data-publicacao.ts";
 import { ehAtendeNet, lerListaAtendeNet, lerMateriaAtendeNet } from "../_shared/atende-net.ts";
 import { ehListaJson, lerListaJson } from "../_shared/lista-json.ts";
@@ -99,6 +99,7 @@ Deno.serve(async (req) => {
         // Portal Atende.Net (IPM): leitor próprio, sem JavaScript nem Firecrawl.
         buscarPagina: (u: string) => (ehAtendeNet(u) ? lerMateriaAtendeNet(u) : fetchArticleImageMeta(u)),
         fotoSempreLiberada: true,
+        maxPaginas: MAX_PAGINAS_PREFEITURA,
       });
     }, vazio);
   }
@@ -109,11 +110,10 @@ Deno.serve(async (req) => {
   // — o Edge Runtime tem timeout curto do lado do cliente (fetch) e o
   // pipeline no admin encadeia scrape → cluster → classify; travar aqui
   // fazia o botão "Rodar pipeline" abortar antes do fim.
-  const CONCURRENCY = 6;
-  async function runAll(fontesList: Fonte[]): Promise<RelatorioFonte[]> {
+  async function runAll(fontesList: Fonte[], paralelo = 6): Promise<RelatorioFonte[]> {
     const queue = [...fontesList];
     const results: RelatorioFonte[] = [];
-    const workers = Array.from({ length: Math.min(CONCURRENCY, queue.length) }, async () => {
+    const workers = Array.from({ length: Math.min(paralelo, queue.length) }, async () => {
       while (queue.length) {
         if (!dentroDoOrcamento()) break; // resto fica para a próxima chamada do cron
         const f = queue.shift();
@@ -137,9 +137,21 @@ Deno.serve(async (req) => {
   // Fora da janela do ciclo (ou ciclo já concluído), o cron chama e sai.
   if (!eligible.length) return json({ ok: true, queued: 0, mode: "idle" });
 
-  const queue = [...(eligible as Fonte[])];
+  // Lote pequeno por chamada: o cron chama a cada 3 min durante 2 h (40
+  // chamadas × LOTE ≥ 188 prefeituras). Antes cada chamada tentava as 188
+  // com 6 em paralelo, o worker em segundo plano era encerrado antes de
+  // gravar qualquer coisa e as mesmas fontes voltavam ao topo da fila —
+  // a coleta de prefeituras ficou parada (out/2026).
+  const LOTE = 5;
+  const queue = (eligible as Fonte[]).slice(0, LOTE);
+  // Marca a tentativa já no início: a próxima chamada pega o lote seguinte
+  // mesmo que este seja interrompido.
+  const marca = new Date().toISOString();
+  await Promise.all(queue.map((f) => sb.from("fontes").update({
+    ultimo_ciclo: { fonte: f.nome, em: marca, andamento: true },
+  }).eq("id", f.id)));
   const task = (async () => {
-    const results = await runAll(queue);
+    const results = await runAll(queue, 2);
     const inseridas = results.reduce((n, r) => n + r.inseridas, 0);
     console.log(`[scrape-prefeitura] lote: ${results.length} fontes, ${inseridas} notícias do dia`);
     if (!inseridas) return;
@@ -164,7 +176,7 @@ Deno.serve(async (req) => {
   // deno-lint-ignore no-explicit-any
   const rt = (globalThis as any).EdgeRuntime;
   if (rt && typeof rt.waitUntil === "function") rt.waitUntil(task);
-  return json({ ok: true, queued: eligible.length, mode: "background" });
+  return json({ ok: true, queued: queue.length, restantes: eligible.length - queue.length, mode: "background" });
 });
 
 function json(body: unknown, status = 200) {
