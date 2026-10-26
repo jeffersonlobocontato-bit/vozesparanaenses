@@ -10,6 +10,7 @@ import {
   listArticlesByCategoryGlobal,
   listArticlesWithoutImage,
   listMostReadArticles,
+  listUltimaPorRegiao,
   cidadeSlug,
   type ArticleListItem,
   type RankedArticle,
@@ -93,6 +94,12 @@ const mostReadQO = queryOptions({
   staleTime: 5 * 60 * 1000,
 });
 
+const ultimaPorRegiaoQO = queryOptions({
+  queryKey: ["articles", "ultima-por-regiao"],
+  queryFn: () => listUltimaPorRegiao(),
+  staleTime: 5 * 60 * 1000,
+});
+
 const colunasAtalhosQO = queryOptions({
   queryKey: ["colunas", "atalhos"],
   queryFn: () => listColunasAtalhos(),
@@ -131,6 +138,7 @@ export const Route = createFileRoute("/")({
     await context.queryClient.ensureQueryData(vaptVuptQO);
     await context.queryClient.ensureQueryData(mostReadQO);
     await context.queryClient.ensureQueryData(colunasAtalhosQO);
+    await context.queryClient.ensureQueryData(ultimaPorRegiaoQO);
   },
   component: Home,
   errorComponent: ({ error }) => (
@@ -148,6 +156,7 @@ function Home() {
   const { data: dobra } = useSuspenseQuery(dobraQO(loc));
   const { data: mostRead } = useSuspenseQuery(mostReadQO);
   const { data: colunas } = useSuspenseQuery(colunasAtalhosQO);
+  const { data: ultimaPorRegiao } = useSuspenseQuery(ultimaPorRegiaoQO);
   // Stories do mobile: reaproveita as consultas de editoria já carregadas.
   const storyTopicos: StoryTopic[] = STORIES_EDITORIAS.map((e) => ({
     label: e.name,
@@ -165,53 +174,14 @@ function Home() {
       loc={loc}
       colunas={colunas}
       storyTopicos={storyTopicos}
+      ultimaPorRegiao={ultimaPorRegiao}
     />
   );
 }
 
-/* --------------------------- Filler manchetes --------------------------- */
-/* Enquanto o pipeline não publica, exibimos manchetes plausíveis por região
-   para que a home nunca apareça vazia. Substituídas automaticamente pelo
-   conteúdo real assim que o artigo daquela região for publicado. */
+/* Sem manchete de enchimento: espaço sem matéria real fica de fora ou vira
+   atalho para a região — portal de notícias nunca mostra título inventado. */
 
-const REGION_FALLBACK: Record<string, string> = {
-  metropolitana: "Grande Curitiba integra tarifa entre 14 municípios da região",
-  litoral: "Trecho da BR-277 é liberado após 12h de interdição em Paranaguá",
-  "campos-gerais": "Indústrias de Ponta Grossa abrem mais de 500 vagas de emprego",
-  "norte-pioneiro": "Jacarezinho recebe R$ 40 milhões para revitalização urbana",
-  "norte-central": "Londrina lança programa de incentivo a startups de saúde",
-  noroeste: "Setor de serviços lidera crescimento econômico em Umuarama",
-  "centro-ocidental": "Campo Mourão inaugura polo tecnológico com apoio da UEM",
-  oeste: "Cascavel bate recorde histórico de exportação de soja",
-  sudoeste: "Francisco Beltrão inaugura novo hospital regional nesta semana",
-  "centro-sul": "Guarapuava atrai investimento bilionário para energia renovável",
-};
-
-const HERO_FALLBACK = {
-  category: "Destaque",
-  title:
-    "Governo anuncia novo pacote de investimentos em infraestrutura para os Campos Gerais",
-  summary:
-    "Obras incluem a duplicação de rodovias e a modernização do escoamento de safra, prometendo reduzir custos logísticos em até 15%.",
-};
-
-const SIDE_FALLBACK = [
-  { cat: "Agronegócio", title: "Safra de soja no Paraná deve bater novo recorde histórico em 2024" },
-  { cat: "Política", title: "Assembleia Legislativa vota hoje projeto que altera previdência estadual" },
-  { cat: "Saúde", title: "Paraná reforça campanha de vacinação contra a gripe em todo o estado" },
-  { cat: "Cidades", title: "Municípios do Paraná ampliam serviços digitais para moradores" },
-];
-
-const SECONDARY_FALLBACK = [
-  { cat: "Esportes", title: "Paranaense 2024: confira os confrontos das quartas de final", summary: "Federação Paranaense confirmou datas e horários dos jogos decisivos." },
-  { cat: "Cultura", title: "Museu Oscar Niemeyer abre nova exposição sobre arte paranaense", summary: "Mostra reúne 25 artistas que retratam a diversidade cultural do estado." },
-];
-
-const MOST_READ_FALLBACK = [
-  "Concurso público estadual abre 1.200 vagas de nível superior",
-  "Previsão do tempo: frente fria chega ao sul do estado na quarta",
-  "Nota Paraná: confira os números sorteados do prêmio mensal",
-];
 
 /* --------------------------- Editorias: paleta monocromática azul --------------------------- */
 /* Escala de 6 tons — do azul-marinho ao azul-céu. Cada editoria ancora num tom;
@@ -308,6 +278,7 @@ function PortalHome({
   loc,
   colunas,
   storyTopicos,
+  ultimaPorRegiao = {},
 }: {
   regions: Region[];
   articles: RankedArticle[];
@@ -317,6 +288,7 @@ function PortalHome({
   loc?: { cidade: string | null; regiaoSlug: string | null };
   colunas?: ColunaAtalho[];
   storyTopicos?: StoryTopic[];
+  ultimaPorRegiao?: Record<string, ArticleListItem>;
 }) {
   const REGIONS_FALLBACK: Region[] = [
     { id: "fb-metropolitana", slug: "metropolitana", name: "Metropolitana" },
@@ -390,13 +362,13 @@ function PortalHome({
             <ul className="flex flex-col">
               {[0, 1, 2, 3].map((i) => {
                 const a = side[i];
-                const fb = SIDE_FALLBACK[i];
+                if (!a) return null;
                 const nota = a && "nota" in a ? a.nota : undefined;
                 const inner = (
                   <>
-                    {a ? <Chapeu artigo={a} cidadeLeitor={cidadeLeitor} /> : <span className="vp-chapeu text-escopo-parana">{fb.cat}</span>}
+                    <Chapeu artigo={a} cidadeLeitor={cidadeLeitor} />
                     <h3 className="mt-1.5 text-[1.375rem] leading-[1.22] font-semibold text-ink group-hover:underline decoration-2 underline-offset-4">
-                      {a?.title ?? fb.title}
+                      {a.title}
                     </h3>
                     {nota && <span className="mt-1 block text-[0.8125rem] font-medium text-ink-subtle">Nota da coluna Vozes {a?.cidade_principal}</span>}
                   </>
@@ -463,8 +435,7 @@ function PortalHome({
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-px bg-slate-200 border border-slate-200 rounded-lg overflow-hidden">
             {regions.map((r) => {
-              const a = articleByRegion.get(r.slug);
-              const title = a?.title ?? REGION_FALLBACK[r.slug] ?? `Últimas notícias de ${r.name}`;
+              const a = ultimaPorRegiao[r.slug] ?? articleByRegion.get(r.slug);
               return (
                 <Link
                   key={r.id}
@@ -475,9 +446,13 @@ function PortalHome({
                   <p className="text-xs md:text-sm font-bold mb-2 uppercase tracking-wider" style={{ color: corDaRegiao(r.slug) }}>
                     {r.name}
                   </p>
-                  <h4 className="font-display text-2xl md:text-xl xl:text-2xl leading-tight group-hover:underline text-slate-900">
-                    {title}
-                  </h4>
+                  {a ? (
+                    <h4 className="font-display text-2xl md:text-xl xl:text-2xl leading-tight group-hover:underline text-slate-900">
+                      {a.title}
+                    </h4>
+                  ) : (
+                    <span className="text-base font-semibold text-slate-500 group-hover:underline">Ver as notícias da região</span>
+                  )}
                 </Link>
               );
             })}
@@ -509,7 +484,7 @@ function PortalHome({
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-8">
               {[0, 1].map((i) => {
               const a = secondary[i];
-              const fb = SECONDARY_FALLBACK[i];
+              if (!a) return null;
               const Wrap: React.ElementType = a?.region ? Link : "div";
               const wrapProps = a?.region
                 ? { to: "/$region/$slug", params: { region: a.region.slug, slug: a.slug } }
@@ -523,12 +498,12 @@ function PortalHome({
                       <div className="h-full w-full bg-gradient-to-br from-slate-200 to-slate-300" />
                     )}
                   </div>
-                  {a ? <Chapeu artigo={a} cidadeLeitor={cidadeLeitor} /> : <span className="vp-chapeu text-escopo-parana">{fb.cat}</span>}
+                  <Chapeu artigo={a} cidadeLeitor={cidadeLeitor} />
                   <h4 className="font-display text-2xl md:text-[1.75rem] leading-tight text-ink group-hover:underline decoration-2 underline-offset-4">
-                    {a?.title ?? fb.title}
+                    {a.title}
                   </h4>
                   <p className="text-base text-ink-muted line-clamp-2">
-                    {a?.summary ?? fb.summary}
+                    {a.summary}
                   </p>
                 </Wrap>
               );
@@ -572,7 +547,7 @@ function PortalHome({
                         : null,
                       i,
                     }))
-                  : MOST_READ_FALLBACK.map((t, i) => ({ key: `fb-${i}`, title: t, to: null, i }))
+                  : []
                 ).map(({ key, title, to, i }) =>
                   to ? (
                     <Link key={key} {...to} className="flex gap-3 group cursor-pointer">
@@ -803,8 +778,9 @@ function VaptVuptModule({ articles }: { articles: ArticleListItem[] }) {
 }
 
 function _HeroCardImpl({ article, cidadeLeitor }: { article: RankedArticle | ItemDobra | undefined; cidadeLeitor?: string | null }) {
-  const title = article?.title ?? HERO_FALLBACK.title;
-  const summary = article?.subtitle ?? article?.summary ?? HERO_FALLBACK.summary;
+  if (!article) return null;
+  const title = article.title;
+  const summary = article.subtitle ?? article.summary;
   const to = article?.region
     ? { to: "/$region/$slug" as const, params: { region: article.region.slug, slug: article.slug } }
     : null;
@@ -817,7 +793,7 @@ function _HeroCardImpl({ article, cidadeLeitor }: { article: RankedArticle | Ite
         </div>
       )}
       <div className={article?.cover_image_url ? "mt-4" : ""}>
-        {article ? <Chapeu artigo={article} cidadeLeitor={cidadeLeitor} /> : <span className="vp-chapeu text-escopo-parana">{HERO_FALLBACK.category}</span>}
+        <Chapeu artigo={article} cidadeLeitor={cidadeLeitor} />
         <h1 className="mt-1.5 text-[2rem] leading-[1.09] md:text-[2.875rem] md:leading-[1.04] text-ink group-hover:underline decoration-2 underline-offset-[6px]">
           {title}
         </h1>

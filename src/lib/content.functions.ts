@@ -844,6 +844,38 @@ export const listArticlesByRegion = createServerFn({ method: "GET" })
   });
 
 /**
+ * Última matéria publicada de cada região (com ou sem foto), dos últimos
+ * 7 dias — alimenta o módulo "Notícias das Regiões" da home. Região sem
+ * publicação no período fica de fora (a home mostra o atalho para ela,
+ * nunca uma manchete inventada).
+ */
+export const listUltimaPorRegiao = createServerFn({ method: "GET" }).handler(
+  async (): Promise<Record<string, ArticleListItem>> => {
+    const { getExternalSupabase } = await import("./external-supabase.server");
+    const sb = getExternalSupabase();
+    const desde = new Date(Date.now() - 7 * 86_400_000).toISOString();
+    const { data, error } = await sb
+      .from("generated_articles")
+      .select(MATERIA_LIST_COLS)
+      .eq("status", "publicado")
+      .gte("publicado_em", desde)
+      .order("publicado_em", { ascending: false })
+      .limit(500);
+    if (error) {
+      if (isMissingSchema(error)) return {};
+      throw new Error(error.message);
+    }
+    const out: Record<string, ArticleListItem> = {};
+    for (const row of (data ?? []) as unknown as MateriaRow[]) {
+      const slug = row.regiao?.slug;
+      if (!slug || slug === "nacional" || slug === "internacional" || out[slug]) continue;
+      out[slug] = mapMateria(row);
+    }
+    return out;
+  },
+);
+
+/**
  * Matérias mais lidas dos últimos N dias — agregadas a partir dos
  * pageviews em `analytics_events`. Usa service role no server (agregado
  * é global, não expõe dados por usuário).
