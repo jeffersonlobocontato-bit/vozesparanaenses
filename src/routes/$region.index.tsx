@@ -96,7 +96,7 @@ function RegionPage() {
   const { data: articles } = useSuspenseQuery(articlesQO(slug));
 
   const tema = region.tema_config ?? {};
-  const primary = tema.paleta?.primaria ?? "#12201E";
+  const primary = tema.paleta?.primaria ?? "#E8EEEC";
   const accent = tema.paleta?.acento ?? "#E29F65";
 
   const { hero, side: sideCards, rest } = arrangePinnedSlots(articles, 4, { region: slug });
@@ -109,7 +109,7 @@ function RegionPage() {
       <SiteHeader />
 
       {/* Region sub-header — thin bar CGN-style */}
-      <div className="border-b border-slate-200 bg-white">
+      <div className="border-b border-slate-200" style={{ background: primary }}>
         <div className="mx-auto flex max-w-7xl items-baseline gap-4 px-4 py-3">
           <span
             className="text-[11px] font-bold uppercase tracking-[0.18em]"
@@ -117,7 +117,7 @@ function RegionPage() {
           >
             {region.name}
           </span>
-          <span className="text-[11px] uppercase tracking-[0.16em] text-slate-400">
+          <span className="text-[11px] uppercase tracking-[0.16em] text-[#12201E]/60">
             {region.description ?? `${region.main_city} e cidades vizinhas`}
           </span>
         </div>
@@ -156,7 +156,7 @@ function RegionPage() {
                   ) : (
                     <div
                       className="aspect-[16/10] w-full"
-                      style={{ background: `${primary}15` }}
+                      style={{ background: primary }}
                     />
                   )}
                   <div className="pt-4">
@@ -168,7 +168,7 @@ function RegionPage() {
                     </div>
                     <h1
                       className="mt-2 text-4xl font-black leading-[1.05] md:text-5xl lg:text-6xl"
-                      style={{ color: primary }}
+                      style={{ color: "#12201E" }}
                     >
                       {hero.title}
                     </h1>
@@ -199,7 +199,7 @@ function RegionPage() {
                     ) : (
                       <div
                         className="aspect-[16/10] w-full"
-                        style={{ background: `${primary}15` }}
+                        style={{ background: primary }}
                       />
                     )}
                     <div className="pt-3">
@@ -211,7 +211,7 @@ function RegionPage() {
                       </div>
                       <h3
                         className="mt-1 text-lg font-black leading-tight md:text-xl"
-                      style={{ color: primary }}
+                      style={{ color: "#12201E" }}
                       >
                         {a.title}
                       </h3>
@@ -235,7 +235,7 @@ function RegionPage() {
             <section className="mx-auto max-w-7xl px-4 py-8">
               <div
                 className="mb-6 border-b border-slate-200 pb-2 text-[11px] font-bold uppercase tracking-[0.2em]"
-                style={{ color: primary }}
+                style={{ color: "#12201E" }}
               >
                 Mais de {region.name}
               </div>
@@ -257,7 +257,7 @@ function RegionPage() {
                     ) : (
                       <div
                         className="aspect-[16/10] w-full"
-                        style={{ background: `${primary}15` }}
+                        style={{ background: primary }}
                       />
                     )}
                     <div className="pt-3">
@@ -269,7 +269,7 @@ function RegionPage() {
                       </div>
                       <h3
                         className="mt-1 text-xl font-black leading-tight md:text-2xl"
-                      style={{ color: primary }}
+                      style={{ color: "#12201E" }}
                       >
                         {a.title}
                       </h3>

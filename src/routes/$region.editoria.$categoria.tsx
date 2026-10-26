@@ -105,7 +105,7 @@ function CategoryPage() {
     };
   const { data: articles } = useSuspenseQuery(listQO(regionSlug, categoriaSlug));
 
-  const primary = region.tema_config?.paleta?.primaria ?? "#12201E";
+  const primary = region.tema_config?.paleta?.primaria ?? "#E8EEEC";
   const accent = region.tema_config?.paleta?.acento ?? "#E29F65";
 
   return (
@@ -119,7 +119,7 @@ function CategoryPage() {
           </div>
           <h1
             className="mt-1 text-5xl leading-[1.02] md:text-6xl"
-            style={{ color: primary }}
+            style={{ color: "#12201E" }}
           >
             {cat.name}
           </h1>
@@ -144,7 +144,7 @@ function CategoryPage() {
                 {a.cover_image_url ? (
                   <img src={a.cover_image_url} alt="" className="aspect-[16/10] w-full object-cover transition-transform duration-500 group-hover:scale-[1.02]" loading="lazy" />
                 ) : (
-                  <div className="aspect-[16/10] w-full" style={{ background: `${primary}15` }} />
+                  <div className="aspect-[16/10] w-full" style={{ background: primary }} />
                 )}
                 <div className="pt-3">
                   <div className="text-[10px] font-bold uppercase tracking-[0.14em]" style={{ color: accent }}>

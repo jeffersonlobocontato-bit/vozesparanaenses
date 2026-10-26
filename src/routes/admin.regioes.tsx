@@ -24,7 +24,7 @@ type Regiao = {
   nome: string;
   cidade_principal: string;
   descricao: string | null;
-  tema_config: { cor_primaria?: string; cor_destaque?: string } | null;
+  tema_config: { cor_primaria?: string; cor_destaque?: string; paleta?: { primaria?: string; acento?: string } } | null;
   ativa: boolean;
 };
 type Categoria = { id: string; slug: string; nome: string };
@@ -85,7 +85,8 @@ function AdminRegioes() {
     try {
       const sb = await getExternalBrowser();
       const { error } = await sb.from("regioes").update({
-        tema_config: { ...(r.tema_config ?? {}), cor_primaria: primaria, cor_destaque: destaque },
+        // O site lê tema_config.paleta (primária = cor oficial da região, fundo; acento = texto/filetes).
+        tema_config: { ...(r.tema_config ?? {}), cor_primaria: undefined, cor_destaque: undefined, paleta: { ...(r.tema_config?.paleta ?? {}), primaria, acento: destaque } },
       }).eq("id", r.id);
       if (error) throw error;
       setMsg(`Tema de ${r.nome} salvo.`);
@@ -248,8 +249,8 @@ function AdminRegioes() {
 }
 
 function TemaCard({ r, onSave }: { r: Regiao; onSave: (r: Regiao, p: string, d: string) => void }) {
-  const origP = r.tema_config?.cor_primaria ?? "#12201E";
-  const origD = r.tema_config?.cor_destaque ?? "#E29F65";
+  const origP = r.tema_config?.paleta?.primaria ?? r.tema_config?.cor_primaria ?? "#12201E";
+  const origD = r.tema_config?.paleta?.acento ?? r.tema_config?.cor_destaque ?? "#E29F65";
   const [primaria, setPrimaria] = useState(origP);
   const [destaque, setDestaque] = useState(origD);
   const mudou = primaria !== origP || destaque !== origD;
@@ -265,11 +266,11 @@ function TemaCard({ r, onSave }: { r: Regiao; onSave: (r: Regiao, p: string, d: 
       <div className="mt-3 h-2 overflow-hidden rounded-full" style={{ background: `linear-gradient(90deg, ${primaria} 70%, ${destaque} 70%)` }} />
       <div className="mt-3 flex items-end gap-3">
         <label className="flex flex-col gap-1 text-[11px] font-semibold text-slate-600">
-          Primária
+          Cor da região
           <input type="color" value={primaria} onChange={(e) => setPrimaria(e.target.value)} className="h-8 w-12 cursor-pointer rounded border border-slate-300" />
         </label>
         <label className="flex flex-col gap-1 text-[11px] font-semibold text-slate-600">
-          Destaque
+          Texto
           <input type="color" value={destaque} onChange={(e) => setDestaque(e.target.value)} className="h-8 w-12 cursor-pointer rounded border border-slate-300" />
         </label>
         <button type="button" onClick={() => onSave(r, primaria, destaque)} disabled={!mudou} className={btn(mudou ? "primary" : "secondary", "sm") + " ml-auto"}>

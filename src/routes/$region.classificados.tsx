@@ -74,7 +74,7 @@ function ClassificadosPage() {
   });
 
   const tema = region.tema_config ?? {};
-  const primary = tema.paleta?.primaria ?? "#12201E";
+  const primary = tema.paleta?.primaria ?? "#E8EEEC";
 
   return (
     <div className="min-h-screen bg-white">
