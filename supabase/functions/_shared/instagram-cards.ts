@@ -196,7 +196,7 @@ const TOM: Record<Fundo, { bg: string; ink: string; muted: string; rule: string;
 export function chaveVisual(card: { formato?: string; fundo?: string } | null | undefined, tipo?: string): string {
   const f = card?.formato ?? tipo;
   if (f === "foto") return "foto";
-  if (f === "alerta") return "alerta";
+  if (f === "alerta") return (card as { fundo?: string } | null | undefined)?.fundo === "papel" ? "claro" : "alerta";
   if (f === "giro-capa" || f === "giro" || f === "coluna") return "claro";
   if (f === "tipografico") {
     const fu = (card?.fundo ?? "tinta") as Fundo;
@@ -271,6 +271,9 @@ export type CardAlerta = {
   dados: Array<{ valor: string; unidade?: string; rotulo: string }>;
   orientacao?: string | null;
   cta?: string;
+  /** "vermelho" (padrão) ou "papel": fundo claro com faixa vermelha, para não
+   *  repetir a cor de um alerta vizinho na grade. */
+  fundo?: "vermelho" | "papel";
 };
 
 export type CardGiroCapa = {
@@ -348,33 +351,38 @@ function cardTipografico(c: CardTipografico): No {
 
 function cardAlerta(c: CardAlerta): No {
   const tam = corpoTitulo(c.titulo, 92);
-  const triangulo = `<svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#b8241a" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M10.3 3.9 1.8 18.1A2 2 0 0 0 3.5 21h17a2 2 0 0 0 1.7-2.9L13.7 3.9a2 2 0 0 0-3.4 0Z"/><path d="M12 9v4"/><path d="M12 17h.01"/></svg>`;
+  const papel = c.fundo === "papel";
+  // Paleta das duas versões: vermelho (texto branco) e papel (texto tinta, faixa vermelha).
+  const t = papel
+    ? { bg: COR.surfaceWarm, ink: COR.ink, sub: COR.alerta, caixa: "rgba(184,36,26,0.08)", seloBg: COR.alerta, seloTx: "#ffffff", balao: COR.alerta, regra: COR.rule }
+    : { bg: COR.alerta, ink: "#ffffff", sub: "#ffe1dd", caixa: "rgba(0,0,0,0.22)", seloBg: "#ffffff", seloTx: COR.alerta, balao: "#ffffff", regra: "rgba(255,255,255,0.3)" };
+  const triangulo = `<svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="${t.seloTx}" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M10.3 3.9 1.8 18.1A2 2 0 0 0 3.5 21h17a2 2 0 0 0 1.7-2.9L13.7 3.9a2 2 0 0 0-3.4 0Z"/><path d="M12 9v4"/><path d="M12 17h.01"/></svg>`;
   const dados = c.dados.slice(0, 3);
   return div(
-    { width: W, height: H, padding: "88px 72px 56px 72px", background: COR.alerta, flexDirection: "column", color: "#ffffff" },
+    { width: W, height: H, padding: "88px 72px 56px 72px", background: t.bg, flexDirection: "column", color: t.ink, position: "relative", ...(papel ? { borderLeft: `28px solid ${COR.alerta}` } : {}) },
     div(
       { alignItems: "center", justifyContent: "space-between" },
       div(
-        { alignItems: "center", gap: 16, padding: "14px 26px", background: "#ffffff", borderRadius: 4 },
+        { alignItems: "center", gap: 16, padding: "14px 26px", background: t.seloBg, borderRadius: 4 },
         h("img", { src: svgDataUri(triangulo), width: 40, height: 40 }),
-        h("span", { style: { fontFamily: F.chapeu, fontWeight: 700, fontSize: 44, lineHeight: 1, letterSpacing: "0.14em", color: COR.alerta } }, "ALERTA"),
+        h("span", { style: { fontFamily: F.chapeu, fontWeight: 700, fontSize: 44, lineHeight: 1, letterSpacing: "0.14em", color: t.seloTx } }, "ALERTA"),
       ),
-      c.quando ? h("span", { style: { fontFamily: F.ui, fontWeight: 600, fontSize: 26, color: "#ffe1dd" } }, c.quando) : null,
+      c.quando ? h("span", { style: { fontFamily: F.ui, fontWeight: 600, fontSize: 26, color: t.sub } }, c.quando) : null,
     ),
-    div({ marginTop: 88 }, chapeuBalao(c.chapeu, "#ffffff")),
-    tituloComPonto(c.titulo, { marginTop: 44, fontFamily: F.titulo, fontWeight: 700, fontSize: tam, lineHeight: 1.02, letterSpacing: -1, color: "#ffffff" }, COR.accent, Math.round(tam * 0.2)),
+    div({ marginTop: 88 }, chapeuBalao(c.chapeu, t.balao)),
+    tituloComPonto(c.titulo, { marginTop: 44, fontFamily: F.titulo, fontWeight: 700, fontSize: tam, lineHeight: 1.02, letterSpacing: -1, color: t.ink }, COR.accent, Math.round(tam * 0.2)),
     dados.length
       ? div(
         { marginTop: 64, gap: 16 },
         ...dados.map((d) =>
           div(
-            { flexDirection: "column", gap: 6, padding: "22px 22px", background: "rgba(0,0,0,0.22)", flexGrow: 1, flexBasis: 0 },
+            { flexDirection: "column", gap: 6, padding: "22px 22px", background: t.caixa, flexGrow: 1, flexBasis: 0 },
             div(
               { alignItems: "baseline" },
               h("span", { style: { fontFamily: F.titulo, fontWeight: 700, fontSize: d.valor.length > 6 ? 48 : 64, lineHeight: 1 } }, d.valor),
               d.unidade ? h("span", { style: { fontFamily: F.titulo, fontWeight: 700, fontSize: 30, marginLeft: 8 } }, d.unidade) : null,
             ),
-            h("span", { style: { fontFamily: F.ui, fontWeight: 600, fontSize: 24, color: "#ffe1dd" } }, d.rotulo),
+            h("span", { style: { fontFamily: F.ui, fontWeight: 600, fontSize: 24, color: t.sub } }, d.rotulo),
           )
         ),
       )
@@ -385,7 +393,7 @@ function cardAlerta(c: CardAlerta): No {
       h("span", {}, "Emergência: Defesa Civil 199 · Bombeiros 193"),
     ),
     div({ flexGrow: 1 }),
-    rodape(true, [CTA(c.cta ?? "Mais informações no link da bio", "#ffffff")], "rgba(255,255,255,0.3)"),
+    rodape(!papel, [CTA(c.cta ?? "Mais informações no link da bio", t.ink)], t.regra),
   );
 }
 

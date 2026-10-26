@@ -215,7 +215,10 @@ Deno.serve(async (req) => {
     const titulo = red?.titulo ?? limitar(l.titulo, 100);
     const linhaFina = red?.linhaFina ?? (l.subtitulo ? limitar(l.subtitulo, 150) : null);
     if (classe === "alerta") {
-      return { card: { formato: "alerta", chapeu: ch.texto, titulo, quando: red?.quando ?? null, dados: red?.dados ?? [], orientacao: red?.orientacao ?? null }, red };
+      // Dois alertas seguidos não saem os dois vermelhos: o segundo vai na versão papel.
+      const viz = vizinhos(quando ?? null);
+      const fundo = !viz.includes("alerta") ? "vermelho" : !viz.includes("claro") ? "papel" : "vermelho";
+      return { card: { formato: "alerta", chapeu: ch.texto, titulo, quando: red?.quando ?? null, dados: red?.dados ?? [], orientacao: red?.orientacao ?? null, fundo }, red };
     }
     let foto = temFotoUtilizavel(m, classe) && l.imagem_capa_url ? await imagemComoDataUri(l.imagem_capa_url) : null;
     let creditoFoto = limparCredito(l.imagem_credito);
