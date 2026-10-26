@@ -1,13 +1,28 @@
 // Visual do vídeo do Cidades do Paraná: fundo quase preto com grade sutil,
 // brilho verde-água no topo, Inter nos títulos e JetBrains Mono nos rótulos.
-import { loadFont as inter } from "@remotion/google-fonts/Inter";
-import { loadFont as mono } from "@remotion/google-fonts/JetBrainsMono";
-import { loadFont as newsreader } from "@remotion/google-fonts/Newsreader";
+// Fontes empacotadas (@fontsource) para renderizar sem acesso ao Google Fonts.
+import "@fontsource/inter/400.css";
+import "@fontsource/inter/500.css";
+import "@fontsource/inter/600.css";
+import "@fontsource/inter/700.css";
+import "@fontsource/jetbrains-mono/400.css";
+import "@fontsource/jetbrains-mono/500.css";
+import "@fontsource/jetbrains-mono/700.css";
+import "@fontsource/newsreader/500.css";
+import "@fontsource/newsreader/600.css";
+
+import { continueRender, delayRender } from "remotion";
+
+if (typeof document !== "undefined") {
+  const h = delayRender("fontes");
+  Promise.all(["400 20px Inter", "500 20px Inter", "600 20px Inter", "700 20px Inter", "400 20px 'JetBrains Mono'", "500 20px 'JetBrains Mono'", "500 20px Newsreader", "600 20px Newsreader"]
+    .map((f) => document.fonts.load(f, "Paraná"))).finally(() => continueRender(h));
+}
 
 export const FONTE = {
-  ui: inter("normal", { weights: ["400", "500", "600", "700"], subsets: ["latin", "latin-ext"] }).fontFamily,
-  mono: mono("normal", { weights: ["400", "500", "700"], subsets: ["latin", "latin-ext"] }).fontFamily,
-  serif: newsreader("normal", { weights: ["500", "600"], subsets: ["latin", "latin-ext"] }).fontFamily,
+  ui: "Inter, sans-serif",
+  mono: "'JetBrains Mono', monospace",
+  serif: "Newsreader, serif",
 };
 
 export const COR = {

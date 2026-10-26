@@ -57,7 +57,7 @@ export const CenaTela: React.FC<PropsTela> = ({ img, url, imgAltura, de = 0, ate
       ) : (
         <AbsoluteFill style={{ flexDirection: "row", alignItems: "center", padding: "0 90px 40px 110px", gap: 70 }}>
           <div style={{ width: 600, display: "flex", flexDirection: "column", gap: 34, flex: "none" }}>
-            {pill && <Pill entra={entrada(f, 2)}>{pill}</Pill>}
+            {pill && <div style={{ display: "flex" }}><Pill entra={entrada(f, 2)}>{pill}</Pill></div>}
             {titulo && <Titulo linhas={titulo.map((t) => ({ t }))} tamanho={66} />}
             {texto && <div style={{ fontFamily: FONTE.mono, fontSize: 26, color: COR.agua, opacity: entrada(f, 22), lineHeight: 1.4 }}>{texto}</div>}
           </div>
@@ -83,7 +83,7 @@ export const CenaCartoes: React.FC<PropsCartoes> = ({ pill, titulo, imagens }) =
       <Fundo />
       <AbsoluteFill style={{ flexDirection: "row", alignItems: "center", padding: "0 90px 40px 110px", gap: 60 }}>
         <div style={{ width: 560, display: "flex", flexDirection: "column", gap: 34, flex: "none" }}>
-          {pill && <Pill entra={entrada(f, 2)}>{pill}</Pill>}
+          {pill && <div style={{ display: "flex" }}><Pill entra={entrada(f, 2)}>{pill}</Pill></div>}
           {titulo && <Titulo linhas={titulo.map((t) => ({ t }))} tamanho={64} />}
         </div>
         <div style={{ flex: 1, position: "relative", height: 860 }}>
@@ -126,7 +126,7 @@ export const CenaPipeline: React.FC<PropsPipeline> = ({ quadros, zooms }) => {
     <AbsoluteFill style={{ background: "#0A1412", opacity: e }}>
       <AbsoluteFill style={{ transformOrigin: "0 0", transform: `scale(${esc}) translate(${-r[0]}px, ${-r[1]}px)` }}>
         <Img src={quadros[i]} style={{ position: "absolute", width: 1920, height: 1080 }} />
-        {i + 1 < quadros.length && <Img src={quadros[i + 1]} style={{ position: "absolute", width: 1920, height: 1080, opacity: frac }} />}
+        {i + 1 < quadros.length && <Img src={quadros[i + 1]} style={{ position: "absolute", width: 1920, height: 1080, opacity: interpolate(frac, [0.82, 1], [0, 1], clamp) }} />}
       </AbsoluteFill>
       {rotulo && (
         <AbsoluteFill style={{ justifyContent: "flex-start", alignItems: "flex-start", padding: 60 }}>
@@ -179,7 +179,7 @@ export const CenaReels: React.FC<{ pill: string; titulo: string[]; video: string
       <Fundo />
       <AbsoluteFill style={{ flexDirection: "row", alignItems: "center", padding: "0 160px 40px 160px", gap: 120 }}>
         <div style={{ flex: 1, display: "flex", flexDirection: "column", gap: 34 }}>
-          <Pill entra={entrada(f, 2)}>{pill}</Pill>
+          <div style={{ display: "flex" }}><Pill entra={entrada(f, 2)}>{pill}</Pill></div>
           <Titulo linhas={titulo.map((t) => ({ t }))} tamanho={72} />
         </div>
         <div style={{ width: 420, height: 860, borderRadius: 56, background: "#111", padding: 14, boxShadow: "0 50px 120px rgba(0,0,0,0.7), 0 0 0 2px #262b2a", opacity: e, translate: `0px ${(1 - e) * 80}px` }}>
@@ -212,7 +212,7 @@ export const CenaPergunta: React.FC<{ linhas: string[] }> = ({ linhas }) => (
   <AbsoluteFill>
     <Fundo brilho={0.6} />
     <AbsoluteFill style={{ justifyContent: "center", alignItems: "center", padding: "0 200px" }}>
-      <Titulo linhas={linhas.map((t, i) => ({ t, apagada: i === linhas.length - 1 }))} tamanho={110} alinhar="center" />
+      <Titulo linhas={linhas.map((t, i) => ({ t, apagada: i < linhas.length - 1 }))} tamanho={92} alinhar="center" />
     </AbsoluteFill>
   </AbsoluteFill>
 );

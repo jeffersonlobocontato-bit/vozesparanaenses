@@ -9,6 +9,9 @@
     "render": "remotion render Pitch out/pitch.mp4"
   },
   "dependencies": {
+    "@fontsource/inter": "^5.3.0",
+    "@fontsource/jetbrains-mono": "^5.3.0",
+    "@fontsource/newsreader": "^5.3.0",
     "@remotion/cli": "4.0.538",
     "@remotion/google-fonts": "4.0.538",
     "@remotion/media": "4.0.538",
