@@ -1,8 +1,9 @@
 # Reels "Resumo do dia" do @vozesparanaenses.
 # Monta o roteiro com os posts publicados no dia, gera a narração (pt-BR),
 # compõe a trilha, renderiza com Remotion e guarda o MP4 como artefato.
-# Publica no Instagram SÓ quando pedido (entrada `publicar`) ou quando a
-# variável do repositório REELS_PUBLICAR_AUTO = "sim" (agenda das 18h).
+# Publica no Instagram na agenda diária (perto das 18h) e quando pedido pela
+# entrada `publicar` — desde que exista o secret ZERNIO_API_KEY no repositório.
+# Sem o secret, só gera o vídeo (artefato + branch reels-previas).
 name: Reels Resumo do Dia
 
 on:
@@ -17,7 +18,7 @@ on:
         type: boolean
         default: false
   schedule:
-    - cron: "35 20 * * *" # 17h35 em Brasília: render ~15 min, posta perto das 18h
+    - cron: "40 20 * * *" # 17h40 em Brasília: o render leva ~5 min e a agenda do GitHub atrasa alguns minutos
 
 permissions:
   contents: write
@@ -30,6 +31,8 @@ jobs:
   reels:
     runs-on: ubuntu-latest
     timeout-minutes: 40
+    env:
+      ZERNIO_API_KEY: ${{ secrets.ZERNIO_API_KEY }}
     defaults:
       run:
         working-directory: reels
@@ -73,7 +76,5 @@ jobs:
           git add . && git commit -qm "Prévia do Reels $(date -u +%F)"
           git push -qf "https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git" reels-previas
       - name: Publica no Instagram
-        if: ${{ github.event.inputs.publicar == 'true' || (github.event_name == 'schedule' && vars.REELS_PUBLICAR_AUTO == 'sim') }}
-        env:
-          ZERNIO_API_KEY: ${{ secrets.ZERNIO_API_KEY }}
+        if: ${{ (github.event.inputs.publicar == 'true' || github.event_name == 'schedule') && env.ZERNIO_API_KEY != '' }}
         run: node scripts/publicar.mjs
