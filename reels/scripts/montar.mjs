@@ -34,6 +34,8 @@ const NOME_REGIAO = {
   metropolitana: "Metropolitana", litoral: "Litoral", "campos-gerais": "Campos Gerais", "norte-pioneiro": "Norte Pioneiro",
   "norte-central": "Norte", noroeste: "Noroeste", "centro-ocidental": "Centro-Ocidental", oeste: "Oeste", sudoeste: "Sudoeste", "centro-sul": "Centro-Sul",
 };
+// Número que é dado (valor, %, quantidade com unidade), não código de rodovia.
+const RE_DADO = /(R\$\s?\d|\d+(?:,\d+)?\s?(?:%|mil\b|milh|bilh|mm\b|km\b|km\/h|ºC|°C|graus|toneladas|pessoas|mortos|feridos|cidades|municípios|casas))/i;
 const RE_NUM = /(R\$\s?)?\d{1,3}(?:\.\d{3})*(?:,\d+)?(?:\s?(?:mil|milhões|milhão|mi|bi|%))?/i;
 
 const dataExtenso = (() => {
@@ -119,15 +121,6 @@ async function main() {
       if (id) cand.push({ id, post: p, peso: (ordem[p.classe] ?? 5) - (p.score ?? 0) / 1000 });
     }
   }
-  cand.sort((a, b) => a.peso - b.peso);
-  const vistas = new Set();
-  const escolhidas = cand.filter((c) => {
-    const a = porId.get(c.id);
-    if (!a || vistas.has(c.id) || a.criticidade_nivel === "alto" || a.criticidade_nivel === "critico") return false;
-    vistas.add(c.id);
-    return true;
-  }).slice(0, MAX_NOTICIAS);
-
   await mkdir(path.join(PUBLIC, "fotos"), { recursive: true });
   // Mídia escolhida pela equipe para o dia (public/extras/AAAA-MM-DD.json):
   // { "<slug da matéria>": { "foto"?: "extras/...jpg", "video"?: "extras/...mp4", "videoDur"?: 7.6, "credito"?: "..." } }
@@ -135,6 +128,40 @@ async function main() {
   try {
     extras = JSON.parse(await readFile(path.join(PUBLIC, "extras", `${hoje}.json`), "utf8"));
   } catch { /* sem extras no dia */ }
+
+  // Prioridade do Reels (decisão de 26/10): 1º matérias com vídeo ou foto real,
+  // 2º cards de dados (alerta com números ou destaque numérico), 3º o resto.
+  // Dentro de cada faixa vale o peso editorial (classe e score).
+  const vistas = new Set();
+  const unicas = cand.sort((a, b) => a.peso - b.peso).filter((c) => {
+    const a = porId.get(c.id);
+    if (!a || vistas.has(c.id) || a.criticidade_nivel === "alto" || a.criticidade_nivel === "critico") return false;
+    vistas.add(c.id);
+    return true;
+  });
+  let nf = 0;
+  for (const c of unicas) {
+    const a = porId.get(c.id);
+    const card = c.post?.card ?? {};
+    c.alerta = c.post?.classe === "alerta";
+    c.extra = extras[a.slug] ?? null;
+    c.foto = null;
+    // Foto real ou vídeo valem para qualquer post, alerta inclusive.
+    if (c.extra && (c.extra.video || c.extra.foto)) {
+      c.faixa = 0;
+    } else {
+      const urlFoto = typeof card.foto === "string" && card.foto.startsWith("http") ? card.foto : a.imagem_capa_url;
+      const fotoReal = urlFoto && (FOTO_OK.has(a.foto_origem ?? "") || card.formato === "foto") && !/gerada por ia/i.test(a.imagem_credito ?? "");
+      if (fotoReal) c.foto = await baixarFoto(urlFoto, `n${nf++}`);
+      c.faixa = c.foto ? 0 : null;
+    }
+    if (c.faixa == null) {
+      const titulo = semPonto(card.titulo ?? a.titulo);
+      const temDado = c.alerta ? (card.dados ?? []).length > 0 || RE_DADO.test(titulo) : Boolean(card.destaque?.valor) || RE_DADO.test(titulo);
+      c.faixa = temDado ? 1 : 2;
+    }
+  }
+  const escolhidas = unicas.map((c, i) => ({ c, i })).sort((x, y) => x.c.faixa - y.c.faixa || x.i - y.i).map((x) => x.c).slice(0, MAX_NOTICIAS);
   const TRANS = ["balao", "chicote", "iris", "luz", "glitch"];
   const cenas = [];
   let tr = 0;
@@ -144,11 +171,11 @@ async function main() {
     const ch = card.chapeu ? { texto: card.chapeu, cor: chapeuDe(a).cor } : chapeuDe(a);
     const titulo = semPonto(card.titulo ?? a.titulo);
     const linhaFina = semPonto(card.linhaFina ?? a.subtitulo ?? "") || null;
-    const alerta = c.post?.classe === "alerta";
+    const alerta = c.alerta && c.faixa !== 0; // alerta com foto vira cena de foto
     let estilo = alerta ? "alerta" : "numero";
     let foto = null;
     let credito = null;
-    const ex = extras[a.slug] ?? null;
+    const ex = c.extra;
     let video = null;
     let videoDur = null;
     if (!alerta && ex) {
@@ -156,16 +183,10 @@ async function main() {
       if (ex.foto) { foto = ex.foto; estilo = "foto"; }
       credito = ex.credito ?? null;
     }
-    if (!alerta && !ex) {
-      const urlFoto = typeof card.foto === "string" && card.foto.startsWith("http") ? card.foto : a.imagem_capa_url;
-      const fotoReal = urlFoto && (FOTO_OK.has(a.foto_origem ?? "") || card.formato === "foto") && !/gerada por ia/i.test(a.imagem_credito ?? "");
-      if (fotoReal) {
-        foto = await baixarFoto(urlFoto, `n${n}`);
-        if (foto) {
-          estilo = "foto";
-          credito = limparCredito(card.credito ?? a.imagem_credito ?? "");
-        }
-      }
+    if (!alerta && !ex && c.foto) {
+      foto = c.foto;
+      estilo = "foto";
+      credito = limparCredito(card.credito ?? a.imagem_credito ?? "");
     }
     const m = (card.destaque?.valor ? card.destaque.valor : titulo.match(RE_NUM)?.[0]) ?? null;
     const numero = estilo === "numero" && m ? { valor: m.trim(), rotulo: card.destaque?.rotulo ?? linhaRotulo(titulo, m) } : null;

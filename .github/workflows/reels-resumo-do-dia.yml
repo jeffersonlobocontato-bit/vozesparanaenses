@@ -21,8 +21,14 @@ on:
         description: "Publicar no Instagram depois de renderizar?"
         type: boolean
         default: false
+  # A agenda do GitHub não é garantida: em 26/10/2026 o horário das 17h40
+  # simplesmente não disparou. Por isso há horários de reserva; cada um confere
+  # antes (job "checar") se o Reels do dia já saiu e, se saiu, não faz nada.
   schedule:
-    - cron: "40 20 * * *" # 17h40 em Brasília: o render leva ~5 min e a agenda do GitHub atrasa alguns minutos
+    - cron: "40 20 * * *" # 17h40 em Brasília (principal: posta perto das 18h)
+    - cron: "17 21 * * *" # 18h17 reserva
+    - cron: "53 21 * * *" # 18h53 reserva
+    - cron: "31 22 * * *" # 19h31 última reserva
 
 permissions:
   contents: write
@@ -32,7 +38,25 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
+  checar:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    outputs:
+      feito: ${{ steps.ja.outputs.feito }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          sparse-checkout: reels/scripts
+      - id: ja
+        name: Reels de hoje já saiu?
+        env:
+          ZERNIO_API_KEY: ${{ secrets.ZERNIO_API_KEY }}
+        run: node reels/scripts/ja-publicado.mjs ${{ github.event.inputs.data }}
+
   reels:
+    needs: checar
+    # Na agenda, só roda se o Reels do dia ainda não saiu; à mão, sempre roda.
+    if: ${{ github.event_name != 'schedule' || needs.checar.outputs.feito != 'sim' }}
     runs-on: ubuntu-latest
     timeout-minutes: 40
     env:
