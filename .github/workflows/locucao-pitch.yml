@@ -9,8 +9,8 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with: { ref: locucao-pitch }
-      - run: pip install edge-tts && sudo apt-get install -y -qq ffmpeg >/dev/null
-      - run: python gerar.py
+      - run: pip install edge-tts imageio-ffmpeg
+      - run: FFMPEG=$(python -c "import imageio_ffmpeg;print(imageio_ffmpeg.get_ffmpeg_exe())") python gerar.py
       - run: |
           git config user.name "vozes-locucao" && git config user.email "reels@vozesparanaenses.com.br"
           git add locucao.mp3 locucao.json && git commit -qm "Locução gerada" && git push -q origin HEAD:locucao-pitch
