@@ -84,6 +84,11 @@ jobs:
           git config user.name "vozes-reels" && git config user.email "reels@vozesparanaenses.com.br"
           git add . && git commit -qm "Prévia do Reels $(date -u +%F)"
           git push -qf "https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git" reels-previas
+      # Diagnóstico visível na lista de etapas (sem precisar abrir o log):
+      # se esta etapa aparecer como executada, o secret não chegou ao job.
+      - name: "Aviso: secret ZERNIO_API_KEY ausente (não publica)"
+        if: ${{ env.ZERNIO_API_KEY == '' }}
+        run: echo "::warning::Crie o secret ZERNIO_API_KEY em Settings > Secrets and variables > Actions > Repository secrets."
       - name: Publica no Instagram
         if: ${{ (github.event.inputs.publicar == 'true' || github.event_name == 'schedule') && env.ZERNIO_API_KEY != '' }}
         run: node scripts/publicar.mjs
