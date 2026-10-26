@@ -1,0 +1,19 @@
+name: Legendas da locução (pitch)
+on:
+  push:
+    branches: [locucao-pitch]
+    paths: [legendas.py, .github/workflows/legendas.yml]
+permissions:
+  contents: write
+jobs:
+  legendas:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: "3.11" }
+      - run: pip install faster-whisper
+      - run: python legendas.py locucao.mp3 legendas.json
+      - run: |
+          git config user.name "github-actions"; git config user.email "actions@github.com"
+          git add legendas.json && git commit -m "Legendas da locução (faster-whisper)" && git push
