@@ -1,2 +1,62 @@
-[0m[1m[31merror[0m: Could not find "@jsquash/jpeg" in a node_modules folder. Deno expects the node_modules/ directory to be up to date. Did you forget to run `deno install`?
-    at [0m[36mfile:///home/runner/work/vozesparanaenses/vozesparanaenses/supabase/functions/_shared/instagram-render.ts[0m:[0m[33m9[0m:[0m[33m46[0m
+[0m[32mDownload[0m https://registry.npmjs.org/satori
+[0m[32mDownload[0m https://registry.npmjs.org/@resvg%2fresvg-wasm
+[0m[32mDownload[0m https://registry.npmjs.org/@jsquash%2fwebp
+[0m[32mDownload[0m https://registry.npmjs.org/@jsquash%2fjpeg
+[0m[32mDownload[0m https://registry.npmjs.org/@shuding%2fopentype.js
+[0m[32mDownload[0m https://registry.npmjs.org/css-background-parser
+[0m[32mDownload[0m https://registry.npmjs.org/css-box-shadow
+[0m[32mDownload[0m https://registry.npmjs.org/css-to-react-native
+[0m[32mDownload[0m https://registry.npmjs.org/emoji-regex
+[0m[32mDownload[0m https://registry.npmjs.org/escape-html
+[0m[32mDownload[0m https://registry.npmjs.org/linebreak
+[0m[32mDownload[0m https://registry.npmjs.org/parse-css-color
+[0m[32mDownload[0m https://registry.npmjs.org/postcss-value-parser
+[0m[32mDownload[0m https://registry.npmjs.org/yoga-wasm-web
+[0m[32mDownload[0m https://registry.npmjs.org/wasm-feature-detect
+[0m[32mDownload[0m https://registry.npmjs.org/fflate
+[0m[32mDownload[0m https://registry.npmjs.org/string.prototype.codepointat
+[0m[32mDownload[0m https://registry.npmjs.org/camelize
+[0m[32mDownload[0m https://registry.npmjs.org/css-color-keywords
+[0m[32mDownload[0m https://registry.npmjs.org/base64-js
+[0m[32mDownload[0m https://registry.npmjs.org/unicode-trie
+[0m[32mDownload[0m https://registry.npmjs.org/color-name
+[0m[32mDownload[0m https://registry.npmjs.org/hex-rgb
+[0m[32mDownload[0m https://registry.npmjs.org/pako
+[0m[32mDownload[0m https://registry.npmjs.org/tiny-inflate
+[0m[32mDownload[0m https://registry.npmjs.org/satori/-/satori-0.10.14.tgz
+[0m[32mDownload[0m https://registry.npmjs.org/@jsquash/webp/-/webp-1.4.0.tgz
+[0m[32mDownload[0m https://registry.npmjs.org/@jsquash/jpeg/-/jpeg-1.5.0.tgz
+[0m[32mDownload[0m https://registry.npmjs.org/@resvg/resvg-wasm/-/resvg-wasm-2.6.2.tgz
+[0m[32mDownload[0m https://registry.npmjs.org/@shuding/opentype.js/-/opentype.js-1.4.0-beta.0.tgz
+[0m[32mDownload[0m https://registry.npmjs.org/css-background-parser/-/css-background-parser-0.1.0.tgz
+[0m[32mDownload[0m https://registry.npmjs.org/postcss-value-parser/-/postcss-value-parser-4.2.0.tgz
+[0m[32mDownload[0m https://registry.npmjs.org/emoji-regex/-/emoji-regex-10.6.0.tgz
+[0m[32mDownload[0m https://registry.npmjs.org/parse-css-color/-/parse-css-color-0.2.1.tgz
+[0m[32mDownload[0m https://registry.npmjs.org/yoga-wasm-web/-/yoga-wasm-web-0.3.3.tgz
+[0m[32mDownload[0m https://registry.npmjs.org/linebreak/-/linebreak-1.1.0.tgz
+[0m[32mDownload[0m https://registry.npmjs.org/escape-html/-/escape-html-1.0.3.tgz
+[0m[32mDownload[0m https://registry.npmjs.org/css-box-shadow/-/css-box-shadow-1.0.0-3.tgz
+[0m[32mDownload[0m https://registry.npmjs.org/css-to-react-native/-/css-to-react-native-3.2.0.tgz
+[0m[32mDownload[0m https://registry.npmjs.org/wasm-feature-detect/-/wasm-feature-detect-1.9.0.tgz
+[0m[32mDownload[0m https://registry.npmjs.org/fflate/-/fflate-0.7.5.tgz
+[0m[32mDownload[0m https://registry.npmjs.org/string.prototype.codepointat/-/string.prototype.codepointat-0.2.1.tgz
+[0m[32mDownload[0m https://registry.npmjs.org/hex-rgb/-/hex-rgb-4.3.0.tgz
+[0m[32mDownload[0m https://registry.npmjs.org/color-name/-/color-name-1.1.4.tgz
+[0m[32mDownload[0m https://registry.npmjs.org/unicode-trie/-/unicode-trie-2.0.0.tgz
+[0m[32mDownload[0m https://registry.npmjs.org/base64-js/-/base64-js-0.0.8.tgz
+[0m[32mDownload[0m https://registry.npmjs.org/css-color-keywords/-/css-color-keywords-1.0.0.tgz
+[0m[32mDownload[0m https://registry.npmjs.org/camelize/-/camelize-1.0.1.tgz
+[0m[32mDownload[0m https://registry.npmjs.org/tiny-inflate/-/tiny-inflate-1.0.3.tgz
+[0m[32mDownload[0m https://registry.npmjs.org/pako/-/pako-0.2.9.tgz
+1 Serviços públicos têm recesso até 2 de novembro; hospital mantém escala
+2 Criação do Organismo de Políticas para as Mulheres é aprovada por unanimidade
+[0m[1m[31merror[0m: Uncaught (in promise) TypeError: Invalid JPEG
+[0m[33mWarning[0m Couldn't format source line: Line 29 is out of bounds (source may have changed at runtime)
+    at [0m[1m[3mas[0m ([0m[36mfile:///home/runner/.cache/deno/npm/registry.npmjs.org/satori/0.10.14/dist/index.js[0m:[0m[33m29[0m:[0m[33m13[0m)
+    at [0m[1m[3myt[0m ([0m[36mfile:///home/runner/.cache/deno/npm/registry.npmjs.org/satori/0.10.14/dist/index.js[0m:[0m[33m210[0m:[0m[33m23[0m)
+    at [0m[36mfile:///home/runner/.cache/deno/npm/registry.npmjs.org/satori/0.10.14/dist/index.js[0m:[0m[33m182[0m:[0m[33m49[0m
+    at [0m[1m[3mArray.map[0m ([0m[36m<anonymous>[0m)
+    at [0m[1m[3mcs[0m ([0m[36mfile:///home/runner/.cache/deno/npm/registry.npmjs.org/satori/0.10.14/dist/index.js[0m:[0m[33m182[0m:[0m[33m38[0m)
+    at [0m[1m[3mwl[0m ([0m[36mfile:///home/runner/.cache/deno/npm/registry.npmjs.org/satori/0.10.14/dist/index.js[0m:[0m[33m93[0m:[0m[33m9[0m)
+    at async [0m[1m[3mrenderizarCard[0m ([0m[2m[38;5;245mfile:///home/runner/work/vozesparanaenses/vozesparanaenses/[0m[0m[36msupabase/functions/_shared/instagram-render.ts[0m:[0m[33m82[0m:[0m[33m15[0m)
+    at async [0m[2m[38;5;245mfile:///home/runner/work/vozesparanaenses/vozesparanaenses/[0m[0m[36mscripts/previa-cards.ts[0m:[0m[33m23[0m:[0m[33m96[0m
