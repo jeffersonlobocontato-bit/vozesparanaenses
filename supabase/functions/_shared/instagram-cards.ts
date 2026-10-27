@@ -311,16 +311,16 @@ function cardFotoEditorial(c: CardFoto): No {
     h("img", { src: c.foto, width: W, height: H, style: { position: "absolute", left: 0, top: 0, width: W, height: H, objectFit: "cover" } }),
     div({
       position: "absolute", left: 0, top: 0, width: W, height: H,
-      backgroundImage: "linear-gradient(180deg, rgba(15,23,20,0.6) 0%, rgba(15,23,20,0) 20%, rgba(15,23,20,0) 42%, rgba(15,23,20,0.86) 70%, rgba(15,23,20,0.97) 100%)",
+      backgroundImage: "linear-gradient(180deg, rgba(15,23,20,0.78) 0%, rgba(15,23,20,0.35) 12%, rgba(15,23,20,0) 24%, rgba(15,23,20,0) 42%, rgba(15,23,20,0.86) 70%, rgba(15,23,20,0.97) 100%)",
     }),
     div(
       { position: "absolute", left: 64, top: 56, flexDirection: "column", gap: 10 },
       div(
         { alignItems: "center", gap: 14 },
         h("img", { src: svgDataUri(ICONE_CLARO), width: 56, height: 56 }),
-        h("span", { style: { fontFamily: F.marca, fontWeight: 700, fontSize: 34, color: "#ffffff", letterSpacing: -0.3 } }, "vozes paranaenses"),
+        h("span", { style: { fontFamily: F.marca, fontWeight: 700, fontSize: 34, color: "#ffffff", letterSpacing: -0.3, textShadow: "0 2px 10px rgba(0,0,0,0.55)" } }, "vozes paranaenses"),
       ),
-      c.tag ? h("span", { style: { fontFamily: F.chapeu, fontWeight: 700, fontSize: 28, letterSpacing: "0.16em", textTransform: "uppercase", color: COR.accent } }, c.tag) : null,
+      c.tag ? h("span", { style: { alignSelf: "flex-start", padding: "4px 12px", borderRadius: 4, background: "rgba(15,23,20,0.72)", fontFamily: F.chapeu, fontWeight: 700, fontSize: 28, letterSpacing: "0.16em", textTransform: "uppercase", color: COR.accent } }, c.tag) : null,
     ),
     c.selo
       ? div(

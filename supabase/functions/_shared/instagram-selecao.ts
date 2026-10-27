@@ -70,7 +70,7 @@ const REGIOES_PR = new Set([
 const norm = (s: string) => s.toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g, "");
 
 const RE_ALERTA = /\b(alertas?|defesa civil|tempora(?:l|is)|tempestades?|granizo|vendava(?:l|is)|ciclones?|interdi\w*|bloquei\w*|evacua\w*|falta d.?agua|desabastec\w*|racionamento|vacina\w*|risco de|avisos? meteorolog\w*|alagamentos?|enchentes?|deslizamentos?|queda de barreiras?)\b/;
-const RE_TRAGEDIA = /\b(morre\w*|morte|mortos?|obito|vitimas? fata\w*|desaba\w*|soterr\w*|tragedia|calamidade|afoga\w*|incendio)\b/;
+const RE_TRAGEDIA = /\b(morre\w*|morte|mort[ao]s?|obito|vitimas? fata\w*|desaba\w*|soterr\w*|tragedia|calamidade|afoga\w*|incendio)\b/;
 // Segurança vai sozinha para o feed só com fato de interesse público (operação,
 // apreensão, prisão, crime grave). Briga, ameaça e furto miúdo ficam para o Giro.
 const RE_SEGURANCA_IMPACTO = /\b(operac\w*|apreen\w*|apreend\w*|pres[oa]s?|prisao|prisoes|quadrilha|faccao|trafico|contrabando\w*|descaminho|homicidio|latrocinio|policia federal|receita federal|gaeco|mandados?)\b/;
@@ -79,7 +79,7 @@ export const ALERTA_VALIDADE_H = 6;
 // Matéria marcada como "nacional" que na verdade é do Paraná (ex.: Cataratas).
 const RE_PARANA = /\b(parana|paranaense\w*|curitiba|foz do iguacu|cataratas do iguacu|londrina|maringa|cascavel|ponta grossa)\b/;
 
-const RE_VITIMA = /\b(morre\w*|morte|mortos?|obito|vitima\w*|ferid\w*|corpo|afoga\w*|soterr\w*)\b/;
+const RE_VITIMA = /\b(morre\w*|morte|mort[ao]s?|obito|vitima\w*|ferid\w*|corpo|afoga\w*|soterr\w*)\b/;
 
 /** Em que classe a matéria cai, e por quê (o motivo aparece no painel). */
 export function classificar(m: MateriaIG, cfg: ConfigIG = CONFIG_PADRAO, agora?: Date): { classe: Classe; motivo: string } {
