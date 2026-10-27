@@ -130,3 +130,17 @@ export function normalizarAvaliacoes(r: { avaliacoes?: Partial<AvaliacaoFoto>[] 
 export function escolherFotoBaixoRisco(avaliacoes: AvaliacaoFoto[]): number | null {
   return avaliacoes.find((a) => a.risco === "baixo")?.indice ?? null;
 }
+
+/**
+ * A "foto" é na verdade uma arte de divulgação (cartaz, aviso com texto e
+ * logo, card de prefeitura)? Arte não serve de foto no Instagram. Na dúvida
+ * ou com a IA fora do ar, trata como foto (false).
+ */
+export async function ehArteDeDivulgacao(apiKey: string, url: string): Promise<boolean> {
+  const raw = await chamarIa(apiKey, [
+    { role: "system", content: "Você classifica imagens de notícias. Responda só JSON {\"arte\": true|false}. arte = true quando a imagem é uma peça gráfica de divulgação (cartaz, aviso, banner, card com texto grande, logotipo ou layout montado) e não uma fotografia de pessoas, lugares ou acontecimentos. Foto com uma marca d'água pequena continua sendo foto (false)." },
+    { role: "user", content: [{ type: "text", text: "Esta imagem é arte de divulgação?" }, { type: "image_url", image_url: { url } }] },
+  ], 60);
+  const r = jsonDe<{ arte?: boolean }>(raw);
+  return r?.arte === true;
+}

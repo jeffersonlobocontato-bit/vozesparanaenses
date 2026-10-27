@@ -63,7 +63,7 @@ const ROTULO_TIPO: Record<string, string> = {
   foto: "Foto", tipografico: "Tipográfico", alerta: "Alerta", giro: "Giro pelo Paraná", coluna: "Coluna", reels: "Reels",
 };
 const ROTULO_CLASSE: Record<string, string> = {
-  alerta: "Alerta", tragedia: "Tragédia", seguranca: "Segurança", nacional: "Nacional", internacional: "Internacional", regional: "Regional", coluna: "Coluna",
+  alerta: "Alerta", tragedia: "Tragédia", seguranca: "Segurança", nacional: "Nacional", internacional: "Internacional", destaque: "Destaque com foto", regional: "Regional", coluna: "Coluna",
 };
 const hora = (iso: string | null) =>
   iso ? new Intl.DateTimeFormat("pt-BR", { timeZone: "America/Sao_Paulo", day: "2-digit", month: "2-digit", hour: "2-digit", minute: "2-digit" }).format(new Date(iso)) : "—";
