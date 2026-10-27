@@ -28,6 +28,7 @@ import {
   escolherAvulsos,
   hashtags,
   montarGiro,
+  fotoReal,
   temFotoUtilizavel,
   type Classe,
   type ConfigIG,
@@ -214,13 +215,16 @@ Deno.serve(async (req) => {
     const red = lamina ? null : await redigir({ apiKey: aiKey, classe, titulo: l.titulo, subtitulo: l.subtitulo, texto: [l.tldr, l.resumo].filter(Boolean).join("\n") || l.subtitulo || "" });
     const titulo = red?.titulo ?? limitar(l.titulo, 100);
     const linhaFina = red?.linhaFina ?? (l.subtitulo ? limitar(l.subtitulo, 150) : null);
-    if (classe === "alerta") {
+    const cardAlerta = () => {
       // Dois alertas seguidos não saem os dois vermelhos: o segundo vai na versão papel.
       const viz = vizinhos(quando ?? null);
       const fundo = !viz.includes("alerta") ? "vermelho" : !viz.includes("claro") ? "papel" : "vermelho";
-      return { card: { formato: "alerta", chapeu: ch.texto, titulo, quando: red?.quando ?? null, dados: red?.dados ?? [], orientacao: red?.orientacao ?? null, fundo }, red };
-    }
+      return { card: { formato: "alerta", chapeu: ch.texto, titulo, quando: red?.quando ?? null, dados: red?.dados ?? [], orientacao: red?.orientacao ?? null, fundo } as Card, red };
+    };
+    // Alerta com foto real da matéria sai em foto com a etiqueta ALERTA; sem foto, no card de alerta.
+    if (classe === "alerta" && !(temFotoUtilizavel(m, classe) && fotoReal(m))) return cardAlerta();
     let foto = temFotoUtilizavel(m, classe) && l.imagem_capa_url ? await imagemComoDataUri(l.imagem_capa_url) : null;
+    if (classe === "alerta" && !foto) return cardAlerta();
     let creditoFoto = limparCredito(l.imagem_credito);
     let fotoUrl = l.imagem_capa_url;
     // Matéria sem foto (post avulso): tenta uma foto real de licença livre do
@@ -247,6 +251,7 @@ Deno.serve(async (req) => {
           cor: corLamina ?? ESCOPO[ch.escopo].claro, titulo, linhaFina, foto, credito: creditoFoto,
           lamina: lamina ? { ...lamina, rotulo: "Giro pelo Paraná" } : undefined,
           tag: lamina ? null : (l.categoria?.nome ?? null),
+          selo: classe === "alerta" ? "ALERTA" : null,
         },
         red,
         fotoUrl,

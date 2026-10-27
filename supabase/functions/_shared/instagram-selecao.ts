@@ -8,8 +8,11 @@
 //                   foto (tipográfico), nunca imagem de vítima.
 //   seguranca     — polícia e fiscalização.
 //   nacional / internacional — curadoria de impacto (sem esporte).
-//   regional      — as 10 regiões do PR: vão para o carrossel "Giro pelo
-//                   Paraná" (até 10 regiões, a mais forte de cada).
+//   destaque      — matéria regional com FOTO REAL (não ilustração): vai
+//                   sozinha para o feed. Os portais de maior audiência
+//                   publicam foto em tela cheia; card sem foto não para o dedo.
+//   regional      — as 10 regiões do PR sem foto: vão para o carrossel
+//                   "Giro pelo Paraná" (até 10 regiões, a mais forte de cada).
 //   fora          — política/eleição (nunca no automático), criticidade
 //                   alta/crítica, propaganda de governo, esporte, tecnologia.
 //
@@ -19,7 +22,7 @@
 // HORÁRIO: um post por vez, com intervalo mínimo entre eles (alerta só
 // precisa do intervalo curto), dentro da janela do dia e até o teto diário.
 
-export type Classe = "alerta" | "tragedia" | "seguranca" | "nacional" | "internacional" | "regional" | "fora";
+export type Classe = "alerta" | "tragedia" | "seguranca" | "nacional" | "internacional" | "destaque" | "regional" | "fora";
 
 export type MateriaIG = {
   id: string;
@@ -45,7 +48,7 @@ export type ConfigIG = {
   teto_dia: number; // posts de feed por dia
   janela_inicio: number; // hora (Brasília)
   janela_fim: number;
-  cotas: Record<"alerta" | "tragedia" | "seguranca" | "nacional" | "internacional", number>;
+  cotas: Partial<Record<"alerta" | "tragedia" | "seguranca" | "nacional" | "internacional" | "destaque", number>>;
   politica_auto: boolean;
 };
 
@@ -55,7 +58,7 @@ export const CONFIG_PADRAO: ConfigIG = {
   teto_dia: 8,
   janela_inicio: 7,
   janela_fim: 22,
-  cotas: { alerta: 3, tragedia: 2, seguranca: 2, nacional: 2, internacional: 1 },
+  cotas: { alerta: 3, tragedia: 2, seguranca: 2, nacional: 2, internacional: 1, destaque: 4 },
   politica_auto: false,
 };
 
@@ -94,14 +97,22 @@ export function classificar(m: MateriaIG, cfg: ConfigIG = CONFIG_PADRAO, agora?:
   if (m.regiao_slug === "internacional" || cat === "internacional") return { classe: "internacional", motivo: "internacional" };
   if (m.regiao_slug === "nacional") return { classe: "nacional", motivo: "nacional" };
   if ((m.tema_crivo === "seguranca" || cat === "seguranca") && RE_SEGURANCA_IMPACTO.test(texto)) return { classe: "seguranca", motivo: "segurança" };
-  if (m.regiao_slug && REGIOES_PR.has(m.regiao_slug)) return { classe: "regional", motivo: "regional" };
+  if (m.regiao_slug && REGIOES_PR.has(m.regiao_slug)) {
+    if (fotoReal(m) && m.prioridade_crivo !== "baixa" && !RE_VITIMA.test(texto)) return { classe: "destaque", motivo: "regional com foto" };
+    return { classe: "regional", motivo: "regional" };
+  }
   return { classe: "fora", motivo: "sem região" };
 }
 
-/** A foto da matéria pode ir para o card? (tragédia nunca leva foto) */
+/** Foto de verdade (prefeitura, agência, Commons), não ilustração de IA. */
+export function fotoReal(m: MateriaIG): boolean {
+  return !!m.imagem_capa_url && m.foto_origem !== "ilustracao_ia" && !/ilustracao-ia/.test(m.imagem_capa_url);
+}
+
+/** A foto da matéria pode ir para o card? (tragédia nunca leva foto; alerta leva, se não for de vítima) */
 export function temFotoUtilizavel(m: MateriaIG, classe: Classe): boolean {
   if (!m.imagem_capa_url) return false;
-  if (classe === "tragedia" || classe === "alerta") return false;
+  if (classe === "tragedia") return false;
   if (RE_VITIMA.test(norm(`${m.titulo} ${m.subtitulo ?? ""}`))) return false;
   return true;
 }
@@ -121,7 +132,7 @@ export function pontuar(m: MateriaIG, classe: Classe, ctx: { agora: Date; maxVis
   if (ctx.maxVisitas > 0) p += pesoAudiencia * ((m.visitas ?? 0) / ctx.maxVisitas);
   const horas = Math.max(0, (ctx.agora.getTime() - new Date(m.publicado_em).getTime()) / 3_600_000);
   p -= Math.min(30, horas * 1.5);
-  if (m.imagem_capa_url) p += m.foto_origem === "ilustracao_ia" ? 3 : 8;
+  if (m.imagem_capa_url) p += fotoReal(m) ? 18 : 3;
   if (m.destaque_home) p += 5;
   return Math.round(p * 10) / 10;
 }
@@ -153,7 +164,8 @@ export function escolherAvulsos(
   const saida: Escolha[] = [];
   for (const e of avaliadas) {
     if (total >= vagas && e.classe !== "alerta") continue; // alerta fura o teto
-    const cota = cfg.cotas[e.classe as keyof ConfigIG["cotas"]] ?? 0;
+    const k = e.classe as keyof ConfigIG["cotas"];
+    const cota = cfg.cotas[k] ?? CONFIG_PADRAO.cotas[k] ?? 0;
     if ((usados[e.classe] ?? 0) >= cota) continue;
     usados[e.classe] = (usados[e.classe] ?? 0) + 1;
     total++;
@@ -173,7 +185,7 @@ export function montarGiro(
   const porRegiao = new Map<string, Escolha>();
   for (const m of candidatas) {
     const { classe } = classificar(m, cfg, ctx.agora);
-    if (classe !== "regional" || !m.regiao_slug) continue;
+    if ((classe !== "regional" && classe !== "destaque") || !m.regiao_slug) continue;
     const e = { materia: m, classe, score: pontuar(m, classe, ctx) };
     if (e.score < scoreMinimo) continue;
     const atual = porRegiao.get(m.regiao_slug);

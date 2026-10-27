@@ -178,6 +178,7 @@ export type CardFoto = {
   // Lâmina de carrossel (Giro): posição atual e total.
   lamina?: { atual: number; total: number; rotulo: string };
   tag?: string | null; // editoria, no canto superior direito
+  selo?: string | null; // "ALERTA": etiqueta vermelha no canto superior esquerdo
 };
 
 /**
@@ -193,9 +194,10 @@ const TOM: Record<Fundo, { bg: string; ink: string; muted: string; rule: string;
 };
 
 /** "Cor" do post na grade do perfil, para comparar vizinhos. */
-export function chaveVisual(card: { formato?: string; fundo?: string } | null | undefined, tipo?: string): string {
+export function chaveVisual(card: { formato?: string; fundo?: string; foto?: string | null } | null | undefined, tipo?: string): string {
   const f = card?.formato ?? tipo;
-  if (f === "foto") return "foto";
+  // Cada foto é uma imagem diferente: duas fotos seguidas não repetem "cor" na grade.
+  if (f === "foto") return card?.foto && !card.foto.startsWith("data:") ? `foto:${card.foto}` : "foto";
   if (f === "alerta") return (card as { fundo?: string } | null | undefined)?.fundo === "papel" ? "claro" : "alerta";
   if (f === "giro-capa" || f === "giro" || f === "coluna") return "claro";
   if (f === "tipografico") {
@@ -314,11 +316,17 @@ function cardFoto(c: CardFoto): No {
         div({ gap: 8 }, ...Array.from({ length: c.lamina.total }, (_, i) => div({ width: c.lamina!.total > 6 ? 32 : 56, height: 6, background: i + 1 === c.lamina!.atual ? "#ffffff" : "rgba(255,255,255,0.35)" }))),
       )
       : c.tag ? div({ position: "absolute", top: 48, right: 56 }, tagEditoria(c.tag, "#ffffff", "rgba(15,23,20,0.45)")) : null,
+    c.selo && !c.lamina
+      ? div(
+        { position: "absolute", top: 48, left: 56, padding: "12px 24px", background: COR.alerta, borderRadius: 4 },
+        h("span", { style: { fontFamily: F.chapeu, fontWeight: 700, fontSize: 36, lineHeight: 1, letterSpacing: "0.14em", color: "#ffffff" } }, c.selo),
+      )
+      : null,
     div(
       { position: "absolute", left: 72, right: 72, bottom: 168, flexDirection: "column" },
       chapeuBalao(c.chapeu, c.cor),
       tituloComPonto(c.titulo, { marginTop: 44, fontFamily: F.titulo, fontWeight: 700, fontSize: tam, lineHeight: 1.04, letterSpacing: -0.8, color: "#ffffff" }, COR.accent, Math.round(tam * 0.21)),
-      c.linhaFina ? h("span", { style: { marginTop: 26, fontFamily: F.titulo, fontSize: 34, lineHeight: 1.32, color: "#d9e3dd" } }, limitar(c.linhaFina, 150)) : null,
+      c.linhaFina && c.titulo.length <= 70 ? h("span", { style: { marginTop: 26, fontFamily: F.titulo, fontSize: 34, lineHeight: 1.32, color: "#d9e3dd" } }, limitar(c.linhaFina, 150)) : null,
     ),
     div(
       { position: "absolute", left: 72, right: 72, bottom: 56, flexDirection: "column" },
