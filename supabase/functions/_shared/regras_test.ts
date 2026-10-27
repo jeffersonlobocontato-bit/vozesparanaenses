@@ -19,6 +19,7 @@ import { corpoTitulo, limitar } from "./instagram-cards.ts";
 import { normalizarColuna, separarPautas, textoDaPagina, urlPermitida } from "./coluna-politica.ts";
 import { faltando5w1h, motivoVeto5w1h } from "./cinco-w.ts";
 import { CICLOS_PORTAIS, cicloAtual, fonteElegivel, imagemValida, normalizarUrl, ordenarPorTentativa } from "./coleta.ts";
+import { ehFotoGenerica, escolherFotoGenerica } from "./foto-generica.ts";
 
 const src = Deno.readTextFileSync(new URL("../../../src/lib/parana-municipios.ts", import.meta.url));
 const cidades = [...src.matchAll(/\{ slug: "([^"]+)", name: "([^"]+)", region: "([^"]+)" \}/g)].map((m) => ({ slug: m[1], nome: JSON.parse(`"${m[2]}"`), regiao_id: m[3] }));
@@ -363,5 +364,16 @@ const fila = ordenarPorTentativa([
   { id: "nunca", ultimo_scrape_em: null, ultimo_ciclo: null },
 ]).map((f) => f.id).join(",");
 ok("fila: nunca tentada › tentada ontem › travada que acabou de tentar", fila === "nunca,ontem,travada", fila);
+// Banco de fotos genéricas (segurança/esportes sem foto)
+const gid = (ed: string, t: string) => escolherFotoGenerica(ed, t, "abc")?.id ?? "nenhuma";
+ok("acidente na BR-277 → rodovia", gid("seguranca", "Colisão na BR-277 deixa dois feridos").startsWith("rodovia"));
+ok("incêndio → bombeiros", gid("seguranca", "Incêndio destrói casa em Toledo") === "bombeiros-1");
+ok("delegado → polícia civil", gid("seguranca", "Delegado prende suspeito de golpe").startsWith("civil"));
+ok("presídio → polícia penal", gid("seguranca", "Detentos fogem de presídio") === "penal-1");
+ok("assalto → viatura da PM", gid("seguranca", "Homem é preso após assalto a mercado").startsWith("pm-viatura"));
+ok("Coritiba → Couto Pereira", gid("esportes", "Coritiba vence o Londrina") === "couto-pereira-1");
+ok("outro clube → sem foto", gid("esportes", "Operário empata em Ponta Grossa") === "nenhuma");
+ok("outra editoria → sem foto", gid("saude", "Hospital abre leitos") === "nenhuma");
+ok("URL do banco é genérica", ehFotoGenerica("https://vozesparanaenses.com.br/fotos-genericas/civil-1.jpg"));
 console.log(falhas ? `\n${falhas} FALHA(S)` : "\nTudo certo");
 if (falhas) Deno.exit(1);

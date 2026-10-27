@@ -22,6 +22,7 @@
 // HORÁRIO: um post por vez, com intervalo mínimo entre eles (alerta só
 // precisa do intervalo curto), dentro da janela do dia e até o teto diário.
 
+import { ehFotoGenerica } from "./foto-generica.ts";
 export type Classe = "alerta" | "tragedia" | "seguranca" | "nacional" | "internacional" | "destaque" | "regional" | "fora";
 
 export type MateriaIG = {
@@ -106,12 +107,15 @@ export function classificar(m: MateriaIG, cfg: ConfigIG = CONFIG_PADRAO, agora?:
 
 /** Foto de verdade (prefeitura, agência, Commons), não ilustração de IA. */
 export function fotoReal(m: MateriaIG): boolean {
-  return !!m.imagem_capa_url && m.foto_origem !== "ilustracao_ia" && !/ilustracao-ia/.test(m.imagem_capa_url);
+  return !!m.imagem_capa_url && m.foto_origem !== "ilustracao_ia" && !/ilustracao-ia/.test(m.imagem_capa_url) &&
+    !ehFotoGenerica(m.imagem_capa_url, m.foto_origem);
 }
 
 /** A foto da matéria pode ir para o card? (tragédia nunca leva foto; alerta leva, se não for de vítima) */
 export function temFotoUtilizavel(m: MateriaIG, classe: Classe): boolean {
   if (!m.imagem_capa_url) return false;
+  // Foto genérica de arquivo (viatura, delegacia...) não vai para o card.
+  if (ehFotoGenerica(m.imagem_capa_url, m.foto_origem)) return false;
   if (classe === "tragedia") return false;
   if (RE_VITIMA.test(norm(`${m.titulo} ${m.subtitulo ?? ""}`))) return false;
   return true;

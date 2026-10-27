@@ -1118,7 +1118,10 @@ export const getPrimeiraDobra = createServerFn({ method: "GET" })
     const doSlot = (nome: string, motivo: ItemDobra["motivo"]) =>
       slot(nome).map((a) => ({ ...a, cidade_principal: null, cidades_mencionadas: null, motivo }) as ItemDobra);
 
-    const comFoto = (l: ItemDobra[]) => l.find((i) => i.cover_image_url && !usados.has(i.id)) ?? null;
+    // Manchete pede foto do fato: a foto genérica de arquivo (viatura,
+    // delegacia — public/fotos-genericas) não vale.
+    const comFoto = (l: ItemDobra[]) =>
+      l.find((i) => i.cover_image_url && !/\/fotos-genericas\//.test(i.cover_image_url) && !usados.has(i.id)) ?? null;
     const primeiro = (...listas: ItemDobra[][]) => {
       for (const l of listas) { const i = l.find((x) => !usados.has(x.id)); if (i) return i; }
       return null;

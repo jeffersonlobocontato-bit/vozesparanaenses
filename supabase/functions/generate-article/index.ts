@@ -14,6 +14,7 @@
 import { faltando5w1h, motivoVeto5w1h } from "../_shared/cinco-w.ts";
 import { candidatoDuplicata, mesmoFato } from "../_shared/duplicidade.ts";
 import { exigirInterno } from "../_shared/auth.ts";
+import { escolherFotoGenerica, FOTO_ORIGEM_GENERICA } from "../_shared/foto-generica.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
 import { carregarCidades, cidadePorNome } from "../_shared/cidades.ts";
 import { decidirFormato, decidirImagem, ehAbrangenciaNacional, podeIrParaDobra, prioridadeDoTema, temaHeuristico, type DecisaoImagem, type OrigemPauta, type Prioridade, type Tema, type TipoImagem } from "../_shared/crivo-editorial.ts";
@@ -595,7 +596,7 @@ Você é repórter, não comentarista. Relate o fato; não tome partido.
   //     específico sem foto liberada → nenhuma (VAPT-VUPT)
   // Matéria do editor (fora do automático) mantém a foto geral da cidade/
   // região como reserva — exceto curadoria e esportes, que são só texto.
-  let fotoOrigem: "fonte_autorizada" | "cidade_geral" | "regiao_geral" | "commons_tema" | "ilustracao_ia" | "nenhuma" = "nenhuma";
+  let fotoOrigem: "fonte_autorizada" | "cidade_geral" | "regiao_geral" | "commons_tema" | "ilustracao_ia" | "generica_institucional" | "nenhuma" = "nenhuma";
   try {
     const { data: imgRow } = await sb.from("article_clusters").select("imagem_tipo").eq("id", clusterId).maybeSingle();
     const tipoImagem = ((imgRow as { imagem_tipo?: string } | null)?.imagem_tipo ?? null) as TipoImagem | null;
@@ -676,6 +677,24 @@ Você é repórter, não comentarista. Relate o fato; não tome partido.
     }
   } catch (_) {
     // Falha na foto não bloqueia a matéria — o editor pode ajustar a capa.
+  }
+
+  // Segurança e esportes sem foto liberada: foto genérica de assessoria
+  // (banco curado em _shared/foto-generica.ts, crédito institucional,
+  // legenda de imagem de arquivo). Não conta como foto real do fato.
+  if (fotoOrigem === "nenhuma") {
+    const generica = escolherFotoGenerica(categoriaSlug ?? null, `${parsed.titulo} ${parsed.resumo ?? ""}`, inserted.id);
+    if (generica) {
+      try {
+        await sb.from("generated_articles").update({
+          imagem_capa_url: generica.url,
+          og_image_url: generica.url,
+          imagem_credito: generica.credito,
+          imagem_legenda: generica.legenda,
+        }).eq("id", inserted.id);
+        fotoOrigem = FOTO_ORIGEM_GENERICA;
+      } catch (_) { /* segue sem foto */ }
+    }
   }
 
   // Curadoria (política, nacional, internacional, esportes) COM foto liberada
