@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { Link2, Check, Share2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
+import { eventoGA } from "@/lib/analytics";
 
 /**
  * Botões de compartilhamento — de propósito, sem SDK nenhum de terceiro
@@ -40,6 +41,8 @@ function TelegramIcon() {
 }
 
 async function trackShare(canal: string, pagina: string) {
+  // GA4: evento recomendado "share" (vira evento-chave no painel).
+  eventoGA("share", { method: canal, content_type: "article", item_id: pagina });
   try {
     await supabase.functions.invoke("track-pageview", {
       body: { tipo_evento: "compartilhamento", origem_trafego: canal, pagina },

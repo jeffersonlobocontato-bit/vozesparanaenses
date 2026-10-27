@@ -126,11 +126,9 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       },
     ],
     scripts: [
-      // GA4 NÃO carrega mais aqui direto no head — antes disparava pra
-      // TODO visitante, sem perguntar nada (item de LGPD apontado na
-      // auditoria: "rastreamento sem escolha"). Agora só é injetado depois
-      // que o CookieConsentBanner recebe um "Aceitar" — ver
-      // src/lib/cookie-consent.ts e src/components/CookieConsentBanner.tsx.
+      // GA4 não carrega aqui no head: o gtag é injetado no cliente com
+      // Consent Mode v2 (tudo negado até o "Aceitar" do CookieConsentBanner)
+      // — ver src/lib/cookie-consent.ts e src/lib/analytics.ts.
       {
         type: "application/ld+json",
         children: jsonLd({

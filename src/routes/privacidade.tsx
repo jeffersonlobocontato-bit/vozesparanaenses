@@ -60,6 +60,11 @@ function Privacidade() {
             métricas anônimas. Você pode desativá-los no seu navegador; algumas funções podem
             deixar de funcionar.
           </p>
+          <p>
+            A medição de audiência usa o Google Analytics no modo de consentimento: enquanto você
+            não clica em "Aceitar", nenhum cookie de medição é gravado e o Google recebe apenas
+            sinais agregados, sem identificador. Publicidade personalizada fica sempre desativada.
+          </p>
 
           <h2>4. Compartilhamento</h2>
           <p>
