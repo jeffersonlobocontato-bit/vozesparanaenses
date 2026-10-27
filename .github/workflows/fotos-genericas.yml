@@ -2,7 +2,7 @@ name: fotos-genericas
 on:
   push:
     branches: [fotos-genericas]
-    paths: [scripts/fotos-genericas/galerias.txt, scripts/fotos-genericas/candidatas.py]
+    paths: [scripts/fotos-genericas/fontes2.txt, scripts/fotos-genericas/candidatas2.py]
   workflow_dispatch:
 permissions:
   contents: write
@@ -12,7 +12,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - run: pip install pillow
-      - run: python scripts/fotos-genericas/candidatas.py 2>&1 | tee scripts/fotos-genericas/log.txt
+      - run: python scripts/fotos-genericas/candidatas2.py 2>&1 | tee scripts/fotos-genericas/log2.txt
       - run: |
           git config user.name "github-actions"; git config user.email "actions@github.com"
           git add scripts/fotos-genericas
