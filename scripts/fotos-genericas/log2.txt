@@ -1,0 +1,25 @@
+0 https://www.parana.pr.gov.br/Galeria-de-Imagens/Batalhao-de-Policia-Rodoviaria-reforca-fiscalizacao-nas-estradas-no-Corpus https://www.parana.pr.gov.br/sites/default/arquivos_restritos/files/imagem/2022-06/img_9074.jpg | Polícia Rodoviária do Paraná    Rodovias estaduais terão policiamento
+1 https://www.parana.pr.gov.br/Galeria-de-Imagens/Batalhao-de-Policia-Rodoviaria-reforca-fiscalizacao-nas-estradas-no-Corpus https://www.parana.pr.gov.br/sites/default/arquivos_restritos/files/imagem/2022-06/img_7626.jpg | Polícia Rodoviária do Paraná    Rodovias estaduais terão policiamento
+2 https://www.parana.pr.gov.br/Galeria-de-Imagens/Batalhao-de-Policia-Rodoviaria-reforca-fiscalizacao-nas-estradas-no-Corpus https://www.parana.pr.gov.br/sites/default/arquivos_restritos/files/imagem/2022-06/img_2869.jpg | Polícia Rodoviária do Paraná    Rodovias estaduais terão policiamento
+3 https://www.parana.pr.gov.br/Galeria-de-Imagens/Batalhao-de-Policia-Rodoviaria-reforca-fiscalizacao-nas-estradas-no-Corpus https://www.parana.pr.gov.br/sites/default/arquivos_restritos/files/imagem/2022-06/pre_1.jpg | Polícia Rodoviária do Paraná    Rodovias estaduais terão policiamento
+4 https://www.parana.pr.gov.br/Galeria-de-Imagens/Batalhao-de-Policia-Rodoviaria-reforca-fiscalizacao-nas-estradas-no-Corpus https://www.parana.pr.gov.br/sites/default/arquivos_restritos/files/imagem/2022-06/whatsapp_image_2022-06-15_at_15.44.061.jpg | Polícia Rodoviária do Paraná    Rodovias estaduais terão policiamento
+5 https://www.parana.pr.gov.br/Galeria-de-Imagens/Policia-Civil-inicia-atuacao-com-Delegacia-Movel-no-Litoral https://www.parana.pr.gov.br/sites/default/arquivos_restritos/files/imagem/migrados/galeria/64274/20201224_101155_01.jpg | 
+6 https://www.parana.pr.gov.br/Galeria-de-Imagens/Policia-Civil-inicia-atuacao-com-Delegacia-Movel-no-Litoral https://www.parana.pr.gov.br/sites/default/arquivos_restritos/files/imagem/migrados/galeria/64274/20201224_110442_01.jpg | 
+7 https://www.parana.pr.gov.br/Galeria-de-Imagens/Policia-Civil-do-Parana-inaugura-nova-sede-da-Delegacia-da-Mulher-de-Toledo https://www.parana.pr.gov.br/sites/default/arquivos_restritos/files/imagem/2026-06/gabriellelicnveski.toledo8.jpg | Gabrielle Licnveski/PCPR   Polícia Civil do Paraná inaugura nova sede
+8 https://www.parana.pr.gov.br/Galeria-de-Imagens/PCPR-inaugura-delegacia-em-Reserva https://www.parana.pr.gov.br/sites/default/arquivos_restritos/files/imagem/2022-01/reserva-2.jpg | PCPR   PCPR inaugura delegacia em Reserva Foto: PCPR
+9 https://www.parana.pr.gov.br/Galeria-de-Imagens/Delegacia-da-Policia-Civil-em-Ortigueira-ganha-novas-instalacoes https://www.parana.pr.gov.br/sites/default/arquivos_restritos/files/imagem/2023-11/in7.jpg | PCPR    Delegacia da Polícia Civil em Ortigueira ganha novas instalaçõ
+10 https://www.parana.pr.gov.br/Galeria-de-Imagens/POLICIA-PENAL https://www.parana.pr.gov.br/sites/default/arquivos_restritos/files/imagem/2021-11/img_9649.jpg | Geraldo Bubniak/AEN    O Governador Carlos Massa Ratinho Junior entreg
+11 https://www.parana.pr.gov.br/Galeria-de-Imagens/POLICIA-PENAL https://www.parana.pr.gov.br/sites/default/arquivos_restritos/files/imagem/2021-11/20200729_agb_viaturas_depen.jpg | Geraldo Bubniak/AEN    O Governador Carlos Massa Ratinho Junior entreg
+12 https://www.parana.pr.gov.br/Galeria-de-Imagens/Estadio-Couto-Pereira-sera-palco-do-final-da-Taca-das-Favelas https://www.parana.pr.gov.br/sites/default/arquivos_restritos/files/imagem/migrados/galeria/58214/20190827_AGB_EstadioCoutoPereira01.jpg | Geraldo Bubniak/AEN   Estádio Couto Pereira será palco do final da Taç
+falhou https://www.athletico.com.br HTTP Error 405: Not Allowed
+https://www.coritiba.com.br links 0
+https://www.paranaclube.com.br links 5
+falhou https://www.londrinaec.com.br <urlopen error [Errno -2] Name or service not known>
+https://operarioferroviario.com.br links 0
+https://www.maringafc.com.br links 16
+13 https://maringafc.com.br/noticia/maringa-futebol-clube-conquista-o-titulo-historico-de-campeao-brasileiro-da-serie-c-2026/ https://maringafc.com.br/wp-content/uploads/2026/10/IMG_4444-scaled.jpg | Fernando Teramatsu / MFC   O momento mais aguardado da temporada acont
+14 https://maringafc.com.br/noticia/maringa-fc-enfrenta-a-ferroviaria-neste-sabado-em-busca-do-titulo-inedito-do-campeonato-brasileiro-da-serie-c/ https://maringafc.com.br/wp-content/uploads/2026/10/WhatsApp-Image-2026-10-23-at-20.09.10.jpeg | Rodrigo Araújo \/ MFC"},{"@type":"BreadcrumbList","@id":"https:\/\/mar
+15 https://maringafc.com.br/noticia/maringa-fc-participa-do-arbitral-do-campeonato-paranaense-de-2027-em-ponta-grossa/ https://maringafc.com.br/wp-content/uploads/2026/10/IMG_0775.JPG-scaled.jpeg | Victória Sellares"},{"@type":"BreadcrumbList","@id":"https:\/\/maringa
+16 https://maringafc.com.br/noticia/o-maringa-futebol-clube-acerta-a-transferencia-do-atleta-da-base-nathan-araujo-para-o-coritiba/ https://maringafc.com.br/wp-content/uploads/2026/10/WhatsApp-Image-2026-10-20-at-10.36.05.jpeg | Fernando Teramatsu"},{"@type":"BreadcrumbList","@id":"https:\/\/maring
+https://fccascavel.com.br links 20
+total 17
