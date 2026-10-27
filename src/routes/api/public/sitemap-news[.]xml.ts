@@ -11,7 +11,7 @@ export const Route = createFileRoute("/api/public/sitemap-news.xml")({
     handlers: {
       GET: async ({ request }) => {
         const origin = new URL(request.url).origin;
-        const articles = await listLatestArticles({ data: { limit: 500 } }).catch(() => []);
+        const articles = await listLatestArticles({ data: { limit: 1000, comImagem: false } }).catch(() => []);
         const cutoff = Date.now() - 1000 * 60 * 60 * 48;
         const recent = articles.filter((a) => {
           if (!a.region || !a.published_at) return false;

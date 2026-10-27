@@ -9,7 +9,7 @@ export const Route = createFileRoute("/api/public/llms.txt")({
         const origin = new URL(request.url).origin;
         const [regions, latest] = await Promise.all([
           listRegions().catch(() => []),
-          listLatestArticles({ data: { limit: 20 } }).catch(() => []),
+          listLatestArticles({ data: { limit: 20, comImagem: false } }).catch(() => []),
         ]);
         const lines: string[] = [];
         lines.push("# Vozes Paranaenses");

@@ -9,7 +9,7 @@ export const Route = createFileRoute("/api/public/llms-full.txt")({
         const origin = new URL(request.url).origin;
         const [regions, articles] = await Promise.all([
           listRegions().catch(() => []),
-          listLatestArticles({ data: { limit: 500 } }).catch(() => []),
+          listLatestArticles({ data: { limit: 500, comImagem: false } }).catch(() => []),
         ]);
         const lines: string[] = [];
         lines.push("# Vozes Paranaenses — Índice completo para LLMs");
