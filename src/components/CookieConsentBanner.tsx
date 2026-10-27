@@ -24,8 +24,8 @@ export function CookieConsentBanner() {
     >
       <div className="mx-auto flex max-w-5xl flex-col items-start gap-3 sm:flex-row sm:items-center sm:justify-between">
         <p className="text-sm text-slate-700">
-          Utilizamos cookies e tecnologias semelhantes para melhorar sua navegação. Ao continuar navegando você concorda com a nossa{" "}
-          <a href="/privacidade" className="text-[#E29F65] underline">Política de Privacidade</a> e Política de Cookies.
+          Usamos cookies para medir a audiência. Você pode aceitar ou recusar. Saiba mais na nossa{" "}
+          <a href="/privacidade" className="text-[#E29F65] underline">Política de Privacidade</a>.
         </p>
         <div className="flex shrink-0 gap-2">
           <button
