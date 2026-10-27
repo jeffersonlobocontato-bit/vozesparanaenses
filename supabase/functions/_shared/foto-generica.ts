@@ -33,19 +33,30 @@ type Grupo = {
 const AEN_PM = "Foto: Rodrigo Félix Leal/AEN";
 
 // A ordem importa: o primeiro gatilho que casar decide.
-const GRUPOS: Grupo[] = [
+export const GRUPOS: Grupo[] = [
   {
     editoria: "seguranca",
-    gatilho: /\b(incendio|fogo|chamas|bombeir|resgat|afoga|soterr|desabamento|desabou|deslizamento)/,
+    gatilho: /\b(incendio|pegou fogo|fogo (em|atinge|destroi|destruiu)|chamas|bombeir|siate|resgat|afoga|soterr|desabamento|desabou|deslizamento|correnteza)/,
     fotos: [{ id: "bombeiros-1", credito: "Foto: Henrique Vieira/Sesp", legenda: "Viaturas do Corpo de Bombeiros do Paraná (imagem de arquivo)" }],
   },
   {
     editoria: "seguranca",
-    gatilho: /\b(rodovia|br-?\d{3}|pr-?\d{3}|estrada|acidente|colisao|colidi|capot|atropel|transito|motorista|caminhao|carreta|engavet|batida|motociclista|blitz|embriaguez|lei seca)/,
+    // Só estrada (rodovia estadual): a foto é da Polícia Rodoviária Estadual.
+    gatilho: /\b(rodovias?\b|prc?-?\d{3}|estrada|engavet|blitz|lei seca)/,
     fotos: [
       { id: "rodovia-1", credito: "Foto: Polícia Rodoviária do Paraná", legenda: "Viatura da Polícia Rodoviária Estadual (imagem de arquivo)" },
       { id: "rodovia-2", credito: "Foto: Polícia Rodoviária do Paraná", legenda: "Fiscalização da Polícia Rodoviária Estadual (imagem de arquivo)" },
       { id: "rodovia-3", credito: "Foto: Polícia Rodoviária do Paraná", legenda: "Motociclistas da Polícia Rodoviária Estadual (imagem de arquivo)" },
+    ],
+  },
+  {
+    editoria: "seguranca",
+    // Trânsito urbano: quem atende é a PM.
+    gatilho: /\b(acidente de transito|colisao|colidi|capot|atropel|tomba|batida entre|motociclista|motoboy)/,
+    fotos: [
+      { id: "pm-viatura-1", credito: AEN_PM, legenda: "Viaturas da Polícia Militar do Paraná (imagem de arquivo)" },
+      { id: "pm-viatura-2", credito: AEN_PM, legenda: "Viaturas da Polícia Militar do Paraná (imagem de arquivo)" },
+      { id: "pm-viatura-3", credito: AEN_PM, legenda: "Viaturas da Polícia Militar do Paraná (imagem de arquivo)" },
     ],
   },
   {
@@ -68,6 +79,8 @@ const GRUPOS: Grupo[] = [
   },
   {
     editoria: "seguranca",
+    // Padrão: só quando é caso de polícia (queda em casa, mal súbito etc. ficam sem foto).
+    gatilho: /\b(policia|pm\b|policiais|policial|rotam|bpfron|prend|preso|presa|prisao|flagrante|furt|roub|assalt|homicid|assassin|tiro|disparo|arma|droga|trafic|apreen|abordag|agred|agress|ameac|violencia|crime|suspeit|facad|esfaque)/,
     fotos: [
       { id: "pm-viatura-1", credito: AEN_PM, legenda: "Viaturas da Polícia Militar do Paraná (imagem de arquivo)" },
       { id: "pm-viatura-2", credito: AEN_PM, legenda: "Viaturas da Polícia Militar do Paraná (imagem de arquivo)" },
@@ -76,7 +89,7 @@ const GRUPOS: Grupo[] = [
   },
   {
     editoria: "esportes",
-    gatilho: /\b(coritiba|coxa|couto pereira)\b/,
+    gatilho: /\b(coritiba|couto pereira)\b/,
     fotos: [{ id: "couto-pereira-1", credito: "Foto: Geraldo Bubniak/AEN", legenda: "Estádio Couto Pereira, em Curitiba (imagem de arquivo)" }],
   },
 ];
@@ -95,6 +108,12 @@ function hash(s: string): number {
  * Escolhe a foto genérica (ou null). `semente` (id da matéria) alterna entre
  * as fotos do mesmo grupo para a home não repetir a mesma imagem.
  */
+// Sem foto genérica: crimes sexuais e contra crianças (nenhuma imagem
+// ilustrativa), e casos federais (PF, Receita, PRF, Gaeco, BR) — o banco é
+// das forças estaduais e mostraria a corporação errada.
+export const SEM_FOTO = /\b(estupr|abuso sexual|infantojuvenil|pedofil|maus-tratos|vulneravel)/;
+export const FEDERAL = /\b(policia federal|pf\b|receita federal|gaeco|prf\b|policia rodoviaria federal|br-?\d{3})/;
+
 export function escolherFotoGenerica(
   editoria: string | null | undefined,
   texto: string,
@@ -102,6 +121,7 @@ export function escolherFotoGenerica(
 ): (FotoGenerica & { url: string }) | null {
   if (editoria !== "seguranca" && editoria !== "esportes") return null;
   const t = norm(texto);
+  if (editoria === "seguranca" && (SEM_FOTO.test(t) || FEDERAL.test(t))) return null;
   const grupo = GRUPOS.find((g) => g.editoria === editoria && (!g.gatilho || g.gatilho.test(t)));
   if (!grupo) return null;
   const foto = grupo.fotos[hash(semente) % grupo.fotos.length];

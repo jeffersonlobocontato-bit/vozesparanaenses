@@ -366,7 +366,15 @@ const fila = ordenarPorTentativa([
 ok("fila: nunca tentada › tentada ontem › travada que acabou de tentar", fila === "nunca,ontem,travada", fila);
 // Banco de fotos genéricas (segurança/esportes sem foto)
 const gid = (ed: string, t: string) => escolherFotoGenerica(ed, t, "abc")?.id ?? "nenhuma";
-ok("acidente na BR-277 → rodovia", gid("seguranca", "Colisão na BR-277 deixa dois feridos").startsWith("rodovia"));
+ok("acidente na PR-456 → rodovia", gid("seguranca", "Colisão na PR-456 deixa dois feridos").startsWith("rodovia"));
+ok("BR (federal) → sem foto", gid("seguranca", "Colisão na BR-277 deixa dois feridos") === "nenhuma");
+ok("crime sexual → sem foto", gid("seguranca", "Homem é preso por estupro de vulnerável") === "nenhuma");
+ok("queda em casa → sem foto", gid("seguranca", "Idosa sofre corte após queda de sofá") === "nenhuma");
+ok("arma de fogo não é bombeiros", gid("seguranca", "Homem é preso após disparos de arma de fogo").startsWith("pm-viatura"));
+ok("colisão urbana → viatura da PM", gid("seguranca", "Motoboy fica ferido após colisão no Centro").startsWith("pm-viatura"));
+ok("rodoviária não é rodovia", gid("seguranca", "Homem passa mal em ônibus na rodoviária") === "nenhuma");
+ok("coxa (corpo) não é Coritiba", gid("esportes", "Corinthians treina e Memphis sente a coxa") === "nenhuma");
+ok("Siate → bombeiros", gid("seguranca", "Mulher cai de escada e é atendida pelo Siate") === "bombeiros-1");
 ok("incêndio → bombeiros", gid("seguranca", "Incêndio destrói casa em Toledo") === "bombeiros-1");
 ok("delegado → polícia civil", gid("seguranca", "Delegado prende suspeito de golpe").startsWith("civil"));
 ok("presídio → polícia penal", gid("seguranca", "Detentos fogem de presídio") === "penal-1");
