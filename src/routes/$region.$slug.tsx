@@ -557,6 +557,8 @@ function ArticlePage() {
             <img
               src={article.cover_image_url}
               alt={article.title}
+              fetchPriority="high"
+              decoding="async"
               className="w-full rounded-sm object-cover shadow-[0_20px_60px_-20px_rgba(10,37,64,0.35)]"
             />
             {(() => {

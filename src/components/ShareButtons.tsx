@@ -60,14 +60,18 @@ export function ShareButtons({ url, title, compact = false }: { url: string; tit
     if (typeof navigator !== "undefined" && "share" in navigator) setCanNativeShare(true);
   }, []);
 
-  const encodedUrl = encodeURIComponent(url);
+  // Link compartilhado leva a origem (UTM): o app do WhatsApp/Telegram não
+  // informa de onde o leitor veio, e sem isso a visita cai em "direto".
+  const comOrigem = (rede: string) =>
+    `${url}${url.includes("?") ? "&" : "?"}utm_source=${rede}&utm_medium=compartilhamento`;
+  const u = (rede: string) => encodeURIComponent(comOrigem(rede));
   const encodedTitle = encodeURIComponent(title);
 
   const canais = [
-    { nome: "WhatsApp", href: `https://api.whatsapp.com/send?text=${encodedTitle}%20${encodedUrl}`, Icon: WhatsAppIcon, cor: "#25D366" },
-    { nome: "Facebook", href: `https://www.facebook.com/sharer/sharer.php?u=${encodedUrl}`, Icon: FacebookIcon, cor: "#1877F2" },
-    { nome: "X", href: `https://twitter.com/intent/tweet?text=${encodedTitle}&url=${encodedUrl}`, Icon: XIcon, cor: "#000000" },
-    { nome: "Telegram", href: `https://t.me/share/url?url=${encodedUrl}&text=${encodedTitle}`, Icon: TelegramIcon, cor: "#26A5E4" },
+    { nome: "WhatsApp", href: `https://api.whatsapp.com/send?text=${encodedTitle}%20${u("whatsapp")}`, Icon: WhatsAppIcon, cor: "#25D366" },
+    { nome: "Facebook", href: `https://www.facebook.com/sharer/sharer.php?u=${u("facebook")}`, Icon: FacebookIcon, cor: "#1877F2" },
+    { nome: "X", href: `https://twitter.com/intent/tweet?text=${encodedTitle}&url=${u("x")}`, Icon: XIcon, cor: "#000000" },
+    { nome: "Telegram", href: `https://t.me/share/url?url=${u("telegram")}&text=${encodedTitle}`, Icon: TelegramIcon, cor: "#26A5E4" },
   ];
 
   async function handleCopy() {

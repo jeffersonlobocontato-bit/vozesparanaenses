@@ -26,7 +26,13 @@ function getRegionMap(): Promise<Map<string, string>> {
 // "ia" separada de "busca", porque distinguir quem chegou via ChatGPT/
 // Perplexity de quem chegou via Google é exatamente o tipo de dado que
 // justifica o investimento em otimização para buscadores de IA (Camada 9).
-function classificarOrigem(referrer: string, host: string): string {
+function classificarOrigem(referrer: string, host: string, search = ""): string {
+  // UTM manda (link da bio do Instagram, links compartilhados): o navegador
+  // interno do Instagram/WhatsApp não informa referrer.
+  const utm = new URLSearchParams(search).get("utm_source")?.toLowerCase() ?? "";
+  if (utm === "whatsapp") return "whatsapp";
+  if (/instagram|facebook|telegram|twitter|^x$|tiktok|threads|linkedin/.test(utm)) return "social";
+  if (utm) return "outro";
   if (!referrer) return "direto";
   let refHost = "";
   try { refHost = new URL(referrer).hostname.replace(/^www\./, ""); } catch { return "outro"; }
@@ -153,6 +159,7 @@ async function trackPageview(pathname: string) {
     const origem_trafego = classificarOrigem(
       typeof document !== "undefined" ? document.referrer : "",
       typeof window !== "undefined" ? window.location.hostname : "",
+      typeof window !== "undefined" ? window.location.search : "",
     );
 
     // A cidade do leitor (por geolocalização de IP) só pode ser resolvida no
