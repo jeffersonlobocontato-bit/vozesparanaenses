@@ -298,7 +298,51 @@ export type Card = CardFoto | CardTipografico | CardAlerta | CardGiroCapa | Card
 const W = 1080;
 const H = 1440;
 
+/**
+ * Post de foto avulso — "lâmina editorial" (versão A, como Folha e Gazeta):
+ * foto em tela cheia, marca pequena no alto à esquerda com a editoria embaixo,
+ * chapéu-balão e título serifado no terço de baixo, crédito no rodapé.
+ * Etiqueta (ex.: ALERTA) no alto à direita.
+ */
+function cardFotoEditorial(c: CardFoto): No {
+  const tam = corpoTitulo(c.titulo, 80);
+  return div(
+    { position: "relative", width: W, height: H, background: COR.dark, overflow: "hidden" },
+    h("img", { src: c.foto, width: W, height: H, style: { position: "absolute", left: 0, top: 0, width: W, height: H, objectFit: "cover" } }),
+    div({
+      position: "absolute", left: 0, top: 0, width: W, height: H,
+      backgroundImage: "linear-gradient(180deg, rgba(15,23,20,0.6) 0%, rgba(15,23,20,0) 20%, rgba(15,23,20,0) 42%, rgba(15,23,20,0.86) 70%, rgba(15,23,20,0.97) 100%)",
+    }),
+    div(
+      { position: "absolute", left: 64, top: 56, flexDirection: "column", gap: 10 },
+      div(
+        { alignItems: "center", gap: 14 },
+        h("img", { src: svgDataUri(ICONE_CLARO), width: 56, height: 56 }),
+        h("span", { style: { fontFamily: F.marca, fontWeight: 700, fontSize: 34, color: "#ffffff", letterSpacing: -0.3 } }, "vozes paranaenses"),
+      ),
+      c.tag ? h("span", { style: { fontFamily: F.chapeu, fontWeight: 700, fontSize: 28, letterSpacing: "0.16em", textTransform: "uppercase", color: COR.accent } }, c.tag) : null,
+    ),
+    c.selo
+      ? div(
+        { position: "absolute", top: 56, right: 56, padding: "12px 24px", background: COR.alerta, borderRadius: 4 },
+        h("span", { style: { fontFamily: F.chapeu, fontWeight: 700, fontSize: 36, lineHeight: 1, letterSpacing: "0.14em", color: "#ffffff" } }, c.selo),
+      )
+      : null,
+    div(
+      { position: "absolute", left: 72, right: 72, bottom: 132, flexDirection: "column" },
+      chapeuBalao(c.chapeu, c.cor),
+      tituloComPonto(c.titulo, { marginTop: 44, fontFamily: F.titulo, fontWeight: 700, fontSize: tam, lineHeight: 1.04, letterSpacing: -0.6, color: "#ffffff" }, COR.accent, Math.round(tam * 0.21)),
+    ),
+    div(
+      { position: "absolute", left: 72, right: 72, bottom: 56, alignItems: "center", justifyContent: "space-between", paddingTop: 22, borderTop: "2px solid rgba(255,255,255,0.22)" },
+      CTA(c.cta ?? "Leia no link da bio", "#ffffff"),
+      c.credito ? CREDITO(limitar(c.credito, 60), COR.darkMuted) : null,
+    ),
+  );
+}
+
 function cardFoto(c: CardFoto): No {
+  if (!c.lamina) return cardFotoEditorial(c);
   const tam = corpoTitulo(c.titulo, 84);
   return div(
     { position: "relative", width: W, height: H, background: COR.dark, overflow: "hidden" },

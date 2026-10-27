@@ -21,6 +21,7 @@ import { chaveVisual, COR_REGIAO, escolherFundo, ESCOPO, limitar, NOME_REGIAO, t
 import { imagemComoDataUri, renderizarCard } from "../_shared/instagram-render.ts";
 import { limparCredito, montarLegenda, redigir } from "../_shared/instagram-redator.ts";
 import { fotoLivrePorTema } from "../_shared/foto-tema.ts";
+import { ehArteDeDivulgacao } from "../_shared/analista-imagem.ts";
 import {
   agendar,
   chapeuDe,
@@ -223,7 +224,9 @@ Deno.serve(async (req) => {
     };
     // Alerta com foto real da matéria sai em foto com a etiqueta ALERTA; sem foto, no card de alerta.
     if (classe === "alerta" && !(temFotoUtilizavel(m, classe) && fotoReal(m))) return cardAlerta();
-    let foto = temFotoUtilizavel(m, classe) && l.imagem_capa_url ? await imagemComoDataUri(l.imagem_capa_url) : null;
+    // Arte de divulgação (cartaz, aviso com texto) não vale como foto no feed.
+    const arte = !!(aiKey && l.imagem_capa_url && temFotoUtilizavel(m, classe) && await ehArteDeDivulgacao(aiKey, l.imagem_capa_url));
+    let foto = temFotoUtilizavel(m, classe) && l.imagem_capa_url && !arte ? await imagemComoDataUri(l.imagem_capa_url) : null;
     if (classe === "alerta" && !foto) return cardAlerta();
     let creditoFoto = limparCredito(l.imagem_credito);
     let fotoUrl = l.imagem_capa_url;

@@ -10,13 +10,11 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Fotos reais de matérias recentes (para as maquetes)
-        run: |
-          mkdir -p previas/fotos
-          K=sb_publishable_fMVraOMiN5QsfLcdVmjLTA_VfukX2cx
-          curl -s "https://flcgtpzfnsrxawvyzzgh.supabase.co/rest/v1/generated_articles?select=titulo,cidade_principal,imagem_capa_url,imagem_credito,foto_origem,regiao:regioes(slug,nome),categoria:editorial_categories(nome)&status=eq.publicado&imagem_capa_url=not.is.null&foto_origem=neq.ilustracao_ia&order=publicado_em.desc&limit=40" -H "apikey: $K" -H "Authorization: Bearer $K" > previas/fotos/lista.json
-          jq -r '[.[] | select(.imagem_capa_url | test("ilustracao-ia") | not) | select(.regiao.slug != "nacional" and .regiao.slug != "internacional")][:8] | to_entries[] | "\(.key)\t\(.value.imagem_capa_url)"' previas/fotos/lista.json | while IFS=$'\t' read i u; do curl -sL "$u" -o "previas/fotos/foto-$i.img"; done
-          ls -la previas/fotos
+      - uses: denoland/setup-deno@v2
+        with: { deno-version: v2.x }
+      - name: Renderiza os cards com o código do robô
+        env: { DENO_NO_PACKAGE_JSON: "1" }
+        run: mkdir -p previas && (deno run -A --node-modules-dir=none scripts/previa-cards.ts 2>&1 | tee previas/log.txt) || true
       - run: |
           git config user.name "github-actions"; git config user.email "actions@github.com"
-          git add -f previas && git commit -m "Fotos para as maquetes" && git push
+          git add -f previas && git commit -m "Prévias dos cards" && git push
