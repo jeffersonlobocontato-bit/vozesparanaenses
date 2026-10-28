@@ -4,6 +4,7 @@ import { Wallet, Home, Inbox, NotebookPen, Columns3, Radio, Map as MapIcon, Bot,
 import { getExternalBrowser } from "@/lib/external-supabase-browser";
 import { Logo } from "@/components/Logo";
 import { situacao, type Assinatura } from "@/lib/custos";
+import { marcarNavegadorDaEquipe } from "@/lib/cookie-consent";
 
 export const Route = createFileRoute("/admin")({
   ssr: false,
@@ -45,6 +46,7 @@ function AdminLayout() {
         return;
       }
       setState("ok");
+      marcarNavegadorDaEquipe();
       if (loc.pathname === "/admin/login") nav({ to: "/admin", replace: true });
     })();
     return () => { alive = false; };

@@ -53,7 +53,12 @@ export function carregarGA4() {
   w.gtag("js", new Date());
   // page_view é manual (analytics.ts), a cada troca de rota, com os
   // parâmetros editoriais (região, editoria, cidade, autoria...).
-  w.gtag("config", GA4_ID, { send_page_view: false });
+  // Navegador da equipe (logou no painel) vai como tráfego interno: o filtro
+  // "Internal Traffic" do GA (traffic_type = internal) tira das métricas.
+  w.gtag("config", GA4_ID, {
+    send_page_view: false,
+    ...(ehNavegadorDaEquipe() ? { traffic_type: "internal" } : {}),
+  });
   if (!document.querySelector(`script[src*="gtag/js?id=${GA4_ID}"]`)) {
     const s = document.createElement("script");
     s.src = `https://www.googletagmanager.com/gtag/js?id=${GA4_ID}`;
@@ -66,4 +71,17 @@ export function carregarGA4() {
  * Mode decide o que ele pode gravar). Nome mantido por compatibilidade. */
 export function restaurarGA4SeJaAceito() {
   carregarGA4();
+}
+
+const CHAVE_EQUIPE = "vp-equipe";
+
+/** Chamado quando admin/editor entra no painel: marca este navegador. */
+export function marcarNavegadorDaEquipe() {
+  try { localStorage.setItem(CHAVE_EQUIPE, "1"); } catch { /* sem storage */ }
+  if (typeof window !== "undefined") window.gtag?.("set", { traffic_type: "internal" });
+}
+
+export function ehNavegadorDaEquipe(): boolean {
+  if (typeof window === "undefined") return false;
+  try { return localStorage.getItem(CHAVE_EQUIPE) === "1"; } catch { return false; }
 }
