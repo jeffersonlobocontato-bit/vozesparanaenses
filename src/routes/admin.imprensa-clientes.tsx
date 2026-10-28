@@ -43,6 +43,8 @@ function AdminImprensaClientes() {
   const [clientes, setClientes] = useState<Cliente[]>([]);
   // Limite de matérias por semana (migração 081); vazio se a coluna ainda não existe.
   const [limites, setLimites] = useState<Record<string, number>>({});
+  // Conteúdos que cada cliente criou no portal (imprensa_submissoes).
+  const [conteudos, setConteudos] = useState<Record<string, { criados: number; publicados: number }>>({});
   const [carregando, setCarregando] = useState(true);
   const [erroLista, setErroLista] = useState<string | null>(null);
   const [formAberto, setFormAberto] = useState(false);
@@ -69,6 +71,14 @@ function AdminImprensaClientes() {
       setClientes((data ?? []) as unknown as Cliente[]);
       const { data: lim, error: limErr } = await sb.from("clientes_imprensa").select("id, limite_semanal");
       setLimites(limErr ? {} : Object.fromEntries((lim ?? []).map((l: { id: string; limite_semanal: number }) => [l.id, l.limite_semanal])));
+      const { data: subs } = await sb.from("imprensa_submissoes").select("cliente_id, status").limit(10000);
+      const cont: Record<string, { criados: number; publicados: number }> = {};
+      for (const s of (subs ?? []) as { cliente_id: string; status: string }[]) {
+        const c = (cont[s.cliente_id] ??= { criados: 0, publicados: 0 });
+        c.criados++;
+        if (s.status === "publicado") c.publicados++;
+      }
+      setConteudos(cont);
     } catch (e: unknown) {
       setErroLista(e instanceof Error ? e.message : "Erro ao carregar a lista de clientes.");
     } finally {
@@ -279,7 +289,15 @@ function AdminImprensaClientes() {
                   <p className="font-semibold text-[#12201E]">{c.nome_empresa} <span className="font-normal text-slate-500">· {c.nome_contato}{c.funcao ? ` · ${c.funcao}` : ""}</span></p>
                   <p className="text-xs text-slate-500">{c.email}{c.origem === "autocadastro" ? " · autocadastro" : ""}</p>
                 </div>
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-3">
+                  <span
+                    className="text-xs text-slate-500"
+                    title="Conteúdos criados pelo cliente no Portal da Imprensa (rascunhos e publicados)"
+                  >
+                    <strong className="font-semibold text-[#12201E]">{conteudos[c.id]?.criados ?? 0}</strong> conteúdos
+                    {" · "}
+                    <strong className="font-semibold text-[#12201E]">{conteudos[c.id]?.publicados ?? 0}</strong> publicados
+                  </span>
                   {c.status === "recusado" ? (
                     <>
                       <StatusPill status="recusado" />
