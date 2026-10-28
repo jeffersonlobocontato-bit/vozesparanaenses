@@ -2,7 +2,7 @@ import { useEffect, useRef } from "react";
 import { useRouterState } from "@tanstack/react-router";
 import { supabase } from "@/integrations/supabase/client";
 import { listRegions } from "@/lib/content.functions";
-import { getConsentimento } from "@/lib/cookie-consent";
+import { getConsentimento, carregarGA4 } from "@/lib/cookie-consent";
 
 declare global {
   interface Window {
@@ -26,7 +26,13 @@ function getRegionMap(): Promise<Map<string, string>> {
 // "ia" separada de "busca", porque distinguir quem chegou via ChatGPT/
 // Perplexity de quem chegou via Google é exatamente o tipo de dado que
 // justifica o investimento em otimização para buscadores de IA (Camada 9).
-function classificarOrigem(referrer: string, host: string): string {
+function classificarOrigem(referrer: string, host: string, search = ""): string {
+  // UTM manda (link da bio do Instagram, links compartilhados): o navegador
+  // interno do Instagram/WhatsApp não informa referrer.
+  const utm = new URLSearchParams(search).get("utm_source")?.toLowerCase() ?? "";
+  if (utm === "whatsapp") return "whatsapp";
+  if (/instagram|facebook|telegram|twitter|^x$|tiktok|threads|linkedin/.test(utm)) return "social";
+  if (utm) return "outro";
   if (!referrer) return "direto";
   let refHost = "";
   try { refHost = new URL(referrer).hostname.replace(/^www\./, ""); } catch { return "outro"; }
@@ -38,29 +44,110 @@ function classificarOrigem(referrer: string, host: string): string {
   return "outro";
 }
 
-async function trackPageview(pathname: string) {
-  // Correção de LGPD: antes, isso disparava pra TODO visitante, sem
-  // perguntar nada ("rastreamento sem escolha", apontado na auditoria).
-  // Agora só roda depois de "Aceitar" no CookieConsentBanner — recusar ou
-  // ainda não ter decidido significa nenhum evento de analytics é enviado,
-  // nem pro GA4 nem pro nosso próprio analytics_events.
-  if (getConsentimento() !== "aceito") return;
+// ---------------------------------------------------------------------------
+// Contexto editorial da página (dimensões personalizadas do GA4, escopo de
+// evento: regiao, editoria, cidade, tipo_conteudo, autoria, data_publicacao).
+// Páginas de matéria publicam o próprio contexto com definirContextoPagina;
+// o page_view dessas rotas espera por ele (até 2,5 s) antes de sair.
+// ---------------------------------------------------------------------------
 
-  // GA4: como o site navega por rotas client-side (sem recarregar a página),
-  // o pageview automático do gtag só dispararia uma vez, no primeiro
-  // carregamento. Desativamos esse automático (send_page_view: false, no
-  // __root.tsx) e disparamos manualmente aqui, a cada troca de rota — sem
-  // isso, o GA4 subcontaria quase todo o tráfego real do site.
-  if (typeof window !== "undefined" && window.gtag) {
-    window.gtag("event", "page_view", {
-      page_path: pathname,
-      page_location: window.location.href,
-      page_title: typeof document !== "undefined" ? document.title : undefined,
-    });
+export type ContextoPagina = {
+  regiao?: string | null;
+  editoria?: string | null;
+  cidade?: string | null;
+  tipo_conteudo?: "materia" | "nota" | "coluna" | "home" | "regiao" | "editoria" | "cidade" | "outro";
+  autoria?: "ia" | "redacao" | "imprensa" | null;
+  data_publicacao?: string | null; // AAAA-MM-DD (fuso de Brasília)
+};
+
+const contextos = new Map<string, ContextoPagina>();
+const esperando = new Map<string, (c: ContextoPagina) => void>();
+let contextoAtual: ContextoPagina = {};
+
+export function definirContextoPagina(pathname: string, ctx: ContextoPagina) {
+  contextos.set(pathname, ctx);
+  const r = esperando.get(pathname);
+  if (r) { esperando.delete(pathname); r(ctx); }
+}
+
+function esperarContexto(pathname: string, ms: number): Promise<ContextoPagina | null> {
+  const ja = contextos.get(pathname);
+  if (ja) return Promise.resolve(ja);
+  return new Promise((resolve) => {
+    const t = setTimeout(() => { esperando.delete(pathname); resolve(null); }, ms);
+    esperando.set(pathname, (c) => { clearTimeout(t); resolve(c); });
+  });
+}
+
+/** Data AAAA-MM-DD no fuso de Brasília. */
+export function dataBrasilia(iso: string | null | undefined): string | null {
+  if (!iso) return null;
+  const d = new Date(iso);
+  if (Number.isNaN(d.getTime())) return null;
+  return d.toLocaleDateString("en-CA", { timeZone: "America/Sao_Paulo" });
+}
+
+function limpar(p: Record<string, unknown>) {
+  const out: Record<string, unknown> = {};
+  for (const [k, v] of Object.entries(p)) if (v !== null && v !== undefined && v !== "") out[k] = v;
+  return out;
+}
+
+/** Evento GA4 com o contexto editorial da página atual anexado. */
+export function eventoGA(nome: string, params: Record<string, unknown> = {}) {
+  if (typeof window === "undefined") return;
+  carregarGA4();
+  window.gtag?.("event", nome, limpar({ ...contextoAtual, ...params }));
+}
+
+async function contextoDaRota(pathname: string, parts: string[]): Promise<ContextoPagina> {
+  if (parts.length === 0) return { tipo_conteudo: "home" };
+  const [a, b, c] = parts;
+  if (a === "coluna") return { tipo_conteudo: "coluna" };
+  if (a === "vozes") return { tipo_conteudo: "coluna", cidade: b ?? null };
+  if (a === "editoria") return { tipo_conteudo: "editoria", editoria: b ?? null };
+  const regionMap = await getRegionMap();
+  if (!regionMap.has(a)) return { tipo_conteudo: "outro" };
+  if (parts.length === 1) return { tipo_conteudo: "regiao", regiao: a };
+  if (b === "editoria") return { tipo_conteudo: "editoria", regiao: a, editoria: c ?? null };
+  if (b === "cidade") return { tipo_conteudo: "cidade", regiao: a, cidade: c ?? null };
+  if (parts.length === 2) {
+    const ctx = await esperarContexto(pathname, 2500);
+    return { tipo_conteudo: "materia", regiao: a, ...(ctx ?? {}) };
+  }
+  return { tipo_conteudo: "outro", regiao: a };
+}
+
+async function trackPageview(pathname: string) {
+  const parts = pathname.split("/").filter(Boolean);
+
+  // GA4 (Consent Mode v2): sai para todo visitante — sem "Aceitar" o gtag
+  // manda só o ping sem cookie, que o Google usa para modelar a audiência.
+  // O page_view automático fica desligado (send_page_view: false) porque o
+  // site navega por rotas client-side; disparamos aqui a cada troca de rota,
+  // já com o contexto editorial da página.
+  try {
+    const ctx = await contextoDaRota(pathname, parts);
+    contextoAtual = ctx;
+    if (typeof window !== "undefined") {
+      carregarGA4();
+      window.gtag?.("event", "page_view", limpar({
+        page_path: pathname,
+        page_location: window.location.href,
+        page_title: typeof document !== "undefined" ? document.title : undefined,
+        content_group: ctx.editoria ?? ctx.tipo_conteudo,
+        ...ctx,
+      }));
+    }
+  } catch {
+    // métrica nunca quebra a navegação
   }
 
+  // Nosso próprio analytics_events (com cidade do leitor por IP no
+  // servidor) continua só depois do "Aceitar" (LGPD).
+  if (getConsentimento() !== "aceito") return;
+
   try {
-    const parts = pathname.split("/").filter(Boolean);
     const regionMap = await getRegionMap();
     const regiaoSlug = parts[0];
     const regiao_id = regiaoSlug ? regionMap.get(regiaoSlug) ?? null : null;
@@ -72,6 +159,7 @@ async function trackPageview(pathname: string) {
     const origem_trafego = classificarOrigem(
       typeof document !== "undefined" ? document.referrer : "",
       typeof window !== "undefined" ? window.location.hostname : "",
+      typeof window !== "undefined" ? window.location.search : "",
     );
 
     // A cidade do leitor (por geolocalização de IP) só pode ser resolvida no

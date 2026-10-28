@@ -1,4 +1,6 @@
 import { jsonLd } from "@/lib/json-ld";
+import { useEffect, useRef, type MouseEvent } from "react";
+import { definirContextoPagina, eventoGA, dataBrasilia } from "@/lib/analytics";
 import { createFileRoute, isNotFound, Link, redirect } from "@tanstack/react-router";
 import { queryOptions, useSuspenseQuery } from "@tanstack/react-query";
 import {
@@ -354,6 +356,52 @@ function ArticlePage() {
   const categoria = article.categoria?.name ?? article.region?.name ?? "Notícia";
   const categoriaSlug = article.categoria?.slug ?? null;
 
+  // --- GA4: contexto editorial do page_view + leitura completa (75%) ---
+  const autoria = article.editor_responsavel
+    ? "redacao"
+    : article.assinatura === ASSINATURA_ASSESSORIA
+      ? "imprensa"
+      : "ia";
+  useEffect(() => {
+    definirContextoPagina(`/${region}/${slug}`, {
+      tipo_conteudo: "materia",
+      regiao: region,
+      editoria: categoriaSlug,
+      cidade: cidadeAtualSlug,
+      autoria,
+      data_publicacao: dataBrasilia(article.published_at),
+    });
+  }, [region, slug, categoriaSlug, cidadeAtualSlug, autoria, article.published_at]);
+
+  const articleRef = useRef<HTMLElement>(null);
+  useEffect(() => {
+    let enviado = false;
+    const medir = () => {
+      const el = articleRef.current;
+      if (enviado || !el) return;
+      const r = el.getBoundingClientRect();
+      if (r.height <= 0) return;
+      if ((window.innerHeight - r.top) / r.height >= 0.75) {
+        enviado = true;
+        eventoGA("leitura_completa", { percent_scrolled: 75 });
+        window.removeEventListener("scroll", medir);
+      }
+    };
+    window.addEventListener("scroll", medir, { passive: true });
+    return () => window.removeEventListener("scroll", medir);
+  }, [slug]);
+
+  const slugsRegioes = new Set(allRegions.map((r) => r.slug));
+  function aoClicar(e: MouseEvent<HTMLDivElement>) {
+    const a = (e.target as HTMLElement).closest("a");
+    if (!a || a.origin !== window.location.origin) return;
+    const partes = a.pathname.split("/").filter(Boolean);
+    if (partes.length !== 2 || !slugsRegioes.has(partes[0])) return;
+    if (partes[1] === "cidade" || partes[1] === "editoria" || partes[1] === slug) return;
+    const bloco = (a.closest("[data-bloco]") as HTMLElement | null)?.dataset.bloco ?? "corpo";
+    eventoGA("clique_relacionada", { destino: a.pathname, bloco });
+  }
+
   // --- Cross-linking: monta dicionário e transforma corpo em parágrafos linkados ---
   const linkTerms = buildLinkTerms({
     regions: allRegions.map((r) => ({ slug: r.slug, name: r.name })),
@@ -381,10 +429,10 @@ function ArticlePage() {
       : relatedCrosslink.mesmaRegiao.slice(0, 3);
 
   return (
-    <div className="min-h-screen bg-white text-slate-900">
+    <div className="min-h-screen bg-white text-slate-900" onClickCapture={aoClicar}>
       <SiteHeader />
 
-      <article className="mx-auto max-w-4xl px-4 pb-16 pt-8 md:pt-12">
+      <article ref={articleRef} className="mx-auto max-w-4xl px-4 pb-16 pt-8 md:pt-12">
         {/* Breadcrumb hierárquico (SEO interno) */}
         <nav
           aria-label="Trilha de navegação"
@@ -509,6 +557,8 @@ function ArticlePage() {
             <img
               src={article.cover_image_url}
               alt={article.title}
+              fetchPriority="high"
+              decoding="async"
               className="w-full rounded-sm object-cover shadow-[0_20px_60px_-20px_rgba(10,37,64,0.35)]"
             />
             {(() => {
@@ -795,7 +845,7 @@ function ArticlePage() {
 
       {/* MAIS DE {CIDADE} — cross-link municipal */}
       {mesmaCidade.length > 0 && article.cidade_principal && cidadeAtualSlug && (
-        <section className="border-t border-slate-200 bg-white">
+        <section data-bloco="mais-da-cidade" className="border-t border-slate-200 bg-white">
           <div className="mx-auto max-w-6xl px-4 py-10">
             <div className="mb-6 flex items-center gap-3">
               <span className="inline-block bg-[#12201E] px-3 py-1 text-xs font-bold uppercase tracking-[0.18em] text-white">
@@ -849,7 +899,7 @@ function ArticlePage() {
 
       {/* MAIS {REGIÃO} — grade de miniaturas ao estilo CGN */}
       {related.length > 0 && (
-        <section className="border-t border-slate-200 bg-slate-50">
+        <section data-bloco="mais-da-regiao" className="border-t border-slate-200 bg-slate-50">
           <div className="mx-auto max-w-6xl px-4 py-12">
             <div className="mb-6 flex items-center gap-3">
               <span className="inline-block bg-[#12201E] px-3 py-1 text-xs font-bold uppercase tracking-[0.18em] text-white">

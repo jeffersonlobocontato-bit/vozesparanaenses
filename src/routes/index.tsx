@@ -789,7 +789,7 @@ function _HeroCardImpl({ article, cidadeLeitor }: { article: RankedArticle | Ite
     <article className="group">
       {article?.cover_image_url && (
         <div className="aspect-video w-full overflow-hidden bg-slate-100">
-          <img src={article.cover_image_url} alt="" className="h-full w-full object-cover" />
+          <img src={article.cover_image_url} alt="" className="h-full w-full object-cover" fetchPriority="high" decoding="async" />
         </div>
       )}
       <div className={article?.cover_image_url ? "mt-4" : ""}>

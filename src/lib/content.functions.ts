@@ -355,18 +355,31 @@ export const listCategorias = createServerFn({ method: "GET" }).handler(
   });
 
 export const listLatestArticles = createServerFn({ method: "GET" })
-  .inputValidator((d: { limit?: number }) => ({ limit: d.limit ?? 12 }))
+  // comImagem: as vitrines do site só mostram matéria com capa (padrão);
+  // sitemap, RSS e llms.txt passam false — matéria sem foto também precisa
+  // ser encontrada pelo Google. Acima de 1.000, busca em páginas (o
+  // PostgREST corta cada consulta em 1.000 linhas).
+  .inputValidator((d: { limit?: number; comImagem?: boolean }) => ({
+    limit: Math.min(d.limit ?? 12, 10000),
+    comImagem: d.comImagem ?? true,
+  }))
   .handler(async ({ data }): Promise<ArticleListItem[]> => {
     const { getExternalSupabase } = await import("./external-supabase.server");
     const sb = getExternalSupabase();
-    const run = (cols: string) =>
-      sb
-        .from("generated_articles")
-        .select(cols)
-        .eq("status", "publicado")
-        .not("imagem_capa_url", "is", null)
-        .order("publicado_em", { ascending: false })
-        .limit(data.limit);
+    const PAGINA = 1000;
+    const run = async (cols: string) => {
+      const linhas: unknown[] = [];
+      for (let de = 0; de < data.limit; de += PAGINA) {
+        const ate = Math.min(de + PAGINA, data.limit) - 1;
+        let q = sb.from("generated_articles").select(cols).eq("status", "publicado");
+        if (data.comImagem) q = q.not("imagem_capa_url", "is", null);
+        const r = await q.order("publicado_em", { ascending: false }).range(de, ate);
+        if (r.error) return { data: null, error: r.error };
+        linhas.push(...(r.data ?? []));
+        if ((r.data ?? []).length < ate - de + 1) break;
+      }
+      return { data: linhas, error: null };
+    };
     let res = await run(MATERIA_LIST_COLS);
     if (res.error && /fixado_(posicao|escopo|regioes|cidades)/i.test(res.error.message)) {
       res = await run(
@@ -1105,7 +1118,10 @@ export const getPrimeiraDobra = createServerFn({ method: "GET" })
     const doSlot = (nome: string, motivo: ItemDobra["motivo"]) =>
       slot(nome).map((a) => ({ ...a, cidade_principal: null, cidades_mencionadas: null, motivo }) as ItemDobra);
 
-    const comFoto = (l: ItemDobra[]) => l.find((i) => i.cover_image_url && !usados.has(i.id)) ?? null;
+    // Manchete pede foto do fato: a foto genérica de arquivo (viatura,
+    // delegacia — public/fotos-genericas) não vale.
+    const comFoto = (l: ItemDobra[]) =>
+      l.find((i) => i.cover_image_url && !/\/fotos-genericas\//.test(i.cover_image_url) && !usados.has(i.id)) ?? null;
     const primeiro = (...listas: ItemDobra[][]) => {
       for (const l of listas) { const i = l.find((x) => !usados.has(x.id)); if (i) return i; }
       return null;

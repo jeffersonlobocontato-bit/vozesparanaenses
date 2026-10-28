@@ -7,7 +7,7 @@ export const Route = createFileRoute("/api/public/rss.xml")({
     handlers: {
       GET: async ({ request }) => {
         const origin = new URL(request.url).origin;
-        const articles = await listLatestArticles({ data: { limit: 60 } }).catch(() => []);
+        const articles = await listLatestArticles({ data: { limit: 60, comImagem: false } }).catch(() => []);
         const items = articles
           .filter((a) => a.region)
           .map((a) => {
