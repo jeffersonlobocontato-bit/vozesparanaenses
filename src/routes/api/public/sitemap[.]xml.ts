@@ -34,7 +34,9 @@ export const Route = createFileRoute("/api/public/sitemap.xml")({
         ];
         for (const r of regions) {
           urls.push({ loc: `${origin}/${r.slug}`, priority: "0.8" });
-          urls.push({ loc: `${origin}/${r.slug}/classificados`, priority: "0.5" });
+          // Classificados ficam fora: página vazia sai com noindex, e listar
+          // noindex no sitemap é sinal contraditório para o Google (eram 7 das
+          // 35 páginas "excluídas pela tag noindex" no Search Console).
         }
 
         // Colunas regionais "Vozes {Região}" com nota publicada.
