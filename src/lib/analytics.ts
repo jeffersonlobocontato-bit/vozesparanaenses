@@ -48,7 +48,8 @@ function classificarOrigem(referrer: string, host: string, search = ""): string 
 // Contexto editorial da página (dimensões personalizadas do GA4, escopo de
 // evento: regiao, editoria, cidade, tipo_conteudo, autoria, data_publicacao).
 // Páginas de matéria publicam o próprio contexto com definirContextoPagina;
-// o page_view dessas rotas espera por ele (até 2,5 s) antes de sair.
+// o page_view dessas rotas espera por ele (até 8 s — na primeira visita a
+// matéria só monta depois de carregar os dados) antes de sair.
 // ---------------------------------------------------------------------------
 
 export type ContextoPagina = {
@@ -112,7 +113,7 @@ async function contextoDaRota(pathname: string, parts: string[]): Promise<Contex
   if (b === "editoria") return { tipo_conteudo: "editoria", regiao: a, editoria: c ?? null };
   if (b === "cidade") return { tipo_conteudo: "cidade", regiao: a, cidade: c ?? null };
   if (parts.length === 2) {
-    const ctx = await esperarContexto(pathname, 2500);
+    const ctx = await esperarContexto(pathname, 8000);
     return { tipo_conteudo: "materia", regiao: a, ...(ctx ?? {}) };
   }
   return { tipo_conteudo: "outro", regiao: a };
@@ -129,6 +130,9 @@ async function trackPageview(pathname: string) {
   try {
     const ctx = await contextoDaRota(pathname, parts);
     contextoAtual = ctx;
+    // O <title> da rota nova é aplicado depois da navegação: espera um
+    // instante para o page_view não sair com o título da página anterior.
+    await new Promise((r) => setTimeout(r, 400));
     if (typeof window !== "undefined") {
       carregarGA4();
       window.gtag?.("event", "page_view", limpar({
