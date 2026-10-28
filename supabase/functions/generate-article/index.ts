@@ -14,6 +14,8 @@
 import { faltando5w1h, motivoVeto5w1h } from "../_shared/cinco-w.ts";
 import { candidatoDuplicata, mesmoFato } from "../_shared/duplicidade.ts";
 import { exigirInterno } from "../_shared/auth.ts";
+import { ehLogomarca } from "../_shared/analista-imagem.ts";
+import { imagemValida } from "../_shared/coleta.ts";
 import { escolherFotoGenerica, FOTO_ORIGEM_GENERICA } from "../_shared/foto-generica.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
 import { carregarCidades, cidadePorNome } from "../_shared/cidades.ts";
@@ -82,6 +84,8 @@ type Payload = { cluster_id?: string; extracted_facts_id?: string; extra_instruc
 
 type RawFoto = {
   id: string;
+  fonte_id?: string | null;
+  url?: string | null;
   imagem_original_url: string | null;
   imagem_credito: string | null;
   foto_status: FotoStatus | null;
@@ -251,7 +255,7 @@ Deno.serve(async (req) => {
   }
   const { data: rawsData } = rawIdsCluster.length
     ? await sb.from("raw_articles")
-      .select("id, imagem_original_url, imagem_credito, foto_status, data_publicacao_original, coletado_em, fonte:fontes(nome, tipo, cidade_slug, curadoria_editoria)")
+      .select("id, fonte_id, url, imagem_original_url, imagem_credito, foto_status, data_publicacao_original, coletado_em, fonte:fontes(nome, tipo, cidade_slug, curadoria_editoria)")
       .in("id", rawIdsCluster)
     : { data: [] as RawFoto[] };
   const raws = (rawsData ?? []) as RawFoto[];
@@ -309,10 +313,22 @@ Deno.serve(async (req) => {
     (tipoFonte(r) === "prefeitura" || ehAgenciaPublica(nomeFonte(r))) && r.imagem_original_url
       ? "autorizada"
       : r.foto_status ?? classificarFoto(r.imagem_original_url, r.imagem_credito, nomesVeiculos);
+  // Logomarca, brasão, nome da prefeitura ou imagem padrão do site NÃO é
+  // foto: a matéria sai só com texto (regra de 28/10/2026, caso Toledo).
+  const logos = new Set<string>();
+  for (const r of raws) {
+    // Só as candidatas a capa (as proibidas já não entram) — poupa a IA.
+    if (r.imagem_original_url && statusFoto(r) === "autorizada" && await naoEhFotoDeVerdade(sb, aiKey, r)) {
+      logos.add(r.id);
+      console.log(`[generate-article] imagem descartada (logomarca/padrão do site): ${r.imagem_original_url}`);
+    }
+  }
   const rawFotoAutorizada = [...raws]
     .sort((a, b) => (tipoFonte(a) === "prefeitura" ? -1 : 0) - (tipoFonte(b) === "prefeitura" ? -1 : 0))
-    .find((r) => statusFoto(r) === "autorizada" && r.imagem_original_url) ?? null;
-  const fotoStatus: FotoStatus = rawFotoAutorizada ? "autorizada" : raws.some((r) => r.imagem_original_url) ? "proibida" : "sem_foto";
+    .find((r) => !logos.has(r.id) && statusFoto(r) === "autorizada" && r.imagem_original_url) ?? null;
+  const fotoStatus: FotoStatus = rawFotoAutorizada
+    ? "autorizada"
+    : raws.some((r) => r.imagem_original_url && !logos.has(r.id)) ? "proibida" : "sem_foto";
 
   const tema = (cluster.tema_crivo as Tema | null) ?? temaHeuristico(`${facts.o_que ?? ""} ${facts.quem ?? ""}`);
   const prioridade = (cluster.prioridade_crivo as Prioridade | null) ?? prioridadeDoTema(tema);
@@ -785,6 +801,35 @@ async function encerrarCluster(sb: any, clusterId: string, rawIds: string[], sta
 
 // Copia a foto institucional para o storage (a fonte pode tirar do ar depois).
 // deno-lint-ignore no-explicit-any
+/**
+ * A imagem da fonte é logomarca / nome da instituição / imagem padrão do
+ * site? Três crivos, do mais barato ao mais caro: nome do arquivo, a mesma
+ * imagem em 3+ notícias diferentes da fonte (30 dias) e a IA de visão.
+ */
+async function naoEhFotoDeVerdade(sb: any, aiKey: string, r: RawFoto): Promise<boolean> {
+  const u = r.imagem_original_url;
+  if (!u) return false;
+  if (!imagemValida(u)) return true;
+  // Mesma imagem em 3+ notícias diferentes = imagem padrão do site. Só para
+  // prefeitura: agência pública (Senado, Agência Brasil) repete foto real.
+  const fonte = Array.isArray(r.fonte) ? r.fonte[0] : r.fonte;
+  if (r.fonte_id && fonte?.tipo === "prefeitura") {
+    try {
+      const { data } = await sb.from("raw_articles").select("url")
+        .eq("fonte_id", r.fonte_id).eq("imagem_original_url", u)
+        .gte("coletado_em", new Date(Date.now() - 30 * 86400_000).toISOString())
+        .limit(20);
+      const urls = new Set(((data ?? []) as { url: string | null }[]).map((x) => x.url ?? ""));
+      if (urls.size >= 3) return true;
+    } catch (_) { /* segue para a IA */ }
+  }
+  try {
+    return await ehLogomarca(aiKey, u);
+  } catch (_) {
+    return false;
+  }
+}
+
 async function copiarFotoParaStorage(sb: any, srcUrl: string, articleId: string): Promise<string | null> {
   const controller = new AbortController();
   const timeout = setTimeout(() => controller.abort(), 6_000);

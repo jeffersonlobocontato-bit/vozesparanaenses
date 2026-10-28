@@ -144,3 +144,19 @@ export async function ehArteDeDivulgacao(apiKey: string, url: string): Promise<b
   const r = jsonDe<{ arte?: boolean }>(raw);
   return r?.arte === true;
 }
+
+/**
+ * A "foto" da fonte é logomarca, brasão, nome/marca da prefeitura ou uma
+ * imagem só de texto? Não serve de capa: a matéria sai só com texto. Na
+ * dúvida ou com a IA fora do ar, trata como foto (false) — o filtro pelo
+ * nome do arquivo (`ehLogomarcaPorUrl`) e o de imagem repetida já pegam o
+ * caso mais comum.
+ */
+export async function ehLogomarca(apiKey: string, url: string): Promise<boolean> {
+  const raw = await chamarIa(apiKey, [
+    { role: "system", content: "Você classifica a imagem de capa de uma notícia. Responda só JSON {\"logo\": true|false}. logo = true quando a imagem é principalmente uma logomarca, brasão, selo, marca ou o nome escrito de uma prefeitura/órgão/empresa, ou quando é só texto sobre fundo (sem fotografia). logo = false quando é uma fotografia de pessoas, lugares, obras ou acontecimentos, mesmo com uma marca d'água pequena num canto." },
+    { role: "user", content: [{ type: "text", text: "Esta imagem é logomarca/nome da instituição (sem foto)?" }, { type: "image_url", image_url: { url } }] },
+  ], 60);
+  const r = jsonDe<{ logo?: boolean }>(raw);
+  return r?.logo === true;
+}

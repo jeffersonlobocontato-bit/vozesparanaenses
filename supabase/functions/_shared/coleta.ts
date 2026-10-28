@@ -75,9 +75,29 @@ export function fonteElegivel(f: FonteColeta, agora: Date = new Date(), ciclos: 
 }
 
 /** Remove parâmetros de rastreio para a mesma matéria não entrar duas vezes. */
+/**
+ * Logomarca, brasão, nome da prefeitura ou imagem padrão do site (og:image
+ * de reserva) — pelo NOME do arquivo. Caso Toledo (28/10/2026):
+ * prefeitura_municipal_de_toledo_h_preto.png virou capa de 7 matérias.
+ * Regra da casa: sem foto de verdade, a matéria sai só com texto.
+ */
+export function ehLogomarcaPorUrl(u: string | null | undefined): boolean {
+  if (!u) return false;
+  let arq = u.split(/[?#]/)[0].split("/").pop() ?? "";
+  try { arq = decodeURIComponent(arq); } catch (_) { /* nome cru */ }
+  arq = arq.toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g, "");
+  if (/(logo|logotipo|logomarca|identidade[-_ ]?visual|marca[-_ ]?(d[aeo]|prefeitura|oficial)|cabecalho|favicon|selo[-_.]|og[-_]?image|imagem[-_]?padrao|default|placeholder|compartilhamento|share[-_]?image|^cropped-|prefeitura[-_ ]?municipal|municipio[-_ ]de|_h_(preto|branco|cor)|vertical[-_](preto|branco|cor))/.test(arq)
+    || /\.gif$/.test(arq)) return true;
+  // Palavras fracas (brasão, horizontal, header) só em nome curto: em
+  // "Festival-Cervejeiro-em-Brasao-Dourado" Brasão é o nome do lugar.
+  const partes = arq.replace(/\.[a-z0-9]+$/, "").split(/[-_ .]+/).filter(Boolean).length;
+  return partes <= 4 && /(brasao|horizontal|header)/.test(arq);
+}
+
 /** Descarta o que não é foto de matéria: emoji, ícone, logo, avatar, pixel, SVG. */
 export function imagemValida(u: string | null | undefined): boolean {
   if (!u) return false;
+  if (/^data:/i.test(u) || ehLogomarcaPorUrl(u)) return false;
   if (/s\.w\.org\/images\/core\/emoji|\/emoji\/|gravatar\.com|\/(sprite|logo|icon|favicon|avatar|blank|placeholder)[^/]*$|1x1|pixel\.|\.svg(\?|$)/i.test(u)) return false;
   // Miniatura explícita (?w=200, -150x150) não serve de capa.
   if (/[?&]w=(\d{1,2}|1\d\d|2[0-4]\d)(&|$)|-\d{2,3}x\d{2,3}\.(jpe?g|png|webp)/i.test(u)) return false;

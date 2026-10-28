@@ -357,6 +357,24 @@ ok("miniatura ?w=200 não serve", !imagemValida("https://admin.cnnbrasil.com.br/
 ok("og:image grande serve", imagemValida("https://admin.cnnbrasil.com.br/x/foto.jpg?w=1200&h=630&crop=1"));
 ok("foto comum serve", imagemValida("https://s2-g1.glbimg.com/abc/afp-20261024.jpg"));
 ok("logo não serve", !imagemValida("https://site.com/wp-content/themes/x/logo.png"));
+// Logomarca / nome da prefeitura / imagem padrão do site → só texto (28/10)
+for (const u of [
+  "https://www.toledo.pr.gov.br/sites/default/files/prefeitura_municipal_de_toledo_h_preto.png",
+  "https://www.palmeira.pr.gov.br/wp-content/uploads/Pref-PalmeiraHorizontal-2022-menor.png",
+  "https://odiariodemaringa.com.br/wp-content/uploads/cropped-ODIARIO-DE-MARINGA-544png-1.png",
+  "https://www.camara.leg.br/tema/assets/images/imagens-compartilhamento/imagem-padrao.jpg",
+  "https://www.folhadelondrina.com.br/themes/default/assets/img/default.jpg",
+  "https://cdn.cgn.inf.br/fotos-cgn/2019/10/16161540/CGN768x461.gif",
+  "https://x.pr.gov.br/img/brasao-municipio.png",
+  "https://x.pr.gov.br/img/Logomarca_Prefeitura.jpg",
+  "data:image/svg+xml;base64,PHN2Zz4=",
+]) ok(`logomarca/padrão não serve: ${u.slice(-40)}`, !imagemValida(u));
+for (const u of [
+  "https://www.toledo.pr.gov.br/sites/default/files/styles/noticia/public/2026-10/jogos-idosos-ginasio.jpg",
+  "https://cascavel.pr.gov.br/arquivos/28102026_obra_avenida.jpg",
+  "https://www5.foz.pr.gov.br/wp-content/uploads/2026/10/Festival-Cervejeiro-em-Brasao-Dourado-1024x683.png",
+  "https://www.aen.pr.gov.br/sites/default/arquivos_restritos/files/imagem/2026-10/foto_estrada.jpeg",
+]) ok(`foto de notícia serve: ${u.slice(-30)}`, imagemValida(u));
 // Fila pela última tentativa
 const fila = ordenarPorTentativa([
   { id: "travada", ultimo_scrape_em: null, ultimo_ciclo: { em: "2026-10-24T15:57:00Z" } },
