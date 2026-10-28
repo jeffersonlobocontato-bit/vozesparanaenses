@@ -9,6 +9,7 @@ import { SiteHeader, SiteFooter } from "@/components/SiteHeader";
 import { WeatherWidget } from "@/components/WeatherWidget";
 import { AdsenseSlot } from "@/components/AdsenseSlot";
 import { arrangePinnedSlots } from "@/lib/pinned-layout";
+import { foraDoIndice } from "@/lib/region-labels";
 
 const regionQO = (slug: string) =>
   queryOptions({
@@ -64,7 +65,7 @@ export const Route = createFileRoute("/$region/")({
             // cidade/editoria/classificados.
             {
               name: "robots",
-              content: (loaderData.articles?.length ?? 0) > 0 ? "index, follow" : "noindex, follow",
+              content: (loaderData.articles?.length ?? 0) > 0 && !foraDoIndice(params.region) ? "index, follow" : "noindex, follow",
             },
           ],
           links: [

@@ -1,5 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { listLatestArticles } from "@/lib/content.functions";
+import { foraDoIndice } from "@/lib/region-labels";
 
 /**
  * Sitemap para Google News. Apenas matérias publicadas nas últimas 48h,
@@ -14,7 +15,7 @@ export const Route = createFileRoute("/api/public/sitemap-news.xml")({
         const articles = await listLatestArticles({ data: { limit: 1000, comImagem: false } }).catch(() => []);
         const cutoff = Date.now() - 1000 * 60 * 60 * 48;
         const recent = articles.filter((a) => {
-          if (!a.region || !a.published_at) return false;
+          if (!a.region || !a.published_at || foraDoIndice(a.region.slug)) return false;
           const t = new Date(a.published_at).getTime();
           return Number.isFinite(t) && t >= cutoff;
         });

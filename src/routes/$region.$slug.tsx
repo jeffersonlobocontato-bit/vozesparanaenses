@@ -24,6 +24,7 @@ import { WhatsAppCTA } from "@/components/WhatsAppCTA";
 import { ShareButtons } from "@/components/ShareButtons";
 import { parseVideoEmbed } from "@/lib/video-embed";
 import { AdminInlineEditButton } from "@/components/AdminInlineEditButton";
+import { foraDoIndice } from "@/lib/region-labels";
 
 const articleQO = (regionSlug: string, slug: string) =>
   queryOptions({
@@ -137,8 +138,16 @@ export const Route = createFileRoute("/$region/$slug")({
       { name: "author", content: a.editor_responsavel ?? a.assinatura },
       { name: "ai-content-declaration", content: "assisted; editorial-review-by-human" },
       { name: "generator", content: "Vozes Paranaenses — redação assistida por IA com revisão humana" },
-      { name: "robots", content: "index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1" },
-      { name: "googlebot", content: "index, follow, max-image-preview:large, max-snippet:-1" },
+      // Nacional/internacional: no site, fora do Google (foco de busca é o PR).
+      ...(foraDoIndice(regionSlug)
+        ? [
+            { name: "robots", content: "noindex, follow" },
+            { name: "googlebot", content: "noindex, follow" },
+          ]
+        : [
+            { name: "robots", content: "index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1" },
+            { name: "googlebot", content: "index, follow, max-image-preview:large, max-snippet:-1" },
+          ]),
       // Geo tags — o site inteiro é PR
       { name: "geo.region", content: "BR-PR" },
       { name: "geo.country", content: "BR" },

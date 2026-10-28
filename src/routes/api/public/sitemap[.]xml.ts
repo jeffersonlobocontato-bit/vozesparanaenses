@@ -1,4 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { foraDoIndice } from "@/lib/region-labels";
 import {
   listRegions,
   listLatestArticles,
@@ -33,6 +34,7 @@ export const Route = createFileRoute("/api/public/sitemap.xml")({
           { loc: `${origin}/termos`, priority: "0.3" },
         ];
         for (const r of regions) {
+          if (foraDoIndice(r.slug)) continue;
           urls.push({ loc: `${origin}/${r.slug}`, priority: "0.8" });
           // Classificados ficam fora: página vazia sai com noindex, e listar
           // noindex no sitemap é sinal contraditório para o Google (eram 7 das
@@ -50,6 +52,7 @@ export const Route = createFileRoute("/api/public/sitemap.xml")({
         }
 
         for (const c of cities) {
+          if (foraDoIndice(c.regionSlug)) continue;
           urls.push({
             loc: `${origin}/${c.regionSlug}/cidade/${c.citySlug}`,
             lastmod: c.lastmod ?? undefined,
@@ -58,6 +61,7 @@ export const Route = createFileRoute("/api/public/sitemap.xml")({
         }
 
         for (const cp of categoryPairs) {
+          if (foraDoIndice(cp.regionSlug)) continue;
           urls.push({
             loc: `${origin}/${cp.regionSlug}/editoria/${cp.categoriaSlug}`,
             lastmod: cp.lastmod ?? undefined,
@@ -66,7 +70,7 @@ export const Route = createFileRoute("/api/public/sitemap.xml")({
         }
 
         for (const a of articles) {
-          if (!a.region) continue;
+          if (!a.region || foraDoIndice(a.region.slug)) continue;
           urls.push({
             loc: `${origin}/${a.region.slug}/${a.slug}`,
             lastmod: a.published_at ?? undefined,
