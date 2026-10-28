@@ -173,10 +173,14 @@ Deno.serve(async (req) => {
       }
     }
   })();
-  // deno-lint-ignore no-explicit-any
-  const rt = (globalThis as any).EdgeRuntime;
-  if (rt && typeof rt.waitUntil === "function") rt.waitUntil(task);
-  return json({ ok: true, queued: queue.length, restantes: eligible.length - queue.length, mode: "background" });
+  // Roda o lote DENTRO da requisição (não em EdgeRuntime.waitUntil): em
+  // 28/10/2026 o lote em segundo plano era encerrado sem gravar nada (as
+  // fontes ficavam "andamento: true" para sempre), enquanto a mesma coleta
+  // inline gravou normal — e segue até o fim mesmo quando o pg_net do cron
+  // desiste de esperar a resposta (timeout de 10 s). Lote de 5 cabe no
+  // orçamento de 110 s.
+  await task.catch((e) => console.error("[scrape-prefeitura] lote falhou", (e as Error).message));
+  return json({ ok: true, queued: queue.length, restantes: eligible.length - queue.length, mode: "inline" });
 });
 
 function json(body: unknown, status = 200) {
