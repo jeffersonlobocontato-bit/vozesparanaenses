@@ -2,7 +2,7 @@ import { jsonLd } from "@/lib/json-ld";
 import { useEffect, useRef, type MouseEvent } from "react";
 import { definirContextoPagina, eventoGA, dataBrasilia } from "@/lib/analytics";
 import { createFileRoute, isNotFound, Link, redirect } from "@tanstack/react-router";
-import { queryOptions, useSuspenseQuery } from "@tanstack/react-query";
+import { queryOptions, useQuery, useSuspenseQuery } from "@tanstack/react-query";
 import {
   getArticle,
   findNotaPorArtigoSlug,
@@ -80,7 +80,12 @@ export const Route = createFileRoute("/$region/$slug")({
       }
       throw e;
     }
-    await Promise.all([
+    // Blocos secundários (relacionadas, cross-links, autolinks). No servidor
+    // (primeira visita e robôs de busca) esperamos tudo, para o HTML já sair
+    // com os links internos. Na navegação dentro do site, só a matéria
+    // segura a tela: o resto carrega em paralelo e aparece quando chegar —
+    // antes, as 6 consultas em série levavam ~6,5 s para mostrar o texto.
+    const secundarios = Promise.all([
       context.queryClient.ensureQueryData(relatedQO(params.region)),
       context.queryClient.ensureQueryData(allRegionsQO),
       context.queryClient.ensureQueryData(allCategoriasQO),
@@ -89,6 +94,8 @@ export const Route = createFileRoute("/$region/$slug")({
         relatedArticlesQO(article.id, params.region, article.cidade_principal),
       ),
     ]);
+    if (typeof window === "undefined") await secundarios;
+    else secundarios.catch(() => {});
     return { article };
   },
   head: ({ loaderData, params }) => {
@@ -329,11 +336,13 @@ export const Route = createFileRoute("/$region/$slug")({
 function ArticlePage() {
   const { region, slug } = Route.useParams();
   const { data: article } = useSuspenseQuery(articleQO(region, slug));
-  const { data: relatedAll } = useSuspenseQuery(relatedQO(region));
-  const { data: allRegions } = useSuspenseQuery(allRegionsQO);
-  const { data: allCategorias } = useSuspenseQuery(allCategoriasQO);
-  const { data: allCities } = useSuspenseQuery(allCityLandingsQO);
-  const { data: relatedCrosslink } = useSuspenseQuery(
+  // Secundários sem suspense: a matéria aparece já; estes blocos entram
+  // quando os dados chegarem (no SSR já vêm prontos no cache).
+  const { data: relatedAll = [] } = useQuery(relatedQO(region));
+  const { data: allRegions = [] } = useQuery(allRegionsQO);
+  const { data: allCategorias = [] } = useQuery(allCategoriasQO);
+  const { data: allCities = [] } = useQuery(allCityLandingsQO);
+  const { data: relatedCrosslink = { mesmaCidade: [], mesmaRegiao: [] } } = useQuery(
     relatedArticlesQO(article.id, region, article.cidade_principal),
   );
   const related = relatedAll.filter((r) => r.slug !== slug).slice(0, 8);

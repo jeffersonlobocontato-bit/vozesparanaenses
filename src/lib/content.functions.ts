@@ -20,6 +20,19 @@ function isMissingSchema(err: { message?: string; code?: string } | null): boole
   );
 }
 
+// Cache em memória do servidor para listas que quase não mudam (regiões,
+// editorias, cidades com matéria). Vale enquanto o processo do servidor
+// estiver vivo; evita repetir as consultas a cada página aberta.
+const memoCache = new Map<string, { ate: number; valor: Promise<unknown> }>();
+function memo<T>(chave: string, ttlMs: number, fn: () => Promise<T>): Promise<T> {
+  const agora = Date.now();
+  const hit = memoCache.get(chave);
+  if (hit && hit.ate > agora) return hit.valor as Promise<T>;
+  const valor = fn().catch((e) => { memoCache.delete(chave); throw e; });
+  memoCache.set(chave, { ate: agora + ttlMs, valor });
+  return valor;
+}
+
 export type TemaConfig = {
   paleta?: { primaria?: string; acento?: string; fundo?: string };
   tipografia_destaque?: string;
@@ -103,6 +116,31 @@ async function assinaturaDaMateria(
   sb: any,
   articleId: string,
 ): Promise<string> {
+  // Caminho rápido: uma consulta só (matéria → cluster → matérias brutas →
+  // fontes). Se o embed falhar (schema antigo), cai no caminho em 3 passos.
+  try {
+    const { data: tudo, error: errTudo } = await sb
+      .from("generated_articles")
+      .select("origem_imprensa_cliente_id, cluster_id, cluster:article_clusters(fonte_oficial, cluster_articles(raw:raw_articles(fonte:fontes(tipo))))")
+      .eq("id", articleId)
+      .maybeSingle();
+    if (!errTudo && tudo) {
+      const um = <T,>(v: T | T[] | null | undefined): T | null => (Array.isArray(v) ? v[0] ?? null : v ?? null);
+      const t = tudo as { origem_imprensa_cliente_id?: string | null; cluster_id?: string | null; cluster?: unknown };
+      if (t.origem_imprensa_cliente_id) return ASSINATURA_ASSESSORIA;
+      const cl = um(t.cluster as { fonte_oficial?: boolean; cluster_articles?: Array<{ raw: unknown }> } | null);
+      if (!t.cluster_id || !cl) return ASSINATURA_REDACAO;
+      if (cl.fonte_oficial) return ASSINATURA_ASSESSORIA;
+      const tipos = (cl.cluster_articles ?? []).map((l) => {
+        const raw = um(l.raw as { fonte?: unknown } | null);
+        return (um(raw?.fonte as { tipo?: string } | null))?.tipo ?? null;
+      });
+      if (tipos.length > 0 && tipos.every((x) => x === "prefeitura")) return ASSINATURA_ASSESSORIA;
+      return ASSINATURA_REDACAO;
+    }
+  } catch {
+    // segue pelo caminho antigo
+  }
   try {
     const { data: art, error } = await sb
       .from("generated_articles")
@@ -284,7 +322,8 @@ function sortWithPinned<T extends { fixado_posicao?: number | null }>(rows: T[])
 }
 
 export const listRegions = createServerFn({ method: "GET" }).handler(
-  async (): Promise<Region[]> => {
+  async (): Promise<Region[]> =>
+    memo("regioes", 10 * 60_000, async () => {
     const { getExternalSupabase } = await import("./external-supabase.server");
     const sb = getExternalSupabase();
     const { data, error } = await sb
@@ -298,7 +337,7 @@ export const listRegions = createServerFn({ method: "GET" }).handler(
       throw new Error(error.message);
     }
     return ((data ?? []) as RegiaoRow[]).map(mapRegiao);
-  },
+  }),
 );
 
 export const getRegionBySlug = createServerFn({ method: "GET" })
@@ -336,7 +375,8 @@ export const getRegionBySlug = createServerFn({ method: "GET" })
   });
 
 export const listCategorias = createServerFn({ method: "GET" }).handler(
-  async (): Promise<Categoria[]> => {
+  async (): Promise<Categoria[]> =>
+    memo("categorias", 10 * 60_000, async () => {
     const { getExternalSupabase } = await import("./external-supabase.server");
     const sb = getExternalSupabase();
     const { data, error } = await sb
@@ -352,7 +392,7 @@ export const listCategorias = createServerFn({ method: "GET" }).handler(
       slug: c.slug,
       name: c.nome,
     }));
-  });
+  }));
 
 export const listLatestArticles = createServerFn({ method: "GET" })
   // comImagem: as vitrines do site só mostram matéria com capa (padrão);
@@ -438,7 +478,8 @@ export type CityInRegion = { citySlug: string; name: string; count: number };
 
 /** Todas as duplas (regionSlug, citySlug) publicadas — usado no sitemap. */
 export const listAllCityLandings = createServerFn({ method: "GET" }).handler(
-  async (): Promise<{ regionSlug: string; citySlug: string; name: string; lastmod: string | null }[]> => {
+  async (): Promise<{ regionSlug: string; citySlug: string; name: string; lastmod: string | null }[]> =>
+    memo("cidades-landing", 10 * 60_000, async () => {
     const { getExternalSupabase } = await import("./external-supabase.server");
     const sb = getExternalSupabase();
     const { data, error } = await sb
@@ -477,7 +518,7 @@ export const listAllCityLandings = createServerFn({ method: "GET" }).handler(
       }
     }
     return [...acc.values()];
-  },
+  }),
 );
 
 /** Combinações região×categoria com pelo menos 1 matéria publicada — usado
@@ -1342,30 +1383,28 @@ export const getArticle = createServerFn({ method: "GET" })
   .handler(async ({ data }): Promise<ArticleFull> => {
     const { getExternalSupabase } = await import("./external-supabase.server");
     const sb = getExternalSupabase();
-    const { data: region } = await sb
-      .from("regioes")
-      .select("id")
-      .eq("slug", data.regionSlug)
-      .maybeSingle();
-    if (!region) throw notFound();
+    // Uma consulta só: a região entra pelo join (antes era uma ida a mais ao
+    // banco só para achar o id da região).
     const { data: row, error } = await sb
       .from("generated_articles")
       .select(
-        "id, slug, titulo, subtitulo, resumo, corpo, imagem_capa_url, imagem_legenda, imagem_galeria, publicado_em, updated_at, cidade_principal, cidades_mencionadas, tldr, fatos_5w1h, faq, editor_responsavel, seo_title, seo_description, og_image_url, video_embed_url, video_legenda, video_credito, regiao:regioes(slug, nome), categoria:editorial_categories(slug, nome)",
+        "id, slug, titulo, subtitulo, resumo, corpo, imagem_capa_url, imagem_legenda, imagem_galeria, publicado_em, updated_at, cidade_principal, cidades_mencionadas, tldr, fatos_5w1h, faq, editor_responsavel, seo_title, seo_description, og_image_url, video_embed_url, video_legenda, video_credito, regiao:regioes!inner(id, slug, nome), categoria:editorial_categories(slug, nome)",
       )
-      .eq("regiao_id", (region as { id: string }).id)
+      .eq("regiao.slug", data.regionSlug)
       .eq("slug", data.slug)
       .eq("status", "publicado")
       .maybeSingle();
     if (error) {
       // Fallback quando as colunas geo/updated_at ainda não existirem no schema.
       if (/column .* does not exist|cidade_|updated_at|tldr|fatos_5w1h|faq|editor_responsavel|video_embed_url|video_legenda|video_credito|imagem_legenda|imagem_galeria/i.test(error.message)) {
+        const { data: regiaoLegada } = await sb.from("regioes").select("id").eq("slug", data.regionSlug).maybeSingle();
+        if (!regiaoLegada) throw notFound();
         const { data: legacy, error: legacyErr } = await sb
           .from("generated_articles")
           .select(
             "id, slug, titulo, subtitulo, resumo, corpo, imagem_capa_url, publicado_em, seo_title, seo_description, og_image_url, regiao:regioes(slug, nome), categoria:editorial_categories(slug, nome)",
           )
-          .eq("regiao_id", (region as { id: string }).id)
+          .eq("regiao_id", (regiaoLegada as { id: string }).id)
           .eq("slug", data.slug)
           .eq("status", "publicado")
           .maybeSingle();
