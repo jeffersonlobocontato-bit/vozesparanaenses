@@ -8,7 +8,7 @@ const URL = "https://flcgtpzfnsrxawvyzzgh.supabase.co/rest/v1/generated_articles
 const KEY = "sb_publishable_fMVraOMiN5QsfLcdVmjLTA_VfukX2cx";
 // id da matéria → título do card (curto, fiel ao texto)
 const PEDIDO: Array<[string, string]> = [
-  ["ffb426cc-8a9c-4760-9e44-35110bee4536", "Havan abre terceira megaloja em Londrina com 200 empregos"],
+  ["ffb426cc-8a9c-4760-9e44-35110bee4536", "Havan inaugura no sábado terceira megaloja de Londrina"],
   ["e80b1a50-0308-42f0-a452-7bbbb8975007", "Ônibus intermunicipais não circulam no feriado de Finados"],
   ["2589a526-f30f-4ba9-aff1-0354e0aaba3d", "35ª Münchenfest é adiada e ingressos serão devolvidos"],
 ];
