@@ -260,3 +260,34 @@ export function ehAbrangenciaNacional(onde: string | null | undefined): boolean 
   const t = onde.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
   return /\b(brasil|pais|nacional|territorio nacional|estados brasileiros|varios estados|regiao sul|sul do brasil|centro-sul do brasil|sudeste|nordeste|norte do brasil|centro-oeste)\b/.test(t);
 }
+
+// ---------------------------------------------------------------------------
+// Cota diária do que é de FORA do Paraná (out/2026). Reescrita de notícia
+// nacional/internacional não indexa no Google e não é o que diferencia o
+// portal; o orçamento de IA vai para o local. Alvo: ~10% do que sai por dia.
+// Esporte que fala de clube paranaense NÃO conta na cota (é notícia nossa).
+// ---------------------------------------------------------------------------
+export const LIMITE_DIA_FORA_DO_PR = { nacional: 5, internacional: 2, esportes: 2 } as const;
+export type FaixaForaDoPr = keyof typeof LIMITE_DIA_FORA_DO_PR;
+
+const CLUBE_PARANAENSE = /\b(athletico|atletico[- ]pr|furacao|coritiba|coxa|operario|fantasma|londrina esporte|londrina ec|tubarao|parana clube|tricolor da vila|fc cascavel|cascavel fc|maringa fc|azuriz|cianorte fc|andraus|rio branco[- ]pr|cascavel futsal|copagril|marreco|pato futsal|foz cataratas)\b/;
+
+export function falaDeClubeParanaense(texto: string): boolean {
+  return CLUBE_PARANAENSE.test(texto.toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g, ""));
+}
+
+/**
+ * Em qual faixa da cota de fora do PR este cluster cai (null = não conta).
+ * Região nacional/internacional; esportes têm faixa própria.
+ */
+export function faixaForaDoPr(regiaoSlug: string, categoriaSlug: string, texto: string): FaixaForaDoPr | null {
+  if (regiaoSlug !== "nacional" && regiaoSlug !== "internacional") return null;
+  if (categoriaSlug === "esportes") return falaDeClubeParanaense(texto) ? null : "esportes";
+  return regiaoSlug === "internacional" ? "internacional" : "nacional";
+}
+
+/** Ainda cabe na cota do dia? Prioridade alta ganha uma folga de 2. */
+export function cabeNaCotaForaDoPr(faixa: FaixaForaDoPr, jaNoDia: number, prioridade: string): boolean {
+  const lim = LIMITE_DIA_FORA_DO_PR[faixa] + (prioridade === "alta" ? 2 : 0);
+  return jaNoDia < lim;
+}

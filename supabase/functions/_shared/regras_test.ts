@@ -18,6 +18,7 @@ import { agendar, chapeuDe, classificar, CONFIG_PADRAO, escolherAvulsos, montarG
 import { corpoTitulo, limitar } from "./instagram-cards.ts";
 import { normalizarColuna, separarPautas, textoDaPagina, urlPermitida } from "./coluna-politica.ts";
 import { faltando5w1h, motivoVeto5w1h } from "./cinco-w.ts";
+import { cabeNaCotaForaDoPr, faixaForaDoPr } from "./crivo-editorial.ts";
 import { CICLOS_PORTAIS, cicloAtual, fonteElegivel, imagemValida, normalizarUrl, ordenarPorTentativa } from "./coleta.ts";
 import { ehFotoGenerica, escolherFotoGenerica } from "./foto-generica.ts";
 
@@ -401,5 +402,16 @@ ok("Coritiba → Couto Pereira", gid("esportes", "Coritiba vence o Londrina") ==
 ok("outro clube → sem foto", gid("esportes", "Operário empata em Ponta Grossa") === "nenhuma");
 ok("outra editoria → sem foto", gid("saude", "Hospital abre leitos") === "nenhuma");
 ok("URL do banco é genérica", ehFotoGenerica("https://vozesparanaenses.com.br/fotos-genericas/civil-1.jpg"));
+// Cota diária de fora do PR
+ok("Brasileirão sem clube do PR conta como esportes", faixaForaDoPr("nacional", "esportes", "Flamengo vence o Palmeiras") === "esportes");
+ok("Athletico fora da cota", faixaForaDoPr("nacional", "esportes", "Athletico-PR empata com o Grêmio") === null);
+ok("Coritiba fora da cota", faixaForaDoPr("internacional", "esportes", "Coritiba anuncia reforço") === null);
+ok("política nacional na faixa nacional", faixaForaDoPr("nacional", "politica", "Senado aprova") === "nacional");
+ok("internacional na faixa internacional", faixaForaDoPr("internacional", "internacional", "Guerra") === "internacional");
+ok("região do PR não conta", faixaForaDoPr("oeste", "esportes", "Flamengo") === null);
+ok("cota nacional: 5º passa", cabeNaCotaForaDoPr("nacional", 4, "media"));
+ok("cota nacional: 6º não passa", !cabeNaCotaForaDoPr("nacional", 5, "media"));
+ok("prioridade alta tem folga de 2", cabeNaCotaForaDoPr("nacional", 6, "alta") && !cabeNaCotaForaDoPr("nacional", 7, "alta"));
+
 console.log(falhas ? `\n${falhas} FALHA(S)` : "\nTudo certo");
 if (falhas) Deno.exit(1);

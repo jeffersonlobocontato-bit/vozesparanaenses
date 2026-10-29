@@ -15,7 +15,7 @@
 
 import { exigirInterno } from "../_shared/auth.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
-import { CRIVO_PROMPT, CRIVO_SCHEMA, motivoDescartePortal, pareceReleaseDeAssessoria, parseCrivo, pesoPrioridade, type ResultadoCrivo } from "../_shared/crivo-editorial.ts";
+import { cabeNaCotaForaDoPr, CRIVO_PROMPT, CRIVO_SCHEMA, faixaForaDoPr, type FaixaForaDoPr, motivoDescartePortal, pareceReleaseDeAssessoria, parseCrivo, pesoPrioridade, type ResultadoCrivo } from "../_shared/crivo-editorial.ts";
 
 const cors = {
   "Access-Control-Allow-Origin": "*",
@@ -100,7 +100,7 @@ async function processClusters(
   const _serve = null; // placeholder para manter escopo
 
   // 1. Classificar cada cluster (usa título do primeiro artigo do cluster)
-  const classified: { id: string; regiao_id: string; categoria_id: string; score: number; curadoria_nacional: boolean; fonte_oficial: boolean; prioridade: string }[] = [];
+  const classified: { id: string; regiao_id: string; categoria_id: string; score: number; curadoria_nacional: boolean; fonte_oficial: boolean; prioridade: string; foraDoPr: FaixaForaDoPr | null }[] = [];
   let semValor = 0;
   let descartesPortal = 0;
   for (const c of clusters) {
@@ -192,7 +192,7 @@ async function processClusters(
     }).eq("id", c.id);
     // Que imagem a matéria pode ter (ver decidirImagem) — coluna da 073.
     await sb.from("article_clusters").update({ imagem_tipo: crivo.imagem }).eq("id", c.id);
-    classified.push({ id: c.id, regiao_id: c.regiao_id, categoria_id: cat.id, score: c.prioridade_score, curadoria_nacional: !!c.curadoria_nacional, fonte_oficial: !!c.fonte_oficial, prioridade: crivo.prioridade });
+    classified.push({ id: c.id, regiao_id: c.regiao_id, categoria_id: cat.id, score: c.prioridade_score, curadoria_nacional: !!c.curadoria_nacional, fonte_oficial: !!c.fonte_oficial, prioridade: crivo.prioridade, foraDoPr: faixaForaDoPr(regiaoSlug, cat.slug, excerpt) });
   }
 
   // 2. Aplicar quotas — janela 7 dias, agrupando por região × categoria
@@ -218,6 +218,24 @@ async function processClusters(
     regionTotals.set(row.regiao_id, (regionTotals.get(row.regiao_id) ?? 0) + 1);
   }
 
+  // Cota diária de fora do PR: o que já foi escrito hoje (Brasília) nas
+  // regiões nacional/internacional, por faixa.
+  const diaSp = new Intl.DateTimeFormat("en-CA", { timeZone: "America/Sao_Paulo" }).format(new Date());
+  const inicioIso = new Date(`${diaSp}T00:00:00-03:00`).toISOString();
+  const noDiaForaDoPr: Record<FaixaForaDoPr, number> = { nacional: 0, internacional: 0, esportes: 0 };
+  if (classified.some((c) => c.foraDoPr)) {
+    const { data: hoje } = await sb.from("generated_articles")
+      .select("titulo, regiao:regioes!inner(slug), categoria:editorial_categories(slug)")
+      .in("regiao.slug", ["nacional", "internacional"])
+      .gte("gerado_em", inicioIso)
+      .neq("status", "rejeitado");
+    for (const g of (hoje ?? []) as { titulo: string; regiao: { slug: string }; categoria: { slug: string } | null }[]) {
+      const f = faixaForaDoPr(g.regiao.slug, g.categoria?.slug ?? "", g.titulo ?? "");
+      if (f) noDiaForaDoPr[f]++;
+    }
+  }
+  let foraDaCota = 0;
+
   let selected = 0;
   let discarded = 0;
   let duplicadas = 0;
@@ -237,6 +255,17 @@ async function processClusters(
       duplicadas++;
       discarded++;
       continue;
+    }
+
+    if (c.foraDoPr) {
+      if (!cabeNaCotaForaDoPr(c.foraDoPr, noDiaForaDoPr[c.foraDoPr], c.prioridade)) {
+        await sb.from("article_clusters").update({ status: "descartado" }).eq("id", c.id);
+        await sb.from("article_clusters").update({ descarte_motivo: `cota do dia de fora do PR (${c.foraDoPr})` }).eq("id", c.id);
+        foraDaCota++;
+        discarded++;
+        continue;
+      }
+      noDiaForaDoPr[c.foraDoPr]++;
     }
 
     const rule = quotaMap.get(`${c.regiao_id}:${c.categoria_id}`);
@@ -266,8 +295,8 @@ async function processClusters(
   // tudo" sem nenhuma matéria sair e sem erro visível em canto nenhum.
   // Ter um único lugar escrevendo evita essa corrida e concentra o erro
   // num só ponto, já com retorno detalhado.
-  console.log(`[classify-and-quota] concluído: classified=${classified.length} selected=${selected} discarded=${discarded} duplicadas=${duplicadas} sem_valor=${semValor} descartes_portal=${descartesPortal} viraram_nota=${viraramNota}`);
-  return { classified: classified.length, selected, discarded, duplicadas, sem_valor: semValor, descartes_portal: descartesPortal, viraram_nota: viraramNota, pendentes_para_escrita: selecionados.length };
+  console.log(`[classify-and-quota] concluído: classified=${classified.length} selected=${selected} discarded=${discarded} duplicadas=${duplicadas} sem_valor=${semValor} descartes_portal=${descartesPortal} viraram_nota=${viraramNota} fora_da_cota_pr=${foraDaCota}`);
+  return { classified: classified.length, selected, discarded, duplicadas, sem_valor: semValor, descartes_portal: descartesPortal, viraram_nota: viraramNota, fora_da_cota_pr: foraDaCota, pendentes_para_escrita: selecionados.length };
 }
 
 function json(body: unknown, status = 200) {
