@@ -1,0 +1,35 @@
+name: diag-fontes3
+on:
+  push:
+    branches: [diag-prefeituras]
+    paths: [scripts/diag-prefeituras/alvos3.json]
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  diagnosticar:
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    steps:
+      - uses: actions/checkout@v4
+      - uses: denoland/setup-deno@v2
+        with:
+          deno-version: v2.x
+      - name: Sites oficiais dos municípios do PR (Wikidata)
+        run: |
+          Q='SELECT ?nome ?site WHERE { ?m wdt:P31 wd:Q3184121; wdt:P131 wd:Q15499; wdt:P856 ?site. ?m rdfs:label ?nome FILTER(lang(?nome)="pt") }'
+          curl -sG https://query.wikidata.org/sparql --data-urlencode "query=$Q" -H 'Accept: application/sparql-results+json' -H 'User-Agent: VozesParanaensesBot/1.0 (contato@vozesparanaenses.com.br)' -o wd.json || true
+          python3 -c "
+          import json,unicodedata
+          try: d=json.load(open('wd.json'))['results']['bindings']
+          except Exception: d=[]
+          n=lambda s:''.join(c for c in unicodedata.normalize('NFD',s) if unicodedata.category(c)!='Mn').lower()
+          json.dump({n(b['nome']['value']):b['site']['value'] for b in d},open('scripts/diag-prefeituras/sites.json','w'),ensure_ascii=False)
+          print(len(d),'sites')"
+      - run: timeout 100m deno run --allow-net --allow-read --allow-write --allow-env scripts/diag-prefeituras/diag.ts alvos3 2>&1 | tail -20
+      - run: timeout 30m deno run --allow-net --allow-read --allow-write --allow-env scripts/diag-prefeituras/diag.ts fontes2 2>&1 | tail -10
+      - run: |
+          git config user.name "github-actions"; git config user.email "actions@github.com"
+          git add scripts/diag-prefeituras/resultado-alvos3.json scripts/diag-prefeituras/resultado-fontes2.json scripts/diag-prefeituras/sites.json
+          git commit -m "Diagnóstico: rodada 2" || exit 0
+          for i in 1 2 3; do git pull --rebase -q && git push && break; sleep 5; done

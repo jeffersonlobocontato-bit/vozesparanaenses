@@ -2,7 +2,7 @@ name: diag-prefeituras
 on:
   push:
     branches: [diag-prefeituras]
-    paths: [scripts/diag-prefeituras/alvos.json, scripts/diag-prefeituras/diag.ts]
+    paths: [scripts/diag-prefeituras/alvos.json]
   workflow_dispatch:
 permissions:
   contents: write

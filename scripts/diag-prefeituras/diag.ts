@@ -22,6 +22,9 @@ const DIR = new URL(".", import.meta.url).pathname;
 const ARQ = Deno.args[0] ?? "alvos";
 const alvos: Alvo[] = JSON.parse(await Deno.readTextFile(DIR + ARQ + ".json"));
 const AGORA = Date.now();
+// Site oficial de cada município (Wikidata P856), se o passo anterior baixou.
+let SITES: Record<string, string> = {};
+try { SITES = JSON.parse(await Deno.readTextFile(DIR + "sites.json")); } catch { /* sem lista */ }
 const DIA = 86400_000;
 const UA = "Mozilla/5.0 (compatible; VozesParanaensesBot/1.0; +contato@vozesparanaenses.com.br)";
 
@@ -31,7 +34,7 @@ function comTempo<T>(p: Promise<T>, ms: number, padrao: T): Promise<T> {
 
 async function baixar(u: string): Promise<{ ok: boolean; url: string; html: string }> {
   try {
-    const r = await comTempo(fetch(u, { headers: { "user-agent": UA }, redirect: "follow" }), 12_000, null as unknown as Response);
+    const r = await comTempo(fetch(u, { headers: { "user-agent": UA }, redirect: "follow" }), 20_000, null as unknown as Response);
     if (!r) return { ok: false, url: u, html: "" };
     const html = r.ok ? (await r.text()).slice(0, 600_000) : "";
     return { ok: r.ok, url: r.url || u, html };
@@ -102,7 +105,12 @@ async function candidatas(a: Alvo): Promise<string[]> {
     try { origens.add(new URL(a.url).origin); } catch { /* ignora */ }
   }
   if (a.modo === "cidade") {
-    for (const h of hostsDaCidade(a.cidade)) {
+    const oficial = SITES[semAcento(a.nome.replace(/^Prefeitura de /, "")).toLowerCase()];
+    if (oficial) {
+      const r = await baixar(oficial);
+      if (r.ok) origens.add(new URL(r.url).origin);
+    }
+    if (!origens.size) for (const h of hostsDaCidade(a.cidade)) {
       const r = await baixar(h + "/");
       if (r.ok && r.html.length > 2000) { origens.add(new URL(r.url).origin); break; }
     }
@@ -150,3 +158,4 @@ await Promise.all(Array.from({ length: 10 }, async () => {
 }));
 await Deno.writeTextFile(DIR + (ARQ === "alvos" ? "resultado" : "resultado-" + ARQ) + ".json", JSON.stringify(resultado, null, 1));
 console.log("pronto", resultado.length);
+Deno.exit(0); // fetch pendurado não segura o processo
