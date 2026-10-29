@@ -1,4 +1,5 @@
-import { createFileRoute, Link, notFound } from "@tanstack/react-router";
+import { createFileRoute, Link, notFound, redirect } from "@tanstack/react-router";
+import { findMunicipio } from "@/lib/parana-municipios";
 import { queryOptions, useSuspenseQuery } from "@tanstack/react-query";
 import {
   getRegionBySlug,
@@ -10,6 +11,8 @@ import { WeatherWidget } from "@/components/WeatherWidget";
 import { AdsenseSlot } from "@/components/AdsenseSlot";
 import { arrangePinnedSlots } from "@/lib/pinned-layout";
 import { foraDoIndice } from "@/lib/region-labels";
+
+const REGIOES_EDITORIAIS = new Set(["metropolitana", "litoral", "campos-gerais", "norte-pioneiro", "norte-central", "noroeste", "centro-ocidental", "oeste", "sudoeste", "centro-sul", "nacional", "internacional"]);
 
 const regionQO = (slug: string) =>
   queryOptions({
@@ -23,6 +26,16 @@ const articlesQO = (slug: string) =>
   });
 
 export const Route = createFileRoute("/$region/")({
+  // Endereço curto da cidade: /toledo, /foz-do-iguacu (e "/Foz do Iguaçu")
+  // → 301 para a página canônica /{regiao}/cidade/{cidade}. Os slugs das
+  // regiões e das 399 cidades não se repetem.
+  beforeLoad: ({ params }) => {
+    if (REGIOES_EDITORIAIS.has(params.region)) return;
+    const m = findMunicipio(decodeURIComponent(params.region));
+    if (m?.region) {
+      throw redirect({ to: "/$region/cidade/$cidade", params: { region: m.region, cidade: m.slug }, statusCode: 301 });
+    }
+  },
   loader: async ({ context, params }) => {
     const region = await context.queryClient.ensureQueryData(
       regionQO(params.region),

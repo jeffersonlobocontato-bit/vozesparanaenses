@@ -434,6 +434,38 @@ export const listLatestArticles = createServerFn({ method: "GET" })
     return sortWithPinned(mapped);
   });
 
+/**
+ * A última matéria de cada região do Paraná (fora Nacional/Internacional e a
+ * região `excluir`) — rodapé da página de cidade: "Enquanto isso nas outras
+ * regiões". Com foto quando a região tiver alguma recente.
+ */
+export const ultimaPorRegiao = createServerFn({ method: "GET" })
+  .inputValidator((d: { excluir?: string | null }) => ({ excluir: d.excluir ?? null }))
+  .handler(async ({ data }): Promise<(ArticleListItem & { cidade_principal: string | null })[]> => {
+    const { getExternalSupabase } = await import("./external-supabase.server");
+    const { foraDoIndice } = await import("./region-labels");
+    const sb = getExternalSupabase();
+    const desde = new Date(Date.now() - 7 * 86400_000).toISOString();
+    const r = await sb.from("generated_articles")
+      .select("id, slug, titulo, subtitulo, resumo, imagem_capa_url, publicado_em, cidade_principal, regiao:regioes(slug, nome), categoria:editorial_categories(slug, nome)")
+      .eq("status", "publicado").gte("publicado_em", desde)
+      .order("publicado_em", { ascending: false }).limit(400);
+    if (r.error) {
+      if (isMissingSchema(r.error)) return [];
+      throw new Error(r.error.message);
+    }
+    const porRegiao = new Map<string, ArticleListItem & { cidade_principal: string | null }>();
+    for (const row of (r.data ?? []) as unknown as (MateriaRow & { cidade_principal: string | null })[]) {
+      const m = { ...mapMateria(row), cidade_principal: row.cidade_principal ?? null };
+      const reg = m.region?.slug;
+      if (!reg || reg === data.excluir || foraDoIndice(reg)) continue;
+      const atual = porRegiao.get(reg);
+      // A primeira (mais recente) vale; troca só se a guardada não tem foto e esta tem.
+      if (!atual || (!atual.cover_image_url && m.cover_image_url)) porRegiao.set(reg, m);
+    }
+    return [...porRegiao.values()].sort((a, b) => (a.region?.name ?? "").localeCompare(b.region?.name ?? "", "pt"));
+  });
+
 /* -------------------- Geolocalização editorial (cidade + entorno) -------------------- */
 
 export type ViewerLocation = {

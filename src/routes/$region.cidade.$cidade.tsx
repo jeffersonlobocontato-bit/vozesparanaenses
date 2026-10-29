@@ -1,7 +1,8 @@
 import { jsonLd } from "@/lib/json-ld";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { queryOptions, useSuspenseQuery } from "@tanstack/react-query";
-import { getRegionBySlug, listArticlesByCity, listNotasCidade } from "@/lib/content.functions";
+import { getRegionBySlug, listArticlesByCity, listNotasCidade, ultimaPorRegiao } from "@/lib/content.functions";
+import { findMunicipioBySlug } from "@/lib/parana-municipios";
 import { ColunaCidadeResumo } from "@/components/ColunaCidade";
 import { SiteHeader, SiteFooter } from "@/components/SiteHeader";
 import { AdsenseSlot } from "@/components/AdsenseSlot";
@@ -24,6 +25,13 @@ const notasQO = (citySlug: string) =>
     queryFn: () => listNotasCidade({ data: { citySlug, limit: 5 } }),
   });
 
+const outrasRegioesQO = (regionSlug: string) =>
+  queryOptions({
+    queryKey: ["ultima-por-regiao", regionSlug],
+    queryFn: () => ultimaPorRegiao({ data: { excluir: regionSlug } }),
+    staleTime: 5 * 60_000,
+  });
+
 const regionQO = (regionSlug: string) =>
   queryOptions({
     queryKey: ["region", regionSlug],
@@ -36,6 +44,8 @@ export const Route = createFileRoute("/$region/cidade/$cidade")({
       context.queryClient.ensureQueryData(cityQO(params.region, params.cidade)),
       context.queryClient.ensureQueryData(regionQO(params.region)),
       context.queryClient.ensureQueryData(notasQO(params.cidade)),
+      // Rodapé com as outras regiões: links internos no HTML para os robôs.
+      context.queryClient.ensureQueryData(outrasRegioesQO(params.region)).catch(() => []),
     ]);
     return { city, region };
   },
@@ -144,6 +154,7 @@ function CityPage() {
   const { data: city } = useSuspenseQuery(cityQO(region, cidade));
   const { data: reg } = useSuspenseQuery(regionQO(region));
   const { data: notas } = useSuspenseQuery(notasQO(cidade));
+  const { data: outras } = useSuspenseQuery(outrasRegioesQO(region));
   const neighbors = getNeighboringCities(cidade, 8);
 
   return (
@@ -170,6 +181,10 @@ function CityPage() {
           <p className="mt-3 max-w-2xl text-sm text-slate-600">
             Últimas matérias sobre {city.cityName} e cidades vizinhas — política, economia, cultura,
             esporte e cotidiano no {reg.name}.
+          </p>
+          <p className="mt-2 text-xs text-slate-500">
+            Endereço curto para salvar e compartilhar:{" "}
+            <span className="font-semibold text-[#12201E]">vozesparanaenses.com.br/{cidade}</span>
           </p>
         </header>
 
@@ -244,12 +259,39 @@ function CityPage() {
                 <li key={n.slug}>
                   <Link
                     to="/$region/cidade/$cidade"
-                    params={{ region, cidade: n.slug }}
+                    params={{ region: findMunicipioBySlug(n.slug)?.region ?? region, cidade: n.slug }}
                     className="inline-flex items-center gap-2 rounded-full border border-slate-300 bg-white px-3 py-1.5 text-xs font-semibold text-[#12201E] transition-colors hover:border-[#12201E] hover:bg-[#12201E] hover:text-white"
                   >
                     <span>{n.name}</span>
                     <span className="text-[10px] font-normal text-slate-500 group-hover:text-white/80">
                       {Math.round(n.distanceKm)} km
+                    </span>
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </section>
+        )}
+        {outras.length > 0 && (
+          <section className="mt-14 border-t border-slate-200 pt-8" aria-labelledby="outras-regioes">
+            <h2 id="outras-regioes" className="font-display text-2xl font-bold text-[#12201E]">
+              Enquanto isso, no resto do Paraná
+            </h2>
+            <p className="mt-1 text-sm text-slate-600">A notícia mais recente de cada uma das outras regiões.</p>
+            <ul className="mt-5 grid grid-cols-1 gap-x-6 gap-y-5 sm:grid-cols-2 lg:grid-cols-3">
+              {outras.map((a) => (
+                <li key={a.id}>
+                  <Link to="/$region/$slug" params={{ region: a.region!.slug, slug: a.slug }} className="group flex gap-3">
+                    {a.cover_image_url && (
+                      <img src={a.cover_image_url} alt="" loading="lazy" className="h-16 w-20 shrink-0 object-cover" />
+                    )}
+                    <span className="min-w-0">
+                      <span className="block text-[10px] font-bold uppercase tracking-[0.18em] text-[#B5651D]">
+                        {[a.region?.name, a.cidade_principal].filter(Boolean).join(" · ")}
+                      </span>
+                      <span className="mt-0.5 block font-display text-base font-bold leading-snug text-slate-900 group-hover:text-[#12201E] line-clamp-3">
+                        {a.title}
+                      </span>
                     </span>
                   </Link>
                 </li>
