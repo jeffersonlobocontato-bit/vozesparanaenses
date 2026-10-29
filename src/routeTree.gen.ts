@@ -38,6 +38,7 @@ import { Route as AutorSlugRouteImport } from './routes/autor.$slug'
 import { Route as AdminVitrinePessoalRouteImport } from './routes/admin.vitrine-pessoal'
 import { Route as AdminSobreRouteImport } from './routes/admin.sobre'
 import { Route as AdminSenhaRouteImport } from './routes/admin.senha'
+import { Route as AdminResumoRegionalRouteImport } from './routes/admin.resumo-regional'
 import { Route as AdminResetPasswordRouteImport } from './routes/admin.reset-password'
 import { Route as AdminRegioesRouteImport } from './routes/admin.regioes'
 import { Route as AdminPipelineRouteImport } from './routes/admin.pipeline'
@@ -219,6 +220,11 @@ const AdminSobreRoute = AdminSobreRouteImport.update({
 const AdminSenhaRoute = AdminSenhaRouteImport.update({
   id: '/senha',
   path: '/senha',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminResumoRegionalRoute = AdminResumoRegionalRouteImport.update({
+  id: '/resumo-regional',
+  path: '/resumo-regional',
   getParentRoute: () => AdminRoute,
 } as any)
 const AdminResetPasswordRoute = AdminResetPasswordRouteImport.update({
@@ -447,6 +453,7 @@ export interface FileRoutesByFullPath {
   '/admin/pipeline': typeof AdminPipelineRoute
   '/admin/regioes': typeof AdminRegioesRoute
   '/admin/reset-password': typeof AdminResetPasswordRoute
+  '/admin/resumo-regional': typeof AdminResumoRegionalRoute
   '/admin/senha': typeof AdminSenhaRoute
   '/admin/sobre': typeof AdminSobreRoute
   '/admin/vitrine-pessoal': typeof AdminVitrinePessoalRoute
@@ -513,6 +520,7 @@ export interface FileRoutesByTo {
   '/admin/pipeline': typeof AdminPipelineRoute
   '/admin/regioes': typeof AdminRegioesRoute
   '/admin/reset-password': typeof AdminResetPasswordRoute
+  '/admin/resumo-regional': typeof AdminResumoRegionalRoute
   '/admin/senha': typeof AdminSenhaRoute
   '/admin/sobre': typeof AdminSobreRoute
   '/admin/vitrine-pessoal': typeof AdminVitrinePessoalRoute
@@ -582,6 +590,7 @@ export interface FileRoutesById {
   '/admin/pipeline': typeof AdminPipelineRoute
   '/admin/regioes': typeof AdminRegioesRoute
   '/admin/reset-password': typeof AdminResetPasswordRoute
+  '/admin/resumo-regional': typeof AdminResumoRegionalRoute
   '/admin/senha': typeof AdminSenhaRoute
   '/admin/sobre': typeof AdminSobreRoute
   '/admin/vitrine-pessoal': typeof AdminVitrinePessoalRoute
@@ -652,6 +661,7 @@ export interface FileRouteTypes {
     | '/admin/pipeline'
     | '/admin/regioes'
     | '/admin/reset-password'
+    | '/admin/resumo-regional'
     | '/admin/senha'
     | '/admin/sobre'
     | '/admin/vitrine-pessoal'
@@ -718,6 +728,7 @@ export interface FileRouteTypes {
     | '/admin/pipeline'
     | '/admin/regioes'
     | '/admin/reset-password'
+    | '/admin/resumo-regional'
     | '/admin/senha'
     | '/admin/sobre'
     | '/admin/vitrine-pessoal'
@@ -786,6 +797,7 @@ export interface FileRouteTypes {
     | '/admin/pipeline'
     | '/admin/regioes'
     | '/admin/reset-password'
+    | '/admin/resumo-regional'
     | '/admin/senha'
     | '/admin/sobre'
     | '/admin/vitrine-pessoal'
@@ -1072,6 +1084,13 @@ declare module '@tanstack/react-router' {
       path: '/senha'
       fullPath: '/admin/senha'
       preLoaderRoute: typeof AdminSenhaRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/resumo-regional': {
+      id: '/admin/resumo-regional'
+      path: '/resumo-regional'
+      fullPath: '/admin/resumo-regional'
+      preLoaderRoute: typeof AdminResumoRegionalRouteImport
       parentRoute: typeof AdminRoute
     }
     '/admin/reset-password': {
@@ -1371,6 +1390,7 @@ interface AdminRouteChildren {
   AdminPipelineRoute: typeof AdminPipelineRoute
   AdminRegioesRoute: typeof AdminRegioesRoute
   AdminResetPasswordRoute: typeof AdminResetPasswordRoute
+  AdminResumoRegionalRoute: typeof AdminResumoRegionalRoute
   AdminSenhaRoute: typeof AdminSenhaRoute
   AdminSobreRoute: typeof AdminSobreRoute
   AdminVitrinePessoalRoute: typeof AdminVitrinePessoalRoute
@@ -1393,6 +1413,7 @@ const AdminRouteChildren: AdminRouteChildren = {
   AdminPipelineRoute: AdminPipelineRoute,
   AdminRegioesRoute: AdminRegioesRoute,
   AdminResetPasswordRoute: AdminResetPasswordRoute,
+  AdminResumoRegionalRoute: AdminResumoRegionalRoute,
   AdminSenhaRoute: AdminSenhaRoute,
   AdminSobreRoute: AdminSobreRoute,
   AdminVitrinePessoalRoute: AdminVitrinePessoalRoute,
