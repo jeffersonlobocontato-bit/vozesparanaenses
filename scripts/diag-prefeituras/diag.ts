@@ -19,7 +19,8 @@ type Teste = {
 };
 
 const DIR = new URL(".", import.meta.url).pathname;
-const alvos: Alvo[] = JSON.parse(await Deno.readTextFile(DIR + "alvos.json"));
+const ARQ = Deno.args[0] ?? "alvos";
+const alvos: Alvo[] = JSON.parse(await Deno.readTextFile(DIR + ARQ + ".json"));
 const AGORA = Date.now();
 const DIA = 86400_000;
 const UA = "Mozilla/5.0 (compatible; VozesParanaensesBot/1.0; +contato@vozesparanaenses.com.br)";
@@ -147,5 +148,5 @@ await Promise.all(Array.from({ length: 10 }, async () => {
     if (feitos % 10 === 0) console.log(`${feitos}/${alvos.length}`);
   }
 }));
-await Deno.writeTextFile(DIR + "resultado.json", JSON.stringify(resultado, null, 1));
+await Deno.writeTextFile(DIR + (ARQ === "alvos" ? "resultado" : "resultado-" + ARQ) + ".json", JSON.stringify(resultado, null, 1));
 console.log("pronto", resultado.length);

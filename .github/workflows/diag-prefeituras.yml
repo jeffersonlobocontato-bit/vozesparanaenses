@@ -20,4 +20,4 @@ jobs:
           git config user.name "github-actions"; git config user.email "actions@github.com"
           git add scripts/diag-prefeituras/resultado.json
           git commit -m "Diagnóstico das fontes de prefeitura" || exit 0
-          git pull --rebase -q && git push
+          for i in 1 2 3; do git pull --rebase -q && git push && break; sleep 5; done

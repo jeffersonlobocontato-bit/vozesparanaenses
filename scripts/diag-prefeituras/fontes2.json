@@ -1,0 +1,164 @@
+[
+{
+"modo": "fonte",
+"nome": "Seab — Agricultura e Abastecimento",
+"cidade": "",
+"url": "https://www.agricultura.pr.gov.br/Noticias"
+},
+{
+"modo": "fonte",
+"nome": "IDR-Paraná",
+"cidade": "",
+"url": "https://www.idrparana.pr.gov.br/Noticias"
+},
+{
+"modo": "fonte",
+"nome": "Adapar",
+"cidade": "",
+"url": "https://www.adapar.pr.gov.br/Noticias"
+},
+{
+"modo": "fonte",
+"nome": "AEN — Agência Estadual de Notícias",
+"cidade": "",
+"url": "https://www.aen.pr.gov.br/Noticias"
+},
+{
+"modo": "fonte",
+"nome": "Embrapa Soja (Londrina)",
+"cidade": "londrina",
+"url": "https://www.embrapa.br/soja/busca-de-noticias"
+},
+{
+"modo": "fonte",
+"nome": "Embrapa Florestas (Colombo)",
+"cidade": "colombo",
+"url": "https://www.embrapa.br/florestas/busca-de-noticias"
+},
+{
+"modo": "fonte",
+"nome": "Sistema Faep",
+"cidade": "",
+"url": "https://sistemafaep.org.br/"
+},
+{
+"modo": "fonte",
+"nome": "Sistema Ocepar",
+"cidade": "",
+"url": "https://www.paranacooperativo.coop.br/"
+},
+{
+"modo": "fonte",
+"nome": "TN Online — Apucarana",
+"cidade": "apucarana",
+"url": "https://tnonline.uol.com.br/"
+},
+{
+"modo": "fonte",
+"nome": "GMC Online — Maringá",
+"cidade": "maringa",
+"url": "https://gmconline.com.br/"
+},
+{
+"modo": "fonte",
+"nome": "Maringá Post",
+"cidade": "maringa",
+"url": "https://maringapost.com.br/"
+},
+{
+"modo": "fonte",
+"nome": "CBN Maringá",
+"cidade": "maringa",
+"url": "https://www.cbnmaringa.com.br/"
+},
+{
+"modo": "fonte",
+"nome": "Paiquerê — Londrina",
+"cidade": "londrina",
+"url": "https://www.paiquere.com.br/"
+},
+{
+"modo": "fonte",
+"nome": "Portal da Cidade Arapongas",
+"cidade": "arapongas",
+"url": "https://arapongas.portaldacidade.com/"
+},
+{
+"modo": "fonte",
+"nome": "Portal da Cidade Apucarana",
+"cidade": "apucarana",
+"url": "https://apucarana.portaldacidade.com/"
+},
+{
+"modo": "fonte",
+"nome": "Portal da Cidade Londrina",
+"cidade": "londrina",
+"url": "https://londrina.portaldacidade.com/"
+},
+{
+"modo": "fonte",
+"nome": "Portal da Cidade Maringá",
+"cidade": "maringa",
+"url": "https://maringa.portaldacidade.com/"
+},
+{
+"modo": "fonte",
+"nome": "Portal da Cidade Ivaiporã",
+"cidade": "ivaipora",
+"url": "https://ivaipora.portaldacidade.com/"
+},
+{
+"modo": "fonte",
+"nome": "Portal da Cidade Cambé",
+"cidade": "cambe",
+"url": "https://cambe.portaldacidade.com/"
+},
+{
+"modo": "fonte",
+"nome": "Tribuna do Norte — Apucarana",
+"cidade": "apucarana",
+"url": "https://www.tribunadonorte.net/"
+},
+{
+"modo": "fonte",
+"nome": "Plantão Maringá",
+"cidade": "maringa",
+"url": "https://www.plantaomaringa.com.br/"
+},
+{
+"modo": "fonte",
+"nome": "Rede Massa — Londrina/Maringá",
+"cidade": "londrina",
+"url": "https://redemassa.com.br/"
+},
+{
+"modo": "fonte",
+"nome": "Jornal de Ponta Grossa",
+"cidade": "ponta-grossa",
+"url": "https://www.jornalpontagrossa.com.br/rss"
+},
+{
+"modo": "fonte",
+"nome": "G Mais Notícias - Guarapuava",
+"cidade": "guarapuava",
+"url": "https://gmaisnoticias.com/rss"
+},
+{
+"modo": "fonte",
+"nome": "Diário do Noroeste - Paranavaí",
+"cidade": "paranavai",
+"url": "https://diariodonoroeste.com.br/rss"
+},
+{
+"modo": "fonte",
+"nome": "Cornelio Noticias",
+"cidade": "cornelio-procopio",
+"url": "https://cornelionoticias.com.br/rss"
+},
+{
+"modo": "fonte",
+"nome": "Catve",
+"cidade": "cascavel",
+"url": "https://www.catve.com/feed"
+}
+]
