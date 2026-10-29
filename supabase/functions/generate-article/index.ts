@@ -14,7 +14,8 @@
 import { faltando5w1h, motivoVeto5w1h } from "../_shared/cinco-w.ts";
 import { candidatoDuplicata, mesmoFato } from "../_shared/duplicidade.ts";
 import { exigirInterno } from "../_shared/auth.ts";
-import { fotoLimpa } from "../_shared/analista-imagem.ts";
+import { analisarMarcas, fotoLimpa } from "../_shared/analista-imagem.ts";
+import { recortarImagem, type Caixa } from "../_shared/recorte-marca.ts";
 import { imagemValida } from "../_shared/coleta.ts";
 import { escolherFotoGenerica, FOTO_ORIGEM_GENERICA } from "../_shared/foto-generica.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
@@ -316,9 +317,11 @@ Deno.serve(async (req) => {
   // Logomarca, brasão, nome da prefeitura ou imagem padrão do site NÃO é
   // foto: a matéria sai só com texto (regra de 28/10/2026, caso Toledo).
   const logos = new Set<string>();
+  // Foto de prefeitura com marca num canto: recorta na cópia (ver recorte-marca.ts).
+  const marcasPorRaw = new Map<string, Caixa[]>();
   for (const r of raws) {
     // Só as candidatas a capa (as proibidas já não entram) — poupa a IA.
-    if (r.imagem_original_url && statusFoto(r) === "autorizada" && await naoEhFotoDeVerdade(sb, aiKey, r)) {
+    if (r.imagem_original_url && statusFoto(r) === "autorizada" && await naoEhFotoDeVerdade(sb, aiKey, r, marcasPorRaw)) {
       logos.add(r.id);
       console.log(`[generate-article] imagem descartada (não é foto limpa: logomarca, marca d'água, nome de veículo ou padrão do site): ${r.imagem_original_url}`);
     }
@@ -624,7 +627,7 @@ Você é repórter, não comentarista. Relate o fato; não tome partido.
       : rawFotoAutorizada ? "fonte" : "foto_cidade";
 
     if (decisaoImagem === "fonte" && rawFotoAutorizada?.imagem_original_url) {
-      const copiada = await copiarFotoParaStorage(sb, rawFotoAutorizada.imagem_original_url, inserted.id);
+      const copiada = await copiarFotoParaStorage(sb, rawFotoAutorizada.imagem_original_url, inserted.id, marcasPorRaw.get(rawFotoAutorizada.id));
       if (copiada) {
         await sb.from("generated_articles").update({
           imagem_original_url: copiada,
@@ -808,7 +811,7 @@ async function encerrarCluster(sb: any, clusterId: string, rawIds: string[], sta
  * site? Três crivos, do mais barato ao mais caro: nome do arquivo, a mesma
  * imagem em 3+ notícias diferentes da fonte (30 dias) e a IA de visão.
  */
-async function naoEhFotoDeVerdade(sb: any, aiKey: string, r: RawFoto): Promise<boolean> {
+async function naoEhFotoDeVerdade(sb: any, aiKey: string, r: RawFoto, marcasPorRaw?: Map<string, Caixa[]>): Promise<boolean> {
   const u = r.imagem_original_url;
   if (!u) return false;
   if (!imagemValida(u)) return true;
@@ -825,16 +828,25 @@ async function naoEhFotoDeVerdade(sb: any, aiKey: string, r: RawFoto): Promise<b
       if (urls.size >= 3) return true;
     } catch (_) { /* segue para a IA */ }
   }
-  // Compliance: só foto limpa (sem logomarca, marca d'água ou nome de
-  // veículo). Foto de portal sem resposta da IA não entra (fail-closed);
-  // a de prefeitura entra (material institucional).
+  // Prefeitura: a foto publica sempre (regra de 29/10/2026). Só é recusada a
+  // imagem que NÃO é foto (logo, brasão, arte, texto). Marca num canto é
+  // recortada na cópia, quando der.
+  if (fonte?.tipo === "prefeitura") {
+    let a: Awaited<ReturnType<typeof analisarMarcas>> = null;
+    try { a = await analisarMarcas(aiKey, u); } catch (_) { a = null; }
+    if (a?.tipo === "nao_e_foto") return true;
+    if (a?.tipo === "foto_com_marca" && a.marcas.length) marcasPorRaw?.set(r.id, a.marcas);
+    return false;
+  }
+  // Portal: só foto limpa (sem logomarca, marca d'água ou nome de veículo).
+  // Sem resposta da IA, não entra (fail-closed).
   let limpa: boolean | null = null;
   try { limpa = await fotoLimpa(aiKey, u); } catch (_) { limpa = null; }
   if (limpa === null) return fonte?.tipo !== "prefeitura";
   return !limpa;
 }
 
-async function copiarFotoParaStorage(sb: any, srcUrl: string, articleId: string): Promise<string | null> {
+async function copiarFotoParaStorage(sb: any, srcUrl: string, articleId: string, marcas?: Caixa[]): Promise<string | null> {
   const controller = new AbortController();
   const timeout = setTimeout(() => controller.abort(), 6_000);
   try {
@@ -843,9 +855,18 @@ async function copiarFotoParaStorage(sb: any, srcUrl: string, articleId: string)
       signal: controller.signal,
     });
     if (!imgRes.ok) return null;
-    const buf = new Uint8Array(await imgRes.arrayBuffer());
-    const mime = imgRes.headers.get("content-type")?.split(";")[0].trim() || "image/jpeg";
+    let buf = new Uint8Array(await imgRes.arrayBuffer());
+    let mime = imgRes.headers.get("content-type")?.split(";")[0].trim() || "image/jpeg";
     if (!/^image\//.test(mime) || buf.byteLength <= 1024) return null;
+    // Foto de prefeitura com marca: recorta fora a marca (se der).
+    if (marcas?.length) {
+      const recortada = await recortarImagem(buf, marcas);
+      if (recortada) {
+        buf = recortada;
+        mime = "image/jpeg";
+        console.log(`[generate-article] marca recortada da foto ${srcUrl}`);
+      }
+    }
     const ext = mime.split("/")[1]?.split("+")[0] ?? "jpg";
     const path = `${articleId}/original.${ext}`;
     const { error } = await sb.storage.from("article-covers").upload(path, buf, { contentType: mime, upsert: true });

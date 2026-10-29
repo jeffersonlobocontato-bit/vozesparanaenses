@@ -226,6 +226,8 @@ const ICONES: Record<string, string> = {
   cultura: '<path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/>',
   brasil: '<path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"/><line x1="4" x2="4" y1="22" y2="15"/>',
   cidades: '<path d="M6 22V4a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v18Z"/><path d="M6 12H4a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2h2"/><path d="M18 9h2a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2h-2"/><path d="M10 6h4M10 10h4M10 14h4M10 18h4"/>',
+  politica: '<line x1="3" x2="21" y1="22" y2="22"/><line x1="6" x2="6" y1="18" y2="11"/><line x1="10" x2="10" y1="18" y2="11"/><line x1="14" x2="14" y1="18" y2="11"/><line x1="18" x2="18" y1="18" y2="11"/><polygon points="12 2 20 7 4 7"/>',
+  esportes: '<path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"/><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"/><path d="M4 22h16"/><path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"/><path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"/><path d="M18 2H6v7a6 6 0 0 0 12 0V2Z"/>',
   geral: '<path d="M4 22h16a2 2 0 0 0 2-2V4a2 2 0 0 0-2-2H8a2 2 0 0 0-2 2v16a2 2 0 0 1-2 2Zm0 0a2 2 0 0 1-2-2v-9c0-1.1.9-2 2-2h2"/><path d="M18 14h-8M15 18h-5M10 6h8v4h-8V6Z"/>',
 };
 /** Ícone da tag a partir do nome da editoria. */
@@ -241,9 +243,44 @@ export function iconeDaEditoria(nome: string): string {
   if (/cultur|evento|lazer/.test(n)) return "cultura";
   if (/brasil|nacional/.test(n)) return "brasil";
   if (/cidade/.test(n)) return "cidades";
+  if (/politic|eleic/.test(n)) return "politica";
+  if (/esporte|futebol/.test(n)) return "esportes";
   return "geral";
 }
-function tagEditoria(texto: string, cor: string, fundoTag: string): No {
+
+/**
+ * Cor da tag por editoria (claro = sobre fundo claro; escuro = sobre fundo
+ * escuro ou foto). Cards vizinhos de editorias diferentes não saem iguais.
+ */
+export const COR_EDITORIA: Record<string, { claro: string; escuro: string }> = {
+  seguranca: { claro: "#B8241A", escuro: "#FF8A80" },
+  saude: { claro: "#0B7285", escuro: "#66D9E8" },
+  educacao: { claro: "#5F3DC4", escuro: "#B197FC" },
+  economia: { claro: "#8C6D0F", escuro: "#FFD43B" },
+  ambiente: { claro: "#2B8A3E", escuro: "#8CE99A" },
+  clima: { claro: "#1971C2", escuro: "#74C0FC" },
+  transito: { claro: "#D9480F", escuro: "#FFA94D" },
+  cultura: { claro: "#A61E4D", escuro: "#F783AC" },
+  cidades: { claro: "#1E5B45", escuro: "#6FBF98" },
+  politica: { claro: "#1B5E9A", escuro: "#7AB8F0" },
+  esportes: { claro: "#364FC7", escuro: "#91A7FF" },
+  brasil: { claro: "#3D4A44", escuro: "#C9D4CE" },
+  mundo: { claro: "#5F4B8B", escuro: "#C3B2EC" },
+  geral: { claro: "#1E5B45", escuro: "#FFFFFF" },
+};
+export function corDaEditoria(nome: string, escuro: boolean): string {
+  const c = COR_EDITORIA[iconeDaEditoria(nome)] ?? COR_EDITORIA.geral;
+  return escuro ? c.escuro : c.claro;
+}
+
+/** Cor do balão do chapéu: a da REGIÃO do Paraná; fora do PR, a do escopo. */
+export function corDoChapeu(regiaoSlug: string | null | undefined, escopo: Escopo, escuro: boolean): string {
+  const r = regiaoSlug ? COR_REGIAO[regiaoSlug] : undefined;
+  if (r && escopo !== "brasil" && escopo !== "mundo") return r;
+  return escuro ? ESCOPO[escopo].escuro : ESCOPO[escopo].claro;
+}
+function tagEditoria(texto: string, escuro: boolean, fundoTag: string): No {
+  const cor = corDaEditoria(texto, escuro);
   const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="${cor}" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">${ICONES[iconeDaEditoria(texto)]}</svg>`;
   return div(
     { alignItems: "center", gap: 12, padding: "10px 20px 10px 14px", border: `2px solid ${cor}`, borderRadius: 999, background: fundoTag },
@@ -320,7 +357,7 @@ function cardFotoEditorial(c: CardFoto): No {
         h("img", { src: svgDataUri(ICONE_CLARO), width: 56, height: 56 }),
         h("span", { style: { fontFamily: F.marca, fontWeight: 700, fontSize: 34, color: "#ffffff", letterSpacing: -0.3, textShadow: "0 2px 10px rgba(0,0,0,0.55)" } }, "vozes paranaenses"),
       ),
-      c.tag ? h("span", { style: { alignSelf: "flex-start", padding: "4px 12px", borderRadius: 4, background: "rgba(15,23,20,0.72)", fontFamily: F.chapeu, fontWeight: 700, fontSize: 28, letterSpacing: "0.16em", textTransform: "uppercase", color: COR.accent } }, c.tag) : null,
+      c.tag ? h("span", { style: { alignSelf: "flex-start", padding: "4px 12px", borderRadius: 4, background: "rgba(15,23,20,0.72)", fontFamily: F.chapeu, fontWeight: 700, fontSize: 28, letterSpacing: "0.16em", textTransform: "uppercase", color: corDaEditoria(c.tag, true) } }, c.tag) : null,
     ),
     c.selo
       ? div(
@@ -359,7 +396,7 @@ function cardFoto(c: CardFoto): No {
         h("span", { style: { fontFamily: F.chapeu, fontWeight: 700, fontSize: 28, letterSpacing: "0.1em", textTransform: "uppercase", color: "#ffffff" } }, c.lamina.rotulo),
         div({ gap: 8 }, ...Array.from({ length: c.lamina.total }, (_, i) => div({ width: c.lamina!.total > 6 ? 32 : 56, height: 6, background: i + 1 === c.lamina!.atual ? "#ffffff" : "rgba(255,255,255,0.35)" }))),
       )
-      : c.tag ? div({ position: "absolute", top: 48, right: 56 }, tagEditoria(c.tag, "#ffffff", "rgba(15,23,20,0.45)")) : null,
+      : c.tag ? div({ position: "absolute", top: 48, right: 56 }, tagEditoria(c.tag, true, "rgba(15,23,20,0.62)")) : null,
     c.selo && !c.lamina
       ? div(
         { position: "absolute", top: 48, left: 56, padding: "12px 24px", background: COR.alerta, borderRadius: 4 },
@@ -382,10 +419,13 @@ function cardFoto(c: CardFoto): No {
 function cardTipografico(c: CardTipografico): No {
   const tam = corpoTitulo(c.titulo, c.destaque ? 74 : 96);
   const t = TOM[c.fundo ?? "tinta"];
-  const corEscopo = c.fundo === "verde" ? COR.accent : t.escuro ? c.cor : (c.corClara ?? COR.brand);
+  const VERDES = new Set(["#2E7D32", "#5F7A1B", "#1e5b45", "#1E5B45"]);
+  const corEscopo = c.fundo === "verde"
+    ? (VERDES.has(c.cor) ? COR.accent : c.cor)
+    : t.escuro ? c.cor : (c.corClara ?? COR.brand);
   return div(
     { width: W, height: H, padding: "112px 72px 56px 72px", background: t.bg, flexDirection: "column", position: "relative" },
-    c.tag ? div({ position: "absolute", top: 40, right: 56 }, tagEditoria(c.tag, t.escuro ? "#ffffff" : COR.brand, t.escuro ? "rgba(255,255,255,0.06)" : "rgba(30,91,69,0.06)")) : null,
+    c.tag ? div({ position: "absolute", top: 40, right: 56 }, tagEditoria(c.tag, t.escuro, t.escuro ? "rgba(255,255,255,0.06)" : "rgba(255,255,255,0.7)")) : null,
     div({ marginTop: c.tag ? 30 : 0 }, chapeuBalao(c.chapeu, corEscopo)),
     c.destaque
       ? div(

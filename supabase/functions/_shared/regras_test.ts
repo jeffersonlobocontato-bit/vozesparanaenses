@@ -19,6 +19,7 @@ import { corpoTitulo, limitar } from "./instagram-cards.ts";
 import { normalizarColuna, separarPautas, textoDaPagina, urlPermitida } from "./coluna-politica.ts";
 import { faltando5w1h, motivoVeto5w1h } from "./cinco-w.ts";
 import { ehDeHojeOuOntem as hojeOuOntem } from "./data-publicacao.ts";
+import { calcularRecorte } from "./recorte-marca.ts";
 import { cabeNaCotaForaDoPr, faixaForaDoPr } from "./crivo-editorial.ts";
 import { CICLOS_PORTAIS, cicloAtual, fonteElegivel, imagemValida, normalizarUrl, ordenarPorTentativa } from "./coleta.ts";
 import { ehFotoGenerica, escolherFotoGenerica } from "./foto-generica.ts";
@@ -422,6 +423,15 @@ ok("prioridade alta tem folga de 2", cabeNaCotaForaDoPr("nacional", 6, "alta") &
   ok("ontem só com data vale", hojeOuOntem("2026-10-28T03:00:00Z", ag));
   ok("anteontem não vale", !hojeOuOntem("2026-10-27T15:00:00Z", ag));
   ok("futuro não vale", !hojeOuOntem("2026-10-30T15:00:00Z", ag));
+}
+// Recorte da marca (foto de prefeitura)
+{
+  const canto = calcularRecorte([{ x: 0.03, y: 0.03, w: 0.25, h: 0.1 }], 1200, 800);
+  ok("logo no canto de cima → corta o topo", !!canto && canto.y > 0.13 && canto.w === 1);
+  const rodape = calcularRecorte([{ x: 0.6, y: 0.88, w: 0.37, h: 0.09 }], 1200, 800);
+  ok("marca no rodapé → corta embaixo", !!rodape && rodape.y === 0 && rodape.h < 0.88);
+  ok("marca no meio → não dá para recortar", calcularRecorte([{ x: 0.3, y: 0.35, w: 0.4, h: 0.3 }], 1200, 800) === null);
+  ok("sem marca → foto inteira", JSON.stringify(calcularRecorte([], 1200, 800)) === JSON.stringify({ x: 0, y: 0, w: 1, h: 1 }));
 }
 console.log(falhas ? `\n${falhas} FALHA(S)` : "\nTudo certo");
 if (falhas) Deno.exit(1);

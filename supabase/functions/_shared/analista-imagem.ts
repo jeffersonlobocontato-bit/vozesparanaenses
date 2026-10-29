@@ -166,3 +166,24 @@ export async function fotoLimpa(apiKey: string, url: string): Promise<boolean | 
 export async function ehLogomarca(apiKey: string, url: string): Promise<boolean> {
   return (await fotoLimpa(apiKey, url)) === false;
 }
+
+/**
+ * Foto de PREFEITURA: onde estão as marcas? A foto publica sempre; a marca é
+ * recortada quando der (ver _shared/recorte-marca.ts). "nao_e_foto" = a
+ * imagem é só logo/brasão/texto/arte — essa não vira capa.
+ * null = IA fora do ar (a foto entra como está).
+ */
+export async function analisarMarcas(apiKey: string, url: string): Promise<
+  { tipo: "foto_limpa" | "foto_com_marca" | "nao_e_foto"; marcas: { x: number; y: number; w: number; h: number }[] } | null
+> {
+  const raw = await chamarIa(apiKey, [
+    { role: "system", content: "Você analisa a imagem de capa de uma notícia de prefeitura. Responda só JSON {\"tipo\": \"foto_limpa\" | \"foto_com_marca\" | \"nao_e_foto\", \"marcas\": [{\"x\":0-1,\"y\":0-1,\"w\":0-1,\"h\":0-1}]}. nao_e_foto = a imagem é principalmente logomarca, brasão, nome da instituição, cartaz, arte montada ou texto sobre fundo. foto_com_marca = fotografia com logomarca, marca d'água, selo, nome/site da prefeitura ou de veículo, ou texto sobreposto em alguma parte; liste em marcas a caixa de CADA uma (x, y = canto superior esquerdo; w, h = largura e altura; tudo em fração da imagem, 0 a 1), com folga. foto_limpa = fotografia sem nenhuma marca (marcas vazio). Placas e fachadas da cena não contam como marca." },
+    { role: "user", content: [{ type: "text", text: "Classifique a imagem e localize as marcas." }, { type: "image_url", image_url: { url } }] },
+  ], 300);
+  const r = jsonDe<{ tipo?: string; marcas?: { x: number; y: number; w: number; h: number }[] }>(raw);
+  if (!r || !["foto_limpa", "foto_com_marca", "nao_e_foto"].includes(r.tipo ?? "")) return null;
+  const marcas = (r.marcas ?? []).filter((m) =>
+    [m.x, m.y, m.w, m.h].every((v) => typeof v === "number" && v >= 0 && v <= 1) && m.w > 0 && m.h > 0
+  );
+  return { tipo: r.tipo as "foto_limpa" | "foto_com_marca" | "nao_e_foto", marcas };
+}

@@ -17,7 +17,7 @@
 
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
 import { exigirInterno } from "../_shared/auth.ts";
-import { chaveVisual, COR_REGIAO, escolherFundo, ESCOPO, limitar, NOME_REGIAO, type Card } from "../_shared/instagram-cards.ts";
+import { chaveVisual, corDoChapeu, COR_REGIAO, escolherFundo, ESCOPO, limitar, NOME_REGIAO, type Card } from "../_shared/instagram-cards.ts";
 import { imagemComoDataUri, renderizarCard } from "../_shared/instagram-render.ts";
 import { limparCredito, montarLegenda, redigir } from "../_shared/instagram-redator.ts";
 import { fotoLivrePorTema } from "../_shared/foto-tema.ts";
@@ -251,7 +251,7 @@ Deno.serve(async (req) => {
       return {
         card: {
           formato: "foto", chapeu: lamina ? [l.cidade_principal, NOME_REGIAO[l.regiao?.slug ?? ""] ?? l.regiao?.nome].filter(Boolean).join(" · ") : ch.texto,
-          cor: corLamina ?? ESCOPO[ch.escopo].claro, titulo, linhaFina, foto, credito: creditoFoto,
+          cor: corLamina ?? corDoChapeu(l.regiao?.slug, ch.escopo, false), titulo, linhaFina, foto, credito: creditoFoto,
           lamina: lamina ? { ...lamina, rotulo: "Giro pelo Paraná" } : undefined,
           tag: lamina ? null : (l.categoria?.nome ?? null),
           selo: classe === "alerta" ? "ALERTA" : null,
@@ -264,7 +264,7 @@ Deno.serve(async (req) => {
     return {
       card: {
         formato: "tipografico", chapeu: lamina ? [l.cidade_principal, NOME_REGIAO[l.regiao?.slug ?? ""] ?? l.regiao?.nome].filter(Boolean).join(" · ") : ch.texto,
-        cor: corLamina ? "#f0b07a" : ESCOPO[ch.escopo].escuro, corClara: ESCOPO[ch.escopo].claro, titulo, linhaFina, destaque: lamina ? null : red?.destaque ?? null,
+        cor: corLamina ? "#f0b07a" : corDoChapeu(l.regiao?.slug, ch.escopo, true), corClara: corDoChapeu(l.regiao?.slug, ch.escopo, false), titulo, linhaFina, destaque: lamina ? null : red?.destaque ?? null,
         fundo: lamina ? "tinta" : escolherFundo(vizinhos(quando ?? null)),
         tag: lamina ? null : (l.categoria?.nome ?? null),
       },
