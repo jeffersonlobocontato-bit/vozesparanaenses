@@ -29,6 +29,8 @@ function escapar(s: string): string {
 // "Prefeitura de Floresta", "município de São João") — "Fulano de Castro"
 // ou "festa de São João" não fazem a notícia ser dessas cidades.
 const NOMES_AMBIGUOS = new Set([
+  // "rondon": a imprensa do Oeste chama Marechal Cândido Rondon de "Rondon".
+  "rondon",
   "angulo", "atalaia", "bandeirantes", "barracao", "bom sucesso", "california", "castro",
   "ceu azul", "colombo", "colorado", "contenda", "farol", "faxinal", "fenix", "figueira",
   "floresta", "florida", "francisco alves", "ipiranga", "jussara", "lapa", "maria helena",
@@ -53,15 +55,43 @@ function removerDateline(corpo: string): string {
  * citada no corpo (mínimo 2 menções, ou 1 com preposição "em/de/no/na").
  * Sem cidade no texto → cidade-sede da fonte, só se a fonte é municipal.
  */
+// Para cada nome, as expressões dos nomes MAIORES que o contêm (calculado uma
+// vez por lista de cidades).
+const CACHE_CONTEM = new WeakMap<Cidade[], Map<string, RegExp[]>>();
+function nomesQueContem(cidades: Cidade[]): Map<string, RegExp[]> {
+  const pronto = CACHE_CONTEM.get(cidades);
+  if (pronto) return pronto;
+  const nomes = cidades.map((c) => normalizar(c.nome));
+  const mapa = new Map<string, RegExp[]>();
+  for (const n of nomes) {
+    const re = new RegExp(`\\b${escapar(n)}\\b`);
+    const lista = nomes.filter((m) => m !== n && m.length > n.length && re.test(m)).map((m) => new RegExp(`\\b${escapar(m)}\\b`, "g"));
+    if (lista.length) mapa.set(n, lista);
+  }
+  CACHE_CONTEM.set(cidades, mapa);
+  return mapa;
+}
+
 export function detectarCidade(titulo: string, corpo: string, cidades: Cidade[], fonte?: FonteGeo): Deteccao | null {
   if (cidades.length) {
-    const t = normalizar(titulo);
-    const b = normalizar(removerDateline(corpo));
+    const tOriginal = normalizar(titulo);
+    const bOriginal = normalizar(removerDateline(corpo));
     let melhorTitulo: { c: Cidade; tam: number } | null = null;
     let melhorCorpo: { c: Cidade; score: number } | null = null;
+    // Nome de cidade que está DENTRO de outro nome de cidade ("Rondon" em
+    // "Marechal Cândido Rondon", "Itambé" em…) não conta essa ocorrência:
+    // tira o nome mais longo do texto antes de procurar o mais curto.
+    const maiores = nomesQueContem(cidades);
+    const semMaiores = (txt: string, n: string) => {
+      let out = txt;
+      for (const re of maiores.get(n) ?? []) out = out.replace(re, " ");
+      return out;
+    };
     for (const c of cidades) {
       const n = normalizar(c.nome);
       if (n.length < 3) continue;
+      const t = semMaiores(tOriginal, n);
+      const b = semMaiores(bOriginal, n);
       const ambiguo = NOMES_AMBIGUOS.has(n);
       const lugarForte = new RegExp(`\\b(em|prefeitura( municipal)? de|municipio de|cidade de)\\s+${escapar(n)}\\b`);
       const re = new RegExp(`\\b${escapar(n)}\\b`);

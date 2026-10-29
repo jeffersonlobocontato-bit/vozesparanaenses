@@ -111,11 +111,13 @@ export function fotoReal(m: MateriaIG): boolean {
     !ehFotoGenerica(m.imagem_capa_url, m.foto_origem);
 }
 
-/** A foto da matéria pode ir para o card? (tragédia nunca leva foto; alerta leva, se não for de vítima) */
+/** A foto da matéria pode ir para o card? (tragédia só com foto neutra de arquivo; alerta leva, se não for de vítima) */
 export function temFotoUtilizavel(m: MateriaIG, classe: Classe): boolean {
   if (!m.imagem_capa_url) return false;
-  // Foto genérica de arquivo (viatura, delegacia...) não vai para o card.
-  if (ehFotoGenerica(m.imagem_capa_url, m.foto_origem)) return false;
+  // Foto neutra de arquivo (viatura, bombeiros, chuva…) vai para o card:
+  // post com foto sempre que houver saída (29/10/2026). Inclusive tragédia —
+  // não é foto do fato nem de vítima.
+  if (ehFotoGenerica(m.imagem_capa_url, m.foto_origem)) return true;
   if (classe === "tragedia") return false;
   if (RE_VITIMA.test(norm(`${m.titulo} ${m.subtitulo ?? ""}`))) return false;
   return true;

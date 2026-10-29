@@ -1,6 +1,6 @@
 import { createFileRoute, Outlet, Link, useNavigate, useLocation } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
-import { Wallet, Home, Inbox, NotebookPen, Columns3, Radio, Map as MapIcon, Bot, BookOpen, Megaphone, UserRound, Newspaper, BarChart3, Info, ExternalLink, KeyRound, LogOut, LayoutDashboard, Instagram, Activity, MessageSquareText } from "lucide-react";
+import { Wallet, Home, Inbox, NotebookPen, Columns3, Radio, Map as MapIcon, Bot, BookOpen, Megaphone, UserRound, Newspaper, BarChart3, Info, ExternalLink, KeyRound, LogOut, LayoutDashboard, Instagram, Activity, MessageSquareText, MapPinned } from "lucide-react";
 import { getExternalBrowser } from "@/lib/external-supabase-browser";
 import { Logo } from "@/components/Logo";
 import { situacao, type Assinatura } from "@/lib/custos";
@@ -110,6 +110,7 @@ const GRUPOS: { titulo: string; itens: ItemNav[] }[] = [
     itens: [
       { to: "/admin/anuncios", label: "Anúncios", icon: Megaphone },
       { to: "/admin/vitrine-pessoal", label: "Vitrine Pessoal", icon: UserRound },
+      { to: "/admin/cobertura", label: "Cobertura", icon: MapPinned },
       { to: "/admin/imprensa-clientes", label: "Portal Imprensa", icon: Newspaper },
     ],
   },

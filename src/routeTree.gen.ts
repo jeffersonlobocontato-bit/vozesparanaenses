@@ -51,6 +51,7 @@ import { Route as AdminImprensaClientesRouteImport } from './routes/admin.impren
 import { Route as AdminFontesRouteImport } from './routes/admin.fontes'
 import { Route as AdminCustosRouteImport } from './routes/admin.custos'
 import { Route as AdminColunasRouteImport } from './routes/admin.colunas'
+import { Route as AdminCoberturaRouteImport } from './routes/admin.cobertura'
 import { Route as AdminAnunciosRouteImport } from './routes/admin.anuncios'
 import { Route as AdminAnalyticsRouteImport } from './routes/admin.analytics'
 import { Route as AdminAgentesRouteImport } from './routes/admin.agentes'
@@ -287,6 +288,11 @@ const AdminColunasRoute = AdminColunasRouteImport.update({
   path: '/colunas',
   getParentRoute: () => AdminRoute,
 } as any)
+const AdminCoberturaRoute = AdminCoberturaRouteImport.update({
+  id: '/cobertura',
+  path: '/cobertura',
+  getParentRoute: () => AdminRoute,
+} as any)
 const AdminAnunciosRoute = AdminAnunciosRouteImport.update({
   id: '/anuncios',
   path: '/anuncios',
@@ -441,6 +447,7 @@ export interface FileRoutesByFullPath {
   '/admin/agentes': typeof AdminAgentesRoute
   '/admin/analytics': typeof AdminAnalyticsRoute
   '/admin/anuncios': typeof AdminAnunciosRoute
+  '/admin/cobertura': typeof AdminCoberturaRoute
   '/admin/colunas': typeof AdminColunasRoute
   '/admin/custos': typeof AdminCustosRoute
   '/admin/fontes': typeof AdminFontesRoute
@@ -508,6 +515,7 @@ export interface FileRoutesByTo {
   '/admin/agentes': typeof AdminAgentesRoute
   '/admin/analytics': typeof AdminAnalyticsRoute
   '/admin/anuncios': typeof AdminAnunciosRoute
+  '/admin/cobertura': typeof AdminCoberturaRoute
   '/admin/colunas': typeof AdminColunasRoute
   '/admin/custos': typeof AdminCustosRoute
   '/admin/fontes': typeof AdminFontesRoute
@@ -578,6 +586,7 @@ export interface FileRoutesById {
   '/admin/agentes': typeof AdminAgentesRoute
   '/admin/analytics': typeof AdminAnalyticsRoute
   '/admin/anuncios': typeof AdminAnunciosRoute
+  '/admin/cobertura': typeof AdminCoberturaRoute
   '/admin/colunas': typeof AdminColunasRoute
   '/admin/custos': typeof AdminCustosRoute
   '/admin/fontes': typeof AdminFontesRoute
@@ -649,6 +658,7 @@ export interface FileRouteTypes {
     | '/admin/agentes'
     | '/admin/analytics'
     | '/admin/anuncios'
+    | '/admin/cobertura'
     | '/admin/colunas'
     | '/admin/custos'
     | '/admin/fontes'
@@ -716,6 +726,7 @@ export interface FileRouteTypes {
     | '/admin/agentes'
     | '/admin/analytics'
     | '/admin/anuncios'
+    | '/admin/cobertura'
     | '/admin/colunas'
     | '/admin/custos'
     | '/admin/fontes'
@@ -785,6 +796,7 @@ export interface FileRouteTypes {
     | '/admin/agentes'
     | '/admin/analytics'
     | '/admin/anuncios'
+    | '/admin/cobertura'
     | '/admin/colunas'
     | '/admin/custos'
     | '/admin/fontes'
@@ -1177,6 +1189,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminColunasRouteImport
       parentRoute: typeof AdminRoute
     }
+    '/admin/cobertura': {
+      id: '/admin/cobertura'
+      path: '/cobertura'
+      fullPath: '/admin/cobertura'
+      preLoaderRoute: typeof AdminCoberturaRouteImport
+      parentRoute: typeof AdminRoute
+    }
     '/admin/anuncios': {
       id: '/admin/anuncios'
       path: '/anuncios'
@@ -1378,6 +1397,7 @@ interface AdminRouteChildren {
   AdminAgentesRoute: typeof AdminAgentesRoute
   AdminAnalyticsRoute: typeof AdminAnalyticsRoute
   AdminAnunciosRoute: typeof AdminAnunciosRoute
+  AdminCoberturaRoute: typeof AdminCoberturaRoute
   AdminColunasRoute: typeof AdminColunasRoute
   AdminCustosRoute: typeof AdminCustosRoute
   AdminFontesRoute: typeof AdminFontesRoute
@@ -1401,6 +1421,7 @@ const AdminRouteChildren: AdminRouteChildren = {
   AdminAgentesRoute: AdminAgentesRoute,
   AdminAnalyticsRoute: AdminAnalyticsRoute,
   AdminAnunciosRoute: AdminAnunciosRoute,
+  AdminCoberturaRoute: AdminCoberturaRoute,
   AdminColunasRoute: AdminColunasRoute,
   AdminCustosRoute: AdminCustosRoute,
   AdminFontesRoute: AdminFontesRoute,

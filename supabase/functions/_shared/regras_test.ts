@@ -433,5 +433,16 @@ ok("prioridade alta tem folga de 2", cabeNaCotaForaDoPr("nacional", 6, "alta") &
   ok("marca no meio → não dá para recortar", calcularRecorte([{ x: 0.3, y: 0.35, w: 0.4, h: 0.3 }], 1200, 800) === null);
   ok("sem marca → foto inteira", JSON.stringify(calcularRecorte([], 1200, 800)) === JSON.stringify({ x: 0, y: 0, w: 1, h: 1 }));
 }
+// "Rondon" dentro de "Marechal Cândido Rondon" não é a cidade de Rondon
+{
+  const cs = [
+    { slug: "rondon", nome: "Rondon", regiao_id: "noroeste" },
+    { slug: "marechal-candido-rondon", nome: "Marechal Cândido Rondon", regiao_id: "oeste" },
+  ] as unknown as Parameters<typeof detectarCidade>[2];
+  ok("Marechal Cândido Rondon no título", detectarCidade("Marechal Cândido Rondon abre vagas", "", cs)?.slug === "marechal-candido-rondon");
+  ok("MCR no corpo não vira Rondon", detectarCidade("Feira de empregos", "A feira em Marechal Cândido Rondon reúne empresas. Marechal Cândido Rondon espera 2 mil pessoas.", cs)?.slug === "marechal-candido-rondon");
+  ok("'Rondon' solto (imprensa do Oeste) não vira a cidade de Rondon", detectarCidade("Rondon recebe festival", "O festival acontece no parque.", cs)?.slug !== "rondon");
+  ok("prefeitura de Rondon vale", detectarCidade("Obra na escola", "A Prefeitura de Rondon entregou a obra. Rondon investiu R$ 1 milhão.", cs)?.slug === "rondon");
+}
 console.log(falhas ? `\n${falhas} FALHA(S)` : "\nTudo certo");
 if (falhas) Deno.exit(1);

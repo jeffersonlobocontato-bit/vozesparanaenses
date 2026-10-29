@@ -22,6 +22,7 @@ import { imagemComoDataUri, renderizarCard } from "../_shared/instagram-render.t
 import { limparCredito, montarLegenda, redigir } from "../_shared/instagram-redator.ts";
 import { fotoLivrePorTema } from "../_shared/foto-tema.ts";
 import { ehArteDeDivulgacao } from "../_shared/analista-imagem.ts";
+import { ehFotoGenerica, escolherFotoGenerica } from "../_shared/foto-generica.ts";
 import {
   agendar,
   chapeuDe,
@@ -222,14 +223,23 @@ Deno.serve(async (req) => {
       const fundo = !viz.includes("alerta") ? "vermelho" : !viz.includes("claro") ? "papel" : "vermelho";
       return { card: { formato: "alerta", chapeu: ch.texto, titulo, quando: red?.quando ?? null, dados: red?.dados ?? [], orientacao: red?.orientacao ?? null, fundo } as Card, red };
     };
-    // Alerta com foto real da matéria sai em foto com a etiqueta ALERTA; sem foto, no card de alerta.
-    if (classe === "alerta" && !(temFotoUtilizavel(m, classe) && fotoReal(m))) return cardAlerta();
+    // Post com foto sempre que houver saída (regra de 29/10/2026): foto da
+    // matéria › foto neutra de arquivo do contexto (viatura, bombeiros, chuva,
+    // geada, Defesa Civil… — _shared/foto-generica.ts) › foto livre do tema.
+    // Alerta sem nenhuma foto cai no card de alerta.
     // Arte de divulgação (cartaz, aviso com texto) não vale como foto no feed.
-    const arte = !!(aiKey && l.imagem_capa_url && temFotoUtilizavel(m, classe) && await ehArteDeDivulgacao(aiKey, l.imagem_capa_url));
+    const arte = !!(aiKey && l.imagem_capa_url && temFotoUtilizavel(m, classe) && !ehFotoGenerica(l.imagem_capa_url, l.foto_origem) && await ehArteDeDivulgacao(aiKey, l.imagem_capa_url));
     let foto = temFotoUtilizavel(m, classe) && l.imagem_capa_url && !arte ? await imagemComoDataUri(l.imagem_capa_url) : null;
-    if (classe === "alerta" && !foto) return cardAlerta();
     let creditoFoto = limparCredito(l.imagem_credito);
     let fotoUrl = l.imagem_capa_url;
+    if (!foto && !lamina) {
+      const arquivo = escolherFotoGenerica(l.categoria?.slug ?? null, `${l.titulo} ${l.subtitulo ?? ""} ${l.resumo ?? ""}`, l.id);
+      if (arquivo) {
+        foto = await imagemComoDataUri(arquivo.url);
+        if (foto) { creditoFoto = limparCredito(arquivo.credito); fotoUrl = arquivo.url; }
+      }
+    }
+    if (classe === "alerta" && !foto) return cardAlerta();
     // Matéria sem foto (post avulso): tenta uma foto real de licença livre do
     // lugar/tema no Wikimedia Commons, aprovada pela analista de imagem só
     // com risco baixo (ex.: Cataratas do Iguaçu). Nunca em alerta/tragédia.
