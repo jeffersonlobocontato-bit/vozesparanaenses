@@ -23,7 +23,7 @@ import { decidirFormato, decidirImagem, ehAbrangenciaNacional, podeIrParaDobra, 
 import { fotoLivrePorTema } from "../_shared/foto-tema.ts";
 import { CREDITO_IA, fotoDaCidade, gerarIlustracaoTematica } from "../_shared/imagem.ts";
 import { avaliarCriticidade, carregarConfigCriticidade } from "../_shared/criticidade.ts";
-import { ehDoDia } from "../_shared/data-publicacao.ts";
+import { ehDeHojeOuOntem, ehDoDia } from "../_shared/data-publicacao.ts";
 import { classificarFoto, creditoParaExibir, ehAgenciaPublica, type FotoStatus } from "../_shared/foto-credito.ts";
 import { escreverNota, publicarNotaNaColuna } from "../_shared/nota-coluna.ts";
 import { garantirRegraTitulo, regraTituloPrompt } from "../_shared/titulo.ts";
@@ -342,7 +342,9 @@ Deno.serve(async (req) => {
     const doDiaDaColeta = (r: RawFoto) =>
       !!r.coletado_em &&
       Date.now() - new Date(r.coletado_em).getTime() < 24 * 3600_000 &&
-      ehDoDia(r.data_publicacao_original, new Date(r.coletado_em));
+      (tipoFonte(r) === "prefeitura"
+        ? ehDeHojeOuOntem(r.data_publicacao_original, new Date(r.coletado_em))
+        : ehDoDia(r.data_publicacao_original, new Date(r.coletado_em)));
     if (raws.length && !raws.some(doDiaDaColeta)) {
       await encerrarCluster(sb, clusterId, rawIdsCluster, "descartado");
       return json({ ok: true, ignorado: "fora_do_dia" });

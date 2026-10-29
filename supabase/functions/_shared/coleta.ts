@@ -14,7 +14,7 @@
 // não mais "1 notícia por ciclo". Sem data identificável ou de outro dia =
 // descartada. Repetição é barrada pelo hash (url normalizada + título).
 
-import { ehDoDia, extrairDataDaUrl, horaSaoPaulo, inicioDoCiclo } from "./data-publicacao.ts";
+import { ehDeHojeOuOntem, ehDoDia, extrairDataDaUrl, horaSaoPaulo, inicioDoCiclo } from "./data-publicacao.ts";
 import { detectarCidade, type Cidade } from "./cidades.ts";
 import { classificarFoto } from "./foto-credito.ts";
 
@@ -155,8 +155,11 @@ export async function processarItensDaFonte(p: {
   fotoSempreLiberada?: boolean;
   maxPaginas?: number;
   agora?: Date;
+  // Prefeitura: aceita também a notícia de ontem (ver ehDeHojeOuOntem).
+  aceitarOntem?: boolean;
 }): Promise<RelatorioFonte> {
   const agora = p.agora ?? new Date();
+  const valeAData = (d: string) => (p.aceitarOntem ? ehDeHojeOuOntem(d, agora) : ehDoDia(d, agora));
   const r: RelatorioFonte = { fonte: p.fonte.nome, total: p.itens.length, inseridas: 0, duplicadas: 0, sem_data: 0, fora_do_dia: 0, fotos: {} };
 
   let paginasBaixadas = 0;
@@ -170,7 +173,7 @@ export async function processarItensDaFonte(p: {
     // outro dia, descarta antes de baixar a página.
     let data = it.data ?? extrairDataDaUrl(it.url);
     let dataOrigem: string | null = it.data ? "listagem" : data ? "url" : null;
-    if (data && !ehDoDia(data, agora)) { r.fora_do_dia++; velhasSeguidas++; continue; }
+    if (data && !valeAData(data)) { r.fora_do_dia++; velhasSeguidas++; continue; }
 
     const url = normalizarUrl(it.url);
     const hash = await sha256(url + "|" + it.titulo.trim().toLowerCase());
@@ -203,7 +206,7 @@ export async function processarItensDaFonte(p: {
 
     // Validador do dia: sem data = não publica (não dá pra garantir que é de hoje).
     if (!data) { r.sem_data++; continue; }
-    if (!ehDoDia(data, agora)) { r.fora_do_dia++; velhasSeguidas++; continue; }
+    if (!valeAData(data)) { r.fora_do_dia++; velhasSeguidas++; continue; }
     velhasSeguidas = 0;
 
     const det = detectarCidade(it.titulo, corpo, p.cidades, p.fonte);

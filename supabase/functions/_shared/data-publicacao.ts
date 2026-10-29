@@ -27,6 +27,20 @@ export function ehDoDia(iso: string | null | undefined, agora: Date = new Date()
   return diaSaoPaulo(d) === diaSaoPaulo(agora);
 }
 
+/**
+ * Prefeitura: vale a notícia de hoje OU de ontem. A coleta roda às 12h e às
+ * 18h; o release publicado depois das 18h (ou num ciclo que falhou) só
+ * aparece no dia seguinte e, com "só hoje", se perdia para sempre. O que já
+ * foi coletado ontem não entra de novo (hash da URL + título).
+ */
+export function ehDeHojeOuOntem(iso: string | null | undefined, agora: Date = new Date()): boolean {
+  if (ehDoDia(iso, agora)) return true;
+  if (!iso) return false;
+  const d = new Date(iso);
+  if (!Number.isFinite(d.getTime())) return false;
+  return diaSaoPaulo(d) === diaSaoPaulo(new Date(agora.getTime() - 86400_000));
+}
+
 /** Instante de início do ciclo atual (hora cheia de Brasília de hoje). */
 export function inicioDoCiclo(hora: number, agora: Date = new Date()): Date {
   const dia = diaSaoPaulo(agora);

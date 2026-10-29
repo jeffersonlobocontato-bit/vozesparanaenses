@@ -89,6 +89,7 @@ Deno.serve(async (req) => {
         // Portal Atende.Net (IPM): leitor próprio, sem JavaScript nem Firecrawl.
         buscarPagina: lerPaginaPrefeitura,
         fotoSempreLiberada: true,
+        aceitarOntem: true,
         maxPaginas: MAX_PAGINAS_PREFEITURA,
       });
     }, vazio);

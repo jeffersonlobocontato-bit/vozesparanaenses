@@ -18,6 +18,7 @@ import { agendar, chapeuDe, classificar, CONFIG_PADRAO, escolherAvulsos, montarG
 import { corpoTitulo, limitar } from "./instagram-cards.ts";
 import { normalizarColuna, separarPautas, textoDaPagina, urlPermitida } from "./coluna-politica.ts";
 import { faltando5w1h, motivoVeto5w1h } from "./cinco-w.ts";
+import { ehDeHojeOuOntem as hojeOuOntem } from "./data-publicacao.ts";
 import { cabeNaCotaForaDoPr, faixaForaDoPr } from "./crivo-editorial.ts";
 import { CICLOS_PORTAIS, cicloAtual, fonteElegivel, imagemValida, normalizarUrl, ordenarPorTentativa } from "./coleta.ts";
 import { ehFotoGenerica, escolherFotoGenerica } from "./foto-generica.ts";
@@ -413,5 +414,14 @@ ok("cota nacional: 5º passa", cabeNaCotaForaDoPr("nacional", 4, "media"));
 ok("cota nacional: 6º não passa", !cabeNaCotaForaDoPr("nacional", 5, "media"));
 ok("prioridade alta tem folga de 2", cabeNaCotaForaDoPr("nacional", 6, "alta") && !cabeNaCotaForaDoPr("nacional", 7, "alta"));
 
+// Prefeitura: hoje ou ontem
+{
+  const ag = new Date("2026-10-29T15:00:00Z"); // 12h de 29/10 em Brasília
+  ok("hoje vale", hojeOuOntem("2026-10-29T10:00:00Z", ag));
+  ok("ontem às 20h vale", hojeOuOntem("2026-10-28T23:00:00Z", ag));
+  ok("ontem só com data vale", hojeOuOntem("2026-10-28T03:00:00Z", ag));
+  ok("anteontem não vale", !hojeOuOntem("2026-10-27T15:00:00Z", ag));
+  ok("futuro não vale", !hojeOuOntem("2026-10-30T15:00:00Z", ag));
+}
 console.log(falhas ? `\n${falhas} FALHA(S)` : "\nTudo certo");
 if (falhas) Deno.exit(1);
