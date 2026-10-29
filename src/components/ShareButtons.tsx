@@ -52,7 +52,7 @@ async function trackShare(canal: string, pagina: string) {
   }
 }
 
-export function ShareButtons({ url, title, compact = false }: { url: string; title: string; compact?: boolean }) {
+export function ShareButtons({ url, title, compact = false, campanha = "compartilhar-materia" }: { url: string; title: string; compact?: boolean; campanha?: string }) {
   const [copied, setCopied] = useState(false);
   const [canNativeShare, setCanNativeShare] = useState(false);
 
@@ -63,7 +63,7 @@ export function ShareButtons({ url, title, compact = false }: { url: string; tit
   // Link compartilhado leva a origem (UTM): o app do WhatsApp/Telegram não
   // informa de onde o leitor veio, e sem isso a visita cai em "direto".
   const comOrigem = (rede: string) =>
-    `${url}${url.includes("?") ? "&" : "?"}utm_source=${rede}&utm_medium=compartilhamento`;
+    `${url}${url.includes("?") ? "&" : "?"}utm_source=${rede}&utm_medium=compartilhamento&utm_campaign=${campanha}`;
   const u = (rede: string) => encodeURIComponent(comOrigem(rede));
   const encodedTitle = encodeURIComponent(title);
 
@@ -76,7 +76,7 @@ export function ShareButtons({ url, title, compact = false }: { url: string; tit
 
   async function handleCopy() {
     try {
-      await navigator.clipboard.writeText(url);
+      await navigator.clipboard.writeText(comOrigem("link_copiado"));
       setCopied(true);
       void trackShare("copiar_link", url);
       setTimeout(() => setCopied(false), 2000);
@@ -87,7 +87,7 @@ export function ShareButtons({ url, title, compact = false }: { url: string; tit
 
   async function handleNativeShare() {
     try {
-      await (navigator as Navigator & { share: (data: ShareData) => Promise<void> }).share({ title, url });
+      await (navigator as Navigator & { share: (data: ShareData) => Promise<void> }).share({ title, url: comOrigem("compartilhamento_nativo") });
       void trackShare("nativo", url);
     } catch {
       // usuário cancelou o share sheet — não é erro

@@ -4,6 +4,8 @@
 // as notas da coluna regional, com link rastreado (utm) para o GA separar a
 // audiência que vem de cada canal.
 
+import { findMunicipio } from "./parana-municipios";
+
 export const SITE = "https://vozesparanaenses.com.br";
 
 export type ItemResumo = {
@@ -27,8 +29,10 @@ export function rotuloDoDia(iso: string): string {
   return `${DIAS[d.getDay()]}, ${String(d.getDate()).padStart(2, "0")}/${String(d.getMonth() + 1).padStart(2, "0")}`;
 }
 
-export function linkRastreado(caminho: string, canal: Canal, regiaoSlug: string): string {
-  const p = new URLSearchParams({ utm_source: canal, utm_medium: "social", utm_campaign: `resumo-${regiaoSlug}` });
+// utm_source = canal, utm_medium = social, utm_campaign = resumo-{regiao},
+// utm_content = o que foi clicado (materia, coluna, regiao, cidade-{slug}).
+export function linkRastreado(caminho: string, canal: Canal, regiaoSlug: string, conteudo?: string): string {
+  const p = new URLSearchParams({ utm_source: canal, utm_medium: "social", utm_campaign: `resumo-${regiaoSlug}`, ...(conteudo ? { utm_content: conteudo } : {}) });
   return `${SITE}${caminho}?${p.toString()}`;
 }
 
@@ -57,18 +61,32 @@ export function montarResumo(p: {
   itens.forEach((it, i) => {
     const onde = it.cidade ? ` (${it.cidade})` : "";
     linhas.push(`${i + 1}. ${negrito(it.titulo)}${onde}`);
-    if (p.canal === "whatsapp") linhas.push(linkRastreado(`/${it.regiaoSlug}/${it.slug}`, p.canal, p.regiaoSlug));
+    if (p.canal === "whatsapp") linhas.push(linkRastreado(`/${it.regiaoSlug}/${it.slug}`, p.canal, p.regiaoSlug, "materia"));
     linhas.push("");
   });
   if (p.notas.length) {
     linhas.push(negrito(`Notas da coluna Vozes ${p.regiaoNome}`));
     for (const n of p.notas.slice(0, 5)) linhas.push(`• ${n.titulo}${n.cidade ? ` (${n.cidade})` : ""}`);
-    if (p.canal === "whatsapp") linhas.push(linkRastreado(`/vozes/${p.regiaoSlug}`, p.canal, p.regiaoSlug));
+    if (p.canal === "whatsapp") linhas.push(linkRastreado(`/vozes/${p.regiaoSlug}`, p.canal, p.regiaoSlug, "coluna"));
     linhas.push("");
   }
+  // Atalho de cada cidade que apareceu no resumo (até 6): o leitor salva
+  // vozesparanaenses.com.br/{cidade} e volta direto na página dela.
+  const cidades = [...new Map(
+    [...itens.map((i) => i.cidade), ...p.notas.map((n) => n.cidade)]
+      .map((c) => (c ? findMunicipio(c) : null))
+      .filter((m): m is NonNullable<typeof m> => !!m && m.region === p.regiaoSlug)
+      .map((m) => [m.slug, m]),
+  ).values()].slice(0, 6);
   if (p.canal === "whatsapp") {
-    linhas.push(`Todas as notícias da região: ${linkRastreado(`/${p.regiaoSlug}`, p.canal, p.regiaoSlug)}`);
+    if (cidades.length) {
+      linhas.push(negrito("Notícias da sua cidade"));
+      for (const c of cidades) linhas.push(`${c.name}: ${linkRastreado(`/${c.slug}`, p.canal, p.regiaoSlug, `cidade-${c.slug}`)}`);
+      linhas.push("");
+    }
+    linhas.push(`Todas as notícias da região: ${linkRastreado(`/${p.regiaoSlug}`, p.canal, p.regiaoSlug, "regiao")}`);
   } else {
+    if (cidades.length) linhas.push(`Sua cidade: ${cidades.map((c) => `vozesparanaenses.com.br/${c.slug}`).join(" · ")}`);
     linhas.push("Leia todas no link da bio.");
     linhas.push(`#VozesParanaenses #${p.regiaoNome.replace(/[^\p{L}\p{N}]/gu, "")}`);
   }

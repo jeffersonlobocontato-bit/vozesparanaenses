@@ -265,6 +265,7 @@ Deno.serve(async (req) => {
           lamina: lamina ? { ...lamina, rotulo: "Giro pelo Paraná" } : undefined,
           tag: lamina ? null : (l.categoria?.nome ?? null),
           selo: classe === "alerta" ? "ALERTA" : null,
+          atalho: lamina ? null : atalhoDaCidade(l.cidade_principal, l.regiao?.slug),
         },
         red,
         fotoUrl,
@@ -277,6 +278,7 @@ Deno.serve(async (req) => {
         cor: corLamina ? "#f0b07a" : corDoChapeu(l.regiao?.slug, ch.escopo, true), corClara: corDoChapeu(l.regiao?.slug, ch.escopo, false), titulo, linhaFina, destaque: lamina ? null : red?.destaque ?? null,
         fundo: lamina ? "tinta" : escolherFundo(vizinhos(quando ?? null)),
         tag: lamina ? null : (l.categoria?.nome ?? null),
+        atalho: lamina ? null : atalhoDaCidade(l.cidade_principal, l.regiao?.slug),
       },
       red,
     };
@@ -376,3 +378,10 @@ Deno.serve(async (req) => {
 
   return json({ ok: true, plano, resultado, ms: Date.now() - inicio });
 });
+
+/** Endereço curto da cidade da matéria (só cidade do Paraná). */
+function atalhoDaCidade(cidade: string | null | undefined, regiaoSlug: string | null | undefined): string | null {
+  if (!cidade || !regiaoSlug || regiaoSlug === "nacional" || regiaoSlug === "internacional") return null;
+  const slug = cidade.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "");
+  return slug ? `vozesparanaenses.com.br/${slug}` : null;
+}

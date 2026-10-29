@@ -147,6 +147,10 @@ function rodape(escuro: boolean, direita: Filho[], borda: string): No {
 }
 
 const CTA = (texto: string, cor: string) => h("span", { style: { fontFamily: F.ui, fontWeight: 600, fontSize: 25, color: cor } }, texto);
+// Endereço curto da cidade (vozesparanaenses.com.br/toledo): no Instagram o
+// link não é clicável; quem digita chega com utm_source=atalho (ver o
+// redirecionamento em src/routes/$region.index.tsx).
+const ATALHO = (texto: string, cor: string) => h("span", { style: { fontFamily: F.ui, fontWeight: 600, fontSize: 22, color: cor } }, texto);
 const CREDITO = (texto: string, cor: string) => h("span", { style: { fontFamily: F.ui, fontWeight: 500, fontSize: 19, color: cor } }, texto);
 
 /** Corpo do título conforme o tamanho do texto (cabe sem estourar o card). */
@@ -179,6 +183,7 @@ export type CardFoto = {
   lamina?: { atual: number; total: number; rotulo: string };
   tag?: string | null; // editoria, no canto superior direito
   selo?: string | null; // "ALERTA": etiqueta vermelha no canto superior esquerdo
+  atalho?: string | null; // "vozesparanaenses.com.br/toledo"
 };
 
 /**
@@ -300,6 +305,7 @@ export type CardTipografico = {
   linhaFina?: string | null;
   destaque?: { valor: string; rotulo: string } | null;
   cta?: string;
+  atalho?: string | null; // "vozesparanaenses.com.br/toledo"
 };
 
 export type CardAlerta = {
@@ -372,7 +378,10 @@ function cardFotoEditorial(c: CardFoto): No {
     ),
     div(
       { position: "absolute", left: 72, right: 72, bottom: 56, alignItems: "center", justifyContent: "space-between", paddingTop: 22, borderTop: "2px solid rgba(255,255,255,0.22)" },
-      CTA(c.cta ?? "Leia no link da bio", "#ffffff"),
+      div({ flexDirection: "column", gap: 4 },
+        CTA(c.cta ?? "Leia no link da bio", "#ffffff"),
+        c.atalho ? ATALHO(c.atalho, COR.accent) : null,
+      ),
       c.credito ? CREDITO(limitar(c.credito, 60), COR.darkMuted) : null,
     ),
   );
@@ -437,7 +446,7 @@ function cardTipografico(c: CardTipografico): No {
     tituloComPonto(c.titulo, { marginTop: c.destaque ? 64 : 56, fontFamily: F.titulo, fontWeight: 700, fontSize: tam, lineHeight: 1.06, letterSpacing: -0.6, color: t.ink }, t.ponto, Math.round(tam * 0.21)),
     c.linhaFina ? h("span", { style: { marginTop: 28, fontFamily: F.titulo, fontSize: 34, lineHeight: 1.32, color: t.muted } }, limitar(c.linhaFina, 170)) : null,
     div({ flexGrow: 1 }),
-    rodape(t.escuro, [CTA(c.cta ?? "Leia no link da bio", t.ink)], t.rule),
+    rodape(t.escuro, [CTA(c.cta ?? "Leia no link da bio", t.ink), c.atalho ? ATALHO(c.atalho, t.escuro ? COR.accent : COR.brand) : null], t.rule),
   );
 }
 

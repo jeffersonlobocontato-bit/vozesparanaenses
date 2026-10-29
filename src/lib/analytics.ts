@@ -31,6 +31,8 @@ function classificarOrigem(referrer: string, host: string, search = ""): string 
   // interno do Instagram/WhatsApp não informa referrer.
   const utm = new URLSearchParams(search).get("utm_source")?.toLowerCase() ?? "";
   if (utm === "whatsapp") return "whatsapp";
+  // Endereço curto digitado (/toledo visto no card, rádio, impresso).
+  if (utm === "atalho") return "atalho";
   if (/instagram|facebook|telegram|twitter|^x$|tiktok|threads|linkedin/.test(utm)) return "social";
   if (utm) return "outro";
   if (!referrer) return "direto";

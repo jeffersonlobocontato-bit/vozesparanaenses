@@ -4,6 +4,7 @@ import { queryOptions, useSuspenseQuery } from "@tanstack/react-query";
 import { getRegionBySlug, listArticlesByCity, listNotasCidade, ultimaPorRegiao } from "@/lib/content.functions";
 import { findMunicipioBySlug } from "@/lib/parana-municipios";
 import { ColunaCidadeResumo } from "@/components/ColunaCidade";
+import { ShareButtons } from "@/components/ShareButtons";
 import { SiteHeader, SiteFooter } from "@/components/SiteHeader";
 import { AdsenseSlot } from "@/components/AdsenseSlot";
 import {
@@ -186,6 +187,11 @@ function CityPage() {
             Endereço curto para salvar e compartilhar:{" "}
             <span className="font-semibold text-[#12201E]">vozesparanaenses.com.br/{cidade}</span>
           </p>
+          <div className="mt-4 max-w-xl">
+            {/* Compartilha o endereço curto com utm_campaign=cidade-{slug}: o
+                Analytics mostra quantas visitas a página da cidade trouxe por rede. */}
+            <ShareButtons compact url={`https://vozesparanaenses.com.br/${cidade}`} title={`Notícias de ${city.cityName} no Vozes Paranaenses`} campanha={`cidade-${cidade}`} />
+          </div>
         </header>
 
         {city.articles.length === 0 ? (

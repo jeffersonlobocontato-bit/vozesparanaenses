@@ -29,11 +29,18 @@ export const Route = createFileRoute("/$region/")({
   // Endereço curto da cidade: /toledo, /foz-do-iguacu (e "/Foz do Iguaçu")
   // → 301 para a página canônica /{regiao}/cidade/{cidade}. Os slugs das
   // regiões e das 399 cidades não se repetem.
-  beforeLoad: ({ params }) => {
+  // Mantém os parâmetros da URL (utm de WhatsApp, Instagram…); quem chega
+  // sem utm (digitou o endereço visto no card, no rádio, no impresso) ganha
+  // utm_source=atalho para o Analytics separar esse tráfego.
+  beforeLoad: ({ params, location }) => {
     if (REGIOES_EDITORIAIS.has(params.region)) return;
     const m = findMunicipio(decodeURIComponent(params.region));
     if (m?.region) {
-      throw redirect({ to: "/$region/cidade/$cidade", params: { region: m.region, cidade: m.slug }, statusCode: 301 });
+      const atual = (location.search ?? {}) as Record<string, unknown>;
+      const search = atual.utm_source
+        ? atual
+        : { ...atual, utm_source: "atalho", utm_medium: "url-curta", utm_campaign: `cidade-${m.slug}` };
+      throw redirect({ to: "/$region/cidade/$cidade", params: { region: m.region, cidade: m.slug }, search: search as never, statusCode: 301 });
     }
   },
   loader: async ({ context, params }) => {
