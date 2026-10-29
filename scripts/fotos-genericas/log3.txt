@@ -1,0 +1,23 @@
+pm galerias 0
+pm fotos 0
+civil galerias 0
+civil fotos 0
+bombeiros galerias 0
+bombeiros fotos 0
+cientifica galerias 0
+cientifica fotos 0
+rodoviaria galerias 0
+rodoviaria fotos 0
+penal galerias 0
+penal fotos 0
+samu galerias 0
+samu fotos 0
+defesa-civil galerias 0
+defesa-civil fotos 0
+chuva galerias 0
+chuva fotos 0
+frio galerias 0
+frio fotos 0
+calor galerias 0
+calor fotos 0
+total 0
