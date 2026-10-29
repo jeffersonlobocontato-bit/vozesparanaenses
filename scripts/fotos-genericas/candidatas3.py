@@ -40,21 +40,42 @@ def guardar(url, tema, galeria, cred):
     manifest.append({"id": i, "tema": tema, "url": url, "galeria": galeria, "credito": cred})
     return True
 
-for tema, buscas in TEMAS.items():
-    galerias = []
-    for b in buscas:
-        for pagina in (0, 1):
-            u = "https://www.parana.pr.gov.br/Galeria-de-Imagens?" + urllib.parse.urlencode({"combine": b, "page": pagina})
-            try: h = txt(u)
-            except Exception as e: print("busca falhou", u, e); continue
-            for m in re.finditer(r'href="(/Galeria-de-Imagens/[^"?#]+)"', h):
-                g = "https://www.parana.pr.gov.br" + m.group(1)
-                # Evita inauguração/entrega de sede (fachada identificável) e solenidades.
-                if re.search(r"inaugur|nova-sede|sede|entrega|solenidade|formatura|governador|palacio|reuniao|visita", g, re.I): continue
-                if g not in galerias: galerias.append(g)
-    print(tema, "galerias", len(galerias))
+# A busca do site é por formulário (POST com token); em vez disso, percorre a
+# listagem de galerias da AEN e filtra pelo título (slug) de cada uma.
+FILTRO = {
+  "pm": r"policia-militar|\bpm\b|-pm-|rotam|bpmoa|choque|policiamento|operacao-verao|viatura",
+  "civil": r"policia-civil|pcpr|delegad",
+  "bombeiros": r"bombeir|siate|resgate|salvamento|incendio",
+  "cientifica": r"cientifica|pericia|iml",
+  "rodoviaria": r"rodoviaria|bprv|blitz|fiscalizacao-nas-rodovias|fiscalizacao-nas-estradas",
+  "penal": r"policia-penal|penitenciar|deppen",
+  "samu": r"samu|ambulanc",
+  "defesa-civil": r"defesa-civil",
+  "chuva": r"chuva|temporal|tempestade|granizo|enchente|alagamento|vendaval",
+  "frio": r"geada|frio|neve|temperatura",
+  "calor": r"calor|estiagem|seca|queimada",
+  "sesp": r"^sesp|seguranca-publica",
+}
+EVITA = r"inaugur|nova-sede|sede-|entrega|solenidade|formatura|governador|palacio|reuniao|visita|posse|homenag|aniversario|medalha|assina"
+slugs = []
+for pagina in range(0, 260):
+    try: h = txt(f"https://www.parana.pr.gov.br/aen/Galerias?page={pagina}")
+    except Exception as e: print("lista falhou", pagina, e); continue
+    novos = [m.group(1) for m in re.finditer(r'href="(/Galeria-de-Imagens/[^"?#]+)"', h)]
+    novos = [s for s in novos if s not in slugs]
+    if not novos: break
+    slugs += novos
+print("galerias listadas", len(slugs))
+por_tema = {t: [] for t in FILTRO}
+for s in slugs:
+    nome = s.split("/")[-1].lower()
+    if re.search(EVITA, nome): continue
+    for t, rx in FILTRO.items():
+        if re.search(rx, nome): por_tema[t].append("https://www.parana.pr.gov.br" + s); break
+for t, gs in por_tema.items():
+    print(t, "galerias", len(gs))
     n = 0
-    for g in galerias[:10]:
+    for g in gs[:14]:
         try: h = txt(g)
         except Exception: continue
         cred = credito_de(h)
@@ -65,11 +86,11 @@ for tema, buscas in TEMAS.items():
             u = urllib.parse.urljoin("https://www.parana.pr.gov.br", u)
             if u not in urls: urls.append(u)
         k = 0
-        for u in urls[:12]:
-            if guardar(u, tema, g, cred): k += 1; n += 1
-            if k >= 5: break
-        if n >= 36: break
-    print(tema, "fotos", n)
+        for u in urls[:10]:
+            if guardar(u, t, g, cred): k += 1; n += 1
+            if k >= 4: break
+        if n >= 32: break
+    print(t, "fotos", n)
 
 (BASE / "candidatas3.json").write_text(json.dumps(manifest, ensure_ascii=False, indent=1))
 W, H, C, R = 520, 346, 3, 3
