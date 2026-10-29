@@ -1,0 +1,23 @@
+name: diag-prefeituras
+on:
+  push:
+    branches: [diag-prefeituras]
+    paths: [scripts/diag-prefeituras/alvos.json, scripts/diag-prefeituras/diag.ts]
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  diagnosticar:
+    runs-on: ubuntu-latest
+    timeout-minutes: 300
+    steps:
+      - uses: actions/checkout@v4
+      - uses: denoland/setup-deno@v2
+        with:
+          deno-version: v2.x
+      - run: deno run --allow-net --allow-read --allow-write --allow-env scripts/diag-prefeituras/diag.ts 2>&1 | tail -50
+      - run: |
+          git config user.name "github-actions"; git config user.email "actions@github.com"
+          git add scripts/diag-prefeituras/resultado.json
+          git commit -m "Diagnóstico das fontes de prefeitura" || exit 0
+          git pull --rebase -q && git push
