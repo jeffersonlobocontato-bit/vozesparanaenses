@@ -4,13 +4,18 @@ on:
     branches: [diag-prefeituras]
     paths: [.github/workflows/checa-site.yml]
 permissions:
-  contents: read
+  contents: write
 jobs:
   checar:
     runs-on: ubuntu-latest
     steps:
+      - uses: actions/checkout@v4
       - run: |
+          exec > checa-site.txt 2>&1
           for u in /toledo "/toledo?utm_source=whatsapp&utm_medium=social" "/Foz%20do%20Igua%C3%A7u" /oeste/cidade/toledo /geo-pr-municipios.json /admin/cobertura /admin/resumo-regional; do
             echo "== $u"; curl -s -o /tmp/p.html -D - -m 30 "https://vozesparanaenses.com.br$u" | grep -iE "^HTTP|^location" ; echo "bytes $(wc -c < /tmp/p.html)"
             grep -o "Endereço curto para salvar[^<]*\|Enquanto isso, no resto do Paraná" /tmp/p.html | head -3
           done
+      - run: |
+          git config user.name "github-actions"; git config user.email "actions@github.com"
+          git add checa-site.txt && git commit -m "resultado checa-site" && git push
