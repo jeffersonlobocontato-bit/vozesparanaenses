@@ -1,0 +1,7072 @@
+[
+ {
+  "modo": "fonte",
+  "id": "7009c903-98d1-4004-b77f-86532db85954",
+  "nome": "Prefeitura de Porto Amazonas",
+  "cidade": "porto-amazonas",
+  "url": "https://www.portoamazonas.pr.gov.br/feed/",
+  "candidatas": 11,
+  "melhor": {
+   "url": "https://www.portoamazonas.pr.gov.br/feed/",
+   "itens": 0,
+   "com_data": 0,
+   "recentes": 0,
+   "futuras": 0,
+   "sem_data": 0,
+   "mais_recente": null,
+   "exemplos": [],
+   "nota": 0
+  },
+  "atual": {
+   "url": "https://www.portoamazonas.pr.gov.br/feed/",
+   "itens": 0,
+   "com_data": 0,
+   "recentes": 0,
+   "futuras": 0,
+   "sem_data": 0,
+   "mais_recente": null,
+   "exemplos": [],
+   "nota": 0
+  },
+  "testes": [
+   {
+    "url": "https://www.portoamazonas.pr.gov.br/feed/",
+    "itens": 0,
+    "com_data": 0,
+    "recentes": 0,
+    "futuras": 0,
+    "sem_data": 0,
+    "mais_recente": null,
+    "exemplos": [],
+    "nota": 0
+   }
+  ]
+ },
+ {
+  "modo": "fonte",
+  "id": "75b9e9de-a5c7-43b7-8f88-a40dae368231",
+  "nome": "Prefeitura de São Jerônimo da Serra",
+  "cidade": "sao-jeronimo-da-serra",
+  "url": "https://www.saojeronimodaserra.pr.gov.br/noticia",
+  "candidatas": 11,
+  "melhor": {
+   "url": "https://www.saojeronimodaserra.pr.gov.br/noticia",
+   "itens": 0,
+   "com_data": 0,
+   "recentes": 0,
+   "futuras": 0,
+   "sem_data": 0,
+   "mais_recente": null,
+   "exemplos": [],
+   "nota": 0
+  },
+  "atual": {
+   "url": "https://www.saojeronimodaserra.pr.gov.br/noticia",
+   "itens": 0,
+   "com_data": 0,
+   "recentes": 0,
+   "futuras": 0,
+   "sem_data": 0,
+   "mais_recente": null,
+   "exemplos": [],
+   "nota": 0
+  },
+  "testes": [
+   {
+    "url": "https://www.saojeronimodaserra.pr.gov.br/noticia",
+    "itens": 0,
+    "com_data": 0,
+    "recentes": 0,
+    "futuras": 0,
+    "sem_data": 0,
+    "mais_recente": null,
+    "exemplos": [],
+    "nota": 0
+   }
+  ]
+ },
+ {
+  "modo": "fonte",
+  "id": "dcad720a-c5e3-43b6-bd5d-16bc0d843c3c",
+  "nome": "Prefeitura de Corumbataí do Sul",
+  "cidade": "corumbatai-do-sul",
+  "url": "https://www.corumbataidosul.pr.gov.br/noticia",
+  "candidatas": 11,
+  "melhor": {
+   "url": "https://www.corumbataidosul.pr.gov.br/noticia",
+   "itens": 0,
+   "com_data": 0,
+   "recentes": 0,
+   "futuras": 0,
+   "sem_data": 0,
+   "mais_recente": null,
+   "exemplos": [],
+   "nota": 0
+  },
+  "atual": {
+   "url": "https://www.corumbataidosul.pr.gov.br/noticia",
+   "itens": 0,
+   "com_data": 0,
+   "recentes": 0,
+   "futuras": 0,
+   "sem_data": 0,
+   "mais_recente": null,
+   "exemplos": [],
+   "nota": 0
+  },
+  "testes": [
+   {
+    "url": "https://www.corumbataidosul.pr.gov.br/noticia",
+    "itens": 0,
+    "com_data": 0,
+    "recentes": 0,
+    "futuras": 0,
+    "sem_data": 0,
+    "mais_recente": null,
+    "exemplos": [],
+    "nota": 0
+   }
+  ]
+ },
+ {
+  "modo": "fonte",
+  "id": "b6069992-caba-4e59-bc5f-6e4a159b7c79",
+  "nome": "Prefeitura de Cianorte",
+  "cidade": "cianorte",
+  "url": "https://www.cianorte.pr.gov.br/site/",
+  "candidatas": 12,
+  "melhor": {
+   "url": "https://www.cianorte.pr.gov.br/site/",
+   "itens": 0,
+   "com_data": 0,
+   "recentes": 0,
+   "futuras": 0,
+   "sem_data": 0,
+   "mais_recente": null,
+   "exemplos": [],
+   "nota": 0
+  },
+  "atual": {
+   "url": "https://www.cianorte.pr.gov.br/site/",
+   "itens": 0,
+   "com_data": 0,
+   "recentes": 0,
+   "futuras": 0,
+   "sem_data": 0,
+   "mais_recente": null,
+   "exemplos": [],
+   "nota": 0
+  },
+  "testes": [
+   {
+    "url": "https://www.cianorte.pr.gov.br/site/",
+    "itens": 0,
+    "com_data": 0,
+    "recentes": 0,
+    "futuras": 0,
+    "sem_data": 0,
+    "mais_recente": null,
+    "exemplos": [],
+    "nota": 0
+   }
+  ]
+ },
+ {
+  "modo": "fonte",
+  "id": "1fb68761-90ee-4d8d-be3f-ea4ef285bf40",
+  "nome": "Prefeitura de Mandirituba",
+  "cidade": "mandirituba",
+  "url": "https://mandirituba.pr.gov.br/noticias",
+  "candidatas": 11,
+  "melhor": {
+   "url": "https://mandirituba.pr.gov.br/noticias",
+   "itens": 0,
+   "com_data": 0,
+   "recentes": 0,
+   "futuras": 0,
+   "sem_data": 0,
+   "mais_recente": null,
+   "exemplos": [],
+   "nota": 0
+  },
+  "atual": {
+   "url": "https://mandirituba.pr.gov.br/noticias",
+   "itens": 0,
+   "com_data": 0,
+   "recentes": 0,
+   "futuras": 0,
+   "sem_data": 0,
+   "mais_recente": null,
+   "exemplos": [],
+   "nota": 0
+  },
+  "testes": [
+   {
+    "url": "https://mandirituba.pr.gov.br/noticias",
+    "itens": 0,
+    "com_data": 0,
+    "recentes": 0,
+    "futuras": 0,
+    "sem_data": 0,
+    "mais_recente": null,
+    "exemplos": [],
+    "nota": 0
+   }
+  ]
+ },
+ {
+  "modo": "fonte",
+  "id": "c9a5ddfb-6b37-4a48-ae1a-9b35eb170ebb",
+  "nome": "Prefeitura de Ramilândia",
+  "cidade": "ramilandia",
+  "url": "https://www.ramilandia.pr.gov.br/noticias/",
+  "candidatas": 11,
+  "melhor": {
+   "url": "https://www.ramilandia.pr.gov.br/noticias/",
+   "itens": 0,
+   "com_data": 0,
+   "recentes": 0,
+   "futuras": 0,
+   "sem_data": 0,
+   "mais_recente": null,
+   "exemplos": [],
+   "nota": 0
+  },
+  "atual": {
+   "url": "https://www.ramilandia.pr.gov.br/noticias/",
+   "itens": 0,
+   "com_data": 0,
+   "recentes": 0,
+   "futuras": 0,
+   "sem_data": 0,
+   "mais_recente": null,
+   "exemplos": [],
+   "nota": 0
+  },
+  "testes": [
+   {
+    "url": "https://www.ramilandia.pr.gov.br/noticias/",
+    "itens": 0,
+    "com_data": 0,
+    "recentes": 0,
+    "futuras": 0,
+    "sem_data": 0,
+    "mais_recente": null,
+    "exemplos": [],
+    "nota": 0
+   }
+  ]
+ },
+ {
+  "modo": "fonte",
+  "id": "9f162938-6fcc-4a25-a1d2-650cc4620ddd",
+  "nome": "Prefeitura de Doutor Camargo",
+  "cidade": "doutor-camargo",
+  "url": "https://www.doutorcamargo.pr.gov.br/feed/",
+  "candidatas": 11,
+  "melhor": {
+   "url": "https://www.doutorcamargo.pr.gov.br/feed/",
+   "itens": 0,
+   "com_data": 0,
+   "recentes": 0,
+   "futuras": 0,
+   "sem_data": 0,
+   "mais_recente": null,
+   "exemplos": [],
+   "nota": 0
+  },
+  "atual": {
+   "url": "https://www.doutorcamargo.pr.gov.br/feed/",
+   "itens": 0,
+   "com_data": 0,
+   "recentes": 0,
+   "futuras": 0,
+   "sem_data": 0,
+   "mais_recente": null,
+   "exemplos": [],
+   "nota": 0
+  },
+  "testes": [
+   {
+    "url": "https://www.doutorcamargo.pr.gov.br/feed/",
+    "itens": 0,
+    "com_data": 0,
+    "recentes": 0,
+    "futuras": 0,
+    "sem_data": 0,
+    "mais_recente": null,
+    "exemplos": [],
+    "nota": 0
+   }
+  ]
+ },
+ {
+  "modo": "fonte",
+  "id": "7ebb4028-5990-45e6-930a-cb53d68cb9bf",
+  "nome": "Prefeitura de São João do Caiuá",
+  "cidade": "sao-joao-do-caiua",
+  "url": "https://www.saojoaodocaiua.pr.gov.br/feed/",
+  "candidatas": 11,
+  "melhor": {
+   "url": "https://www.saojoaodocaiua.pr.gov.br/feed/",
+   "itens": 0,
+   "com_data": 0,
+   "recentes": 0,
+   "futuras": 0,
+   "sem_data": 0,
+   "mais_recente": null,
+   "exemplos": [],
+   "nota": 0
+  },
+  "atual": {
+   "url": "https://www.saojoaodocaiua.pr.gov.br/feed/",
+   "itens": 0,
+   "com_data": 0,
+   "recentes": 0,
+   "futuras": 0,
+   "sem_data": 0,
+   "mais_recente": null,
+   "exemplos": [],
+   "nota": 0
+  },
+  "testes": [
+   {
+    "url": "https://www.saojoaodocaiua.pr.gov.br/feed/",
+    "itens": 0,
+    "com_data": 0,
+    "recentes": 0,
+    "futuras": 0,
+    "sem_data": 0,
+    "mais_recente": null,
+    "exemplos": [],
+    "nota": 0
+   }
+  ]
+ },
+ {
+  "modo": "fonte",
+  "id": "e2a4375f-b704-485a-a829-b91beaae3aa4",
+  "nome": "Prefeitura de Porto Barreiro",
+  "cidade": "porto-barreiro",
+  "url": "https://www.portobarreiro.pr.gov.br/noticias/",
+  "candidatas": 11,
+  "melhor": {
+   "url": "https://www.portobarreiro.pr.gov.br/noticias/",
+   "itens": 0,
+   "com_data": 0,
+   "recentes": 0,
+   "futuras": 0,
+   "sem_data": 0,
+   "mais_recente": null,
+   "exemplos": [],
+   "nota": 0
+  },
+  "atual": {
+   "url": "https://www.portobarreiro.pr.gov.br/noticias/",
+   "itens": 0,
+   "com_data": 0,
+   "recentes": 0,
+   "futuras": 0,
+   "sem_data": 0,
+   "mais_recente": null,
+   "exemplos": [],
+   "nota": 0
+  },
+  "testes": [
+   {
+    "url": "https://www.portobarreiro.pr.gov.br/noticias/",
+    "itens": 0,
+    "com_data": 0,
+    "recentes": 0,
+    "futuras": 0,
+    "sem_data": 0,
+    "mais_recente": null,
+    "exemplos": [],
+    "nota": 0
+   }
+  ]
+ },
+ {
+  "modo": "fonte",
+  "id": "7e5b0aec-6788-4849-956c-f7260e4d4849",
+  "nome": "Prefeitura de São José dos Pinhais",
+  "cidade": "sao-jose-dos-pinhais",
+  "url": "https://www.sjp.pr.gov.br/noticias/",
+  "candidatas": 11,
+  "melhor": {
+   "url": "https://www.sjp.pr.gov.br/noticias/",
+   "itens": 0,
+   "com_data": 0,
+   "recentes": 0,
+   "futuras": 0,
+   "sem_data": 0,
+   "mais_recente": null,
+   "exemplos": [],
+   "nota": 0
+  },
+  "atual": {
+   "url": "https://www.sjp.pr.gov.br/noticias/",
+   "itens": 0,
+   "com_data": 0,
+   "recentes": 0,
+   "futuras": 0,
+   "sem_data": 0,
+   "mais_recente": null,
+   "exemplos": [],
+   "nota": 0
+  },
+  "testes": [
+   {
+    "url": "https://www.sjp.pr.gov.br/noticias/",
+    "itens": 0,
+    "com_data": 0,
+    "recentes": 0,
+    "futuras": 0,
+    "sem_data": 0,
+    "mais_recente": null,
+    "exemplos": [],
+    "nota": 0
+   }
+  ]
+ },
+ {
+  "modo": "fonte",
+  "id": "5a5270ea-4c58-4209-8cc8-9c66680dbc43",
+  "nome": "Prefeitura de Sertanópolis",
+  "cidade": "sertanopolis",
+  "url": "https://www.sertanopolis.pr.gov.br/feed/",
+  "candidatas": 11,
+  "melhor": {
+   "url": "https://www.sertanopolis.pr.gov.br/feed/",
+   "itens": 0,
+   "com_data": 0,
+   "recentes": 0,
+   "futuras": 0,
+   "sem_data": 0,
+   "mais_recente": null,
+   "exemplos": [],
+   "nota": 0
+  },
+  "atual": {
+   "url": "https://www.sertanopolis.pr.gov.br/feed/",
+   "itens": 0,
+   "com_data": 0,
+   "recentes": 0,
+   "futuras": 0,
+   "sem_data": 0,
+   "mais_recente": null,
+   "exemplos": [],
+   "nota": 0
+  },
+  "testes": [
+   {
+    "url": "https://www.sertanopolis.pr.gov.br/feed/",
+    "itens": 0,
+    "com_data": 0,
+    "recentes": 0,
+    "futuras": 0,
+    "sem_data": 0,
+    "mais_recente": null,
+    "exemplos": [],
+    "nota": 0
+   }
+  ]
+ },
+ {
+  "modo": "fonte",
+  "id": "1b24c854-3433-47cd-80c6-a92fc77073c2",
+  "nome": "Prefeitura de Adrianópolis",
+  "cidade": "adrianopolis",
+  "url": "https://www.adrianopolis.pr.gov.br/noticiasView/?id=73097",
+  "candidatas": 12,
+  "melhor": {
+   "url": "https://www.adrianopolis.pr.gov.br/noticiasView/?id=73097",
+   "itens": 5,
+   "com_data": 0,
+   "recentes": 0,
+   "futuras": 0,
+   "sem_data": 5,
+   "mais_recente": null,
+   "exemplos": [
+    {
+     "titulo": "Geral 08/10/2026 09:00 A Secretaria Municipal de Agricultura, Abastecimento e Meio Ambient",
+     "url": "https://www.adrianopolis.pr.gov.br/noticiasView/?id=73096",
+     "data": null
+    },
+    {
+     "titulo": "Geral 08/10/2026 09:00 Cuidando dos Animais, fortalecendo a nossa gente. No dia 26 de outu",
+     "url": "https://www.adrianopolis.pr.gov.br/noticiasView/?id=73095",
+     "data": null
+    },
+    {
+     "titulo": "Geral 08/10/2026 09:00 QUANDO A CHUVA DEIXA MARCAS, A SOLIDARIEDADE DEIXA ESPERANÇAS... Ad",
+     "url": "https://www.adrianopolis.pr.gov.br/noticiasView/?id=73094",
+     "data": null
+    },
+    {
+     "titulo": "Geral 08/10/2026 09:00 Leilão- Prefeitura Municipal de Adrianópolis",
+     "url": "https://www.adrianopolis.pr.gov.br/noticiasView/?id=73093",
+     "data": null
+    },
+    {
+     "titulo": "Geral 08/10/2026 09:00 MULHERES- SEU VOTO É UM DIREITO! SUA SEGURANÇA É PRIORIDADE.",
+     "url": "https://www.adrianopolis.pr.gov.br/noticiasView/?id=73092",
+     "data": null
+    }
+   ],
+   "nota": -5
+  },
+  "atual": {
+   "url": "https://www.adrianopolis.pr.gov.br/noticiasView/?id=73097",
+   "itens": 5,
+   "com_data": 0,
+   "recentes": 0,
+   "futuras": 0,
+   "sem_data": 5,
+   "mais_recente": null,
+   "exemplos": [
+    {
+     "titulo": "Geral 08/10/2026 09:00 A Secretaria Municipal de Agricultura, Abastecimento e Meio Ambient",
+     "url": "https://www.adrianopolis.pr.gov.br/noticiasView/?id=73096",
+     "data": null
+    },
+    {
+     "titulo": "Geral 08/10/2026 09:00 Cuidando dos Animais, fortalecendo a nossa gente. No dia 26 de outu",
+     "url": "https://www.adrianopolis.pr.gov.br/noticiasView/?id=73095",
+     "data": null
+    },
+    {
+     "titulo": "Geral 08/10/2026 09:00 QUANDO A CHUVA DEIXA MARCAS, A SOLIDARIEDADE DEIXA ESPERANÇAS... Ad",
+     "url": "https://www.adrianopolis.pr.gov.br/noticiasView/?id=73094",
+     "data": null
+    },
+    {
+     "titulo": "Geral 08/10/2026 09:00 Leilão- Prefeitura Municipal de Adrianópolis",
+     "url": "https://www.adrianopolis.pr.gov.br/noticiasView/?id=73093",
+     "data": null
+    },
+    {
+     "titulo": "Geral 08/10/2026 09:00 MULHERES- SEU VOTO É UM DIREITO! SUA SEGURANÇA É PRIORIDADE.",
+     "url": "https://www.adrianopolis.pr.gov.br/noticiasView/?id=73092",
+     "data": null
+    }
+   ],
+   "nota": -5
+  },
+  "testes": [
+   {
+    "url": "https://www.adrianopolis.pr.gov.br/noticiasView/?id=73097",
+    "itens": 5,
+    "com_data": 0,
+    "recentes": 0,
+    "futuras": 0,
+    "sem_data": 5,
+    "mais_recente": null,
+    "exemplos": [
+     {
+      "titulo": "Geral 08/10/2026 09:00 A Secretaria Municipal de Agricultura, Abastecimento e Meio Ambient",
+      "url": "https://www.adrianopolis.pr.gov.br/noticiasView/?id=73096",
+      "data": null
+     },
+     {
+      "titulo": "Geral 08/10/2026 09:00 Cuidando dos Animais, fortalecendo a nossa gente. No dia 26 de outu",
+      "url": "https://www.adrianopolis.pr.gov.br/noticiasView/?id=73095",
+      "data": null
+     },
+     {
+      "titulo": "Geral 08/10/2026 09:00 QUANDO A CHUVA DEIXA MARCAS, A SOLIDARIEDADE DEIXA ESPERANÇAS... Ad",
+      "url": "https://www.adrianopolis.pr.gov.br/noticiasView/?id=73094",
+      "data": null
+     },
+     {
+      "titulo": "Geral 08/10/2026 09:00 Leilão- Prefeitura Municipal de Adrianópolis",
+      "url": "https://www.adrianopolis.pr.gov.br/noticiasView/?id=73093",
+      "data": null
+     },
+     {
+      "titulo": "Geral 08/10/2026 09:00 MULHERES- SEU VOTO É UM DIREITO! SUA SEGURANÇA É PRIORIDADE.",
+      "url": "https://www.adrianopolis.pr.gov.br/noticiasView/?id=73092",
+      "data": null
+     }
+    ],
+    "nota": -5
+   }
+  ]
+ },
+ {
+  "modo": "fonte",
+  "id": "d3905895-af65-4c0a-a456-b064bfcb6086",
+  "nome": "Prefeitura de Palotina",
+  "cidade": "palotina",
+  "url": "https://www.palotina.pr.gov.br/noticia",
+  "candidatas": 11,
+  "melhor": {
+   "url": "https://www.palotina.pr.gov.br/noticia",
+   "itens": 0,
+   "com_data": 0,
+   "recentes": 0,
+   "futuras": 0,
+   "sem_data": 0,
+   "mais_recente": null,
+   "exemplos": [],
+   "nota": 0
+  },
+  "atual": {
+   "url": "https://www.palotina.pr.gov.br/noticia",
+   "itens": 0,
+   "com_data": 0,
+   "recentes": 0,
+   "futuras": 0,
+   "sem_data": 0,
+   "mais_recente": null,
+   "exemplos": [],
+   "nota": 0
+  },
+  "testes": [
+   {
+    "url": "https://www.palotina.pr.gov.br/noticia",
+    "itens": 0,
+    "com_data": 0,
+    "recentes": 0,
+    "futuras": 0,
+    "sem_data": 0,
+    "mais_recente": null,
+    "exemplos": [],
+    "nota": 0
+   }
+  ]
+ },
+ {
+  "modo": "fonte",
+  "id": "71d3134b-5e64-40ab-9a06-e80101daed49",
+  "nome": "Prefeitura de Campo do Tenente",
+  "cidade": "campo-do-tenente",
+  "url": "https://www.campodotenente.pr.gov.br/noticias",
+  "candidatas": 11,
+  "melhor": {
+   "url": "https://www.campodotenente.pr.gov.br/noticias",
+   "itens": 0,
+   "com_data": 0,
+   "recentes": 0,
+   "futuras": 0,
+   "sem_data": 0,
+   "mais_recente": null,
+   "exemplos": [],
+   "nota": 0
+  },
+  "atual": {
+   "url": "https://www.campodotenente.pr.gov.br/noticias",
+   "itens": 0,
+   "com_data": 0,
+   "recentes": 0,
+   "futuras": 0,
+   "sem_data": 0,
+   "mais_recente": null,
+   "exemplos": [],
+   "nota": 0
+  },
+  "testes": [
+   {
+    "url": "https://www.campodotenente.pr.gov.br/noticias",
+    "itens": 0,
+    "com_data": 0,
+    "recentes": 0,
+    "futuras": 0,
+    "sem_data": 0,
+    "mais_recente": null,
+    "exemplos": [],
+    "nota": 0
+   }
+  ]
+ },
+ {
+  "modo": "fonte",
+  "id": "16237733-0bff-4c23-9910-4b270e2e653a",
+  "nome": "Prefeitura de Luiziana",
+  "cidade": "luiziana",
+  "url": "https://www.luiziana.pr.gov.br/feed/",
+  "candidatas": 11,
+  "melhor": {
+   "url": "https://www.luiziana.pr.gov.br/feed/",
+   "itens": 0,
+   "com_data": 0,
+   "recentes": 0,
+   "futuras": 0,
+   "sem_data": 0,
+   "mais_recente": null,
+   "exemplos": [],
+   "nota": 0
+  },
+  "atual": {
+   "url": "https://www.luiziana.pr.gov.br/feed/",
+   "itens": 0,
+   "com_data": 0,
+   "recentes": 0,
+   "futuras": 0,
+   "sem_data": 0,
+   "mais_recente": null,
+   "exemplos": [],
+   "nota": 0
+  },
+  "testes": [
+   {
+    "url": "https://www.luiziana.pr.gov.br/feed/",
+    "itens": 0,
+    "com_data": 0,
+    "recentes": 0,
+    "futuras": 0,
+    "sem_data": 0,
+    "mais_recente": null,
+    "exemplos": [],
+    "nota": 0
+   }
+  ]
+ },
+ {
+  "modo": "fonte",
+  "id": "15cb88ba-90cd-4bfe-8547-4f9cd766343b",
+  "nome": "Prefeitura de Tapejara",
+  "cidade": "tapejara",
+  "url": "https://www.tapejara.pr.gov.br/feed/",
+  "candidatas": 11,
+  "melhor": {
+   "url": "https://www.tapejara.pr.gov.br/feed/",
+   "itens": 0,
+   "com_data": 0,
+   "recentes": 0,
+   "futuras": 0,
+   "sem_data": 0,
+   "mais_recente": null,
+   "exemplos": [],
+   "nota": 0
+  },
+  "atual": {
+   "url": "https://www.tapejara.pr.gov.br/feed/",
+   "itens": 0,
+   "com_data": 0,
+   "recentes": 0,
+   "futuras": 0,
+   "sem_data": 0,
+   "mais_recente": null,
+   "exemplos": [],
+   "nota": 0
+  },
+  "testes": [
+   {
+    "url": "https://www.tapejara.pr.gov.br/feed/",
+    "itens": 0,
+    "com_data": 0,
+    "recentes": 0,
+    "futuras": 0,
+    "sem_data": 0,
+    "mais_recente": null,
+    "exemplos": [],
+    "nota": 0
+   }
+  ]
+ },
+ {
+  "modo": "fonte",
+  "id": "6ae5c69e-3bef-4524-b318-695010a4e73b",
+  "nome": "Prefeitura de Santa Fé",
+  "cidade": "santa-fe",
+  "url": "https://www.santafe.pr.gov.br/feed/",
+  "candidatas": 11,
+  "melhor": {
+   "url": "https://www.santafe.pr.gov.br/feed/",
+   "itens": 0,
+   "com_data": 0,
+   "recentes": 0,
+   "futuras": 0,
+   "sem_data": 0,
+   "mais_recente": null,
+   "exemplos": [],
+   "nota": 0
+  },
+  "atual": {
+   "url": "https://www.santafe.pr.gov.br/feed/",
+   "itens": 0,
+   "com_data": 0,
+   "recentes": 0,
+   "futuras": 0,
+   "sem_data": 0,
+   "mais_recente": null,
+   "exemplos": [],
+   "nota": 0
+  },
+  "testes": [
+   {
+    "url": "https://www.santafe.pr.gov.br/feed/",
+    "itens": 0,
+    "com_data": 0,
+    "recentes": 0,
+    "futuras": 0,
+    "sem_data": 0,
+    "mais_recente": null,
+    "exemplos": [],
+    "nota": 0
+   }
+  ]
+ },
+ {
+  "modo": "fonte",
+  "id": "2923a951-8b82-40eb-bf0f-84c4f58549af",
+  "nome": "Prefeitura de Mallet",
+  "cidade": "mallet",
+  "url": "https://mallet.pr.gov.br/noticiasView/?id=434",
+  "candidatas": 12,
+  "melhor": {
+   "url": "https://mallet.pr.gov.br/noticiasView/?id=434",
+   "itens": 0,
+   "com_data": 0,
+   "recentes": 0,
+   "futuras": 0,
+   "sem_data": 0,
+   "mais_recente": null,
+   "exemplos": [],
+   "nota": 0
+  },
+  "atual": {
+   "url": "https://mallet.pr.gov.br/noticiasView/?id=434",
+   "itens": 0,
+   "com_data": 0,
+   "recentes": 0,
+   "futuras": 0,
+   "sem_data": 0,
+   "mais_recente": null,
+   "exemplos": [],
+   "nota": 0
+  },
+  "testes": [
+   {
+    "url": "https://mallet.pr.gov.br/noticiasView/?id=434",
+    "itens": 0,
+    "com_data": 0,
+    "recentes": 0,
+    "futuras": 0,
+    "sem_data": 0,
+    "mais_recente": null,
+    "exemplos": [],
+    "nota": 0
+   }
+  ]
+ },
+ {
+  "modo": "fonte",
+  "id": "d10ba222-7ed3-424a-9bd4-18e950950181",
+  "nome": "Prefeitura de Formosa do Oeste",
+  "cidade": "formosa-do-oeste",
+  "url": "https://www.formosadooeste.pr.gov.br/noticia",
+  "candidatas": 11,
+  "melhor": {
+   "url": "https://www.formosadooeste.pr.gov.br/noticia",
+   "itens": 0,
+   "com_data": 0,
+   "recentes": 0,
+   "futuras": 0,
+   "sem_data": 0,
+   "mais_recente": null,
+   "exemplos": [],
+   "nota": 0
+  },
+  "atual": {
+   "url": "https://www.formosadooeste.pr.gov.br/noticia",
+   "itens": 0,
+   "com_data": 0,
+   "recentes": 0,
+   "futuras": 0,
+   "sem_data": 0,
+   "mais_recente": null,
+   "exemplos": [],
+   "nota": 0
+  },
+  "testes": [
+   {
+    "url": "https://www.formosadooeste.pr.gov.br/noticia",
+    "itens": 0,
+    "com_data": 0,
+    "recentes": 0,
+    "futuras": 0,
+    "sem_data": 0,
+    "mais_recente": null,
+    "exemplos": [],
+    "nota": 0
+   }
+  ]
+ },
+ {
+  "modo": "fonte",
+  "id": "098c45ff-9c81-4357-8f8f-745be77dfe22",
+  "nome": "Prefeitura de Fazenda Rio Grande",
+  "cidade": "fazenda-rio-grande",
+  "url": "https://www.fazendariogrande.pr.gov.br/noticias",
+  "candidatas": 11,
+  "melhor": {
+   "url": "https://www.fazendariogrande.pr.gov.br/noticias",
+   "itens": 0,
+   "com_data": 0,
+   "recentes": 0,
+   "futuras": 0,
+   "sem_data": 0,
+   "mais_recente": null,
+   "exemplos": [],
+   "nota": 0
+  },
+  "atual": {
+   "url": "https://www.fazendariogrande.pr.gov.br/noticias",
+   "itens": 0,
+   "com_data": 0,
+   "recentes": 0,
+   "futuras": 0,
+   "sem_data": 0,
+   "mais_recente": null,
+   "exemplos": [],
+   "nota": 0
+  },
+  "testes": [
+   {
+    "url": "https://www.fazendariogrande.pr.gov.br/noticias",
+    "itens": 0,
+    "com_data": 0,
+    "recentes": 0,
+    "futuras": 0,
+    "sem_data": 0,
+    "mais_recente": null,
+    "exemplos": [],
+    "nota": 0
+   }
+  ]
+ },
+ {
+  "modo": "fonte",
+  "id": "efde492b-7aa1-4fb8-a6e2-be49e4f31ac9",
+  "nome": "Prefeitura de Candói",
+  "cidade": "candoi",
+  "url": "https://www.candoi.pr.gov.br/noticias/",
+  "candidatas": 11,
+  "melhor": {
+   "url": "https://www.candoi.pr.gov.br/noticias/",
+   "itens": 0,
+   "com_data": 0,
+   "recentes": 0,
+   "futuras": 0,
+   "sem_data": 0,
+   "mais_recente": null,
+   "exemplos": [],
+   "nota": 0
+  },
+  "atual": {
+   "url": "https://www.candoi.pr.gov.br/noticias/",
+   "itens": 0,
+   "com_data": 0,
+   "recentes": 0,
+   "futuras": 0,
+   "sem_data": 0,
+   "mais_recente": null,
+   "exemplos": [],
+   "nota": 0
+  },
+  "testes": [
+   {
+    "url": "https://www.candoi.pr.gov.br/noticias/",
+    "itens": 0,
+    "com_data": 0,
+    "recentes": 0,
+    "futuras": 0,
+    "sem_data": 0,
+    "mais_recente": null,
+    "exemplos": [],
+    "nota": 0
+   }
+  ]
+ },
+ {
+  "modo": "fonte",
+  "id": "b471ad9a-c935-4298-84f0-f2eba3ea8ad6",
+  "nome": "Prefeitura de Nossa Senhora das Graças",
+  "cidade": "nossa-senhora-das-gracas",
+  "url": "https://nossasenhoradasgracas.pr.gov.br/noticias/",
+  "candidatas": 11,
+  "melhor": {
+   "url": "https://nossasenhoradasgracas.pr.gov.br/noticias/",
+   "itens": 2,
+   "com_data": 0,
+   "recentes": 0,
+   "futuras": 0,
+   "sem_data": 2,
+   "mais_recente": null,
+   "exemplos": [
+    {
+     "titulo": "Notícias e Informações",
+     "url": "https://nossasenhoradasgracas.pr.gov.br/noticias/",
+     "data": null
+    },
+    {
+     "titulo": "Secretaria de Esporte e Lazer Responsável: Rafael Junior Maiorar",
+     "url": "https://nossasenhoradasgracas.pr.gov.br/secretaria/esportes",
+     "data": null
+    }
+   ],
+   "nota": -2
+  },
+  "atual": {
+   "url": "https://nossasenhoradasgracas.pr.gov.br/noticias/",
+   "itens": 2,
+   "com_data": 0,
+   "recentes": 0,
+   "futuras": 0,
+   "sem_data": 2,
+   "mais_recente": null,
+   "exemplos": [
+    {
+     "titulo": "Notícias e Informações",
+     "url": "https://nossasenhoradasgracas.pr.gov.br/noticias/",
+     "data": null
+    },
+    {
+     "titulo": "Secretaria de Esporte e Lazer Responsável: Rafael Junior Maiorar",
+     "url": "https://nossasenhoradasgracas.pr.gov.br/secretaria/esportes",
+     "data": null
+    }
+   ],
+   "nota": -2
+  },
+  "testes": [
+   {
+    "url": "https://nossasenhoradasgracas.pr.gov.br/noticias/",
+    "itens": 2,
+    "com_data": 0,
+    "recentes": 0,
+    "futuras": 0,
+    "sem_data": 2,
+    "mais_recente": null,
+    "exemplos": [
+     {
+      "titulo": "Notícias e Informações",
+      "url": "https://nossasenhoradasgracas.pr.gov.br/noticias/",
+      "data": null
+     },
+     {
+      "titulo": "Secretaria de Esporte e Lazer Responsável: Rafael Junior Maiorar",
+      "url": "https://nossasenhoradasgracas.pr.gov.br/secretaria/esportes",
+      "data": null
+     }
+    ],
+    "nota": -2
+   },
+   {
+    "url": "https://nossasenhoradasgracas.pr.gov.br/noticias",
+    "itens": 2,
+    "com_data": 0,
+    "recentes": 0,
+    "futuras": 0,
+    "sem_data": 2,
+    "mais_recente": null,
+    "exemplos": [
+     {
+      "titulo": "Notícias e Informações",
+      "url": "https://nossasenhoradasgracas.pr.gov.br/noticias/",
+      "data": null
+     },
+     {
+      "titulo": "Secretaria de Esporte e Lazer Responsável: Rafael Junior Maiorar",
+      "url": "https://nossasenhoradasgracas.pr.gov.br/secretaria/esportes",
+      "data": null
+     }
+    ],
+    "nota": -2
+   }
+  ]
+ },
+ {
+  "modo": "fonte",
+  "id": "6869060e-5677-430c-83b0-7d5479ee1327",
+  "nome": "Prefeitura de Telêmaco Borba",
+  "cidade": "telemaco-borba",
+  "url": "https://www.telemacoborba.pr.gov.br/imprensa/noticias.html",
+  "candidatas": 12,
+  "melhor": {
+   "url": "https://www.telemacoborba.pr.gov.br/imprensa/noticias.html",
+   "itens": 0,
+   "com_data": 0,
+   "recentes": 0,
+   "futuras": 0,
+   "sem_data": 0,
+   "mais_recente": null,
+   "exemplos": [],
+   "nota": 0
+  },
+  "atual": {
+   "url": "https://www.telemacoborba.pr.gov.br/imprensa/noticias.html",
+   "itens": 0,
+   "com_data": 0,
+   "recentes": 0,
+   "futuras": 0,
+   "sem_data": 0,
+   "mais_recente": null,
+   "exemplos": [],
+   "nota": 0
+  },
+  "testes": [
+   {
+    "url": "https://www.telemacoborba.pr.gov.br/imprensa/noticias.html",
+    "itens": 0,
+    "com_data": 0,
+    "recentes": 0,
+    "futuras": 0,
+    "sem_data": 0,
+    "mais_recente": null,
+    "exemplos": [],
+    "nota": 0
+   }
+  ]
+ },
+ {
+  "modo": "fonte",
+  "id": "a8761e32-f454-4ec5-92da-c8272da7d1f0",
+  "nome": "Prefeitura de Ribeirão do Pinhal",
+  "cidade": "ribeirao-do-pinhal",
+  "url": "https://www.ribeiraodopinhal.pr.gov.br/noticias_site",
+  "candidatas": 11,
+  "melhor": {
+   "url": "https://www.ribeiraodopinhal.pr.gov.br/noticias_site",
+   "itens": 10,
+   "com_data": 0,
+   "recentes": 0,
+   "futuras": 0,
+   "sem_data": 6,
+   "mais_recente": null,
+   "exemplos": [
+    {
+     "titulo": "🐾 Programa Castra Paraná 2 – Inscrições Abertas",
+     "url": "https://www.ribeiraodopinhal.pr.gov.br/noticias_individual/1264",
+     "data": null
+    },
+    {
+     "titulo": "com vocês o MASCOTE OFICIAL SECRETARIA MUNICIPAL DE ESPORTES DE RIBEIRÃO DO PINHAL",
+     "url": "https://www.ribeiraodopinhal.pr.gov.br/noticias_individual/1263",
+     "data": null
+    },
+    {
+     "titulo": "🏅📚 Ribeirão do Pinhal conquista novamente o Selo Ouro no Compromisso Nacional Criança Al",
+     "url": "https://www.ribeiraodopinhal.pr.gov.br/noticias_individual/1261",
+     "data": null
+    },
+    {
+     "titulo": "🏆 Orgulho que transforma: Escola Municipal do Campo Triolândia é premiada com Kits Tecnol",
+     "url": "https://www.ribeiraodopinhal.pr.gov.br/noticias_individual/1262",
+     "data": null
+    },
+    {
+     "titulo": "Mensagem de Ano Novo 2026",
+     "url": "https://www.ribeiraodopinhal.pr.gov.br/noticias_individual/1260",
+     "data": null
+    },
+    {
+     "titulo": "ESTUDANTES DA REDE MUNICIPAL DE ENSINO CONQUISTAM 1º LUGAR NA AVALIAÇÃO NACIONAL DA FTD",
+     "url": "https://www.ribeiraodopinhal.pr.gov.br/noticias_individual/1259",
+     "data": null
+    }
+   ],
+   "nota": -2
+  },
+  "atual": {
+   "url": "https://www.ribeiraodopinhal.pr.gov.br/noticias_site",
+   "itens": 10,
+   "com_data": 0,
+   "recentes": 0,
+   "futuras": 0,
+   "sem_data": 6,
+   "mais_recente": null,
+   "exemplos": [
+    {
+     "titulo": "🐾 Programa Castra Paraná 2 – Inscrições Abertas",
+     "url": "https://www.ribeiraodopinhal.pr.gov.br/noticias_individual/1264",
+     "data": null
+    },
+    {
+     "titulo": "com vocês o MASCOTE OFICIAL SECRETARIA MUNICIPAL DE ESPORTES DE RIBEIRÃO DO PINHAL",
+     "url": "https://www.ribeiraodopinhal.pr.gov.br/noticias_individual/1263",
+     "data": null
+    },
+    {
+     "titulo": "🏅📚 Ribeirão do Pinhal conquista novamente o Selo Ouro no Compromisso Nacional Criança Al",
+     "url": "https://www.ribeiraodopinhal.pr.gov.br/noticias_individual/1261",
+     "data": null
+    },
+    {
+     "titulo": "🏆 Orgulho que transforma: Escola Municipal do Campo Triolândia é premiada com Kits Tecnol",
+     "url": "https://www.ribeiraodopinhal.pr.gov.br/noticias_individual/1262",
+     "data": null
+    },
+    {
+     "titulo": "Mensagem de Ano Novo 2026",
+     "url": "https://www.ribeiraodopinhal.pr.gov.br/noticias_individual/1260",
+     "data": null
+    },
+    {
+     "titulo": "ESTUDANTES DA REDE MUNICIPAL DE ENSINO CONQUISTAM 1º LUGAR NA AVALIAÇÃO NACIONAL DA FTD",
+     "url": "https://www.ribeiraodopinhal.pr.gov.br/noticias_individual/1259",
+     "data": null
+    }
+   ],
+   "nota": -2
+  },
+  "testes": [
+   {
+    "url": "https://www.ribeiraodopinhal.pr.gov.br/noticias_site",
+    "itens": 10,
+    "com_data": 0,
+    "recentes": 0,
+    "futuras": 0,
+    "sem_data": 6,
+    "mais_recente": null,
+    "exemplos": [
+     {
+      "titulo": "🐾 Programa Castra Paraná 2 – Inscrições Abertas",
+      "url": "https://www.ribeiraodopinhal.pr.gov.br/noticias_individual/1264",
+      "data": null
+     },
+     {
+      "titulo": "com vocês o MASCOTE OFICIAL SECRETARIA MUNICIPAL DE ESPORTES DE RIBEIRÃO DO PINHAL",
+      "url": "https://www.ribeiraodopinhal.pr.gov.br/noticias_individual/1263",
+      "data": null
+     },
+     {
+      "titulo": "🏅📚 Ribeirão do Pinhal conquista novamente o Selo Ouro no Compromisso Nacional Criança Al",
+      "url": "https://www.ribeiraodopinhal.pr.gov.br/noticias_individual/1261",
+      "data": null
+     },
+     {
+      "titulo": "🏆 Orgulho que transforma: Escola Municipal do Campo Triolândia é premiada com Kits Tecnol",
+      "url": "https://www.ribeiraodopinhal.pr.gov.br/noticias_individual/1262",
+      "data": null
+     },
+     {
+      "titulo": "Mensagem de Ano Novo 2026",
+      "url": "https://www.ribeiraodopinhal.pr.gov.br/noticias_individual/1260",
+      "data": null
+     },
+     {
+      "titulo": "ESTUDANTES DA REDE MUNICIPAL DE ENSINO CONQUISTAM 1º LUGAR NA AVALIAÇÃO NACIONAL DA FTD",
+      "url": "https://www.ribeiraodopinhal.pr.gov.br/noticias_individual/1259",
+      "data": null
+     }
+    ],
+    "nota": -2
+   }
+  ]
+ },
+ {
+  "modo": "fonte",
+  "id": "4cc59106-bee2-4f66-96b4-de0f8e90e0fd",
+  "nome": "Prefeitura de Foz do Jordão",
+  "cidade": "foz-do-jordao",
+  "url": "https://www.fozdojordao.pr.gov.br/noticias/",
+  "candidatas": 11,
+  "melhor": {
+   "url": "https://www.fozdojordao.pr.gov.br/noticias/",
+   "itens": 0,
+   "com_data": 0,
+   "recentes": 0,
+   "futuras": 0,
+   "sem_data": 0,
+   "mais_recente": null,
+   "exemplos": [],
+   "nota": 0
+  },
+  "atual": {
+   "url": "https://www.fozdojordao.pr.gov.br/noticias/",
+   "itens": 0,
+   "com_data": 0,
+   "recentes": 0,
+   "futuras": 0,
+   "sem_data": 0,
+   "mais_recente": null,
+   "exemplos": [],
+   "nota": 0
+  },
+  "testes": [
+   {
+    "url": "https://www.fozdojordao.pr.gov.br/noticias/",
+    "itens": 0,
+    "com_data": 0,
+    "recentes": 0,
+    "futuras": 0,
+    "sem_data": 0,
+    "mais_recente": null,
+    "exemplos": [],
+    "nota": 0
+   }
+  ]
+ },
+ {
+  "modo": "fonte",
+  "id": "822a6079-172d-4da0-819d-cb565765d9c2",
+  "nome": "Prefeitura de Ubiratã",
+  "cidade": "ubirata",
+  "url": "https://www.ubirata.pr.gov.br/feed/",
+  "candidatas": 11,
+  "melhor": {
+   "url": "https://www.ubirata.pr.gov.br/feed/",
+   "itens": 0,
+   "com_data": 0,
+   "recentes": 0,
+   "futuras": 0,
+   "sem_data": 0,
+   "mais_recente": null,
+   "exemplos": [],
+   "nota": 0
+  },
+  "atual": {
+   "url": "https://www.ubirata.pr.gov.br/feed/",
+   "itens": 0,
+   "com_data": 0,
+   "recentes": 0,
+   "futuras": 0,
+   "sem_data": 0,
+   "mais_recente": null,
+   "exemplos": [],
+   "nota": 0
+  },
+  "testes": [
+   {
+    "url": "https://www.ubirata.pr.gov.br/feed/",
+    "itens": 0,
+    "com_data": 0,
+    "recentes": 0,
+    "futuras": 0,
+    "sem_data": 0,
+    "mais_recente": null,
+    "exemplos": [],
+    "nota": 0
+   }
+  ]
+ },
+ {
+  "modo": "fonte",
+  "id": "9cf7ec39-439a-49bd-95f4-c6a7e6d95788",
+  "nome": "Prefeitura de Guaratuba",
+  "cidade": "guaratuba",
+  "url": "http://portal.guaratuba.pr.gov.br/lista-noticias",
+  "candidatas": 12,
+  "melhor": {
+   "url": "http://portal.guaratuba.pr.gov.br/lista-noticias",
+   "itens": 0,
+   "com_data": 0,
+   "recentes": 0,
+   "futuras": 0,
+   "sem_data": 0,
+   "mais_recente": null,
+   "exemplos": [],
+   "nota": 0
+  },
+  "atual": {
+   "url": "http://portal.guaratuba.pr.gov.br/lista-noticias",
+   "itens": 0,
+   "com_data": 0,
+   "recentes": 0,
+   "futuras": 0,
+   "sem_data": 0,
+   "mais_recente": null,
+   "exemplos": [],
+   "nota": 0
+  },
+  "testes": [
+   {
+    "url": "http://portal.guaratuba.pr.gov.br/lista-noticias",
+    "itens": 0,
+    "com_data": 0,
+    "recentes": 0,
+    "futuras": 0,
+    "sem_data": 0,
+    "mais_recente": null,
+    "exemplos": [],
+    "nota": 0
+   }
+  ]
+ },
+ {
+  "modo": "fonte",
+  "id": "857ce378-0bb9-4a16-91f4-d2435822cbaf",
+  "nome": "Prefeitura de Bocaiúva do Sul",
+  "cidade": "bocaiuva-do-sul",
+  "url": "https://www.bocaiuvadosul.pr.gov.br/noticias_site",
+  "candidatas": 11,
+  "melhor": {
+   "url": "https://www.bocaiuvadosul.pr.gov.br/noticias_site",
+   "itens": 10,
+   "com_data": 0,
+   "recentes": 0,
+   "futuras": 0,
+   "sem_data": 6,
+   "mais_recente": null,
+   "exemplos": [
+    {
+     "titulo": "Escala de Atendimento Odonto/Médico Área Rural",
+     "url": "https://www.bocaiuvadosul.pr.gov.br/noticias_individual/440",
+     "data": null
+    },
+    {
+     "titulo": "EDITAL Nº 01/2026 – SEMED - PROCESSO SELETIVO DE MÉRITO E DESEMPENHO PARA FORMAÇÃO DE BANC",
+     "url": "https://www.bocaiuvadosul.pr.gov.br/noticias_individual/442",
+     "data": null
+    },
+    {
+     "titulo": "AVISO DE INTENÇÃO DE ORÇAMENTO - ITENS BORRACHARIA MUNICIPAL",
+     "url": "https://www.bocaiuvadosul.pr.gov.br/noticias_individual/441",
+     "data": null
+    },
+    {
+     "titulo": "O MUNICÍPIO DE BOCAIUVA DO SUL, Estado do Paraná, por intermédio da Secretaria Municipal d",
+     "url": "https://www.bocaiuvadosul.pr.gov.br/noticias_individual/439",
+     "data": null
+    },
+    {
+     "titulo": "X Conferência Municipal dos Direitos da Criança e do Adolescente.",
+     "url": "https://www.bocaiuvadosul.pr.gov.br/noticias_individual/437",
+     "data": null
+    },
+    {
+     "titulo": "CONSULTA PÚBLICA DO ESPORTE 🏅",
+     "url": "https://www.bocaiuvadosul.pr.gov.br/noticias_individual/436",
+     "data": null
+    }
+   ],
+   "nota": -2
+  },
+  "atual": {
+   "url": "https://www.bocaiuvadosul.pr.gov.br/noticias_site",
+   "itens": 10,
+   "com_data": 0,
+   "recentes": 0,
+   "futuras": 0,
+   "sem_data": 6,
+   "mais_recente": null,
+   "exemplos": [
+    {
+     "titulo": "Escala de Atendimento Odonto/Médico Área Rural",
+     "url": "https://www.bocaiuvadosul.pr.gov.br/noticias_individual/440",
+     "data": null
+    },
+    {
+     "titulo": "EDITAL Nº 01/2026 – SEMED - PROCESSO SELETIVO DE MÉRITO E DESEMPENHO PARA FORMAÇÃO DE BANC",
+     "url": "https://www.bocaiuvadosul.pr.gov.br/noticias_individual/442",
+     "data": null
+    },
+    {
+     "titulo": "AVISO DE INTENÇÃO DE ORÇAMENTO - ITENS BORRACHARIA MUNICIPAL",
+     "url": "https://www.bocaiuvadosul.pr.gov.br/noticias_individual/441",
+     "data": null
+    },
+    {
+     "titulo": "O MUNICÍPIO DE BOCAIUVA DO SUL, Estado do Paraná, por intermédio da Secretaria Municipal d",
+     "url": "https://www.bocaiuvadosul.pr.gov.br/noticias_individual/439",
+     "data": null
+    },
+    {
+     "titulo": "X Conferência Municipal dos Direitos da Criança e do Adolescente.",
+     "url": "https://www.bocaiuvadosul.pr.gov.br/noticias_individual/437",
+     "data": null
+    },
+    {
+     "titulo": "CONSULTA PÚBLICA DO ESPORTE 🏅",
+     "url": "https://www.bocaiuvadosul.pr.gov.br/noticias_individual/436",
+     "data": null
+    }
+   ],
+   "nota": -2
+  },
+  "testes": [
+   {
+    "url": "https://www.bocaiuvadosul.pr.gov.br/noticias_site",
+    "itens": 10,
+    "com_data": 0,
+    "recentes": 0,
+    "futuras": 0,
+    "sem_data": 6,
+    "mais_recente": null,
+    "exemplos": [
+     {
+      "titulo": "Escala de Atendimento Odonto/Médico Área Rural",
+      "url": "https://www.bocaiuvadosul.pr.gov.br/noticias_individual/440",
+      "data": null
+     },
+     {
+      "titulo": "EDITAL Nº 01/2026 – SEMED - PROCESSO SELETIVO DE MÉRITO E DESEMPENHO PARA FORMAÇÃO DE BANC",
+      "url": "https://www.bocaiuvadosul.pr.gov.br/noticias_individual/442",
+      "data": null
+     },
+     {
+      "titulo": "AVISO DE INTENÇÃO DE ORÇAMENTO - ITENS BORRACHARIA MUNICIPAL",
+      "url": "https://www.bocaiuvadosul.pr.gov.br/noticias_individual/441",
+      "data": null
+     },
+     {
+      "titulo": "O MUNICÍPIO DE BOCAIUVA DO SUL, Estado do Paraná, por intermédio da Secretaria Municipal d",
+      "url": "https://www.bocaiuvadosul.pr.gov.br/noticias_individual/439",
+      "data": null
+     },
+     {
+      "titulo": "X Conferência Municipal dos Direitos da Criança e do Adolescente.",
+      "url": "https://www.bocaiuvadosul.pr.gov.br/noticias_individual/437",
+      "data": null
+     },
+     {
+      "titulo": "CONSULTA PÚBLICA DO ESPORTE 🏅",
+      "url": "https://www.bocaiuvadosul.pr.gov.br/noticias_individual/436",
+      "data": null
+     }
+    ],
+    "nota": -2
+   }
+  ]
+ },
+ {
+  "modo": "fonte",
+  "id": "4d533dd5-e78d-4e40-8561-85f2eaad9fb0",
+  "nome": "Prefeitura de Salto do Itararé",
+  "cidade": "salto-do-itarare",
+  "url": "https://www.saltodoitarare.pr.gov.br/noticias",
+  "candidatas": 11,
+  "melhor": {
+   "url": "https://www.saltodoitarare.pr.gov.br/noticias",
+   "itens": 14,
+   "com_data": 0,
+   "recentes": 0,
+   "futuras": 0,
+   "sem_data": 6,
+   "mais_recente": null,
+   "exemplos": [
+    {
+     "titulo": "Plano de Cargos e Carreiras",
+     "url": "https://www.saltodoitarare.pr.gov.br/uploads/20250512011626-Plano%20de%20Cargos%20e%20Salarios.pdf",
+     "data": null
+    },
+    {
+     "titulo": "Estatuto do Servidor Público",
+     "url": "https://www.saltodoitarare.pr.gov.br/uploads/20250509023526-ESTATUTO-FUNCION%C3%81RIOS.pdf",
+     "data": null
+    },
+    {
+     "titulo": "Estatuto do Magistéio",
+     "url": "https://www.saltodoitarare.pr.gov.br/uploads/20250509021206-ESTATUTO_DO_MAGISTERIO.pdf",
+     "data": null
+    },
+    {
+     "titulo": "MÓVEIS - DISPENSA DE LICITAÇÃO",
+     "url": "https://www.saltodoitarare.pr.gov.br/noticias_individual/483",
+     "data": null
+    },
+    {
+     "titulo": "MATERIAL PARA VOLEI - DISPENSA DE LICITAÇÃO",
+     "url": "https://www.saltodoitarare.pr.gov.br/noticias_individual/480",
+     "data": null
+    },
+    {
+     "titulo": "EQUIPAMENTOS - DISPENSA DE LICITAÇÃO",
+     "url": "https://www.saltodoitarare.pr.gov.br/noticias_individual/482",
+     "data": null
+    }
+   ],
+   "nota": -2
+  },
+  "atual": {
+   "url": "https://www.saltodoitarare.pr.gov.br/noticias",
+   "itens": 14,
+   "com_data": 0,
+   "recentes": 0,
+   "futuras": 0,
+   "sem_data": 6,
+   "mais_recente": null,
+   "exemplos": [
+    {
+     "titulo": "Plano de Cargos e Carreiras",
+     "url": "https://www.saltodoitarare.pr.gov.br/uploads/20250512011626-Plano%20de%20Cargos%20e%20Salarios.pdf",
+     "data": null
+    },
+    {
+     "titulo": "Estatuto do Servidor Público",
+     "url": "https://www.saltodoitarare.pr.gov.br/uploads/20250509023526-ESTATUTO-FUNCION%C3%81RIOS.pdf",
+     "data": null
+    },
+    {
+     "titulo": "Estatuto do Magistéio",
+     "url": "https://www.saltodoitarare.pr.gov.br/uploads/20250509021206-ESTATUTO_DO_MAGISTERIO.pdf",
+     "data": null
+    },
+    {
+     "titulo": "MÓVEIS - DISPENSA DE LICITAÇÃO",
+     "url": "https://www.saltodoitarare.pr.gov.br/noticias_individual/483",
+     "data": null
+    },
+    {
+     "titulo": "MATERIAL PARA VOLEI - DISPENSA DE LICITAÇÃO",
+     "url": "https://www.saltodoitarare.pr.gov.br/noticias_individual/480",
+     "data": null
+    },
+    {
+     "titulo": "EQUIPAMENTOS - DISPENSA DE LICITAÇÃO",
+     "url": "https://www.saltodoitarare.pr.gov.br/noticias_individual/482",
+     "data": null
+    }
+   ],
+   "nota": -2
+  },
+  "testes": [
+   {
+    "url": "https://www.saltodoitarare.pr.gov.br/noticias",
+    "itens": 14,
+    "com_data": 0,
+    "recentes": 0,
+    "futuras": 0,
+    "sem_data": 6,
+    "mais_recente": null,
+    "exemplos": [
+     {
+      "titulo": "Plano de Cargos e Carreiras",
+      "url": "https://www.saltodoitarare.pr.gov.br/uploads/20250512011626-Plano%20de%20Cargos%20e%20Salarios.pdf",
+      "data": null
+     },
+     {
+      "titulo": "Estatuto do Servidor Público",
+      "url": "https://www.saltodoitarare.pr.gov.br/uploads/20250509023526-ESTATUTO-FUNCION%C3%81RIOS.pdf",
+      "data": null
+     },
+     {
+      "titulo": "Estatuto do Magistéio",
+      "url": "https://www.saltodoitarare.pr.gov.br/uploads/20250509021206-ESTATUTO_DO_MAGISTERIO.pdf",
+      "data": null
+     },
+     {
+      "titulo": "MÓVEIS - DISPENSA DE LICITAÇÃO",
+      "url": "https://www.saltodoitarare.pr.gov.br/noticias_individual/483",
+      "data": null
+     },
+     {
+      "titulo": "MATERIAL PARA VOLEI - DISPENSA DE LICITAÇÃO",
+      "url": "https://www.saltodoitarare.pr.gov.br/noticias_individual/480",
+      "data": null
+     },
+     {
+      "titulo": "EQUIPAMENTOS - DISPENSA DE LICITAÇÃO",
+      "url": "https://www.saltodoitarare.pr.gov.br/noticias_individual/482",
+      "data": null
+     }
+    ],
+    "nota": -2
+   },
+   {
+    "url": "https://www.saltodoitarare.pr.gov.br/noticias/",
+    "itens": 14,
+    "com_data": 0,
+    "recentes": 0,
+    "futuras": 0,
+    "sem_data": 6,
+    "mais_recente": null,
+    "exemplos": [
+     {
+      "titulo": "Plano de Cargos e Carreiras",
+      "url": "https://www.saltodoitarare.pr.gov.br/uploads/20250512011626-Plano%20de%20Cargos%20e%20Salarios.pdf",
+      "data": null
+     },
+     {
+      "titulo": "Estatuto do Servidor Público",
+      "url": "https://www.saltodoitarare.pr.gov.br/uploads/20250509023526-ESTATUTO-FUNCION%C3%81RIOS.pdf",
+      "data": null
+     },
+     {
+      "titulo": "Estatuto do Magistéio",
+      "url": "https://www.saltodoitarare.pr.gov.br/uploads/20250509021206-ESTATUTO_DO_MAGISTERIO.pdf",
+      "data": null
+     },
+     {
+      "titulo": "MÓVEIS - DISPENSA DE LICITAÇÃO",
+      "url": "https://www.saltodoitarare.pr.gov.br/noticias_individual/483",
+      "data": null
+     },
+     {
+      "titulo": "MATERIAL PARA VOLEI - DISPENSA DE LICITAÇÃO",
+      "url": "https://www.saltodoitarare.pr.gov.br/noticias_individual/480",
+      "data": null
+     },
+     {
+      "titulo": "EQUIPAMENTOS - DISPENSA DE LICITAÇÃO",
+      "url": "https://www.saltodoitarare.pr.gov.br/noticias_individual/482",
+      "data": null
+     }
+    ],
+    "nota": -2
+   }
+  ]
+ },
+ {
+  "modo": "fonte",
+  "id": "72021f62-a9e2-491d-b376-0f095af379c8",
+  "nome": "Prefeitura de Nova Olímpia",
+  "cidade": "nova-olimpia",
+  "url": "https://novaolimpia.pr.gov.br/noticias",
+  "candidatas": 11,
+  "melhor": {
+   "url": "https://novaolimpia.pr.gov.br/noticias",
+   "itens": 8,
+   "com_data": 0,
+   "recentes": 0,
+   "futuras": 0,
+   "sem_data": 6,
+   "mais_recente": null,
+   "exemplos": [
+    {
+     "titulo": "Desenvolvimento 3 de jul. de 2025 A Prefeitura de Nova Olímpia PR convida você a participa",
+     "url": "https://novaolimpia.pr.gov.br/noticia/desenvolvimento/a-prefeitura-de-nova-olimpia-pr-convida-voce-a-participar-da-construcao-do-nosso-plano-plurianual-participativo",
+     "data": null
+    },
+    {
+     "titulo": "Geral 28 de jun. de 2024 Nova Olímpia volta a surpreender e inaugura parque temático na es",
+     "url": "https://novaolimpia.pr.gov.br/noticia/geral/nova-olimpia-volta-a-surpreender-e-inaugura-parque-tematico-na-escola-municipal",
+     "data": null
+    },
+    {
+     "titulo": "Geral 7 de jun. de 2024 Milhares de pessoas são esperadas neste final de semana na Festa J",
+     "url": "https://novaolimpia.pr.gov.br/noticia/geral/milhares-de-pessoas-sao-esperadas-neste-final-de-semana-na-festa-junina-de-nova-olimpia",
+     "data": null
+    },
+    {
+     "titulo": "Geral 18 de mar. de 2024 Programa Bolsa Universitária",
+     "url": "https://novaolimpia.pr.gov.br/noticia/geral/programa-bolsa-universitaria",
+     "data": null
+    },
+    {
+     "titulo": "Geral 15 de mar. de 2024 Nova Olímpia surpreende de novo: Praça da República ganha bela te",
+     "url": "https://novaolimpia.pr.gov.br/noticia/geral/nova-olimpia-surpreende-de-novo-praca-da-republica-ganha-bela-tematica-de-pascoa",
+     "data": null
+    },
+    {
+     "titulo": "Geral 11 de dez. de 2023 Nova Olímpia encanta moradores e visitantes com sua bela decoraçã",
+     "url": "https://novaolimpia.pr.gov.br/noticia/geral/nova-olimpia-encanta-moradores-e-visitantes-com-sua-bela-decoracao-de-natal",
+     "data": null
+    }
+   ],
+   "nota": -4
+  },
+  "atual": {
+   "url": "https://novaolimpia.pr.gov.br/noticias",
+   "itens": 8,
+   "com_data": 0,
+   "recentes": 0,
+   "futuras": 0,
+   "sem_data": 6,
+   "mais_recente": null,
+   "exemplos": [
+    {
+     "titulo": "Desenvolvimento 3 de jul. de 2025 A Prefeitura de Nova Olímpia PR convida você a participa",
+     "url": "https://novaolimpia.pr.gov.br/noticia/desenvolvimento/a-prefeitura-de-nova-olimpia-pr-convida-voce-a-participar-da-construcao-do-nosso-plano-plurianual-participativo",
+     "data": null
+    },
+    {
+     "titulo": "Geral 28 de jun. de 2024 Nova Olímpia volta a surpreender e inaugura parque temático na es",
+     "url": "https://novaolimpia.pr.gov.br/noticia/geral/nova-olimpia-volta-a-surpreender-e-inaugura-parque-tematico-na-escola-municipal",
+     "data": null
+    },
+    {
+     "titulo": "Geral 7 de jun. de 2024 Milhares de pessoas são esperadas neste final de semana na Festa J",
+     "url": "https://novaolimpia.pr.gov.br/noticia/geral/milhares-de-pessoas-sao-esperadas-neste-final-de-semana-na-festa-junina-de-nova-olimpia",
+     "data": null
+    },
+    {
+     "titulo": "Geral 18 de mar. de 2024 Programa Bolsa Universitária",
+     "url": "https://novaolimpia.pr.gov.br/noticia/geral/programa-bolsa-universitaria",
+     "data": null
+    },
+    {
+     "titulo": "Geral 15 de mar. de 2024 Nova Olímpia surpreende de novo: Praça da República ganha bela te",
+     "url": "https://novaolimpia.pr.gov.br/noticia/geral/nova-olimpia-surpreende-de-novo-praca-da-republica-ganha-bela-tematica-de-pascoa",
+     "data": null
+    },
+    {
+     "titulo": "Geral 11 de dez. de 2023 Nova Olímpia encanta moradores e visitantes com sua bela decoraçã",
+     "url": "https://novaolimpia.pr.gov.br/noticia/geral/nova-olimpia-encanta-moradores-e-visitantes-com-sua-bela-decoracao-de-natal",
+     "data": null
+    }
+   ],
+   "nota": -4
+  },
+  "testes": [
+   {
+    "url": "https://novaolimpia.pr.gov.br/noticias",
+    "itens": 8,
+    "com_data": 0,
+    "recentes": 0,
+    "futuras": 0,
+    "sem_data": 6,
+    "mais_recente": null,
+    "exemplos": [
+     {
+      "titulo": "Desenvolvimento 3 de jul. de 2025 A Prefeitura de Nova Olímpia PR convida você a participa",
+      "url": "https://novaolimpia.pr.gov.br/noticia/desenvolvimento/a-prefeitura-de-nova-olimpia-pr-convida-voce-a-participar-da-construcao-do-nosso-plano-plurianual-participativo",
+      "data": null
+     },
+     {
+      "titulo": "Geral 28 de jun. de 2024 Nova Olímpia volta a surpreender e inaugura parque temático na es",
+      "url": "https://novaolimpia.pr.gov.br/noticia/geral/nova-olimpia-volta-a-surpreender-e-inaugura-parque-tematico-na-escola-municipal",
+      "data": null
+     },
+     {
+      "titulo": "Geral 7 de jun. de 2024 Milhares de pessoas são esperadas neste final de semana na Festa J",
+      "url": "https://novaolimpia.pr.gov.br/noticia/geral/milhares-de-pessoas-sao-esperadas-neste-final-de-semana-na-festa-junina-de-nova-olimpia",
+      "data": null
+     },
+     {
+      "titulo": "Geral 18 de mar. de 2024 Programa Bolsa Universitária",
+      "url": "https://novaolimpia.pr.gov.br/noticia/geral/programa-bolsa-universitaria",
+      "data": null
+     },
+     {
+      "titulo": "Geral 15 de mar. de 2024 Nova Olímpia surpreende de novo: Praça da República ganha bela te",
+      "url": "https://novaolimpia.pr.gov.br/noticia/geral/nova-olimpia-surpreende-de-novo-praca-da-republica-ganha-bela-tematica-de-pascoa",
+      "data": null
+     },
+     {
+      "titulo": "Geral 11 de dez. de 2023 Nova Olímpia encanta moradores e visitantes com sua bela decoraçã",
+      "url": "https://novaolimpia.pr.gov.br/noticia/geral/nova-olimpia-encanta-moradores-e-visitantes-com-sua-bela-decoracao-de-natal",
+      "data": null
+     }
+    ],
+    "nota": -4
+   },
+   {
+    "url": "https://novaolimpia.pr.gov.br/noticias/",
+    "itens": 8,
+    "com_data": 0,
+    "recentes": 0,
+    "futuras": 0,
+    "sem_data": 6,
+    "mais_recente": null,
+    "exemplos": [
+     {
+      "titulo": "Desenvolvimento 3 de jul. de 2025 A Prefeitura de Nova Olímpia PR convida você a participa",
+      "url": "https://novaolimpia.pr.gov.br/noticia/desenvolvimento/a-prefeitura-de-nova-olimpia-pr-convida-voce-a-participar-da-construcao-do-nosso-plano-plurianual-participativo",
+      "data": null
+     },
+     {
+      "titulo": "Geral 28 de jun. de 2024 Nova Olímpia volta a surpreender e inaugura parque temático na es",
+      "url": "https://novaolimpia.pr.gov.br/noticia/geral/nova-olimpia-volta-a-surpreender-e-inaugura-parque-tematico-na-escola-municipal",
+      "data": null
+     },
+     {
+      "titulo": "Geral 7 de jun. de 2024 Milhares de pessoas são esperadas neste final de semana na Festa J",
+      "url": "https://novaolimpia.pr.gov.br/noticia/geral/milhares-de-pessoas-sao-esperadas-neste-final-de-semana-na-festa-junina-de-nova-olimpia",
+      "data": null
+     },
+     {
+      "titulo": "Geral 18 de mar. de 2024 Programa Bolsa Universitária",
+      "url": "https://novaolimpia.pr.gov.br/noticia/geral/programa-bolsa-universitaria",
+      "data": null
+     },
+     {
+      "titulo": "Geral 15 de mar. de 2024 Nova Olímpia surpreende de novo: Praça da República ganha bela te",
+      "url": "https://novaolimpia.pr.gov.br/noticia/geral/nova-olimpia-surpreende-de-novo-praca-da-republica-ganha-bela-tematica-de-pascoa",
+      "data": null
+     },
+     {
+      "titulo": "Geral 11 de dez. de 2023 Nova Olímpia encanta moradores e visitantes com sua bela decoraçã",
+      "url": "https://novaolimpia.pr.gov.br/noticia/geral/nova-olimpia-encanta-moradores-e-visitantes-com-sua-bela-decoracao-de-natal",
+      "data": null
+     }
+    ],
+    "nota": -4
+   }
+  ]
+ },
+ {
+  "modo": "cidade",
+  "nome": "Prefeitura de Almirante Tamandaré",
+  "cidade": "almirante-tamandare",
+  "candidatas": 11,
+  "melhor": {
+   "url": "https://almirantetamandare.atende.net/cidadao/noticia",
+   "itens": 0,
+   "com_data": 0,
+   "recentes": 0,
+   "futuras": 0,
+   "sem_data": 0,
+   "mais_recente": null,
+   "exemplos": [],
+   "nota": 0
+  },
+  "atual": null,
+  "testes": [
+   {
+    "url": "https://almirantetamandare.atende.net/cidadao/noticia",
+    "itens": 0,
+    "com_data": 0,
+    "recentes": 0,
+    "futuras": 0,
+    "sem_data": 0,
+    "mais_recente": null,
+    "exemplos": [],
+    "nota": 0
+   }
+  ]
+ },
+ {
+  "modo": "fonte",
+  "id": "d32f0b73-fd0a-469f-a9a3-e7d09c515782",
+  "nome": "Prefeitura de Turvo",
+  "cidade": "turvo",
+  "url": "https://www.turvo.pr.gov.br/noticias/ultimas-noticias",
+  "candidatas": 14,
+  "melhor": {
+   "url": "https://www.turvo.pr.gov.br/noticias/outubro-2026",
+   "itens": 10,
+   "com_data": 0,
+   "recentes": 0,
+   "futuras": 0,
+   "sem_data": 6,
+   "mais_recente": null,
+   "exemplos": [
+    {
+     "titulo": "Demais Áreas da Cultura 2023",
+     "url": "https://www.turvo.pr.gov.br/municipio/cultura-1/editais-e-leis/lei-paulo-gustavo-2023-2/demais-areas-da-cultura",
+     "data": null
+    },
+    {
+     "titulo": "Demais Áreas da Cultura 2024",
+     "url": "https://www.turvo.pr.gov.br/municipio/cultura-1/editais-e-leis/lei/demais-areas-da-cultura-2024",
+     "data": null
+    },
+    {
+     "titulo": "Demais Áreas da Cultura 2025",
+     "url": "https://www.turvo.pr.gov.br/municipio/cultura-1/editais-e-leis/lei-paulo-gustavo-2025/demais-areas-da-cultura-2025",
+     "data": null
+    },
+    {
+     "titulo": "Lei Aldir Blanc 2026",
+     "url": "https://www.turvo.pr.gov.br/municipio/cultura-1/editais-e-leis/lei-aldir-blanc-2026",
+     "data": null
+    },
+    {
+     "titulo": "EDITAL_1 eleição suplementar conselho.pdf",
+     "url": "https://www.turvo.pr.gov.br/noticias/outubro-2026/edital_1-eleicao-suplementar-conselho.pdf/view",
+     "data": null
+    },
+    {
+     "titulo": "CMDCA de Turvo abre inscrições para Processo de Escolha Suplementar do Conselho Tutelar",
+     "url": "https://www.turvo.pr.gov.br/noticias/outubro-2026/cmdca-de-turvo-abre-inscricoes-para-processo-de-escolha-suplementar-do-conselho-tutelar",
+     "data": null
+    }
+   ],
+   "nota": -2
+  },
+  "atual": {
+   "url": "https://www.turvo.pr.gov.br/noticias/ultimas-noticias",
+   "itens": 4,
+   "com_data": 0,
+   "recentes": 0,
+   "futuras": 0,
+   "sem_data": 4,
+   "mais_recente": null,
+   "exemplos": [
+    {
+     "titulo": "Demais Áreas da Cultura 2023",
+     "url": "https://www.turvo.pr.gov.br/municipio/cultura-1/editais-e-leis/lei-paulo-gustavo-2023-2/demais-areas-da-cultura",
+     "data": null
+    },
+    {
+     "titulo": "Demais Áreas da Cultura 2024",
+     "url": "https://www.turvo.pr.gov.br/municipio/cultura-1/editais-e-leis/lei/demais-areas-da-cultura-2024",
+     "data": null
+    },
+    {
+     "titulo": "Demais Áreas da Cultura 2025",
+     "url": "https://www.turvo.pr.gov.br/municipio/cultura-1/editais-e-leis/lei-paulo-gustavo-2025/demais-areas-da-cultura-2025",
+     "data": null
+    },
+    {
+     "titulo": "Lei Aldir Blanc 2026",
+     "url": "https://www.turvo.pr.gov.br/municipio/cultura-1/editais-e-leis/lei-aldir-blanc-2026",
+     "data": null
+    }
+   ],
+   "nota": -4
+  },
+  "testes": [
+   {
+    "url": "https://www.turvo.pr.gov.br/noticias/outubro-2026",
+    "itens": 10,
+    "com_data": 0,
+    "recentes": 0,
+    "futuras": 0,
+    "sem_data": 6,
+    "mais_recente": null,
+    "exemplos": [
+     {
+      "titulo": "Demais Áreas da Cultura 2023",
+      "url": "https://www.turvo.pr.gov.br/municipio/cultura-1/editais-e-leis/lei-paulo-gustavo-2023-2/demais-areas-da-cultura",
+      "data": null
+     },
+     {
+      "titulo": "Demais Áreas da Cultura 2024",
+      "url": "https://www.turvo.pr.gov.br/municipio/cultura-1/editais-e-leis/lei/demais-areas-da-cultura-2024",
+      "data": null
+     },
+     {
+      "titulo": "Demais Áreas da Cultura 2025",
+      "url": "https://www.turvo.pr.gov.br/municipio/cultura-1/editais-e-leis/lei-paulo-gustavo-2025/demais-areas-da-cultura-2025",
+      "data": null
+     },
+     {
+      "titulo": "Lei Aldir Blanc 2026",
+      "url": "https://www.turvo.pr.gov.br/municipio/cultura-1/editais-e-leis/lei-aldir-blanc-2026",
+      "data": null
+     },
+     {
+      "titulo": "EDITAL_1 eleição suplementar conselho.pdf",
+      "url": "https://www.turvo.pr.gov.br/noticias/outubro-2026/edital_1-eleicao-suplementar-conselho.pdf/view",
+      "data": null
+     },
+     {
+      "titulo": "CMDCA de Turvo abre inscrições para Processo de Escolha Suplementar do Conselho Tutelar",
+      "url": "https://www.turvo.pr.gov.br/noticias/outubro-2026/cmdca-de-turvo-abre-inscricoes-para-processo-de-escolha-suplementar-do-conselho-tutelar",
+      "data": null
+     }
+    ],
+    "nota": -2
+   },
+   {
+    "url": "https://www.turvo.pr.gov.br/noticias/ultimas-noticias",
+    "itens": 4,
+    "com_data": 0,
+    "recentes": 0,
+    "futuras": 0,
+    "sem_data": 4,
+    "mais_recente": null,
+    "exemplos": [
+     {
+      "titulo": "Demais Áreas da Cultura 2023",
+      "url": "https://www.turvo.pr.gov.br/municipio/cultura-1/editais-e-leis/lei-paulo-gustavo-2023-2/demais-areas-da-cultura",
+      "data": null
+     },
+     {
+      "titulo": "Demais Áreas da Cultura 2024",
+      "url": "https://www.turvo.pr.gov.br/municipio/cultura-1/editais-e-leis/lei/demais-areas-da-cultura-2024",
+      "data": null
+     },
+     {
+      "titulo": "Demais Áreas da Cultura 2025",
+      "url": "https://www.turvo.pr.gov.br/municipio/cultura-1/editais-e-leis/lei-paulo-gustavo-2025/demais-areas-da-cultura-2025",
+      "data": null
+     },
+     {
+      "titulo": "Lei Aldir Blanc 2026",
+      "url": "https://www.turvo.pr.gov.br/municipio/cultura-1/editais-e-leis/lei-aldir-blanc-2026",
+      "data": null
+     }
+    ],
+    "nota": -4
+   },
+   {
+    "url": "https://www.turvo.pr.gov.br/noticias/outubro-2026/olimpiada-da-melhor-idade-reune-grupos-das-ubss-de-turvo-em-dia-de-integracao-e-diversao",
+    "itens": 4,
+    "com_data": 0,
+    "recentes": 0,
+    "futuras": 0,
+    "sem_data": 4,
+    "mais_recente": null,
+    "exemplos": [
+     {
+      "titulo": "Demais Áreas da Cultura 2023",
+      "url": "https://www.turvo.pr.gov.br/municipio/cultura-1/editais-e-leis/lei-paulo-gustavo-2023-2/demais-areas-da-cultura",
+      "data": null
+     },
+     {
+      "titulo": "Demais Áreas da Cultura 2024",
+      "url": "https://www.turvo.pr.gov.br/municipio/cultura-1/editais-e-leis/lei/demais-areas-da-cultura-2024",
+      "data": null
+     },
+     {
+      "titulo": "Demais Áreas da Cultura 2025",
+      "url": "https://www.turvo.pr.gov.br/municipio/cultura-1/editais-e-leis/lei-paulo-gustavo-2025/demais-areas-da-cultura-2025",
+      "data": null
+     },
+     {
+      "titulo": "Lei Aldir Blanc 2026",
+      "url": "https://www.turvo.pr.gov.br/municipio/cultura-1/editais-e-leis/lei-aldir-blanc-2026",
+      "data": null
+     }
+    ],
+    "nota": -4
+   },
+   {
+    "url": "https://www.turvo.pr.gov.br/noticias",
+    "itens": 4,
+    "com_data": 0,
+    "recentes": 0,
+    "futuras": 0,
+    "sem_data": 4,
+    "mais_recente": null,
+    "exemplos": [
+     {
+      "titulo": "Demais Áreas da Cultura 2023",
+      "url": "https://www.turvo.pr.gov.br/municipio/cultura-1/editais-e-leis/lei-paulo-gustavo-2023-2/demais-areas-da-cultura",
+      "data": null
+     },
+     {
+      "titulo": "Demais Áreas da Cultura 2024",
+      "url": "https://www.turvo.pr.gov.br/municipio/cultura-1/editais-e-leis/lei/demais-areas-da-cultura-2024",
+      "data": null
+     },
+     {
+      "titulo": "Demais Áreas da Cultura 2025",
+      "url": "https://www.turvo.pr.gov.br/municipio/cultura-1/editais-e-leis/lei-paulo-gustavo-2025/demais-areas-da-cultura-2025",
+      "data": null
+     },
+     {
+      "titulo": "Lei Aldir Blanc 2026",
+      "url": "https://www.turvo.pr.gov.br/municipio/cultura-1/editais-e-leis/lei-aldir-blanc-2026",
+      "data": null
+     }
+    ],
+    "nota": -4
+   }
+  ]
+ },
+ {
+  "modo": "fonte",
+  "id": "2084d3c4-694e-4b1a-beb2-4be6be9e6f09",
+  "nome": "Prefeitura de Prudentópolis",
+  "cidade": "prudentopolis",
+  "url": "https://www.prudentopolis.pr.gov.br/noticias/",
+  "candidatas": 11,
+  "melhor": {
+   "url": "https://www.prudentopolis.pr.gov.br/noticias/",
+   "itens": 30,
+   "com_data": 0,
+   "recentes": 0,
+   "futuras": 0,
+   "sem_data": 6,
+   "mais_recente": null,
+   "exemplos": [
+    {
+     "titulo": "Secretário de Administração 28/10 - Feliz dia do Servidor Público Publicado em: 10/04/2018",
+     "url": "https://www.prudentopolis.pr.gov.br/noticiasView/2856_2810-Feliz-dia-do-Servidor-Publico.html",
+     "data": null
+    },
+    {
+     "titulo": "Secretário de Esportes e Recreação Jogos de Integração promovem esporte e união entre os s",
+     "url": "https://www.prudentopolis.pr.gov.br/noticiasView/2855_Jogos-de-Integracao-promovem-esporte-e-uniao-entre-os-servidores-publicos-de-Prudentopolis.html",
+     "data": null
+    },
+    {
+     "titulo": "Secretária de Cultura Grupo do Projeto Vestir participa de oficina no UniSenai em Curitiba",
+     "url": "https://www.prudentopolis.pr.gov.br/noticiasView/2854_Grupo-do-Projeto-Vestir-participa-de-oficina-no-UniSenai-em-Curitiba.html",
+     "data": null
+    },
+    {
+     "titulo": "Secretário de Transportes e Infraestrutura Após fortes chuvas, equipes municipais agem rap",
+     "url": "https://www.prudentopolis.pr.gov.br/noticiasView/2853_Apos-fortes-chuvas-equipes-municipais-agem-rapidamente-na-recuperacao-de-pontes-e-estradas-rurais-em-Prudentopolis.html",
+     "data": null
+    },
+    {
+     "titulo": "Secretário de Administração Prudentópolis realiza abertura da 5ª Semana do Servidor Públic",
+     "url": "https://www.prudentopolis.pr.gov.br/noticiasView/2852_Prudentopolis-realiza-abertura-da-5-Semana-do-Servidor-Publico-e-lanca-identidade-visual-do-projeto-Vestir-Prudentopoli.html",
+     "data": null
+    },
+    {
+     "titulo": "Secretário de Administração Prudentópolis inicia a 5ª Semana do Servidor Público com ativi",
+     "url": "https://www.prudentopolis.pr.gov.br/noticiasView/2851_Prudentopolis-inicia-a-5-Semana-do-Servidor-Publico-com-atividades-especiais.html",
+     "data": null
+    }
+   ],
+   "nota": -2
+  },
+  "atual": {
+   "url": "https://www.prudentopolis.pr.gov.br/noticias/",
+   "itens": 30,
+   "com_data": 0,
+   "recentes": 0,
+   "futuras": 0,
+   "sem_data": 6,
+   "mais_recente": null,
+   "exemplos": [
+    {
+     "titulo": "Secretário de Administração 28/10 - Feliz dia do Servidor Público Publicado em: 10/04/2018",
+     "url": "https://www.prudentopolis.pr.gov.br/noticiasView/2856_2810-Feliz-dia-do-Servidor-Publico.html",
+     "data": null
+    },
+    {
+     "titulo": "Secretário de Esportes e Recreação Jogos de Integração promovem esporte e união entre os s",
+     "url": "https://www.prudentopolis.pr.gov.br/noticiasView/2855_Jogos-de-Integracao-promovem-esporte-e-uniao-entre-os-servidores-publicos-de-Prudentopolis.html",
+     "data": null
+    },
+    {
+     "titulo": "Secretária de Cultura Grupo do Projeto Vestir participa de oficina no UniSenai em Curitiba",
+     "url": "https://www.prudentopolis.pr.gov.br/noticiasView/2854_Grupo-do-Projeto-Vestir-participa-de-oficina-no-UniSenai-em-Curitiba.html",
+     "data": null
+    },
+    {
+     "titulo": "Secretário de Transportes e Infraestrutura Após fortes chuvas, equipes municipais agem rap",
+     "url": "https://www.prudentopolis.pr.gov.br/noticiasView/2853_Apos-fortes-chuvas-equipes-municipais-agem-rapidamente-na-recuperacao-de-pontes-e-estradas-rurais-em-Prudentopolis.html",
+     "data": null
+    },
+    {
+     "titulo": "Secretário de Administração Prudentópolis realiza abertura da 5ª Semana do Servidor Públic",
+     "url": "https://www.prudentopolis.pr.gov.br/noticiasView/2852_Prudentopolis-realiza-abertura-da-5-Semana-do-Servidor-Publico-e-lanca-identidade-visual-do-projeto-Vestir-Prudentopoli.html",
+     "data": null
+    },
+    {
+     "titulo": "Secretário de Administração Prudentópolis inicia a 5ª Semana do Servidor Público com ativi",
+     "url": "https://www.prudentopolis.pr.gov.br/noticiasView/2851_Prudentopolis-inicia-a-5-Semana-do-Servidor-Publico-com-atividades-especiais.html",
+     "data": null
+    }
+   ],
+   "nota": -2
+  },
+  "testes": [
+   {
+    "url": "https://www.prudentopolis.pr.gov.br/noticias/",
+    "itens": 30,
+    "com_data": 0,
+    "recentes": 0,
+    "futuras": 0,
+    "sem_data": 6,
+    "mais_recente": null,
+    "exemplos": [
+     {
+      "titulo": "Secretário de Administração 28/10 - Feliz dia do Servidor Público Publicado em: 10/04/2018",
+      "url": "https://www.prudentopolis.pr.gov.br/noticiasView/2856_2810-Feliz-dia-do-Servidor-Publico.html",
+      "data": null
+     },
+     {
+      "titulo": "Secretário de Esportes e Recreação Jogos de Integração promovem esporte e união entre os s",
+      "url": "https://www.prudentopolis.pr.gov.br/noticiasView/2855_Jogos-de-Integracao-promovem-esporte-e-uniao-entre-os-servidores-publicos-de-Prudentopolis.html",
+      "data": null
+     },
+     {
+      "titulo": "Secretária de Cultura Grupo do Projeto Vestir participa de oficina no UniSenai em Curitiba",
+      "url": "https://www.prudentopolis.pr.gov.br/noticiasView/2854_Grupo-do-Projeto-Vestir-participa-de-oficina-no-UniSenai-em-Curitiba.html",
+      "data": null
+     },
+     {
+      "titulo": "Secretário de Transportes e Infraestrutura Após fortes chuvas, equipes municipais agem rap",
+      "url": "https://www.prudentopolis.pr.gov.br/noticiasView/2853_Apos-fortes-chuvas-equipes-municipais-agem-rapidamente-na-recuperacao-de-pontes-e-estradas-rurais-em-Prudentopolis.html",
+      "data": null
+     },
+     {
+      "titulo": "Secretário de Administração Prudentópolis realiza abertura da 5ª Semana do Servidor Públic",
+      "url": "https://www.prudentopolis.pr.gov.br/noticiasView/2852_Prudentopolis-realiza-abertura-da-5-Semana-do-Servidor-Publico-e-lanca-identidade-visual-do-projeto-Vestir-Prudentopoli.html",
+      "data": null
+     },
+     {
+      "titulo": "Secretário de Administração Prudentópolis inicia a 5ª Semana do Servidor Público com ativi",
+      "url": "https://www.prudentopolis.pr.gov.br/noticiasView/2851_Prudentopolis-inicia-a-5-Semana-do-Servidor-Publico-com-atividades-especiais.html",
+      "data": null
+     }
+    ],
+    "nota": -2
+   },
+   {
+    "url": "https://www.prudentopolis.pr.gov.br/noticias",
+    "itens": 30,
+    "com_data": 0,
+    "recentes": 0,
+    "futuras": 0,
+    "sem_data": 6,
+    "mais_recente": null,
+    "exemplos": [
+     {
+      "titulo": "Secretário de Administração 28/10 - Feliz dia do Servidor Público Publicado em: 10/04/2018",
+      "url": "https://www.prudentopolis.pr.gov.br/noticiasView/2856_2810-Feliz-dia-do-Servidor-Publico.html",
+      "data": null
+     },
+     {
+      "titulo": "Secretário de Esportes e Recreação Jogos de Integração promovem esporte e união entre os s",
+      "url": "https://www.prudentopolis.pr.gov.br/noticiasView/2855_Jogos-de-Integracao-promovem-esporte-e-uniao-entre-os-servidores-publicos-de-Prudentopolis.html",
+      "data": null
+     },
+     {
+      "titulo": "Secretária de Cultura Grupo do Projeto Vestir participa de oficina no UniSenai em Curitiba",
+      "url": "https://www.prudentopolis.pr.gov.br/noticiasView/2854_Grupo-do-Projeto-Vestir-participa-de-oficina-no-UniSenai-em-Curitiba.html",
+      "data": null
+     },
+     {
+      "titulo": "Secretário de Transportes e Infraestrutura Após fortes chuvas, equipes municipais agem rap",
+      "url": "https://www.prudentopolis.pr.gov.br/noticiasView/2853_Apos-fortes-chuvas-equipes-municipais-agem-rapidamente-na-recuperacao-de-pontes-e-estradas-rurais-em-Prudentopolis.html",
+      "data": null
+     },
+     {
+      "titulo": "Secretário de Administração Prudentópolis realiza abertura da 5ª Semana do Servidor Públic",
+      "url": "https://www.prudentopolis.pr.gov.br/noticiasView/2852_Prudentopolis-realiza-abertura-da-5-Semana-do-Servidor-Publico-e-lanca-identidade-visual-do-projeto-Vestir-Prudentopoli.html",
+      "data": null
+     },
+     {
+      "titulo": "Secretário de Administração Prudentópolis inicia a 5ª Semana do Servidor Público com ativi",
+      "url": "https://www.prudentopolis.pr.gov.br/noticiasView/2851_Prudentopolis-inicia-a-5-Semana-do-Servidor-Publico-com-atividades-especiais.html",
+      "data": null
+     }
+    ],
+    "nota": -2
+   }
+  ]
+ },
+ {
+  "modo": "fonte",
+  "id": "64b7d52f-748e-472c-ab73-b860dc182c0a",
+  "nome": "Prefeitura de Curitiba",
+  "cidade": "curitiba",
+  "url": "https://comunicacao.curitiba.pr.gov.br/",
+  "candidatas": 14,
+  "melhor": {
+   "url": "https://www.facebook.com/sharer/sharer.php?u=https://www.curitiba.pr.gov.br/noticias/operacao-inverno-e-campanha-do-agasalho-2026-terminam-na-terca-feira/85066",
+   "itens": 0,
+   "com_data": 0,
+   "recentes": 0,
+   "futuras": 0,
+   "sem_data": 0,
+   "mais_recente": null,
+   "exemplos": [],
+   "nota": 0
+  },
+  "atual": {
+   "url": "https://comunicacao.curitiba.pr.gov.br/",
+   "itens": 5,
+   "com_data": 0,
+   "recentes": 0,
+   "futuras": 0,
+   "sem_data": 5,
+   "mais_recente": null,
+   "exemplos": [
+    {
+     "titulo": "var largura = window.innerWidth; var imagemUrl = document.getElementById(\"imagemProgramas_",
+     "url": "https://www.curitiba.pr.gov.br/noticias/",
+     "data": null
+    },
+    {
+     "titulo": "Aviso de Pauta Opera&#xE7;&#xE3;o Inverno e Campanha do Agasalho 2026 terminam na ter&#xE7",
+     "url": "https://www.curitiba.pr.gov.br/noticias/operacao-inverno-e-campanha-do-agasalho-2026-terminam-na-terca-feira/85066",
+     "data": null
+    },
+    {
+     "titulo": "Garantia de direitos Semin&#xE1;rio fortalece qualifica&#xE7;&#xE3;o do acolhimento instit",
+     "url": "https://www.curitiba.pr.gov.br/noticias/seminario-fortalece-qualificacao-do-acolhimento-institucional-de-criancas-e-adolescentes-em-curitiba/84346",
+     "data": null
+    },
+    {
+     "titulo": "Publicidade Com 16 pr&#xEA;mios, Prefeitura de Curitiba &#xE9; destaque no Colunistas Sul",
+     "url": "https://www.curitiba.pr.gov.br/noticias/com-16-premios-prefeitura-de-curitiba-e-destaque-no-colunistas-sul/82928",
+     "data": null
+    },
+    {
+     "titulo": "Política de Privacidade",
+     "url": "https://www.curitiba.pr.gov.br/conteudo/politica-de-privacidade/2",
+     "data": null
+    }
+   ],
+   "nota": -5
+  },
+  "testes": [
+   {
+    "url": "https://www.facebook.com/sharer/sharer.php?u=https://www.curitiba.pr.gov.br/noticias/operacao-inverno-e-campanha-do-agasalho-2026-terminam-na-terca-feira/85066",
+    "itens": 0,
+    "com_data": 0,
+    "recentes": 0,
+    "futuras": 0,
+    "sem_data": 0,
+    "mais_recente": null,
+    "exemplos": [],
+    "nota": 0
+   },
+   {
+    "url": "https://comunicacao.curitiba.pr.gov.br/conteudo/estrutura/235",
+    "itens": 1,
+    "com_data": 0,
+    "recentes": 0,
+    "futuras": 0,
+    "sem_data": 1,
+    "mais_recente": null,
+    "exemplos": [
+     {
+      "titulo": "Política de Privacidade",
+      "url": "https://www.curitiba.pr.gov.br/conteudo/politica-de-privacidade/2",
+      "data": null
+     }
+    ],
+    "nota": -1
+   },
+   {
+    "url": "https://comunicacao.curitiba.pr.gov.br/conteudo/contatos/344",
+    "itens": 1,
+    "com_data": 0,
+    "recentes": 0,
+    "futuras": 0,
+    "sem_data": 1,
+    "mais_recente": null,
+    "exemplos": [
+     {
+      "titulo": "Política de Privacidade",
+      "url": "https://www.curitiba.pr.gov.br/conteudo/politica-de-privacidade/2",
+      "data": null
+     }
+    ],
+    "nota": -1
+   },
+   {
+    "url": "https://comunicacao.curitiba.pr.gov.br/conteudo/licitacoes/454",
+    "itens": 30,
+    "com_data": 0,
+    "recentes": 0,
+    "futuras": 0,
+    "sem_data": 6,
+    "mais_recente": null,
+    "exemplos": [
+     {
+      "titulo": "Edital de Chamamento P&uacute;blico n.&ordm; 03/2026",
+      "url": "https://mid.curitiba.pr.gov.br/2026/00464498.pdf",
+      "data": null
+     },
+     {
+      "titulo": "Edital de Chamamento P&uacute;blico n.&ordm; 03/2026 - Reabertura",
+      "url": "https://mid.curitiba.pr.gov.br/2026/00464711.pdf",
+      "data": null
+     },
+     {
+      "titulo": "Edital de Chamamento P&uacute;blico n.&ordm; 03/2026 - P&oacute;s Reabertura e prorroga&cc",
+      "url": "https://mid.curitiba.pr.gov.br/2026/00464905.pdf",
+      "data": null
+     },
+     {
+      "titulo": "Publica&ccedil;&atilde;o lista vinculos com poder p&uacute;blico - p&oacute;s reabertura &",
+      "url": "https://mid.curitiba.pr.gov.br/2026/00465128.pdf",
+      "data": null
+     },
+     {
+      "titulo": "Convoca&ccedil;&atilde;o sorteio subcomiss&atilde;o - p&oacute;s reabertura &nbsp;e 2&ordf",
+      "url": "https://mid.curitiba.pr.gov.br/2026/00465129.pdf",
+      "data": null
+     },
+     {
+      "titulo": "Edital de Patrocinio n.&ordm; 001/2026 - Aniversario Curitiba 333 anos",
+      "url": "https://mid.curitiba.pr.gov.br/2026/00463040.pdf",
+      "data": null
+     }
+    ],
+    "nota": -2
+   }
+  ]
+ },
+ {
+  "modo": "cidade",
+  "nome": "Prefeitura de Alto Piquiri",
+  "cidade": "alto-piquiri",
+  "candidatas": 0,
+  "melhor": null,
+  "atual": null,
+  "testes": []
+ },
+ {
+  "modo": "cidade",
+  "nome": "Prefeitura de Alto Paraná",
+  "cidade": "alto-parana",
+  "candidatas": 0,
+  "melhor": null,
+  "atual": null,
+  "testes": []
+ },
+ {
+  "modo": "cidade",
+  "nome": "Prefeitura de Abatiá",
+  "cidade": "abatia",
+  "candidatas": 0,
+  "melhor": null,
+  "atual": null,
+  "testes": []
+ },
+ {
+  "modo": "cidade",
+  "nome": "Prefeitura de Alto Paraíso",
+  "cidade": "alto-paraiso",
+  "candidatas": 0,
+  "melhor": null,
+  "atual": null,
+  "testes": []
+ },
+ {
+  "modo": "cidade",
+  "nome": "Prefeitura de Bela Vista do Paraíso",
+  "cidade": "bela-vista-do-paraiso",
+  "candidatas": 0,
+  "melhor": null,
+  "atual": null,
+  "testes": []
+ },
+ {
+  "modo": "cidade",
+  "nome": "Prefeitura de Assaí",
+  "cidade": "assai",
+  "candidatas": 11,
+  "melhor": {
+   "url": "https://www.assai.pr.gov.br/noticias",
+   "itens": 0,
+   "com_data": 0,
+   "recentes": 0,
+   "futuras": 0,
+   "sem_data": 0,
+   "mais_recente": null,
+   "exemplos": [],
+   "nota": 0
+  },
+  "atual": null,
+  "testes": [
+   {
+    "url": "https://www.assai.pr.gov.br/noticias",
+    "itens": 0,
+    "com_data": 0,
+    "recentes": 0,
+    "futuras": 0,
+    "sem_data": 0,
+    "mais_recente": null,
+    "exemplos": [],
+    "nota": 0
+   },
+   {
+    "url": "https://www.assai.pr.gov.br/noticias/",
+    "itens": 0,
+    "com_data": 0,
+    "recentes": 0,
+    "futuras": 0,
+    "sem_data": 0,
+    "mais_recente": null,
+    "exemplos": [],
+    "nota": 0
+   },
+   {
+    "url": "https://www.assai.pr.gov.br/noticia/categoria",
+    "itens": 0,
+    "com_data": 0,
+    "recentes": 0,
+    "futuras": 0,
+    "sem_data": 0,
+    "mais_recente": null,
+    "exemplos": [],
+    "nota": 0
+   }
+  ]
+ },
+ {
+  "modo": "cidade",
+  "nome": "Prefeitura de Braganey",
+  "cidade": "braganey",
+  "candidatas": 0,
+  "melhor": null,
+  "atual": null,
+  "testes": []
+ },
+ {
+  "modo": "fonte",
+  "id": "be52181b-8e2e-4483-8e32-76072712bfcd",
+  "nome": "Prefeitura de Matelândia",
+  "cidade": "matelandia",
+  "url": "https://www.matelandia.pr.gov.br/feed/",
+  "candidatas": 11,
+  "melhor": {
+   "url": "https://www.matelandia.pr.gov.br/feed/",
+   "itens": 0,
+   "com_data": 0,
+   "recentes": 0,
+   "futuras": 0,
+   "sem_data": 0,
+   "mais_recente": null,
+   "exemplos": [],
+   "nota": 0
+  },
+  "atual": {
+   "url": "https://www.matelandia.pr.gov.br/feed/",
+   "itens": 0,
+   "com_data": 0,
+   "recentes": 0,
+   "futuras": 0,
+   "sem_data": 0,
+   "mais_recente": null,
+   "exemplos": [],
+   "nota": 0
+  },
+  "testes": [
+   {
+    "url": "https://www.matelandia.pr.gov.br/feed/",
+    "itens": 0,
+    "com_data": 0,
+    "recentes": 0,
+    "futuras": 0,
+    "sem_data": 0,
+    "mais_recente": null,
+    "exemplos": [],
+    "nota": 0
+   }
+  ]
+ },
+ {
+  "modo": "cidade",
+  "nome": "Prefeitura de Atalaia",
+  "cidade": "atalaia",
+  "candidatas": 12,
+  "melhor": {
+   "url": "https://www.atalaia.pr.gov.br/?meio=171612",
+   "itens": 0,
+   "com_data": 0,
+   "recentes": 0,
+   "futuras": 0,
+   "sem_data": 0,
+   "mais_recente": null,
+   "exemplos": [],
+   "nota": 0
+  },
+  "atual": null,
+  "testes": [
+   {
+    "url": "https://www.atalaia.pr.gov.br/?meio=171612",
+    "itens": 0,
+    "com_data": 0,
+    "recentes": 0,
+    "futuras": 0,
+    "sem_data": 0,
+    "mais_recente": null,
+    "exemplos": [],
+    "nota": 0
+   }
+  ]
+ },
+ {
+  "modo": "cidade",
+  "nome": "Prefeitura de Alvorada do Sul",
+  "cidade": "alvorada-do-sul",
+  "candidatas": 0,
+  "melhor": null,
+  "atual": null,
+  "testes": []
+ },
+ {
+  "modo": "cidade",
+  "nome": "Prefeitura de Brasilândia do Sul",
+  "cidade": "brasilandia-do-sul",
+  "candidatas": 13,
+  "melhor": {
+   "url": "https://www.brasilandiadosul.pr.gov.br/noticias",
+   "itens": 0,
+   "com_data": 0,
+   "recentes": 0,
+   "futuras": 0,
+   "sem_data": 0,
+   "mais_recente": null,
+   "exemplos": [],
+   "nota": 0
+  },
+  "atual": null,
+  "testes": [
+   {
+    "url": "https://www.brasilandiadosul.pr.gov.br/noticias",
+    "itens": 0,
+    "com_data": 0,
+    "recentes": 0,
+    "futuras": 0,
+    "sem_data": 0,
+    "mais_recente": null,
+    "exemplos": [],
+    "nota": 0
+   },
+   {
+    "url": "https://brasilandiadosul.pr.gov.br/noticia/75",
+    "itens": 0,
+    "com_data": 0,
+    "recentes": 0,
+    "futuras": 0,
+    "sem_data": 0,
+    "mais_recente": null,
+    "exemplos": [],
+    "nota": 0
+   },
+   {
+    "url": "https://www.brasilandiadosul.pr.gov.br/noticia/99",
+    "itens": 0,
+    "com_data": 0,
+    "recentes": 0,
+    "futuras": 0,
+    "sem_data": 0,
+    "mais_recente": null,
+    "exemplos": [],
+    "nota": 0
+   },
+   {
+    "url": "https://www.brasilandiadosul.pr.gov.br/feed/",
+    "itens": 0,
+    "com_data": 0,
+    "recentes": 0,
+    "futuras": 0,
+    "sem_data": 0,
+    "mais_recente": null,
+    "exemplos": [],
+    "nota": 0
+   }
+  ]
+ },
+ {
+  "modo": "cidade",
+  "nome": "Prefeitura de Boa Ventura de São Roque",
+  "cidade": "boa-ventura-de-sao-roque",
+  "candidatas": 0,
+  "melhor": null,
+  "atual": null,
+  "testes": []
+ },
+ {
+  "modo": "cidade",
+  "nome": "Prefeitura de Campina da Lagoa",
+  "cidade": "campina-da-lagoa",
+  "candidatas": 12,
+  "melhor": {
+   "url": "https://www.campinadalagoa.pr.gov.br/index.php?meio=1349",
+   "itens": 0,
+   "com_data": 0,
+   "recentes": 0,
+   "futuras": 0,
+   "sem_data": 0,
+   "mais_recente": null,
+   "exemplos": [],
+   "nota": 0
+  },
+  "atual": null,
+  "testes": [
+   {
+    "url": "https://www.campinadalagoa.pr.gov.br/index.php?meio=1349",
+    "itens": 0,
+    "com_data": 0,
+    "recentes": 0,
+    "futuras": 0,
+    "sem_data": 0,
+    "mais_recente": null,
+    "exemplos": [],
+    "nota": 0
+   }
+  ]
+ },
+ {
+  "modo": "cidade",
+  "nome": "Prefeitura de Ampére",
+  "cidade": "ampere",
+  "candidatas": 0,
+  "melhor": null,
+  "atual": null,
+  "testes": []
+ },
+ {
+  "modo": "cidade",
+  "nome": "Prefeitura de Campo Bonito",
+  "cidade": "campo-bonito",
+  "candidatas": 0,
+  "melhor": null,
+  "atual": null,
+  "testes": []
+ },
+ {
+  "modo": "cidade",
+  "nome": "Prefeitura de Carambeí",
+  "cidade": "carambei",
+  "candidatas": 11,
+  "melhor": {
+   "url": "https://carambei.atende.net/cidadao/noticia",
+   "itens": 0,
+   "com_data": 0,
+   "recentes": 0,
+   "futuras": 0,
+   "sem_data": 0,
+   "mais_recente": null,
+   "exemplos": [],
+   "nota": 0
+  },
+  "atual": null,
+  "testes": [
+   {
+    "url": "https://carambei.atende.net/cidadao/noticia",
+    "itens": 0,
+    "com_data": 0,
+    "recentes": 0,
+    "futuras": 0,
+    "sem_data": 0,
+    "mais_recente": null,
+    "exemplos": [],
+    "nota": 0
+   }
+  ]
+ },
+ {
+  "modo": "cidade",
+  "nome": "Prefeitura de Araruna",
+  "cidade": "araruna",
+  "candidatas": 0,
+  "melhor": null,
+  "atual": null,
+  "testes": []
+ },
+ {
+  "modo": "cidade",
+  "nome": "Prefeitura de Assis Chateaubriand",
+  "cidade": "assis-chateaubriand",
+  "candidatas": 0,
+  "melhor": null,
+  "atual": null,
+  "testes": []
+ },
+ {
+  "modo": "cidade",
+  "nome": "Prefeitura de Campina do Simão",
+  "cidade": "campina-do-simao",
+  "candidatas": 14,
+  "melhor": {
+   "url": "https://www.campinadosimao.pr.gov.br/Noticias",
+   "itens": 1,
+   "com_data": 0,
+   "recentes": 0,
+   "futuras": 0,
+   "sem_data": 1,
+   "mais_recente": null,
+   "exemplos": [
+    {
+     "titulo": "Veja todas as notícias",
+     "url": "https://www.campinadosimao.pr.gov.br/Noticias",
+     "data": null
+    }
+   ],
+   "nota": -1
+  },
+  "atual": null,
+  "testes": [
+   {
+    "url": "https://www.campinadosimao.pr.gov.br/Noticias",
+    "itens": 1,
+    "com_data": 0,
+    "recentes": 0,
+    "futuras": 0,
+    "sem_data": 1,
+    "mais_recente": null,
+    "exemplos": [
+     {
+      "titulo": "Veja todas as notícias",
+      "url": "https://www.campinadosimao.pr.gov.br/Noticias",
+      "data": null
+     }
+    ],
+    "nota": -1
+   },
+   {
+    "url": "https://www.campinadosimao.pr.gov.br/Noticias?data=7963834819ae1636231eaf0c1b832caa",
+    "itens": 1,
+    "com_data": 0,
+    "recentes": 0,
+    "futuras": 0,
+    "sem_data": 1,
+    "mais_recente": null,
+    "exemplos": [
+     {
+      "titulo": "Veja todas as notícias",
+      "url": "https://www.campinadosimao.pr.gov.br/Noticias",
+      "data": null
+     }
+    ],
+    "nota": -1
+   },
+   {
+    "url": "https://www.campinadosimao.pr.gov.br/Noticias?data=92fa3411d3387791859834f158b289e8",
+    "itens": 1,
+    "com_data": 0,
+    "recentes": 0,
+    "futuras": 0,
+    "sem_data": 1,
+    "mais_recente": null,
+    "exemplos": [
+     {
+      "titulo": "Veja todas as notícias",
+      "url": "https://www.campinadosimao.pr.gov.br/Noticias",
+      "data": null
+     }
+    ],
+    "nota": -1
+   },
+   {
+    "url": "https://www.campinadosimao.pr.gov.br/Noticias?data=b05d620e2830a4f3f6c7866f81031a43",
+    "itens": 1,
+    "com_data": 0,
+    "recentes": 0,
+    "futuras": 0,
+    "sem_data": 1,
+    "mais_recente": null,
+    "exemplos": [
+     {
+      "titulo": "Veja todas as notícias",
+      "url": "https://www.campinadosimao.pr.gov.br/Noticias",
+      "data": null
+     }
+    ],
+    "nota": -1
+   }
+  ]
+ },
+ {
+  "modo": "cidade",
+  "nome": "Prefeitura de Cornélio Procópio",
+  "cidade": "cornelio-procopio",
+  "candidatas": 0,
+  "melhor": null,
+  "atual": null,
+  "testes": []
+ },
+ {
+  "modo": "cidade",
+  "nome": "Prefeitura de Coronel Domingos Soares",
+  "cidade": "coronel-domingos-soares",
+  "candidatas": 0,
+  "melhor": null,
+  "atual": null,
+  "testes": []
+ },
+ {
+  "modo": "cidade",
+  "nome": "Prefeitura de Centenário do Sul",
+  "cidade": "centenario-do-sul",
+  "candidatas": 12,
+  "melhor": {
+   "url": "https://www.centenariodosul.pr.gov.br/index.php?meio=172009",
+   "itens": 0,
+   "com_data": 0,
+   "recentes": 0,
+   "futuras": 0,
+   "sem_data": 0,
+   "mais_recente": null,
+   "exemplos": [],
+   "nota": 0
+  },
+  "atual": null,
+  "testes": [
+   {
+    "url": "https://www.centenariodosul.pr.gov.br/index.php?meio=172009",
+    "itens": 0,
+    "com_data": 0,
+    "recentes": 0,
+    "futuras": 0,
+    "sem_data": 0,
+    "mais_recente": null,
+    "exemplos": [],
+    "nota": 0
+   }
+  ]
+ },
+ {
+  "modo": "cidade",
+  "nome": "Prefeitura de Barbosa Ferraz",
+  "cidade": "barbosa-ferraz",
+  "candidatas": 0,
+  "melhor": null,
+  "atual": null,
+  "testes": []
+ },
+ {
+  "modo": "cidade",
+  "nome": "Prefeitura de Cidade Gaúcha",
+  "cidade": "cidade-gaucha",
+  "candidatas": 12,
+  "melhor": {
+   "url": "https://www.cidadegaucha.pr.gov.br/?meio=1834410",
+   "itens": 0,
+   "com_data": 0,
+   "recentes": 0,
+   "futuras": 0,
+   "sem_data": 0,
+   "mais_recente": null,
+   "exemplos": [],
+   "nota": 0
+  },
+  "atual": null,
+  "testes": [
+   {
+    "url": "https://www.cidadegaucha.pr.gov.br/?meio=1834410",
+    "itens": 0,
+    "com_data": 0,
+    "recentes": 0,
+    "futuras": 0,
+    "sem_data": 0,
+    "mais_recente": null,
+    "exemplos": [],
+    "nota": 0
+   }
+  ]
+ },
+ {
+  "modo": "cidade",
+  "nome": "Prefeitura de Cerro Azul",
+  "cidade": "cerro-azul",
+  "candidatas": 12,
+  "melhor": {
+   "url": "https://www.cerroazul.pr.gov.br/?meio=180007",
+   "itens": 0,
+   "com_data": 0,
+   "recentes": 0,
+   "futuras": 0,
+   "sem_data": 0,
+   "mais_recente": null,
+   "exemplos": [],
+   "nota": 0
+  },
+  "atual": null,
+  "testes": [
+   {
+    "url": "https://www.cerroazul.pr.gov.br/?meio=180007",
+    "itens": 0,
+    "com_data": 0,
+    "recentes": 0,
+    "futuras": 0,
+    "sem_data": 0,
+    "mais_recente": null,
+    "exemplos": [],
+    "nota": 0
+   }
+  ]
+ },
+ {
+  "modo": "cidade",
+  "nome": "Prefeitura de Cruzeiro do Sul",
+  "cidade": "cruzeiro-do-sul",
+  "candidatas": 12,
+  "melhor": {
+   "url": "https://www.cruzeirodosul.pr.gov.br/index.php?meio=171846",
+   "itens": 0,
+   "com_data": 0,
+   "recentes": 0,
+   "futuras": 0,
+   "sem_data": 0,
+   "mais_recente": null,
+   "exemplos": [],
+   "nota": 0
+  },
+  "atual": null,
+  "testes": [
+   {
+    "url": "https://www.cruzeirodosul.pr.gov.br/index.php?meio=171846",
+    "itens": 0,
+    "com_data": 0,
+    "recentes": 0,
+    "futuras": 0,
+    "sem_data": 0,
+    "mais_recente": null,
+    "exemplos": [],
+    "nota": 0
+   }
+  ]
+ },
+ {
+  "modo": "cidade",
+  "nome": "Prefeitura de Douradina",
+  "cidade": "douradina",
+  "candidatas": 0,
+  "melhor": null,
+  "atual": null,
+  "testes": []
+ },
+ {
+  "modo": "cidade",
+  "nome": "Prefeitura de Cafelândia",
+  "cidade": "cafelandia",
+  "candidatas": 0,
+  "melhor": null,
+  "atual": null,
+  "testes": []
+ },
+ {
+  "modo": "cidade",
+  "nome": "Prefeitura de Califórnia",
+  "cidade": "california",
+  "candidatas": 0,
+  "melhor": null,
+  "atual": null,
+  "testes": []
+ },
+ {
+  "modo": "cidade",
+  "nome": "Prefeitura de Diamante do Norte",
+  "cidade": "diamante-do-norte",
+  "candidatas": 13,
+  "melhor": {
+   "url": "https://www.diamantedonorte.pr.gov.br/index.php?meio=1834381",
+   "itens": 0,
+   "com_data": 0,
+   "recentes": 0,
+   "futuras": 0,
+   "sem_data": 0,
+   "mais_recente": null,
+   "exemplos": [],
+   "nota": 0
+  },
+  "atual": null,
+  "testes": [
+   {
+    "url": "https://www.diamantedonorte.pr.gov.br/index.php?meio=1834381",
+    "itens": 0,
+    "com_data": 0,
+    "recentes": 0,
+    "futuras": 0,
+    "sem_data": 0,
+    "mais_recente": null,
+    "exemplos": [],
+    "nota": 0
+   },
+   {
+    "url": "https://www.diamantedonorte.pr.gov.br/?meio=1834381",
+    "itens": 0,
+    "com_data": 0,
+    "recentes": 0,
+    "futuras": 0,
+    "sem_data": 0,
+    "mais_recente": null,
+    "exemplos": [],
+    "nota": 0
+   }
+  ]
+ },
+ {
+  "modo": "cidade",
+  "nome": "Prefeitura de Doutor Ulysses",
+  "cidade": "doutor-ulysses",
+  "candidatas": 12,
+  "melhor": {
+   "url": "https://www.doutorulysses.pr.gov.br/index.php?meio=521",
+   "itens": 0,
+   "com_data": 0,
+   "recentes": 0,
+   "futuras": 0,
+   "sem_data": 0,
+   "mais_recente": null,
+   "exemplos": [],
+   "nota": 0
+  },
+  "atual": null,
+  "testes": [
+   {
+    "url": "https://www.doutorulysses.pr.gov.br/index.php?meio=521",
+    "itens": 0,
+    "com_data": 0,
+    "recentes": 0,
+    "futuras": 0,
+    "sem_data": 0,
+    "mais_recente": null,
+    "exemplos": [],
+    "nota": 0
+   }
+  ]
+ },
+ {
+  "modo": "cidade",
+  "nome": "Prefeitura de Flor da Serra do Sul",
+  "cidade": "flor-da-serra-do-sul",
+  "candidatas": 0,
+  "melhor": null,
+  "atual": null,
+  "testes": []
+ },
+ {
+  "modo": "cidade",
+  "nome": "Prefeitura de Cafezal do Sul",
+  "cidade": "cafezal-do-sul",
+  "candidatas": 0,
+  "melhor": null,
+  "atual": null,
+  "testes": []
+ },
+ {
+  "modo": "cidade",
+  "nome": "Prefeitura de Céu Azul",
+  "cidade": "ceu-azul",
+  "candidatas": 11,
+  "melhor": {
+   "url": "https://ceuazul.pr.gov.br/cidadao/noticia",
+   "itens": 0,
+   "com_data": 0,
+   "recentes": 0,
+   "futuras": 0,
+   "sem_data": 0,
+   "mais_recente": null,
+   "exemplos": [],
+   "nota": 0
+  },
+  "atual": null,
+  "testes": [
+   {
+    "url": "https://ceuazul.pr.gov.br/cidadao/noticia",
+    "itens": 0,
+    "com_data": 0,
+    "recentes": 0,
+    "futuras": 0,
+    "sem_data": 0,
+    "mais_recente": null,
+    "exemplos": [],
+    "nota": 0
+   }
+  ]
+ },
+ {
+  "modo": "fonte",
+  "id": "667a2381-12bc-4cbd-8b37-83a099966518",
+  "nome": "Prefeitura de Bela Vista da Caroba",
+  "cidade": "bela-vista-da-caroba",
+  "url": "https://www.belavistadacaroba.pr.gov.br/noticias",
+  "candidatas": 14,
+  "melhor": {
+   "url": "https://www.belavistadacaroba.pr.gov.br/noticias",
+   "itens": 20,
+   "com_data": 6,
+   "recentes": 0,
+   "futuras": 0,
+   "sem_data": 0,
+   "mais_recente": "2026-08-21T13:53:14.000Z",
+   "exemplos": [
+    {
+     "titulo": "Relatório da Pesquisa de Satisfação dos Usuários da Política de Assistência Social de Bela",
+     "url": "https://www.belavistadacaroba.pr.gov.br/noticias/relatorio-da-pesquisa-de-satisfacao-dos-usuarios-da-politica-de-assistencia-social-de-bela-vista-da-caroba-pr-2025",
+     "data": "2026-08-21T13:53:14.000Z"
+    },
+    {
+     "titulo": "Diagnóstico Socioterritorial de Bela Vista da Caroba - Paraná",
+     "url": "https://www.belavistadacaroba.pr.gov.br/noticias/diagnostico-socioterritorial-de-bela-vista-da-caroba-parana",
+     "data": "2026-06-09T18:05:42.000Z"
+    },
+    {
+     "titulo": "Protocolo Intersetorial de Atendimento a Crianças e Adolescentes Vítimas ou Testemunhas de",
+     "url": "https://www.belavistadacaroba.pr.gov.br/noticias/protocolo-intersetorial-de-atendimento-a-criancas-e-adolescentes-vitimas-ou-testemunhas-de-violencia-2",
+     "data": "2026-06-08T20:16:22.000Z"
+    },
+    {
+     "titulo": "PROCESSO DE SELEÇÃO COMPLEMENTAR IMPLANTAÇÃO DE ESTUFAS AGRÍCOLAS 01/2026",
+     "url": "https://www.belavistadacaroba.pr.gov.br/noticias/processo-de-selecao-complementar-implantacao-de-estufas-agricolas-01-2026",
+     "data": "2026-06-01T18:15:14.000Z"
+    },
+    {
+     "titulo": "Eleição Suplementar Conselho Tutelar 2026",
+     "url": "https://www.belavistadacaroba.pr.gov.br/noticias/eleicao-suplementar-conselho-tutelar-2026",
+     "data": "2026-03-24T14:12:59.000Z"
+    },
+    {
+     "titulo": "Programa Habitacional",
+     "url": "https://www.belavistadacaroba.pr.gov.br/noticias/programa-habitacional",
+     "data": "2025-12-23T18:34:03.000Z"
+    }
+   ],
+   "nota": 28
+  },
+  "atual": {
+   "url": "https://www.belavistadacaroba.pr.gov.br/noticias",
+   "itens": 20,
+   "com_data": 6,
+   "recentes": 0,
+   "futuras": 0,
+   "sem_data": 0,
+   "mais_recente": "2026-08-21T13:53:14.000Z",
+   "exemplos": [
+    {
+     "titulo": "Relatório da Pesquisa de Satisfação dos Usuários da Política de Assistência Social de Bela",
+     "url": "https://www.belavistadacaroba.pr.gov.br/noticias/relatorio-da-pesquisa-de-satisfacao-dos-usuarios-da-politica-de-assistencia-social-de-bela-vista-da-caroba-pr-2025",
+     "data": "2026-08-21T13:53:14.000Z"
+    },
+    {
+     "titulo": "Diagnóstico Socioterritorial de Bela Vista da Caroba - Paraná",
+     "url": "https://www.belavistadacaroba.pr.gov.br/noticias/diagnostico-socioterritorial-de-bela-vista-da-caroba-parana",
+     "data": "2026-06-09T18:05:42.000Z"
+    },
+    {
+     "titulo": "Protocolo Intersetorial de Atendimento a Crianças e Adolescentes Vítimas ou Testemunhas de",
+     "url": "https://www.belavistadacaroba.pr.gov.br/noticias/protocolo-intersetorial-de-atendimento-a-criancas-e-adolescentes-vitimas-ou-testemunhas-de-violencia-2",
+     "data": "2026-06-08T20:16:22.000Z"
+    },
+    {
+     "titulo": "PROCESSO DE SELEÇÃO COMPLEMENTAR IMPLANTAÇÃO DE ESTUFAS AGRÍCOLAS 01/2026",
+     "url": "https://www.belavistadacaroba.pr.gov.br/noticias/processo-de-selecao-complementar-implantacao-de-estufas-agricolas-01-2026",
+     "data": "2026-06-01T18:15:14.000Z"
+    },
+    {
+     "titulo": "Eleição Suplementar Conselho Tutelar 2026",
+     "url": "https://www.belavistadacaroba.pr.gov.br/noticias/eleicao-suplementar-conselho-tutelar-2026",
+     "data": "2026-03-24T14:12:59.000Z"
+    },
+    {
+     "titulo": "Programa Habitacional",
+     "url": "https://www.belavistadacaroba.pr.gov.br/noticias/programa-habitacional",
+     "data": "2025-12-23T18:34:03.000Z"
+    }
+   ],
+   "nota": 28
+  },
+  "testes": [
+   {
+    "url": "https://www.belavistadacaroba.pr.gov.br/noticias",
+    "itens": 20,
+    "com_data": 6,
+    "recentes": 0,
+    "futuras": 0,
+    "sem_data": 0,
+    "mais_recente": "2026-08-21T13:53:14.000Z",
+    "exemplos": [
+     {
+      "titulo": "Relatório da Pesquisa de Satisfação dos Usuários da Política de Assistência Social de Bela",
+      "url": "https://www.belavistadacaroba.pr.gov.br/noticias/relatorio-da-pesquisa-de-satisfacao-dos-usuarios-da-politica-de-assistencia-social-de-bela-vista-da-caroba-pr-2025",
+      "data": "2026-08-21T13:53:14.000Z"
+     },
+     {
+      "titulo": "Diagnóstico Socioterritorial de Bela Vista da Caroba - Paraná",
+      "url": "https://www.belavistadacaroba.pr.gov.br/noticias/diagnostico-socioterritorial-de-bela-vista-da-caroba-parana",
+      "data": "2026-06-09T18:05:42.000Z"
+     },
+     {
+      "titulo": "Protocolo Intersetorial de Atendimento a Crianças e Adolescentes Vítimas ou Testemunhas de",
+      "url": "https://www.belavistadacaroba.pr.gov.br/noticias/protocolo-intersetorial-de-atendimento-a-criancas-e-adolescentes-vitimas-ou-testemunhas-de-violencia-2",
+      "data": "2026-06-08T20:16:22.000Z"
+     },
+     {
+      "titulo": "PROCESSO DE SELEÇÃO COMPLEMENTAR IMPLANTAÇÃO DE ESTUFAS AGRÍCOLAS 01/2026",
+      "url": "https://www.belavistadacaroba.pr.gov.br/noticias/processo-de-selecao-complementar-implantacao-de-estufas-agricolas-01-2026",
+      "data": "2026-06-01T18:15:14.000Z"
+     },
+     {
+      "titulo": "Eleição Suplementar Conselho Tutelar 2026",
+      "url": "https://www.belavistadacaroba.pr.gov.br/noticias/eleicao-suplementar-conselho-tutelar-2026",
+      "data": "2026-03-24T14:12:59.000Z"
+     },
+     {
+      "titulo": "Programa Habitacional",
+      "url": "https://www.belavistadacaroba.pr.gov.br/noticias/programa-habitacional",
+      "data": "2025-12-23T18:34:03.000Z"
+     }
+    ],
+    "nota": 28
+   },
+   {
+    "url": "https://www.belavistadacaroba.pr.gov.br/noticias/relatorio-da-pesquisa-de-satisfacao-dos-usuarios-da-politica-de-assistencia-social-de-bela-vista-da-caroba-pr-2025",
+    "itens": 9,
+    "com_data": 6,
+    "recentes": 0,
+    "futuras": 0,
+    "sem_data": 0,
+    "mais_recente": "2026-08-21T13:53:14.000Z",
+    "exemplos": [
+     {
+      "titulo": "Relatório da Pesquisa de Satisfação dos Usuários da Política de Assistência Social de Bela",
+      "url": "https://www.belavistadacaroba.pr.gov.br/noticias/relatorio-da-pesquisa-de-satisfacao-dos-usuarios-da-politica-de-assistencia-social-de-bela-vista-da-caroba-pr-2025",
+      "data": "2026-08-21T13:53:14.000Z"
+     },
+     {
+      "titulo": "Diagnóstico Socioterritorial de Bela Vista da Caroba - Paraná",
+      "url": "https://www.belavistadacaroba.pr.gov.br/noticias/diagnostico-socioterritorial-de-bela-vista-da-caroba-parana",
+      "data": "2026-06-09T18:05:42.000Z"
+     },
+     {
+      "titulo": "Protocolo Intersetorial de Atendimento a Crianças e Adolescentes Vítimas ou Testemunhas de",
+      "url": "https://www.belavistadacaroba.pr.gov.br/noticias/protocolo-intersetorial-de-atendimento-a-criancas-e-adolescentes-vitimas-ou-testemunhas-de-violencia-2",
+      "data": "2026-06-08T20:16:22.000Z"
+     },
+     {
+      "titulo": "PROCESSO DE SELEÇÃO COMPLEMENTAR IMPLANTAÇÃO DE ESTUFAS AGRÍCOLAS 01/2026",
+      "url": "https://www.belavistadacaroba.pr.gov.br/noticias/processo-de-selecao-complementar-implantacao-de-estufas-agricolas-01-2026",
+      "data": "2026-06-01T18:15:14.000Z"
+     },
+     {
+      "titulo": "Eleição Suplementar Conselho Tutelar 2026",
+      "url": "https://www.belavistadacaroba.pr.gov.br/noticias/eleicao-suplementar-conselho-tutelar-2026",
+      "data": "2026-03-24T14:12:59.000Z"
+     },
+     {
+      "titulo": "Programa Habitacional",
+      "url": "https://www.belavistadacaroba.pr.gov.br/noticias/programa-habitacional",
+      "data": "2025-12-23T18:34:03.000Z"
+     }
+    ],
+    "nota": 27
+   },
+   {
+    "url": "https://www.belavistadacaroba.pr.gov.br/noticias/diagnostico-socioterritorial-de-bela-vista-da-caroba-parana",
+    "itens": 9,
+    "com_data": 6,
+    "recentes": 0,
+    "futuras": 0,
+    "sem_data": 0,
+    "mais_recente": "2026-08-21T13:53:14.000Z",
+    "exemplos": [
+     {
+      "titulo": "Relatório da Pesquisa de Satisfação dos Usuários da Política de Assistência Social de Bela",
+      "url": "https://www.belavistadacaroba.pr.gov.br/noticias/relatorio-da-pesquisa-de-satisfacao-dos-usuarios-da-politica-de-assistencia-social-de-bela-vista-da-caroba-pr-2025",
+      "data": "2026-08-21T13:53:14.000Z"
+     },
+     {
+      "titulo": "Diagnóstico Socioterritorial de Bela Vista da Caroba - Paraná",
+      "url": "https://www.belavistadacaroba.pr.gov.br/noticias/diagnostico-socioterritorial-de-bela-vista-da-caroba-parana",
+      "data": "2026-06-09T18:05:42.000Z"
+     },
+     {
+      "titulo": "Protocolo Intersetorial de Atendimento a Crianças e Adolescentes Vítimas ou Testemunhas de",
+      "url": "https://www.belavistadacaroba.pr.gov.br/noticias/protocolo-intersetorial-de-atendimento-a-criancas-e-adolescentes-vitimas-ou-testemunhas-de-violencia-2",
+      "data": "2026-06-08T20:16:22.000Z"
+     },
+     {
+      "titulo": "PROCESSO DE SELEÇÃO COMPLEMENTAR IMPLANTAÇÃO DE ESTUFAS AGRÍCOLAS 01/2026",
+      "url": "https://www.belavistadacaroba.pr.gov.br/noticias/processo-de-selecao-complementar-implantacao-de-estufas-agricolas-01-2026",
+      "data": "2026-06-01T18:15:14.000Z"
+     },
+     {
+      "titulo": "Eleição Suplementar Conselho Tutelar 2026",
+      "url": "https://www.belavistadacaroba.pr.gov.br/noticias/eleicao-suplementar-conselho-tutelar-2026",
+      "data": "2026-03-24T14:12:59.000Z"
+     },
+     {
+      "titulo": "Programa Habitacional",
+      "url": "https://www.belavistadacaroba.pr.gov.br/noticias/programa-habitacional",
+      "data": "2025-12-23T18:34:03.000Z"
+     }
+    ],
+    "nota": 27
+   },
+   {
+    "url": "https://www.belavistadacaroba.pr.gov.br/noticias/protocolo-intersetorial-de-atendimento-a-criancas-e-adolescentes-vitimas-ou-testemunhas-de-violencia-2",
+    "itens": 9,
+    "com_data": 6,
+    "recentes": 0,
+    "futuras": 0,
+    "sem_data": 0,
+    "mais_recente": "2026-08-21T13:53:14.000Z",
+    "exemplos": [
+     {
+      "titulo": "Relatório da Pesquisa de Satisfação dos Usuários da Política de Assistência Social de Bela",
+      "url": "https://www.belavistadacaroba.pr.gov.br/noticias/relatorio-da-pesquisa-de-satisfacao-dos-usuarios-da-politica-de-assistencia-social-de-bela-vista-da-caroba-pr-2025",
+      "data": "2026-08-21T13:53:14.000Z"
+     },
+     {
+      "titulo": "Diagnóstico Socioterritorial de Bela Vista da Caroba - Paraná",
+      "url": "https://www.belavistadacaroba.pr.gov.br/noticias/diagnostico-socioterritorial-de-bela-vista-da-caroba-parana",
+      "data": "2026-06-09T18:05:42.000Z"
+     },
+     {
+      "titulo": "Protocolo Intersetorial de Atendimento a Crianças e Adolescentes Vítimas ou Testemunhas de",
+      "url": "https://www.belavistadacaroba.pr.gov.br/noticias/protocolo-intersetorial-de-atendimento-a-criancas-e-adolescentes-vitimas-ou-testemunhas-de-violencia-2",
+      "data": "2026-06-08T20:16:22.000Z"
+     },
+     {
+      "titulo": "PROCESSO DE SELEÇÃO COMPLEMENTAR IMPLANTAÇÃO DE ESTUFAS AGRÍCOLAS 01/2026",
+      "url": "https://www.belavistadacaroba.pr.gov.br/noticias/processo-de-selecao-complementar-implantacao-de-estufas-agricolas-01-2026",
+      "data": "2026-06-01T18:15:14.000Z"
+     },
+     {
+      "titulo": "Eleição Suplementar Conselho Tutelar 2026",
+      "url": "https://www.belavistadacaroba.pr.gov.br/noticias/eleicao-suplementar-conselho-tutelar-2026",
+      "data": "2026-03-24T14:12:59.000Z"
+     },
+     {
+      "titulo": "Programa Habitacional",
+      "url": "https://www.belavistadacaroba.pr.gov.br/noticias/programa-habitacional",
+      "data": "2025-12-23T18:34:03.000Z"
+     }
+    ],
+    "nota": 27
+   }
+  ]
+ },
+ {
+  "modo": "cidade",
+  "nome": "Prefeitura de Farol",
+  "cidade": "farol",
+  "candidatas": 11,
+  "melhor": {
+   "url": "https://www.farol.pr.gov.br/noticias",
+   "itens": 0,
+   "com_data": 0,
+   "recentes": 0,
+   "futuras": 0,
+   "sem_data": 0,
+   "mais_recente": null,
+   "exemplos": [],
+   "nota": 0
+  },
+  "atual": null,
+  "testes": [
+   {
+    "url": "https://www.farol.pr.gov.br/noticias",
+    "itens": 0,
+    "com_data": 0,
+    "recentes": 0,
+    "futuras": 0,
+    "sem_data": 0,
+    "mais_recente": null,
+    "exemplos": [],
+    "nota": 0
+   },
+   {
+    "url": "https://www.farol.pr.gov.br/feed/",
+    "itens": 0,
+    "com_data": 0,
+    "recentes": 0,
+    "futuras": 0,
+    "sem_data": 0,
+    "mais_recente": null,
+    "exemplos": [],
+    "nota": 0
+   },
+   {
+    "url": "https://www.farol.pr.gov.br/noticias/",
+    "itens": 0,
+    "com_data": 0,
+    "recentes": 0,
+    "futuras": 0,
+    "sem_data": 0,
+    "mais_recente": null,
+    "exemplos": [],
+    "nota": 0
+   },
+   {
+    "url": "https://www.farol.pr.gov.br/noticia",
+    "itens": 0,
+    "com_data": 0,
+    "recentes": 0,
+    "futuras": 0,
+    "sem_data": 0,
+    "mais_recente": null,
+    "exemplos": [],
+    "nota": 0
+   }
+  ]
+ },
+ {
+  "modo": "cidade",
+  "nome": "Prefeitura de Dois Vizinhos",
+  "cidade": "dois-vizinhos",
+  "candidatas": 13,
+  "melhor": {
+   "url": "https://doisvizinhos.pr.gov.br/noticias",
+   "itens": 1,
+   "com_data": 0,
+   "recentes": 0,
+   "futuras": 0,
+   "sem_data": 1,
+   "mais_recente": null,
+   "exemplos": [
+    {
+     "titulo": "Pol�tica de Privacidade e Prote��o de Dados",
+     "url": "https://doisvizinhos.pr.gov.br/p/politica-de-privacidade",
+     "data": null
+    }
+   ],
+   "nota": -1
+  },
+  "atual": null,
+  "testes": [
+   {
+    "url": "https://doisvizinhos.pr.gov.br/noticias",
+    "itens": 1,
+    "com_data": 0,
+    "recentes": 0,
+    "futuras": 0,
+    "sem_data": 1,
+    "mais_recente": null,
+    "exemplos": [
+     {
+      "titulo": "Pol�tica de Privacidade e Prote��o de Dados",
+      "url": "https://doisvizinhos.pr.gov.br/p/politica-de-privacidade",
+      "data": null
+     }
+    ],
+    "nota": -1
+   },
+   {
+    "url": "https://doisvizinhos.pr.gov.br/secretarias/secretaria-de-comunicacao-social-marketing",
+    "itens": 1,
+    "com_data": 0,
+    "recentes": 0,
+    "futuras": 0,
+    "sem_data": 1,
+    "mais_recente": null,
+    "exemplos": [
+     {
+      "titulo": "Pol�tica de Privacidade e Prote��o de Dados",
+      "url": "https://doisvizinhos.pr.gov.br/p/politica-de-privacidade",
+      "data": null
+     }
+    ],
+    "nota": -1
+   },
+   {
+    "url": "https://doisvizinhos.pr.gov.br/noticias/",
+    "itens": 1,
+    "com_data": 0,
+    "recentes": 0,
+    "futuras": 0,
+    "sem_data": 1,
+    "mais_recente": null,
+    "exemplos": [
+     {
+      "titulo": "Pol�tica de Privacidade e Prote��o de Dados",
+      "url": "https://doisvizinhos.pr.gov.br/p/politica-de-privacidade",
+      "data": null
+     }
+    ],
+    "nota": -1
+   }
+  ]
+ },
+ {
+  "modo": "fonte",
+  "id": "9a0bf546-78a3-4b3f-a4bf-ac72d1095ed6",
+  "nome": "Prefeitura de Pinhalão",
+  "cidade": "pinhalao",
+  "url": "https://www.pinhalao.pr.gov.br/noticia/categoria/",
+  "erro": "tempo esgotado"
+ },
+ {
+  "modo": "cidade",
+  "nome": "Prefeitura de Carlópolis",
+  "cidade": "carlopolis",
+  "candidatas": 0,
+  "melhor": null,
+  "atual": null,
+  "testes": []
+ },
+ {
+  "modo": "cidade",
+  "nome": "Prefeitura de Goioerê",
+  "cidade": "goioere",
+  "candidatas": 0,
+  "melhor": null,
+  "atual": null,
+  "testes": []
+ },
+ {
+  "modo": "cidade",
+  "nome": "Prefeitura de Cruzeiro do Oeste",
+  "cidade": "cruzeiro-do-oeste",
+  "candidatas": 0,
+  "melhor": null,
+  "atual": null,
+  "testes": []
+ },
+ {
+  "modo": "fonte",
+  "id": "3dca0143-fa83-4e73-bd30-0936273700ca",
+  "nome": "Prefeitura de Guapirama",
+  "cidade": "guapirama",
+  "url": "https://www.guapirama.pr.gov.br/noticia/3338/obras/",
+  "erro": "tempo esgotado"
+ },
+ {
+  "modo": "fonte",
+  "id": "8a4eb68e-2f62-4b4d-900b-42e1dcc2f5cf",
+  "nome": "Prefeitura de Ivaí",
+  "cidade": "ivai",
+  "url": "https://www.ivai.pr.gov.br/noticia/categoria/",
+  "candidatas": 12,
+  "melhor": {
+   "url": "https://www.ivai.pr.gov.br/noticia/categoria/",
+   "itens": 13,
+   "com_data": 5,
+   "recentes": 1,
+   "futuras": 0,
+   "sem_data": 1,
+   "mais_recente": "2026-10-19T15:00:00.000Z",
+   "exemplos": [
+    {
+     "titulo": "10ª Conferência Municipal dos Direitos da Criança e do Ad...",
+     "url": "https://www.ivai.pr.gov.br/noticia/1478979/10-conferencia-municipal-dos-direitos-da-crianca-e-do-adolescente/",
+     "data": "2026-10-19T15:00:00.000Z"
+    },
+    {
+     "titulo": "RELATÓRIO SECRETARIA DE OBRAS - AGOSTO 2026",
+     "url": "https://www.ivai.pr.gov.br/noticia/1478977/relatorio-secretaria-de-obras-agosto-2026/",
+     "data": "2026-09-15T15:00:00.000Z"
+    },
+    {
+     "titulo": "Desenvolvimento Urbano",
+     "url": "https://www.ivai.pr.gov.br/noticia/categoria/26/desenvolvimento-urbano/",
+     "data": null
+    },
+    {
+     "titulo": "RELATÓRIO MENSAL DA SECRETARIA DE HABITAÇÃO.",
+     "url": "https://www.ivai.pr.gov.br/noticia/1478976/relatorio-mensal-da-secretaria-de-habitacao-/",
+     "data": "2026-05-31T15:00:00.000Z"
+    },
+    {
+     "titulo": "SECRETARIA DE ESPORTES - RELATÓRIO DE ABRIL DE 2026",
+     "url": "https://www.ivai.pr.gov.br/noticia/1478975/secretaria-de-esportes-relatorio-de-abril-de-2026/",
+     "data": "2026-04-30T15:00:00.000Z"
+    },
+    {
+     "titulo": "EDITAL DE CONVOCAÇÃO Nº 001/2024",
+     "url": "https://www.ivai.pr.gov.br/noticia/1478974/edital-de-convocacao-n-0012024/",
+     "data": "2026-04-24T15:00:00.000Z"
+    }
+   ],
+   "nota": 29
+  },
+  "atual": {
+   "url": "https://www.ivai.pr.gov.br/noticia/categoria/",
+   "itens": 13,
+   "com_data": 5,
+   "recentes": 1,
+   "futuras": 0,
+   "sem_data": 1,
+   "mais_recente": "2026-10-19T15:00:00.000Z",
+   "exemplos": [
+    {
+     "titulo": "10ª Conferência Municipal dos Direitos da Criança e do Ad...",
+     "url": "https://www.ivai.pr.gov.br/noticia/1478979/10-conferencia-municipal-dos-direitos-da-crianca-e-do-adolescente/",
+     "data": "2026-10-19T15:00:00.000Z"
+    },
+    {
+     "titulo": "RELATÓRIO SECRETARIA DE OBRAS - AGOSTO 2026",
+     "url": "https://www.ivai.pr.gov.br/noticia/1478977/relatorio-secretaria-de-obras-agosto-2026/",
+     "data": "2026-09-15T15:00:00.000Z"
+    },
+    {
+     "titulo": "Desenvolvimento Urbano",
+     "url": "https://www.ivai.pr.gov.br/noticia/categoria/26/desenvolvimento-urbano/",
+     "data": null
+    },
+    {
+     "titulo": "RELATÓRIO MENSAL DA SECRETARIA DE HABITAÇÃO.",
+     "url": "https://www.ivai.pr.gov.br/noticia/1478976/relatorio-mensal-da-secretaria-de-habitacao-/",
+     "data": "2026-05-31T15:00:00.000Z"
+    },
+    {
+     "titulo": "SECRETARIA DE ESPORTES - RELATÓRIO DE ABRIL DE 2026",
+     "url": "https://www.ivai.pr.gov.br/noticia/1478975/secretaria-de-esportes-relatorio-de-abril-de-2026/",
+     "data": "2026-04-30T15:00:00.000Z"
+    },
+    {
+     "titulo": "EDITAL DE CONVOCAÇÃO Nº 001/2024",
+     "url": "https://www.ivai.pr.gov.br/noticia/1478974/edital-de-convocacao-n-0012024/",
+     "data": "2026-04-24T15:00:00.000Z"
+    }
+   ],
+   "nota": 29
+  },
+  "testes": [
+   {
+    "url": "https://www.ivai.pr.gov.br/noticia/categoria/",
+    "itens": 13,
+    "com_data": 5,
+    "recentes": 1,
+    "futuras": 0,
+    "sem_data": 1,
+    "mais_recente": "2026-10-19T15:00:00.000Z",
+    "exemplos": [
+     {
+      "titulo": "10ª Conferência Municipal dos Direitos da Criança e do Ad...",
+      "url": "https://www.ivai.pr.gov.br/noticia/1478979/10-conferencia-municipal-dos-direitos-da-crianca-e-do-adolescente/",
+      "data": "2026-10-19T15:00:00.000Z"
+     },
+     {
+      "titulo": "RELATÓRIO SECRETARIA DE OBRAS - AGOSTO 2026",
+      "url": "https://www.ivai.pr.gov.br/noticia/1478977/relatorio-secretaria-de-obras-agosto-2026/",
+      "data": "2026-09-15T15:00:00.000Z"
+     },
+     {
+      "titulo": "Desenvolvimento Urbano",
+      "url": "https://www.ivai.pr.gov.br/noticia/categoria/26/desenvolvimento-urbano/",
+      "data": null
+     },
+     {
+      "titulo": "RELATÓRIO MENSAL DA SECRETARIA DE HABITAÇÃO.",
+      "url": "https://www.ivai.pr.gov.br/noticia/1478976/relatorio-mensal-da-secretaria-de-habitacao-/",
+      "data": "2026-05-31T15:00:00.000Z"
+     },
+     {
+      "titulo": "SECRETARIA DE ESPORTES - RELATÓRIO DE ABRIL DE 2026",
+      "url": "https://www.ivai.pr.gov.br/noticia/1478975/secretaria-de-esportes-relatorio-de-abril-de-2026/",
+      "data": "2026-04-30T15:00:00.000Z"
+     },
+     {
+      "titulo": "EDITAL DE CONVOCAÇÃO Nº 001/2024",
+      "url": "https://www.ivai.pr.gov.br/noticia/1478974/edital-de-convocacao-n-0012024/",
+      "data": "2026-04-24T15:00:00.000Z"
+     }
+    ],
+    "nota": 29
+   },
+   {
+    "url": "https://www.ivai.pr.gov.br/feed/",
+    "itens": 9,
+    "com_data": 4,
+    "recentes": 1,
+    "futuras": 0,
+    "sem_data": 2,
+    "mais_recente": "2026-10-19T15:00:00.000Z",
+    "exemplos": [
+     {
+      "titulo": ". 443 . 19 de Outubro de 2026 Assistência Social . 10ª Conferência Municipal dos Direitos ",
+      "url": "https://www.ivai.pr.gov.br/noticia/1478979/10-conferencia-municipal-dos-direitos-da-crianca-e-do-adolescente/",
+      "data": "2026-10-19T15:00:00.000Z"
+     },
+     {
+      "titulo": ". 79 . 14 de Outubro de 2026 Administração . REFIS 2026 . REFIS 2026 . . Continuar lendo .",
+      "url": "https://www.ivai.pr.gov.br/noticia/1478978/refis-2026/",
+      "data": "2026-10-14T15:00:00.000Z"
+     },
+     {
+      "titulo": ". 216 . 15 de Setembro de 2026 Obras . RELATÓRIO SECRETARIA DE OBRAS - AGOSTO 2026 . RELAT",
+      "url": "https://www.ivai.pr.gov.br/noticia/1478977/relatorio-secretaria-de-obras-agosto-2026/",
+      "data": "2026-09-15T15:00:00.000Z"
+     },
+     {
+      "titulo": ". 412 . 31 de Maio de 2026 Desenvolvimento Urbano . RELATÓRIO MENSAL DA SECRETARIA DE HABI",
+      "url": "https://www.ivai.pr.gov.br/noticia/1478976/relatorio-mensal-da-secretaria-de-habitacao-/",
+      "data": "2026-05-31T15:00:00.000Z"
+     },
+     {
+      "titulo": ". 619 . 30 de Abril de 2026 Administração . SECRETARIA DE ESPORTES - RELATÓRIO DE ABRIL DE",
+      "url": "https://www.ivai.pr.gov.br/noticia/1478975/secretaria-de-esportes-relatorio-de-abril-de-2026/",
+      "data": null
+     },
+     {
+      "titulo": ". 719 . 24 de Abril de 2026 Administração . EDITAL DE CONVOCAÇÃO Nº 001/2024 . EDITAL DE C",
+      "url": "https://www.ivai.pr.gov.br/noticia/1478974/edital-de-convocacao-n-0012024/",
+      "data": null
+     }
+    ],
+    "nota": 23
+   }
+  ]
+ },
+ {
+  "modo": "fonte",
+  "id": "bf73e345-7ebf-465e-9891-4d708d1764c4",
+  "nome": "Prefeitura de Rio Bom",
+  "cidade": "rio-bom",
+  "url": "https://www.riobom.pr.gov.br/noticia/categoria",
+  "erro": "tempo esgotado"
+ },
+ {
+  "modo": "cidade",
+  "nome": "Prefeitura de Cândido de Abreu",
+  "cidade": "candido-de-abreu",
+  "candidatas": 0,
+  "melhor": null,
+  "atual": null,
+  "testes": []
+ },
+ {
+  "modo": "cidade",
+  "nome": "Prefeitura de Fernandes Pinheiro",
+  "cidade": "fernandes-pinheiro",
+  "candidatas": 0,
+  "melhor": null,
+  "atual": null,
+  "testes": []
+ },
+ {
+  "modo": "cidade",
+  "nome": "Prefeitura de Guaraqueçaba",
+  "cidade": "guaraquecaba",
+  "candidatas": 12,
+  "melhor": {
+   "url": "https://www.guaraquecaba.pr.gov.br/?meio=1800835",
+   "itens": 0,
+   "com_data": 0,
+   "recentes": 0,
+   "futuras": 0,
+   "sem_data": 0,
+   "mais_recente": null,
+   "exemplos": [],
+   "nota": 0
+  },
+  "atual": null,
+  "testes": [
+   {
+    "url": "https://www.guaraquecaba.pr.gov.br/?meio=1800835",
+    "itens": 0,
+    "com_data": 0,
+    "recentes": 0,
+    "futuras": 0,
+    "sem_data": 0,
+    "mais_recente": null,
+    "exemplos": [],
+    "nota": 0
+   }
+  ]
+ },
+ {
+  "modo": "cidade",
+  "nome": "Prefeitura de Iguaraçu",
+  "cidade": "iguaracu",
+  "candidatas": 12,
+  "melhor": {
+   "url": "https://www.iguaracu.pr.gov.br/?meio=16637",
+   "itens": 0,
+   "com_data": 0,
+   "recentes": 0,
+   "futuras": 0,
+   "sem_data": 0,
+   "mais_recente": null,
+   "exemplos": [],
+   "nota": 0
+  },
+  "atual": null,
+  "testes": [
+   {
+    "url": "https://www.iguaracu.pr.gov.br/?meio=16637",
+    "itens": 0,
+    "com_data": 0,
+    "recentes": 0,
+    "futuras": 0,
+    "sem_data": 0,
+    "mais_recente": null,
+    "exemplos": [],
+    "nota": 0
+   }
+  ]
+ },
+ {
+  "modo": "cidade",
+  "nome": "Prefeitura de Curiúva",
+  "cidade": "curiuva",
+  "candidatas": 0,
+  "melhor": null,
+  "atual": null,
+  "testes": []
+ },
+ {
+  "modo": "cidade",
+  "nome": "Prefeitura de Iporã",
+  "cidade": "ipora",
+  "candidatas": 12,
+  "melhor": {
+   "url": "http://www.ipora.pr.gov.br/?meio=1800189",
+   "itens": 0,
+   "com_data": 0,
+   "recentes": 0,
+   "futuras": 0,
+   "sem_data": 0,
+   "mais_recente": null,
+   "exemplos": [],
+   "nota": 0
+  },
+  "atual": null,
+  "testes": [
+   {
+    "url": "http://www.ipora.pr.gov.br/?meio=1800189",
+    "itens": 0,
+    "com_data": 0,
+    "recentes": 0,
+    "futuras": 0,
+    "sem_data": 0,
+    "mais_recente": null,
+    "exemplos": [],
+    "nota": 0
+   }
+  ]
+ },
+ {
+  "modo": "cidade",
+  "nome": "Prefeitura de Floraí",
+  "cidade": "florai",
+  "candidatas": 0,
+  "melhor": null,
+  "atual": null,
+  "testes": []
+ },
+ {
+  "modo": "cidade",
+  "nome": "Prefeitura de Irati",
+  "cidade": "irati",
+  "candidatas": 0,
+  "melhor": null,
+  "atual": null,
+  "testes": []
+ },
+ {
+  "modo": "cidade",
+  "nome": "Prefeitura de Florestópolis",
+  "cidade": "florestopolis",
+  "candidatas": 0,
+  "melhor": null,
+  "atual": null,
+  "testes": []
+ },
+ {
+  "modo": "cidade",
+  "nome": "Prefeitura de Flórida",
+  "cidade": "florida",
+  "candidatas": 0,
+  "melhor": null,
+  "atual": null,
+  "testes": []
+ },
+ {
+  "modo": "cidade",
+  "nome": "Prefeitura de Itaipulândia",
+  "cidade": "itaipulandia",
+  "candidatas": 0,
+  "melhor": null,
+  "atual": null,
+  "testes": []
+ },
+ {
+  "modo": "cidade",
+  "nome": "Prefeitura de Francisco Alves",
+  "cidade": "francisco-alves",
+  "candidatas": 0,
+  "melhor": null,
+  "atual": null,
+  "testes": []
+ },
+ {
+  "modo": "cidade",
+  "nome": "Prefeitura de Ibema",
+  "cidade": "ibema",
+  "candidatas": 0,
+  "melhor": null,
+  "atual": null,
+  "testes": []
+ },
+ {
+  "modo": "cidade",
+  "nome": "Prefeitura de Floresta",
+  "cidade": "floresta",
+  "candidatas": 0,
+  "melhor": null,
+  "atual": null,
+  "testes": []
+ },
+ {
+  "modo": "cidade",
+  "nome": "Prefeitura de Godoy Moreira",
+  "cidade": "godoy-moreira",
+  "candidatas": 0,
+  "melhor": null,
+  "atual": null,
+  "testes": []
+ },
+ {
+  "modo": "cidade",
+  "nome": "Prefeitura de Icaraíma",
+  "cidade": "icaraima",
+  "candidatas": 14,
+  "melhor": {
+   "url": "https://www.icaraima.pr.gov.br/noticia/565/dia-do-servidor-publico-28-10",
+   "itens": 1,
+   "com_data": 0,
+   "recentes": 0,
+   "futuras": 0,
+   "sem_data": 1,
+   "mais_recente": null,
+   "exemplos": [
+    {
+     "titulo": "Política Nacional Aldir Blanc de Fomento a Cultura",
+     "url": "https://icaraima.pr.gov.br/cultura",
+     "data": null
+    }
+   ],
+   "nota": -1
+  },
+  "atual": null,
+  "testes": [
+   {
+    "url": "https://www.icaraima.pr.gov.br/noticia/565/dia-do-servidor-publico-28-10",
+    "itens": 1,
+    "com_data": 0,
+    "recentes": 0,
+    "futuras": 0,
+    "sem_data": 1,
+    "mais_recente": null,
+    "exemplos": [
+     {
+      "titulo": "Política Nacional Aldir Blanc de Fomento a Cultura",
+      "url": "https://icaraima.pr.gov.br/cultura",
+      "data": null
+     }
+    ],
+    "nota": -1
+   },
+   {
+    "url": "https://www.icaraima.pr.gov.br/noticia/564/feriado-02-11",
+    "itens": 1,
+    "com_data": 0,
+    "recentes": 0,
+    "futuras": 0,
+    "sem_data": 1,
+    "mais_recente": null,
+    "exemplos": [
+     {
+      "titulo": "Política Nacional Aldir Blanc de Fomento a Cultura",
+      "url": "https://icaraima.pr.gov.br/cultura",
+      "data": null
+     }
+    ],
+    "nota": -1
+   },
+   {
+    "url": "https://www.icaraima.pr.gov.br/noticia/563/convite-capacitacao-primeiros-socorros-e-cuidado-humanizado",
+    "itens": 1,
+    "com_data": 0,
+    "recentes": 0,
+    "futuras": 0,
+    "sem_data": 1,
+    "mais_recente": null,
+    "exemplos": [
+     {
+      "titulo": "Política Nacional Aldir Blanc de Fomento a Cultura",
+      "url": "https://icaraima.pr.gov.br/cultura",
+      "data": null
+     }
+    ],
+    "nota": -1
+   },
+   {
+    "url": "https://www.icaraima.pr.gov.br/feed/",
+    "itens": 1,
+    "com_data": 0,
+    "recentes": 0,
+    "futuras": 0,
+    "sem_data": 1,
+    "mais_recente": null,
+    "exemplos": [
+     {
+      "titulo": "Política Nacional Aldir Blanc de Fomento a Cultura",
+      "url": "https://icaraima.pr.gov.br/cultura",
+      "data": null
+     }
+    ],
+    "nota": -1
+   }
+  ]
+ },
+ {
+  "modo": "cidade",
+  "nome": "Prefeitura de Fênix",
+  "cidade": "fenix",
+  "candidatas": 0,
+  "melhor": null,
+  "atual": null,
+  "testes": []
+ },
+ {
+  "modo": "cidade",
+  "nome": "Prefeitura de Guairaçá",
+  "cidade": "guairaca",
+  "candidatas": 0,
+  "melhor": null,
+  "atual": null,
+  "testes": []
+ },
+ {
+  "modo": "cidade",
+  "nome": "Prefeitura de Itaguajé",
+  "cidade": "itaguaje",
+  "candidatas": 11,
+  "melhor": null,
+  "atual": null,
+  "testes": []
+ },
+ {
+  "modo": "cidade",
+  "nome": "Prefeitura de Iguatu",
+  "cidade": "iguatu",
+  "candidatas": 0,
+  "melhor": null,
+  "atual": null,
+  "testes": []
+ },
+ {
+  "modo": "cidade",
+  "nome": "Prefeitura de Indianópolis",
+  "cidade": "indianopolis",
+  "candidatas": 0,
+  "melhor": null,
+  "atual": null,
+  "testes": []
+ },
+ {
+  "modo": "cidade",
+  "nome": "Prefeitura de Laranjeiras do Sul",
+  "cidade": "laranjeiras-do-sul",
+  "candidatas": 14,
+  "melhor": {
+   "url": "http://www.laranjeirasdosul.pr.gov.br/noticias.php",
+   "itens": 0,
+   "com_data": 0,
+   "recentes": 0,
+   "futuras": 0,
+   "sem_data": 0,
+   "mais_recente": null,
+   "exemplos": [],
+   "nota": 0
+  },
+  "atual": null,
+  "testes": [
+   {
+    "url": "http://www.laranjeirasdosul.pr.gov.br/noticias.php",
+    "itens": 0,
+    "com_data": 0,
+    "recentes": 0,
+    "futuras": 0,
+    "sem_data": 0,
+    "mais_recente": null,
+    "exemplos": [],
+    "nota": 0
+   },
+   {
+    "url": "http://www.laranjeirasdosul.pr.gov.br/exibe_noticia.php?id=2345",
+    "itens": 0,
+    "com_data": 0,
+    "recentes": 0,
+    "futuras": 0,
+    "sem_data": 0,
+    "mais_recente": null,
+    "exemplos": [],
+    "nota": 0
+   },
+   {
+    "url": "http://www.laranjeirasdosul.pr.gov.br/exibe_noticia.php?id=2344",
+    "itens": 0,
+    "com_data": 0,
+    "recentes": 0,
+    "futuras": 0,
+    "sem_data": 0,
+    "mais_recente": null,
+    "exemplos": [],
+    "nota": 0
+   },
+   {
+    "url": "http://www.laranjeirasdosul.pr.gov.br/exibe_noticia.php?id=2343",
+    "itens": 0,
+    "com_data": 0,
+    "recentes": 0,
+    "futuras": 0,
+    "sem_data": 0,
+    "mais_recente": null,
+    "exemplos": [],
+    "nota": 0
+   }
+  ]
+ },
+ {
+  "modo": "cidade",
+  "nome": "Prefeitura de Kaloré",
+  "cidade": "kalore",
+  "candidatas": 13,
+  "melhor": {
+   "url": "https://www.kalore.pr.gov.br/?meio=16029",
+   "itens": 1,
+   "com_data": 0,
+   "recentes": 0,
+   "futuras": 0,
+   "sem_data": 1,
+   "mais_recente": null,
+   "exemplos": [
+    {
+     "titulo": "Leis e Atos Regulam e organizam a vida em nossa cidade.",
+     "url": "https://kalore.eloweb.net/portaltransparencia/leiseatos-geral/geral",
+     "data": null
+    }
+   ],
+   "nota": -1
+  },
+  "atual": null,
+  "testes": [
+   {
+    "url": "https://www.kalore.pr.gov.br/?meio=16029",
+    "itens": 1,
+    "com_data": 0,
+    "recentes": 0,
+    "futuras": 0,
+    "sem_data": 1,
+    "mais_recente": null,
+    "exemplos": [
+     {
+      "titulo": "Leis e Atos Regulam e organizam a vida em nossa cidade.",
+      "url": "https://kalore.eloweb.net/portaltransparencia/leiseatos-geral/geral",
+      "data": null
+     }
+    ],
+    "nota": -1
+   },
+   {
+    "url": "https://www.kalore.pr.gov.br/?meio=16155",
+    "itens": 1,
+    "com_data": 0,
+    "recentes": 0,
+    "futuras": 0,
+    "sem_data": 1,
+    "mais_recente": null,
+    "exemplos": [
+     {
+      "titulo": "Leis e Atos Regulam e organizam a vida em nossa cidade.",
+      "url": "https://kalore.eloweb.net/portaltransparencia/leiseatos-geral/geral",
+      "data": null
+     }
+    ],
+    "nota": -1
+   }
+  ]
+ },
+ {
+  "modo": "cidade",
+  "nome": "Prefeitura de Guamiranga",
+  "cidade": "guamiranga",
+  "candidatas": 0,
+  "melhor": null,
+  "atual": null,
+  "testes": []
+ },
+ {
+  "modo": "cidade",
+  "nome": "Prefeitura de Imbituva",
+  "cidade": "imbituva",
+  "candidatas": 0,
+  "melhor": null,
+  "atual": null,
+  "testes": []
+ },
+ {
+  "modo": "cidade",
+  "nome": "Prefeitura de Iracema do Oeste",
+  "cidade": "iracema-do-oeste",
+  "candidatas": 0,
+  "melhor": null,
+  "atual": null,
+  "testes": []
+ },
+ {
+  "modo": "cidade",
+  "nome": "Prefeitura de Iretama",
+  "cidade": "iretama",
+  "candidatas": 0,
+  "melhor": null,
+  "atual": null,
+  "testes": []
+ },
+ {
+  "modo": "cidade",
+  "nome": "Prefeitura de Itambé",
+  "cidade": "itambe",
+  "candidatas": 0,
+  "melhor": null,
+  "atual": null,
+  "testes": []
+ },
+ {
+  "modo": "cidade",
+  "nome": "Prefeitura de Itaúna do Sul",
+  "cidade": "itauna-do-sul",
+  "candidatas": 0,
+  "melhor": null,
+  "atual": null,
+  "testes": []
+ },
+ {
+  "modo": "cidade",
+  "nome": "Prefeitura de Lobato",
+  "cidade": "lobato",
+  "candidatas": 12,
+  "melhor": {
+   "url": "https://www.lobato.pr.gov.br/?meio=171740",
+   "itens": 0,
+   "com_data": 0,
+   "recentes": 0,
+   "futuras": 0,
+   "sem_data": 0,
+   "mais_recente": null,
+   "exemplos": [],
+   "nota": 0
+  },
+  "atual": null,
+  "testes": [
+   {
+    "url": "https://www.lobato.pr.gov.br/?meio=171740",
+    "itens": 0,
+    "com_data": 0,
+    "recentes": 0,
+    "futuras": 0,
+    "sem_data": 0,
+    "mais_recente": null,
+    "exemplos": [],
+    "nota": 0
+   }
+  ]
+ },
+ {
+  "modo": "cidade",
+  "nome": "Prefeitura de Marumbi",
+  "cidade": "marumbi",
+  "candidatas": 12,
+  "melhor": {
+   "url": "https://www.marumbi.pr.gov.br/?meio=171469",
+   "itens": 0,
+   "com_data": 0,
+   "recentes": 0,
+   "futuras": 0,
+   "sem_data": 0,
+   "mais_recente": null,
+   "exemplos": [],
+   "nota": 0
+  },
+  "atual": null,
+  "testes": [
+   {
+    "url": "https://www.marumbi.pr.gov.br/?meio=171469",
+    "itens": 0,
+    "com_data": 0,
+    "recentes": 0,
+    "futuras": 0,
+    "sem_data": 0,
+    "mais_recente": null,
+    "exemplos": [],
+    "nota": 0
+   }
+  ]
+ },
+ {
+  "modo": "cidade",
+  "nome": "Prefeitura de Mato Rico",
+  "cidade": "mato-rico",
+  "candidatas": 14,
+  "melhor": {
+   "url": "https://www.matorico.pr.gov.br/noticia.php?s=unidade-de-apoio-rural-bela-vista-realiza-primeiro-encontro-do-grupo-hiperdia-23102026-141326",
+   "itens": 0,
+   "com_data": 0,
+   "recentes": 0,
+   "futuras": 0,
+   "sem_data": 0,
+   "mais_recente": null,
+   "exemplos": [],
+   "nota": 0
+  },
+  "atual": null,
+  "testes": [
+   {
+    "url": "https://www.matorico.pr.gov.br/noticia.php?s=unidade-de-apoio-rural-bela-vista-realiza-primeiro-encontro-do-grupo-hiperdia-23102026-141326",
+    "itens": 0,
+    "com_data": 0,
+    "recentes": 0,
+    "futuras": 0,
+    "sem_data": 0,
+    "mais_recente": null,
+    "exemplos": [],
+    "nota": 0
+   },
+   {
+    "url": "https://www.matorico.pr.gov.br/noticia.php?s=carreta-saude-da-mulher-realiza-atendimentos-em-mato-rico-e-beneficia-mulheres-de-toda-a-regiao-22102026-094945",
+    "itens": 0,
+    "com_data": 0,
+    "recentes": 0,
+    "futuras": 0,
+    "sem_data": 0,
+    "mais_recente": null,
+    "exemplos": [],
+    "nota": 0
+   },
+   {
+    "url": "https://www.matorico.pr.gov.br/noticia.php?s=mato-rico-promove-curso-de-artesanato-em-madeira-e-resina-epoxi-por-meio-da-lei-aldir-blanc-21102026-151758",
+    "itens": 0,
+    "com_data": 0,
+    "recentes": 0,
+    "futuras": 0,
+    "sem_data": 0,
+    "mais_recente": null,
+    "exemplos": [],
+    "nota": 0
+   }
+  ]
+ },
+ {
+  "modo": "cidade",
+  "nome": "Prefeitura de Ivaiporã",
+  "cidade": "ivaipora",
+  "candidatas": 0,
+  "melhor": null,
+  "atual": null,
+  "testes": []
+ },
+ {
+  "modo": "cidade",
+  "nome": "Prefeitura de Marquinho",
+  "cidade": "marquinho",
+  "candidatas": 14,
+  "melhor": {
+   "url": "https://www.marquinho.pr.gov.br/Noticias",
+   "itens": 0,
+   "com_data": 0,
+   "recentes": 0,
+   "futuras": 0,
+   "sem_data": 0,
+   "mais_recente": null,
+   "exemplos": [],
+   "nota": 0
+  },
+  "atual": null,
+  "testes": [
+   {
+    "url": "https://www.marquinho.pr.gov.br/Noticias",
+    "itens": 0,
+    "com_data": 0,
+    "recentes": 0,
+    "futuras": 0,
+    "sem_data": 0,
+    "mais_recente": null,
+    "exemplos": [],
+    "nota": 0
+   },
+   {
+    "url": "https://www.marquinho.pr.gov.br/Noticias?data=2467136260cbbfcd5ee790005e24ba65",
+    "itens": 0,
+    "com_data": 0,
+    "recentes": 0,
+    "futuras": 0,
+    "sem_data": 0,
+    "mais_recente": null,
+    "exemplos": [],
+    "nota": 0
+   },
+   {
+    "url": "https://www.marquinho.pr.gov.br/Noticias?data=bc1e8776e3fe414e20dffc9b4b97d630",
+    "itens": 0,
+    "com_data": 0,
+    "recentes": 0,
+    "futuras": 0,
+    "sem_data": 0,
+    "mais_recente": null,
+    "exemplos": [],
+    "nota": 0
+   },
+   {
+    "url": "https://www.marquinho.pr.gov.br/Noticias?data=38d5a7af0f6f5e655f6d4c1f3a758f55",
+    "itens": 0,
+    "com_data": 0,
+    "recentes": 0,
+    "futuras": 0,
+    "sem_data": 0,
+    "mais_recente": null,
+    "exemplos": [],
+    "nota": 0
+   }
+  ]
+ },
+ {
+  "modo": "cidade",
+  "nome": "Prefeitura de Ivatuba",
+  "cidade": "ivatuba",
+  "candidatas": 0,
+  "melhor": null,
+  "atual": null,
+  "testes": []
+ },
+ {
+  "modo": "cidade",
+  "nome": "Prefeitura de Nova Aliança do Ivaí",
+  "cidade": "nova-alianca-do-ivai",
+  "candidatas": 0,
+  "melhor": null,
+  "atual": null,
+  "testes": []
+ },
+ {
+  "modo": "cidade",
+  "nome": "Prefeitura de Mercedes",
+  "cidade": "mercedes",
+  "candidatas": 14,
+  "melhor": {
+   "url": "https://www.mercedes.pr.gov.br/noticias.php",
+   "itens": 0,
+   "com_data": 0,
+   "recentes": 0,
+   "futuras": 0,
+   "sem_data": 0,
+   "mais_recente": null,
+   "exemplos": [],
+   "nota": 0
+  },
+  "atual": null,
+  "testes": [
+   {
+    "url": "https://www.mercedes.pr.gov.br/noticias.php",
+    "itens": 0,
+    "com_data": 0,
+    "recentes": 0,
+    "futuras": 0,
+    "sem_data": 0,
+    "mais_recente": null,
+    "exemplos": [],
+    "nota": 0
+   },
+   {
+    "url": "https://www.mercedes.pr.gov.br/noticia.php?id=6146",
+    "itens": 0,
+    "com_data": 0,
+    "recentes": 0,
+    "futuras": 0,
+    "sem_data": 0,
+    "mais_recente": null,
+    "exemplos": [],
+    "nota": 0
+   },
+   {
+    "url": "https://www.mercedes.pr.gov.br/noticia.php?id=6145",
+    "itens": 0,
+    "com_data": 0,
+    "recentes": 0,
+    "futuras": 0,
+    "sem_data": 0,
+    "mais_recente": null,
+    "exemplos": [],
+    "nota": 0
+   },
+   {
+    "url": "https://www.mercedes.pr.gov.br/noticia.php?id=6144",
+    "itens": 0,
+    "com_data": 0,
+    "recentes": 0,
+    "futuras": 0,
+    "sem_data": 0,
+    "mais_recente": null,
+    "exemplos": [],
+    "nota": 0
+   }
+  ]
+ },
+ {
+  "modo": "cidade",
+  "nome": "Prefeitura de Jandaia do Sul",
+  "cidade": "jandaia-do-sul",
+  "candidatas": 0,
+  "melhor": null,
+  "atual": null,
+  "testes": []
+ },
+ {
+  "modo": "cidade",
+  "nome": "Prefeitura de Jataizinho",
+  "cidade": "jataizinho",
+  "candidatas": 0,
+  "melhor": null,
+  "atual": null,
+  "testes": []
+ },
+ {
+  "modo": "cidade",
+  "nome": "Prefeitura de Marmeleiro",
+  "cidade": "marmeleiro",
+  "candidatas": 14,
+  "melhor": {
+   "url": "https://www.marmeleiro.pr.gov.br/noticias.php",
+   "itens": 0,
+   "com_data": 0,
+   "recentes": 0,
+   "futuras": 0,
+   "sem_data": 0,
+   "mais_recente": null,
+   "exemplos": [],
+   "nota": 0
+  },
+  "atual": null,
+  "testes": [
+   {
+    "url": "https://www.marmeleiro.pr.gov.br/noticias.php",
+    "itens": 0,
+    "com_data": 0,
+    "recentes": 0,
+    "futuras": 0,
+    "sem_data": 0,
+    "mais_recente": null,
+    "exemplos": [],
+    "nota": 0
+   },
+   {
+    "url": "https://www.marmeleiro.pr.gov.br/noticia.php?notid=3979",
+    "itens": 0,
+    "com_data": 0,
+    "recentes": 0,
+    "futuras": 0,
+    "sem_data": 0,
+    "mais_recente": null,
+    "exemplos": [],
+    "nota": 0
+   },
+   {
+    "url": "https://www.marmeleiro.pr.gov.br/noticia.php?notid=3978",
+    "itens": 0,
+    "com_data": 0,
+    "recentes": 0,
+    "futuras": 0,
+    "sem_data": 0,
+    "mais_recente": null,
+    "exemplos": [],
+    "nota": 0
+   },
+   {
+    "url": "https://www.marmeleiro.pr.gov.br/noticia.php?notid=3977",
+    "itens": 0,
+    "com_data": 0,
+    "recentes": 0,
+    "futuras": 0,
+    "sem_data": 0,
+    "mais_recente": null,
+    "exemplos": [],
+    "nota": 0
+   }
+  ]
+ },
+ {
+  "modo": "cidade",
+  "nome": "Prefeitura de Jesuítas",
+  "cidade": "jesuitas",
+  "candidatas": 0,
+  "melhor": null,
+  "atual": null,
+  "testes": []
+ },
+ {
+  "modo": "cidade",
+  "nome": "Prefeitura de Nova Esperança do Sudoeste",
+  "cidade": "nova-esperanca-do-sudoeste",
+  "candidatas": 11,
+  "melhor": null,
+  "atual": null,
+  "testes": []
+ },
+ {
+  "modo": "cidade",
+  "nome": "Prefeitura de Miraselva",
+  "cidade": "miraselva",
+  "candidatas": 11,
+  "melhor": {
+   "url": "https://www.miraselva.pr.gov.br/noticias",
+   "itens": 0,
+   "com_data": 0,
+   "recentes": 0,
+   "futuras": 0,
+   "sem_data": 0,
+   "mais_recente": null,
+   "exemplos": [],
+   "nota": 0
+  },
+  "atual": null,
+  "testes": [
+   {
+    "url": "https://www.miraselva.pr.gov.br/noticias",
+    "itens": 0,
+    "com_data": 0,
+    "recentes": 0,
+    "futuras": 0,
+    "sem_data": 0,
+    "mais_recente": null,
+    "exemplos": [],
+    "nota": 0
+   },
+   {
+    "url": "https://www.miraselva.pr.gov.br/noticias/",
+    "itens": 0,
+    "com_data": 0,
+    "recentes": 0,
+    "futuras": 0,
+    "sem_data": 0,
+    "mais_recente": null,
+    "exemplos": [],
+    "nota": 0
+   },
+   {
+    "url": "https://www.miraselva.pr.gov.br/noticias_site",
+    "itens": 0,
+    "com_data": 0,
+    "recentes": 0,
+    "futuras": 0,
+    "sem_data": 0,
+    "mais_recente": null,
+    "exemplos": [],
+    "nota": 0
+   }
+  ]
+ },
+ {
+  "modo": "cidade",
+  "nome": "Prefeitura de Munhoz de Melo",
+  "cidade": "munhoz-de-melo",
+  "candidatas": 0,
+  "melhor": null,
+  "atual": null,
+  "testes": []
+ },
+ {
+  "modo": "cidade",
+  "nome": "Prefeitura de Nova Santa Bárbara",
+  "cidade": "nova-santa-barbara",
+  "candidatas": 0,
+  "melhor": null,
+  "atual": null,
+  "testes": []
+ },
+ {
+  "modo": "cidade",
+  "nome": "Prefeitura de Nova Laranjeiras",
+  "cidade": "nova-laranjeiras",
+  "candidatas": 13,
+  "melhor": {
+   "url": "https://www.novalaranjeiras.pr.gov.br/noticias.php",
+   "itens": 0,
+   "com_data": 0,
+   "recentes": 0,
+   "futuras": 0,
+   "sem_data": 0,
+   "mais_recente": null,
+   "exemplos": [],
+   "nota": 0
+  },
+  "atual": null,
+  "testes": [
+   {
+    "url": "https://www.novalaranjeiras.pr.gov.br/noticias.php",
+    "itens": 0,
+    "com_data": 0,
+    "recentes": 0,
+    "futuras": 0,
+    "sem_data": 0,
+    "mais_recente": null,
+    "exemplos": [],
+    "nota": 0
+   },
+   {
+    "url": "https://www.novalaranjeiras.pr.gov.br/noticias_infancia.php",
+    "itens": 0,
+    "com_data": 0,
+    "recentes": 0,
+    "futuras": 0,
+    "sem_data": 0,
+    "mais_recente": null,
+    "exemplos": [],
+    "nota": 0
+   }
+  ]
+ },
+ {
+  "modo": "cidade",
+  "nome": "Prefeitura de Medianeira",
+  "cidade": "medianeira",
+  "candidatas": 14,
+  "melhor": {
+   "url": "https://www.medianeira.pr.gov.br/?noticia=11724",
+   "itens": 0,
+   "com_data": 0,
+   "recentes": 0,
+   "futuras": 0,
+   "sem_data": 0,
+   "mais_recente": null,
+   "exemplos": [],
+   "nota": 0
+  },
+  "atual": null,
+  "testes": [
+   {
+    "url": "https://www.medianeira.pr.gov.br/?noticia=11724",
+    "itens": 0,
+    "com_data": 0,
+    "recentes": 0,
+    "futuras": 0,
+    "sem_data": 0,
+    "mais_recente": null,
+    "exemplos": [],
+    "nota": 0
+   },
+   {
+    "url": "https://www.medianeira.pr.gov.br/?noticia=11736",
+    "itens": 0,
+    "com_data": 0,
+    "recentes": 0,
+    "futuras": 0,
+    "sem_data": 0,
+    "mais_recente": null,
+    "exemplos": [],
+    "nota": 0
+   },
+   {
+    "url": "https://www.medianeira.pr.gov.br/?noticia=11735",
+    "itens": 0,
+    "com_data": 0,
+    "recentes": 0,
+    "futuras": 0,
+    "sem_data": 0,
+    "mais_recente": null,
+    "exemplos": [],
+    "nota": 0
+   },
+   {
+    "url": "https://www.medianeira.pr.gov.br/?noticia=11734",
+    "itens": 0,
+    "com_data": 0,
+    "recentes": 0,
+    "futuras": 0,
+    "sem_data": 0,
+    "mais_recente": null,
+    "exemplos": [],
+    "nota": 0
+   }
+  ]
+ },
+ {
+  "modo": "cidade",
+  "nome": "Prefeitura de Nova Londrina",
+  "cidade": "nova-londrina",
+  "candidatas": 11,
+  "melhor": {
+   "url": "https://www.novalondrina.pr.gov.br/noticias",
+   "itens": 0,
+   "com_data": 0,
+   "recentes": 0,
+   "futuras": 0,
+   "sem_data": 0,
+   "mais_recente": null,
+   "exemplos": [],
+   "nota": 0
+  },
+  "atual": null,
+  "testes": [
+   {
+    "url": "https://www.novalondrina.pr.gov.br/noticias",
+    "itens": 0,
+    "com_data": 0,
+    "recentes": 0,
+    "futuras": 0,
+    "sem_data": 0,
+    "mais_recente": null,
+    "exemplos": [],
+    "nota": 0
+   },
+   {
+    "url": "https://www.novalondrina.pr.gov.br/noticias/",
+    "itens": 0,
+    "com_data": 0,
+    "recentes": 0,
+    "futuras": 0,
+    "sem_data": 0,
+    "mais_recente": null,
+    "exemplos": [],
+    "nota": 0
+   },
+   {
+    "url": "https://www.novalondrina.pr.gov.br/noticias_site",
+    "itens": 0,
+    "com_data": 0,
+    "recentes": 0,
+    "futuras": 0,
+    "sem_data": 0,
+    "mais_recente": null,
+    "exemplos": [],
+    "nota": 0
+   }
+  ]
+ },
+ {
+  "modo": "cidade",
+  "nome": "Prefeitura de Leópolis",
+  "cidade": "leopolis",
+  "candidatas": 0,
+  "melhor": null,
+  "atual": null,
+  "testes": []
+ },
+ {
+  "modo": "cidade",
+  "nome": "Prefeitura de Manoel Ribas",
+  "cidade": "manoel-ribas",
+  "candidatas": 0,
+  "melhor": null,
+  "atual": null,
+  "testes": []
+ },
+ {
+  "modo": "cidade",
+  "nome": "Prefeitura de Palmas",
+  "cidade": "palmas",
+  "candidatas": 11,
+  "melhor": {
+   "url": "https://palmas.pmp.pr.gov.br/feed/",
+   "itens": 0,
+   "com_data": 0,
+   "recentes": 0,
+   "futuras": 0,
+   "sem_data": 0,
+   "mais_recente": null,
+   "exemplos": [],
+   "nota": 0
+  },
+  "atual": null,
+  "testes": [
+   {
+    "url": "https://palmas.pmp.pr.gov.br/feed/",
+    "itens": 0,
+    "com_data": 0,
+    "recentes": 0,
+    "futuras": 0,
+    "sem_data": 0,
+    "mais_recente": null,
+    "exemplos": [],
+    "nota": 0
+   },
+   {
+    "url": "https://palmas.pmp.pr.gov.br/noticias",
+    "itens": 0,
+    "com_data": 0,
+    "recentes": 0,
+    "futuras": 0,
+    "sem_data": 0,
+    "mais_recente": null,
+    "exemplos": [],
+    "nota": 0
+   },
+   {
+    "url": "https://palmas.pmp.pr.gov.br/noticias/",
+    "itens": 0,
+    "com_data": 0,
+    "recentes": 0,
+    "futuras": 0,
+    "sem_data": 0,
+    "mais_recente": null,
+    "exemplos": [],
+    "nota": 0
+   },
+   {
+    "url": "https://palmas.pmp.pr.gov.br/noticia",
+    "itens": 0,
+    "com_data": 0,
+    "recentes": 0,
+    "futuras": 0,
+    "sem_data": 0,
+    "mais_recente": null,
+    "exemplos": [],
+    "nota": 0
+   }
+  ]
+ },
+ {
+  "modo": "cidade",
+  "nome": "Prefeitura de Lunardelli",
+  "cidade": "lunardelli",
+  "candidatas": 0,
+  "melhor": null,
+  "atual": null,
+  "testes": []
+ },
+ {
+  "modo": "fonte",
+  "id": "348d018a-49aa-419a-a0fb-9743d47a601e",
+  "nome": "Prefeitura de Capanema",
+  "cidade": "capanema",
+  "url": "https://www.capanema.pr.gov.br/noticias",
+  "erro": "tempo esgotado"
+ },
+ {
+  "modo": "cidade",
+  "nome": "Prefeitura de Peabiru",
+  "cidade": "peabiru",
+  "candidatas": 12,
+  "melhor": {
+   "url": "https://peabiru.pr.gov.br/?meio=171403",
+   "itens": 0,
+   "com_data": 0,
+   "recentes": 0,
+   "futuras": 0,
+   "sem_data": 0,
+   "mais_recente": null,
+   "exemplos": [],
+   "nota": 0
+  },
+  "atual": null,
+  "testes": [
+   {
+    "url": "https://peabiru.pr.gov.br/?meio=171403",
+    "itens": 0,
+    "com_data": 0,
+    "recentes": 0,
+    "futuras": 0,
+    "sem_data": 0,
+    "mais_recente": null,
+    "exemplos": [],
+    "nota": 0
+   }
+  ]
+ },
+ {
+  "modo": "cidade",
+  "nome": "Prefeitura de Planaltina do Paraná",
+  "cidade": "planaltina-do-parana",
+  "candidatas": 11,
+  "melhor": null,
+  "atual": null,
+  "testes": []
+ },
+ {
+  "modo": "cidade",
+  "nome": "Prefeitura de Lindoeste",
+  "cidade": "lindoeste",
+  "candidatas": 0,
+  "melhor": null,
+  "atual": null,
+  "testes": []
+ },
+ {
+  "modo": "cidade",
+  "nome": "Prefeitura de Mandaguari",
+  "cidade": "mandaguari",
+  "candidatas": 0,
+  "melhor": null,
+  "atual": null,
+  "testes": []
+ },
+ {
+  "modo": "cidade",
+  "nome": "Prefeitura de Novo Itacolomi",
+  "cidade": "novo-itacolomi",
+  "candidatas": 13,
+  "melhor": {
+   "url": "https://novoitacolomi.pr.gov.br/portal/?cat=15",
+   "itens": 0,
+   "com_data": 0,
+   "recentes": 0,
+   "futuras": 0,
+   "sem_data": 0,
+   "mais_recente": null,
+   "exemplos": [],
+   "nota": 0
+  },
+  "atual": null,
+  "testes": [
+   {
+    "url": "https://novoitacolomi.pr.gov.br/portal/?cat=15",
+    "itens": 0,
+    "com_data": 0,
+    "recentes": 0,
+    "futuras": 0,
+    "sem_data": 0,
+    "mais_recente": null,
+    "exemplos": [],
+    "nota": 0
+   }
+  ]
+ },
+ {
+  "modo": "cidade",
+  "nome": "Prefeitura de Marialva",
+  "cidade": "marialva",
+  "candidatas": 0,
+  "melhor": null,
+  "atual": null,
+  "testes": []
+ },
+ {
+  "modo": "cidade",
+  "nome": "Prefeitura de Pérola d'Oeste",
+  "cidade": "perola-d-oeste",
+  "candidatas": 0,
+  "melhor": null,
+  "atual": null,
+  "testes": []
+ },
+ {
+  "modo": "cidade",
+  "nome": "Prefeitura de Mirador",
+  "cidade": "mirador",
+  "candidatas": 0,
+  "melhor": null,
+  "atual": null,
+  "testes": []
+ },
+ {
+  "modo": "cidade",
+  "nome": "Prefeitura de Pinhal de São Bento",
+  "cidade": "pinhal-de-sao-bento",
+  "candidatas": 13,
+  "melhor": {
+   "url": "https://www.pinhaldesaobento.pr.gov.br/portal/servicos/1033/imprensa/",
+   "itens": 0,
+   "com_data": 0,
+   "recentes": 0,
+   "futuras": 0,
+   "sem_data": 0,
+   "mais_recente": null,
+   "exemplos": [],
+   "nota": 0
+  },
+  "atual": null,
+  "testes": [
+   {
+    "url": "https://www.pinhaldesaobento.pr.gov.br/portal/servicos/1033/imprensa/",
+    "itens": 0,
+    "com_data": 0,
+    "recentes": 0,
+    "futuras": 0,
+    "sem_data": 0,
+    "mais_recente": null,
+    "exemplos": [],
+    "nota": 0
+   },
+   {
+    "url": "https://www.pinhaldesaobento.pr.gov.br/portal/noticias/3",
+    "itens": 0,
+    "com_data": 0,
+    "recentes": 0,
+    "futuras": 0,
+    "sem_data": 0,
+    "mais_recente": null,
+    "exemplos": [],
+    "nota": 0
+   },
+   {
+    "url": "https://www.pinhaldesaobento.pr.gov.br/portal/noticias",
+    "itens": 0,
+    "com_data": 0,
+    "recentes": 0,
+    "futuras": 0,
+    "sem_data": 0,
+    "mais_recente": null,
+    "exemplos": [],
+    "nota": 0
+   }
+  ]
+ },
+ {
+  "modo": "cidade",
+  "nome": "Prefeitura de Ourizona",
+  "cidade": "ourizona",
+  "candidatas": 0,
+  "melhor": null,
+  "atual": null,
+  "testes": []
+ },
+ {
+  "modo": "cidade",
+  "nome": "Prefeitura de Nova Tebas",
+  "cidade": "nova-tebas",
+  "candidatas": 0,
+  "melhor": null,
+  "atual": null,
+  "testes": []
+ },
+ {
+  "modo": "cidade",
+  "nome": "Prefeitura de Nova América da Colina",
+  "cidade": "nova-america-da-colina",
+  "candidatas": 0,
+  "melhor": null,
+  "atual": null,
+  "testes": []
+ },
+ {
+  "modo": "cidade",
+  "nome": "Prefeitura de Nova Aurora",
+  "cidade": "nova-aurora",
+  "candidatas": 0,
+  "melhor": null,
+  "atual": null,
+  "testes": []
+ },
+ {
+  "modo": "cidade",
+  "nome": "Prefeitura de Ortigueira",
+  "cidade": "ortigueira",
+  "candidatas": 0,
+  "melhor": null,
+  "atual": null,
+  "testes": []
+ },
+ {
+  "modo": "cidade",
+  "nome": "Prefeitura de Paiçandu",
+  "cidade": "paicandu",
+  "candidatas": 0,
+  "melhor": null,
+  "atual": null,
+  "testes": []
+ },
+ {
+  "modo": "cidade",
+  "nome": "Prefeitura de Rio Bonito do Iguaçu",
+  "cidade": "rio-bonito-do-iguacu",
+  "candidatas": 11,
+  "melhor": {
+   "url": "https://riobonito.pr.gov.br/feed/",
+   "itens": 0,
+   "com_data": 0,
+   "recentes": 0,
+   "futuras": 0,
+   "sem_data": 0,
+   "mais_recente": null,
+   "exemplos": [],
+   "nota": 0
+  },
+  "atual": null,
+  "testes": [
+   {
+    "url": "https://riobonito.pr.gov.br/feed/",
+    "itens": 0,
+    "com_data": 0,
+    "recentes": 0,
+    "futuras": 0,
+    "sem_data": 0,
+    "mais_recente": null,
+    "exemplos": [],
+    "nota": 0
+   },
+   {
+    "url": "https://riobonito.pr.gov.br/noticias",
+    "itens": 0,
+    "com_data": 0,
+    "recentes": 0,
+    "futuras": 0,
+    "sem_data": 0,
+    "mais_recente": null,
+    "exemplos": [],
+    "nota": 0
+   },
+   {
+    "url": "https://riobonito.pr.gov.br/noticias/",
+    "itens": 0,
+    "com_data": 0,
+    "recentes": 0,
+    "futuras": 0,
+    "sem_data": 0,
+    "mais_recente": null,
+    "exemplos": [],
+    "nota": 0
+   },
+   {
+    "url": "https://riobonito.pr.gov.br/noticia",
+    "itens": 0,
+    "com_data": 0,
+    "recentes": 0,
+    "futuras": 0,
+    "sem_data": 0,
+    "mais_recente": null,
+    "exemplos": [],
+    "nota": 0
+   }
+  ]
+ },
+ {
+  "modo": "cidade",
+  "nome": "Prefeitura de Primeiro de Maio",
+  "cidade": "primeiro-de-maio",
+  "candidatas": 12,
+  "melhor": {
+   "url": "https://www.primeirodemaio.pr.gov.br/portal/noticias/3",
+   "itens": 0,
+   "com_data": 0,
+   "recentes": 0,
+   "futuras": 0,
+   "sem_data": 0,
+   "mais_recente": null,
+   "exemplos": [],
+   "nota": 0
+  },
+  "atual": null,
+  "testes": [
+   {
+    "url": "https://www.primeirodemaio.pr.gov.br/portal/noticias/3",
+    "itens": 0,
+    "com_data": 0,
+    "recentes": 0,
+    "futuras": 0,
+    "sem_data": 0,
+    "mais_recente": null,
+    "exemplos": [],
+    "nota": 0
+   },
+   {
+    "url": "https://www.primeirodemaio.pr.gov.br/portal/noticias",
+    "itens": 0,
+    "com_data": 0,
+    "recentes": 0,
+    "futuras": 0,
+    "sem_data": 0,
+    "mais_recente": null,
+    "exemplos": [],
+    "nota": 0
+   }
+  ]
+ },
+ {
+  "modo": "cidade",
+  "nome": "Prefeitura de Paranapoema",
+  "cidade": "paranapoema",
+  "candidatas": 11,
+  "melhor": {
+   "url": "https://www.paranapoema.pr.gov.br/feed/",
+   "itens": 1,
+   "com_data": 0,
+   "recentes": 0,
+   "futuras": 0,
+   "sem_data": 1,
+   "mais_recente": null,
+   "exemplos": [
+    {
+     "titulo": "Lei de Acesso a Informação",
+     "url": "https://www.planalto.gov.br/ccivil_03/_ato2011-2014/2011/lei/l12527.htm",
+     "data": null
+    }
+   ],
+   "nota": -1
+  },
+  "atual": null,
+  "testes": [
+   {
+    "url": "https://www.paranapoema.pr.gov.br/feed/",
+    "itens": 1,
+    "com_data": 0,
+    "recentes": 0,
+    "futuras": 0,
+    "sem_data": 1,
+    "mais_recente": null,
+    "exemplos": [
+     {
+      "titulo": "Lei de Acesso a Informação",
+      "url": "https://www.planalto.gov.br/ccivil_03/_ato2011-2014/2011/lei/l12527.htm",
+      "data": null
+     }
+    ],
+    "nota": -1
+   },
+   {
+    "url": "https://www.paranapoema.pr.gov.br/noticias",
+    "itens": 1,
+    "com_data": 0,
+    "recentes": 0,
+    "futuras": 0,
+    "sem_data": 1,
+    "mais_recente": null,
+    "exemplos": [
+     {
+      "titulo": "Lei de Acesso a Informação",
+      "url": "https://www.planalto.gov.br/ccivil_03/_ato2011-2014/2011/lei/l12527.htm",
+      "data": null
+     }
+    ],
+    "nota": -1
+   },
+   {
+    "url": "https://www.paranapoema.pr.gov.br/noticias/",
+    "itens": 1,
+    "com_data": 0,
+    "recentes": 0,
+    "futuras": 0,
+    "sem_data": 1,
+    "mais_recente": null,
+    "exemplos": [
+     {
+      "titulo": "Lei de Acesso a Informação",
+      "url": "https://www.planalto.gov.br/ccivil_03/_ato2011-2014/2011/lei/l12527.htm",
+      "data": null
+     }
+    ],
+    "nota": -1
+   },
+   {
+    "url": "https://www.paranapoema.pr.gov.br/noticia",
+    "itens": 1,
+    "com_data": 0,
+    "recentes": 0,
+    "futuras": 0,
+    "sem_data": 1,
+    "mais_recente": null,
+    "exemplos": [
+     {
+      "titulo": "Lei de Acesso a Informação",
+      "url": "https://www.planalto.gov.br/ccivil_03/_ato2011-2014/2011/lei/l12527.htm",
+      "data": null
+     }
+    ],
+    "nota": -1
+   }
+  ]
+ },
+ {
+  "modo": "cidade",
+  "nome": "Prefeitura de Quitandinha",
+  "cidade": "quitandinha",
+  "candidatas": 11,
+  "melhor": {
+   "url": "https://www.quitandinha.pr.gov.br/noticias",
+   "itens": 0,
+   "com_data": 0,
+   "recentes": 0,
+   "futuras": 0,
+   "sem_data": 0,
+   "mais_recente": null,
+   "exemplos": [],
+   "nota": 0
+  },
+  "atual": null,
+  "testes": [
+   {
+    "url": "https://www.quitandinha.pr.gov.br/noticias",
+    "itens": 0,
+    "com_data": 0,
+    "recentes": 0,
+    "futuras": 0,
+    "sem_data": 0,
+    "mais_recente": null,
+    "exemplos": [],
+    "nota": 0
+   },
+   {
+    "url": "https://www.quitandinha.pr.gov.br/noticias/",
+    "itens": 0,
+    "com_data": 0,
+    "recentes": 0,
+    "futuras": 0,
+    "sem_data": 0,
+    "mais_recente": null,
+    "exemplos": [],
+    "nota": 0
+   },
+   {
+    "url": "https://www.quitandinha.pr.gov.br/portal/noticias",
+    "itens": 0,
+    "com_data": 0,
+    "recentes": 0,
+    "futuras": 0,
+    "sem_data": 0,
+    "mais_recente": null,
+    "exemplos": [],
+    "nota": 0
+   }
+  ]
+ },
+ {
+  "modo": "cidade",
+  "nome": "Prefeitura de Perobal",
+  "cidade": "perobal",
+  "candidatas": 0,
+  "melhor": null,
+  "atual": null,
+  "testes": []
+ },
+ {
+  "modo": "cidade",
+  "nome": "Prefeitura de Pitangueiras",
+  "cidade": "pitangueiras",
+  "candidatas": 0,
+  "melhor": null,
+  "atual": null,
+  "testes": []
+ },
+ {
+  "modo": "cidade",
+  "nome": "Prefeitura de Santa Isabel do Ivaí",
+  "cidade": "santa-isabel-do-ivai",
+  "candidatas": 12,
+  "melhor": {
+   "url": "https://www.santaisabeldoivai.pr.gov.br/?meio=171329",
+   "itens": 0,
+   "com_data": 0,
+   "recentes": 0,
+   "futuras": 0,
+   "sem_data": 0,
+   "mais_recente": null,
+   "exemplos": [],
+   "nota": 0
+  },
+  "atual": null,
+  "testes": [
+   {
+    "url": "https://www.santaisabeldoivai.pr.gov.br/?meio=171329",
+    "itens": 0,
+    "com_data": 0,
+    "recentes": 0,
+    "futuras": 0,
+    "sem_data": 0,
+    "mais_recente": null,
+    "exemplos": [],
+    "nota": 0
+   }
+  ]
+ },
+ {
+  "modo": "cidade",
+  "nome": "Prefeitura de Pontal do Paraná",
+  "cidade": "pontal-do-parana",
+  "candidatas": 0,
+  "melhor": null,
+  "atual": null,
+  "testes": []
+ },
+ {
+  "modo": "cidade",
+  "nome": "Prefeitura de Santa Tereza do Oeste",
+  "cidade": "santa-tereza-do-oeste",
+  "candidatas": 11,
+  "melhor": {
+   "url": "https://www.santatereza.pr.gov.br/noticias",
+   "itens": 30,
+   "com_data": 6,
+   "recentes": 3,
+   "futuras": 0,
+   "sem_data": 0,
+   "mais_recente": "2026-10-27T15:00:00.000Z",
+   "exemplos": [
+    {
+     "titulo": "SECRETARIA DE CULTURA E TURISMO Dia das Crianças Publicado em: 10/04/2018 -->",
+     "url": "https://www.santatereza.pr.gov.br/noticiasView/1954_Dia-das-Criancas.html",
+     "data": "2026-10-27T15:00:00.000Z"
+    },
+    {
+     "titulo": "SECRETARIA DE ADMINISTRAÇÃO SANTA TEREZA DO OESTE EM TRANSFORMAÇÃO! Publicado em: 10/04/20",
+     "url": "https://www.santatereza.pr.gov.br/noticiasView/1953_SANTA-TEREZA-DO-OESTE-EM-TRANSFORMACAO.html",
+     "data": "2026-10-27T15:00:00.000Z"
+    },
+    {
+     "titulo": "SECRETARIA DE ADMINISTRAÇÃO 13ª Festa do Peão de Santa Tereza do Oeste Publicado em: 10/04",
+     "url": "https://www.santatereza.pr.gov.br/noticiasView/1952_13-Festa-do-Peao-de-Santa-Tereza-do-Oeste.html",
+     "data": "2026-10-27T15:00:00.000Z"
+    },
+    {
+     "titulo": "SECRETARIA DE PLANEJAMENTO Prefeitura investe na construção de creche para ampliar o atend",
+     "url": "https://www.santatereza.pr.gov.br/noticiasView/1951_Prefeitura-investe-na-construcao-de-creche-para-ampliar-o-atendimento-a-educacao-infantil-na-Vila-Canario-.html",
+     "data": "2026-10-14T15:00:00.000Z"
+    },
+    {
+     "titulo": "SECRETARIA DE PLANEJAMENTO As obras do Parque Natural Algenir Antônio Renosto seguem avanç",
+     "url": "https://www.santatereza.pr.gov.br/noticiasView/1950_As-obras-do-Parque-Natural-Algenir-Antonio-Renosto-seguem-avancando-em-Santa-Tereza-do-Oeste.html",
+     "data": "2026-10-14T15:00:00.000Z"
+    },
+    {
+     "titulo": "SECRETARIA DE CULTURA E TURISMO Rainha do Rodeio - 13ª Festa do Peão de Santa Tereza do Oe",
+     "url": "https://www.santatereza.pr.gov.br/noticiasView/1949_Rainha-do-Rodeio-13-Festa-do-Peao-de-Santa-Tereza-do-Oeste.html",
+     "data": "2026-09-21T15:00:00.000Z"
+    }
+   ],
+   "nota": 46
+  },
+  "atual": null,
+  "testes": [
+   {
+    "url": "https://www.santatereza.pr.gov.br/noticias",
+    "itens": 30,
+    "com_data": 6,
+    "recentes": 3,
+    "futuras": 0,
+    "sem_data": 0,
+    "mais_recente": "2026-10-27T15:00:00.000Z",
+    "exemplos": [
+     {
+      "titulo": "SECRETARIA DE CULTURA E TURISMO Dia das Crianças Publicado em: 10/04/2018 -->",
+      "url": "https://www.santatereza.pr.gov.br/noticiasView/1954_Dia-das-Criancas.html",
+      "data": "2026-10-27T15:00:00.000Z"
+     },
+     {
+      "titulo": "SECRETARIA DE ADMINISTRAÇÃO SANTA TEREZA DO OESTE EM TRANSFORMAÇÃO! Publicado em: 10/04/20",
+      "url": "https://www.santatereza.pr.gov.br/noticiasView/1953_SANTA-TEREZA-DO-OESTE-EM-TRANSFORMACAO.html",
+      "data": "2026-10-27T15:00:00.000Z"
+     },
+     {
+      "titulo": "SECRETARIA DE ADMINISTRAÇÃO 13ª Festa do Peão de Santa Tereza do Oeste Publicado em: 10/04",
+      "url": "https://www.santatereza.pr.gov.br/noticiasView/1952_13-Festa-do-Peao-de-Santa-Tereza-do-Oeste.html",
+      "data": "2026-10-27T15:00:00.000Z"
+     },
+     {
+      "titulo": "SECRETARIA DE PLANEJAMENTO Prefeitura investe na construção de creche para ampliar o atend",
+      "url": "https://www.santatereza.pr.gov.br/noticiasView/1951_Prefeitura-investe-na-construcao-de-creche-para-ampliar-o-atendimento-a-educacao-infantil-na-Vila-Canario-.html",
+      "data": "2026-10-14T15:00:00.000Z"
+     },
+     {
+      "titulo": "SECRETARIA DE PLANEJAMENTO As obras do Parque Natural Algenir Antônio Renosto seguem avanç",
+      "url": "https://www.santatereza.pr.gov.br/noticiasView/1950_As-obras-do-Parque-Natural-Algenir-Antonio-Renosto-seguem-avancando-em-Santa-Tereza-do-Oeste.html",
+      "data": "2026-10-14T15:00:00.000Z"
+     },
+     {
+      "titulo": "SECRETARIA DE CULTURA E TURISMO Rainha do Rodeio - 13ª Festa do Peão de Santa Tereza do Oe",
+      "url": "https://www.santatereza.pr.gov.br/noticiasView/1949_Rainha-do-Rodeio-13-Festa-do-Peao-de-Santa-Tereza-do-Oeste.html",
+      "data": "2026-09-21T15:00:00.000Z"
+     }
+    ],
+    "nota": 46
+   }
+  ]
+ },
+ {
+  "modo": "cidade",
+  "nome": "Prefeitura de Santo Antônio do Caiuá",
+  "cidade": "santo-antonio-do-caiua",
+  "candidatas": 0,
+  "melhor": null,
+  "atual": null,
+  "testes": []
+ },
+ {
+  "modo": "cidade",
+  "nome": "Prefeitura de Porto Rico",
+  "cidade": "porto-rico",
+  "candidatas": 0,
+  "melhor": null,
+  "atual": null,
+  "testes": []
+ },
+ {
+  "modo": "cidade",
+  "nome": "Prefeitura de Prado Ferreira",
+  "cidade": "prado-ferreira",
+  "candidatas": 0,
+  "melhor": null,
+  "atual": null,
+  "testes": []
+ },
+ {
+  "modo": "cidade",
+  "nome": "Prefeitura de Realeza",
+  "cidade": "realeza",
+  "candidatas": 11,
+  "melhor": {
+   "url": "http://www.realeza.pr.gov.br/feed/",
+   "itens": 0,
+   "com_data": 0,
+   "recentes": 0,
+   "futuras": 0,
+   "sem_data": 0,
+   "mais_recente": null,
+   "exemplos": [],
+   "nota": 0
+  },
+  "atual": null,
+  "testes": [
+   {
+    "url": "http://www.realeza.pr.gov.br/feed/",
+    "itens": 0,
+    "com_data": 0,
+    "recentes": 0,
+    "futuras": 0,
+    "sem_data": 0,
+    "mais_recente": null,
+    "exemplos": [],
+    "nota": 0
+   },
+   {
+    "url": "http://www.realeza.pr.gov.br/noticias",
+    "itens": 0,
+    "com_data": 0,
+    "recentes": 0,
+    "futuras": 0,
+    "sem_data": 0,
+    "mais_recente": null,
+    "exemplos": [],
+    "nota": 0
+   },
+   {
+    "url": "http://www.realeza.pr.gov.br/noticias/",
+    "itens": 0,
+    "com_data": 0,
+    "recentes": 0,
+    "futuras": 0,
+    "sem_data": 0,
+    "mais_recente": null,
+    "exemplos": [],
+    "nota": 0
+   },
+   {
+    "url": "http://www.realeza.pr.gov.br/noticia",
+    "itens": 0,
+    "com_data": 0,
+    "recentes": 0,
+    "futuras": 0,
+    "sem_data": 0,
+    "mais_recente": null,
+    "exemplos": [],
+    "nota": 0
+   }
+  ]
+ },
+ {
+  "modo": "cidade",
+  "nome": "Prefeitura de Santa Terezinha de Itaipu",
+  "cidade": "santa-terezinha-de-itaipu",
+  "candidatas": 11,
+  "melhor": {
+   "url": "https://www.stitaipu.pr.gov.br/feed/",
+   "itens": 7,
+   "com_data": 6,
+   "recentes": 6,
+   "futuras": 0,
+   "sem_data": 0,
+   "mais_recente": "2026-10-28T15:00:00.000Z",
+   "exemplos": [
+    {
+     "titulo": ". 24 . 28 de Outubro de 2026 Meio Ambiente e Agricultura . Reunião técnica discute elabora",
+     "url": "https://www.stitaipu.pr.gov.br/noticia/3645/reuniao-tecnica-discute-elaboracao-do-plano-de-educacao-e-comunicacao-ambiental/",
+     "data": "2026-10-28T15:00:00.000Z"
+    },
+    {
+     "titulo": ". 34 . 28 de Outubro de 2026 Educação . Escola Olímpio Spricigo recebe sala-piloto do Meta",
+     "url": "https://www.stitaipu.pr.gov.br/noticia/3644/escola-olimpio-spricigo-recebe-sala-piloto-do-metaverso-educacional/",
+     "data": "2026-10-28T15:00:00.000Z"
+    },
+    {
+     "titulo": ". 64 . 27 de Outubro de 2026 Educação . Teatro leva educação financeira, cooperação e sust",
+     "url": "https://www.stitaipu.pr.gov.br/noticia/3643/teatro-leva-educacao-financeira-cooperacao-e-sustentabilidade-a-alunos-da-rede-municipal/",
+     "data": "2026-10-27T15:00:00.000Z"
+    },
+    {
+     "titulo": ". 169 . 26 de Outubro de 2026 Administração . Emissão de notas fiscais terá novo sistema e",
+     "url": "https://www.stitaipu.pr.gov.br/noticia/3642/emissao-de-notas-fiscais-tera-novo-sistema-em-santa-terezinha-de-itaipu/",
+     "data": "2026-10-26T15:00:00.000Z"
+    },
+    {
+     "titulo": ". 355 . 23 de Outubro de 2026 Fundo Social de Solidariedade . Moradores de áreas atingidas",
+     "url": "https://www.stitaipu.pr.gov.br/noticia/3641/moradores-de-areas-atingidas-por-tempestades-podem-solicitar-saque-do-fgts-por-calamidade/",
+     "data": "2026-10-23T15:00:00.000Z"
+    },
+    {
+     "titulo": ". 377 . 22 de Outubro de 2026 Cultura . Selecionados pela PNAB assinam termos para execuçã",
+     "url": "https://www.stitaipu.pr.gov.br/noticia/3640/selecionados-pela-pnab-assinam-termos-para-execucao-de-projetos-culturais/",
+     "data": "2026-10-22T15:00:00.000Z"
+    }
+   ],
+   "nota": 61
+  },
+  "atual": null,
+  "testes": [
+   {
+    "url": "https://www.stitaipu.pr.gov.br/feed/",
+    "itens": 7,
+    "com_data": 6,
+    "recentes": 6,
+    "futuras": 0,
+    "sem_data": 0,
+    "mais_recente": "2026-10-28T15:00:00.000Z",
+    "exemplos": [
+     {
+      "titulo": ". 24 . 28 de Outubro de 2026 Meio Ambiente e Agricultura . Reunião técnica discute elabora",
+      "url": "https://www.stitaipu.pr.gov.br/noticia/3645/reuniao-tecnica-discute-elaboracao-do-plano-de-educacao-e-comunicacao-ambiental/",
+      "data": "2026-10-28T15:00:00.000Z"
+     },
+     {
+      "titulo": ". 34 . 28 de Outubro de 2026 Educação . Escola Olímpio Spricigo recebe sala-piloto do Meta",
+      "url": "https://www.stitaipu.pr.gov.br/noticia/3644/escola-olimpio-spricigo-recebe-sala-piloto-do-metaverso-educacional/",
+      "data": "2026-10-28T15:00:00.000Z"
+     },
+     {
+      "titulo": ". 64 . 27 de Outubro de 2026 Educação . Teatro leva educação financeira, cooperação e sust",
+      "url": "https://www.stitaipu.pr.gov.br/noticia/3643/teatro-leva-educacao-financeira-cooperacao-e-sustentabilidade-a-alunos-da-rede-municipal/",
+      "data": "2026-10-27T15:00:00.000Z"
+     },
+     {
+      "titulo": ". 169 . 26 de Outubro de 2026 Administração . Emissão de notas fiscais terá novo sistema e",
+      "url": "https://www.stitaipu.pr.gov.br/noticia/3642/emissao-de-notas-fiscais-tera-novo-sistema-em-santa-terezinha-de-itaipu/",
+      "data": "2026-10-26T15:00:00.000Z"
+     },
+     {
+      "titulo": ". 355 . 23 de Outubro de 2026 Fundo Social de Solidariedade . Moradores de áreas atingidas",
+      "url": "https://www.stitaipu.pr.gov.br/noticia/3641/moradores-de-areas-atingidas-por-tempestades-podem-solicitar-saque-do-fgts-por-calamidade/",
+      "data": "2026-10-23T15:00:00.000Z"
+     },
+     {
+      "titulo": ". 377 . 22 de Outubro de 2026 Cultura . Selecionados pela PNAB assinam termos para execuçã",
+      "url": "https://www.stitaipu.pr.gov.br/noticia/3640/selecionados-pela-pnab-assinam-termos-para-execucao-de-projetos-culturais/",
+      "data": "2026-10-22T15:00:00.000Z"
+     }
+    ],
+    "nota": 61
+   }
+  ]
+ },
+ {
+  "modo": "cidade",
+  "nome": "Prefeitura de Presidente Castelo Branco",
+  "cidade": "presidente-castelo-branco",
+  "candidatas": 0,
+  "melhor": null,
+  "atual": null,
+  "testes": []
+ },
+ {
+  "modo": "cidade",
+  "nome": "Prefeitura de Salto do Lontra",
+  "cidade": "salto-do-lontra",
+  "candidatas": 13,
+  "melhor": {
+   "url": "https://www.saltodolontra.pr.gov.br/noticias.asp",
+   "itens": 1,
+   "com_data": 0,
+   "recentes": 0,
+   "futuras": 0,
+   "sem_data": 1,
+   "mais_recente": null,
+   "exemplos": [
+    {
+     "titulo": "Ver todas as not�cias",
+     "url": "https://www.saltodolontra.pr.gov.br/noticias.asp",
+     "data": null
+    }
+   ],
+   "nota": -1
+  },
+  "atual": null,
+  "testes": [
+   {
+    "url": "https://www.saltodolontra.pr.gov.br/noticias.asp",
+    "itens": 1,
+    "com_data": 0,
+    "recentes": 0,
+    "futuras": 0,
+    "sem_data": 1,
+    "mais_recente": null,
+    "exemplos": [
+     {
+      "titulo": "Ver todas as not�cias",
+      "url": "https://www.saltodolontra.pr.gov.br/noticias.asp",
+      "data": null
+     }
+    ],
+    "nota": -1
+   },
+   {
+    "url": "https://www.saltodolontra.pr.gov.br/comunicacao-social.asp",
+    "itens": 1,
+    "com_data": 0,
+    "recentes": 0,
+    "futuras": 0,
+    "sem_data": 1,
+    "mais_recente": null,
+    "exemplos": [
+     {
+      "titulo": "Ver todas as not�cias",
+      "url": "https://www.saltodolontra.pr.gov.br/noticias.asp",
+      "data": null
+     }
+    ],
+    "nota": -1
+   }
+  ]
+ },
+ {
+  "modo": "cidade",
+  "nome": "Prefeitura de Serranópolis do Iguaçu",
+  "cidade": "serranopolis-do-iguacu",
+  "candidatas": 0,
+  "melhor": null,
+  "atual": null,
+  "testes": []
+ },
+ {
+  "modo": "cidade",
+  "nome": "Prefeitura de São Jorge d'Oeste",
+  "cidade": "sao-jorge-d-oeste",
+  "candidatas": 0,
+  "melhor": null,
+  "atual": null,
+  "testes": []
+ },
+ {
+  "modo": "cidade",
+  "nome": "Prefeitura de São Jorge do Ivaí",
+  "cidade": "sao-jorge-do-ivai",
+  "candidatas": 0,
+  "melhor": null,
+  "atual": null,
+  "testes": []
+ },
+ {
+  "modo": "cidade",
+  "nome": "Prefeitura de Sarandi",
+  "cidade": "sarandi",
+  "candidatas": 11,
+  "melhor": null,
+  "atual": null,
+  "testes": []
+ },
+ {
+  "modo": "cidade",
+  "nome": "Prefeitura de Quatiguá",
+  "cidade": "quatigua",
+  "candidatas": 0,
+  "melhor": null,
+  "atual": null,
+  "testes": []
+ },
+ {
+  "modo": "cidade",
+  "nome": "Prefeitura de São José das Palmeiras",
+  "cidade": "sao-jose-das-palmeiras",
+  "candidatas": 0,
+  "melhor": null,
+  "atual": null,
+  "testes": []
+ },
+ {
+  "modo": "cidade",
+  "nome": "Prefeitura de Santa Cecília do Pavão",
+  "cidade": "santa-cecilia-do-pavao",
+  "candidatas": 11,
+  "melhor": {
+   "url": "https://www.santaceciliadopavao.pr.gov.br/feed/",
+   "itens": 0,
+   "com_data": 0,
+   "recentes": 0,
+   "futuras": 0,
+   "sem_data": 0,
+   "mais_recente": null,
+   "exemplos": [],
+   "nota": 0
+  },
+  "atual": null,
+  "testes": [
+   {
+    "url": "https://www.santaceciliadopavao.pr.gov.br/feed/",
+    "itens": 0,
+    "com_data": 0,
+    "recentes": 0,
+    "futuras": 0,
+    "sem_data": 0,
+    "mais_recente": null,
+    "exemplos": [],
+    "nota": 0
+   },
+   {
+    "url": "https://www.santaceciliadopavao.pr.gov.br/noticias",
+    "itens": 0,
+    "com_data": 0,
+    "recentes": 0,
+    "futuras": 0,
+    "sem_data": 0,
+    "mais_recente": null,
+    "exemplos": [],
+    "nota": 0
+   },
+   {
+    "url": "https://www.santaceciliadopavao.pr.gov.br/noticias/",
+    "itens": 0,
+    "com_data": 0,
+    "recentes": 0,
+    "futuras": 0,
+    "sem_data": 0,
+    "mais_recente": null,
+    "exemplos": [],
+    "nota": 0
+   },
+   {
+    "url": "https://www.santaceciliadopavao.pr.gov.br/noticia",
+    "itens": 0,
+    "com_data": 0,
+    "recentes": 0,
+    "futuras": 0,
+    "sem_data": 0,
+    "mais_recente": null,
+    "exemplos": [],
+    "nota": 0
+   }
+  ]
+ },
+ {
+  "modo": "cidade",
+  "nome": "Prefeitura de São João do Triunfo",
+  "cidade": "sao-joao-do-triunfo",
+  "candidatas": 0,
+  "melhor": null,
+  "atual": null,
+  "testes": []
+ },
+ {
+  "modo": "fonte",
+  "id": "f7c263a7-03e9-4c09-8753-cec2db1341da",
+  "nome": "Prefeitura de Esperança Nova",
+  "cidade": "esperanca-nova",
+  "url": "https://www.esperancanova.pr.gov.br/noticia/categoria",
+  "erro": "tempo esgotado"
+ },
+ {
+  "modo": "cidade",
+  "nome": "Prefeitura de São Miguel do Iguaçu",
+  "cidade": "sao-miguel-do-iguacu",
+  "candidatas": 0,
+  "melhor": null,
+  "atual": null,
+  "testes": []
+ },
+ {
+  "modo": "cidade",
+  "nome": "Prefeitura de Renascença",
+  "cidade": "renascenca",
+  "candidatas": 11,
+  "melhor": {
+   "url": "https://www.renascenca.pr.gov.br/feed/",
+   "itens": 0,
+   "com_data": 0,
+   "recentes": 0,
+   "futuras": 0,
+   "sem_data": 0,
+   "mais_recente": null,
+   "exemplos": [],
+   "nota": 0
+  },
+  "atual": null,
+  "testes": [
+   {
+    "url": "https://www.renascenca.pr.gov.br/feed/",
+    "itens": 0,
+    "com_data": 0,
+    "recentes": 0,
+    "futuras": 0,
+    "sem_data": 0,
+    "mais_recente": null,
+    "exemplos": [],
+    "nota": 0
+   },
+   {
+    "url": "https://www.renascenca.pr.gov.br/noticias",
+    "itens": 0,
+    "com_data": 0,
+    "recentes": 0,
+    "futuras": 0,
+    "sem_data": 0,
+    "mais_recente": null,
+    "exemplos": [],
+    "nota": 0
+   },
+   {
+    "url": "https://www.renascenca.pr.gov.br/noticias/",
+    "itens": 0,
+    "com_data": 0,
+    "recentes": 0,
+    "futuras": 0,
+    "sem_data": 0,
+    "mais_recente": null,
+    "exemplos": [],
+    "nota": 0
+   },
+   {
+    "url": "https://www.renascenca.pr.gov.br/noticia",
+    "itens": 0,
+    "com_data": 0,
+    "recentes": 0,
+    "futuras": 0,
+    "sem_data": 0,
+    "mais_recente": null,
+    "exemplos": [],
+    "nota": 0
+   }
+  ]
+ },
+ {
+  "modo": "cidade",
+  "nome": "Prefeitura de São Sebastião da Amoreira",
+  "cidade": "sao-sebastiao-da-amoreira",
+  "candidatas": 0,
+  "melhor": null,
+  "atual": null,
+  "testes": []
+ },
+ {
+  "modo": "cidade",
+  "nome": "Prefeitura de São Pedro do Paraná",
+  "cidade": "sao-pedro-do-parana",
+  "candidatas": 0,
+  "melhor": null,
+  "atual": null,
+  "testes": []
+ },
+ {
+  "modo": "cidade",
+  "nome": "Prefeitura de Tamarana",
+  "cidade": "tamarana",
+  "candidatas": 11,
+  "melhor": null,
+  "atual": null,
+  "testes": []
+ },
+ {
+  "modo": "cidade",
+  "nome": "Prefeitura de Quinta do Sol",
+  "cidade": "quinta-do-sol",
+  "candidatas": 0,
+  "melhor": null,
+  "atual": null,
+  "testes": []
+ },
+ {
+  "modo": "cidade",
+  "nome": "Prefeitura de São Jorge do Patrocínio",
+  "cidade": "sao-jorge-do-patrocinio",
+  "candidatas": 0,
+  "melhor": null,
+  "atual": null,
+  "testes": []
+ },
+ {
+  "modo": "cidade",
+  "nome": "Prefeitura de Querência do Norte",
+  "cidade": "querencia-do-norte",
+  "candidatas": 0,
+  "melhor": null,
+  "atual": null,
+  "testes": []
+ },
+ {
+  "modo": "cidade",
+  "nome": "Prefeitura de Santo Antônio do Sudoeste",
+  "cidade": "santo-antonio-do-sudoeste",
+  "candidatas": 0,
+  "melhor": null,
+  "atual": null,
+  "testes": []
+ },
+ {
+  "modo": "cidade",
+  "nome": "Prefeitura de Três Barras do Paraná",
+  "cidade": "tres-barras-do-parana",
+  "candidatas": 0,
+  "melhor": null,
+  "atual": null,
+  "testes": []
+ },
+ {
+  "modo": "cidade",
+  "nome": "Prefeitura de Rancho Alegre D'Oeste",
+  "cidade": "rancho-alegre-d-oeste",
+  "candidatas": 0,
+  "melhor": null,
+  "atual": null,
+  "testes": []
+ },
+ {
+  "modo": "cidade",
+  "nome": "Prefeitura de Roncador",
+  "cidade": "roncador",
+  "candidatas": 0,
+  "melhor": null,
+  "atual": null,
+  "testes": []
+ },
+ {
+  "modo": "cidade",
+  "nome": "Prefeitura de Santo Antônio do Paraíso",
+  "cidade": "santo-antonio-do-paraiso",
+  "candidatas": 0,
+  "melhor": null,
+  "atual": null,
+  "testes": []
+ },
+ {
+  "modo": "cidade",
+  "nome": "Prefeitura de Vera Cruz do Oeste",
+  "cidade": "vera-cruz-do-oeste",
+  "candidatas": 0,
+  "melhor": null,
+  "atual": null,
+  "testes": []
+ },
+ {
+  "modo": "cidade",
+  "nome": "Prefeitura de Rosário do Ivaí",
+  "cidade": "rosario-do-ivai",
+  "candidatas": 0,
+  "melhor": null,
+  "atual": null,
+  "testes": []
+ },
+ {
+  "modo": "cidade",
+  "nome": "Prefeitura de São João",
+  "cidade": "sao-joao",
+  "candidatas": 11,
+  "melhor": {
+   "url": "https://www.saojoao.pr.gov.br/feed/",
+   "itens": 0,
+   "com_data": 0,
+   "recentes": 0,
+   "futuras": 0,
+   "sem_data": 0,
+   "mais_recente": null,
+   "exemplos": [],
+   "nota": 0
+  },
+  "atual": null,
+  "testes": [
+   {
+    "url": "https://www.saojoao.pr.gov.br/feed/",
+    "itens": 0,
+    "com_data": 0,
+    "recentes": 0,
+    "futuras": 0,
+    "sem_data": 0,
+    "mais_recente": null,
+    "exemplos": [],
+    "nota": 0
+   },
+   {
+    "url": "https://www.saojoao.pr.gov.br/noticias/",
+    "itens": 0,
+    "com_data": 0,
+    "recentes": 0,
+    "futuras": 0,
+    "sem_data": 0,
+    "mais_recente": null,
+    "exemplos": [],
+    "nota": 0
+   }
+  ]
+ },
+ {
+  "modo": "cidade",
+  "nome": "Prefeitura de Santa Lúcia",
+  "cidade": "santa-lucia",
+  "candidatas": 0,
+  "melhor": null,
+  "atual": null,
+  "testes": []
+ },
+ {
+  "modo": "cidade",
+  "nome": "Prefeitura de Virmond",
+  "cidade": "virmond",
+  "candidatas": 12,
+  "melhor": {
+   "url": "http://www.virmond.pr.gov.br/Noticias",
+   "itens": 1,
+   "com_data": 0,
+   "recentes": 0,
+   "futuras": 0,
+   "sem_data": 1,
+   "mais_recente": null,
+   "exemplos": [
+    {
+     "titulo": "Veja todas as notícias",
+     "url": "http://www.virmond.pr.gov.br/Noticias",
+     "data": null
+    }
+   ],
+   "nota": -1
+  },
+  "atual": null,
+  "testes": [
+   {
+    "url": "http://www.virmond.pr.gov.br/Noticias",
+    "itens": 1,
+    "com_data": 0,
+    "recentes": 0,
+    "futuras": 0,
+    "sem_data": 1,
+    "mais_recente": null,
+    "exemplos": [
+     {
+      "titulo": "Veja todas as notícias",
+      "url": "http://www.virmond.pr.gov.br/Noticias",
+      "data": null
+     }
+    ],
+    "nota": -1
+   }
+  ]
+ },
+ {
+  "modo": "cidade",
+  "nome": "Prefeitura de Tuneiras do Oeste",
+  "cidade": "tuneiras-do-oeste",
+  "candidatas": 11,
+  "melhor": {
+   "url": "https://www.tuneirasdooeste.pr.gov.br/noticias",
+   "itens": 0,
+   "com_data": 0,
+   "recentes": 0,
+   "futuras": 0,
+   "sem_data": 0,
+   "mais_recente": null,
+   "exemplos": [],
+   "nota": 0
+  },
+  "atual": null,
+  "testes": [
+   {
+    "url": "https://www.tuneirasdooeste.pr.gov.br/noticias",
+    "itens": 0,
+    "com_data": 0,
+    "recentes": 0,
+    "futuras": 0,
+    "sem_data": 0,
+    "mais_recente": null,
+    "exemplos": [],
+    "nota": 0
+   },
+   {
+    "url": "https://www.tuneirasdooeste.pr.gov.br/feed/",
+    "itens": 0,
+    "com_data": 0,
+    "recentes": 0,
+    "futuras": 0,
+    "sem_data": 0,
+    "mais_recente": null,
+    "exemplos": [],
+    "nota": 0
+   },
+   {
+    "url": "https://www.tuneirasdooeste.pr.gov.br/noticias/",
+    "itens": 0,
+    "com_data": 0,
+    "recentes": 0,
+    "futuras": 0,
+    "sem_data": 0,
+    "mais_recente": null,
+    "exemplos": [],
+    "nota": 0
+   },
+   {
+    "url": "https://www.tuneirasdooeste.pr.gov.br/noticia",
+    "itens": 0,
+    "com_data": 0,
+    "recentes": 0,
+    "futuras": 0,
+    "sem_data": 0,
+    "mais_recente": null,
+    "exemplos": [],
+    "nota": 0
+   }
+  ]
+ },
+ {
+  "modo": "cidade",
+  "nome": "Prefeitura de Santa Cruz de Monte Castelo",
+  "cidade": "santa-cruz-de-monte-castelo",
+  "candidatas": 0,
+  "melhor": null,
+  "atual": null,
+  "testes": []
+ },
+ {
+  "modo": "cidade",
+  "nome": "Prefeitura de Ângulo",
+  "cidade": "angulo",
+  "candidatas": 12,
+  "melhor": {
+   "url": "http://www.angulo.pr.gov.br/index.php?meio=17125",
+   "itens": 0,
+   "com_data": 0,
+   "recentes": 0,
+   "futuras": 0,
+   "sem_data": 0,
+   "mais_recente": null,
+   "exemplos": [],
+   "nota": 0
+  },
+  "atual": null,
+  "testes": [
+   {
+    "url": "http://www.angulo.pr.gov.br/index.php?meio=17125",
+    "itens": 0,
+    "com_data": 0,
+    "recentes": 0,
+    "futuras": 0,
+    "sem_data": 0,
+    "mais_recente": null,
+    "exemplos": [],
+    "nota": 0
+   }
+  ]
+ },
+ {
+  "modo": "cidade",
+  "nome": "Prefeitura de São João do Ivaí",
+  "cidade": "sao-joao-do-ivai",
+  "candidatas": 0,
+  "melhor": null,
+  "atual": null,
+  "testes": []
+ },
+ {
+  "modo": "cidade",
+  "nome": "Prefeitura de Verê",
+  "cidade": "vere",
+  "candidatas": 12,
+  "melhor": {
+   "url": "https://www.vere.pr.gov.br/paginas/index/b14b0b3b13b18b13b7b6",
+   "itens": 0,
+   "com_data": 0,
+   "recentes": 0,
+   "futuras": 0,
+   "sem_data": 0,
+   "mais_recente": null,
+   "exemplos": [],
+   "nota": 0
+  },
+  "atual": null,
+  "testes": [
+   {
+    "url": "https://www.vere.pr.gov.br/paginas/index/b14b0b3b13b18b13b7b6",
+    "itens": 0,
+    "com_data": 0,
+    "recentes": 0,
+    "futuras": 0,
+    "sem_data": 0,
+    "mais_recente": null,
+    "exemplos": [],
+    "nota": 0
+   }
+  ]
+ },
+ {
+  "modo": "cidade",
+  "nome": "Prefeitura de São Pedro do Ivaí",
+  "cidade": "sao-pedro-do-ivai",
+  "candidatas": 0,
+  "melhor": null,
+  "atual": null,
+  "testes": []
+ },
+ {
+  "modo": "cidade",
+  "nome": "Prefeitura de Santo Inácio",
+  "cidade": "santo-inacio",
+  "candidatas": 0,
+  "melhor": null,
+  "atual": null,
+  "testes": []
+ },
+ {
+  "modo": "cidade",
+  "nome": "Prefeitura de Sertaneja",
+  "cidade": "sertaneja",
+  "candidatas": 0,
+  "melhor": null,
+  "atual": null,
+  "testes": []
+ },
+ {
+  "modo": "cidade",
+  "nome": "Prefeitura de São Carlos do Ivaí",
+  "cidade": "sao-carlos-do-ivai",
+  "candidatas": 0,
+  "melhor": null,
+  "atual": null,
+  "testes": []
+ },
+ {
+  "modo": "fonte",
+  "nome": "Prefeitura de Curitiba",
+  "cidade": "curitiba",
+  "url": "https://www.curitiba.pr.gov.br/noticias",
+  "candidatas": 11,
+  "melhor": {
+   "url": "https://www.curitiba.pr.gov.br/noticias",
+   "itens": 0,
+   "com_data": 0,
+   "recentes": 0,
+   "futuras": 0,
+   "sem_data": 0,
+   "mais_recente": null,
+   "exemplos": [],
+   "nota": 0
+  },
+  "atual": {
+   "url": "https://www.curitiba.pr.gov.br/noticias",
+   "itens": 0,
+   "com_data": 0,
+   "recentes": 0,
+   "futuras": 0,
+   "sem_data": 0,
+   "mais_recente": null,
+   "exemplos": [],
+   "nota": 0
+  },
+  "testes": [
+   {
+    "url": "https://www.curitiba.pr.gov.br/noticias",
+    "itens": 0,
+    "com_data": 0,
+    "recentes": 0,
+    "futuras": 0,
+    "sem_data": 0,
+    "mais_recente": null,
+    "exemplos": [],
+    "nota": 0
+   }
+  ]
+ },
+ {
+  "modo": "fonte",
+  "nome": "Prefeitura de Curitiba",
+  "cidade": "curitiba",
+  "url": "https://www.curitiba.pr.gov.br/",
+  "candidatas": 12,
+  "melhor": {
+   "url": "https://www.curitiba.pr.gov.br/",
+   "itens": 0,
+   "com_data": 0,
+   "recentes": 0,
+   "futuras": 0,
+   "sem_data": 0,
+   "mais_recente": null,
+   "exemplos": [],
+   "nota": 0
+  },
+  "atual": {
+   "url": "https://www.curitiba.pr.gov.br/",
+   "itens": 0,
+   "com_data": 0,
+   "recentes": 0,
+   "futuras": 0,
+   "sem_data": 0,
+   "mais_recente": null,
+   "exemplos": [],
+   "nota": 0
+  },
+  "testes": [
+   {
+    "url": "https://www.curitiba.pr.gov.br/",
+    "itens": 0,
+    "com_data": 0,
+    "recentes": 0,
+    "futuras": 0,
+    "sem_data": 0,
+    "mais_recente": null,
+    "exemplos": [],
+    "nota": 0
+   }
+  ]
+ },
+ {
+  "modo": "fonte",
+  "nome": "Prefeitura de São José dos Pinhais",
+  "cidade": "sao-jose-dos-pinhais",
+  "url": "https://www.sjp.pr.gov.br/",
+  "candidatas": 12,
+  "melhor": {
+   "url": "https://www.sjp.pr.gov.br/",
+   "itens": 0,
+   "com_data": 0,
+   "recentes": 0,
+   "futuras": 0,
+   "sem_data": 0,
+   "mais_recente": null,
+   "exemplos": [],
+   "nota": 0
+  },
+  "atual": {
+   "url": "https://www.sjp.pr.gov.br/",
+   "itens": 0,
+   "com_data": 0,
+   "recentes": 0,
+   "futuras": 0,
+   "sem_data": 0,
+   "mais_recente": null,
+   "exemplos": [],
+   "nota": 0
+  },
+  "testes": [
+   {
+    "url": "https://www.sjp.pr.gov.br/",
+    "itens": 0,
+    "com_data": 0,
+    "recentes": 0,
+    "futuras": 0,
+    "sem_data": 0,
+    "mais_recente": null,
+    "exemplos": [],
+    "nota": 0
+   }
+  ]
+ },
+ {
+  "modo": "fonte",
+  "nome": "Prefeitura de Cianorte",
+  "cidade": "cianorte",
+  "url": "https://www.cianorte.pr.gov.br/",
+  "candidatas": 12,
+  "melhor": {
+   "url": "https://www.cianorte.pr.gov.br/",
+   "itens": 0,
+   "com_data": 0,
+   "recentes": 0,
+   "futuras": 0,
+   "sem_data": 0,
+   "mais_recente": null,
+   "exemplos": [],
+   "nota": 0
+  },
+  "atual": {
+   "url": "https://www.cianorte.pr.gov.br/",
+   "itens": 0,
+   "com_data": 0,
+   "recentes": 0,
+   "futuras": 0,
+   "sem_data": 0,
+   "mais_recente": null,
+   "exemplos": [],
+   "nota": 0
+  },
+  "testes": [
+   {
+    "url": "https://www.cianorte.pr.gov.br/",
+    "itens": 0,
+    "com_data": 0,
+    "recentes": 0,
+    "futuras": 0,
+    "sem_data": 0,
+    "mais_recente": null,
+    "exemplos": [],
+    "nota": 0
+   }
+  ]
+ },
+ {
+  "modo": "cidade",
+  "nome": "Prefeitura de São Tomé",
+  "cidade": "sao-tome",
+  "candidatas": 0,
+  "melhor": null,
+  "atual": null,
+  "testes": []
+ },
+ {
+  "modo": "cidade",
+  "nome": "Prefeitura de Terra Rica",
+  "cidade": "terra-rica",
+  "candidatas": 0,
+  "melhor": null,
+  "atual": null,
+  "testes": []
+ },
+ {
+  "modo": "fonte",
+  "nome": "Prefeitura de Umuarama",
+  "cidade": "umuarama",
+  "url": "https://www.umuarama.pr.gov.br/",
+  "candidatas": 13,
+  "melhor": {
+   "url": "https://www.umuarama.pr.gov.br/",
+   "itens": 7,
+   "com_data": 6,
+   "recentes": 6,
+   "futuras": 0,
+   "sem_data": 0,
+   "mais_recente": "2026-10-27T15:00:00.000Z",
+   "exemplos": [
+    {
+     "titulo": "Prefeitura inicia decoração de Natal em Umuarama",
+     "url": "https://www.umuarama.pr.gov.br/noticias/indstria-comrcio-e-turismo/prefeitura-inicia-decorao-de-natal-em-umuarama",
+     "data": "2026-10-27T15:00:00.000Z"
+    },
+    {
+     "titulo": "Município terá ponto facultativo nesta quarta-feira",
+     "url": "https://www.umuarama.pr.gov.br/noticias/administracao/municpio-ter-ponto-facultativo-nesta-quarta-feira",
+     "data": "2026-10-26T15:00:00.000Z"
+    },
+    {
+     "titulo": "INFRAESTRUTURA Umuarama terá três novos pontos de atendimento à população",
+     "url": "https://www.umuarama.pr.gov.br/noticias/obras-planejamento-urbano-e-projetos-tecnicos/umuarama-ter-trs-novos-pontos-de-atendimento--populao",
+     "data": "2026-10-27T15:00:00.000Z"
+    },
+    {
+     "titulo": "VOLEIBOL Smel e Unipar promovem curso de capacitação e atualização",
+     "url": "https://www.umuarama.pr.gov.br/noticias/esportes-e-lazer/smel-e-unipar-promovem-curso-de-capacitao-e-atualizao",
+     "data": "2026-10-27T15:00:00.000Z"
+    },
+    {
+     "titulo": "ARTE E CULTURA Cinema paranaense celebra diversidade em mostra gratuita de curtas",
+     "url": "https://www.umuarama.pr.gov.br/noticias/fundacao-cultural/cinema-paranaense-celebra-diversidade-em-mostra-gratuita-de-curtas",
+     "data": "2026-10-26T15:00:00.000Z"
+    },
+    {
+     "titulo": "CESTAS VERDES Banco de Alimentos atende mais de 300 famílias",
+     "url": "https://www.umuarama.pr.gov.br/noticias/agricultura/banco-de-alimentos-atende-mais-de-300-famlias",
+     "data": "2026-10-26T15:00:00.000Z"
+    }
+   ],
+   "nota": 61
+  },
+  "atual": {
+   "url": "https://www.umuarama.pr.gov.br/",
+   "itens": 7,
+   "com_data": 6,
+   "recentes": 6,
+   "futuras": 0,
+   "sem_data": 0,
+   "mais_recente": "2026-10-27T15:00:00.000Z",
+   "exemplos": [
+    {
+     "titulo": "Prefeitura inicia decoração de Natal em Umuarama",
+     "url": "https://www.umuarama.pr.gov.br/noticias/indstria-comrcio-e-turismo/prefeitura-inicia-decorao-de-natal-em-umuarama",
+     "data": "2026-10-27T15:00:00.000Z"
+    },
+    {
+     "titulo": "Município terá ponto facultativo nesta quarta-feira",
+     "url": "https://www.umuarama.pr.gov.br/noticias/administracao/municpio-ter-ponto-facultativo-nesta-quarta-feira",
+     "data": "2026-10-26T15:00:00.000Z"
+    },
+    {
+     "titulo": "INFRAESTRUTURA Umuarama terá três novos pontos de atendimento à população",
+     "url": "https://www.umuarama.pr.gov.br/noticias/obras-planejamento-urbano-e-projetos-tecnicos/umuarama-ter-trs-novos-pontos-de-atendimento--populao",
+     "data": "2026-10-27T15:00:00.000Z"
+    },
+    {
+     "titulo": "VOLEIBOL Smel e Unipar promovem curso de capacitação e atualização",
+     "url": "https://www.umuarama.pr.gov.br/noticias/esportes-e-lazer/smel-e-unipar-promovem-curso-de-capacitao-e-atualizao",
+     "data": "2026-10-27T15:00:00.000Z"
+    },
+    {
+     "titulo": "ARTE E CULTURA Cinema paranaense celebra diversidade em mostra gratuita de curtas",
+     "url": "https://www.umuarama.pr.gov.br/noticias/fundacao-cultural/cinema-paranaense-celebra-diversidade-em-mostra-gratuita-de-curtas",
+     "data": "2026-10-26T15:00:00.000Z"
+    },
+    {
+     "titulo": "CESTAS VERDES Banco de Alimentos atende mais de 300 famílias",
+     "url": "https://www.umuarama.pr.gov.br/noticias/agricultura/banco-de-alimentos-atende-mais-de-300-famlias",
+     "data": "2026-10-26T15:00:00.000Z"
+    }
+   ],
+   "nota": 61
+  },
+  "testes": [
+   {
+    "url": "https://www.umuarama.pr.gov.br/",
+    "itens": 7,
+    "com_data": 6,
+    "recentes": 6,
+    "futuras": 0,
+    "sem_data": 0,
+    "mais_recente": "2026-10-27T15:00:00.000Z",
+    "exemplos": [
+     {
+      "titulo": "Prefeitura inicia decoração de Natal em Umuarama",
+      "url": "https://www.umuarama.pr.gov.br/noticias/indstria-comrcio-e-turismo/prefeitura-inicia-decorao-de-natal-em-umuarama",
+      "data": "2026-10-27T15:00:00.000Z"
+     },
+     {
+      "titulo": "Município terá ponto facultativo nesta quarta-feira",
+      "url": "https://www.umuarama.pr.gov.br/noticias/administracao/municpio-ter-ponto-facultativo-nesta-quarta-feira",
+      "data": "2026-10-26T15:00:00.000Z"
+     },
+     {
+      "titulo": "INFRAESTRUTURA Umuarama terá três novos pontos de atendimento à população",
+      "url": "https://www.umuarama.pr.gov.br/noticias/obras-planejamento-urbano-e-projetos-tecnicos/umuarama-ter-trs-novos-pontos-de-atendimento--populao",
+      "data": "2026-10-27T15:00:00.000Z"
+     },
+     {
+      "titulo": "VOLEIBOL Smel e Unipar promovem curso de capacitação e atualização",
+      "url": "https://www.umuarama.pr.gov.br/noticias/esportes-e-lazer/smel-e-unipar-promovem-curso-de-capacitao-e-atualizao",
+      "data": "2026-10-27T15:00:00.000Z"
+     },
+     {
+      "titulo": "ARTE E CULTURA Cinema paranaense celebra diversidade em mostra gratuita de curtas",
+      "url": "https://www.umuarama.pr.gov.br/noticias/fundacao-cultural/cinema-paranaense-celebra-diversidade-em-mostra-gratuita-de-curtas",
+      "data": "2026-10-26T15:00:00.000Z"
+     },
+     {
+      "titulo": "CESTAS VERDES Banco de Alimentos atende mais de 300 famílias",
+      "url": "https://www.umuarama.pr.gov.br/noticias/agricultura/banco-de-alimentos-atende-mais-de-300-famlias",
+      "data": "2026-10-26T15:00:00.000Z"
+     }
+    ],
+    "nota": 61
+   }
+  ]
+ },
+ {
+  "modo": "cidade",
+  "nome": "Prefeitura de Uniflor",
+  "cidade": "uniflor",
+  "candidatas": 0,
+  "melhor": null,
+  "atual": null,
+  "testes": []
+ },
+ {
+  "modo": "cidade",
+  "nome": "Prefeitura de Tapira",
+  "cidade": "tapira",
+  "candidatas": 0,
+  "melhor": null,
+  "atual": null,
+  "testes": []
+ },
+ {
+  "modo": "cidade",
+  "nome": "Prefeitura de Umuarama",
+  "cidade": "umuarama",
+  "candidatas": 12,
+  "melhor": {
+   "url": "https://www.umuarama.pr.gov.br/noticias",
+   "itens": 1,
+   "com_data": 0,
+   "recentes": 0,
+   "futuras": 0,
+   "sem_data": 1,
+   "mais_recente": null,
+   "exemplos": [
+    {
+     "titulo": "Plano Diretor Municipal - PDM",
+     "url": "https://leismunicipais.com.br/a1/pr/u/umuarama/lei-complementar/2018/45/445/lei-complementar-n-445-2018-institui-o-plano-diretor-municipal-pdm-de-umuarama?q=445%2F2018",
+     "data": null
+    }
+   ],
+   "nota": -1
+  },
+  "atual": null,
+  "testes": [
+   {
+    "url": "https://www.umuarama.pr.gov.br/noticias",
+    "itens": 1,
+    "com_data": 0,
+    "recentes": 0,
+    "futuras": 0,
+    "sem_data": 1,
+    "mais_recente": null,
+    "exemplos": [
+     {
+      "titulo": "Plano Diretor Municipal - PDM",
+      "url": "https://leismunicipais.com.br/a1/pr/u/umuarama/lei-complementar/2018/45/445/lei-complementar-n-445-2018-institui-o-plano-diretor-municipal-pdm-de-umuarama?q=445%2F2018",
+      "data": null
+     }
+    ],
+    "nota": -1
+   },
+   {
+    "url": "https://www.umuarama.pr.gov.br/noticias/",
+    "itens": 1,
+    "com_data": 0,
+    "recentes": 0,
+    "futuras": 0,
+    "sem_data": 1,
+    "mais_recente": null,
+    "exemplos": [
+     {
+      "titulo": "Plano Diretor Municipal - PDM",
+      "url": "https://leismunicipais.com.br/a1/pr/u/umuarama/lei-complementar/2018/45/445/lei-complementar-n-445-2018-institui-o-plano-diretor-municipal-pdm-de-umuarama?q=445%2F2018",
+      "data": null
+     }
+    ],
+    "nota": -1
+   }
+  ]
+ },
+ {
+  "modo": "cidade",
+  "nome": "Prefeitura de Uraí",
+  "cidade": "urai",
+  "candidatas": 0,
+  "melhor": null,
+  "atual": null,
+  "testes": []
+ },
+ {
+  "modo": "fonte",
+  "nome": "Prefeitura de Medianeira",
+  "cidade": "medianeira",
+  "url": "https://www.medianeira.pr.gov.br/",
+  "candidatas": 14,
+  "melhor": {
+   "url": "https://www.medianeira.pr.gov.br/",
+   "itens": 0,
+   "com_data": 0,
+   "recentes": 0,
+   "futuras": 0,
+   "sem_data": 0,
+   "mais_recente": null,
+   "exemplos": [],
+   "nota": 0
+  },
+  "atual": {
+   "url": "https://www.medianeira.pr.gov.br/",
+   "itens": 0,
+   "com_data": 0,
+   "recentes": 0,
+   "futuras": 0,
+   "sem_data": 0,
+   "mais_recente": null,
+   "exemplos": [],
+   "nota": 0
+  },
+  "testes": [
+   {
+    "url": "https://www.medianeira.pr.gov.br/",
+    "itens": 0,
+    "com_data": 0,
+    "recentes": 0,
+    "futuras": 0,
+    "sem_data": 0,
+    "mais_recente": null,
+    "exemplos": [],
+    "nota": 0
+   },
+   {
+    "url": "https://www.medianeira.pr.gov.br/?noticia=11724",
+    "itens": 0,
+    "com_data": 0,
+    "recentes": 0,
+    "futuras": 0,
+    "sem_data": 0,
+    "mais_recente": null,
+    "exemplos": [],
+    "nota": 0
+   },
+   {
+    "url": "https://www.medianeira.pr.gov.br/?noticia=11736",
+    "itens": 0,
+    "com_data": 0,
+    "recentes": 0,
+    "futuras": 0,
+    "sem_data": 0,
+    "mais_recente": null,
+    "exemplos": [],
+    "nota": 0
+   },
+   {
+    "url": "https://www.medianeira.pr.gov.br/?noticia=11735",
+    "itens": 0,
+    "com_data": 0,
+    "recentes": 0,
+    "futuras": 0,
+    "sem_data": 0,
+    "mais_recente": null,
+    "exemplos": [],
+    "nota": 0
+   }
+  ]
+ },
+ {
+  "modo": "cidade",
+  "nome": "Prefeitura de Wenceslau Braz",
+  "cidade": "wenceslau-braz",
+  "candidatas": 0,
+  "melhor": null,
+  "atual": null,
+  "testes": []
+ },
+ {
+  "modo": "cidade",
+  "nome": "Prefeitura de Teixeira Soares",
+  "cidade": "teixeira-soares",
+  "candidatas": 0,
+  "melhor": null,
+  "atual": null,
+  "testes": []
+ },
+ {
+  "modo": "cidade",
+  "nome": "Prefeitura de Tupãssi",
+  "cidade": "tupassi",
+  "candidatas": 11,
+  "melhor": {
+   "url": "https://tupassi.atende.net/cidadao/noticia",
+   "itens": 0,
+   "com_data": 0,
+   "recentes": 0,
+   "futuras": 0,
+   "sem_data": 0,
+   "mais_recente": null,
+   "exemplos": [],
+   "nota": 0
+  },
+  "atual": null,
+  "testes": [
+   {
+    "url": "https://tupassi.atende.net/cidadao/noticia",
+    "itens": 0,
+    "com_data": 0,
+    "recentes": 0,
+    "futuras": 0,
+    "sem_data": 0,
+    "mais_recente": null,
+    "exemplos": [],
+    "nota": 0
+   }
+  ]
+ }
+]

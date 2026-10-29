@@ -1,0 +1,3075 @@
+[
+ {
+  "modo": "fonte",
+  "nome": "GMC Online — Maringá",
+  "cidade": "maringa",
+  "url": "https://gmconline.com.br/",
+  "candidatas": 14,
+  "melhor": {
+   "url": "https://gmconline.com.br/",
+   "itens": 10,
+   "com_data": 6,
+   "recentes": 6,
+   "futuras": 0,
+   "sem_data": 0,
+   "mais_recente": "2026-10-29T00:29:03.000Z",
+   "exemplos": [
+    {
+     "titulo": "Resultado do Dia de Sorte: concurso 1334",
+     "url": "https://gmconline.com.br/loterias/resultado-do-dia-de-sorte-concurso-1334/",
+     "data": "2026-10-29T00:29:03.000Z"
+    },
+    {
+     "titulo": "Resultado da Lotomania: concurso 2993",
+     "url": "https://gmconline.com.br/loterias/resultado-da-lotomania-concurso-2993/",
+     "data": "2026-10-29T00:24:46.000Z"
+    },
+    {
+     "titulo": "Resultado Super Sete: concurso 916",
+     "url": "https://gmconline.com.br/loterias/resultado-super-sete-concurso-916/",
+     "data": "2026-10-29T00:19:01.000Z"
+    },
+    {
+     "titulo": "Resultado da Dupla Sena: concurso 3026",
+     "url": "https://gmconline.com.br/loterias/resultado-da-dupla-sena-concurso-3026/",
+     "data": "2026-10-29T00:16:18.000Z"
+    },
+    {
+     "titulo": "Resultado da Quina: concurso 7154",
+     "url": "https://gmconline.com.br/loterias/resultado-da-quina-concurso-7154/",
+     "data": "2026-10-29T00:12:36.000Z"
+    },
+    {
+     "titulo": "Resultado da Lotofácil: concurso 3816",
+     "url": "https://gmconline.com.br/loterias/resultado-da-lotofacil-concurso-3816/",
+     "data": "2026-10-29T00:11:23.000Z"
+    }
+   ],
+   "nota": 64
+  },
+  "atual": {
+   "url": "https://gmconline.com.br/",
+   "itens": 10,
+   "com_data": 6,
+   "recentes": 6,
+   "futuras": 0,
+   "sem_data": 0,
+   "mais_recente": "2026-10-29T00:29:03.000Z",
+   "exemplos": [
+    {
+     "titulo": "Resultado do Dia de Sorte: concurso 1334",
+     "url": "https://gmconline.com.br/loterias/resultado-do-dia-de-sorte-concurso-1334/",
+     "data": "2026-10-29T00:29:03.000Z"
+    },
+    {
+     "titulo": "Resultado da Lotomania: concurso 2993",
+     "url": "https://gmconline.com.br/loterias/resultado-da-lotomania-concurso-2993/",
+     "data": "2026-10-29T00:24:46.000Z"
+    },
+    {
+     "titulo": "Resultado Super Sete: concurso 916",
+     "url": "https://gmconline.com.br/loterias/resultado-super-sete-concurso-916/",
+     "data": "2026-10-29T00:19:01.000Z"
+    },
+    {
+     "titulo": "Resultado da Dupla Sena: concurso 3026",
+     "url": "https://gmconline.com.br/loterias/resultado-da-dupla-sena-concurso-3026/",
+     "data": "2026-10-29T00:16:18.000Z"
+    },
+    {
+     "titulo": "Resultado da Quina: concurso 7154",
+     "url": "https://gmconline.com.br/loterias/resultado-da-quina-concurso-7154/",
+     "data": "2026-10-29T00:12:36.000Z"
+    },
+    {
+     "titulo": "Resultado da Lotofácil: concurso 3816",
+     "url": "https://gmconline.com.br/loterias/resultado-da-lotofacil-concurso-3816/",
+     "data": "2026-10-29T00:11:23.000Z"
+    }
+   ],
+   "nota": 64
+  },
+  "testes": [
+   {
+    "url": "https://gmconline.com.br/",
+    "itens": 10,
+    "com_data": 6,
+    "recentes": 6,
+    "futuras": 0,
+    "sem_data": 0,
+    "mais_recente": "2026-10-29T00:29:03.000Z",
+    "exemplos": [
+     {
+      "titulo": "Resultado do Dia de Sorte: concurso 1334",
+      "url": "https://gmconline.com.br/loterias/resultado-do-dia-de-sorte-concurso-1334/",
+      "data": "2026-10-29T00:29:03.000Z"
+     },
+     {
+      "titulo": "Resultado da Lotomania: concurso 2993",
+      "url": "https://gmconline.com.br/loterias/resultado-da-lotomania-concurso-2993/",
+      "data": "2026-10-29T00:24:46.000Z"
+     },
+     {
+      "titulo": "Resultado Super Sete: concurso 916",
+      "url": "https://gmconline.com.br/loterias/resultado-super-sete-concurso-916/",
+      "data": "2026-10-29T00:19:01.000Z"
+     },
+     {
+      "titulo": "Resultado da Dupla Sena: concurso 3026",
+      "url": "https://gmconline.com.br/loterias/resultado-da-dupla-sena-concurso-3026/",
+      "data": "2026-10-29T00:16:18.000Z"
+     },
+     {
+      "titulo": "Resultado da Quina: concurso 7154",
+      "url": "https://gmconline.com.br/loterias/resultado-da-quina-concurso-7154/",
+      "data": "2026-10-29T00:12:36.000Z"
+     },
+     {
+      "titulo": "Resultado da Lotofácil: concurso 3816",
+      "url": "https://gmconline.com.br/loterias/resultado-da-lotofacil-concurso-3816/",
+      "data": "2026-10-29T00:11:23.000Z"
+     }
+    ],
+    "nota": 64
+   }
+  ]
+ },
+ {
+  "modo": "fonte",
+  "nome": "TN Online — Apucarana",
+  "cidade": "apucarana",
+  "url": "https://tnonline.uol.com.br/",
+  "candidatas": 14,
+  "melhor": {
+   "url": "https://tnonline.uol.com.br/",
+   "itens": 30,
+   "com_data": 6,
+   "recentes": 6,
+   "futuras": 0,
+   "sem_data": 0,
+   "mais_recente": "2026-10-29T01:35:45.000Z",
+   "exemplos": [
+    {
+     "titulo": "Aposta feita via internet leva mais de R$ 324 milh&#245;es na Mega-Sena; veja onde",
+     "url": "https://tnonline.uol.com.br/noticias/cotidiano/aposta-feita-via-internet-leva-mais-de-r-324-milhoes-na-mega-sena-veja-onde-1169211",
+     "data": "2026-10-29T01:35:45.000Z"
+    },
+    {
+     "titulo": "Ex-ministra de Bolsonaro reconhece vit&#243;ria de Lula ap&#243;s carta golpista e fuga de",
+     "url": "https://tnonline.uol.com.br/noticias/politica/ex-ministra-de-bolsonaro-reconhece-vitoria-de-lula-apos-carta-golpista-e-fuga-de-flavio-1169210",
+     "data": "2026-10-29T01:29:33.000Z"
+    },
+    {
+     "titulo": "De 'verdadeiro presidente' a 'l&#237;der do Brasil': o que mudou na carta golpista de Fl&#",
+     "url": "https://tnonline.uol.com.br/noticias/politica/de-verdadeiro-presidente-a-lider-do-brasil-o-que-mudou-na-carta-golpista-de-flavio-1169208",
+     "data": "2026-10-29T01:24:32.000Z"
+    },
+    {
+     "titulo": "Deputados pedem investiga&#231;&#227;o de listas de boicote e agress&#245;es em SC: N&#227",
+     "url": "https://tnonline.uol.com.br/noticias/politica/deputados-pedem-investigacao-de-listas-de-boicote-e-agressoes-em-sc-nao-estamos-no-nazismo-1169207",
+     "data": "2026-10-29T01:14:15.000Z"
+    },
+    {
+     "titulo": "OAB-PR faz alerta sobre ilegalidade de coa&#231;&#227;o e demiss&#227;o por escolha eleito",
+     "url": "https://tnonline.uol.com.br/noticias/parana/oab-pr-faz-alerta-sobre-ilegalidade-de-coacao-e-demissao-por-escolha-eleitoral-1169205",
+     "data": "2026-10-29T01:04:02.000Z"
+    },
+    {
+     "titulo": "Pecuarista &#233; suspeito de matar companheira 38 anos mais nova no interior de SP",
+     "url": "https://tnonline.uol.com.br/noticias/cotidiano/pecuarista-e-suspeito-de-matar-companheira-38-anos-mais-nova-no-interior-de-sp-1169204",
+     "data": "2026-10-29T00:59:58.000Z"
+    }
+   ],
+   "nota": 64
+  },
+  "atual": {
+   "url": "https://tnonline.uol.com.br/",
+   "itens": 30,
+   "com_data": 6,
+   "recentes": 6,
+   "futuras": 0,
+   "sem_data": 0,
+   "mais_recente": "2026-10-29T01:35:45.000Z",
+   "exemplos": [
+    {
+     "titulo": "Aposta feita via internet leva mais de R$ 324 milh&#245;es na Mega-Sena; veja onde",
+     "url": "https://tnonline.uol.com.br/noticias/cotidiano/aposta-feita-via-internet-leva-mais-de-r-324-milhoes-na-mega-sena-veja-onde-1169211",
+     "data": "2026-10-29T01:35:45.000Z"
+    },
+    {
+     "titulo": "Ex-ministra de Bolsonaro reconhece vit&#243;ria de Lula ap&#243;s carta golpista e fuga de",
+     "url": "https://tnonline.uol.com.br/noticias/politica/ex-ministra-de-bolsonaro-reconhece-vitoria-de-lula-apos-carta-golpista-e-fuga-de-flavio-1169210",
+     "data": "2026-10-29T01:29:33.000Z"
+    },
+    {
+     "titulo": "De 'verdadeiro presidente' a 'l&#237;der do Brasil': o que mudou na carta golpista de Fl&#",
+     "url": "https://tnonline.uol.com.br/noticias/politica/de-verdadeiro-presidente-a-lider-do-brasil-o-que-mudou-na-carta-golpista-de-flavio-1169208",
+     "data": "2026-10-29T01:24:32.000Z"
+    },
+    {
+     "titulo": "Deputados pedem investiga&#231;&#227;o de listas de boicote e agress&#245;es em SC: N&#227",
+     "url": "https://tnonline.uol.com.br/noticias/politica/deputados-pedem-investigacao-de-listas-de-boicote-e-agressoes-em-sc-nao-estamos-no-nazismo-1169207",
+     "data": "2026-10-29T01:14:15.000Z"
+    },
+    {
+     "titulo": "OAB-PR faz alerta sobre ilegalidade de coa&#231;&#227;o e demiss&#227;o por escolha eleito",
+     "url": "https://tnonline.uol.com.br/noticias/parana/oab-pr-faz-alerta-sobre-ilegalidade-de-coacao-e-demissao-por-escolha-eleitoral-1169205",
+     "data": "2026-10-29T01:04:02.000Z"
+    },
+    {
+     "titulo": "Pecuarista &#233; suspeito de matar companheira 38 anos mais nova no interior de SP",
+     "url": "https://tnonline.uol.com.br/noticias/cotidiano/pecuarista-e-suspeito-de-matar-companheira-38-anos-mais-nova-no-interior-de-sp-1169204",
+     "data": "2026-10-29T00:59:58.000Z"
+    }
+   ],
+   "nota": 64
+  },
+  "testes": [
+   {
+    "url": "https://tnonline.uol.com.br/",
+    "itens": 30,
+    "com_data": 6,
+    "recentes": 6,
+    "futuras": 0,
+    "sem_data": 0,
+    "mais_recente": "2026-10-29T01:35:45.000Z",
+    "exemplos": [
+     {
+      "titulo": "Aposta feita via internet leva mais de R$ 324 milh&#245;es na Mega-Sena; veja onde",
+      "url": "https://tnonline.uol.com.br/noticias/cotidiano/aposta-feita-via-internet-leva-mais-de-r-324-milhoes-na-mega-sena-veja-onde-1169211",
+      "data": "2026-10-29T01:35:45.000Z"
+     },
+     {
+      "titulo": "Ex-ministra de Bolsonaro reconhece vit&#243;ria de Lula ap&#243;s carta golpista e fuga de",
+      "url": "https://tnonline.uol.com.br/noticias/politica/ex-ministra-de-bolsonaro-reconhece-vitoria-de-lula-apos-carta-golpista-e-fuga-de-flavio-1169210",
+      "data": "2026-10-29T01:29:33.000Z"
+     },
+     {
+      "titulo": "De 'verdadeiro presidente' a 'l&#237;der do Brasil': o que mudou na carta golpista de Fl&#",
+      "url": "https://tnonline.uol.com.br/noticias/politica/de-verdadeiro-presidente-a-lider-do-brasil-o-que-mudou-na-carta-golpista-de-flavio-1169208",
+      "data": "2026-10-29T01:24:32.000Z"
+     },
+     {
+      "titulo": "Deputados pedem investiga&#231;&#227;o de listas de boicote e agress&#245;es em SC: N&#227",
+      "url": "https://tnonline.uol.com.br/noticias/politica/deputados-pedem-investigacao-de-listas-de-boicote-e-agressoes-em-sc-nao-estamos-no-nazismo-1169207",
+      "data": "2026-10-29T01:14:15.000Z"
+     },
+     {
+      "titulo": "OAB-PR faz alerta sobre ilegalidade de coa&#231;&#227;o e demiss&#227;o por escolha eleito",
+      "url": "https://tnonline.uol.com.br/noticias/parana/oab-pr-faz-alerta-sobre-ilegalidade-de-coacao-e-demissao-por-escolha-eleitoral-1169205",
+      "data": "2026-10-29T01:04:02.000Z"
+     },
+     {
+      "titulo": "Pecuarista &#233; suspeito de matar companheira 38 anos mais nova no interior de SP",
+      "url": "https://tnonline.uol.com.br/noticias/cotidiano/pecuarista-e-suspeito-de-matar-companheira-38-anos-mais-nova-no-interior-de-sp-1169204",
+      "data": "2026-10-29T00:59:58.000Z"
+     }
+    ],
+    "nota": 64
+   }
+  ]
+ },
+ {
+  "modo": "fonte",
+  "nome": "Maringá Post",
+  "cidade": "maringa",
+  "url": "https://maringapost.com.br/",
+  "candidatas": 13,
+  "melhor": {
+   "url": "https://maringapost.com.br/",
+   "itens": 10,
+   "com_data": 6,
+   "recentes": 6,
+   "futuras": 0,
+   "sem_data": 0,
+   "mais_recente": "2026-10-29T01:20:40.000Z",
+   "exemplos": [
+    {
+     "titulo": "Coordenador do PL admite falta de provas sobre fraude eleitoral",
+     "url": "https://maringapost.com.br/2026/10/28/coordenador-do-pl-admite-falta-de-provas-sobre-fraude-eleitoral/",
+     "data": "2026-10-29T01:20:40.000Z"
+    },
+    {
+     "titulo": "Apostador de MT ganha sozinho R$ 324,8 milhões na Mega-sena",
+     "url": "https://maringapost.com.br/2026/10/28/apostador-de-mt-ganha-sozinho-r-3248-milhoes-na-mega-sena/",
+     "data": "2026-10-29T00:52:47.000Z"
+    },
+    {
+     "titulo": "Paraná lidera registros de casos de violência política no Brasil",
+     "url": "https://maringapost.com.br/2026/10/28/parana-lidera-registros-de-casos-de-violencia-politica-no-brasil/",
+     "data": "2026-10-28T22:58:04.000Z"
+    },
+    {
+     "titulo": "Prefeitura vai investir R$ 214 mil para trazer de volta o Ingazinho, criado por Maurício d",
+     "url": "https://maringapost.com.br/2026/10/28/prefeitura-vai-investir-r-214-mil-para-trazer-de-volta-o-ingazinho-criado-por-mauricio-de-sousa/",
+     "data": "2026-10-28T20:24:54.000Z"
+    },
+    {
+     "titulo": "Maringá Encantada abre as inscrições",
+     "url": "https://maringapost.com.br/2026/10/28/maringa-encantada-abre-as-inscricoes/",
+     "data": "2026-10-28T20:23:35.000Z"
+    },
+    {
+     "titulo": "Consórcio vence leilão para ampliar abastecimento de água no Norte do Paraná",
+     "url": "https://maringapost.com.br/2026/10/28/consorcio-vence-leilao-para-ampliar-abastecimento-de-agua-no-norte-do-parana/",
+     "data": "2026-10-28T20:04:53.000Z"
+    }
+   ],
+   "nota": 64
+  },
+  "atual": {
+   "url": "https://maringapost.com.br/",
+   "itens": 10,
+   "com_data": 6,
+   "recentes": 6,
+   "futuras": 0,
+   "sem_data": 0,
+   "mais_recente": "2026-10-29T01:20:40.000Z",
+   "exemplos": [
+    {
+     "titulo": "Coordenador do PL admite falta de provas sobre fraude eleitoral",
+     "url": "https://maringapost.com.br/2026/10/28/coordenador-do-pl-admite-falta-de-provas-sobre-fraude-eleitoral/",
+     "data": "2026-10-29T01:20:40.000Z"
+    },
+    {
+     "titulo": "Apostador de MT ganha sozinho R$ 324,8 milhões na Mega-sena",
+     "url": "https://maringapost.com.br/2026/10/28/apostador-de-mt-ganha-sozinho-r-3248-milhoes-na-mega-sena/",
+     "data": "2026-10-29T00:52:47.000Z"
+    },
+    {
+     "titulo": "Paraná lidera registros de casos de violência política no Brasil",
+     "url": "https://maringapost.com.br/2026/10/28/parana-lidera-registros-de-casos-de-violencia-politica-no-brasil/",
+     "data": "2026-10-28T22:58:04.000Z"
+    },
+    {
+     "titulo": "Prefeitura vai investir R$ 214 mil para trazer de volta o Ingazinho, criado por Maurício d",
+     "url": "https://maringapost.com.br/2026/10/28/prefeitura-vai-investir-r-214-mil-para-trazer-de-volta-o-ingazinho-criado-por-mauricio-de-sousa/",
+     "data": "2026-10-28T20:24:54.000Z"
+    },
+    {
+     "titulo": "Maringá Encantada abre as inscrições",
+     "url": "https://maringapost.com.br/2026/10/28/maringa-encantada-abre-as-inscricoes/",
+     "data": "2026-10-28T20:23:35.000Z"
+    },
+    {
+     "titulo": "Consórcio vence leilão para ampliar abastecimento de água no Norte do Paraná",
+     "url": "https://maringapost.com.br/2026/10/28/consorcio-vence-leilao-para-ampliar-abastecimento-de-agua-no-norte-do-parana/",
+     "data": "2026-10-28T20:04:53.000Z"
+    }
+   ],
+   "nota": 64
+  },
+  "testes": [
+   {
+    "url": "https://maringapost.com.br/",
+    "itens": 10,
+    "com_data": 6,
+    "recentes": 6,
+    "futuras": 0,
+    "sem_data": 0,
+    "mais_recente": "2026-10-29T01:20:40.000Z",
+    "exemplos": [
+     {
+      "titulo": "Coordenador do PL admite falta de provas sobre fraude eleitoral",
+      "url": "https://maringapost.com.br/2026/10/28/coordenador-do-pl-admite-falta-de-provas-sobre-fraude-eleitoral/",
+      "data": "2026-10-29T01:20:40.000Z"
+     },
+     {
+      "titulo": "Apostador de MT ganha sozinho R$ 324,8 milhões na Mega-sena",
+      "url": "https://maringapost.com.br/2026/10/28/apostador-de-mt-ganha-sozinho-r-3248-milhoes-na-mega-sena/",
+      "data": "2026-10-29T00:52:47.000Z"
+     },
+     {
+      "titulo": "Paraná lidera registros de casos de violência política no Brasil",
+      "url": "https://maringapost.com.br/2026/10/28/parana-lidera-registros-de-casos-de-violencia-politica-no-brasil/",
+      "data": "2026-10-28T22:58:04.000Z"
+     },
+     {
+      "titulo": "Prefeitura vai investir R$ 214 mil para trazer de volta o Ingazinho, criado por Maurício d",
+      "url": "https://maringapost.com.br/2026/10/28/prefeitura-vai-investir-r-214-mil-para-trazer-de-volta-o-ingazinho-criado-por-mauricio-de-sousa/",
+      "data": "2026-10-28T20:24:54.000Z"
+     },
+     {
+      "titulo": "Maringá Encantada abre as inscrições",
+      "url": "https://maringapost.com.br/2026/10/28/maringa-encantada-abre-as-inscricoes/",
+      "data": "2026-10-28T20:23:35.000Z"
+     },
+     {
+      "titulo": "Consórcio vence leilão para ampliar abastecimento de água no Norte do Paraná",
+      "url": "https://maringapost.com.br/2026/10/28/consorcio-vence-leilao-para-ampliar-abastecimento-de-agua-no-norte-do-parana/",
+      "data": "2026-10-28T20:04:53.000Z"
+     }
+    ],
+    "nota": 64
+   }
+  ]
+ },
+ {
+  "modo": "fonte",
+  "nome": "Paiquerê — Londrina",
+  "cidade": "londrina",
+  "url": "https://www.paiquere.com.br/",
+  "candidatas": 12,
+  "melhor": {
+   "url": "https://www.paiquere.com.br/",
+   "itens": 10,
+   "com_data": 6,
+   "recentes": 6,
+   "futuras": 0,
+   "sem_data": 0,
+   "mais_recente": "2026-10-28T12:07:29.000Z",
+   "exemplos": [
+    {
+     "titulo": "“Ato vergonhoso”, diz Lula sobre fuga de Flávio Bolsonaro",
+     "url": "https://www.paiquere.com.br/28/10/2026/ato-vergonhoso-diz-lula-sobre-fuga-de-flavio-bolsonaro/",
+     "data": "2026-10-28T12:07:29.000Z"
+    },
+    {
+     "titulo": "Procon-LD alerta para o golpe do falso aluguel ao planejar as férias de fim de ano",
+     "url": "https://www.paiquere.com.br/28/10/2026/procon-ld-alerta-para-o-golpe-do-falso-aluguel-ao-planejar-as-ferias-de-fim-de-ano/",
+     "data": "2026-10-28T12:04:29.000Z"
+    },
+    {
+     "titulo": "Londrina perde para o Athletico nos pênaltis e está fora da Copa Paraná",
+     "url": "https://www.paiquere.com.br/28/10/2026/londrina-perde-para-o-athletico-nos-penaltis-e-esta-fora-da-copa-parana/",
+     "data": "2026-10-28T12:02:44.000Z"
+    },
+    {
+     "titulo": "Vendas de alimentos sobem no Brasil após proibição das bets, diz Abras",
+     "url": "https://www.paiquere.com.br/28/10/2026/vendas-de-alimentos-sobem-no-brasil-apos-proibicao-das-bets-diz-abras/",
+     "data": "2026-10-28T11:59:11.000Z"
+    },
+    {
+     "titulo": "Em carta redigida nos EUA, Flávio Bolsonaro se declara presidente eleito do Brasil",
+     "url": "https://www.paiquere.com.br/28/10/2026/em-carta-redigida-nos-eua-flavio-bolsonaro-se-declara-presidente-eleito-do-brasil/",
+     "data": "2026-10-28T11:54:32.000Z"
+    },
+    {
+     "titulo": "Londrina anuncia a contratação de Higo Magalhães",
+     "url": "https://www.paiquere.com.br/28/10/2026/londrina-anuncia-a-contratacao-de-higo-magalhaes/",
+     "data": "2026-10-28T11:53:41.000Z"
+    }
+   ],
+   "nota": 64
+  },
+  "atual": {
+   "url": "https://www.paiquere.com.br/",
+   "itens": 10,
+   "com_data": 6,
+   "recentes": 6,
+   "futuras": 0,
+   "sem_data": 0,
+   "mais_recente": "2026-10-28T12:07:29.000Z",
+   "exemplos": [
+    {
+     "titulo": "“Ato vergonhoso”, diz Lula sobre fuga de Flávio Bolsonaro",
+     "url": "https://www.paiquere.com.br/28/10/2026/ato-vergonhoso-diz-lula-sobre-fuga-de-flavio-bolsonaro/",
+     "data": "2026-10-28T12:07:29.000Z"
+    },
+    {
+     "titulo": "Procon-LD alerta para o golpe do falso aluguel ao planejar as férias de fim de ano",
+     "url": "https://www.paiquere.com.br/28/10/2026/procon-ld-alerta-para-o-golpe-do-falso-aluguel-ao-planejar-as-ferias-de-fim-de-ano/",
+     "data": "2026-10-28T12:04:29.000Z"
+    },
+    {
+     "titulo": "Londrina perde para o Athletico nos pênaltis e está fora da Copa Paraná",
+     "url": "https://www.paiquere.com.br/28/10/2026/londrina-perde-para-o-athletico-nos-penaltis-e-esta-fora-da-copa-parana/",
+     "data": "2026-10-28T12:02:44.000Z"
+    },
+    {
+     "titulo": "Vendas de alimentos sobem no Brasil após proibição das bets, diz Abras",
+     "url": "https://www.paiquere.com.br/28/10/2026/vendas-de-alimentos-sobem-no-brasil-apos-proibicao-das-bets-diz-abras/",
+     "data": "2026-10-28T11:59:11.000Z"
+    },
+    {
+     "titulo": "Em carta redigida nos EUA, Flávio Bolsonaro se declara presidente eleito do Brasil",
+     "url": "https://www.paiquere.com.br/28/10/2026/em-carta-redigida-nos-eua-flavio-bolsonaro-se-declara-presidente-eleito-do-brasil/",
+     "data": "2026-10-28T11:54:32.000Z"
+    },
+    {
+     "titulo": "Londrina anuncia a contratação de Higo Magalhães",
+     "url": "https://www.paiquere.com.br/28/10/2026/londrina-anuncia-a-contratacao-de-higo-magalhaes/",
+     "data": "2026-10-28T11:53:41.000Z"
+    }
+   ],
+   "nota": 64
+  },
+  "testes": [
+   {
+    "url": "https://www.paiquere.com.br/",
+    "itens": 10,
+    "com_data": 6,
+    "recentes": 6,
+    "futuras": 0,
+    "sem_data": 0,
+    "mais_recente": "2026-10-28T12:07:29.000Z",
+    "exemplos": [
+     {
+      "titulo": "“Ato vergonhoso”, diz Lula sobre fuga de Flávio Bolsonaro",
+      "url": "https://www.paiquere.com.br/28/10/2026/ato-vergonhoso-diz-lula-sobre-fuga-de-flavio-bolsonaro/",
+      "data": "2026-10-28T12:07:29.000Z"
+     },
+     {
+      "titulo": "Procon-LD alerta para o golpe do falso aluguel ao planejar as férias de fim de ano",
+      "url": "https://www.paiquere.com.br/28/10/2026/procon-ld-alerta-para-o-golpe-do-falso-aluguel-ao-planejar-as-ferias-de-fim-de-ano/",
+      "data": "2026-10-28T12:04:29.000Z"
+     },
+     {
+      "titulo": "Londrina perde para o Athletico nos pênaltis e está fora da Copa Paraná",
+      "url": "https://www.paiquere.com.br/28/10/2026/londrina-perde-para-o-athletico-nos-penaltis-e-esta-fora-da-copa-parana/",
+      "data": "2026-10-28T12:02:44.000Z"
+     },
+     {
+      "titulo": "Vendas de alimentos sobem no Brasil após proibição das bets, diz Abras",
+      "url": "https://www.paiquere.com.br/28/10/2026/vendas-de-alimentos-sobem-no-brasil-apos-proibicao-das-bets-diz-abras/",
+      "data": "2026-10-28T11:59:11.000Z"
+     },
+     {
+      "titulo": "Em carta redigida nos EUA, Flávio Bolsonaro se declara presidente eleito do Brasil",
+      "url": "https://www.paiquere.com.br/28/10/2026/em-carta-redigida-nos-eua-flavio-bolsonaro-se-declara-presidente-eleito-do-brasil/",
+      "data": "2026-10-28T11:54:32.000Z"
+     },
+     {
+      "titulo": "Londrina anuncia a contratação de Higo Magalhães",
+      "url": "https://www.paiquere.com.br/28/10/2026/londrina-anuncia-a-contratacao-de-higo-magalhaes/",
+      "data": "2026-10-28T11:53:41.000Z"
+     }
+    ],
+    "nota": 64
+   }
+  ]
+ },
+ {
+  "modo": "fonte",
+  "nome": "Portal da Cidade Arapongas",
+  "cidade": "arapongas",
+  "url": "https://arapongas.portaldacidade.com/",
+  "candidatas": 12,
+  "melhor": {
+   "url": "https://arapongas.portaldacidade.com/",
+   "itens": 0,
+   "com_data": 0,
+   "recentes": 0,
+   "futuras": 0,
+   "sem_data": 0,
+   "mais_recente": null,
+   "exemplos": [],
+   "nota": 0
+  },
+  "atual": {
+   "url": "https://arapongas.portaldacidade.com/",
+   "itens": 0,
+   "com_data": 0,
+   "recentes": 0,
+   "futuras": 0,
+   "sem_data": 0,
+   "mais_recente": null,
+   "exemplos": [],
+   "nota": 0
+  },
+  "testes": [
+   {
+    "url": "https://arapongas.portaldacidade.com/",
+    "itens": 0,
+    "com_data": 0,
+    "recentes": 0,
+    "futuras": 0,
+    "sem_data": 0,
+    "mais_recente": null,
+    "exemplos": [],
+    "nota": 0
+   }
+  ]
+ },
+ {
+  "modo": "fonte",
+  "nome": "CBN Maringá",
+  "cidade": "maringa",
+  "url": "https://www.cbnmaringa.com.br/",
+  "candidatas": 14,
+  "melhor": {
+   "url": "https://www.cbnmaringa.com.br/",
+   "itens": 10,
+   "com_data": 6,
+   "recentes": 6,
+   "futuras": 0,
+   "sem_data": 0,
+   "mais_recente": "2026-10-28T20:10:40.000Z",
+   "exemplos": [
+    {
+     "titulo": "Como os empresários do ramo alimentício podem se adaptar às mudanças de mercado?",
+     "url": "https://cbnmaringa.com.br/noticia/como-os-empresarios-do-ramo-alimenticio-podem-se-adaptar-as-mudancas-de-mercado/",
+     "data": "2026-10-28T20:10:40.000Z"
+    },
+    {
+     "titulo": "Como funciona o home equity, crédito com garantia de imóvel?",
+     "url": "https://cbnmaringa.com.br/noticia/como-funciona-o-home-equity-credito-com-garantia-de-imovel/",
+     "data": "2026-10-28T18:06:57.000Z"
+    },
+    {
+     "titulo": "Caminhonetes furtadas na região chegavam ao Paraguai em menos de duas horas, diz polícia",
+     "url": "https://cbnmaringa.com.br/noticia/caminhonetes-furtadas-na-regiao-chegavam-ao-paraguai-em-menos-de-duas-horas-diz-policia/",
+     "data": "2026-10-28T17:10:24.000Z"
+    },
+    {
+     "titulo": "O voo de ida para o Rio: Por que a sociedade aceita o sacrifício feminino, mas pune a sobr",
+     "url": "https://cbnmaringa.com.br/noticia/o-voo-de-ida-para-o-rio-por-que-a-sociedade-aceita-o-sacrificio-feminino-mas-pune-a-sobrevivencia/",
+     "data": "2026-10-28T16:44:11.000Z"
+    },
+    {
+     "titulo": "Consultoria de pequenas e médias empresas reduz custos em 50% com coworking",
+     "url": "https://cbnmaringa.com.br/noticia/consultoria-de-pequenas-e-medias-empresas-reduz-custos-em-50-com-coworking/",
+     "data": "2026-10-28T14:52:57.000Z"
+    },
+    {
+     "titulo": "Quais as vantagens de um coworking?",
+     "url": "https://cbnmaringa.com.br/noticia/quais-as-vantagens-de-um-coworking/",
+     "data": "2026-10-28T14:18:11.000Z"
+    }
+   ],
+   "nota": 64
+  },
+  "atual": {
+   "url": "https://www.cbnmaringa.com.br/",
+   "itens": 10,
+   "com_data": 6,
+   "recentes": 6,
+   "futuras": 0,
+   "sem_data": 0,
+   "mais_recente": "2026-10-28T20:10:40.000Z",
+   "exemplos": [
+    {
+     "titulo": "Como os empresários do ramo alimentício podem se adaptar às mudanças de mercado?",
+     "url": "https://cbnmaringa.com.br/noticia/como-os-empresarios-do-ramo-alimenticio-podem-se-adaptar-as-mudancas-de-mercado/",
+     "data": "2026-10-28T20:10:40.000Z"
+    },
+    {
+     "titulo": "Como funciona o home equity, crédito com garantia de imóvel?",
+     "url": "https://cbnmaringa.com.br/noticia/como-funciona-o-home-equity-credito-com-garantia-de-imovel/",
+     "data": "2026-10-28T18:06:57.000Z"
+    },
+    {
+     "titulo": "Caminhonetes furtadas na região chegavam ao Paraguai em menos de duas horas, diz polícia",
+     "url": "https://cbnmaringa.com.br/noticia/caminhonetes-furtadas-na-regiao-chegavam-ao-paraguai-em-menos-de-duas-horas-diz-policia/",
+     "data": "2026-10-28T17:10:24.000Z"
+    },
+    {
+     "titulo": "O voo de ida para o Rio: Por que a sociedade aceita o sacrifício feminino, mas pune a sobr",
+     "url": "https://cbnmaringa.com.br/noticia/o-voo-de-ida-para-o-rio-por-que-a-sociedade-aceita-o-sacrificio-feminino-mas-pune-a-sobrevivencia/",
+     "data": "2026-10-28T16:44:11.000Z"
+    },
+    {
+     "titulo": "Consultoria de pequenas e médias empresas reduz custos em 50% com coworking",
+     "url": "https://cbnmaringa.com.br/noticia/consultoria-de-pequenas-e-medias-empresas-reduz-custos-em-50-com-coworking/",
+     "data": "2026-10-28T14:52:57.000Z"
+    },
+    {
+     "titulo": "Quais as vantagens de um coworking?",
+     "url": "https://cbnmaringa.com.br/noticia/quais-as-vantagens-de-um-coworking/",
+     "data": "2026-10-28T14:18:11.000Z"
+    }
+   ],
+   "nota": 64
+  },
+  "testes": [
+   {
+    "url": "https://www.cbnmaringa.com.br/",
+    "itens": 10,
+    "com_data": 6,
+    "recentes": 6,
+    "futuras": 0,
+    "sem_data": 0,
+    "mais_recente": "2026-10-28T20:10:40.000Z",
+    "exemplos": [
+     {
+      "titulo": "Como os empresários do ramo alimentício podem se adaptar às mudanças de mercado?",
+      "url": "https://cbnmaringa.com.br/noticia/como-os-empresarios-do-ramo-alimenticio-podem-se-adaptar-as-mudancas-de-mercado/",
+      "data": "2026-10-28T20:10:40.000Z"
+     },
+     {
+      "titulo": "Como funciona o home equity, crédito com garantia de imóvel?",
+      "url": "https://cbnmaringa.com.br/noticia/como-funciona-o-home-equity-credito-com-garantia-de-imovel/",
+      "data": "2026-10-28T18:06:57.000Z"
+     },
+     {
+      "titulo": "Caminhonetes furtadas na região chegavam ao Paraguai em menos de duas horas, diz polícia",
+      "url": "https://cbnmaringa.com.br/noticia/caminhonetes-furtadas-na-regiao-chegavam-ao-paraguai-em-menos-de-duas-horas-diz-policia/",
+      "data": "2026-10-28T17:10:24.000Z"
+     },
+     {
+      "titulo": "O voo de ida para o Rio: Por que a sociedade aceita o sacrifício feminino, mas pune a sobr",
+      "url": "https://cbnmaringa.com.br/noticia/o-voo-de-ida-para-o-rio-por-que-a-sociedade-aceita-o-sacrificio-feminino-mas-pune-a-sobrevivencia/",
+      "data": "2026-10-28T16:44:11.000Z"
+     },
+     {
+      "titulo": "Consultoria de pequenas e médias empresas reduz custos em 50% com coworking",
+      "url": "https://cbnmaringa.com.br/noticia/consultoria-de-pequenas-e-medias-empresas-reduz-custos-em-50-com-coworking/",
+      "data": "2026-10-28T14:52:57.000Z"
+     },
+     {
+      "titulo": "Quais as vantagens de um coworking?",
+      "url": "https://cbnmaringa.com.br/noticia/quais-as-vantagens-de-um-coworking/",
+      "data": "2026-10-28T14:18:11.000Z"
+     }
+    ],
+    "nota": 64
+   }
+  ]
+ },
+ {
+  "modo": "fonte",
+  "nome": "Portal da Cidade Londrina",
+  "cidade": "londrina",
+  "url": "https://londrina.portaldacidade.com/",
+  "candidatas": 12,
+  "melhor": {
+   "url": "https://londrina.portaldacidade.com/",
+   "itens": 0,
+   "com_data": 0,
+   "recentes": 0,
+   "futuras": 0,
+   "sem_data": 0,
+   "mais_recente": null,
+   "exemplos": [],
+   "nota": 0
+  },
+  "atual": {
+   "url": "https://londrina.portaldacidade.com/",
+   "itens": 0,
+   "com_data": 0,
+   "recentes": 0,
+   "futuras": 0,
+   "sem_data": 0,
+   "mais_recente": null,
+   "exemplos": [],
+   "nota": 0
+  },
+  "testes": [
+   {
+    "url": "https://londrina.portaldacidade.com/",
+    "itens": 0,
+    "com_data": 0,
+    "recentes": 0,
+    "futuras": 0,
+    "sem_data": 0,
+    "mais_recente": null,
+    "exemplos": [],
+    "nota": 0
+   }
+  ]
+ },
+ {
+  "modo": "fonte",
+  "nome": "Portal da Cidade Maringá",
+  "cidade": "maringa",
+  "url": "https://maringa.portaldacidade.com/",
+  "candidatas": 12,
+  "melhor": {
+   "url": "https://maringa.portaldacidade.com/",
+   "itens": 0,
+   "com_data": 0,
+   "recentes": 0,
+   "futuras": 0,
+   "sem_data": 0,
+   "mais_recente": null,
+   "exemplos": [],
+   "nota": 0
+  },
+  "atual": {
+   "url": "https://maringa.portaldacidade.com/",
+   "itens": 0,
+   "com_data": 0,
+   "recentes": 0,
+   "futuras": 0,
+   "sem_data": 0,
+   "mais_recente": null,
+   "exemplos": [],
+   "nota": 0
+  },
+  "testes": [
+   {
+    "url": "https://maringa.portaldacidade.com/",
+    "itens": 0,
+    "com_data": 0,
+    "recentes": 0,
+    "futuras": 0,
+    "sem_data": 0,
+    "mais_recente": null,
+    "exemplos": [],
+    "nota": 0
+   }
+  ]
+ },
+ {
+  "modo": "fonte",
+  "nome": "Adapar",
+  "cidade": "",
+  "url": "https://www.adapar.pr.gov.br/Noticias",
+  "candidatas": 14,
+  "melhor": {
+   "url": "https://www.adapar.pr.gov.br/Noticias",
+   "itens": 30,
+   "com_data": 5,
+   "recentes": 5,
+   "futuras": 0,
+   "sem_data": 1,
+   "mais_recente": "2026-10-26T15:00:00.000Z",
+   "exemplos": [
+    {
+     "titulo": "Lista de Correspondentes Bancários",
+     "url": "https://www.adapar.pr.gov.br/sites/adapar/arquivos_restritos/files/documento/2020-10/correspondentes_bb_pr.pdf",
+     "data": null
+    },
+    {
+     "titulo": "Adapar suspende retirada de ostras em Guaratuba por nível de ficotoxinas acima do limite",
+     "url": "https://www.adapar.pr.gov.br/Noticia/Adapar-suspende-retirada-de-ostras-em-Guaratuba-por-nivel-de-ficotoxinas-acima-do-limite",
+     "data": "2026-10-26T15:00:00.000Z"
+    },
+    {
+     "titulo": "Adapar organiza treinamento de 31 novos servidores da área vegetal na região Norte do Esta",
+     "url": "https://www.adapar.pr.gov.br/Noticia/Adapar-organiza-treinamento-de-31-novos-servidores-da-area-vegetal-na-regiao-Norte-do",
+     "data": "2026-10-23T15:00:00.000Z"
+    },
+    {
+     "titulo": "Café mais barato na prateleira e soja em alta nas exportações, mostra boletim do Deral",
+     "url": "https://www.adapar.pr.gov.br/Noticia/Cafe-mais-barato-na-prateleira-e-soja-em-alta-nas-exportacoes-mostra-boletim-do-Deral",
+     "data": "2026-10-22T15:00:00.000Z"
+    },
+    {
+     "titulo": "Adapar reforça ações de vigilância sanitária na Avicultura após confirmação de foco de Doe",
+     "url": "https://www.adapar.pr.gov.br/Noticia/Adapar-reforca-acoes-de-vigilancia-sanitaria-na-Avicultura-apos-confirmacao-de-foco-de",
+     "data": "2026-10-22T15:00:00.000Z"
+    },
+    {
+     "titulo": "Remessa de 4,8 mil toneladas de alimentos abastece as escolas estaduais até o fim do ano",
+     "url": "https://www.adapar.pr.gov.br/Noticia/Remessa-de-48-mil-toneladas-de-alimentos-abastece-escolas-estaduais-ate-o-fim-do-ano",
+     "data": "2026-10-22T15:00:00.000Z"
+    }
+   ],
+   "nota": 53
+  },
+  "atual": {
+   "url": "https://www.adapar.pr.gov.br/Noticias",
+   "itens": 30,
+   "com_data": 5,
+   "recentes": 5,
+   "futuras": 0,
+   "sem_data": 1,
+   "mais_recente": "2026-10-26T15:00:00.000Z",
+   "exemplos": [
+    {
+     "titulo": "Lista de Correspondentes Bancários",
+     "url": "https://www.adapar.pr.gov.br/sites/adapar/arquivos_restritos/files/documento/2020-10/correspondentes_bb_pr.pdf",
+     "data": null
+    },
+    {
+     "titulo": "Adapar suspende retirada de ostras em Guaratuba por nível de ficotoxinas acima do limite",
+     "url": "https://www.adapar.pr.gov.br/Noticia/Adapar-suspende-retirada-de-ostras-em-Guaratuba-por-nivel-de-ficotoxinas-acima-do-limite",
+     "data": "2026-10-26T15:00:00.000Z"
+    },
+    {
+     "titulo": "Adapar organiza treinamento de 31 novos servidores da área vegetal na região Norte do Esta",
+     "url": "https://www.adapar.pr.gov.br/Noticia/Adapar-organiza-treinamento-de-31-novos-servidores-da-area-vegetal-na-regiao-Norte-do",
+     "data": "2026-10-23T15:00:00.000Z"
+    },
+    {
+     "titulo": "Café mais barato na prateleira e soja em alta nas exportações, mostra boletim do Deral",
+     "url": "https://www.adapar.pr.gov.br/Noticia/Cafe-mais-barato-na-prateleira-e-soja-em-alta-nas-exportacoes-mostra-boletim-do-Deral",
+     "data": "2026-10-22T15:00:00.000Z"
+    },
+    {
+     "titulo": "Adapar reforça ações de vigilância sanitária na Avicultura após confirmação de foco de Doe",
+     "url": "https://www.adapar.pr.gov.br/Noticia/Adapar-reforca-acoes-de-vigilancia-sanitaria-na-Avicultura-apos-confirmacao-de-foco-de",
+     "data": "2026-10-22T15:00:00.000Z"
+    },
+    {
+     "titulo": "Remessa de 4,8 mil toneladas de alimentos abastece as escolas estaduais até o fim do ano",
+     "url": "https://www.adapar.pr.gov.br/Noticia/Remessa-de-48-mil-toneladas-de-alimentos-abastece-escolas-estaduais-ate-o-fim-do-ano",
+     "data": "2026-10-22T15:00:00.000Z"
+    }
+   ],
+   "nota": 53
+  },
+  "testes": [
+   {
+    "url": "https://www.adapar.pr.gov.br/Noticias",
+    "itens": 30,
+    "com_data": 5,
+    "recentes": 5,
+    "futuras": 0,
+    "sem_data": 1,
+    "mais_recente": "2026-10-26T15:00:00.000Z",
+    "exemplos": [
+     {
+      "titulo": "Lista de Correspondentes Bancários",
+      "url": "https://www.adapar.pr.gov.br/sites/adapar/arquivos_restritos/files/documento/2020-10/correspondentes_bb_pr.pdf",
+      "data": null
+     },
+     {
+      "titulo": "Adapar suspende retirada de ostras em Guaratuba por nível de ficotoxinas acima do limite",
+      "url": "https://www.adapar.pr.gov.br/Noticia/Adapar-suspende-retirada-de-ostras-em-Guaratuba-por-nivel-de-ficotoxinas-acima-do-limite",
+      "data": "2026-10-26T15:00:00.000Z"
+     },
+     {
+      "titulo": "Adapar organiza treinamento de 31 novos servidores da área vegetal na região Norte do Esta",
+      "url": "https://www.adapar.pr.gov.br/Noticia/Adapar-organiza-treinamento-de-31-novos-servidores-da-area-vegetal-na-regiao-Norte-do",
+      "data": "2026-10-23T15:00:00.000Z"
+     },
+     {
+      "titulo": "Café mais barato na prateleira e soja em alta nas exportações, mostra boletim do Deral",
+      "url": "https://www.adapar.pr.gov.br/Noticia/Cafe-mais-barato-na-prateleira-e-soja-em-alta-nas-exportacoes-mostra-boletim-do-Deral",
+      "data": "2026-10-22T15:00:00.000Z"
+     },
+     {
+      "titulo": "Adapar reforça ações de vigilância sanitária na Avicultura após confirmação de foco de Doe",
+      "url": "https://www.adapar.pr.gov.br/Noticia/Adapar-reforca-acoes-de-vigilancia-sanitaria-na-Avicultura-apos-confirmacao-de-foco-de",
+      "data": "2026-10-22T15:00:00.000Z"
+     },
+     {
+      "titulo": "Remessa de 4,8 mil toneladas de alimentos abastece as escolas estaduais até o fim do ano",
+      "url": "https://www.adapar.pr.gov.br/Noticia/Remessa-de-48-mil-toneladas-de-alimentos-abastece-escolas-estaduais-ate-o-fim-do-ano",
+      "data": "2026-10-22T15:00:00.000Z"
+     }
+    ],
+    "nota": 53
+   }
+  ]
+ },
+ {
+  "modo": "fonte",
+  "nome": "Portal da Cidade Cambé",
+  "cidade": "cambe",
+  "url": "https://cambe.portaldacidade.com/",
+  "candidatas": 12,
+  "melhor": {
+   "url": "https://cambe.portaldacidade.com/",
+   "itens": 0,
+   "com_data": 0,
+   "recentes": 0,
+   "futuras": 0,
+   "sem_data": 0,
+   "mais_recente": null,
+   "exemplos": [],
+   "nota": 0
+  },
+  "atual": {
+   "url": "https://cambe.portaldacidade.com/",
+   "itens": 0,
+   "com_data": 0,
+   "recentes": 0,
+   "futuras": 0,
+   "sem_data": 0,
+   "mais_recente": null,
+   "exemplos": [],
+   "nota": 0
+  },
+  "testes": [
+   {
+    "url": "https://cambe.portaldacidade.com/",
+    "itens": 0,
+    "com_data": 0,
+    "recentes": 0,
+    "futuras": 0,
+    "sem_data": 0,
+    "mais_recente": null,
+    "exemplos": [],
+    "nota": 0
+   }
+  ]
+ },
+ {
+  "modo": "fonte",
+  "nome": "IDR-Paraná",
+  "cidade": "",
+  "url": "https://www.idrparana.pr.gov.br/Noticias",
+  "candidatas": 14,
+  "melhor": {
+   "url": "https://www.idrparana.pr.gov.br/Noticias",
+   "itens": 30,
+   "com_data": 5,
+   "recentes": 5,
+   "futuras": 0,
+   "sem_data": 1,
+   "mais_recente": "2026-10-28T15:00:00.000Z",
+   "exemplos": [
+    {
+     "titulo": "Denunciar crime ambiental",
+     "url": "https://www.idrparana.pr.gov.br/servicos/Meio-Ambiente/Policia-Ambiental/Denunciar-crime-ambiental-JGoMV8N0",
+     "data": null
+    },
+    {
+     "titulo": "IDR-Paraná orienta produtores sobre oportunidades de negócios no turismo rural em Astorga",
+     "url": "https://www.idrparana.pr.gov.br/Noticia/IDR-Parana-orienta-produtores-sobre-oportunidades-de-negocios-no-turismo-rural-em-Astorga",
+     "data": "2026-10-28T15:00:00.000Z"
+    },
+    {
+     "titulo": "Encontro em Mariópolis reúne mulheres do campo com palestras, feira de agroindústrias e aç",
+     "url": "https://www.idrparana.pr.gov.br/Noticia/Encontro-em-Mariopolis-reune-mulheres-do-campo-com-palestras-feira-de-agroindustrias-e",
+     "data": "2026-10-28T15:00:00.000Z"
+    },
+    {
+     "titulo": "Produção orgânica é tema de evento em Campo Mourão nesta quinta-feira",
+     "url": "https://www.idrparana.pr.gov.br/Noticia/Producao-organica-e-tema-de-evento-em-Campo-Mourao-nesta-quinta-feira",
+     "data": "2026-10-27T15:00:00.000Z"
+    },
+    {
+     "titulo": "SEAGRI marca presença na AveSui, uma das maiores feiras da proteína animal da América Lati",
+     "url": "https://www.idrparana.pr.gov.br/Noticia/SEAGRI-marca-presenca-na-AveSui-uma-das-maiores-feiras-da-proteina-animal-da-America-Latina",
+     "data": "2026-10-26T15:00:00.000Z"
+    },
+    {
+     "titulo": "Plantio direto: tecnologia que nasceu no Paraná ajuda a produzir mais e preservar o meio a",
+     "url": "https://www.idrparana.pr.gov.br/Noticia/Plantio-direto-tecnologia-que-nasceu-no-Parana-ajuda-produzir-mais-e-preservar-o-meio",
+     "data": "2026-10-23T15:00:00.000Z"
+    }
+   ],
+   "nota": 53
+  },
+  "atual": {
+   "url": "https://www.idrparana.pr.gov.br/Noticias",
+   "itens": 30,
+   "com_data": 5,
+   "recentes": 5,
+   "futuras": 0,
+   "sem_data": 1,
+   "mais_recente": "2026-10-28T15:00:00.000Z",
+   "exemplos": [
+    {
+     "titulo": "Denunciar crime ambiental",
+     "url": "https://www.idrparana.pr.gov.br/servicos/Meio-Ambiente/Policia-Ambiental/Denunciar-crime-ambiental-JGoMV8N0",
+     "data": null
+    },
+    {
+     "titulo": "IDR-Paraná orienta produtores sobre oportunidades de negócios no turismo rural em Astorga",
+     "url": "https://www.idrparana.pr.gov.br/Noticia/IDR-Parana-orienta-produtores-sobre-oportunidades-de-negocios-no-turismo-rural-em-Astorga",
+     "data": "2026-10-28T15:00:00.000Z"
+    },
+    {
+     "titulo": "Encontro em Mariópolis reúne mulheres do campo com palestras, feira de agroindústrias e aç",
+     "url": "https://www.idrparana.pr.gov.br/Noticia/Encontro-em-Mariopolis-reune-mulheres-do-campo-com-palestras-feira-de-agroindustrias-e",
+     "data": "2026-10-28T15:00:00.000Z"
+    },
+    {
+     "titulo": "Produção orgânica é tema de evento em Campo Mourão nesta quinta-feira",
+     "url": "https://www.idrparana.pr.gov.br/Noticia/Producao-organica-e-tema-de-evento-em-Campo-Mourao-nesta-quinta-feira",
+     "data": "2026-10-27T15:00:00.000Z"
+    },
+    {
+     "titulo": "SEAGRI marca presença na AveSui, uma das maiores feiras da proteína animal da América Lati",
+     "url": "https://www.idrparana.pr.gov.br/Noticia/SEAGRI-marca-presenca-na-AveSui-uma-das-maiores-feiras-da-proteina-animal-da-America-Latina",
+     "data": "2026-10-26T15:00:00.000Z"
+    },
+    {
+     "titulo": "Plantio direto: tecnologia que nasceu no Paraná ajuda a produzir mais e preservar o meio a",
+     "url": "https://www.idrparana.pr.gov.br/Noticia/Plantio-direto-tecnologia-que-nasceu-no-Parana-ajuda-produzir-mais-e-preservar-o-meio",
+     "data": "2026-10-23T15:00:00.000Z"
+    }
+   ],
+   "nota": 53
+  },
+  "testes": [
+   {
+    "url": "https://www.idrparana.pr.gov.br/Noticias",
+    "itens": 30,
+    "com_data": 5,
+    "recentes": 5,
+    "futuras": 0,
+    "sem_data": 1,
+    "mais_recente": "2026-10-28T15:00:00.000Z",
+    "exemplos": [
+     {
+      "titulo": "Denunciar crime ambiental",
+      "url": "https://www.idrparana.pr.gov.br/servicos/Meio-Ambiente/Policia-Ambiental/Denunciar-crime-ambiental-JGoMV8N0",
+      "data": null
+     },
+     {
+      "titulo": "IDR-Paraná orienta produtores sobre oportunidades de negócios no turismo rural em Astorga",
+      "url": "https://www.idrparana.pr.gov.br/Noticia/IDR-Parana-orienta-produtores-sobre-oportunidades-de-negocios-no-turismo-rural-em-Astorga",
+      "data": "2026-10-28T15:00:00.000Z"
+     },
+     {
+      "titulo": "Encontro em Mariópolis reúne mulheres do campo com palestras, feira de agroindústrias e aç",
+      "url": "https://www.idrparana.pr.gov.br/Noticia/Encontro-em-Mariopolis-reune-mulheres-do-campo-com-palestras-feira-de-agroindustrias-e",
+      "data": "2026-10-28T15:00:00.000Z"
+     },
+     {
+      "titulo": "Produção orgânica é tema de evento em Campo Mourão nesta quinta-feira",
+      "url": "https://www.idrparana.pr.gov.br/Noticia/Producao-organica-e-tema-de-evento-em-Campo-Mourao-nesta-quinta-feira",
+      "data": "2026-10-27T15:00:00.000Z"
+     },
+     {
+      "titulo": "SEAGRI marca presença na AveSui, uma das maiores feiras da proteína animal da América Lati",
+      "url": "https://www.idrparana.pr.gov.br/Noticia/SEAGRI-marca-presenca-na-AveSui-uma-das-maiores-feiras-da-proteina-animal-da-America-Latina",
+      "data": "2026-10-26T15:00:00.000Z"
+     },
+     {
+      "titulo": "Plantio direto: tecnologia que nasceu no Paraná ajuda a produzir mais e preservar o meio a",
+      "url": "https://www.idrparana.pr.gov.br/Noticia/Plantio-direto-tecnologia-que-nasceu-no-Parana-ajuda-produzir-mais-e-preservar-o-meio",
+      "data": "2026-10-23T15:00:00.000Z"
+     }
+    ],
+    "nota": 53
+   }
+  ]
+ },
+ {
+  "modo": "fonte",
+  "nome": "Portal da Cidade Apucarana",
+  "cidade": "apucarana",
+  "url": "https://apucarana.portaldacidade.com/",
+  "candidatas": 12,
+  "melhor": {
+   "url": "https://apucarana.portaldacidade.com/",
+   "itens": 0,
+   "com_data": 0,
+   "recentes": 0,
+   "futuras": 0,
+   "sem_data": 0,
+   "mais_recente": null,
+   "exemplos": [],
+   "nota": 0
+  },
+  "atual": {
+   "url": "https://apucarana.portaldacidade.com/",
+   "itens": 0,
+   "com_data": 0,
+   "recentes": 0,
+   "futuras": 0,
+   "sem_data": 0,
+   "mais_recente": null,
+   "exemplos": [],
+   "nota": 0
+  },
+  "testes": [
+   {
+    "url": "https://apucarana.portaldacidade.com/",
+    "itens": 0,
+    "com_data": 0,
+    "recentes": 0,
+    "futuras": 0,
+    "sem_data": 0,
+    "mais_recente": null,
+    "exemplos": [],
+    "nota": 0
+   }
+  ]
+ },
+ {
+  "modo": "fonte",
+  "nome": "Plantão Maringá",
+  "cidade": "maringa",
+  "url": "https://www.plantaomaringa.com.br/",
+  "candidatas": 12,
+  "melhor": {
+   "url": "https://www.plantaomaringa.com.br/",
+   "itens": 0,
+   "com_data": 0,
+   "recentes": 0,
+   "futuras": 0,
+   "sem_data": 0,
+   "mais_recente": null,
+   "exemplos": [],
+   "nota": 0
+  },
+  "atual": {
+   "url": "https://www.plantaomaringa.com.br/",
+   "itens": 0,
+   "com_data": 0,
+   "recentes": 0,
+   "futuras": 0,
+   "sem_data": 0,
+   "mais_recente": null,
+   "exemplos": [],
+   "nota": 0
+  },
+  "testes": [
+   {
+    "url": "https://www.plantaomaringa.com.br/",
+    "itens": 0,
+    "com_data": 0,
+    "recentes": 0,
+    "futuras": 0,
+    "sem_data": 0,
+    "mais_recente": null,
+    "exemplos": [],
+    "nota": 0
+   }
+  ]
+ },
+ {
+  "modo": "fonte",
+  "nome": "Jornal de Ponta Grossa",
+  "cidade": "ponta-grossa",
+  "url": "https://www.jornalpontagrossa.com.br/rss",
+  "candidatas": 13,
+  "melhor": {
+   "url": "https://www.jornalpontagrossa.com.br/rss",
+   "itens": 30,
+   "com_data": 2,
+   "recentes": 2,
+   "futuras": 0,
+   "sem_data": 4,
+   "mais_recente": "2026-10-29T00:22:26.000Z",
+   "exemplos": [
+    {
+     "titulo": "Geral Santos: Polícia apreende dois menores suspeitos da morte de engenheiro Foram identif",
+     "url": "https://www.jornalpontagrossa.com.br/noticia/194318/santos-policia-apreende-dois-menores-suspeitos-da-morte-de-engenheiro",
+     "data": null
+    },
+    {
+     "titulo": "Afastamentos por vício em jogos cresceram 5 vezes em três anos",
+     "url": "https://www.jornalpontagrossa.com.br/noticia/194302/afastamentos-por-vicio-em-jogos-cresceram-5-vezes-em-tres-anos",
+     "data": "2026-10-28T23:02:16.000Z"
+    },
+    {
+     "titulo": "Copel inaugura subestação em São Pedro do Paraná e reforça sistema elétrico no Noroeste",
+     "url": "https://www.jornalpontagrossa.com.br/noticia/194299/copel-inaugura-subestacao-em-sao-pedro-do-parana-e-reforca-sistema-eletrico-no-noroeste",
+     "data": null
+    },
+    {
+     "titulo": "Fundo Estratégico do Paraná é finalista em prêmio do Tesouro Nacional",
+     "url": "https://www.jornalpontagrossa.com.br/noticia/194290/fundo-estrategico-do-parana-e-finalista-em-premio-do-tesouro-nacional",
+     "data": null
+    },
+    {
+     "titulo": "Câmara Projeto cria política de incentivo à tecnologia assistiva e mobilidade inclusiva O ",
+     "url": "https://www.jornalpontagrossa.com.br/noticia/194317/projeto-cria-politica-de-incentivo-a-tecnologia-assistiva-e-mobilidade-inclusiva",
+     "data": "2026-10-29T00:22:26.000Z"
+    },
+    {
+     "titulo": "Justiça Presidente do TSE diz que eleições ocorreram dentro da normalidade Derrotado, Fláv",
+     "url": "https://www.jornalpontagrossa.com.br/noticia/194315/presidente-do-tse-diz-que-eleicoes-ocorreram-dentro-da-normalidade",
+     "data": null
+    }
+   ],
+   "nota": 20
+  },
+  "atual": {
+   "url": "https://www.jornalpontagrossa.com.br/rss",
+   "itens": 30,
+   "com_data": 2,
+   "recentes": 2,
+   "futuras": 0,
+   "sem_data": 4,
+   "mais_recente": "2026-10-29T00:22:26.000Z",
+   "exemplos": [
+    {
+     "titulo": "Geral Santos: Polícia apreende dois menores suspeitos da morte de engenheiro Foram identif",
+     "url": "https://www.jornalpontagrossa.com.br/noticia/194318/santos-policia-apreende-dois-menores-suspeitos-da-morte-de-engenheiro",
+     "data": null
+    },
+    {
+     "titulo": "Afastamentos por vício em jogos cresceram 5 vezes em três anos",
+     "url": "https://www.jornalpontagrossa.com.br/noticia/194302/afastamentos-por-vicio-em-jogos-cresceram-5-vezes-em-tres-anos",
+     "data": "2026-10-28T23:02:16.000Z"
+    },
+    {
+     "titulo": "Copel inaugura subestação em São Pedro do Paraná e reforça sistema elétrico no Noroeste",
+     "url": "https://www.jornalpontagrossa.com.br/noticia/194299/copel-inaugura-subestacao-em-sao-pedro-do-parana-e-reforca-sistema-eletrico-no-noroeste",
+     "data": null
+    },
+    {
+     "titulo": "Fundo Estratégico do Paraná é finalista em prêmio do Tesouro Nacional",
+     "url": "https://www.jornalpontagrossa.com.br/noticia/194290/fundo-estrategico-do-parana-e-finalista-em-premio-do-tesouro-nacional",
+     "data": null
+    },
+    {
+     "titulo": "Câmara Projeto cria política de incentivo à tecnologia assistiva e mobilidade inclusiva O ",
+     "url": "https://www.jornalpontagrossa.com.br/noticia/194317/projeto-cria-politica-de-incentivo-a-tecnologia-assistiva-e-mobilidade-inclusiva",
+     "data": "2026-10-29T00:22:26.000Z"
+    },
+    {
+     "titulo": "Justiça Presidente do TSE diz que eleições ocorreram dentro da normalidade Derrotado, Fláv",
+     "url": "https://www.jornalpontagrossa.com.br/noticia/194315/presidente-do-tse-diz-que-eleicoes-ocorreram-dentro-da-normalidade",
+     "data": null
+    }
+   ],
+   "nota": 20
+  },
+  "testes": [
+   {
+    "url": "https://www.jornalpontagrossa.com.br/rss",
+    "itens": 30,
+    "com_data": 2,
+    "recentes": 2,
+    "futuras": 0,
+    "sem_data": 4,
+    "mais_recente": "2026-10-29T00:22:26.000Z",
+    "exemplos": [
+     {
+      "titulo": "Geral Santos: Polícia apreende dois menores suspeitos da morte de engenheiro Foram identif",
+      "url": "https://www.jornalpontagrossa.com.br/noticia/194318/santos-policia-apreende-dois-menores-suspeitos-da-morte-de-engenheiro",
+      "data": null
+     },
+     {
+      "titulo": "Afastamentos por vício em jogos cresceram 5 vezes em três anos",
+      "url": "https://www.jornalpontagrossa.com.br/noticia/194302/afastamentos-por-vicio-em-jogos-cresceram-5-vezes-em-tres-anos",
+      "data": "2026-10-28T23:02:16.000Z"
+     },
+     {
+      "titulo": "Copel inaugura subestação em São Pedro do Paraná e reforça sistema elétrico no Noroeste",
+      "url": "https://www.jornalpontagrossa.com.br/noticia/194299/copel-inaugura-subestacao-em-sao-pedro-do-parana-e-reforca-sistema-eletrico-no-noroeste",
+      "data": null
+     },
+     {
+      "titulo": "Fundo Estratégico do Paraná é finalista em prêmio do Tesouro Nacional",
+      "url": "https://www.jornalpontagrossa.com.br/noticia/194290/fundo-estrategico-do-parana-e-finalista-em-premio-do-tesouro-nacional",
+      "data": null
+     },
+     {
+      "titulo": "Câmara Projeto cria política de incentivo à tecnologia assistiva e mobilidade inclusiva O ",
+      "url": "https://www.jornalpontagrossa.com.br/noticia/194317/projeto-cria-politica-de-incentivo-a-tecnologia-assistiva-e-mobilidade-inclusiva",
+      "data": "2026-10-29T00:22:26.000Z"
+     },
+     {
+      "titulo": "Justiça Presidente do TSE diz que eleições ocorreram dentro da normalidade Derrotado, Fláv",
+      "url": "https://www.jornalpontagrossa.com.br/noticia/194315/presidente-do-tse-diz-que-eleicoes-ocorreram-dentro-da-normalidade",
+      "data": null
+     }
+    ],
+    "nota": 20
+   }
+  ]
+ },
+ {
+  "modo": "fonte",
+  "nome": "Portal da Cidade Ivaiporã",
+  "cidade": "ivaipora",
+  "url": "https://ivaipora.portaldacidade.com/",
+  "candidatas": 12,
+  "melhor": {
+   "url": "https://ivaipora.portaldacidade.com/",
+   "itens": 0,
+   "com_data": 0,
+   "recentes": 0,
+   "futuras": 0,
+   "sem_data": 0,
+   "mais_recente": null,
+   "exemplos": [],
+   "nota": 0
+  },
+  "atual": {
+   "url": "https://ivaipora.portaldacidade.com/",
+   "itens": 0,
+   "com_data": 0,
+   "recentes": 0,
+   "futuras": 0,
+   "sem_data": 0,
+   "mais_recente": null,
+   "exemplos": [],
+   "nota": 0
+  },
+  "testes": [
+   {
+    "url": "https://ivaipora.portaldacidade.com/",
+    "itens": 0,
+    "com_data": 0,
+    "recentes": 0,
+    "futuras": 0,
+    "sem_data": 0,
+    "mais_recente": null,
+    "exemplos": [],
+    "nota": 0
+   }
+  ]
+ },
+ {
+  "modo": "fonte",
+  "nome": "Diário do Noroeste - Paranavaí",
+  "cidade": "paranavai",
+  "url": "https://diariodonoroeste.com.br/rss",
+  "candidatas": 13,
+  "melhor": {
+   "url": "https://diariodonoroeste.com.br/rss",
+   "itens": 12,
+   "com_data": 6,
+   "recentes": 6,
+   "futuras": 0,
+   "sem_data": 0,
+   "mais_recente": "2026-10-28T19:26:44.000Z",
+   "exemplos": [
+    {
+     "titulo": "Paranavaí e Tecpar alinham implantação de polo tecnológico e divulgam edital de inteligênc",
+     "url": "https://diariodonoroeste.com.br/paranavai-e-tecpar-alinham-implantacao-de-polo-tecnologico-e-divulgam-edital-de-inteligencia-artificial/",
+     "data": "2026-10-28T19:26:44.000Z"
+    },
+    {
+     "titulo": "Maratona de Matemática reúne alunos de 19 escolas municipais de Paranavaí",
+     "url": "https://diariodonoroeste.com.br/maratona-de-matematica-reune-alunos-de-19-escolas-municipais-de-paranavai/",
+     "data": "2026-10-28T18:00:00.000Z"
+    },
+    {
+     "titulo": "Estar ocupado virou símbolo de status, mas isso pode estar sabotando sua carreira",
+     "url": "https://diariodonoroeste.com.br/estar-ocupado-virou-simbolo-de-status-mas-isso-pode-estar-sabotando-sua-carreira/",
+     "data": "2026-10-28T17:00:00.000Z"
+    },
+    {
+     "titulo": "Vereador de Paranavaí propõe realização de jogos municipais rurais",
+     "url": "https://diariodonoroeste.com.br/vereador-de-paranavai-propoe-realizacao-de-jogos-municipais-rurais/",
+     "data": "2026-10-28T16:45:00.000Z"
+    },
+    {
+     "titulo": "Suspeito de atirar seis vezes contra homem em Terra Rica é preso",
+     "url": "https://diariodonoroeste.com.br/suspeito-de-atirar-seis-vezes-contra-homem-em-terra-rica-e-preso/",
+     "data": "2026-10-28T16:09:31.000Z"
+    },
+    {
+     "titulo": "Alfabetizar 95% das crianças até 2029 levaria 8,5 mil jovens a mais a concluir a escola co",
+     "url": "https://diariodonoroeste.com.br/alfabetizar-95-das-criancas-ate-2029-levaria-85-mil-jovens-a-mais-a-concluir-a-escola-com-aprendizado-adequado/",
+     "data": "2026-10-28T14:05:00.000Z"
+    }
+   ],
+   "nota": 64
+  },
+  "atual": {
+   "url": "https://diariodonoroeste.com.br/rss",
+   "itens": 12,
+   "com_data": 6,
+   "recentes": 6,
+   "futuras": 0,
+   "sem_data": 0,
+   "mais_recente": "2026-10-28T19:26:44.000Z",
+   "exemplos": [
+    {
+     "titulo": "Paranavaí e Tecpar alinham implantação de polo tecnológico e divulgam edital de inteligênc",
+     "url": "https://diariodonoroeste.com.br/paranavai-e-tecpar-alinham-implantacao-de-polo-tecnologico-e-divulgam-edital-de-inteligencia-artificial/",
+     "data": "2026-10-28T19:26:44.000Z"
+    },
+    {
+     "titulo": "Maratona de Matemática reúne alunos de 19 escolas municipais de Paranavaí",
+     "url": "https://diariodonoroeste.com.br/maratona-de-matematica-reune-alunos-de-19-escolas-municipais-de-paranavai/",
+     "data": "2026-10-28T18:00:00.000Z"
+    },
+    {
+     "titulo": "Estar ocupado virou símbolo de status, mas isso pode estar sabotando sua carreira",
+     "url": "https://diariodonoroeste.com.br/estar-ocupado-virou-simbolo-de-status-mas-isso-pode-estar-sabotando-sua-carreira/",
+     "data": "2026-10-28T17:00:00.000Z"
+    },
+    {
+     "titulo": "Vereador de Paranavaí propõe realização de jogos municipais rurais",
+     "url": "https://diariodonoroeste.com.br/vereador-de-paranavai-propoe-realizacao-de-jogos-municipais-rurais/",
+     "data": "2026-10-28T16:45:00.000Z"
+    },
+    {
+     "titulo": "Suspeito de atirar seis vezes contra homem em Terra Rica é preso",
+     "url": "https://diariodonoroeste.com.br/suspeito-de-atirar-seis-vezes-contra-homem-em-terra-rica-e-preso/",
+     "data": "2026-10-28T16:09:31.000Z"
+    },
+    {
+     "titulo": "Alfabetizar 95% das crianças até 2029 levaria 8,5 mil jovens a mais a concluir a escola co",
+     "url": "https://diariodonoroeste.com.br/alfabetizar-95-das-criancas-ate-2029-levaria-85-mil-jovens-a-mais-a-concluir-a-escola-com-aprendizado-adequado/",
+     "data": "2026-10-28T14:05:00.000Z"
+    }
+   ],
+   "nota": 64
+  },
+  "testes": [
+   {
+    "url": "https://diariodonoroeste.com.br/rss",
+    "itens": 12,
+    "com_data": 6,
+    "recentes": 6,
+    "futuras": 0,
+    "sem_data": 0,
+    "mais_recente": "2026-10-28T19:26:44.000Z",
+    "exemplos": [
+     {
+      "titulo": "Paranavaí e Tecpar alinham implantação de polo tecnológico e divulgam edital de inteligênc",
+      "url": "https://diariodonoroeste.com.br/paranavai-e-tecpar-alinham-implantacao-de-polo-tecnologico-e-divulgam-edital-de-inteligencia-artificial/",
+      "data": "2026-10-28T19:26:44.000Z"
+     },
+     {
+      "titulo": "Maratona de Matemática reúne alunos de 19 escolas municipais de Paranavaí",
+      "url": "https://diariodonoroeste.com.br/maratona-de-matematica-reune-alunos-de-19-escolas-municipais-de-paranavai/",
+      "data": "2026-10-28T18:00:00.000Z"
+     },
+     {
+      "titulo": "Estar ocupado virou símbolo de status, mas isso pode estar sabotando sua carreira",
+      "url": "https://diariodonoroeste.com.br/estar-ocupado-virou-simbolo-de-status-mas-isso-pode-estar-sabotando-sua-carreira/",
+      "data": "2026-10-28T17:00:00.000Z"
+     },
+     {
+      "titulo": "Vereador de Paranavaí propõe realização de jogos municipais rurais",
+      "url": "https://diariodonoroeste.com.br/vereador-de-paranavai-propoe-realizacao-de-jogos-municipais-rurais/",
+      "data": "2026-10-28T16:45:00.000Z"
+     },
+     {
+      "titulo": "Suspeito de atirar seis vezes contra homem em Terra Rica é preso",
+      "url": "https://diariodonoroeste.com.br/suspeito-de-atirar-seis-vezes-contra-homem-em-terra-rica-e-preso/",
+      "data": "2026-10-28T16:09:31.000Z"
+     },
+     {
+      "titulo": "Alfabetizar 95% das crianças até 2029 levaria 8,5 mil jovens a mais a concluir a escola co",
+      "url": "https://diariodonoroeste.com.br/alfabetizar-95-das-criancas-ate-2029-levaria-85-mil-jovens-a-mais-a-concluir-a-escola-com-aprendizado-adequado/",
+      "data": "2026-10-28T14:05:00.000Z"
+     }
+    ],
+    "nota": 64
+   }
+  ]
+ },
+ {
+  "modo": "fonte",
+  "nome": "G Mais Notícias - Guarapuava",
+  "cidade": "guarapuava",
+  "url": "https://gmaisnoticias.com/rss",
+  "candidatas": 14,
+  "melhor": {
+   "url": "https://gmaisnoticias.com/feed",
+   "itens": 30,
+   "com_data": 6,
+   "recentes": 6,
+   "futuras": 0,
+   "sem_data": 0,
+   "mais_recente": "2026-10-28T20:00:00.000Z",
+   "exemplos": [
+    {
+     "titulo": "Combate às violências contra as mulheres: Bancos vermelhos são instalados na Unicentro",
+     "url": "https://gmaisnoticias.com/combate-as-violencias-contra-as-mulheres-bancos-vermelhos-sao-instalados-na-unicentro",
+     "data": "2026-10-28T20:00:00.000Z"
+    },
+    {
+     "titulo": "Detran-PR entrega 33,3 mil novas placas de trânsito a 167 municípios",
+     "url": "https://gmaisnoticias.com/detran-pr-entrega-33-3-mil-novas-placas-de-transito-a-167-municipios",
+     "data": "2026-10-28T19:10:00.000Z"
+    },
+    {
+     "titulo": "JUSTIÇA SOB PRESSÃO: juiz federal vira alvo de investigação após decisões sobre cursos de ",
+     "url": "https://gmaisnoticias.com/justica-sob-pressao-juiz-federal-vira-alvo-de-investigacao-apos-decisoes-sobre-cursos-de-medicina-entenda-o-caso-que-chegou-ao-stf",
+     "data": "2026-10-28T18:23:00.000Z"
+    },
+    {
+     "titulo": "Viagem no tempo em Guarapuava! Crianças descobrem como era o passado e surpreendem com pro",
+     "url": "https://gmaisnoticias.com/viagem-no-tempo-em-guarapuava-criancas-descobrem-como-era-o-passado-e-surpreendem-com-projeto-cheio-de-curiosidade",
+     "data": "2026-10-28T17:50:00.000Z"
+    },
+    {
+     "titulo": "PRF apreende 1,2 tonelada de maconha em caminhão paraguaio na BR-277, em Guarapuava",
+     "url": "https://gmaisnoticias.com/prf-apreende-1-2-tonelada-de-maconha-em-caminhao-paraguaio-na-br-277-em-guarapuava",
+     "data": "2026-10-28T17:10:00.000Z"
+    },
+    {
+     "titulo": "INSS diz que mensagem sobre bloqueio de benefícios por falta de biometria é falsa",
+     "url": "https://gmaisnoticias.com/inss-diz-que-mensagem-sobre-bloqueio-de-beneficios-por-falta-de-biometria-e-falsa",
+     "data": "2026-10-28T16:23:00.000Z"
+    }
+   ],
+   "nota": 64
+  },
+  "atual": {
+   "url": "https://gmaisnoticias.com/rss",
+   "itens": 1,
+   "com_data": 1,
+   "recentes": 0,
+   "futuras": 0,
+   "sem_data": 0,
+   "mais_recente": "2021-08-20T15:00:00.000Z",
+   "exemplos": [
+    {
+     "titulo": "Política de Privacidade.",
+     "url": "https://gmaisnoticias.com/politica-de-privacidade",
+     "data": "2021-08-20T15:00:00.000Z"
+    }
+   ],
+   "nota": 4
+  },
+  "testes": [
+   {
+    "url": "https://gmaisnoticias.com/feed",
+    "itens": 30,
+    "com_data": 6,
+    "recentes": 6,
+    "futuras": 0,
+    "sem_data": 0,
+    "mais_recente": "2026-10-28T20:00:00.000Z",
+    "exemplos": [
+     {
+      "titulo": "Combate às violências contra as mulheres: Bancos vermelhos são instalados na Unicentro",
+      "url": "https://gmaisnoticias.com/combate-as-violencias-contra-as-mulheres-bancos-vermelhos-sao-instalados-na-unicentro",
+      "data": "2026-10-28T20:00:00.000Z"
+     },
+     {
+      "titulo": "Detran-PR entrega 33,3 mil novas placas de trânsito a 167 municípios",
+      "url": "https://gmaisnoticias.com/detran-pr-entrega-33-3-mil-novas-placas-de-transito-a-167-municipios",
+      "data": "2026-10-28T19:10:00.000Z"
+     },
+     {
+      "titulo": "JUSTIÇA SOB PRESSÃO: juiz federal vira alvo de investigação após decisões sobre cursos de ",
+      "url": "https://gmaisnoticias.com/justica-sob-pressao-juiz-federal-vira-alvo-de-investigacao-apos-decisoes-sobre-cursos-de-medicina-entenda-o-caso-que-chegou-ao-stf",
+      "data": "2026-10-28T18:23:00.000Z"
+     },
+     {
+      "titulo": "Viagem no tempo em Guarapuava! Crianças descobrem como era o passado e surpreendem com pro",
+      "url": "https://gmaisnoticias.com/viagem-no-tempo-em-guarapuava-criancas-descobrem-como-era-o-passado-e-surpreendem-com-projeto-cheio-de-curiosidade",
+      "data": "2026-10-28T17:50:00.000Z"
+     },
+     {
+      "titulo": "PRF apreende 1,2 tonelada de maconha em caminhão paraguaio na BR-277, em Guarapuava",
+      "url": "https://gmaisnoticias.com/prf-apreende-1-2-tonelada-de-maconha-em-caminhao-paraguaio-na-br-277-em-guarapuava",
+      "data": "2026-10-28T17:10:00.000Z"
+     },
+     {
+      "titulo": "INSS diz que mensagem sobre bloqueio de benefícios por falta de biometria é falsa",
+      "url": "https://gmaisnoticias.com/inss-diz-que-mensagem-sobre-bloqueio-de-beneficios-por-falta-de-biometria-e-falsa",
+      "data": "2026-10-28T16:23:00.000Z"
+     }
+    ],
+    "nota": 64
+   },
+   {
+    "url": "https://gmaisnoticias.com/rss",
+    "itens": 1,
+    "com_data": 1,
+    "recentes": 0,
+    "futuras": 0,
+    "sem_data": 0,
+    "mais_recente": "2021-08-20T15:00:00.000Z",
+    "exemplos": [
+     {
+      "titulo": "Política de Privacidade.",
+      "url": "https://gmaisnoticias.com/politica-de-privacidade",
+      "data": "2021-08-20T15:00:00.000Z"
+     }
+    ],
+    "nota": 4
+   }
+  ]
+ },
+ {
+  "modo": "fonte",
+  "nome": "Catve",
+  "cidade": "cascavel",
+  "url": "https://www.catve.com/feed",
+  "candidatas": 12,
+  "melhor": {
+   "url": "https://www.catve.com/feed",
+   "itens": 0,
+   "com_data": 0,
+   "recentes": 0,
+   "futuras": 0,
+   "sem_data": 0,
+   "mais_recente": null,
+   "exemplos": [],
+   "nota": 0
+  },
+  "atual": {
+   "url": "https://www.catve.com/feed",
+   "itens": 0,
+   "com_data": 0,
+   "recentes": 0,
+   "futuras": 0,
+   "sem_data": 0,
+   "mais_recente": null,
+   "exemplos": [],
+   "nota": 0
+  },
+  "testes": [
+   {
+    "url": "https://www.catve.com/feed",
+    "itens": 0,
+    "com_data": 0,
+    "recentes": 0,
+    "futuras": 0,
+    "sem_data": 0,
+    "mais_recente": null,
+    "exemplos": [],
+    "nota": 0
+   }
+  ]
+ },
+ {
+  "modo": "fonte",
+  "nome": "AEN — Agência Estadual de Notícias",
+  "cidade": "",
+  "url": "https://www.aen.pr.gov.br/Noticias",
+  "candidatas": 14,
+  "melhor": {
+   "url": "https://www.parana.pr.gov.br/aen/noticias",
+   "itens": 30,
+   "com_data": 5,
+   "recentes": 5,
+   "futuras": 0,
+   "sem_data": 1,
+   "mais_recente": "2026-10-28T20:48:00.000Z",
+   "exemplos": [
+    {
+     "titulo": "De janeiro/2019 até hoje",
+     "url": "https://www.parana.pr.gov.br/aen/noticias",
+     "data": null
+    },
+    {
+     "titulo": "Feira reunirá milhares de estudantes em um grande encontro de ciência em Curitiba",
+     "url": "https://www.parana.pr.gov.br/aen/Noticia/Feira-reunira-milhares-de-estudantes-em-um-grande-encontro-de-ciencia-em-Curitiba",
+     "data": "2026-10-28T20:48:00.000Z"
+    },
+    {
+     "titulo": "Fundo Estratégico do Paraná é finalista em prêmio do Tesouro Nacional",
+     "url": "https://www.parana.pr.gov.br/aen/Noticia/Fundo-Estrategico-do-Parana-e-finalista-em-premio-do-Tesouro-Nacional",
+     "data": "2026-10-28T20:09:00.000Z"
+    },
+    {
+     "titulo": "Rodovia das Cataratas terá nova liberação de tráfego nesta sexta-feira",
+     "url": "https://www.parana.pr.gov.br/aen/Noticia/Rodovia-das-Cataratas-tera-nova-liberacao-de-trafego-nesta-sexta-feira",
+     "data": "2026-10-28T19:40:00.000Z"
+    },
+    {
+     "titulo": "Amep promove oficinas técnicas para elaboração de plano de proteção ambiental da RMC",
+     "url": "https://www.parana.pr.gov.br/aen/Noticia/Amep-promove-oficinas-tecnicas-para-elaboracao-de-plano-de-protecao-ambiental-da-RMC",
+     "data": "2026-10-28T19:36:00.000Z"
+    },
+    {
+     "titulo": "Leilão define consórcio para implantação de sistema de abastecimento integrado da Sanepar ",
+     "url": "https://www.parana.pr.gov.br/aen/Noticia/Leilao-define-consorcio-para-implantacao-de-sistema-de-abastecimento-integrado-da",
+     "data": "2026-10-28T19:23:00.000Z"
+    }
+   ],
+   "nota": 53
+  },
+  "atual": {
+   "url": "https://www.aen.pr.gov.br/Noticias",
+   "itens": 30,
+   "com_data": 0,
+   "recentes": 0,
+   "futuras": 0,
+   "sem_data": 6,
+   "mais_recente": null,
+   "exemplos": [
+    {
+     "titulo": "De janeiro/2019 até hoje",
+     "url": "https://www.aen.pr.gov.br/aen/noticias",
+     "data": null
+    },
+    {
+     "titulo": "Feira reunirá milhares de estudantes em um grande encontro de ciência em Curitiba",
+     "url": "https://www.aen.pr.gov.br/aen/Noticia/Feira-reunira-milhares-de-estudantes-em-um-grande-encontro-de-ciencia-em-Curitiba",
+     "data": null
+    },
+    {
+     "titulo": "Fundo Estratégico do Paraná é finalista em prêmio do Tesouro Nacional",
+     "url": "https://www.aen.pr.gov.br/aen/Noticia/Fundo-Estrategico-do-Parana-e-finalista-em-premio-do-Tesouro-Nacional",
+     "data": null
+    },
+    {
+     "titulo": "Rodovia das Cataratas terá nova liberação de tráfego nesta sexta-feira",
+     "url": "https://www.aen.pr.gov.br/aen/Noticia/Rodovia-das-Cataratas-tera-nova-liberacao-de-trafego-nesta-sexta-feira",
+     "data": null
+    },
+    {
+     "titulo": "Amep promove oficinas técnicas para elaboração de plano de proteção ambiental da RMC",
+     "url": "https://www.aen.pr.gov.br/aen/Noticia/Amep-promove-oficinas-tecnicas-para-elaboracao-de-plano-de-protecao-ambiental-da-RMC",
+     "data": null
+    },
+    {
+     "titulo": "Leilão define consórcio para implantação de sistema de abastecimento integrado da Sanepar ",
+     "url": "https://www.aen.pr.gov.br/aen/Noticia/Leilao-define-consorcio-para-implantacao-de-sistema-de-abastecimento-integrado-da",
+     "data": null
+    }
+   ],
+   "nota": -2
+  },
+  "testes": [
+   {
+    "url": "https://www.parana.pr.gov.br/aen/noticias",
+    "itens": 30,
+    "com_data": 5,
+    "recentes": 5,
+    "futuras": 0,
+    "sem_data": 1,
+    "mais_recente": "2026-10-28T20:48:00.000Z",
+    "exemplos": [
+     {
+      "titulo": "De janeiro/2019 até hoje",
+      "url": "https://www.parana.pr.gov.br/aen/noticias",
+      "data": null
+     },
+     {
+      "titulo": "Feira reunirá milhares de estudantes em um grande encontro de ciência em Curitiba",
+      "url": "https://www.parana.pr.gov.br/aen/Noticia/Feira-reunira-milhares-de-estudantes-em-um-grande-encontro-de-ciencia-em-Curitiba",
+      "data": "2026-10-28T20:48:00.000Z"
+     },
+     {
+      "titulo": "Fundo Estratégico do Paraná é finalista em prêmio do Tesouro Nacional",
+      "url": "https://www.parana.pr.gov.br/aen/Noticia/Fundo-Estrategico-do-Parana-e-finalista-em-premio-do-Tesouro-Nacional",
+      "data": "2026-10-28T20:09:00.000Z"
+     },
+     {
+      "titulo": "Rodovia das Cataratas terá nova liberação de tráfego nesta sexta-feira",
+      "url": "https://www.parana.pr.gov.br/aen/Noticia/Rodovia-das-Cataratas-tera-nova-liberacao-de-trafego-nesta-sexta-feira",
+      "data": "2026-10-28T19:40:00.000Z"
+     },
+     {
+      "titulo": "Amep promove oficinas técnicas para elaboração de plano de proteção ambiental da RMC",
+      "url": "https://www.parana.pr.gov.br/aen/Noticia/Amep-promove-oficinas-tecnicas-para-elaboracao-de-plano-de-protecao-ambiental-da-RMC",
+      "data": "2026-10-28T19:36:00.000Z"
+     },
+     {
+      "titulo": "Leilão define consórcio para implantação de sistema de abastecimento integrado da Sanepar ",
+      "url": "https://www.parana.pr.gov.br/aen/Noticia/Leilao-define-consorcio-para-implantacao-de-sistema-de-abastecimento-integrado-da",
+      "data": "2026-10-28T19:23:00.000Z"
+     }
+    ],
+    "nota": 53
+   },
+   {
+    "url": "https://www.aen.pr.gov.br/Noticias",
+    "itens": 30,
+    "com_data": 0,
+    "recentes": 0,
+    "futuras": 0,
+    "sem_data": 6,
+    "mais_recente": null,
+    "exemplos": [
+     {
+      "titulo": "De janeiro/2019 até hoje",
+      "url": "https://www.aen.pr.gov.br/aen/noticias",
+      "data": null
+     },
+     {
+      "titulo": "Feira reunirá milhares de estudantes em um grande encontro de ciência em Curitiba",
+      "url": "https://www.aen.pr.gov.br/aen/Noticia/Feira-reunira-milhares-de-estudantes-em-um-grande-encontro-de-ciencia-em-Curitiba",
+      "data": null
+     },
+     {
+      "titulo": "Fundo Estratégico do Paraná é finalista em prêmio do Tesouro Nacional",
+      "url": "https://www.aen.pr.gov.br/aen/Noticia/Fundo-Estrategico-do-Parana-e-finalista-em-premio-do-Tesouro-Nacional",
+      "data": null
+     },
+     {
+      "titulo": "Rodovia das Cataratas terá nova liberação de tráfego nesta sexta-feira",
+      "url": "https://www.aen.pr.gov.br/aen/Noticia/Rodovia-das-Cataratas-tera-nova-liberacao-de-trafego-nesta-sexta-feira",
+      "data": null
+     },
+     {
+      "titulo": "Amep promove oficinas técnicas para elaboração de plano de proteção ambiental da RMC",
+      "url": "https://www.aen.pr.gov.br/aen/Noticia/Amep-promove-oficinas-tecnicas-para-elaboracao-de-plano-de-protecao-ambiental-da-RMC",
+      "data": null
+     },
+     {
+      "titulo": "Leilão define consórcio para implantação de sistema de abastecimento integrado da Sanepar ",
+      "url": "https://www.aen.pr.gov.br/aen/Noticia/Leilao-define-consorcio-para-implantacao-de-sistema-de-abastecimento-integrado-da",
+      "data": null
+     }
+    ],
+    "nota": -2
+   }
+  ]
+ },
+ {
+  "modo": "fonte",
+  "nome": "Cornelio Noticias",
+  "cidade": "cornelio-procopio",
+  "url": "https://cornelionoticias.com.br/rss",
+  "candidatas": 14,
+  "melhor": {
+   "url": "https://cornelionoticias.com.br/rss",
+   "itens": 0,
+   "com_data": 0,
+   "recentes": 0,
+   "futuras": 0,
+   "sem_data": 0,
+   "mais_recente": null,
+   "exemplos": [],
+   "nota": 0
+  },
+  "atual": {
+   "url": "https://cornelionoticias.com.br/rss",
+   "itens": 0,
+   "com_data": 0,
+   "recentes": 0,
+   "futuras": 0,
+   "sem_data": 0,
+   "mais_recente": null,
+   "exemplos": [],
+   "nota": 0
+  },
+  "testes": [
+   {
+    "url": "https://cornelionoticias.com.br/rss",
+    "itens": 0,
+    "com_data": 0,
+    "recentes": 0,
+    "futuras": 0,
+    "sem_data": 0,
+    "mais_recente": null,
+    "exemplos": [],
+    "nota": 0
+   },
+   {
+    "url": "https://cornelionoticias.com.br/posts/lista/noticias",
+    "itens": 0,
+    "com_data": 0,
+    "recentes": 0,
+    "futuras": 0,
+    "sem_data": 0,
+    "mais_recente": null,
+    "exemplos": [],
+    "nota": 0
+   },
+   {
+    "url": "https://www.facebook.com/portalcornelionoticias",
+    "itens": 0,
+    "com_data": 0,
+    "recentes": 0,
+    "futuras": 0,
+    "sem_data": 0,
+    "mais_recente": null,
+    "exemplos": [],
+    "nota": 0
+   },
+   {
+    "url": "https://www.youtube.com/user/cornelionoticias",
+    "itens": 0,
+    "com_data": 0,
+    "recentes": 0,
+    "futuras": 0,
+    "sem_data": 0,
+    "mais_recente": null,
+    "exemplos": [],
+    "nota": 0
+   }
+  ]
+ },
+ {
+  "modo": "fonte",
+  "nome": "Rede Massa — Londrina/Maringá",
+  "cidade": "londrina",
+  "url": "https://redemassa.com.br/",
+  "candidatas": 12,
+  "melhor": {
+   "url": "https://redemassa.com.br/",
+   "itens": 0,
+   "com_data": 0,
+   "recentes": 0,
+   "futuras": 0,
+   "sem_data": 0,
+   "mais_recente": null,
+   "exemplos": [],
+   "nota": 0
+  },
+  "atual": {
+   "url": "https://redemassa.com.br/",
+   "itens": 0,
+   "com_data": 0,
+   "recentes": 0,
+   "futuras": 0,
+   "sem_data": 0,
+   "mais_recente": null,
+   "exemplos": [],
+   "nota": 0
+  },
+  "testes": [
+   {
+    "url": "https://redemassa.com.br/",
+    "itens": 0,
+    "com_data": 0,
+    "recentes": 0,
+    "futuras": 0,
+    "sem_data": 0,
+    "mais_recente": null,
+    "exemplos": [],
+    "nota": 0
+   }
+  ]
+ },
+ {
+  "modo": "fonte",
+  "nome": "Embrapa Soja (Londrina)",
+  "cidade": "londrina",
+  "url": "https://www.embrapa.br/soja/busca-de-noticias",
+  "candidatas": 13,
+  "melhor": {
+   "url": "https://www.embrapa.br/noticias",
+   "itens": 18,
+   "com_data": 1,
+   "recentes": 0,
+   "futuras": 0,
+   "sem_data": 5,
+   "mais_recente": "2026-09-28T15:00:00.000Z",
+   "exemplos": [
+    {
+     "titulo": "acesse a lista completa",
+     "url": "https://www.embrapa.br/busca-de-noticias/-/noticia/",
+     "data": null
+    },
+    {
+     "titulo": "Lodo de tratamento de água vira fertilizante de liberação lenta em parceria Embrapa-Sabesp",
+     "url": "https://www.embrapa.br/busca-de-noticias/-/noticia/149202216/lodo-de-tratamento-de-agua-vira-fertilizante-de-liberacao-lenta-em-parceria-embrapa-sabesp",
+     "data": null
+    },
+    {
+     "titulo": "Bactérias do gênero Bacillus se consolidam como os principais agentes de controle biológic",
+     "url": "https://www.embrapa.br/busca-de-noticias/-/noticia/149237097/bacterias-do-genero-bacillus-se-consolidam-como-os-principais-agentes-de-controle-biologico-na-agricultura-brasileira",
+     "data": "2026-09-28T15:00:00.000Z"
+    },
+    {
+     "titulo": "Pesquisadora Christiane Paiva, da Embrapa, vence 8º Prêmio CBMM de Ciência e Tecnologia",
+     "url": "https://www.embrapa.br/busca-de-noticias/-/noticia/149283862/pesquisadora-christiane-paiva-da-embrapa-vence-8-premio-cbmm-de-ciencia-e-tecnologia",
+     "data": null
+    },
+    {
+     "titulo": "Projeto da Embrapa em conservação de sementes ganha destaque global no site da FAO",
+     "url": "https://www.embrapa.br/busca-de-noticias/-/noticia/149072547/projeto-da-embrapa-em-conservacao-de-sementes-ganha-destaque-global-no-site-da-fao",
+     "data": null
+    },
+    {
+     "titulo": "Técnicas para criação de galinhas fortalecem a segurança alimentar de comunidades pantanei",
+     "url": "https://www.embrapa.br/busca-de-noticias/-/noticia/149294074/tecnicas-para-criacao-de-galinhas-fortalecem-a-seguranca-alimentar-de-comunidades-pantaneiras",
+     "data": null
+    }
+   ],
+   "nota": 3
+  },
+  "atual": {
+   "url": "https://www.embrapa.br/soja/busca-de-noticias",
+   "itens": 10,
+   "com_data": 0,
+   "recentes": 0,
+   "futuras": 0,
+   "sem_data": 6,
+   "mais_recente": null,
+   "exemplos": [
+    {
+     "titulo": "Geotecnologia usada no redimensionamento de terraços favorece a conservação do solo",
+     "url": "https://www.embrapa.br/web/soja/busca-de-noticias/-/noticia/148877537/geotecnologia-usada-no-redimensionamento-de-terracos-favorece-a-conservacao-do-solo?p_auth=V3YrerWs#p_buscanoticia_WAR_pcebusca",
+     "data": null
+    },
+    {
+     "titulo": "Mariangela Hungria debate protagonismo dos bioinsumos na agricultura",
+     "url": "https://www.embrapa.br/web/soja/busca-de-noticias/-/noticia/148437913/mariangela-hungria-debate-protagonismo-dos-bioinsumos-na-agricultura?p_auth=V3YrerWs#p_buscanoticia_WAR_pcebusca",
+     "data": null
+    },
+    {
+     "titulo": "Análise genética indica cultivares de soja STS para manejo de plantas daninhas",
+     "url": "https://www.embrapa.br/web/soja/busca-de-noticias/-/noticia/147221644/analise-genetica-indica-cultivares-de-soja-sts-para-manejo-de-plantas-daninhas?p_auth=V3YrerWs#p_buscanoticia_WAR_pcebusca",
+     "data": null
+    },
+    {
+     "titulo": "Embrapa Soja promove capacitação para classificadores de soja",
+     "url": "https://www.embrapa.br/web/soja/busca-de-noticias/-/noticia/147173213/embrapa-soja-promove-capacitacao-para-classificadores-de-soja?p_auth=V3YrerWs#p_buscanoticia_WAR_pcebusca",
+     "data": null
+    },
+    {
+     "titulo": "Mariangela Hungria debate eficiência feminina no campo na Expointer",
+     "url": "https://www.embrapa.br/web/soja/busca-de-noticias/-/noticia/147012371/mariangela-hungria-debate-eficiencia-feminina-no-campo-na-expointer?p_auth=V3YrerWs#p_buscanoticia_WAR_pcebusca",
+     "data": null
+    },
+    {
+     "titulo": "Práticas sustentáveis no agro como resposta ao desafio climático",
+     "url": "https://www.embrapa.br/web/soja/busca-de-noticias/-/noticia/147007912/praticas-sustentaveis-no-agro-como-resposta-ao-desafio-climatico?p_auth=V3YrerWs#p_buscanoticia_WAR_pcebusca",
+     "data": null
+    }
+   ],
+   "nota": -2
+  },
+  "testes": [
+   {
+    "url": "https://www.embrapa.br/noticias",
+    "itens": 18,
+    "com_data": 1,
+    "recentes": 0,
+    "futuras": 0,
+    "sem_data": 5,
+    "mais_recente": "2026-09-28T15:00:00.000Z",
+    "exemplos": [
+     {
+      "titulo": "acesse a lista completa",
+      "url": "https://www.embrapa.br/busca-de-noticias/-/noticia/",
+      "data": null
+     },
+     {
+      "titulo": "Lodo de tratamento de água vira fertilizante de liberação lenta em parceria Embrapa-Sabesp",
+      "url": "https://www.embrapa.br/busca-de-noticias/-/noticia/149202216/lodo-de-tratamento-de-agua-vira-fertilizante-de-liberacao-lenta-em-parceria-embrapa-sabesp",
+      "data": null
+     },
+     {
+      "titulo": "Bactérias do gênero Bacillus se consolidam como os principais agentes de controle biológic",
+      "url": "https://www.embrapa.br/busca-de-noticias/-/noticia/149237097/bacterias-do-genero-bacillus-se-consolidam-como-os-principais-agentes-de-controle-biologico-na-agricultura-brasileira",
+      "data": "2026-09-28T15:00:00.000Z"
+     },
+     {
+      "titulo": "Pesquisadora Christiane Paiva, da Embrapa, vence 8º Prêmio CBMM de Ciência e Tecnologia",
+      "url": "https://www.embrapa.br/busca-de-noticias/-/noticia/149283862/pesquisadora-christiane-paiva-da-embrapa-vence-8-premio-cbmm-de-ciencia-e-tecnologia",
+      "data": null
+     },
+     {
+      "titulo": "Projeto da Embrapa em conservação de sementes ganha destaque global no site da FAO",
+      "url": "https://www.embrapa.br/busca-de-noticias/-/noticia/149072547/projeto-da-embrapa-em-conservacao-de-sementes-ganha-destaque-global-no-site-da-fao",
+      "data": null
+     },
+     {
+      "titulo": "Técnicas para criação de galinhas fortalecem a segurança alimentar de comunidades pantanei",
+      "url": "https://www.embrapa.br/busca-de-noticias/-/noticia/149294074/tecnicas-para-criacao-de-galinhas-fortalecem-a-seguranca-alimentar-de-comunidades-pantaneiras",
+      "data": null
+     }
+    ],
+    "nota": 3
+   },
+   {
+    "url": "https://www.embrapa.br/noticias/",
+    "itens": 18,
+    "com_data": 1,
+    "recentes": 0,
+    "futuras": 0,
+    "sem_data": 5,
+    "mais_recente": "2026-09-28T15:00:00.000Z",
+    "exemplos": [
+     {
+      "titulo": "acesse a lista completa",
+      "url": "https://www.embrapa.br/busca-de-noticias/-/noticia/",
+      "data": null
+     },
+     {
+      "titulo": "Lodo de tratamento de água vira fertilizante de liberação lenta em parceria Embrapa-Sabesp",
+      "url": "https://www.embrapa.br/busca-de-noticias/-/noticia/149202216/lodo-de-tratamento-de-agua-vira-fertilizante-de-liberacao-lenta-em-parceria-embrapa-sabesp",
+      "data": null
+     },
+     {
+      "titulo": "Bactérias do gênero Bacillus se consolidam como os principais agentes de controle biológic",
+      "url": "https://www.embrapa.br/busca-de-noticias/-/noticia/149237097/bacterias-do-genero-bacillus-se-consolidam-como-os-principais-agentes-de-controle-biologico-na-agricultura-brasileira",
+      "data": "2026-09-28T15:00:00.000Z"
+     },
+     {
+      "titulo": "Pesquisadora Christiane Paiva, da Embrapa, vence 8º Prêmio CBMM de Ciência e Tecnologia",
+      "url": "https://www.embrapa.br/busca-de-noticias/-/noticia/149283862/pesquisadora-christiane-paiva-da-embrapa-vence-8-premio-cbmm-de-ciencia-e-tecnologia",
+      "data": null
+     },
+     {
+      "titulo": "Projeto da Embrapa em conservação de sementes ganha destaque global no site da FAO",
+      "url": "https://www.embrapa.br/busca-de-noticias/-/noticia/149072547/projeto-da-embrapa-em-conservacao-de-sementes-ganha-destaque-global-no-site-da-fao",
+      "data": null
+     },
+     {
+      "titulo": "Técnicas para criação de galinhas fortalecem a segurança alimentar de comunidades pantanei",
+      "url": "https://www.embrapa.br/busca-de-noticias/-/noticia/149294074/tecnicas-para-criacao-de-galinhas-fortalecem-a-seguranca-alimentar-de-comunidades-pantaneiras",
+      "data": null
+     }
+    ],
+    "nota": 3
+   },
+   {
+    "url": "https://www.embrapa.br/sala-de-imprensa",
+    "itens": 4,
+    "com_data": 1,
+    "recentes": 0,
+    "futuras": 0,
+    "sem_data": 3,
+    "mais_recente": "2026-09-28T15:00:00.000Z",
+    "exemplos": [
+     {
+      "titulo": "Lodo de tratamento de água vira fertilizante de liberação lenta em parceria Embrapa-Sabesp",
+      "url": "https://www.embrapa.br/busca-de-noticias/-/noticia/149202216/lodo-de-tratamento-de-agua-vira-fertilizante-de-liberacao-lenta-em-parceria-embrapa-sabesp",
+      "data": null
+     },
+     {
+      "titulo": "Bactérias do gênero Bacillus se consolidam como os principais agentes de controle biológic",
+      "url": "https://www.embrapa.br/busca-de-noticias/-/noticia/149237097/bacterias-do-genero-bacillus-se-consolidam-como-os-principais-agentes-de-controle-biologico-na-agricultura-brasileira",
+      "data": "2026-09-28T15:00:00.000Z"
+     },
+     {
+      "titulo": "Técnicas para criação de galinhas fortalecem a segurança alimentar de comunidades pantanei",
+      "url": "https://www.embrapa.br/busca-de-noticias/-/noticia/149294074/tecnicas-para-criacao-de-galinhas-fortalecem-a-seguranca-alimentar-de-comunidades-pantaneiras",
+      "data": null
+     },
+     {
+      "titulo": "Embrapa Instrumentação",
+      "url": "https://www.embrapa.br/instrumentacao/noticias",
+      "data": null
+     }
+    ],
+    "nota": 1
+   },
+   {
+    "url": "https://www.embrapa.br/soja/busca-de-noticias",
+    "itens": 10,
+    "com_data": 0,
+    "recentes": 0,
+    "futuras": 0,
+    "sem_data": 6,
+    "mais_recente": null,
+    "exemplos": [
+     {
+      "titulo": "Geotecnologia usada no redimensionamento de terraços favorece a conservação do solo",
+      "url": "https://www.embrapa.br/web/soja/busca-de-noticias/-/noticia/148877537/geotecnologia-usada-no-redimensionamento-de-terracos-favorece-a-conservacao-do-solo?p_auth=V3YrerWs#p_buscanoticia_WAR_pcebusca",
+      "data": null
+     },
+     {
+      "titulo": "Mariangela Hungria debate protagonismo dos bioinsumos na agricultura",
+      "url": "https://www.embrapa.br/web/soja/busca-de-noticias/-/noticia/148437913/mariangela-hungria-debate-protagonismo-dos-bioinsumos-na-agricultura?p_auth=V3YrerWs#p_buscanoticia_WAR_pcebusca",
+      "data": null
+     },
+     {
+      "titulo": "Análise genética indica cultivares de soja STS para manejo de plantas daninhas",
+      "url": "https://www.embrapa.br/web/soja/busca-de-noticias/-/noticia/147221644/analise-genetica-indica-cultivares-de-soja-sts-para-manejo-de-plantas-daninhas?p_auth=V3YrerWs#p_buscanoticia_WAR_pcebusca",
+      "data": null
+     },
+     {
+      "titulo": "Embrapa Soja promove capacitação para classificadores de soja",
+      "url": "https://www.embrapa.br/web/soja/busca-de-noticias/-/noticia/147173213/embrapa-soja-promove-capacitacao-para-classificadores-de-soja?p_auth=V3YrerWs#p_buscanoticia_WAR_pcebusca",
+      "data": null
+     },
+     {
+      "titulo": "Mariangela Hungria debate eficiência feminina no campo na Expointer",
+      "url": "https://www.embrapa.br/web/soja/busca-de-noticias/-/noticia/147012371/mariangela-hungria-debate-eficiencia-feminina-no-campo-na-expointer?p_auth=V3YrerWs#p_buscanoticia_WAR_pcebusca",
+      "data": null
+     },
+     {
+      "titulo": "Práticas sustentáveis no agro como resposta ao desafio climático",
+      "url": "https://www.embrapa.br/web/soja/busca-de-noticias/-/noticia/147007912/praticas-sustentaveis-no-agro-como-resposta-ao-desafio-climatico?p_auth=V3YrerWs#p_buscanoticia_WAR_pcebusca",
+      "data": null
+     }
+    ],
+    "nota": -2
+   }
+  ]
+ },
+ {
+  "modo": "fonte",
+  "nome": "Embrapa Florestas (Colombo)",
+  "cidade": "colombo",
+  "url": "https://www.embrapa.br/florestas/busca-de-noticias",
+  "candidatas": 13,
+  "melhor": {
+   "url": "https://www.embrapa.br/noticias",
+   "itens": 18,
+   "com_data": 1,
+   "recentes": 0,
+   "futuras": 0,
+   "sem_data": 5,
+   "mais_recente": "2026-09-28T15:00:00.000Z",
+   "exemplos": [
+    {
+     "titulo": "acesse a lista completa",
+     "url": "https://www.embrapa.br/busca-de-noticias/-/noticia/",
+     "data": null
+    },
+    {
+     "titulo": "Lodo de tratamento de água vira fertilizante de liberação lenta em parceria Embrapa-Sabesp",
+     "url": "https://www.embrapa.br/busca-de-noticias/-/noticia/149202216/lodo-de-tratamento-de-agua-vira-fertilizante-de-liberacao-lenta-em-parceria-embrapa-sabesp",
+     "data": null
+    },
+    {
+     "titulo": "Bactérias do gênero Bacillus se consolidam como os principais agentes de controle biológic",
+     "url": "https://www.embrapa.br/busca-de-noticias/-/noticia/149237097/bacterias-do-genero-bacillus-se-consolidam-como-os-principais-agentes-de-controle-biologico-na-agricultura-brasileira",
+     "data": "2026-09-28T15:00:00.000Z"
+    },
+    {
+     "titulo": "Pesquisadora Christiane Paiva, da Embrapa, vence 8º Prêmio CBMM de Ciência e Tecnologia",
+     "url": "https://www.embrapa.br/busca-de-noticias/-/noticia/149283862/pesquisadora-christiane-paiva-da-embrapa-vence-8-premio-cbmm-de-ciencia-e-tecnologia",
+     "data": null
+    },
+    {
+     "titulo": "Projeto da Embrapa em conservação de sementes ganha destaque global no site da FAO",
+     "url": "https://www.embrapa.br/busca-de-noticias/-/noticia/149072547/projeto-da-embrapa-em-conservacao-de-sementes-ganha-destaque-global-no-site-da-fao",
+     "data": null
+    },
+    {
+     "titulo": "Técnicas para criação de galinhas fortalecem a segurança alimentar de comunidades pantanei",
+     "url": "https://www.embrapa.br/busca-de-noticias/-/noticia/149294074/tecnicas-para-criacao-de-galinhas-fortalecem-a-seguranca-alimentar-de-comunidades-pantaneiras",
+     "data": null
+    }
+   ],
+   "nota": 3
+  },
+  "atual": {
+   "url": "https://www.embrapa.br/florestas/busca-de-noticias",
+   "itens": 10,
+   "com_data": 0,
+   "recentes": 0,
+   "futuras": 0,
+   "sem_data": 6,
+   "mais_recente": null,
+   "exemplos": [
+    {
+     "titulo": "Embrapa conclui missão técnica na Etiópia para fortalecer o desenvolvimento florestal",
+     "url": "https://www.embrapa.br/web/florestas/busca-de-noticias/-/noticia/149345234/embrapa-conclui-missao-tecnica-na-etiopia-para-fortalecer-o-desenvolvimento-florestal?p_auth=4UjXznkD#p_buscanoticia_WAR_pcebusca",
+     "data": null
+    },
+    {
+     "titulo": "C.Vale e Embrapa discutem potencial energético do eucalipto",
+     "url": "https://www.embrapa.br/web/florestas/busca-de-noticias/-/noticia/149342647/cvale-e-embrapa-discutem-potencial-energetico-do-eucalipto?p_auth=4UjXznkD#p_buscanoticia_WAR_pcebusca",
+     "data": null
+    },
+    {
+     "titulo": "Expedição Silvicultura apresenta retrato das florestas plantadas e debate desafios para o ",
+     "url": "https://www.embrapa.br/web/florestas/busca-de-noticias/-/noticia/149106871/expedicao-silvicultura-apresenta-retrato-das-florestas-plantadas-e-debate-desafios-para-o-setor?p_auth=4UjXznkD#p_buscanoticia_WAR_pcebusca",
+     "data": null
+    },
+    {
+     "titulo": "Oferta de madeira exige planejamento por idade dos plantios, produtividade e custos, apont",
+     "url": "https://www.embrapa.br/web/florestas/busca-de-noticias/-/noticia/149106670/oferta-de-madeira-exige-planejamento-por-idade-dos-plantios-produtividade-e-custos-aponta-pesquisador-da-embrapa?p_auth=4UjXznkD#p_buscanoticia_WAR_pcebusca",
+     "data": null
+    },
+    {
+     "titulo": "Expedição Silvicultura revela produtividade florestal e concentração da expansão em Mato G",
+     "url": "https://www.embrapa.br/web/florestas/busca-de-noticias/-/noticia/149106379/expedicao-silvicultura-revela-produtividade-florestal-e-concentracao-da-expansao-em-mato-grosso-do-sul?p_auth=4UjXznkD#p_buscanoticia_WAR_pcebusca",
+     "data": null
+    },
+    {
+     "titulo": "Embrapa Florestas é designada como Centro de Referência da FAO para florestas plantadas",
+     "url": "https://www.embrapa.br/web/florestas/busca-de-noticias/-/noticia/148472542/embrapa-florestas-e-designada-como-centro-de-referencia-da-fao-para-florestas-plantadas?p_auth=4UjXznkD#p_buscanoticia_WAR_pcebusca",
+     "data": null
+    }
+   ],
+   "nota": -2
+  },
+  "testes": [
+   {
+    "url": "https://www.embrapa.br/noticias",
+    "itens": 18,
+    "com_data": 1,
+    "recentes": 0,
+    "futuras": 0,
+    "sem_data": 5,
+    "mais_recente": "2026-09-28T15:00:00.000Z",
+    "exemplos": [
+     {
+      "titulo": "acesse a lista completa",
+      "url": "https://www.embrapa.br/busca-de-noticias/-/noticia/",
+      "data": null
+     },
+     {
+      "titulo": "Lodo de tratamento de água vira fertilizante de liberação lenta em parceria Embrapa-Sabesp",
+      "url": "https://www.embrapa.br/busca-de-noticias/-/noticia/149202216/lodo-de-tratamento-de-agua-vira-fertilizante-de-liberacao-lenta-em-parceria-embrapa-sabesp",
+      "data": null
+     },
+     {
+      "titulo": "Bactérias do gênero Bacillus se consolidam como os principais agentes de controle biológic",
+      "url": "https://www.embrapa.br/busca-de-noticias/-/noticia/149237097/bacterias-do-genero-bacillus-se-consolidam-como-os-principais-agentes-de-controle-biologico-na-agricultura-brasileira",
+      "data": "2026-09-28T15:00:00.000Z"
+     },
+     {
+      "titulo": "Pesquisadora Christiane Paiva, da Embrapa, vence 8º Prêmio CBMM de Ciência e Tecnologia",
+      "url": "https://www.embrapa.br/busca-de-noticias/-/noticia/149283862/pesquisadora-christiane-paiva-da-embrapa-vence-8-premio-cbmm-de-ciencia-e-tecnologia",
+      "data": null
+     },
+     {
+      "titulo": "Projeto da Embrapa em conservação de sementes ganha destaque global no site da FAO",
+      "url": "https://www.embrapa.br/busca-de-noticias/-/noticia/149072547/projeto-da-embrapa-em-conservacao-de-sementes-ganha-destaque-global-no-site-da-fao",
+      "data": null
+     },
+     {
+      "titulo": "Técnicas para criação de galinhas fortalecem a segurança alimentar de comunidades pantanei",
+      "url": "https://www.embrapa.br/busca-de-noticias/-/noticia/149294074/tecnicas-para-criacao-de-galinhas-fortalecem-a-seguranca-alimentar-de-comunidades-pantaneiras",
+      "data": null
+     }
+    ],
+    "nota": 3
+   },
+   {
+    "url": "https://www.embrapa.br/noticias/",
+    "itens": 18,
+    "com_data": 1,
+    "recentes": 0,
+    "futuras": 0,
+    "sem_data": 5,
+    "mais_recente": "2026-09-28T15:00:00.000Z",
+    "exemplos": [
+     {
+      "titulo": "acesse a lista completa",
+      "url": "https://www.embrapa.br/busca-de-noticias/-/noticia/",
+      "data": null
+     },
+     {
+      "titulo": "Lodo de tratamento de água vira fertilizante de liberação lenta em parceria Embrapa-Sabesp",
+      "url": "https://www.embrapa.br/busca-de-noticias/-/noticia/149202216/lodo-de-tratamento-de-agua-vira-fertilizante-de-liberacao-lenta-em-parceria-embrapa-sabesp",
+      "data": null
+     },
+     {
+      "titulo": "Bactérias do gênero Bacillus se consolidam como os principais agentes de controle biológic",
+      "url": "https://www.embrapa.br/busca-de-noticias/-/noticia/149237097/bacterias-do-genero-bacillus-se-consolidam-como-os-principais-agentes-de-controle-biologico-na-agricultura-brasileira",
+      "data": "2026-09-28T15:00:00.000Z"
+     },
+     {
+      "titulo": "Pesquisadora Christiane Paiva, da Embrapa, vence 8º Prêmio CBMM de Ciência e Tecnologia",
+      "url": "https://www.embrapa.br/busca-de-noticias/-/noticia/149283862/pesquisadora-christiane-paiva-da-embrapa-vence-8-premio-cbmm-de-ciencia-e-tecnologia",
+      "data": null
+     },
+     {
+      "titulo": "Projeto da Embrapa em conservação de sementes ganha destaque global no site da FAO",
+      "url": "https://www.embrapa.br/busca-de-noticias/-/noticia/149072547/projeto-da-embrapa-em-conservacao-de-sementes-ganha-destaque-global-no-site-da-fao",
+      "data": null
+     },
+     {
+      "titulo": "Técnicas para criação de galinhas fortalecem a segurança alimentar de comunidades pantanei",
+      "url": "https://www.embrapa.br/busca-de-noticias/-/noticia/149294074/tecnicas-para-criacao-de-galinhas-fortalecem-a-seguranca-alimentar-de-comunidades-pantaneiras",
+      "data": null
+     }
+    ],
+    "nota": 3
+   },
+   {
+    "url": "https://www.embrapa.br/sala-de-imprensa",
+    "itens": 4,
+    "com_data": 1,
+    "recentes": 0,
+    "futuras": 0,
+    "sem_data": 3,
+    "mais_recente": "2026-09-28T15:00:00.000Z",
+    "exemplos": [
+     {
+      "titulo": "Lodo de tratamento de água vira fertilizante de liberação lenta em parceria Embrapa-Sabesp",
+      "url": "https://www.embrapa.br/busca-de-noticias/-/noticia/149202216/lodo-de-tratamento-de-agua-vira-fertilizante-de-liberacao-lenta-em-parceria-embrapa-sabesp",
+      "data": null
+     },
+     {
+      "titulo": "Bactérias do gênero Bacillus se consolidam como os principais agentes de controle biológic",
+      "url": "https://www.embrapa.br/busca-de-noticias/-/noticia/149237097/bacterias-do-genero-bacillus-se-consolidam-como-os-principais-agentes-de-controle-biologico-na-agricultura-brasileira",
+      "data": "2026-09-28T15:00:00.000Z"
+     },
+     {
+      "titulo": "Técnicas para criação de galinhas fortalecem a segurança alimentar de comunidades pantanei",
+      "url": "https://www.embrapa.br/busca-de-noticias/-/noticia/149294074/tecnicas-para-criacao-de-galinhas-fortalecem-a-seguranca-alimentar-de-comunidades-pantaneiras",
+      "data": null
+     },
+     {
+      "titulo": "Embrapa Instrumentação",
+      "url": "https://www.embrapa.br/instrumentacao/noticias",
+      "data": null
+     }
+    ],
+    "nota": 1
+   },
+   {
+    "url": "https://www.embrapa.br/florestas/busca-de-noticias",
+    "itens": 10,
+    "com_data": 0,
+    "recentes": 0,
+    "futuras": 0,
+    "sem_data": 6,
+    "mais_recente": null,
+    "exemplos": [
+     {
+      "titulo": "Embrapa conclui missão técnica na Etiópia para fortalecer o desenvolvimento florestal",
+      "url": "https://www.embrapa.br/web/florestas/busca-de-noticias/-/noticia/149345234/embrapa-conclui-missao-tecnica-na-etiopia-para-fortalecer-o-desenvolvimento-florestal?p_auth=4UjXznkD#p_buscanoticia_WAR_pcebusca",
+      "data": null
+     },
+     {
+      "titulo": "C.Vale e Embrapa discutem potencial energético do eucalipto",
+      "url": "https://www.embrapa.br/web/florestas/busca-de-noticias/-/noticia/149342647/cvale-e-embrapa-discutem-potencial-energetico-do-eucalipto?p_auth=4UjXznkD#p_buscanoticia_WAR_pcebusca",
+      "data": null
+     },
+     {
+      "titulo": "Expedição Silvicultura apresenta retrato das florestas plantadas e debate desafios para o ",
+      "url": "https://www.embrapa.br/web/florestas/busca-de-noticias/-/noticia/149106871/expedicao-silvicultura-apresenta-retrato-das-florestas-plantadas-e-debate-desafios-para-o-setor?p_auth=4UjXznkD#p_buscanoticia_WAR_pcebusca",
+      "data": null
+     },
+     {
+      "titulo": "Oferta de madeira exige planejamento por idade dos plantios, produtividade e custos, apont",
+      "url": "https://www.embrapa.br/web/florestas/busca-de-noticias/-/noticia/149106670/oferta-de-madeira-exige-planejamento-por-idade-dos-plantios-produtividade-e-custos-aponta-pesquisador-da-embrapa?p_auth=4UjXznkD#p_buscanoticia_WAR_pcebusca",
+      "data": null
+     },
+     {
+      "titulo": "Expedição Silvicultura revela produtividade florestal e concentração da expansão em Mato G",
+      "url": "https://www.embrapa.br/web/florestas/busca-de-noticias/-/noticia/149106379/expedicao-silvicultura-revela-produtividade-florestal-e-concentracao-da-expansao-em-mato-grosso-do-sul?p_auth=4UjXznkD#p_buscanoticia_WAR_pcebusca",
+      "data": null
+     },
+     {
+      "titulo": "Embrapa Florestas é designada como Centro de Referência da FAO para florestas plantadas",
+      "url": "https://www.embrapa.br/web/florestas/busca-de-noticias/-/noticia/148472542/embrapa-florestas-e-designada-como-centro-de-referencia-da-fao-para-florestas-plantadas?p_auth=4UjXznkD#p_buscanoticia_WAR_pcebusca",
+      "data": null
+     }
+    ],
+    "nota": -2
+   }
+  ]
+ },
+ {
+  "modo": "fonte",
+  "nome": "Seab — Agricultura e Abastecimento",
+  "cidade": "",
+  "url": "https://www.agricultura.pr.gov.br/Noticias",
+  "candidatas": 14,
+  "melhor": {
+   "url": "https://www.idrparana.pr.gov.br/system/files/publico/Anexos%20de%20noticias/QueijariasCadastradas.pdf?fbclid=IwAR1hNApXUHQgmYAlRs2ailY24CuWsSIIpJrZDfdH4s7V7GrIUgQb9Zdh_aY",
+   "itens": 6,
+   "com_data": 5,
+   "recentes": 5,
+   "futuras": 0,
+   "sem_data": 1,
+   "mais_recente": "2026-10-28T15:00:00.000Z",
+   "exemplos": [
+    {
+     "titulo": "Denunciar crime ambiental",
+     "url": "https://www.idrparana.pr.gov.br/servicos/Meio-Ambiente/Policia-Ambiental/Denunciar-crime-ambiental-JGoMV8N0",
+     "data": null
+    },
+    {
+     "titulo": "IDR-Paraná orienta produtores sobre oportunidades de negócios no turismo rural em Astorga",
+     "url": "https://www.idrparana.pr.gov.br/Noticia/IDR-Parana-orienta-produtores-sobre-oportunidades-de-negocios-no-turismo-rural-em-Astorga",
+     "data": "2026-10-28T15:00:00.000Z"
+    },
+    {
+     "titulo": "Encontro em Mariópolis reúne mulheres do campo com palestras, feira de agroindústrias e aç",
+     "url": "https://www.idrparana.pr.gov.br/Noticia/Encontro-em-Mariopolis-reune-mulheres-do-campo-com-palestras-feira-de-agroindustrias-e",
+     "data": "2026-10-28T15:00:00.000Z"
+    },
+    {
+     "titulo": "Produção orgânica é tema de evento em Campo Mourão nesta quinta-feira",
+     "url": "https://www.idrparana.pr.gov.br/Noticia/Producao-organica-e-tema-de-evento-em-Campo-Mourao-nesta-quinta-feira",
+     "data": "2026-10-27T15:00:00.000Z"
+    },
+    {
+     "titulo": "SEAGRI marca presença na AveSui, uma das maiores feiras da proteína animal da América Lati",
+     "url": "https://www.idrparana.pr.gov.br/Noticia/SEAGRI-marca-presenca-na-AveSui-uma-das-maiores-feiras-da-proteina-animal-da-America-Latina",
+     "data": "2026-10-26T15:00:00.000Z"
+    },
+    {
+     "titulo": "Plantio direto: tecnologia que nasceu no Paraná ajuda a produzir mais e preservar o meio a",
+     "url": "https://www.idrparana.pr.gov.br/Noticia/Plantio-direto-tecnologia-que-nasceu-no-Parana-ajuda-produzir-mais-e-preservar-o-meio",
+     "data": "2026-10-23T15:00:00.000Z"
+    }
+   ],
+   "nota": 49
+  },
+  "atual": {
+   "url": "https://www.agricultura.pr.gov.br/Noticias",
+   "itens": 30,
+   "com_data": 0,
+   "recentes": 0,
+   "futuras": 0,
+   "sem_data": 6,
+   "mais_recente": null,
+   "exemplos": [
+    {
+     "titulo": "Política de Tratamento de Dados Pessoais",
+     "url": "https://www.agricultura.pr.gov.br/Pagina/Politica-de-Tratamento-de-Dados-Pessoais",
+     "data": null
+    },
+    {
+     "titulo": "Cartilha Programas de Apoio à Agricultura Familiar do Paraná",
+     "url": "https://www.agricultura.pr.gov.br/sites/default/arquivos_restritos/files/documento/2024-04/cartilha_-_ultima_versao_0.pdf",
+     "data": null
+    },
+    {
+     "titulo": "Segurança nas Cadeias Alimentares contra o Novo Coronavírus",
+     "url": "https://www.agricultura.pr.gov.br/sites/default/arquivos_restritos/files/documento/2021-01/livro_eletronico_-_seguranca_nas_cadeias_agroalimentares_contra_o_novo_coronavirus_-_08.01.2021.pdf",
+     "data": null
+    },
+    {
+     "titulo": "Cartilha da Lei Geral de Proteção de Dados (LGPD)",
+     "url": "https://www.agricultura.pr.gov.br/sites/default/arquivos_restritos/files/documento/2021-05/cartilha_lgpd.pdf",
+     "data": null
+    },
+    {
+     "titulo": "Meio Ambiente em Tópicos",
+     "url": "https://www.aen.pr.gov.br/sites/default/arquivos_restritos/files/documento/2022-05/meio-ambiente.pdf",
+     "data": null
+    },
+    {
+     "titulo": "Agricultura familiar",
+     "url": "https://www.agricultura.pr.gov.br/sites/default/arquivos_restritos/files/documento/2022-10/agricultura_familiar.pdf",
+     "data": null
+    }
+   ],
+   "nota": -2
+  },
+  "testes": [
+   {
+    "url": "https://www.idrparana.pr.gov.br/system/files/publico/Anexos%20de%20noticias/QueijariasCadastradas.pdf?fbclid=IwAR1hNApXUHQgmYAlRs2ailY24CuWsSIIpJrZDfdH4s7V7GrIUgQb9Zdh_aY",
+    "itens": 6,
+    "com_data": 5,
+    "recentes": 5,
+    "futuras": 0,
+    "sem_data": 1,
+    "mais_recente": "2026-10-28T15:00:00.000Z",
+    "exemplos": [
+     {
+      "titulo": "Denunciar crime ambiental",
+      "url": "https://www.idrparana.pr.gov.br/servicos/Meio-Ambiente/Policia-Ambiental/Denunciar-crime-ambiental-JGoMV8N0",
+      "data": null
+     },
+     {
+      "titulo": "IDR-Paraná orienta produtores sobre oportunidades de negócios no turismo rural em Astorga",
+      "url": "https://www.idrparana.pr.gov.br/Noticia/IDR-Parana-orienta-produtores-sobre-oportunidades-de-negocios-no-turismo-rural-em-Astorga",
+      "data": "2026-10-28T15:00:00.000Z"
+     },
+     {
+      "titulo": "Encontro em Mariópolis reúne mulheres do campo com palestras, feira de agroindústrias e aç",
+      "url": "https://www.idrparana.pr.gov.br/Noticia/Encontro-em-Mariopolis-reune-mulheres-do-campo-com-palestras-feira-de-agroindustrias-e",
+      "data": "2026-10-28T15:00:00.000Z"
+     },
+     {
+      "titulo": "Produção orgânica é tema de evento em Campo Mourão nesta quinta-feira",
+      "url": "https://www.idrparana.pr.gov.br/Noticia/Producao-organica-e-tema-de-evento-em-Campo-Mourao-nesta-quinta-feira",
+      "data": "2026-10-27T15:00:00.000Z"
+     },
+     {
+      "titulo": "SEAGRI marca presença na AveSui, uma das maiores feiras da proteína animal da América Lati",
+      "url": "https://www.idrparana.pr.gov.br/Noticia/SEAGRI-marca-presenca-na-AveSui-uma-das-maiores-feiras-da-proteina-animal-da-America-Latina",
+      "data": "2026-10-26T15:00:00.000Z"
+     },
+     {
+      "titulo": "Plantio direto: tecnologia que nasceu no Paraná ajuda a produzir mais e preservar o meio a",
+      "url": "https://www.idrparana.pr.gov.br/Noticia/Plantio-direto-tecnologia-que-nasceu-no-Parana-ajuda-produzir-mais-e-preservar-o-meio",
+      "data": "2026-10-23T15:00:00.000Z"
+     }
+    ],
+    "nota": 49
+   },
+   {
+    "url": "https://www.agricultura.pr.gov.br/Noticias",
+    "itens": 30,
+    "com_data": 0,
+    "recentes": 0,
+    "futuras": 0,
+    "sem_data": 6,
+    "mais_recente": null,
+    "exemplos": [
+     {
+      "titulo": "Política de Tratamento de Dados Pessoais",
+      "url": "https://www.agricultura.pr.gov.br/Pagina/Politica-de-Tratamento-de-Dados-Pessoais",
+      "data": null
+     },
+     {
+      "titulo": "Cartilha Programas de Apoio à Agricultura Familiar do Paraná",
+      "url": "https://www.agricultura.pr.gov.br/sites/default/arquivos_restritos/files/documento/2024-04/cartilha_-_ultima_versao_0.pdf",
+      "data": null
+     },
+     {
+      "titulo": "Segurança nas Cadeias Alimentares contra o Novo Coronavírus",
+      "url": "https://www.agricultura.pr.gov.br/sites/default/arquivos_restritos/files/documento/2021-01/livro_eletronico_-_seguranca_nas_cadeias_agroalimentares_contra_o_novo_coronavirus_-_08.01.2021.pdf",
+      "data": null
+     },
+     {
+      "titulo": "Cartilha da Lei Geral de Proteção de Dados (LGPD)",
+      "url": "https://www.agricultura.pr.gov.br/sites/default/arquivos_restritos/files/documento/2021-05/cartilha_lgpd.pdf",
+      "data": null
+     },
+     {
+      "titulo": "Meio Ambiente em Tópicos",
+      "url": "https://www.aen.pr.gov.br/sites/default/arquivos_restritos/files/documento/2022-05/meio-ambiente.pdf",
+      "data": null
+     },
+     {
+      "titulo": "Agricultura familiar",
+      "url": "https://www.agricultura.pr.gov.br/sites/default/arquivos_restritos/files/documento/2022-10/agricultura_familiar.pdf",
+      "data": null
+     }
+    ],
+    "nota": -2
+   },
+   {
+    "url": "https://www.agricultura.pr.gov.br/Pagina/Comunicacao-Social",
+    "itens": 19,
+    "com_data": 0,
+    "recentes": 0,
+    "futuras": 0,
+    "sem_data": 6,
+    "mais_recente": null,
+    "exemplos": [
+     {
+      "titulo": "Política de Tratamento de Dados Pessoais",
+      "url": "https://www.agricultura.pr.gov.br/Pagina/Politica-de-Tratamento-de-Dados-Pessoais",
+      "data": null
+     },
+     {
+      "titulo": "Cartilha Programas de Apoio à Agricultura Familiar do Paraná",
+      "url": "https://www.agricultura.pr.gov.br/sites/default/arquivos_restritos/files/documento/2024-04/cartilha_-_ultima_versao_0.pdf",
+      "data": null
+     },
+     {
+      "titulo": "Segurança nas Cadeias Alimentares contra o Novo Coronavírus",
+      "url": "https://www.agricultura.pr.gov.br/sites/default/arquivos_restritos/files/documento/2021-01/livro_eletronico_-_seguranca_nas_cadeias_agroalimentares_contra_o_novo_coronavirus_-_08.01.2021.pdf",
+      "data": null
+     },
+     {
+      "titulo": "Cartilha da Lei Geral de Proteção de Dados (LGPD)",
+      "url": "https://www.agricultura.pr.gov.br/sites/default/arquivos_restritos/files/documento/2021-05/cartilha_lgpd.pdf",
+      "data": null
+     },
+     {
+      "titulo": "Meio Ambiente em Tópicos",
+      "url": "https://www.aen.pr.gov.br/sites/default/arquivos_restritos/files/documento/2022-05/meio-ambiente.pdf",
+      "data": null
+     },
+     {
+      "titulo": "Agricultura familiar",
+      "url": "https://www.agricultura.pr.gov.br/sites/default/arquivos_restritos/files/documento/2022-10/agricultura_familiar.pdf",
+      "data": null
+     }
+    ],
+    "nota": -2
+   },
+   {
+    "url": "https://www.agricultura.pr.gov.br/Pagina/Assessoria-de-Comunicacao",
+    "itens": 19,
+    "com_data": 0,
+    "recentes": 0,
+    "futuras": 0,
+    "sem_data": 6,
+    "mais_recente": null,
+    "exemplos": [
+     {
+      "titulo": "Política de Tratamento de Dados Pessoais",
+      "url": "https://www.agricultura.pr.gov.br/Pagina/Politica-de-Tratamento-de-Dados-Pessoais",
+      "data": null
+     },
+     {
+      "titulo": "Cartilha Programas de Apoio à Agricultura Familiar do Paraná",
+      "url": "https://www.agricultura.pr.gov.br/sites/default/arquivos_restritos/files/documento/2024-04/cartilha_-_ultima_versao_0.pdf",
+      "data": null
+     },
+     {
+      "titulo": "Segurança nas Cadeias Alimentares contra o Novo Coronavírus",
+      "url": "https://www.agricultura.pr.gov.br/sites/default/arquivos_restritos/files/documento/2021-01/livro_eletronico_-_seguranca_nas_cadeias_agroalimentares_contra_o_novo_coronavirus_-_08.01.2021.pdf",
+      "data": null
+     },
+     {
+      "titulo": "Cartilha da Lei Geral de Proteção de Dados (LGPD)",
+      "url": "https://www.agricultura.pr.gov.br/sites/default/arquivos_restritos/files/documento/2021-05/cartilha_lgpd.pdf",
+      "data": null
+     },
+     {
+      "titulo": "Meio Ambiente em Tópicos",
+      "url": "https://www.aen.pr.gov.br/sites/default/arquivos_restritos/files/documento/2022-05/meio-ambiente.pdf",
+      "data": null
+     },
+     {
+      "titulo": "Agricultura familiar",
+      "url": "https://www.agricultura.pr.gov.br/sites/default/arquivos_restritos/files/documento/2022-10/agricultura_familiar.pdf",
+      "data": null
+     }
+    ],
+    "nota": -2
+   }
+  ]
+ },
+ {
+  "modo": "fonte",
+  "nome": "Sistema Ocepar",
+  "cidade": "",
+  "url": "https://www.paranacooperativo.coop.br/",
+  "candidatas": 14,
+  "melhor": {
+   "url": "https://www.paranacooperativo.coop.br/",
+   "itens": 28,
+   "com_data": 6,
+   "recentes": 0,
+   "futuras": 0,
+   "sem_data": 0,
+   "mais_recente": "2024-08-28T16:19:04.000Z",
+   "exemplos": [
+    {
+     "titulo": "REPRESENTA&Ccedil;&Atilde;O 28/10/2026 Cooperativismo refor&ccedil;a interlocu&ccedil;&ati",
+     "url": "https://www.paranacooperativo.coop.br/noticias-representacao/cooperativismo-reforca-interlocucao-com-ministerio-da-agricultura-e-pecuaria",
+     "data": "2024-08-28T16:19:04.000Z"
+    },
+    {
+     "titulo": "EDUCA&Ccedil;&Atilde;O 28/10/2026 Programa de Desenvolvimento da Lideran&ccedil;a em Coope",
+     "url": "https://www.paranacooperativo.coop.br/noticias-educacao/programa-de-desenvolvimento-da-lideranca-em-cooperativas-fortalece-a-gestao-estrategica-e-prepara-lideres-para-os-desafios-do-futuro",
+     "data": "2024-08-28T16:19:04.000Z"
+    },
+    {
+     "titulo": "COOPERATIVISMO 28/10/2026 F&oacute;rum realizado pelo Sistema Ocepar re&uacute;ne auditore",
+     "url": "https://www.paranacooperativo.coop.br/noticias-cooperativismo/forum-realizado-pelo-sistema-ocepar-reune-auditores-internos-de-cooperativas-paranaenses",
+     "data": "2024-08-28T16:19:04.000Z"
+    },
+    {
+     "titulo": "COOPERATIVISMO 27/10/2026 Mais de 130 profissionais das cooperativas do PR participam do F",
+     "url": "https://www.paranacooperativo.coop.br/noticias-cooperativismo/mais-de-130-profissionais-das-cooperativas-do-pr-participam-do-forum-de-saude-seguranca-e-relacoes-do-trabalho-em-cascavel",
+     "data": "2024-08-28T16:19:04.000Z"
+    },
+    {
+     "titulo": "Manual de Gest&atilde;o de Risco de Imagem do Sistema Ocepar &eacute; apresentado aos prof",
+     "url": "https://www.paranacooperativo.coop.br/noticias-governanca/manual-de-gestao-de-risco-de-imagem-do-sistema-ocepar-e-apresentado-aos-profissionais-das-cooperativas-do-pr",
+     "data": "2024-08-28T16:19:04.000Z"
+    },
+    {
+     "titulo": "Cooperada da Camisc Leandra Miglioranza &eacute; destaque na lista 100 Mulheres Poderosas ",
+     "url": "https://www.paranacooperativo.coop.br/noticias-representacao/cooperada-da-camisc-leandra-miglioranza-e-destaque-na-lista-100-mulheres-poderosas-do-agro",
+     "data": "2024-08-28T16:19:04.000Z"
+    }
+   ],
+   "nota": 28
+  },
+  "atual": {
+   "url": "https://www.paranacooperativo.coop.br/",
+   "itens": 28,
+   "com_data": 6,
+   "recentes": 0,
+   "futuras": 0,
+   "sem_data": 0,
+   "mais_recente": "2024-08-28T16:19:04.000Z",
+   "exemplos": [
+    {
+     "titulo": "REPRESENTA&Ccedil;&Atilde;O 28/10/2026 Cooperativismo refor&ccedil;a interlocu&ccedil;&ati",
+     "url": "https://www.paranacooperativo.coop.br/noticias-representacao/cooperativismo-reforca-interlocucao-com-ministerio-da-agricultura-e-pecuaria",
+     "data": "2024-08-28T16:19:04.000Z"
+    },
+    {
+     "titulo": "EDUCA&Ccedil;&Atilde;O 28/10/2026 Programa de Desenvolvimento da Lideran&ccedil;a em Coope",
+     "url": "https://www.paranacooperativo.coop.br/noticias-educacao/programa-de-desenvolvimento-da-lideranca-em-cooperativas-fortalece-a-gestao-estrategica-e-prepara-lideres-para-os-desafios-do-futuro",
+     "data": "2024-08-28T16:19:04.000Z"
+    },
+    {
+     "titulo": "COOPERATIVISMO 28/10/2026 F&oacute;rum realizado pelo Sistema Ocepar re&uacute;ne auditore",
+     "url": "https://www.paranacooperativo.coop.br/noticias-cooperativismo/forum-realizado-pelo-sistema-ocepar-reune-auditores-internos-de-cooperativas-paranaenses",
+     "data": "2024-08-28T16:19:04.000Z"
+    },
+    {
+     "titulo": "COOPERATIVISMO 27/10/2026 Mais de 130 profissionais das cooperativas do PR participam do F",
+     "url": "https://www.paranacooperativo.coop.br/noticias-cooperativismo/mais-de-130-profissionais-das-cooperativas-do-pr-participam-do-forum-de-saude-seguranca-e-relacoes-do-trabalho-em-cascavel",
+     "data": "2024-08-28T16:19:04.000Z"
+    },
+    {
+     "titulo": "Manual de Gest&atilde;o de Risco de Imagem do Sistema Ocepar &eacute; apresentado aos prof",
+     "url": "https://www.paranacooperativo.coop.br/noticias-governanca/manual-de-gestao-de-risco-de-imagem-do-sistema-ocepar-e-apresentado-aos-profissionais-das-cooperativas-do-pr",
+     "data": "2024-08-28T16:19:04.000Z"
+    },
+    {
+     "titulo": "Cooperada da Camisc Leandra Miglioranza &eacute; destaque na lista 100 Mulheres Poderosas ",
+     "url": "https://www.paranacooperativo.coop.br/noticias-representacao/cooperada-da-camisc-leandra-miglioranza-e-destaque-na-lista-100-mulheres-poderosas-do-agro",
+     "data": "2024-08-28T16:19:04.000Z"
+    }
+   ],
+   "nota": 28
+  },
+  "testes": [
+   {
+    "url": "https://www.paranacooperativo.coop.br/",
+    "itens": 28,
+    "com_data": 6,
+    "recentes": 0,
+    "futuras": 0,
+    "sem_data": 0,
+    "mais_recente": "2024-08-28T16:19:04.000Z",
+    "exemplos": [
+     {
+      "titulo": "REPRESENTA&Ccedil;&Atilde;O 28/10/2026 Cooperativismo refor&ccedil;a interlocu&ccedil;&ati",
+      "url": "https://www.paranacooperativo.coop.br/noticias-representacao/cooperativismo-reforca-interlocucao-com-ministerio-da-agricultura-e-pecuaria",
+      "data": "2024-08-28T16:19:04.000Z"
+     },
+     {
+      "titulo": "EDUCA&Ccedil;&Atilde;O 28/10/2026 Programa de Desenvolvimento da Lideran&ccedil;a em Coope",
+      "url": "https://www.paranacooperativo.coop.br/noticias-educacao/programa-de-desenvolvimento-da-lideranca-em-cooperativas-fortalece-a-gestao-estrategica-e-prepara-lideres-para-os-desafios-do-futuro",
+      "data": "2024-08-28T16:19:04.000Z"
+     },
+     {
+      "titulo": "COOPERATIVISMO 28/10/2026 F&oacute;rum realizado pelo Sistema Ocepar re&uacute;ne auditore",
+      "url": "https://www.paranacooperativo.coop.br/noticias-cooperativismo/forum-realizado-pelo-sistema-ocepar-reune-auditores-internos-de-cooperativas-paranaenses",
+      "data": "2024-08-28T16:19:04.000Z"
+     },
+     {
+      "titulo": "COOPERATIVISMO 27/10/2026 Mais de 130 profissionais das cooperativas do PR participam do F",
+      "url": "https://www.paranacooperativo.coop.br/noticias-cooperativismo/mais-de-130-profissionais-das-cooperativas-do-pr-participam-do-forum-de-saude-seguranca-e-relacoes-do-trabalho-em-cascavel",
+      "data": "2024-08-28T16:19:04.000Z"
+     },
+     {
+      "titulo": "Manual de Gest&atilde;o de Risco de Imagem do Sistema Ocepar &eacute; apresentado aos prof",
+      "url": "https://www.paranacooperativo.coop.br/noticias-governanca/manual-de-gestao-de-risco-de-imagem-do-sistema-ocepar-e-apresentado-aos-profissionais-das-cooperativas-do-pr",
+      "data": "2024-08-28T16:19:04.000Z"
+     },
+     {
+      "titulo": "Cooperada da Camisc Leandra Miglioranza &eacute; destaque na lista 100 Mulheres Poderosas ",
+      "url": "https://www.paranacooperativo.coop.br/noticias-representacao/cooperada-da-camisc-leandra-miglioranza-e-destaque-na-lista-100-mulheres-poderosas-do-agro",
+      "data": "2024-08-28T16:19:04.000Z"
+     }
+    ],
+    "nota": 28
+   },
+   {
+    "url": "https://paranacooperativo.coop.br/conteudos/noticias",
+    "itens": 30,
+    "com_data": 6,
+    "recentes": 0,
+    "futuras": 0,
+    "sem_data": 0,
+    "mais_recente": "2024-08-28T16:19:04.000Z",
+    "exemplos": [
+     {
+      "titulo": "Sistema Ocepar promove F&oacute;rum de Sa&uacute;de, Seguran&ccedil;a e Rela&ccedil;&otild",
+      "url": "https://paranacooperativo.coop.br/noticias/sistema-ocepar-promove-forum-de-saude-seguranca-e-relacoes-do-trabalho-em-cascavel",
+      "data": "2024-08-28T16:19:04.000Z"
+     },
+     {
+      "titulo": "Mostra em Londrina evidencia avan&ccedil;o do uso de intelig&ecirc;ncia artificial no coop",
+      "url": "https://paranacooperativo.coop.br/noticias/mostra-em-londrina-evidencia-avanco-do-uso-de-inteligencia-artificial-no-cooperativismo",
+      "data": "2024-08-28T16:19:04.000Z"
+     },
+     {
+      "titulo": "Rebanho bovino cai para 234,3 milh&otilde;es de cabe&ccedil;as em 2025, o menor em tr&ecir",
+      "url": "https://paranacooperativo.coop.br/noticias/rebanho-bovino-cai-para-234-3-milhoes-de-cabecas-em-2025-o-menor-em-tres-anos",
+      "data": "2024-08-28T16:19:04.000Z"
+     },
+     {
+      "titulo": "Cocari recebe novo reconhecimento da Bayer no programa Top Multiplicadores",
+      "url": "https://paranacooperativo.coop.br/noticias/cocari-recebe-novo-reconhecimento-da-bayer-no-programa-top-multiplicadores",
+      "data": "2024-08-28T16:19:04.000Z"
+     },
+     {
+      "titulo": "Rally: produtor n&atilde;o pode deixar de lado cuidados com o solo",
+      "url": "https://paranacooperativo.coop.br/noticias/rally-produtor-nao-pode-deixar-de-lado-cuidados-com-o-solo",
+      "data": "2024-08-28T16:19:04.000Z"
+     },
+     {
+      "titulo": "Cocari capacita equipe t&eacute;cnica para orientar cooperados na implanta&ccedil;&atilde;",
+      "url": "https://paranacooperativo.coop.br/noticias/cocari-capacita-equipe-tecnica-para-orientar-cooperados-na-implantacao-da-safra-de-soja-26-27",
+      "data": "2024-08-28T16:19:04.000Z"
+     }
+    ],
+    "nota": 28
+   },
+   {
+    "url": "https://paranacooperativo.coop.br/noticias-economia/sicredi-soma-alcanca-r-5-bilhoes-em-ativos-contabeis",
+    "itens": 6,
+    "com_data": 6,
+    "recentes": 0,
+    "futuras": 0,
+    "sem_data": 0,
+    "mais_recente": "2024-08-28T16:19:04.000Z",
+    "exemplos": [
+     {
+      "titulo": "Not&iacute;cias economia",
+      "url": "https://paranacooperativo.coop.br/conteudos/noticias-economia",
+      "data": "2024-08-28T16:19:04.000Z"
+     },
+     {
+      "titulo": "Artigo anterior: Sicredi Dexis re&uacute;ne coordenadores para apresentar resultados do te",
+      "url": "https://paranacooperativo.coop.br/noticias-economia/sicredi-dexis-reune-coordenadores-para-apresentar-resultados-do-terceiro-trimestre",
+      "data": "2024-08-28T16:19:04.000Z"
+     },
+     {
+      "titulo": "Pr&oacute;ximo artigo: Mapa confirma foco da doen&ccedil;a de Newcastle em Nova Erechim (S",
+      "url": "https://paranacooperativo.coop.br/noticias-economia/mapa-confirma-foco-da-doenca-de-newcastle-em-nova-erechim-sc",
+      "data": "2024-08-28T16:19:04.000Z"
+     },
+     {
+      "titulo": "Cooperativismo refor&ccedil;a interlocu&ccedil;&atilde;o com Minist&eacute;rio da Agricult",
+      "url": "https://paranacooperativo.coop.br/noticias-representacao/cooperativismo-reforca-interlocucao-com-ministerio-da-agricultura-e-pecuaria",
+      "data": "2024-08-28T16:19:04.000Z"
+     },
+     {
+      "titulo": "Programa de Desenvolvimento da Lideran&ccedil;a em Cooperativas fortalece a gest&atilde;o ",
+      "url": "https://paranacooperativo.coop.br/noticias-educacao/programa-de-desenvolvimento-da-lideranca-em-cooperativas-fortalece-a-gestao-estrategica-e-prepara-lideres-para-os-desafios-do-futuro",
+      "data": "2024-08-28T16:19:04.000Z"
+     },
+     {
+      "titulo": "F&oacute;rum realizado pelo Sistema Ocepar re&uacute;ne auditores internos de cooperativas",
+      "url": "https://paranacooperativo.coop.br/noticias-cooperativismo/forum-realizado-pelo-sistema-ocepar-reune-auditores-internos-de-cooperativas-paranaenses",
+      "data": "2024-08-28T16:19:04.000Z"
+     }
+    ],
+    "nota": 24
+   },
+   {
+    "url": "https://paranacooperativo.coop.br/noticias-cooperativismo/c-vale-apresenta-desempenho-e-investimentos-em-terra-roxa",
+    "itens": 5,
+    "com_data": 5,
+    "recentes": 0,
+    "futuras": 0,
+    "sem_data": 0,
+    "mais_recente": "2024-08-28T16:19:04.000Z",
+    "exemplos": [
+     {
+      "titulo": "Not&iacute;cias cooperativismo",
+      "url": "https://paranacooperativo.coop.br/conteudos/noticias-cooperativismo",
+      "data": "2024-08-28T16:19:04.000Z"
+     },
+     {
+      "titulo": "Artigo anterior: F&oacute;rum realizado pelo Sistema Ocepar re&uacute;ne auditores interno",
+      "url": "https://paranacooperativo.coop.br/noticias-cooperativismo/forum-realizado-pelo-sistema-ocepar-reune-auditores-internos-de-cooperativas-paranaenses",
+      "data": "2024-08-28T16:19:04.000Z"
+     },
+     {
+      "titulo": "Pr&oacute;ximo artigo: Mais de 130 profissionais das cooperativas do PR participam do F&oa",
+      "url": "https://paranacooperativo.coop.br/noticias-cooperativismo/mais-de-130-profissionais-das-cooperativas-do-pr-participam-do-forum-de-saude-seguranca-e-relacoes-do-trabalho-em-cascavel",
+      "data": "2024-08-28T16:19:04.000Z"
+     },
+     {
+      "titulo": "Cooperativismo refor&ccedil;a interlocu&ccedil;&atilde;o com Minist&eacute;rio da Agricult",
+      "url": "https://paranacooperativo.coop.br/noticias-representacao/cooperativismo-reforca-interlocucao-com-ministerio-da-agricultura-e-pecuaria",
+      "data": "2024-08-28T16:19:04.000Z"
+     },
+     {
+      "titulo": "Programa de Desenvolvimento da Lideran&ccedil;a em Cooperativas fortalece a gest&atilde;o ",
+      "url": "https://paranacooperativo.coop.br/noticias-educacao/programa-de-desenvolvimento-da-lideranca-em-cooperativas-fortalece-a-gestao-estrategica-e-prepara-lideres-para-os-desafios-do-futuro",
+      "data": "2024-08-28T16:19:04.000Z"
+     }
+    ],
+    "nota": 20
+   }
+  ]
+ },
+ {
+  "modo": "fonte",
+  "nome": "Sistema Faep",
+  "cidade": "",
+  "url": "https://sistemafaep.org.br/",
+  "candidatas": 14,
+  "melhor": {
+   "url": "https://sistemafaep.org.br/",
+   "itens": 0,
+   "com_data": 0,
+   "recentes": 0,
+   "futuras": 0,
+   "sem_data": 0,
+   "mais_recente": null,
+   "exemplos": [],
+   "nota": 0
+  },
+  "atual": {
+   "url": "https://sistemafaep.org.br/",
+   "itens": 0,
+   "com_data": 0,
+   "recentes": 0,
+   "futuras": 0,
+   "sem_data": 0,
+   "mais_recente": null,
+   "exemplos": [],
+   "nota": 0
+  },
+  "testes": [
+   {
+    "url": "https://sistemafaep.org.br/",
+    "itens": 0,
+    "com_data": 0,
+    "recentes": 0,
+    "futuras": 0,
+    "sem_data": 0,
+    "mais_recente": null,
+    "exemplos": [],
+    "nota": 0
+   },
+   {
+    "url": "https://www.sistemafaep.org.br/",
+    "itens": 0,
+    "com_data": 0,
+    "recentes": 0,
+    "futuras": 0,
+    "sem_data": 0,
+    "mais_recente": null,
+    "exemplos": [],
+    "nota": 0
+   },
+   {
+    "url": "https://feeds.feedburner.com/SistemaFAEP",
+    "itens": 0,
+    "com_data": 0,
+    "recentes": 0,
+    "futuras": 0,
+    "sem_data": 0,
+    "mais_recente": null,
+    "exemplos": [],
+    "nota": 0
+   },
+   {
+    "url": "https://sistemafaep.org.br/feed/",
+    "itens": 0,
+    "com_data": 0,
+    "recentes": 0,
+    "futuras": 0,
+    "sem_data": 0,
+    "mais_recente": null,
+    "exemplos": [],
+    "nota": 0
+   }
+  ]
+ },
+ {
+  "modo": "fonte",
+  "nome": "Tribuna do Norte — Apucarana",
+  "cidade": "apucarana",
+  "url": "https://www.tribunadonorte.net/",
+  "erro": "tempo esgotado"
+ }
+]
