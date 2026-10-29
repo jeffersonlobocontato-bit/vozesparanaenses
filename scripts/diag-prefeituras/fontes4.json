@@ -1,0 +1,482 @@
+[
+{
+"modo": "fonte",
+"nome": "aRede — Ponta Grossa",
+"cidade": "ponta-grossa",
+"url": "https://arede.info/"
+},
+{
+"modo": "fonte",
+"nome": "Diário dos Campos — Ponta Grossa",
+"cidade": "ponta-grossa",
+"url": "https://dcmais.com.br/"
+},
+{
+"modo": "fonte",
+"nome": "P1 News — Castro",
+"cidade": "castro",
+"url": "https://p1news.com.br/"
+},
+{
+"modo": "fonte",
+"nome": "Jaguariaíva Agora",
+"cidade": "jaguariaiva",
+"url": "https://www.jaguariaivaagora.com.br/"
+},
+{
+"modo": "fonte",
+"nome": "Hoje Centro Sul — Irati",
+"cidade": "irati",
+"url": "https://www.hojecentrosul.com.br/"
+},
+{
+"modo": "fonte",
+"nome": "O Paraná — Cascavel",
+"cidade": "cascavel",
+"url": "https://oparana.com.br/"
+},
+{
+"modo": "fonte",
+"nome": "Jornal Hoje — Cascavel",
+"cidade": "cascavel",
+"url": "https://jhoje.com.br/"
+},
+{
+"modo": "fonte",
+"nome": "H2FOZ — Foz do Iguaçu",
+"cidade": "foz-do-iguacu",
+"url": "https://www.h2foz.com.br/"
+},
+{
+"modo": "fonte",
+"nome": "GDia — Foz do Iguaçu",
+"cidade": "foz-do-iguacu",
+"url": "https://gdia.com.br/"
+},
+{
+"modo": "fonte",
+"nome": "Tribuna Popular — Foz",
+"cidade": "foz-do-iguacu",
+"url": "https://tribunafoz.com/"
+},
+{
+"modo": "fonte",
+"nome": "Jornal do Oeste — Toledo",
+"cidade": "toledo",
+"url": "https://www.jornaldooeste.com.br/"
+},
+{
+"modo": "fonte",
+"nome": "Gazeta de Toledo",
+"cidade": "toledo",
+"url": "https://gazetadetoledo.com.br/"
+},
+{
+"modo": "fonte",
+"nome": "Toledo News",
+"cidade": "toledo",
+"url": "https://www.toledonews.com.br/"
+},
+{
+"modo": "fonte",
+"nome": "Correio do Lago — Santa Helena",
+"cidade": "santa-helena",
+"url": "https://www.correiodolago.com.br/"
+},
+{
+"modo": "fonte",
+"nome": "Costa Oeste News — São Miguel do Iguaçu",
+"cidade": "sao-miguel-do-iguacu",
+"url": "https://www.costaoestenews.com/"
+},
+{
+"modo": "fonte",
+"nome": "Jornal Mensageiro — Medianeira",
+"cidade": "medianeira",
+"url": "https://www.jornalmensageiro.com/"
+},
+{
+"modo": "fonte",
+"nome": "Portal Medianeira",
+"cidade": "medianeira",
+"url": "https://www.portalmedianeira.net.br/"
+},
+{
+"modo": "fonte",
+"nome": "Aqui Agora — Oeste",
+"cidade": "assis-chateaubriand",
+"url": "https://www.aquiagora.net/"
+},
+{
+"modo": "fonte",
+"nome": "Portal Assis — Assis Chateaubriand",
+"cidade": "assis-chateaubriand",
+"url": "https://portalassis.com.br/"
+},
+{
+"modo": "fonte",
+"nome": "Bem Oeste — Palotina",
+"cidade": "palotina",
+"url": "https://www.bemoeste.com.br/"
+},
+{
+"modo": "fonte",
+"nome": "Folha de Palotina",
+"cidade": "palotina",
+"url": "https://www.folhadepalotina.com.br/"
+},
+{
+"modo": "fonte",
+"nome": "Oeste em Foco",
+"cidade": "cascavel",
+"url": "https://oesteemfocoparana.com.br/"
+},
+{
+"modo": "fonte",
+"nome": "Portal Guaíra",
+"cidade": "guaira",
+"url": "https://portalguaira.com/"
+},
+{
+"modo": "fonte",
+"nome": "RR Mais — Guaraniaçu",
+"cidade": "guaraniacu",
+"url": "https://www.rrmais.com.br/"
+},
+{
+"modo": "fonte",
+"nome": "Jornal de Beltrão",
+"cidade": "francisco-beltrao",
+"url": "https://jornaldebeltrao.com.br/"
+},
+{
+"modo": "fonte",
+"nome": "RBJ — Sudoeste",
+"cidade": "francisco-beltrao",
+"url": "https://www.rbj.com.br/"
+},
+{
+"modo": "fonte",
+"nome": "Tribuna dos Lagos — Dois Vizinhos",
+"cidade": "dois-vizinhos",
+"url": "https://www.tribunadoslagos.com.br/"
+},
+{
+"modo": "fonte",
+"nome": "Portal Dois Vizinhos",
+"cidade": "dois-vizinhos",
+"url": "https://www.portaldoisvizinhos.com.br/"
+},
+{
+"modo": "fonte",
+"nome": "Liberal Online — Realeza",
+"cidade": "realeza",
+"url": "https://www.liberalonline.com.br/"
+},
+{
+"modo": "fonte",
+"nome": "Jornal da Fronteira — Barracão",
+"cidade": "barracao",
+"url": "https://jornaldafronteira.com.br/"
+},
+{
+"modo": "fonte",
+"nome": "Correio do Cidadão — Guarapuava",
+"cidade": "guarapuava",
+"url": "https://www.correiodocidadao.com.br/"
+},
+{
+"modo": "fonte",
+"nome": "Rede Sul de Notícias — Guarapuava",
+"cidade": "guarapuava",
+"url": "https://www.redesuldenoticias.com.br/"
+},
+{
+"modo": "fonte",
+"nome": "Correio do Povo — Laranjeiras do Sul",
+"cidade": "laranjeiras-do-sul",
+"url": "https://www.jcorreiodopovo.com.br/"
+},
+{
+"modo": "fonte",
+"nome": "Cantu em Foco — Laranjeiras do Sul",
+"cidade": "laranjeiras-do-sul",
+"url": "https://www.cantuemfoco.com.br/"
+},
+{
+"modo": "fonte",
+"nome": "VVale — União da Vitória",
+"cidade": "uniao-da-vitoria",
+"url": "https://www.vvale.com.br/"
+},
+{
+"modo": "fonte",
+"nome": "Jornal Fatos — Pinhão",
+"cidade": "pinhao",
+"url": "https://jornalfatos.com.br/"
+},
+{
+"modo": "fonte",
+"nome": "Diário Reservense — Reserva do Iguaçu",
+"cidade": "reserva-do-iguacu",
+"url": "https://diarioreservense.com.br/"
+},
+{
+"modo": "fonte",
+"nome": "Tablóide Regional — Pitanga",
+"cidade": "pitanga",
+"url": "https://www.tabloideregional.com.br/"
+},
+{
+"modo": "fonte",
+"nome": "Paraná Centro — Ivaiporã",
+"cidade": "ivaipora",
+"url": "https://jornal.paranacentro.com.br/"
+},
+{
+"modo": "fonte",
+"nome": "Ivaiporã Online",
+"cidade": "ivaipora",
+"url": "https://ivaipora.online/"
+},
+{
+"modo": "fonte",
+"nome": "Repórter do Vale — Borrazópolis",
+"cidade": "borrazopolis",
+"url": "https://jornalreporterdovale.com/"
+},
+{
+"modo": "fonte",
+"nome": "Jandaia Online",
+"cidade": "jandaia-do-sul",
+"url": "https://www.jandaiaonline.com.br/"
+},
+{
+"modo": "fonte",
+"nome": "Correio de Notícias — Mandaguari",
+"cidade": "mandaguari",
+"url": "https://correiodenoticias.net/"
+},
+{
+"modo": "fonte",
+"nome": "Notícias de Rolândia",
+"cidade": "rolandia",
+"url": "https://www.noticiasderolandia.com/"
+},
+{
+"modo": "fonte",
+"nome": "Portal Cambé",
+"cidade": "cambe",
+"url": "https://www.portalcambe.com.br/"
+},
+{
+"modo": "fonte",
+"nome": "AN Notícias — Apucarana",
+"cidade": "apucarana",
+"url": "https://www.annoticias.com.br/"
+},
+{
+"modo": "fonte",
+"nome": "Jornal União — Londrina",
+"cidade": "londrina",
+"url": "https://jornaluniao.com.br/"
+},
+{
+"modo": "fonte",
+"nome": "Maringá Mais",
+"cidade": "maringa",
+"url": "https://www.maringamais.com.br/"
+},
+{
+"modo": "fonte",
+"nome": "Assaí Online",
+"cidade": "assai",
+"url": "https://assaionline.com.br/"
+},
+{
+"modo": "fonte",
+"nome": "Folha Extra — Norte Pioneiro",
+"cidade": "santo-antonio-da-platina",
+"url": "https://folhaextra.com/"
+},
+{
+"modo": "fonte",
+"nome": "NP Diário — Norte Pioneiro",
+"cidade": "santo-antonio-da-platina",
+"url": "https://npdiario.com.br/"
+},
+{
+"modo": "fonte",
+"nome": "Tribuna do Vale — Sto. Antônio da Platina",
+"cidade": "santo-antonio-da-platina",
+"url": "https://www.tribunadovale.com.br/"
+},
+{
+"modo": "fonte",
+"nome": "Portal JNN — Jacarezinho",
+"cidade": "jacarezinho",
+"url": "https://www.portaljnn.com/"
+},
+{
+"modo": "fonte",
+"nome": "Folha do Norte PR — Bandeirantes",
+"cidade": "bandeirantes",
+"url": "https://folhadonortepr.com.br/"
+},
+{
+"modo": "fonte",
+"nome": "Jornal de Ibaiti",
+"cidade": "ibaiti",
+"url": "https://www.jornaldeibaiti.com.br/"
+},
+{
+"modo": "fonte",
+"nome": "Portal NP Online",
+"cidade": "jacarezinho",
+"url": "https://portalnponline.com/"
+},
+{
+"modo": "fonte",
+"nome": "Umuarama Ilustrado",
+"cidade": "umuarama",
+"url": "https://ilustrado.com.br/"
+},
+{
+"modo": "fonte",
+"nome": "Tribuna de Cianorte",
+"cidade": "cianorte",
+"url": "https://www.tribunadecianorte.com.br/"
+},
+{
+"modo": "fonte",
+"nome": "Jornal Noroeste — Paranavaí",
+"cidade": "paranavai",
+"url": "https://jornalnoroeste.com/"
+},
+{
+"modo": "fonte",
+"nome": "Portal do Noroeste",
+"cidade": "paranavai",
+"url": "https://portaldonoroeste.com.br/"
+},
+{
+"modo": "fonte",
+"nome": "Portal Cruzeiro do Oeste",
+"cidade": "cruzeiro-do-oeste",
+"url": "https://portalcruzeirodooeste.com.br/"
+},
+{
+"modo": "fonte",
+"nome": "Portal Altônia",
+"cidade": "altonia",
+"url": "https://www.portalaltonia.com.br/"
+},
+{
+"modo": "fonte",
+"nome": "Gazeta Regional — Goioerê",
+"cidade": "goioere",
+"url": "https://www.gazetaregional.com/"
+},
+{
+"modo": "fonte",
+"nome": "Paraná Notícias — Campo Mourão",
+"cidade": "campo-mourao",
+"url": "https://parananoticias.com.br/"
+},
+{
+"modo": "fonte",
+"nome": "Ubiratã Online",
+"cidade": "ubirata",
+"url": "https://ubirataonline.com.br/"
+},
+{
+"modo": "fonte",
+"nome": "Banda B — Curitiba e RMC",
+"cidade": "curitiba",
+"url": "https://www.bandab.com.br/"
+},
+{
+"modo": "fonte",
+"nome": "Tribuna do Paraná",
+"cidade": "curitiba",
+"url": "https://www.tribunapr.com.br/"
+},
+{
+"modo": "fonte",
+"nome": "Massa News",
+"cidade": "curitiba",
+"url": "https://massanews.com/"
+},
+{
+"modo": "fonte",
+"nome": "Plural — Curitiba",
+"cidade": "curitiba",
+"url": "https://www.plural.jor.br/"
+},
+{
+"modo": "fonte",
+"nome": "Folha de Campo Largo",
+"cidade": "campo-largo",
+"url": "https://www.folhadecampolargo.com.br/"
+},
+{
+"modo": "fonte",
+"nome": "Tribuna Regional da Lapa",
+"cidade": "lapa",
+"url": "https://tribunaregionaldalapa.com.br/"
+},
+{
+"modo": "fonte",
+"nome": "SJP News",
+"cidade": "sao-jose-dos-pinhais",
+"url": "https://www.sjpnews.com/"
+},
+{
+"modo": "fonte",
+"nome": "Jornal Registra — SJP",
+"cidade": "sao-jose-dos-pinhais",
+"url": "https://www.jornalregistra.com/"
+},
+{
+"modo": "fonte",
+"nome": "Tudo Pinhais",
+"cidade": "pinhais",
+"url": "https://www.tudopinhais.com.br/"
+},
+{
+"modo": "fonte",
+"nome": "Diário de Piraquara",
+"cidade": "piraquara",
+"url": "https://diariodepiraquara.com.br/"
+},
+{
+"modo": "fonte",
+"nome": "Jornal de Colombo",
+"cidade": "colombo",
+"url": "https://www.jornaldecolombo.com.br/"
+},
+{
+"modo": "fonte",
+"nome": "Grande Curitiba",
+"cidade": "curitiba",
+"url": "https://grandecuritiba.info/"
+},
+{
+"modo": "fonte",
+"nome": "Click Riomafra — Rio Negro",
+"cidade": "rio-negro",
+"url": "https://www.clickriomafra.com.br/"
+},
+{
+"modo": "fonte",
+"nome": "Correio do Litoral — Guaratuba",
+"cidade": "guaratuba",
+"url": "https://correiodolitoral.com/"
+},
+{
+"modo": "fonte",
+"nome": "Agora Litoral — Paranaguá",
+"cidade": "paranagua",
+"url": "https://agoralitoral.com.br/"
+}
+]

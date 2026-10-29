@@ -1,0 +1,23 @@
+name: diag-fontes4
+on:
+  push:
+    branches: [diag-prefeituras]
+    paths: [scripts/diag-prefeituras/fontes4.json]
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  diagnosticar:
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@v4
+      - uses: denoland/setup-deno@v2
+        with:
+          deno-version: v2.x
+      - run: timeout 80m deno run --allow-net --allow-read --allow-write --allow-env scripts/diag-prefeituras/diag.ts fontes4 2>&1 | tail -20
+      - run: |
+          git config user.name "github-actions"; git config user.email "actions@github.com"
+          git add scripts/diag-prefeituras/resultado-fontes4.json
+          git commit -m "Diagnóstico: jornais regionais candidatos" || exit 0
+          for i in 1 2 3; do git pull --rebase -q && git push && break; sleep 5; done
