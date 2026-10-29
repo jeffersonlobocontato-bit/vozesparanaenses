@@ -1,0 +1,25 @@
+== /toledo
+HTTP/2 301 
+location: /oeste/cidade/toledo?utm_source=atalho&utm_medium=url-curta&utm_campaign=cidade-toledo
+bytes 0
+== /toledo?utm_source=whatsapp&utm_medium=social
+HTTP/2 301 
+location: /oeste/cidade/toledo?utm_source=whatsapp&utm_medium=social
+bytes 0
+== /Foz%20do%20Igua%C3%A7u
+HTTP/2 301 
+location: /oeste/cidade/foz-do-iguacu?utm_source=atalho&utm_medium=url-curta&utm_campaign=cidade-foz-do-iguacu
+bytes 0
+== /oeste/cidade/toledo
+HTTP/2 200 
+bytes 62563
+grep: /tmp/p.html: binary file matches
+== /geo-pr-municipios.json
+HTTP/2 200 
+bytes 85582
+== /admin/cobertura
+HTTP/2 200 
+bytes 8571
+== /admin/resumo-regional
+HTTP/2 200 
+bytes 8699
