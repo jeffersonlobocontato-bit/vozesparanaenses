@@ -1,0 +1,16 @@
+name: checa-site
+on:
+  push:
+    branches: [diag-prefeituras]
+    paths: [.github/workflows/checa-site.yml]
+permissions:
+  contents: read
+jobs:
+  checar:
+    runs-on: ubuntu-latest
+    steps:
+      - run: |
+          for u in /toledo "/toledo?utm_source=whatsapp&utm_medium=social" "/Foz%20do%20Igua%C3%A7u" /oeste/cidade/toledo /geo-pr-municipios.json /admin/cobertura /admin/resumo-regional; do
+            echo "== $u"; curl -s -o /tmp/p.html -D - -m 30 "https://vozesparanaenses.com.br$u" | grep -iE "^HTTP|^location" ; echo "bytes $(wc -c < /tmp/p.html)"
+            grep -o "Endereço curto para salvar[^<]*\|Enquanto isso, no resto do Paraná" /tmp/p.html | head -3
+          done
