@@ -14,7 +14,7 @@
 import { faltando5w1h, motivoVeto5w1h } from "../_shared/cinco-w.ts";
 import { candidatoDuplicata, mesmoFato } from "../_shared/duplicidade.ts";
 import { exigirInterno } from "../_shared/auth.ts";
-import { ehLogomarca } from "../_shared/analista-imagem.ts";
+import { fotoLimpa } from "../_shared/analista-imagem.ts";
 import { imagemValida } from "../_shared/coleta.ts";
 import { escolherFotoGenerica, FOTO_ORIGEM_GENERICA } from "../_shared/foto-generica.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
@@ -320,7 +320,7 @@ Deno.serve(async (req) => {
     // Só as candidatas a capa (as proibidas já não entram) — poupa a IA.
     if (r.imagem_original_url && statusFoto(r) === "autorizada" && await naoEhFotoDeVerdade(sb, aiKey, r)) {
       logos.add(r.id);
-      console.log(`[generate-article] imagem descartada (logomarca/padrão do site): ${r.imagem_original_url}`);
+      console.log(`[generate-article] imagem descartada (não é foto limpa: logomarca, marca d'água, nome de veículo ou padrão do site): ${r.imagem_original_url}`);
     }
   }
   const rawFotoAutorizada = [...raws]
@@ -825,11 +825,13 @@ async function naoEhFotoDeVerdade(sb: any, aiKey: string, r: RawFoto): Promise<b
       if (urls.size >= 3) return true;
     } catch (_) { /* segue para a IA */ }
   }
-  try {
-    return await ehLogomarca(aiKey, u);
-  } catch (_) {
-    return false;
-  }
+  // Compliance: só foto limpa (sem logomarca, marca d'água ou nome de
+  // veículo). Foto de portal sem resposta da IA não entra (fail-closed);
+  // a de prefeitura entra (material institucional).
+  let limpa: boolean | null = null;
+  try { limpa = await fotoLimpa(aiKey, u); } catch (_) { limpa = null; }
+  if (limpa === null) return fonte?.tipo !== "prefeitura";
+  return !limpa;
 }
 
 async function copiarFotoParaStorage(sb: any, srcUrl: string, articleId: string): Promise<string | null> {

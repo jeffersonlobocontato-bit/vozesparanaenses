@@ -146,17 +146,23 @@ export async function ehArteDeDivulgacao(apiKey: string, url: string): Promise<b
 }
 
 /**
- * A "foto" da fonte é logomarca, brasão, nome/marca da prefeitura ou uma
- * imagem só de texto? Não serve de capa: a matéria sai só com texto. Na
- * dúvida ou com a IA fora do ar, trata como foto (false) — o filtro pelo
- * nome do arquivo (`ehLogomarcaPorUrl`) e o de imagem repetida já pegam o
- * caso mais comum.
+ * Compliance da capa: só FOTO LIMPA vira capa. Reprova (false) quando há
+ * logomarca, marca d'água, selo, assinatura ou nome de veículo de comunicação,
+ * portal, emissora, prefeitura ou empresa em qualquer parte da imagem (mesmo
+ * pequeno num canto), texto sobreposto, moldura/arte montada, print de tela ou
+ * imagem só de texto. Aprova (true) só fotografia sem nenhuma marca.
+ * null = IA fora do ar ou resposta ilegível (quem chama decide).
  */
-export async function ehLogomarca(apiKey: string, url: string): Promise<boolean> {
+export async function fotoLimpa(apiKey: string, url: string): Promise<boolean | null> {
   const raw = await chamarIa(apiKey, [
-    { role: "system", content: "Você classifica a imagem de capa de uma notícia. Responda só JSON {\"logo\": true|false}. logo = true quando a imagem é principalmente uma logomarca, brasão, selo, marca ou o nome escrito de uma prefeitura/órgão/empresa, ou quando é só texto sobre fundo (sem fotografia). logo = false quando é uma fotografia de pessoas, lugares, obras ou acontecimentos, mesmo com uma marca d'água pequena num canto." },
-    { role: "user", content: [{ type: "text", text: "Esta imagem é logomarca/nome da instituição (sem foto)?" }, { type: "image_url", image_url: { url } }] },
-  ], 60);
-  const r = jsonDe<{ logo?: boolean }>(raw);
-  return r?.logo === true;
+    { role: "system", content: "Você é o compliance de imagens de um portal de notícias. Responda só JSON {\"limpa\": true|false, \"motivo\": \"...\"}. limpa = true SOMENTE se for uma fotografia sem nenhuma marca. limpa = false se houver, em QUALQUER parte da imagem, mesmo pequeno ou num canto: logomarca, marca d'água, selo, assinatura, nome ou endereço de site de jornal, portal, emissora de rádio/TV, prefeitura, órgão ou empresa; texto sobreposto (manchete, legenda dentro da imagem, tarja); moldura ou arte montada; card de rede social; print de tela; ou se a imagem for só logo ou texto. Placas e fachadas que fazem parte da cena fotografada não contam como marca." },
+    { role: "user", content: [{ type: "text", text: "Esta imagem é uma foto limpa, sem nenhuma logomarca, marca d'água ou nome de veículo?" }, { type: "image_url", image_url: { url } }] },
+  ], 80);
+  const r = jsonDe<{ limpa?: boolean }>(raw);
+  return typeof r?.limpa === "boolean" ? r.limpa : null;
+}
+
+/** Compatibilidade: logomarca/marca/nome na imagem (fail-open). */
+export async function ehLogomarca(apiKey: string, url: string): Promise<boolean> {
+  return (await fotoLimpa(apiKey, url)) === false;
 }
