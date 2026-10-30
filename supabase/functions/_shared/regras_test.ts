@@ -303,6 +303,8 @@ ok("portal fato específico sem foto → nenhuma", fi({}) === "nenhuma");
 ok("prefeitura com foto → foto dela", fi({ origem: "prefeitura", fotoStatus: "autorizada" }) === "fonte");
 ok("curadoria fora da dobra", !podeIrParaDobra("curadoria", true));
 ok("tema policial nunca vai para IA", ehTemaPolicial("PRF inicia Operação Finados nas rodovias federais") && ehTemaPolicial("Homem é preso em Toledo") && ehTemaPolicial("qualquer coisa", "seguranca"));
+ok("fiscalização do TCE não é tema policial", !ehTemaPolicial("TCE-PR inicia Plano de Fiscalização com 126 diretrizes", "politica"));
+ok("importunação sexual → sem foto", escolherFotoGenerica("seguranca", "Mulher denuncia cunhado por importunação sexual", "abc") === null);
 ok("tema geral pode ir para IA", !ehTemaPolicial("Frente fria derruba temperaturas no Paraná", "cotidiano"));
 ok("prompt de ilustração proíbe pessoas e crianças", /sem pessoas/.test(promptIlustracao("x")) && /sem crian/.test(promptIlustracao("x")));
 const pag = (title: string, w: number, h: number, lic: string, cats: string) => ({ title, imageinfo: [{ width: w, height: h, thumburl: `https://x/${title}`, extmetadata: { LicenseShortName: { value: lic }, Categories: { value: cats }, Artist: { value: "<a>Fulano</a>" } } }] });

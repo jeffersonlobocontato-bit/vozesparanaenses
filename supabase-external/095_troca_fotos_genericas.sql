@@ -22,7 +22,7 @@ where g.status = 'publicado'
   and (
     -- IA em tema policial
     (g.foto_origem = 'ilustracao_ia'
-      and lower(translate(g.titulo || ' ' || coalesce(g.resumo, ''), 'áàâãäéèêëíìîïóòôõöúùûüçÁÀÂÃÄÉÈÊËÍÌÎÏÓÒÔÕÖÚÙÛÜÇ', 'aaaaaeeeeiiiiooooouuuucAAAAAEEEEIIIIOOOOOUUUUC')) ~ '(polici|\mprf\M|\mpm\M|apreen|pres[oa]\M|prisao|trafic|contrabando|crime|fiscaliza|acidente|colisao)')
+      and lower(translate(g.titulo || ' ' || coalesce(g.resumo, ''), 'áàâãäéèêëíìîïóòôõöúùûüçÁÀÂÃÄÉÈÊËÍÌÎÏÓÒÔÕÖÚÙÛÜÇ', 'aaaaaeeeeiiiiooooouuuucAAAAAEEEEIIIIOOOOOUUUUC')) ~ '(polici|\mprf\M|\mpm\M|apreen|pres[oa]\M|prisao|trafic|contrabando|crime|blitz|acidente|colisao)')
     -- foto de arquivo repetida: fica com a matéria mais antiga, as outras saem
     or (g.foto_origem = 'generica_institucional' and exists (
       select 1 from generated_articles o
@@ -81,7 +81,7 @@ alvo as (
       when b.t ~ '(pericia|perito|\miml\M|necropsia|cientifica|corpo (e |foi )?encontrado|ossada|cadaver)' then 'cientifica'
       when b.t ~ '(presidio|penitenciar|cadeia publica|detento|policia penal|depen|rebeliao|sistema prisional)' then 'penal'
       when b.t ~ '(policia federal|\mpf\M|receita federal|gaeco)' then null  -- caso federal: sem foto
-      when b.t ~ '(estupr|abuso sexual|infantojuvenil|pedofil|maus-tratos|vulneravel)' then null
+      when b.t ~ '(estupr|abuso sexual|importunacao sexual|assedio sexual|violencia sexual|infantojuvenil|pedofil|maus-tratos|vulneravel)' then null
       when b.t ~ '(delegacia|delegad|inquerito|policia civil|pcpr|investigac|indiciad|mandado de prisao|golpe|estelionat)' then 'civil'
       else 'pm'
     end as grupo

@@ -217,7 +217,7 @@ function hash(s: string): number {
 // Sem foto genérica: crimes sexuais e contra crianças (nenhuma imagem
 // ilustrativa), e casos federais (PF, Receita, Gaeco) — mostraria a
 // corporação errada. PRF/BR tem grupo próprio (fotos da PRF) e vem antes.
-export const SEM_FOTO = /\b(estupr|abuso sexual|infantojuvenil|pedofil|maus-tratos|vulneravel)/;
+export const SEM_FOTO = /\b(estupr|abuso sexual|importunacao sexual|assedio sexual|violencia sexual|infantojuvenil|pedofil|maus-tratos|vulneravel)/;
 export const FEDERAL = /\b(policia federal|pf\b|receita federal|gaeco)/;
 
 export function escolherFotoGenerica(
