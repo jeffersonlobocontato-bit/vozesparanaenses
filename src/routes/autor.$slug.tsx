@@ -78,7 +78,7 @@ export const Route = createFileRoute("/autor/$slug")({
   ),
   errorComponent: ({ error }) => (
     <div className="p-8 text-center text-sm text-muted-foreground">
-      Erro: {error.message}
+      Erro: {(error as Error).message}
     </div>
   ),
 });

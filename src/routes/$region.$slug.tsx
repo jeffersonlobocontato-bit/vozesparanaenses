@@ -338,7 +338,7 @@ export const Route = createFileRoute("/$region/$slug")({
   ),
   errorComponent: ({ error }) => (
     <div className="p-8 text-center text-sm text-muted-foreground">
-      Erro ao carregar matéria: {error.message}
+      Erro ao carregar matéria: {(error as Error).message}
     </div>
   ),
 });
