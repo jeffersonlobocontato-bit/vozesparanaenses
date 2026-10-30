@@ -1,5 +1,5 @@
 // Testes das leituras do painel de Analytics (rode: npx deno run scripts/analytics-leituras_test.ts)
-import { leituras, periodo } from "../src/lib/analytics-leituras.ts";
+import { leituras, periodo, medicaoRecente } from "../src/lib/analytics-leituras.ts";
 import { corpoDoRelatorio, intervalos, relatoriosDaAba, ABAS } from "../src/lib/ga4-relatorios.ts";
 
 let falhas = 0;
@@ -21,10 +21,18 @@ let ls = leituras("visao", {
 ok("visão: queda de leitores é crítica", tem(ls, "Queda de leitores", "critico"), ls);
 ok("visão: amostra pequena", tem(ls, "Amostra pequena"));
 ok("visão: engajamento baixo", tem(ls, "Engajamento baixo", "critico"));
-ok("visão: sem conversão", tem(ls, "Nenhuma conversão"));
-ok("visão: pouca leitura até o fim", tem(ls, "Pouca leitura"));
+ok("visão: conversões novas não viram alerta na 1ª semana", medicaoRecente("2026-10-30") ? tem(ls, "Conversões começando") : tem(ls, "Nenhuma conversão"));
+ok("visão: leitura completa em nova medição", medicaoRecente("2026-10-30") ? tem(ls, "nova medição") : tem(ls, "Pouca leitura"));
+ok("medição recente expira em 7 dias", !medicaoRecente("2026-10-30", Date.parse("2026-11-08T12:00:00Z")) && medicaoRecente("2026-10-30", Date.parse("2026-11-02T12:00:00Z")));
 ok("visão: pouca busca orgânica", tem(ls, "Pouca busca orgânica"));
 ok("críticos primeiro", ls[0].nivel === "critico");
+
+// base fraca: +1000% não é crescimento
+ls = leituras("visao", { totais: [
+  { dateRange: "atual", activeUsers: 330, screenPageViews: 480, engagementRate: 0.6 },
+  { dateRange: "anterior", activeUsers: 30, screenPageViews: 70, engagementRate: 0.6 },
+] }, { dias: 28 });
+ok("base fraca: avisa em vez de comemorar", tem(ls, "Comparação sem base") && !tem(ls, "Crescimento de leitores") && !tem(ls, "Menos páginas por leitor"), ls);
 
 // aquisição: dependência e direto
 ls = leituras("aquisicao", {

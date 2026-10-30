@@ -105,6 +105,24 @@ export const dispositivoPt = (d: string) => DISPOSITIVO_PT[d] ?? d;
 /** Amostra pequena: abaixo disso, variações percentuais são ruído. */
 export const AMOSTRA_MINIMA = 100;
 
+/**
+ * Datas em que a medição mudou: antes delas o evento não existia (ou era
+ * medido de outro jeito). Nos 7 dias seguintes, ausência/queda desses
+ * eventos não vira alerta — vira aviso de que a série está começando.
+ */
+export const MEDICAO_DESDE = {
+  conversoes: "2026-10-30", // generate_lead, clique_whatsapp, comentario_enviado
+  leituraCompleta: "2026-10-30", // passou a medir o fim do texto (antes: 75% do <article>)
+} as const;
+
+/** A medição começou há menos de 7 dias (ou começa dentro do período). */
+export function medicaoRecente(desde: string, agora = Date.now()): boolean {
+  return agora - new Date(`${desde}T03:00:00Z`).getTime() < 7 * 86_400_000;
+}
+
+/** Base de comparação pequena demais: a variação % não diz nada. */
+export const BASE_COMPARACAO_MINIMA = 50;
+
 // ------------------------------------------------------------------ leituras
 export function leituras(aba: Aba, r: Relatorios, x: Extras): Leitura[] {
   const out: Leitura[] = [];
@@ -120,19 +138,25 @@ export function leituras(aba: Aba, r: Relatorios, x: Extras): Leitura[] {
       if (usuarios < AMOSTRA_MINIMA) {
         add("alerta", "Amostra pequena", `${inteiro(usuarios)} leitores medidos no período. Com o Consent Mode, o GA só conta quem aceita os cookies: leia as variações como tendência, não como número exato (aba Qualidade dos dados).`);
       }
-      if (vUsu !== null && vUsu <= -0.2 && usuarios >= 30) add("critico", "Queda de leitores", `Leitores ${pctTexto(vUsu)} contra o período anterior (${inteiro(num(an.activeUsers))} → ${inteiro(usuarios)}). Confira se o pipeline publicou normalmente (painel Pipeline ao vivo) e a aba Fontes e canais.`);
+      const baseFraca = num(an.activeUsers) < BASE_COMPARACAO_MINIMA;
+      if (baseFraca && usuarios >= 30) {
+        add("alerta", "Comparação sem base", `O período anterior teve só ${inteiro(num(an.activeUsers))} leitores medidos, então a variação (${pctTexto(vUsu)}) não mede crescimento: reflete o pipeline parado (18/09–22/10) e o rastreamento ainda sendo montado. Compare semana com semana a partir de novembro.`);
+      } else if (vUsu !== null && vUsu <= -0.2 && usuarios >= 30) add("critico", "Queda de leitores", `Leitores ${pctTexto(vUsu)} contra o período anterior (${inteiro(num(an.activeUsers))} → ${inteiro(usuarios)}). Confira se o pipeline publicou normalmente (painel Pipeline ao vivo) e a aba Fontes e canais.`);
       else if (vUsu !== null && vUsu >= 0.2 && usuarios >= 30) add("insight", "Crescimento de leitores", `Leitores ${pctTexto(vUsu)} contra o período anterior. Veja em Fontes e canais qual canal puxou a alta e reforce.`);
-      if (vPv !== null && vUsu !== null && vPv < vUsu - 0.15) add("alerta", "Menos páginas por leitor", `Visualizações (${pctTexto(vPv)}) cresceram menos que leitores (${pctTexto(vUsu)}): quem chega lê uma matéria e sai. Reforce relacionadas e links internos.`);
+      if (!baseFraca && vPv !== null && vUsu !== null && vPv < vUsu - 0.15) add("alerta", "Menos páginas por leitor", `Visualizações (${pctTexto(vPv)}) cresceram menos que leitores (${pctTexto(vUsu)}): quem chega lê uma matéria e sai. Reforce relacionadas e links internos.`);
       const eng = num(at.engagementRate);
       if (usuarios >= 30 && eng > 0 && eng < 0.45) add("critico", "Engajamento baixo", `Só ${pct(eng)} das sessões foram engajadas (mais de 10 s, 2 páginas ou conversão). Referência para portal de notícias: 55% ou mais.`);
       const ev = agrupar(periodo(r.eventos, "atual"), "eventName", "eventCount");
       const pv = ev.page_view ?? 0;
       const conv = (ev.generate_lead ?? 0) + (ev.clique_whatsapp ?? 0) + (ev.comentario_enviado ?? 0);
-      if (pv >= 200 && conv === 0) add("alerta", "Nenhuma conversão no período", "Nenhum lead, clique de WhatsApp ou comentário registrado. Confira se os CTAs de WhatsApp e newsletter estão visíveis nas matérias.");
+      if (pv >= 200 && conv === 0 && medicaoRecente(MEDICAO_DESDE.conversoes)) add("insight", "Conversões começando a ser medidas", "Leads, cliques de WhatsApp e comentários passaram a ser medidos em 30/10. Zero até agora é esperado; o alerta liga sozinho depois de 7 dias.");
+      else if (pv >= 200 && conv === 0) add("alerta", "Nenhuma conversão no período", "Nenhum lead, clique de WhatsApp ou comentário registrado. Confira se os CTAs de WhatsApp e newsletter estão visíveis nas matérias.");
       if (pv > 0) {
         const lc = (ev.leitura_completa ?? 0) / pv;
-        if (pv >= 100 && lc < 0.15) add("alerta", "Pouca leitura até o fim", `Só ${pct(lc)} das visualizações chegam a 75% da matéria. Textos longos demais ou anúncios no meio do texto podem estar derrubando a leitura.`);
-        else if (pv >= 100 && lc >= 0.35) add("insight", "Boa leitura até o fim", `${pct(lc)} das visualizações chegam a 75% da matéria — o formato está funcionando.`);
+        if (medicaoRecente(MEDICAO_DESDE.leituraCompleta)) {
+          if (pv >= 100) add("insight", "Leitura completa em nova medição", `${pct(lc)} no período, mas até 30/10 o evento só disparava a 75% da página inteira (foto, "Os fatos", FAQ e rodapé incluídos) e subestimava a leitura. Desde 30/10 mede quem chega ao fim do texto: leia este número a partir de 6/11.`);
+        } else if (pv >= 100 && lc < 0.15) add("alerta", "Pouca leitura até o fim", `Só ${pct(lc)} das visualizações chegam ao fim do texto. Textos longos demais ou anúncios no meio do texto podem estar derrubando a leitura.`);
+        else if (pv >= 100 && lc >= 0.35) add("insight", "Boa leitura até o fim", `${pct(lc)} das visualizações chegam ao fim do texto — o formato está funcionando.`);
       }
       const canais = agrupar(r.canais, "sessionDefaultChannelGroup", "sessions");
       const totalS = Object.values(canais).reduce((a, b) => a + b, 0);
@@ -316,7 +340,7 @@ export function leituras(aba: Aba, r: Relatorios, x: Extras): Leitura[] {
         const sc = (ev.scroll ?? 0) / pv;
         if (sc > 0) add("insight", "Rolagem", `${pct(sc)} das visualizações rolam até 90% da página (medição automática do GA).`);
       }
-      for (const nomeEv of ["leitura_completa", "share", "clique_relacionada"]) {
+      for (const nomeEv of medicaoRecente(MEDICAO_DESDE.leituraCompleta) ? ["share", "clique_relacionada"] : ["leitura_completa", "share", "clique_relacionada"]) {
         const v = variacao(ev[nomeEv] ?? 0, evAn[nomeEv] ?? 0);
         if (v !== null && (evAn[nomeEv] ?? 0) >= 20 && v <= -0.3) add("alerta", `${nomeEv} em queda`, `${pctTexto(v)} contra o período anterior.`);
       }
@@ -334,7 +358,8 @@ export function leituras(aba: Aba, r: Relatorios, x: Extras): Leitura[] {
       const sess = num(periodo(r.sessoes, "atual")[0]?.sessions);
       const leads = at.generate_lead ?? 0;
       const whats = at.clique_whatsapp ?? 0;
-      if (sess >= 100 && leads === 0) add("critico", "Nenhum lead no período", `${inteiro(sess)} sessões e nenhum formulário/cadastro concluído. Confira se os formulários estão no ar e se o evento chega (DebugView do GA).`);
+      if (sess >= 100 && leads === 0 && medicaoRecente(MEDICAO_DESDE.conversoes)) add("insight", "Leads começando a ser medidos", "Os eventos de lead entraram no ar em 30/10: zero até agora é esperado. O alerta liga depois de 7 dias.");
+      else if (sess >= 100 && leads === 0) add("critico", "Nenhum lead no período", `${inteiro(sess)} sessões e nenhum formulário/cadastro concluído. Confira se os formulários estão no ar e se o evento chega (DebugView do GA).`);
       if (sess > 0 && leads > 0) add("insight", "Taxa de lead", `${(leads / sess * 1000).toFixed(1).replace(".", ",")} leads a cada mil sessões.`);
       const vL = variacao(leads, an.generate_lead ?? 0);
       if (vL !== null && (an.generate_lead ?? 0) >= 5 && vL <= -0.3) add("alerta", "Leads em queda", `${pctTexto(vL)} contra o período anterior.`);

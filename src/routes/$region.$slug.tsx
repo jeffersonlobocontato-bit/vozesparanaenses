@@ -392,16 +392,19 @@ function ArticlePage() {
   }, [region, slug, categoriaSlug, cidadeAtualSlug, autoria, article.published_at]);
 
   const articleRef = useRef<HTMLElement>(null);
+  // Leitura completa = o leitor chegou ao FIM DO TEXTO (o último parágrafo
+  // entrou na tela). Antes media 75% do <article> inteiro, que inclui foto,
+  // "Os fatos", FAQ, botões e anúncio do rodapé — quem lia a matéria toda
+  // muitas vezes não chegava lá, e a taxa saía artificialmente baixa (5%).
+  const fimDoTextoRef = useRef<HTMLDivElement>(null);
   useEffect(() => {
     let enviado = false;
     const medir = () => {
-      const el = articleRef.current;
-      if (enviado || !el) return;
-      const r = el.getBoundingClientRect();
-      if (r.height <= 0) return;
-      if ((window.innerHeight - r.top) / r.height >= 0.75) {
+      const fim = fimDoTextoRef.current;
+      if (enviado || !fim) return;
+      if (fim.getBoundingClientRect().top <= window.innerHeight) {
         enviado = true;
-        eventoGA("leitura_completa", { percent_scrolled: 75 });
+        eventoGA("leitura_completa", { percent_scrolled: 100, medida: "fim_do_texto" });
         window.removeEventListener("scroll", medir);
       }
     };
@@ -741,6 +744,7 @@ function ArticlePage() {
                 </div>
               );
             })}
+            <div ref={fimDoTextoRef} aria-hidden="true" />
           </div>
         )}
 
