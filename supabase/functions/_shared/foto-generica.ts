@@ -24,6 +24,10 @@ export type FotoGenerica = {
   legenda: string;
 };
 
+// Polícia Rodoviária Federal / rodovia federal (BR): grupo próprio, com as
+// fotos da galeria oficial da PRF. Vem antes do teste de "caso federal".
+export const PRF = /\b(prf|policia rodoviaria federal|rodovias? federa(l|is)|br-?\d{3})/;
+
 type Grupo = {
   /** "qualquer" = vale para toda editoria (clima/alertas). */
   editoria: "seguranca" | "esportes" | "qualquer";
@@ -66,6 +70,22 @@ export const GRUPOS: Grupo[] = [
       f("cbm-1", "Foto: Sesp", "Viatura do Corpo de Bombeiros"),
       f("cbm-2", "Foto: Corpo de Bombeiros do Paraná", "Equipe de resgate do Corpo de Bombeiros"),
       f("cbm-3", "Foto: Corpo de Bombeiros do Paraná", "Equipe de resgate do Corpo de Bombeiros"),
+    ],
+  },
+  {
+    editoria: "seguranca",
+    // Rodovia federal / PRF: galeria oficial da PRF no Paraná (Flickr
+    // prfparana, fotos de divulgação com crédito do autor) — agentes de
+    // costas ou distantes em fiscalização, sem rosto em primeiro plano.
+    gatilho: PRF,
+    fotos: [
+      f("prf-1", "Foto: André Filgueira/PRF", "Policial rodoviária federal em fiscalização na rodovia"),
+      f("prf-2", "Foto: André Filgueira/PRF", "Policial rodoviária federal em fiscalização de veículo"),
+      f("prf-3", "Foto: André Filgueira/PRF", "Abordagem da PRF em rodovia federal"),
+      f("prf-4", "Foto: André Filgueira/PRF", "Policial rodoviária federal acompanha o fluxo na rodovia"),
+      f("prf-5", "Foto: PRF", "Fiscalização de carga pela PRF"),
+      f("prf-6", "Foto: André Filgueira/PRF", "Policial rodoviário federal orienta o trânsito"),
+      f("prf-7", "Foto: PRF", "Motopoliciamento da PRF em rodovia federal"),
     ],
   },
   {
@@ -195,23 +215,49 @@ function hash(s: string): number {
  * as fotos do mesmo grupo para a home não repetir a mesma imagem.
  */
 // Sem foto genérica: crimes sexuais e contra crianças (nenhuma imagem
-// ilustrativa), e casos federais (PF, Receita, PRF, Gaeco, BR) — o banco é
-// das forças estaduais e mostraria a corporação errada.
+// ilustrativa), e casos federais (PF, Receita, Gaeco) — mostraria a
+// corporação errada. PRF/BR tem grupo próprio (fotos da PRF) e vem antes.
 export const SEM_FOTO = /\b(estupr|abuso sexual|infantojuvenil|pedofil|maus-tratos|vulneravel)/;
-export const FEDERAL = /\b(policia federal|pf\b|receita federal|gaeco|prf\b|policia rodoviaria federal|br-?\d{3})/;
+export const FEDERAL = /\b(policia federal|pf\b|receita federal|gaeco)/;
 
 export function escolherFotoGenerica(
   editoria: string | null | undefined,
   texto: string,
   semente: string,
 ): (FotoGenerica & { url: string }) | null {
+  const r = escolherFotoGenericaInedita(editoria, texto, semente, new Set());
+  return r && "foto" in r ? r.foto : null;
+}
+
+export const urlFotoGenerica = (id: string) => `${SITE_FOTOS_GENERICAS}/${id}.jpg`;
+
+/**
+ * Como escolherFotoGenerica, mas pula as fotos em `evitar` (URLs já usadas
+ * por OUTRA matéria recente de outro assunto — regra de 30/10/2026: duas
+ * matérias de temas diferentes nunca com a mesma foto). Se o grupo do tema
+ * existe e todas as fotos dele já estão em uso, devolve { repetida: true }:
+ * a pauta vira nota na coluna da região em vez de repetir a foto.
+ */
+export function escolherFotoGenericaInedita(
+  editoria: string | null | undefined,
+  texto: string,
+  semente: string,
+  evitar: Set<string>,
+): { foto: FotoGenerica & { url: string } } | { repetida: true } | null {
   const t = norm(texto);
   if (SEM_FOTO.test(t)) return null;
-  if (editoria === "seguranca" && FEDERAL.test(t)) return null;
+  const ehPrf = editoria === "seguranca" && PRF.test(t);
+  if (editoria === "seguranca" && !ehPrf && FEDERAL.test(t)) return null;
   const grupo = GRUPOS.find((g) => (g.editoria === editoria || g.editoria === "qualquer") && (!g.gatilho || g.gatilho.test(t)));
   if (!grupo) return null;
-  const foto = grupo.fotos[hash(semente) % grupo.fotos.length];
-  return { ...foto, url: `${SITE_FOTOS_GENERICAS}/${foto.id}.jpg` };
+  const n = grupo.fotos.length;
+  const inicio = hash(semente) % n;
+  for (let i = 0; i < n; i++) {
+    const foto = grupo.fotos[(inicio + i) % n];
+    const url = urlFotoGenerica(foto.id);
+    if (!evitar.has(url)) return { foto: { ...foto, url } };
+  }
+  return { repetida: true };
 }
 
 export function ehFotoGenerica(url: string | null | undefined, origem?: string | null): boolean {

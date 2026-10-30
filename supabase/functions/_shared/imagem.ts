@@ -43,13 +43,26 @@ function base64ToBytes(b64: string): Uint8Array {
   return Uint8Array.from(bin, (c) => c.charCodeAt(0));
 }
 
+// Polícia, crime e fiscalização NUNCA ganham imagem de IA (regra do editor,
+// 30/10/2026): há fotos reais e públicas das corporações (banco genérico em
+// _shared/foto-generica.ts). Sem foto real, a matéria sai sem imagem ou vira
+// nota na coluna da região.
+const TEMA_POLICIAL = /\b(polici|pm\b|pmpr|prf\b|pcpr|pf\b|guarda municipal|gcm\b|delegad|delegacia|viatura|blitz|apreen|apreend|pres[oa]s?\b|prisao|prend|flagrante|operacao (policial|integrada|conjunta)|trafic|contrabando|descaminho|crime|criminos|homicid|assassin|assalt|roub|furt|estelion|golpe|suspeit|mandado|investigac|fiscaliza|bombeir|siate|samu|acidente|colisao|atropel)/;
+
+export function ehTemaPolicial(texto: string, categoriaSlug?: string | null): boolean {
+  if (categoriaSlug === "seguranca") return true;
+  return TEMA_POLICIAL.test(texto.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, ""));
+}
+
 /** Gera a ilustração temática, sobe no storage e devolve a URL pública. */
 export async function gerarIlustracaoTematica(p: {
   sb: Sb;
   aiKey: string;
   articleId: string;
   tema: string;
+  categoriaSlug?: string | null;
 }): Promise<string | null> {
+  if (ehTemaPolicial(p.tema, p.categoriaSlug)) return null;
   try {
     const res = await fetch(AI_URL, {
       method: "POST",

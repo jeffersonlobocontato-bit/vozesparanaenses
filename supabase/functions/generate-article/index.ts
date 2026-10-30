@@ -17,7 +17,7 @@ import { exigirInterno } from "../_shared/auth.ts";
 import { analisarMarcas, fotoLimpa } from "../_shared/analista-imagem.ts";
 import { recortarImagem, type Caixa } from "../_shared/recorte-marca.ts";
 import { imagemValida } from "../_shared/coleta.ts";
-import { escolherFotoGenerica, FOTO_ORIGEM_GENERICA } from "../_shared/foto-generica.ts";
+import { escolherFotoGenericaInedita, FOTO_ORIGEM_GENERICA } from "../_shared/foto-generica.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
 import { carregarCidades, cidadePorNome } from "../_shared/cidades.ts";
 import { decidirFormato, decidirImagem, ehAbrangenciaNacional, podeIrParaDobra, prioridadeDoTema, temaHeuristico, type DecisaoImagem, type OrigemPauta, type Prioridade, type Tema, type TipoImagem } from "../_shared/crivo-editorial.ts";
@@ -618,6 +618,11 @@ Você é repórter, não comentarista. Relate o fato; não tome partido.
   // Matéria do editor (fora do automático) mantém a foto geral da cidade/
   // região como reserva — exceto curadoria e esportes, que são só texto.
   let fotoOrigem: "fonte_autorizada" | "cidade_geral" | "regiao_geral" | "commons_tema" | "ilustracao_ia" | "generica_institucional" | "nenhuma" = "nenhuma";
+  // Foto única por assunto (regra de 30/10/2026): foto de arquivo, da cidade
+  // ou livre do tema que OUTRA matéria recente de outro assunto já usa não
+  // entra — se só sobrar foto repetida, a pauta vira nota na coluna.
+  const emUso = await fotosEmUso(sb, inserted.id, parsed.titulo);
+  let fotoRepetida = false;
   try {
     const { data: imgRow } = await sb.from("article_clusters").select("imagem_tipo").eq("id", clusterId).maybeSingle();
     const tipoImagem = ((imgRow as { imagem_tipo?: string } | null)?.imagem_tipo ?? null) as TipoImagem | null;
@@ -649,7 +654,9 @@ Você é repórter, não comentarista. Relate o fato; não tome partido.
         sb, aiKey, articleId: inserted.id,
         titulo: parsed.titulo, resumo: parsed.resumo ?? null, escopo: categoriaSlug ?? "geral",
       });
-      if (livre && !("sensivel" in livre)) {
+      const livreRepetida = !!livre && !("sensivel" in livre) && !!livre.credito && emUso.creditos.has(livre.credito);
+      if (livreRepetida) fotoRepetida = true;
+      if (livre && !("sensivel" in livre) && !livreRepetida) {
         await sb.from("generated_articles").update({
           imagem_capa_url: livre.url,
           og_image_url: livre.url,
@@ -659,7 +666,11 @@ Você é repórter, não comentarista. Relate o fato; não tome partido.
         fotoOrigem = "commons_tema";
       }
       const tema = `${parsed.titulo}. ${parsed.resumo ?? ""}`;
-      const url = livre ? null : await gerarIlustracaoTematica({ sb, aiKey, articleId: inserted.id, tema });
+      // IA só do tema e nunca em tema policial (gerarIlustracaoTematica recusa).
+      const temaSensivel = !!livre && "sensivel" in livre;
+      const url = fotoOrigem !== "nenhuma" || temaSensivel
+        ? null
+        : await gerarIlustracaoTematica({ sb, aiKey, articleId: inserted.id, tema, categoriaSlug: categoriaSlug ?? null });
       if (url) {
         await sb.from("generated_articles").update({
           imagem_capa_url: url,
@@ -669,6 +680,8 @@ Você é repórter, não comentarista. Relate o fato; não tome partido.
         }).eq("id", inserted.id);
         fotoOrigem = "ilustracao_ia";
       }
+    } else if (decisaoImagem === "foto_cidade" && cidade && emUso.cidades.has(cidade.nome)) {
+      fotoRepetida = true; // a vista da cidade já ilustra outra matéria recente
     } else if (decisaoImagem === "foto_cidade" && cidade) {
       const foto = await fotoDaCidade(sb, cidade);
       const copiada = foto ? (await copiarFotoParaStorage(sb, foto.url, inserted.id)) ?? foto.url : null;
@@ -704,7 +717,9 @@ Você é repórter, não comentarista. Relate o fato; não tome partido.
   // (banco curado em _shared/foto-generica.ts, crédito institucional,
   // legenda de imagem de arquivo). Não conta como foto real do fato.
   if (fotoOrigem === "nenhuma") {
-    const generica = escolherFotoGenerica(categoriaSlug ?? null, `${parsed.titulo} ${parsed.resumo ?? ""}`, inserted.id);
+    const escolha = escolherFotoGenericaInedita(categoriaSlug ?? null, `${parsed.titulo} ${parsed.resumo ?? ""}`, inserted.id, emUso.urls);
+    if (escolha && "repetida" in escolha) fotoRepetida = true;
+    const generica = escolha && "foto" in escolha ? escolha.foto : null;
     if (generica) {
       try {
         await sb.from("generated_articles").update({
@@ -715,6 +730,47 @@ Você é repórter, não comentarista. Relate o fato; não tome partido.
         }).eq("id", inserted.id);
         fotoOrigem = FOTO_ORIGEM_GENERICA;
       } catch (_) { /* segue sem foto */ }
+    }
+  }
+
+  // Só havia foto repetida (de outra matéria recente de outro assunto): em
+  // vez de repetir a imagem, a pauta vira nota na coluna "Vozes {Região}"
+  // (regra do editor, 30/10/2026). O rascunho recém-criado é apagado.
+  if (automatico && fotoOrigem === "nenhuma" && fotoRepetida && regiaoId) {
+    try {
+      const { data: regiaoRow } = await sb.from("regioes").select("nome").eq("id", regiaoId).maybeSingle();
+      const regiaoNome = (regiaoRow as { nome?: string } | null)?.nome ?? "Paraná";
+      const nota = await escreverNota(facts, cidade?.nome ?? regiaoNome, regiaoNome, aiKey);
+      if (!("error" in nota)) {
+        nota.titulo = (await garantirRegraTitulo({
+          titulo: nota.titulo, cidadeTag: cidade?.nome ?? null, contexto: nota.corpo, aiKey, maxChars: 80,
+        })).titulo;
+        const critNota = await avaliarCriticidade(
+          { titulo: nota.titulo, corpo: nota.corpo, fatos: { ...facts, dados }, formato: "nota", categoria: categoriaSlug },
+          aiKey, configCriticidade,
+        );
+        const fontesFatos = (facts.fontes ?? []) as Array<{ url?: string; veiculo?: string }>;
+        const resultado = await publicarNotaNaColuna(sb, {
+          cidadeSlug: cidade?.slug ?? null,
+          regiaoId,
+          clusterId,
+          titulo: nota.titulo,
+          corpo: nota.corpo,
+          fonteNome: (raws[0] && nomeFonte(raws[0])) ?? fontesFatos[0]?.veiculo ?? null,
+          fonteUrl: fontesFatos[0]?.url ?? null,
+          tema,
+          dataOriginal: raws.map((r) => r.data_publicacao_original).filter(Boolean).sort()[0] ?? null,
+          criticidade: critNota,
+        });
+        if (!("error" in resultado)) {
+          await sb.from("generated_articles").delete().eq("id", inserted.id);
+          await encerrarCluster(sb, clusterId, rawIdsCluster, "rascunho_gerado");
+          console.log(`[generate-article] foto só repetida → nota na coluna: "${nota.titulo}"`);
+          return json({ ok: true, formato: "nota", nota: resultado, motivo: "foto_repetida", criticidade: critNota });
+        }
+      }
+    } catch (_) {
+      // falhou a nota: segue como matéria só com texto (nunca com foto repetida)
     }
   }
 
@@ -1145,4 +1201,35 @@ function json(payload: unknown, status = 200) {
     status,
     headers: { ...cors, "Content-Type": "application/json" },
   });
+}
+
+// Fotos que outra matéria recente (7 dias, menos as rejeitadas) já usa como
+// capa. Matéria do MESMO assunto (título muito parecido — suíte do mesmo
+// fato) não conta: aí repetir a foto é coerente.
+const DIAS_FOTO_UNICA = 7;
+// deno-lint-ignore no-explicit-any
+async function fotosEmUso(sb: any, idAtual: string, titulo: string): Promise<{ urls: Set<string>; creditos: Set<string>; cidades: Set<string> }> {
+  const urls = new Set<string>();
+  const creditos = new Set<string>();
+  const cidades = new Set<string>();
+  try {
+    const desde = new Date(Date.now() - DIAS_FOTO_UNICA * 86_400_000).toISOString();
+    const { data } = await sb
+      .from("generated_articles")
+      .select("id, titulo, imagem_capa_url, imagem_credito, foto_origem, cidade_principal")
+      .gte("gerado_em", desde)
+      .neq("id", idAtual)
+      .neq("status", "rejeitado")
+      .not("imagem_capa_url", "is", null)
+      .limit(5000);
+    for (const r of (data ?? []) as Array<{ titulo: string; imagem_capa_url: string; imagem_credito: string | null; foto_origem: string | null; cidade_principal: string | null }>) {
+      if (tituloMuitoParecido(titulo, r.titulo)) continue;
+      urls.add(r.imagem_capa_url);
+      if (r.foto_origem === "commons_tema" && r.imagem_credito) creditos.add(r.imagem_credito);
+      if (r.foto_origem === "cidade_geral" && r.cidade_principal) cidades.add(r.cidade_principal);
+    }
+  } catch (_) {
+    // sem a consulta, segue sem a trava (melhor do que travar a matéria)
+  }
+  return { urls, creditos, cidades };
 }

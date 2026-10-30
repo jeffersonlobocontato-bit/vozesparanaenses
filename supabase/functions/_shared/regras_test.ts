@@ -8,7 +8,7 @@ import { classificarFoto, ehAgenciaPublica } from "./foto-credito.ts";
 import { ehDoDia, extrairDataPublicacao, inicioDoCiclo, diaSaoPaulo } from "./data-publicacao.ts";
 import { avaliarRegras } from "./criticidade.ts";
 import { decidirFormato, decidirImagem, ehAbrangenciaNacional, motivoDescartePortal, pareceReleaseDeAssessoria, podeIrParaDobra, temaHeuristico, parseCrivo } from "./crivo-editorial.ts";
-import { escolherFotoCommons, filtrarCandidatasCommons, promptIlustracao } from "./imagem.ts";
+import { escolherFotoCommons, filtrarCandidatasCommons, ehTemaPolicial, promptIlustracao } from "./imagem.ts";
 import { escolherFotoBaixoRisco, normalizarAvaliacoes, normalizarPlano } from "./analista-imagem.ts";
 import { limparPrefeituraMecanico, verificarTitulo } from "./titulo.ts";
 import { dataAtendeNetParaIso, ehAtendeNet, parseListaAtendeNet, parseMateriaAtendeNet } from "./atende-net.ts";
@@ -22,7 +22,7 @@ import { ehDeHojeOuOntem as hojeOuOntem } from "./data-publicacao.ts";
 import { calcularRecorte } from "./recorte-marca.ts";
 import { cabeNaCotaForaDoPr, faixaForaDoPr } from "./crivo-editorial.ts";
 import { CICLOS_PORTAIS, cicloAtual, fonteElegivel, imagemValida, normalizarUrl, ordenarPorTentativa } from "./coleta.ts";
-import { ehFotoGenerica, escolherFotoGenerica } from "./foto-generica.ts";
+import { ehFotoGenerica, escolherFotoGenerica, escolherFotoGenericaInedita, urlFotoGenerica } from "./foto-generica.ts";
 
 const src = Deno.readTextFileSync(new URL("../../../src/lib/parana-municipios.ts", import.meta.url));
 const cidades = [...src.matchAll(/\{ slug: "([^"]+)", name: "([^"]+)", region: "([^"]+)" \}/g)].map((m) => ({ slug: m[1], nome: JSON.parse(`"${m[2]}"`), regiao_id: m[3] }));
@@ -302,6 +302,8 @@ ok("portal fala da cidade → foto da cidade", fi({ tipoImagem: "cidade" }) === 
 ok("portal fato específico sem foto → nenhuma", fi({}) === "nenhuma");
 ok("prefeitura com foto → foto dela", fi({ origem: "prefeitura", fotoStatus: "autorizada" }) === "fonte");
 ok("curadoria fora da dobra", !podeIrParaDobra("curadoria", true));
+ok("tema policial nunca vai para IA", ehTemaPolicial("PRF inicia Operação Finados nas rodovias federais") && ehTemaPolicial("Homem é preso em Toledo") && ehTemaPolicial("qualquer coisa", "seguranca"));
+ok("tema geral pode ir para IA", !ehTemaPolicial("Frente fria derruba temperaturas no Paraná", "cotidiano"));
 ok("prompt de ilustração proíbe pessoas e crianças", /sem pessoas/.test(promptIlustracao("x")) && /sem crian/.test(promptIlustracao("x")));
 const pag = (title: string, w: number, h: number, lic: string, cats: string) => ({ title, imageinfo: [{ width: w, height: h, thumburl: `https://x/${title}`, extmetadata: { LicenseShortName: { value: lic }, Categories: { value: cats }, Artist: { value: "<a>Fulano</a>" } } }] });
 const fc = escolherFotoCommons([
@@ -388,7 +390,21 @@ ok("fila: nunca tentada › tentada ontem › travada que acabou de tentar", fil
 // Banco de fotos genéricas (segurança/esportes sem foto)
 const gid = (ed: string, t: string) => escolherFotoGenerica(ed, t, "abc")?.id ?? "nenhuma";
 ok("acidente na PR-456 → rodovia", gid("seguranca", "Colisão na PR-456 deixa dois feridos").startsWith("rodovia"));
-ok("BR (federal) → sem foto", gid("seguranca", "Colisão na BR-277 deixa dois feridos") === "nenhuma");
+ok("BR (federal) → PRF", gid("seguranca", "Colisão na BR-277 deixa dois feridos").startsWith("prf-"));
+ok("operação da PRF → foto da PRF", gid("seguranca", "PRF inicia Operação Finados nas rodovias federais").startsWith("prf-"));
+ok("PRF e PF juntas → foto da PRF", gid("seguranca", "PRF e PF apreendem dinheiro em veículo na BR-277").startsWith("prf-"));
+ok("só Polícia Federal → sem foto", gid("seguranca", "Polícia Federal cumpre mandados em Cascavel") === "nenhuma");
+// Foto única por assunto: pula as já usadas; tudo em uso → vira nota
+{
+  const t = "Colisão na PR-456 deixa dois feridos";
+  const usadas = new Set(["rodovia-1", "rodovia-2", "rodovia-3"].map(urlFotoGenerica));
+  const r = escolherFotoGenericaInedita("seguranca", t, "abc", usadas);
+  ok("pula as fotos em uso", !!r && "foto" in r && r.foto.id === "rodovia-4", JSON.stringify(r));
+  usadas.add(urlFotoGenerica("rodovia-4"));
+  const r2 = escolherFotoGenericaInedita("seguranca", t, "abc", usadas);
+  ok("grupo todo em uso → repetida (vira nota)", !!r2 && "repetida" in r2);
+  ok("sem grupo → null (não é repetição)", escolherFotoGenericaInedita("saude", "Hospital abre leitos", "abc", usadas) === null);
+}
 ok("crime sexual → sem foto", gid("seguranca", "Homem é preso por estupro de vulnerável") === "nenhuma");
 ok("queda em casa → sem foto", gid("seguranca", "Idosa sofre corte após queda de sofá") === "nenhuma");
 ok("arma de fogo não é bombeiros", gid("seguranca", "Homem é preso após disparos de arma de fogo").startsWith("pm-"));

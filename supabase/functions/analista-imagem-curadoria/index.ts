@@ -23,7 +23,7 @@
 import { exigirInterno } from "../_shared/auth.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
 import { avaliarFotos, escolherFotoBaixoRisco, planejarImagem, type AvaliacaoFoto } from "../_shared/analista-imagem.ts";
-import { buscarCommonsTema, copiarImagemParaStorage, CREDITO_IA, gerarIlustracaoTematica, type FotoCandidata } from "../_shared/imagem.ts";
+import { buscarCommonsTema, copiarImagemParaStorage, CREDITO_IA, ehTemaPolicial, gerarIlustracaoTematica, type FotoCandidata } from "../_shared/imagem.ts";
 
 const cors = {
   "Access-Control-Allow-Origin": "*",
@@ -173,7 +173,12 @@ async function analisarMateria(
     }
   }
 
-  // Sem foto de risco baixo: ilustração por IA, só do tema.
+  // Sem foto de risco baixo: ilustração por IA, só do tema — nunca em tema
+  // policial (regra de 30/10/2026: polícia só com foto real).
+  if (ehTemaPolicial(`${m.titulo}. ${m.resumo ?? ""}`)) {
+    await registrar("sem_imagem", { motivo: "tema policial: sem ilustração de IA", avaliacoes });
+    return { decisao: "sem_imagem", motivo: "tema policial: sem ilustração de IA" };
+  }
   const ilustracao = await gerarIlustracaoTematica({ sb, aiKey, articleId: m.id, tema: `${m.titulo}. ${m.resumo ?? ""}` });
   if (ilustracao) {
     await sb.from("generated_articles").update({
