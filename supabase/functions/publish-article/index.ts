@@ -10,6 +10,7 @@
 import { exigirEquipe } from "../_shared/auth.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
 import { gerarMetadados, MODEL_METADADOS } from "../_shared/metadados-artigo.ts";
+import { garantirPreviaLeve } from "../_shared/previa-leve.ts";
 
 const cors = {
   "Access-Control-Allow-Origin": "*",
@@ -119,6 +120,7 @@ Deno.serve(async (req) => {
     .select("id, slug, titulo, status")
     .single();
   if (insErr) return json({ error: "insert_failed", detail: insErr.message }, 500);
+  if (row.og_image_url) await garantirPreviaLeve(sb, inserted.id, row.og_image_url as string);
 
   return json({ ok: true, article: inserted, slug: inserted.slug, publicado: publicar, model: MODEL });
 });

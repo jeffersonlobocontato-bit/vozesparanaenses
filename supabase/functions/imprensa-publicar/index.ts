@@ -14,6 +14,7 @@ import { avaliarPauta, clienteEhPrefeitura, mensagemPautaBloqueada } from "../_s
 import { mensagemLimite, situacaoLimite } from "../_shared/imprensa-limite.ts";
 import { gerarMetadados, type Meta } from "../_shared/metadados-artigo.ts";
 import { resolverCidade } from "../_shared/imprensa-cidade.ts";
+import { garantirPreviaLeve } from "../_shared/previa-leve.ts";
 
 const cors = {
   "Access-Control-Allow-Origin": "*",
@@ -184,6 +185,7 @@ Deno.serve(async (req) => {
     .single();
 
   if (insertErr) return json({ error: "insert_artigo_failed", detail: insertErr.message }, 500);
+  if (capa) await garantirPreviaLeve(sb, artigo.id, capa);
 
   await sb.from("imprensa_submissoes").update({
     titulo_gerado: body.titulo.trim(),

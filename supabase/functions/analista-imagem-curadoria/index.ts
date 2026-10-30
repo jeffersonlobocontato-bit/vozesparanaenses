@@ -23,6 +23,7 @@
 import { exigirInterno } from "../_shared/auth.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
 import { avaliarFotos, escolherFotoBaixoRisco, planejarImagem, type AvaliacaoFoto } from "../_shared/analista-imagem.ts";
+import { garantirPreviaLeve } from "../_shared/previa-leve.ts";
 import { buscarCommonsTema, copiarImagemParaStorage, CREDITO_IA, ehTemaPolicial, gerarIlustracaoTematica, type FotoCandidata } from "../_shared/imagem.ts";
 
 const cors = {
@@ -167,6 +168,7 @@ async function analisarMateria(
           foto_origem: "commons_analista",
           destaque_home: true,
         }).eq("id", m.id);
+        await garantirPreviaLeve(sb, m.id, capa);
         await registrar("foto_commons", { foto: { titulo: foto.titulo, licenca: foto.licenca, autor: foto.autor }, avaliacoes });
         return { decisao: "foto_commons", motivo: foto.titulo };
       }

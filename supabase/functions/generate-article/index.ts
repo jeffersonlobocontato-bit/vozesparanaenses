@@ -18,6 +18,7 @@ import { analisarMarcas, fotoLimpa } from "../_shared/analista-imagem.ts";
 import { recortarImagem, type Caixa } from "../_shared/recorte-marca.ts";
 import { imagemValida } from "../_shared/coleta.ts";
 import { escolherFotoGenericaInedita, FOTO_ORIGEM_GENERICA } from "../_shared/foto-generica.ts";
+import { garantirPreviaLeve } from "../_shared/previa-leve.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
 import { carregarCidades, cidadePorNome } from "../_shared/cidades.ts";
 import { decidirFormato, decidirImagem, ehAbrangenciaNacional, podeIrParaDobra, prioridadeDoTema, temaHeuristico, type DecisaoImagem, type OrigemPauta, type Prioridade, type Tema, type TipoImagem } from "../_shared/crivo-editorial.ts";
@@ -772,6 +773,14 @@ Você é repórter, não comentarista. Relate o fato; não tome partido.
     } catch (_) {
       // falhou a nota: segue como matéria só com texto (nunca com foto repetida)
     }
+  }
+
+  // Prévia leve (og:image ≤ ~280 KB) para o WhatsApp mostrar a foto.
+  if (fotoOrigem !== "nenhuma") {
+    try {
+      const { data: og } = await sb.from("generated_articles").select("og_image_url").eq("id", inserted.id).maybeSingle();
+      await garantirPreviaLeve(sb, inserted.id, (og as { og_image_url?: string | null } | null)?.og_image_url);
+    } catch (_) { /* prévia não trava a matéria */ }
   }
 
   // Curadoria (política, nacional, internacional, esportes) COM foto liberada

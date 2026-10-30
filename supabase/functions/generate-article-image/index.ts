@@ -9,6 +9,7 @@
 //     para o storage no momento da geração) como capa da matéria.
 // Salva em storage `article-covers` e atualiza imagem_capa_url + og_image_url + imagem_credito.
 
+import { garantirPreviaLeve } from "../_shared/previa-leve.ts";
 import { exigirEquipe } from "../_shared/auth.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
 import { CREDITO_IA, promptIlustracao } from "../_shared/imagem.ts";
@@ -173,6 +174,7 @@ Deno.serve(async (req) => {
     .update({ imagem_capa_url: publicUrl, og_image_url: publicUrl, imagem_credito: credito })
     .eq("id", body.article_id);
   if (updErr) return json({ error: "article_update_failed", detail: updErr.message }, 500);
+  await garantirPreviaLeve(sb, body.article_id, publicUrl);
 
   return json({ ok: true, url: publicUrl, credito, mode: body.mode });
 });
