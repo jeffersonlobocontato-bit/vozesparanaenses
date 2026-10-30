@@ -1,4 +1,5 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { leadGA } from "@/lib/analytics";
 import { useEffect, useRef, useState } from "react";
 import { SiteHeader, SiteFooter } from "@/components/SiteHeader";
 import { supabase } from "@/integrations/supabase/client";
@@ -77,6 +78,7 @@ function VitrinePessoalChat() {
       const res = data as { mensagem: string; finalizado: boolean; token: string; aviso?: string };
       setMensagens((m) => [...m, { role: "assistant", content: res.mensagem }]);
       if (res.finalizado) {
+        leadGA("vitrine_pessoal");
         setRedirecionando(true);
         setTimeout(() => {
           navigate({ to: "/vitrine/$token", params: { token: res.token } });

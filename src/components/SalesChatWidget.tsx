@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from "react";
+import { leadGA } from "@/lib/analytics";
 import { supabase } from "@/integrations/supabase/client";
 
 const WHATSAPP_COMERCIAL = "5545999864213";
@@ -67,6 +68,8 @@ export function SalesChatWidget() {
     const novasMensagens: Msg[] = [...mensagens, { role: "user", content: texto }];
     setMensagens(novasMensagens);
     setInput("");
+    // Primeira mensagem do visitante = lead do chat de anúncios.
+    if (!novasMensagens.slice(0, -1).some((m) => m.role === "user")) leadGA("chat_anuncios");
     setEnviando(true);
     try {
       const { data, error } = await supabase.functions.invoke("sales-chat", {

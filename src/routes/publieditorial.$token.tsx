@@ -1,4 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { leadGA } from "@/lib/analytics";
 import { useEffect, useRef, useState } from "react";
 import { SiteHeader, SiteFooter } from "@/components/SiteHeader";
 import { supabase } from "@/integrations/supabase/client";
@@ -99,7 +100,10 @@ function PublieditorialEntrevista() {
       if (chatErr) throw chatErr;
       const res = chatData as { mensagem: string; finalizado: boolean; aviso?: string };
       setMensagens((m) => [...m, { role: "assistant", content: res.mensagem }]);
-      if (res.finalizado) setFinalizado({ aviso: res.aviso });
+      if (res.finalizado) {
+        setFinalizado({ aviso: res.aviso });
+        leadGA("publieditorial");
+      }
     } catch (e: unknown) {
       setErro(e instanceof Error ? e.message : "Não foi possível enviar sua mensagem. Tente novamente.");
     } finally {

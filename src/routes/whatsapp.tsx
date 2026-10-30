@@ -1,4 +1,5 @@
 import { createFileRoute, useRouter } from "@tanstack/react-router";
+import { leadGA } from "@/lib/analytics";
 import { useServerFn } from "@tanstack/react-start";
 import { useMutation } from "@tanstack/react-query";
 import { useState } from "react";
@@ -48,6 +49,7 @@ function WhatsappPage() {
   const mutation = useMutation({
     mutationFn: createLead,
     onSuccess: () => {
+      leadGA("newsletter_whatsapp", { regiao: regiaoSlug || null });
       router.navigate({ to: "/" });
     },
   });

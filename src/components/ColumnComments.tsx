@@ -1,4 +1,5 @@
 import { useEffect, useState, useCallback } from "react";
+import { eventoGA } from "@/lib/analytics";
 import {
   listComentariosColuna,
   criarComentarioColuna,
@@ -32,6 +33,7 @@ export function ColumnComments({ edicaoId }: { edicaoId: string }) {
       const r = await criarComentarioColuna({ data: { edicaoId, nome, comentario: texto } });
       if (!r.ok) { setMsg(r.erro ?? "Não foi possível enviar."); return; }
       setTexto("");
+      eventoGA("comentario_enviado", { conteudo: "coluna" });
       setMsg("Comentário publicado. Obrigado por participar!");
       await carregar();
     } catch {

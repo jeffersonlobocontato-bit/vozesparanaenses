@@ -1,4 +1,5 @@
 import { createFileRoute, Link, useRouter } from "@tanstack/react-router";
+import { leadGA } from "@/lib/analytics";
 import { queryOptions, useSuspenseQuery, useMutation } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { useState } from "react";
@@ -66,6 +67,7 @@ function ClassificadosPage() {
   const mutation = useMutation({
     mutationFn: create,
     onSuccess: () => {
+      leadGA("classificado", { categoria_classificado: cat });
       setTitulo("");
       setDescricao("");
       setContato("");

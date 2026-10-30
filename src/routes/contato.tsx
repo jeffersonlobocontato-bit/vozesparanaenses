@@ -1,4 +1,5 @@
 import { jsonLd } from "@/lib/json-ld";
+import { leadGA } from "@/lib/analytics";
 import { createFileRoute } from "@tanstack/react-router";
 import { useState } from "react";
 import { getRecaptchaToken } from "@/lib/recaptcha";
@@ -108,6 +109,7 @@ function Contato() {
       const data = await res.json();
       if (res.ok && data.success) {
         setStatus("success");
+        leadGA("contato", { departamento: form.department });
         setForm({ name: "", email: "", subject: "", department: "redacao", message: "" });
       } else {
         setStatus("error");

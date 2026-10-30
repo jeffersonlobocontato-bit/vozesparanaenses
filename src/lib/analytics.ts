@@ -103,6 +103,31 @@ export function eventoGA(nome: string, params: Record<string, unknown> = {}) {
   window.gtag?.("event", nome, limpar({ ...contextoAtual, ...params }));
 }
 
+/**
+ * Conversão: lead gerado (formulário, cadastro, chat). Nome padrão do GA4
+ * ("generate_lead", marcado como evento-chave) + o tipo do lead.
+ */
+export function leadGA(tipo: string, params: Record<string, unknown> = {}) {
+  eventoGA("generate_lead", { lead_tipo: tipo, ...params });
+}
+
+/**
+ * Cliques em links de WhatsApp (comunidade e comercial). O link de
+ * compartilhar do WhatsApp (api.whatsapp.com/send) já conta como "share".
+ */
+function instalarCliqueWhatsapp() {
+  if (typeof document === "undefined" || (window as { __vpWhats?: boolean }).__vpWhats) return;
+  (window as { __vpWhats?: boolean }).__vpWhats = true;
+  document.addEventListener("click", (e) => {
+    const a = (e.target as Element | null)?.closest?.("a[href]") as HTMLAnchorElement | null;
+    if (!a || location.pathname.startsWith("/admin")) return;
+    const h = a.href;
+    const destino = /chat\.whatsapp\.com/.test(h) ? "comunidade" : /wa\.me\//.test(h) ? "comercial" : null;
+    if (!destino) return;
+    eventoGA("clique_whatsapp", { destino, origem_clique: a.getAttribute("aria-label") ?? a.textContent?.trim().slice(0, 60) ?? null });
+  }, { capture: true });
+}
+
 async function contextoDaRota(pathname: string, parts: string[]): Promise<ContextoPagina> {
   if (parts.length === 0) return { tipo_conteudo: "home" };
   const [a, b, c] = parts;
@@ -187,6 +212,8 @@ async function trackPageview(pathname: string) {
 export function PageviewTracker() {
   const pathname = useRouterState({ select: (s) => s.location.pathname });
   const last = useRef<string | null>(null);
+
+  useEffect(() => { instalarCliqueWhatsapp(); }, []);
 
   useEffect(() => {
     if (last.current === pathname) return;

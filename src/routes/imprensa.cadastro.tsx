@@ -1,4 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
+import { leadGA } from "@/lib/analytics";
 import { ArrowLeft } from "lucide-react";
 import { useState } from "react";
 import { Logo } from "@/components/Logo";
@@ -69,6 +70,7 @@ function ImprensaCadastro() {
         termo_aceito: true,
       });
       setFeito(true);
+      leadGA("portal_imprensa", { cidade: muni.slug });
     } catch (e: unknown) {
       setErro(e instanceof Error ? e.message : "Não foi possível concluir o cadastro.");
     } finally {
