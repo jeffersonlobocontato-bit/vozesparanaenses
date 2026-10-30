@@ -37,34 +37,41 @@ export function CookieConsentBanner() {
     setVisivel(false);
   }
 
+  // Banner em destaque (30/10/2026): cartão escuro grande no rodapé, texto
+  // grande e botões largos. Recusar tem o mesmo tamanho de Aceitar (ANPD:
+  // recusar tão fácil quanto aceitar; "continuar navegando" não é aceite).
   const botao =
-    "min-w-[112px] rounded-full px-5 py-2.5 text-sm font-bold transition-colors";
+    "w-full rounded-2xl px-6 py-4 text-lg font-bold transition-colors focus:outline-none focus-visible:ring-4 focus-visible:ring-white/40";
 
   return (
     <div
       role="dialog"
-      aria-label="Consentimento de cookies"
-      className="fixed inset-x-0 bottom-0 z-50 border-t border-slate-200 bg-white px-4 py-4 shadow-[0_-4px_16px_rgba(0,0,0,0.08)] sm:px-6"
+      aria-modal="false"
+      aria-labelledby="vp-cookies-texto"
+      className="fixed inset-x-0 bottom-0 z-50 px-3 pb-3 sm:px-6 sm:pb-6"
     >
-      <div className="mx-auto flex max-w-5xl flex-col items-start gap-3 sm:flex-row sm:items-center sm:justify-between">
-        <p className="text-sm leading-snug text-slate-700">
-          <strong className="text-[#12201E]">O Vozes é gratuito e feito para a sua região.</strong>{" "}
-          Com o seu aceite, contamos as visitas para saber quais notícias interessam mais —
-          só estatística: nunca anúncio personalizado, nunca para identificar você.{" "}
-          <a href="/privacidade" className="text-[#12201E] underline">Política de Privacidade</a>
+      <div className="mx-auto max-w-3xl rounded-3xl bg-[#12201E]/95 p-6 text-white shadow-[0_-8px_40px_rgba(0,0,0,0.35)] backdrop-blur sm:p-8">
+        <p id="vp-cookies-texto" className="text-lg leading-relaxed sm:text-xl">
+          Usamos cookies para medir a audiência e saber quais notícias da sua região interessam mais.
+          Só estatística: <strong className="font-bold">nunca anúncio personalizado, nunca para identificar você</strong>.
+          Saiba mais na nossa{" "}
+          <a href="/privacidade" className="font-bold text-[#E29F65] underline-offset-4 hover:underline">
+            Política de Privacidade
+          </a>
+          .
         </p>
-        <div className="flex w-full shrink-0 gap-2 sm:w-auto">
-          <button
-            onClick={() => escolher("recusado")}
-            className={`${botao} flex-1 border-2 border-[#12201E] text-[#12201E] hover:bg-slate-50 sm:flex-none`}
-          >
-            Recusar
-          </button>
+        <div className="mt-6 grid gap-3 sm:grid-cols-2">
           <button
             onClick={() => escolher("aceito")}
-            className={`${botao} flex-1 border-2 border-[#E29F65] bg-[#E29F65] text-[#12201E] hover:bg-[#d08c52] sm:flex-none`}
+            className={`${botao} bg-[#E29F65] text-[#12201E] hover:bg-[#ECB585]`}
           >
-            Aceitar
+            Aceitar e continuar
+          </button>
+          <button
+            onClick={() => escolher("recusado")}
+            className={`${botao} border-2 border-white/70 text-white hover:bg-white/10`}
+          >
+            Recusar
           </button>
         </div>
       </div>
