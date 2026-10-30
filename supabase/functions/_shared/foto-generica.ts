@@ -35,7 +35,7 @@ type Grupo = {
 // Critério da curadoria (29/10/2026, pedido do editor): foto NEUTRA e de
 // cena — viatura ou agente em patrulha, perícia, resgate, céu de temporal —
 // com profundidade. NUNCA fachada de delegacia/quartel (mostra a cidade
-// errada), frota enfileirada em entrega no Palácio, autoridade, palanque
+// errada), frota (várias viaturas enfileiradas — nunca, em lugar nenhum: regra de 29/10/2026), entrega no Palácio, autoridade, palanque
 // ou evento. Fotos tiradas das galerias oficiais (AEN, Sesp, PMPR, PCPR,
 // Polícia Penal, Polícia Científica, CBMPR, Sesa, DER) — lista e folhas
 // de contato em scripts/fotos-genericas/ (branch fotos-genericas).
@@ -44,10 +44,8 @@ const arq = (s: string) => `${s} (imagem de arquivo)`;
 const f = (id: string, credito: string, legenda: string): FotoGenerica => ({ id, credito, legenda: arq(legenda) });
 
 const PM = [
-  f("pm-1", "Foto: Paulo Henrique/Sesp", "Viaturas da Polícia Militar em patrulhamento"),
   f("pm-2", "Foto: Cb Ismael Ponchio/PMPR", "Policiais militares em patrulhamento"),
   f("pm-3", "Foto: PMPR", "Viatura e motocicleta da Polícia Militar"),
-  f("pm-4", "Foto: Gabriel Rosa/AEN", "Viaturas policiais com sinalizador ligado"),
 ];
 
 // A ordem importa: o primeiro gatilho que casar decide. Segurança primeiro;
@@ -114,7 +112,7 @@ export const GRUPOS: Grupo[] = [
     gatilho: /\b(delegacia|delegad[oa]|inquerito|policia civil|pcpr|investigac|indiciad|mandado de prisao|golpe|estelionat)/,
     fotos: [
       f("pcpr-1", "Foto: PCPR", "Policiais civis em operação"),
-      f("pcpr-2", "Foto: PCPR", "Viaturas da Polícia Civil em operação"),
+      f("pcpr-4", "Foto: PCPR", "Policiais civis em operação"),
       f("pcpr-3", "Foto: PCPR", "Viatura do canil da Polícia Civil"),
     ],
   },

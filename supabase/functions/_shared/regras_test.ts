@@ -401,7 +401,7 @@ ok("afogamento → resgate aquático", gid("seguranca", "Jovem morre afogado no 
 ok("delegado → polícia civil", gid("seguranca", "Delegado prende suspeito de golpe").startsWith("pcpr-"));
 ok("presídio → polícia penal", gid("seguranca", "Detentos fogem de presídio").startsWith("ppen-"));
 ok("assalto → viatura da PM", gid("seguranca", "Homem é preso após assalto a mercado").startsWith("pm-"));
-ok("ampolas apreendidas → PM em patrulha (nunca o Palácio)", /^pm-[1-4]$/.test(gid("seguranca", "Mulher é presa com 319 ampolas de medicamentos emagrecedores")));
+ok("ampolas apreendidas → PM em patrulha (nunca o Palácio)", /^pm-[23]$/.test(gid("seguranca", "Mulher é presa com 319 ampolas de medicamentos emagrecedores")));
 ok("temporal (outra editoria) → clima", gid("cotidiano", "Temporal com granizo atinge o Oeste").startsWith("clima-temporal"));
 ok("geada → clima", gid("cotidiano", "Cidades amanhecem com geada").startsWith("clima-geada"));
 ok("deslizamento → interdição", gid("cotidiano", "Deslizamento interdita estrada em Guaratuba").startsWith("clima-interdicao"));
