@@ -52,8 +52,8 @@ export function CookieConsentBanner() {
     >
       <div className="mx-auto max-w-3xl rounded-3xl bg-[#12201E]/95 p-6 text-white shadow-[0_-8px_40px_rgba(0,0,0,0.35)] backdrop-blur sm:p-8">
         <p id="vp-cookies-texto" className="text-lg leading-relaxed sm:text-xl">
-          Usamos cookies para medir a audiência e saber quais notícias da sua região interessam mais.
-          Só estatística: <strong className="font-bold">nunca anúncio personalizado, nunca para identificar você</strong>.
+          Usamos cookies para melhorar a sua experiência com conteúdos que te interessam.
+          É só estatística de audiência: <strong className="font-bold">nunca anúncio personalizado, nunca para identificar você</strong>.
           Saiba mais na nossa{" "}
           <a href="/privacidade" className="font-bold text-[#E29F65] underline-offset-4 hover:underline">
             Política de Privacidade
