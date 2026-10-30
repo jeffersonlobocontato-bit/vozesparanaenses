@@ -22,6 +22,7 @@ import { AdSlot } from "@/components/AdSlot";
 import { AdsenseSlot } from "@/components/AdsenseSlot";
 import { WhatsAppCTA } from "@/components/WhatsAppCTA";
 import { ShareButtons } from "@/components/ShareButtons";
+import { WhatsAppFixo } from "@/components/WhatsAppFixo";
 import { parseVideoEmbed } from "@/lib/video-embed";
 import { AdminInlineEditButton } from "@/components/AdminInlineEditButton";
 import { foraDoIndice } from "@/lib/region-labels";
@@ -851,12 +852,15 @@ function ArticlePage() {
         )}
 
         {/* Compartilhar — bloco completo no fim da matéria */}
-        <div className="mx-auto mt-8 max-w-3xl">
+        <div className="mx-auto mt-8 max-w-3xl" data-compartilhar-fim>
           <ShareButtons
             url={`https://vozesparanaenses.com.br/${region}/${article.slug}`}
             title={article.title}
           />
         </div>
+
+        {/* Celular: botão fixo de WhatsApp enquanto lê (some ao chegar aqui) */}
+        <WhatsAppFixo url={`https://vozesparanaenses.com.br/${region}/${article.slug}`} title={article.title} />
 
         {/* Anúncio — rodapé da matéria */}
         <div className="mx-auto mt-10 flex max-w-3xl justify-center">
