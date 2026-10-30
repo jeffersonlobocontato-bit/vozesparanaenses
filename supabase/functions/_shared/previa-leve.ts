@@ -27,8 +27,18 @@ export async function garantirPreviaLeve(sb: Sb, articleId: string, url: string 
     const res = await fetch(url, { signal: ctrl.signal, headers: { "User-Agent": "VozesParanaensesBot/1.0" } });
     if (!res.ok) return null;
     const tipo = res.headers.get("content-type") ?? "";
-    const buf = new Uint8Array(await res.arrayBuffer());
+    let buf = new Uint8Array(await res.arrayBuffer());
     if (buf.byteLength <= LIMITE_PREVIA && /jpe?g/i.test(tipo)) return null;
+    // Arquivo grande demais para decodificar na função (estoura memória):
+    // pede ao storage uma versão já reduzida; sem isso, desiste.
+    if (buf.byteLength > 2_500_000) {
+      if (!url.includes("/storage/v1/object/public/")) return null;
+      const menor = url.replace("/storage/v1/object/public/", "/storage/v1/render/image/public/").split("#")[0];
+      const r2 = await fetch(`${menor}${menor.includes("?") ? "&" : "?"}width=1200&quality=75`, { signal: ctrl.signal });
+      if (!r2.ok) return null;
+      buf = new Uint8Array(await r2.arrayBuffer());
+      if (buf.byteLength > 2_500_000) return null;
+    }
     const { decode, Image } = await import("https://deno.land/x/imagescript@1.3.0/mod.ts");
     const img = await decode(buf);
     if (!(img instanceof Image)) return null;
