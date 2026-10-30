@@ -417,7 +417,7 @@ function ArticlePage() {
     if (partes.length !== 2 || !slugsRegioes.has(partes[0])) return;
     if (partes[1] === "cidade" || partes[1] === "editoria" || partes[1] === slug) return;
     const bloco = (a.closest("[data-bloco]") as HTMLElement | null)?.dataset.bloco ?? "corpo";
-    eventoGA("clique_relacionada", { destino: a.pathname, bloco });
+    eventoGA("clique_relacionada", { pagina_destino: a.pathname, bloco });
   }
 
   // --- Cross-linking: monta dicionário e transforma corpo em parágrafos linkados ---

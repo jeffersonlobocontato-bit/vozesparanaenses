@@ -1,514 +1,886 @@
-import { createFileRoute } from "@tanstack/react-router";
-import { useEffect, useMemo, useState, useCallback } from "react";
-import { getExternalBrowser } from "@/lib/external-supabase-browser";
+import { createFileRoute, Link } from "@tanstack/react-router";
+import { useQuery } from "@tanstack/react-query";
+import { useMemo, useState, type ReactNode } from "react";
 import {
-  ResponsiveContainer, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip,
-  LineChart, Line, PieChart, Pie, Cell, Legend,
+  ResponsiveContainer, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend,
 } from "recharts";
-import { Lightbulb } from "lucide-react";
-import { PageHeader, Section, Tabs, ErrorBanner, EmptyState, campoClass } from "@/components/admin/ui";
+import {
+  Activity, AlertOctagon, AlertTriangle, BarChart3, Database, FileText, Gauge, Lightbulb,
+  MapPin, MousePointerClick, Newspaper, RefreshCw, Search, ShieldCheck, Target, Users, ExternalLink,
+} from "lucide-react";
+import { getExternalBrowser } from "@/lib/external-supabase-browser";
+import { relatorioAnalytics, type RespostaAba } from "@/lib/ga4.functions";
+import { ABAS, type Aba } from "@/lib/ga4-relatorios";
+import {
+  agrupar, canalPt, dispositivoPt, duracao, eventosPor, inteiro, leituras, num, pct, pctTexto, periodo, soma,
+  variacao, VAZIO, type Extras, type Leitura, type Linha, type Relatorios,
+} from "@/lib/analytics-leituras";
+import { PageHeader, Section, ErrorBanner, EmptyState, campoClass, btn } from "@/components/admin/ui";
+import { BasePropria } from "@/components/admin/analytics/BasePropria";
+
+// Painel de Analytics do admin: o GA4 inteiro dentro do painel (API de Dados,
+// via ga4.functions.ts) + o que só o nosso banco sabe (produção por editoria
+// e região, aceite de cookies, base própria). Menu lateral por aba; cada aba
+// abre com as LEITURAS (crítico, alerta, insight — analytics-leituras.ts).
+
+type Busca = { aba?: Aba; dias?: number };
+const DIAS = [
+  { dias: 1, rotulo: "Hoje" },
+  { dias: 7, rotulo: "7 dias" },
+  { dias: 28, rotulo: "28 dias" },
+  { dias: 90, rotulo: "90 dias" },
+] as const;
 
 export const Route = createFileRoute("/admin/analytics")({
+  validateSearch: (s: Record<string, unknown>): Busca => ({
+    aba: ABAS.some((a) => a.id === s.aba) ? (s.aba as Aba) : undefined,
+    dias: [1, 7, 28, 90].includes(Number(s.dias)) ? Number(s.dias) : undefined,
+  }),
   component: AdminAnalytics,
 });
 
-type EventoRow = {
-  ts: string;
-  pagina: string | null;
-  origem_trafego: string | null;
-  cidade_leitor: string | null;
-  categoria: string | null;
-  regiao: { nome: string; slug: string } | { nome: string; slug: string }[] | null;
+// Cores dos gráficos (validadas: faixa de luminosidade, croma e contraste;
+// a 2ª série vai tracejada porque a separação para daltonismo é limítrofe).
+const COR = { atual: "#C97A3A", anterior: "#1F8A70", grade: "#E2E8F0", eixo: "#64748B" } as const;
+
+const ICONE: Record<Aba, typeof Activity> = {
+  visao: Gauge, "tempo-real": Activity, aquisicao: Target, publico: Users, conteudo: FileText,
+  editorias: Newspaper, regioes: MapPin, engajamento: MousePointerClick, conversoes: BarChart3,
+  busca: Search, qualidade: ShieldCheck, "base-propria": Database,
 };
-
-type ArtigoRow = {
-  slug: string;
-  titulo: string;
-  regiao: { slug: string } | { slug: string }[] | null;
-  categoria: { nome: string } | { nome: string }[] | null;
-};
-
-// Paleta dos gráficos: cores da marca, nomeadas, em vez de hex soltos.
-const PALETA = {
-  tinta: "#12201E",
-  verde: "#1E5B45",
-  laranja: "#E29F65",
-  azul: "#1B5E9A",
-  ardosia: "#64748B",
-} as const;
-// Ordem das fatias da pizza de origem (repete se houver mais categorias).
-const CORES = [PALETA.tinta, PALETA.laranja, PALETA.verde, PALETA.azul, PALETA.ardosia];
-const GRADE = "#E2E8F0";
-const PERIODOS = [
-  { label: "Hoje", dias: 1 },
-  { label: "Últimos 7 dias", dias: 7 },
-  { label: "Últimos 30 dias", dias: 30 },
-] as const;
-
-function first<T>(v: T | T[] | null): T | null {
-  return Array.isArray(v) ? (v[0] ?? null) : v;
-}
-
-function pct(atual: number, anterior: number): { valor: number; texto: string; positivo: boolean } {
-  if (anterior === 0) {
-    if (atual === 0) return { valor: 0, texto: "—", positivo: true };
-    return { valor: 100, texto: "novo", positivo: true };
-  }
-  const v = ((atual - anterior) / anterior) * 100;
-  return { valor: v, texto: `${v >= 0 ? "+" : ""}${v.toFixed(0)}%`, positivo: v >= 0 };
-}
+const GRUPOS: Array<{ titulo: string; abas: Aba[] }> = [
+  { titulo: "Panorama", abas: ["visao", "tempo-real"] },
+  { titulo: "Audiência", abas: ["aquisicao", "publico"] },
+  { titulo: "Conteúdo", abas: ["conteudo", "editorias", "regioes"] },
+  { titulo: "Resultado", abas: ["engajamento", "conversoes", "busca"] },
+  { titulo: "Dados", abas: ["qualidade", "base-propria"] },
+];
 
 function AdminAnalytics() {
-  const [periodo, setPeriodo] = useState<number>(7);
-  // "publico" = acessos de leitores nas páginas do site; "admin" = acessos
-  // internos dentro do /admin (nós mesmos usando o painel); "tudo" = soma
-  // dos dois. Sem essa separação, o volume de uso interno inflava o total
-  // de "pageviews" e distorcia todos os cruzamentos (região, editoria etc.).
-  const [segmento, setSegmento] = useState<"publico" | "admin" | "tudo">("publico");
-  const [rows, setRows] = useState<EventoRow[] | null>(null);
-  const [rowsAnterior, setRowsAnterior] = useState<EventoRow[] | null>(null);
-  const [artigos, setArtigos] = useState<ArtigoRow[]>([]);
-  const [err, setErr] = useState<string | null>(null);
+  const busca = Route.useSearch();
+  const aba: Aba = busca.aba ?? "visao";
+  const dias = busca.dias ?? 28;
+  const navigate = Route.useNavigate();
+  const [forcar, setForcar] = useState(0);
+  const meta = ABAS.find((a) => a.id === aba)!;
 
-  const load = useCallback(async (dias: number) => {
-    setRows(null); setErr(null);
-    try {
+  const ga = useQuery({
+    queryKey: ["analytics-ga", aba, dias, forcar],
+    enabled: aba !== "base-propria",
+    queryFn: async (): Promise<RespostaAba> => {
       const sb = await getExternalBrowser();
-      const agora = Date.now();
-      const since = new Date(agora - dias * 24 * 3600 * 1000).toISOString();
-      const sincePrev = new Date(agora - dias * 2 * 24 * 3600 * 1000).toISOString();
+      const token = (await sb.auth.getSession()).data.session?.access_token ?? "";
+      return relatorioAnalytics({ data: { token, aba, dias, atualizar: forcar > 0 } });
+    },
+    staleTime: aba === "tempo-real" ? 30_000 : 5 * 60_000,
+    refetchInterval: aba === "tempo-real" ? 60_000 : false,
+  });
+  const extras = useQuery({ queryKey: ["analytics-extras", dias], queryFn: () => carregarExtras(dias), staleTime: 5 * 60_000 });
 
-      // PostgREST corta em 1000 linhas por request independentemente do
-      // .limit() — precisamos paginar com .range() pra não subcontar
-      // pageviews depois que o site passa dos mil acessos no período.
-      const PAGE = 1000;
-      const MAX_PAGES = 50; // teto de segurança: 50k eventos por janela
-      async function fetchAllPageviews(gte: string, lt?: string) {
-        const acc: EventoRow[] = [];
-        for (let i = 0; i < MAX_PAGES; i++) {
-          let q = sb.from("analytics_events")
-            .select("ts, pagina, origem_trafego, cidade_leitor, categoria, regiao:regioes(nome, slug)")
-            .eq("tipo_evento", "pageview")
-            .gte("ts", gte)
-            .order("ts", { ascending: false })
-            .range(i * PAGE, i * PAGE + PAGE - 1);
-          if (lt) q = q.lt("ts", lt);
-          const { data, error } = await q;
-          if (error) throw error;
-          const batch = (data ?? []) as unknown as EventoRow[];
-          acc.push(...batch);
-          if (batch.length < PAGE) break;
-        }
-        return acc;
-      }
-
-      const [atual, anterior, artigosRes] = await Promise.all([
-        fetchAllPageviews(since),
-        fetchAllPageviews(sincePrev, since),
-        sb.from("generated_articles")
-          .select("slug, titulo, regiao:regioes(slug), categoria:editorial_categories(nome)")
-          .eq("status", "publicado").order("publicado_em", { ascending: false }).limit(1000),
-      ]);
-      if (artigosRes.error) throw artigosRes.error;
-      setRows(atual);
-      setRowsAnterior(anterior);
-      setArtigos((artigosRes.data ?? []) as unknown as ArtigoRow[]);
-    } catch (e: unknown) {
-      setErr(e instanceof Error ? e.message : "Erro ao carregar analytics");
-    }
-  }, []);
-
-  useEffect(() => { load(periodo); }, [load, periodo]);
-
-  // Filtra por segmento em memória — a coleta do tracker cobre tudo, então
-  // basta separar aqui pelo prefixo /admin da URL registrada em `pagina`.
-  function ehAdmin(p: string | null): boolean {
-    return !!p && p.startsWith("/admin");
-  }
-  const rowsFiltradas = useMemo(() => {
-    if (!rows) return null;
-    if (segmento === "tudo") return rows;
-    if (segmento === "admin") return rows.filter((r) => ehAdmin(r.pagina));
-    return rows.filter((r) => !ehAdmin(r.pagina));
-  }, [rows, segmento]);
-  const rowsAnteriorFiltradas = useMemo(() => {
-    if (!rowsAnterior) return null;
-    if (segmento === "tudo") return rowsAnterior;
-    if (segmento === "admin") return rowsAnterior.filter((r) => ehAdmin(r.pagina));
-    return rowsAnterior.filter((r) => !ehAdmin(r.pagina));
-  }, [rowsAnterior, segmento]);
-  const totalAdmin = useMemo(() => (rows ?? []).filter((r) => ehAdmin(r.pagina)).length, [rows]);
-  const totalPublico = useMemo(() => (rows ?? []).filter((r) => !ehAdmin(r.pagina)).length, [rows]);
-
-  // Mapa pagina ("/regiao/slug") -> {titulo, categoria} pra virar ranking
-  // de matéria de verdade, não só a URL crua — é a diferença entre uma
-  // lista de links e um "top conteúdo" de verdade, como no GA.
-  const tituloPorPagina = useMemo(() => {
-    const m = new Map<string, { titulo: string; categoria: string | null }>();
-    for (const a of artigos) {
-      const regiaoSlug = first(a.regiao)?.slug;
-      if (!regiaoSlug) continue;
-      m.set(`/${regiaoSlug}/${a.slug}`, { titulo: a.titulo, categoria: first(a.categoria)?.nome ?? null });
-    }
-    return m;
-  }, [artigos]);
-
-  const porRegiao = useMemo(() => {
-    const m = new Map<string, number>();
-    for (const r of rowsFiltradas ?? []) {
-      const nome = first(r.regiao)?.nome ?? "Sem região";
-      m.set(nome, (m.get(nome) ?? 0) + 1);
-    }
-    return Array.from(m.entries()).map(([nome, total]) => ({ nome, total })).sort((a, b) => b.total - a.total);
-  }, [rowsFiltradas]);
-
-  const porOrigem = useMemo(() => {
-    const m = new Map<string, number>();
-    for (const r of rowsFiltradas ?? []) {
-      const o = r.origem_trafego ?? "outro";
-      m.set(o, (m.get(o) ?? 0) + 1);
-    }
-    return Array.from(m.entries()).map(([origem, total]) => ({ origem, total })).sort((a, b) => b.total - a.total);
-  }, [rowsFiltradas]);
-
-  const porEditoria = useMemo(() => {
-    const m = new Map<string, number>();
-    for (const r of rowsFiltradas ?? []) {
-      const c = r.categoria ?? "sem editoria";
-      m.set(c, (m.get(c) ?? 0) + 1);
-    }
-    return Array.from(m.entries()).map(([categoria, total]) => ({ categoria, total })).sort((a, b) => b.total - a.total);
-  }, [rowsFiltradas]);
-
-  const porEditoriaAnterior = useMemo(() => {
-    const m = new Map<string, number>();
-    for (const r of rowsAnteriorFiltradas ?? []) {
-      const c = r.categoria ?? "sem editoria";
-      m.set(c, (m.get(c) ?? 0) + 1);
-    }
-    return m;
-  }, [rowsAnteriorFiltradas]);
-
-  const porPagina = useMemo(() => {
-    const m = new Map<string, number>();
-    for (const r of rowsFiltradas ?? []) {
-      if (!r.pagina) continue;
-      m.set(r.pagina, (m.get(r.pagina) ?? 0) + 1);
-    }
-    return Array.from(m.entries())
-      .map(([pagina, total]) => ({ pagina, total, meta: tituloPorPagina.get(pagina) }))
-      .sort((a, b) => b.total - a.total)
-      .slice(0, 12);
-  }, [rowsFiltradas, tituloPorPagina]);
-
-  const porCidadeLeitor = useMemo(() => {
-    const m = new Map<string, number>();
-    for (const r of rowsFiltradas ?? []) {
-      if (!r.cidade_leitor) continue;
-      m.set(r.cidade_leitor, (m.get(r.cidade_leitor) ?? 0) + 1);
-    }
-    return Array.from(m.entries()).map(([cidade, total]) => ({ cidade, total })).sort((a, b) => b.total - a.total).slice(0, 10);
-  }, [rowsFiltradas]);
-
-  const porDia = useMemo(() => {
-    const m = new Map<string, number>();
-    for (const r of rowsFiltradas ?? []) {
-      const dia = new Intl.DateTimeFormat("pt-BR", { timeZone: "America/Sao_Paulo", day: "2-digit", month: "2-digit" }).format(new Date(r.ts));
-      m.set(dia, (m.get(dia) ?? 0) + 1);
-    }
-    return Array.from(m.entries()).map(([dia, total]) => ({ dia, total })).reverse();
-  }, [rowsFiltradas]);
-
-  const totalIA = porOrigem.find((o) => o.origem === "ia")?.total ?? 0;
-  const total = rowsFiltradas?.length ?? 0;
-  const totalAnterior = rowsAnteriorFiltradas?.length ?? 0;
-  const variacaoTotal = pct(total, totalAnterior);
-  const regioesComTrafego = porRegiao.length;
-
-  // Insights automáticos — a editoria que mais cresceu, a região líder, o
-  // canal que mais trouxe leitor. É o que transforma número solto em
-  // leitura de tendência, sem o usuário precisar cruzar os gráficos na mão.
-  const insights = useMemo(() => {
-    const lista: string[] = [];
-    if (!rowsFiltradas || total === 0) return lista;
-
-    let melhorEditoria: { nome: string; variacao: ReturnType<typeof pct> } | null = null;
-    for (const e of porEditoria) {
-      if (e.total < 3) continue; // ignora ruído de volume muito baixo
-      const anterior = porEditoriaAnterior.get(e.categoria) ?? 0;
-      const variacao = pct(e.total, anterior);
-      if (!melhorEditoria || variacao.valor > melhorEditoria.variacao.valor) {
-        melhorEditoria = { nome: e.categoria, variacao };
-      }
-    }
-    if (melhorEditoria && melhorEditoria.variacao.valor > 15) {
-      lista.push(`"${cap(melhorEditoria.nome)}" foi a editoria com maior crescimento no período (${melhorEditoria.variacao.texto} vs. período anterior).`);
-    }
-
-    if (porRegiao.length > 0) {
-      const lider = porRegiao[0];
-      const participacao = total ? Math.round((lider.total / total) * 100) : 0;
-      if (participacao >= 30) {
-        lista.push(`A região ${lider.nome} concentra ${participacao}% do tráfego total — vale checar se as outras regiões precisam de mais publicações.`);
-      }
-    }
-
-    if (totalIA > 0) {
-      const participacaoIA = Math.round((totalIA / total) * 100);
-      if (participacaoIA >= 10) {
-        lista.push(`${participacaoIA}% dos acessos vieram de assistentes de IA (ChatGPT, Perplexity, Gemini) — sinal de que o conteúdo está sendo bem indexado por essas fontes.`);
-      }
-    }
-
-    if (porCidadeLeitor.length > 0) {
-      lista.push(`${cap(porCidadeLeitor[0].cidade)} é a cidade com mais leitores no período (${porCidadeLeitor[0].total} acessos).`);
-    }
-
-    return lista;
-  }, [rowsFiltradas, total, porEditoria, porEditoriaAnterior, porRegiao, totalIA, porCidadeLeitor]);
+  const rel: Relatorios = ga.data?.relatorios ?? {};
+  const ex: Extras = extras.data ?? { dias };
+  const lista = useMemo(() => (ga.data?.configurado ? leituras(aba, rel, ex) : []), [aba, ga.data, extras.data]); // eslint-disable-line react-hooks/exhaustive-deps
 
   return (
     <div className="space-y-6">
       <PageHeader
         eyebrow="Analytics"
-        title="Painel de Analytics"
-        subtitle="Tráfego cruzado das 10 regiões — página, editoria, origem e tendência, com comparação ao período anterior."
+        title={meta.rotulo}
+        subtitle={meta.descricao}
         actions={
           <div className="flex flex-wrap items-center gap-2">
-            <Tabs<"publico" | "admin" | "tudo">
-              value={segmento}
-              onChange={setSegmento}
-              items={[
-                { value: "publico", label: "Leitores" },
-                { value: "admin", label: "Uso interno" },
-                { value: "tudo", label: "Tudo" },
-              ]}
-            />
-            <select aria-label="Período" value={periodo} onChange={(e) => setPeriodo(Number(e.target.value))} className={campoClass}>
-              {PERIODOS.map((p) => <option key={p.dias} value={p.dias}>{p.label}</option>)}
-            </select>
+            {aba !== "tempo-real" && aba !== "base-propria" && (
+              <select
+                aria-label="Período"
+                value={dias}
+                onChange={(e) => navigate({ search: { aba, dias: Number(e.target.value) } })}
+                className={campoClass}
+              >
+                {DIAS.map((d) => <option key={d.dias} value={d.dias}>{d.rotulo}</option>)}
+              </select>
+            )}
+            {aba !== "base-propria" && (
+              <button type="button" className={btn("secondary", "sm")} onClick={() => setForcar((n) => n + 1)} disabled={ga.isFetching}>
+                <RefreshCw className={`h-4 w-4 ${ga.isFetching ? "animate-spin" : ""}`} aria-hidden /> Atualizar
+              </button>
+            )}
+            <a className={btn("ghost", "sm")} href="https://analytics.google.com/analytics/web/#/a400813205p545150980/reports/intelligenthome" target="_blank" rel="noreferrer">
+              <ExternalLink className="h-4 w-4" aria-hidden /> GA4
+            </a>
           </div>
         }
       />
 
-      {err && <ErrorBanner>{err}</ErrorBanner>}
-      <TaxaDeAceite dias={periodo} />
-      {!rows && !err && <p className="text-sm text-slate-500">Carregando…</p>}
-
-      {rows && (
-        <>
-          <div className="rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-xs text-slate-600 shadow-sm">
-            No período: <strong className="text-slate-900">{totalPublico}</strong> acessos de leitores no site
-            {" · "}<strong className="text-slate-900">{totalAdmin}</strong> acessos internos dentro do /admin
-            {" · "}total <strong className="text-slate-900">{totalPublico + totalAdmin}</strong>.
-            {segmento !== "tudo" && (
-              <> Mostrando apenas <strong>{segmento === "admin" ? "acessos internos" : "acessos de leitores"}</strong>.</>
-            )}
-          </div>
-
-          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-            <KpiCard label="Acessos no período" valor={total} variacao={variacaoTotal} />
-            <KpiCard label="Regiões com tráfego" valor={regioesComTrafego} variacao={pct(regioesComTrafego, porRegiaoAnteriorCount(rowsAnteriorFiltradas))} />
-            <KpiCard label="Editorias com tráfego" valor={porEditoria.length} variacao={{ valor: 0, texto: "", positivo: true }} semComparacao />
-            <div className="rounded-2xl border border-slate-200 bg-white shadow-sm p-4">
-              <p className="text-xs text-slate-500">Vindos de IA (ChatGPT, Perplexity, Gemini)</p>
-              <p className="text-3xl font-bold" style={{ color: PALETA.azul }}>{totalIA} <span className="text-sm font-normal text-slate-500">({total ? Math.round((totalIA / total) * 100) : 0}%)</span></p>
-            </div>
-          </div>
-
-          {total === 0 && (
-            <EmptyState title="Nenhum acesso registrado neste período">
-              É normal se o portal for novo ou tiver pouco tráfego. O rastreamento registra cada página visitada no site público.
-            </EmptyState>
-          )}
-
-          {insights.length > 0 && (
-            <section className="rounded-2xl border border-[#E29F65]/40 bg-[#E29F65]/10 p-5">
-              <h2 className="mb-2 flex items-center gap-2 text-sm font-bold uppercase tracking-[0.12em] text-[#12201E]">
-                <Lightbulb className="h-4 w-4 text-[#B5651D]" aria-hidden />
-                Destaques do período
-              </h2>
-              <ul className="list-disc space-y-1.5 pl-5 text-sm text-[#12201E]">
-                {insights.map((texto, i) => <li key={i}>{texto}</li>)}
-              </ul>
-            </section>
-          )}
-
-          <div className="grid gap-6 lg:grid-cols-2">
-            <Section title="Acessos por dia">
-              <ResponsiveContainer width="100%" height={220}>
-                <LineChart data={porDia}>
-                  <CartesianGrid strokeDasharray="3 3" stroke={GRADE} />
-                  <XAxis dataKey="dia" fontSize={11} stroke={PALETA.ardosia} />
-                  <YAxis fontSize={11} allowDecimals={false} stroke={PALETA.ardosia} />
-                  <Tooltip />
-                  <Line type="monotone" dataKey="total" name="Acessos" stroke={PALETA.laranja} strokeWidth={2} dot={false} />
-                </LineChart>
-              </ResponsiveContainer>
-            </Section>
-
-            <Section title="Acessos por editoria">
-              <ResponsiveContainer width="100%" height={220}>
-                <BarChart data={porEditoria} layout="vertical" margin={{ left: 24 }}>
-                  <CartesianGrid strokeDasharray="3 3" stroke={GRADE} />
-                  <XAxis type="number" fontSize={11} allowDecimals={false} stroke={PALETA.ardosia} />
-                  <YAxis dataKey="categoria" type="category" fontSize={11} width={100} tickFormatter={cap} stroke={PALETA.ardosia} />
-                  <Tooltip />
-                  <Bar dataKey="total" name="Acessos" fill={PALETA.verde} radius={[0, 4, 4, 0]} />
-                </BarChart>
-              </ResponsiveContainer>
-            </Section>
-
-            <Section title="Acessos por região">
-              <ResponsiveContainer width="100%" height={220}>
-                <BarChart data={porRegiao} layout="vertical" margin={{ left: 24 }}>
-                  <CartesianGrid strokeDasharray="3 3" stroke={GRADE} />
-                  <XAxis type="number" fontSize={11} allowDecimals={false} stroke={PALETA.ardosia} />
-                  <YAxis dataKey="nome" type="category" fontSize={11} width={110} stroke={PALETA.ardosia} />
-                  <Tooltip />
-                  <Bar dataKey="total" name="Acessos" fill={PALETA.tinta} radius={[0, 4, 4, 0]} />
-                </BarChart>
-              </ResponsiveContainer>
-            </Section>
-
-            <Section title="Origem do tráfego">
-              <ResponsiveContainer width="100%" height={220}>
-                <PieChart>
-                  <Pie data={porOrigem} dataKey="total" nameKey="origem" cx="50%" cy="50%" outerRadius={80} label>
-                    {porOrigem.map((_, i) => <Cell key={i} fill={CORES[i % CORES.length]} />)}
-                  </Pie>
-                  <Tooltip />
-                  <Legend />
-                </PieChart>
-              </ResponsiveContainer>
-            </Section>
-
-            <Section title="Matérias mais acessadas" subtitle="Ranking do período." className="lg:col-span-2">
-              <table className="w-full text-sm">
-                <thead>
-                  <tr className="border-b border-slate-200 text-left text-[11px] uppercase tracking-wide text-slate-500">
-                    <th className="w-8 py-1.5 font-medium">#</th>
-                    <th className="py-1.5 font-medium">Matéria</th>
-                    <th className="py-1.5 font-medium">Editoria</th>
-                    <th className="py-1.5 text-right font-medium">Acessos</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {porPagina.map((p, i) => (
-                    <tr key={p.pagina} className="border-b border-slate-100 last:border-0">
-                      <td className="py-1.5 text-slate-500">{i + 1}</td>
-                      <td className="py-1.5">
-                        {p.meta ? (
-                          <a href={p.pagina} target="_blank" rel="noreferrer" className="font-medium text-[#12201E] underline-offset-2 hover:underline">{p.meta.titulo}</a>
-                        ) : (
-                          <span className="truncate text-slate-500">{p.pagina}</span>
-                        )}
-                      </td>
-                      <td className="py-1.5 text-xs text-slate-500">{p.meta?.categoria ?? "—"}</td>
-                      <td className="py-1.5 text-right font-semibold tabular-nums">{p.total}</td>
-                    </tr>
-                  ))}
-                  {porPagina.length === 0 && (
-                    <tr><td colSpan={4} className="py-3 text-center text-slate-500">Sem acessos a matérias no período.</td></tr>
-                  )}
-                </tbody>
-              </table>
-            </Section>
-
-            <Section
-              title="De onde vêm os leitores"
-              subtitle="Cidade aproximada pela geolocalização do IP. O IP nunca é armazenado, só a cidade."
-              className="lg:col-span-2"
-            >
-              <div className="grid gap-x-6 sm:grid-cols-2">
-                <ul className="space-y-1 text-sm">
-                  {porCidadeLeitor.slice(0, 5).map((c, i) => (
-                    <li key={c.cidade} className="flex items-center justify-between gap-2 border-b border-slate-100 py-1 last:border-0">
-                      <span className="truncate text-slate-600">{i + 1}. {c.cidade}</span>
-                      <span className="font-semibold tabular-nums">{c.total}</span>
-                    </li>
-                  ))}
-                </ul>
-                <ul className="space-y-1 text-sm">
-                  {porCidadeLeitor.slice(5, 10).map((c, i) => (
-                    <li key={c.cidade} className="flex items-center justify-between gap-2 border-b border-slate-100 py-1 last:border-0">
-                      <span className="truncate text-slate-600">{i + 6}. {c.cidade}</span>
-                      <span className="font-semibold tabular-nums">{c.total}</span>
-                    </li>
-                  ))}
-                </ul>
-                {porCidadeLeitor.length === 0 && <p className="text-sm text-slate-500">Sem cidade identificada no período.</p>}
+      <div className="grid gap-6 lg:grid-cols-[210px_minmax(0,1fr)]">
+        <nav aria-label="Abas do Analytics" className="lg:sticky lg:top-4 lg:self-start">
+          <div className="flex gap-2 overflow-x-auto pb-1 lg:flex-col lg:gap-4 lg:overflow-visible">
+            {GRUPOS.map((g) => (
+              <div key={g.titulo} className="flex shrink-0 gap-1 lg:flex-col">
+                <p className="hidden px-2 text-[10px] font-bold uppercase tracking-[0.16em] text-slate-400 lg:block">{g.titulo}</p>
+                {g.abas.map((id) => {
+                  const a = ABAS.find((x) => x.id === id)!;
+                  const Icone = ICONE[id];
+                  const ativo = id === aba;
+                  return (
+                    <Link
+                      key={id}
+                      to="/admin/analytics"
+                      search={{ aba: id, dias }}
+                      className={`flex shrink-0 items-center gap-2 rounded-lg px-2.5 py-2 text-sm font-semibold transition-colors ${
+                        ativo ? "bg-[#12201E] text-white" : "text-slate-600 hover:bg-slate-100 hover:text-[#12201E]"
+                      }`}
+                    >
+                      <Icone className="h-4 w-4 shrink-0" aria-hidden />
+                      <span className="whitespace-nowrap">{a.rotulo}</span>
+                    </Link>
+                  );
+                })}
               </div>
-            </Section>
+            ))}
           </div>
-        </>
+        </nav>
+
+        <div className="min-w-0 space-y-6">
+          {aba === "base-propria" ? (
+            <BasePropria />
+          ) : ga.isLoading ? (
+            <p className="text-sm text-slate-500">Buscando no GA4…</p>
+          ) : ga.error ? (
+            <ErrorBanner>{ga.error instanceof Error ? ga.error.message : "Erro ao consultar o GA4"}</ErrorBanner>
+          ) : ga.data && !ga.data.configurado ? (
+            <SemCredencial motivo={ga.data.motivo} />
+          ) : ga.data ? (
+            <>
+              <Leituras lista={lista} />
+              <ConteudoAba aba={aba} r={rel} ex={ex} dias={dias} />
+              <Rodape resp={ga.data} />
+            </>
+          ) : null}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ------------------------------------------------------------ dados do banco
+async function carregarExtras(dias: number): Promise<Extras> {
+  const sb = await getExternalBrowser();
+  const desde = new Date(Date.now() - dias * 86_400_000).toISOString();
+  const producaoEditoria: Record<string, number> = {};
+  const producaoRegiao: Record<string, number> = {};
+  for (let i = 0; i < 10; i++) {
+    const { data, error } = await sb
+      .from("generated_articles")
+      .select("categoria:editorial_categories(slug), regiao:regioes(slug)")
+      .eq("status", "publicado")
+      .gte("publicado_em", desde)
+      .range(i * 1000, i * 1000 + 999);
+    if (error) break;
+    for (const l of (data ?? []) as unknown as Array<{ categoria: { slug: string } | null; regiao: { slug: string } | null }>) {
+      if (l.categoria?.slug) producaoEditoria[l.categoria.slug] = (producaoEditoria[l.categoria.slug] ?? 0) + 1;
+      if (l.regiao?.slug) producaoRegiao[l.regiao.slug] = (producaoRegiao[l.regiao.slug] ?? 0) + 1;
+    }
+    if ((data ?? []).length < 1000) break;
+  }
+  let consentimento: Extras["consentimento"];
+  try {
+    const { data } = await sb.rpc("consentimento_resumo", { p_dias: dias });
+    const linhas = (data ?? []) as Array<{ exibido: number; aceito: number; recusado: number }>;
+    consentimento = linhas.reduce((a, l) => ({ exibido: a.exibido + l.exibido, aceito: a.aceito + l.aceito, recusado: a.recusado + l.recusado }), { exibido: 0, aceito: 0, recusado: 0 });
+  } catch { /* sem a 098 */ }
+  const { count } = await sb
+    .from("analytics_events")
+    .select("id", { count: "exact", head: true })
+    .eq("tipo_evento", "pageview")
+    .gte("ts", desde)
+    .not("pagina", "like", "/admin%");
+  return { dias, producaoEditoria, producaoRegiao, consentimento, pageviewsBase: count ?? undefined };
+}
+
+// ------------------------------------------------------------- peças comuns
+function Leituras({ lista }: { lista: Leitura[] }) {
+  if (!lista.length) {
+    return (
+      <Section>
+        <p className="text-sm text-slate-500">Nada fora do normal nesta aba no período.</p>
+      </Section>
+    );
+  }
+  const estilo = {
+    critico: { Icone: AlertOctagon, rotulo: "Crítico", caixa: "border-[#12201E] bg-[#12201E] text-white", sub: "text-white/80" },
+    alerta: { Icone: AlertTriangle, rotulo: "Alerta", caixa: "border-[#E29F65] bg-[#E29F65]/15 text-[#12201E]", sub: "text-slate-700" },
+    insight: { Icone: Lightbulb, rotulo: "Insight", caixa: "border-slate-200 bg-white text-[#12201E]", sub: "text-slate-600" },
+  } as const;
+  return (
+    <section aria-label="Leituras do período" className="grid gap-3 md:grid-cols-2">
+      {lista.map((l, i) => {
+        const e = estilo[l.nivel];
+        return (
+          <div key={i} className={`rounded-2xl border p-4 shadow-sm ${e.caixa}`}>
+            <p className="flex items-center gap-2 text-[11px] font-bold uppercase tracking-[0.14em]">
+              <e.Icone className="h-4 w-4" aria-hidden /> {e.rotulo} · {l.titulo}
+            </p>
+            <p className={`mt-1.5 text-sm leading-relaxed ${e.sub}`}>{l.texto}</p>
+          </div>
+        );
+      })}
+    </section>
+  );
+}
+
+function Kpi({ rotulo, valor, anterior, formato = "inteiro", inverso }: {
+  rotulo: string; valor: number; anterior?: number; formato?: "inteiro" | "pct" | "duracao" | "decimal"; inverso?: boolean;
+}) {
+  const f = (v: number) => formato === "pct" ? pct(v) : formato === "duracao" ? duracao(v) : formato === "decimal" ? v.toFixed(2).replace(".", ",") : inteiro(v);
+  const v = anterior === undefined ? null : variacao(valor, anterior);
+  const bom = v === null ? null : inverso ? v < 0 : v >= 0;
+  return (
+    <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
+      <p className="text-xs text-slate-500">{rotulo}</p>
+      <p className="mt-1 text-2xl font-bold tabular-nums text-[#12201E]">{f(valor)}</p>
+      {v !== null && (
+        <p className={`mt-0.5 text-xs font-semibold ${bom ? "text-[#1F6B57]" : "text-[#B5651D]"}`}>
+          {pctTexto(v)} <span className="font-normal text-slate-400">vs. {f(anterior ?? 0)}</span>
+        </p>
       )}
     </div>
   );
 }
 
-function porRegiaoAnteriorCount(rowsAnterior: EventoRow[] | null): number {
-  const s = new Set<string>();
-  for (const r of rowsAnterior ?? []) {
-    const nome = first(r.regiao)?.nome;
-    if (nome) s.add(nome);
-  }
-  return s.size;
+function Kpis({ children }: { children: ReactNode }) {
+  return <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">{children}</div>;
 }
 
-function cap(s: string): string {
-  if (!s) return s;
-  return s.charAt(0).toUpperCase() + s.slice(1);
-}
-
-function KpiCard({ label, valor, variacao, semComparacao }: {
-  label: string; valor: number; variacao: { valor: number; texto: string; positivo: boolean }; semComparacao?: boolean;
+/** Barras horizontais de um tom só (magnitude), com valor escrito ao lado. */
+function Barras({ itens, formato = inteiro, vazio = "Sem dados no período." }: {
+  itens: Array<{ rotulo: string; valor: number; detalhe?: string }>;
+  formato?: (v: number) => string;
+  vazio?: string;
 }) {
+  const max = Math.max(1, ...itens.map((i) => i.valor));
+  if (!itens.length) return <p className="text-sm text-slate-500">{vazio}</p>;
   return (
-    <div className="rounded-2xl border border-slate-200 bg-white shadow-sm p-4">
-      <p className="text-xs text-slate-500">{label}</p>
-      <div className="flex items-baseline gap-2">
-        <p className="text-3xl font-bold text-[#12201E]">{valor}</p>
-        {!semComparacao && variacao.texto && (
-          <span className={`text-xs font-semibold ${variacao.positivo ? "text-emerald-700" : "text-red-700"}`}>
-            {variacao.texto}
-          </span>
-        )}
-      </div>
-      {!semComparacao && <p className="text-[10px] text-slate-500">em relação ao período anterior</p>}
+    <ul className="space-y-2">
+      {itens.map((i) => (
+        <li key={i.rotulo} title={`${i.rotulo}: ${formato(i.valor)}${i.detalhe ? ` · ${i.detalhe}` : ""}`}>
+          <div className="flex items-baseline justify-between gap-3 text-sm">
+            <span className="min-w-0 truncate text-[#12201E]">{i.rotulo}</span>
+            <span className="shrink-0 tabular-nums text-slate-600">
+              {formato(i.valor)}
+              {i.detalhe && <span className="ml-2 text-xs text-slate-400">{i.detalhe}</span>}
+            </span>
+          </div>
+          <div className="mt-1 h-2 rounded-full bg-slate-100">
+            <div className="h-2 rounded-full" style={{ width: `${(i.valor / max) * 100}%`, background: COR.atual }} />
+          </div>
+        </li>
+      ))}
+    </ul>
+  );
+}
+
+type Coluna = { rotulo: string; valor: (l: Linha) => ReactNode; num?: boolean };
+function Tabela({ colunas, linhas, vazio = "Sem dados no período." }: { colunas: Coluna[]; linhas: Linha[]; vazio?: string }) {
+  if (!linhas.length) return <p className="text-sm text-slate-500">{vazio}</p>;
+  return (
+    <div className="overflow-x-auto">
+      <table className="w-full text-sm">
+        <thead>
+          <tr className="border-b border-slate-200 text-left text-xs uppercase tracking-wide text-slate-500">
+            {colunas.map((c) => <th key={c.rotulo} className={`px-2 py-2 font-semibold ${c.num ? "text-right" : ""}`}>{c.rotulo}</th>)}
+          </tr>
+        </thead>
+        <tbody>
+          {linhas.map((l, i) => (
+            <tr key={i} className="border-b border-slate-100 last:border-0">
+              {colunas.map((c) => (
+                <td key={c.rotulo} className={`px-2 py-1.5 ${c.num ? "text-right tabular-nums text-slate-700" : "max-w-[28rem] truncate text-[#12201E]"}`}>{c.valor(l)}</td>
+              ))}
+            </tr>
+          ))}
+        </tbody>
+      </table>
     </div>
   );
 }
 
-// Taxa de aceite do banner de cookies (contagem anônima, migração 098):
-// é a fração dos leitores que o GA4 e o nosso analytics_events enxergam.
-type LinhaConsent = { dia: string; exibido: number; aceito: number; recusado: number };
-
-function TaxaDeAceite({ dias }: { dias: number }) {
-  const [linhas, setLinhas] = useState<LinhaConsent[] | null>(null);
-  useEffect(() => {
-    let vivo = true;
-    getExternalBrowser()
-      .then((sb) => sb.rpc("consentimento_resumo", { p_dias: dias }))
-      .then(({ data, error }) => { if (vivo) setLinhas(error ? null : ((data ?? []) as LinhaConsent[])); });
-    return () => { vivo = false; };
-  }, [dias]);
-  if (!linhas) return null;
-  const soma = linhas.reduce(
-    (a, l) => ({ exibido: a.exibido + l.exibido, aceito: a.aceito + l.aceito, recusado: a.recusado + l.recusado }),
-    { exibido: 0, aceito: 0, recusado: 0 },
-  );
-  const semResposta = Math.max(0, soma.exibido - soma.aceito - soma.recusado);
-  const p = (n: number) => (soma.exibido ? `${Math.round((n / soma.exibido) * 100)}%` : "—");
+function Serie({ dados, series }: { dados: Array<Record<string, string | number>>; series: Array<{ chave: string; nome: string }> }) {
+  if (!dados.length) return <p className="text-sm text-slate-500">Sem dados no período.</p>;
   return (
-    <div className="rounded-xl border border-slate-200 bg-white px-4 py-3 text-xs text-slate-600 shadow-sm">
-      <strong className="text-slate-900">Banner de cookies no período:</strong>{" "}
-      exibido a <strong className="text-slate-900">{soma.exibido}</strong> leitores
-      {" · "}aceitaram <strong className="text-[#B5651D]">{soma.aceito} ({p(soma.aceito)})</strong>
-      {" · "}recusaram <strong className="text-slate-900">{soma.recusado} ({p(soma.recusado)})</strong>
-      {" · "}não responderam <strong className="text-slate-900">{semResposta} ({p(semResposta)})</strong>.
-      {" "}Só quem aceita entra nos números abaixo e no GA4 — leia os totais como uma amostra.
-      {soma.exibido === 0 && " (A contagem começa a partir da publicação do site com a migração 098.)"}
+    <ResponsiveContainer width="100%" height={240}>
+      <LineChart data={dados} margin={{ top: 8, right: 12, bottom: 0, left: -8 }}>
+        <CartesianGrid strokeDasharray="3 3" stroke={COR.grade} vertical={false} />
+        <XAxis dataKey="rotulo" fontSize={11} stroke={COR.eixo} tickLine={false} />
+        <YAxis fontSize={11} stroke={COR.eixo} allowDecimals={false} tickLine={false} axisLine={false} />
+        <Tooltip />
+        {series.length > 1 && <Legend wrapperStyle={{ fontSize: 12 }} />}
+        {series.map((s, i) => (
+          <Line key={s.chave} type="monotone" dataKey={s.chave} name={s.nome} stroke={i === 0 ? COR.atual : COR.anterior}
+            strokeWidth={2} strokeDasharray={i === 0 ? undefined : "5 4"} dot={false} activeDot={{ r: 4 }} />
+        ))}
+      </LineChart>
+    </ResponsiveContainer>
+  );
+}
+
+const dataGA = (d: string) => (d.length === 8 ? `${d.slice(6, 8)}/${d.slice(4, 6)}` : d);
+const titulo = (t: unknown) => String(t ?? "").replace(/\s+[—|-]\s+Vozes Paranaenses$/, "");
+const rotuloSlug = (s: unknown) => {
+  const t = String(s ?? "");
+  if (VAZIO(t)) return "(sem valor)";
+  return t.replace(/-/g, " ").replace(/^\w/, (c) => c.toUpperCase());
+};
+
+function Grade({ children }: { children: ReactNode }) {
+  return <div className="grid gap-6 xl:grid-cols-2">{children}</div>;
+}
+
+function Rodape({ resp }: { resp: RespostaAba }) {
+  const erros = Object.entries(resp.erros ?? {});
+  return (
+    <div className="space-y-2 text-xs text-slate-400">
+      {erros.length > 0 && (
+        <ErrorBanner>
+          Alguns relatórios não vieram: {erros.map(([k, v]) => `${k} (${v.slice(0, 140)})`).join(" · ")}
+        </ErrorBanner>
+      )}
+      <p>
+        Fonte: GA4 (propriedade 545150980), páginas do /admin excluídas. Atualizado às{" "}
+        {new Date(resp.geradoEm).toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" })} (cache de 10 min). Os números do GA são só de quem aceitou os cookies.
+      </p>
     </div>
+  );
+}
+
+function SemCredencial({ motivo }: { motivo?: string }) {
+  return (
+    <EmptyState title="Falta ligar o painel ao GA4">
+      <p className="mb-3">{motivo}</p>
+      <ol className="mx-auto max-w-xl list-decimal space-y-1 text-left">
+        <li>No Google Cloud (projeto <strong>vozes-paranaense</strong>), ative a <em>Google Analytics Data API</em>.</li>
+        <li>Em IAM › Contas de serviço, crie a conta <em>painel-analytics</em> e gere uma chave JSON.</li>
+        <li>No GA4: Administrador › Gerenciamento de acesso à propriedade › adicione o e-mail da conta de serviço como <strong>Leitor</strong>.</li>
+        <li>Na Lovable, crie o secret <code>GA4_SERVICE_ACCOUNT_JSON</code> com o conteúdo do JSON e publique o site.</li>
+      </ol>
+      <p className="mt-3">Enquanto isso, a aba <strong>Base própria</strong> continua funcionando.</p>
+    </EmptyState>
+  );
+}
+
+// ----------------------------------------------------------------- as abas
+function ConteudoAba({ aba, r, ex, dias }: { aba: Aba; r: Relatorios; ex: Extras; dias: number }) {
+  switch (aba) {
+    case "visao": return <AbaVisao r={r} />;
+    case "tempo-real": return <AbaTempoReal r={r} />;
+    case "aquisicao": return <AbaAquisicao r={r} />;
+    case "publico": return <AbaPublico r={r} />;
+    case "conteudo": return <AbaConteudo r={r} />;
+    case "editorias": return <AbaSegmento r={r} dim="customEvent:editoria" nome="Editoria" producao={ex.producaoEditoria} />;
+    case "regioes": return <AbaSegmento r={r} dim="customEvent:regiao" nome="Região" producao={ex.producaoRegiao} cidades />;
+    case "engajamento": return <AbaEngajamento r={r} />;
+    case "conversoes": return <AbaConversoes r={r} />;
+    case "busca": return <AbaBusca r={r} />;
+    case "qualidade": return <AbaQualidade r={r} ex={ex} dias={dias} />;
+    default: return null;
+  }
+}
+
+function AbaVisao({ r }: { r: Relatorios }) {
+  const at = periodo(r.totais, "atual")[0] ?? {};
+  const an = periodo(r.totais, "anterior")[0] ?? {};
+  const ev = agrupar(periodo(r.eventos, "atual"), "eventName", "eventCount");
+  const evAn = agrupar(periodo(r.eventos, "anterior"), "eventName", "eventCount");
+  const serie = (r.serie ?? []).map((l) => ({ rotulo: dataGA(String(l.date)), leitores: num(l.activeUsers), visualizacoes: num(l.screenPageViews) }));
+  const conv = (e: Record<string, number>) => (e.generate_lead ?? 0) + (e.clique_whatsapp ?? 0) + (e.comentario_enviado ?? 0);
+  return (
+    <>
+      <Kpis>
+        <Kpi rotulo="Leitores" valor={num(at.activeUsers)} anterior={num(an.activeUsers)} />
+        <Kpi rotulo="Novos leitores" valor={num(at.newUsers)} anterior={num(an.newUsers)} />
+        <Kpi rotulo="Sessões" valor={num(at.sessions)} anterior={num(an.sessions)} />
+        <Kpi rotulo="Visualizações" valor={num(at.screenPageViews)} anterior={num(an.screenPageViews)} />
+        <Kpi rotulo="Taxa de engajamento" valor={num(at.engagementRate)} anterior={num(an.engagementRate)} formato="pct" />
+        <Kpi rotulo="Duração média da sessão" valor={num(at.averageSessionDuration)} anterior={num(an.averageSessionDuration)} formato="duracao" />
+        <Kpi rotulo="Leituras completas" valor={ev.leitura_completa ?? 0} anterior={evAn.leitura_completa ?? 0} />
+        <Kpi rotulo="Conversões (leads, WhatsApp, comentários)" valor={conv(ev)} anterior={conv(evAn)} />
+      </Kpis>
+      <Section title="Leitores e visualizações por dia">
+        <div className="p-4"><Serie dados={serie} series={[{ chave: "visualizacoes", nome: "Visualizações" }, { chave: "leitores", nome: "Leitores" }]} /></div>
+      </Section>
+      <Grade>
+        <Section title="Canais"><div className="p-4">
+          <Barras itens={(r.canais ?? []).map((l) => ({ rotulo: canalPt(String(l.sessionDefaultChannelGroup)), valor: num(l.sessions), detalhe: `engaj. ${pct(num(l.engagementRate))}` }))} />
+        </div></Section>
+        <Section title="Páginas mais vistas"><div className="p-4">
+          <Barras itens={(r.paginas ?? []).map((l) => ({ rotulo: titulo(l.pageTitle) || String(l.pagePath), valor: num(l.screenPageViews) }))} />
+        </div></Section>
+      </Grade>
+    </>
+  );
+}
+
+function AbaTempoReal({ r }: { r: Relatorios }) {
+  const tot = r.total?.[0] ?? {};
+  const minutos = Array.from({ length: 30 }, (_, i) => 29 - i).map((m) => ({
+    rotulo: `-${m}min`,
+    leitores: num((r.minutos ?? []).find((l) => Number(l.minutesAgo) === m)?.activeUsers),
+  }));
+  return (
+    <>
+      <Kpis>
+        <Kpi rotulo="Leitores nos últimos 30 min" valor={num(tot.activeUsers)} />
+        <Kpi rotulo="Visualizações nos últimos 30 min" valor={num(tot.screenPageViews)} />
+      </Kpis>
+      <Section title="Leitores por minuto" subtitle="Atualiza sozinho a cada minuto">
+        <div className="p-4"><Serie dados={minutos} series={[{ chave: "leitores", nome: "Leitores" }]} /></div>
+      </Section>
+      <Grade>
+        <Section title="Lendo agora"><div className="p-4">
+          <Barras itens={(r.paginas ?? []).map((l) => ({ rotulo: titulo(l.unifiedScreenName), valor: num(l.activeUsers) }))} vazio="Ninguém medido agora." />
+        </div></Section>
+        <Section title="Cidades"><div className="p-4">
+          <Barras itens={(r.cidades ?? []).map((l) => ({ rotulo: VAZIO(l.city) ? "(não identificada)" : String(l.city), valor: num(l.activeUsers) }))} vazio="Ninguém medido agora." />
+        </div></Section>
+        <Section title="Dispositivo"><div className="p-4">
+          <Barras itens={(r.dispositivo ?? []).map((l) => ({ rotulo: dispositivoPt(String(l.deviceCategory)), valor: num(l.activeUsers) }))} vazio="Ninguém medido agora." />
+        </div></Section>
+        <Section title="Eventos"><div className="p-4">
+          <Barras itens={(r.eventos ?? []).map((l) => ({ rotulo: String(l.eventName), valor: num(l.eventCount) }))} vazio="Nenhum evento agora." />
+        </div></Section>
+      </Grade>
+    </>
+  );
+}
+
+function AbaAquisicao({ r }: { r: Relatorios }) {
+  const at = periodo(r.canais, "atual");
+  const an = periodo(r.canais, "anterior");
+  const total = soma(at, "sessions");
+  const canaisTop = at.slice(0, 2).map((l) => String(l.sessionDefaultChannelGroup));
+  const porDia = new Map<string, Record<string, string | number>>();
+  for (const l of r.serieCanal ?? []) {
+    const d = dataGA(String(l.date));
+    const c = String(l.sessionDefaultChannelGroup);
+    if (!canaisTop.includes(c)) continue;
+    const linha = porDia.get(d) ?? { rotulo: d };
+    linha[c] = num(l.sessions);
+    porDia.set(d, linha);
+  }
+  return (
+    <>
+      <Section title="Canais" subtitle="Sessões, qualidade e conversão de cada canal, com o período anterior">
+        <div className="p-4">
+          <Tabela
+            linhas={at}
+            colunas={[
+              { rotulo: "Canal", valor: (l) => canalPt(String(l.sessionDefaultChannelGroup)) },
+              { rotulo: "Sessões", num: true, valor: (l) => inteiro(num(l.sessions)) },
+              { rotulo: "Participação", num: true, valor: (l) => (total ? pct(num(l.sessions) / total) : "—") },
+              { rotulo: "vs. anterior", num: true, valor: (l) => pctTexto(variacao(num(l.sessions), num(an.find((a) => a.sessionDefaultChannelGroup === l.sessionDefaultChannelGroup)?.sessions))) },
+              { rotulo: "Engajamento", num: true, valor: (l) => pct(num(l.engagementRate)) },
+              { rotulo: "Duração", num: true, valor: (l) => duracao(num(l.averageSessionDuration)) },
+              { rotulo: "Pág./sessão", num: true, valor: (l) => num(l.screenPageViewsPerSession).toFixed(2).replace(".", ",") },
+              { rotulo: "Conversões", num: true, valor: (l) => inteiro(num(l.keyEvents)) },
+            ]}
+          />
+        </div>
+      </Section>
+      {canaisTop.length > 0 && (
+        <Section title="Os dois maiores canais por dia">
+          <div className="p-4"><Serie dados={[...porDia.values()]} series={canaisTop.map((c) => ({ chave: c, nome: canalPt(c) }))} /></div>
+        </Section>
+      )}
+      <Section title="Fonte / mídia" subtitle="google / organic, instagram / social, whatsapp / … — de onde exatamente veio a sessão">
+        <div className="p-4">
+          <Tabela
+            linhas={r.fontes ?? []}
+            colunas={[
+              { rotulo: "Fonte / mídia", valor: (l) => String(l.sessionSourceMedium) },
+              { rotulo: "Sessões", num: true, valor: (l) => inteiro(num(l.sessions)) },
+              { rotulo: "Leitores", num: true, valor: (l) => inteiro(num(l.activeUsers)) },
+              { rotulo: "Engajamento", num: true, valor: (l) => pct(num(l.engagementRate)) },
+              { rotulo: "Duração", num: true, valor: (l) => duracao(num(l.averageSessionDuration)) },
+              { rotulo: "Conversões", num: true, valor: (l) => inteiro(num(l.keyEvents)) },
+            ]}
+          />
+        </div>
+      </Section>
+      <Grade>
+        <Section title="Campanhas (utm_campaign)"><div className="p-4">
+          <Tabela
+            linhas={(r.campanhas ?? []).filter((l) => !VAZIO(l.sessionCampaignName))}
+            vazio="Nenhuma campanha com UTM no período."
+            colunas={[
+              { rotulo: "Campanha", valor: (l) => String(l.sessionCampaignName) },
+              { rotulo: "Fonte", valor: (l) => String(l.sessionSourceMedium) },
+              { rotulo: "Sessões", num: true, valor: (l) => inteiro(num(l.sessions)) },
+              { rotulo: "Conv.", num: true, valor: (l) => inteiro(num(l.keyEvents)) },
+            ]}
+          />
+        </div></Section>
+        <Section title="Páginas de entrada"><div className="p-4">
+          <Barras itens={(r.entrada ?? []).map((l) => ({ rotulo: String(l.landingPage), valor: num(l.sessions), detalhe: `engaj. ${pct(num(l.engagementRate))}` }))} />
+        </div></Section>
+      </Grade>
+    </>
+  );
+}
+
+const DIA_SEMANA = ["Dom", "Seg", "Ter", "Qua", "Qui", "Sex", "Sáb"];
+function AbaPublico({ r }: { r: Relatorios }) {
+  const tipo = periodo(r.tipo, "atual");
+  const tipoAn = periodo(r.tipo, "anterior");
+  const g = (ls: Linha[], t: string) => num(ls.find((l) => l.newVsReturning === t)?.activeUsers);
+  const horas = Array.from({ length: 24 }, (_, h) => ({
+    rotulo: `${h}h`,
+    leitores: num((r.hora ?? []).find((l) => Number(l.hour) === h)?.activeUsers),
+  }));
+  return (
+    <>
+      <Kpis>
+        <Kpi rotulo="Leitores novos" valor={g(tipo, "new")} anterior={g(tipoAn, "new")} />
+        <Kpi rotulo="Leitores que voltaram" valor={g(tipo, "returning")} anterior={g(tipoAn, "returning")} />
+        <Kpi
+          rotulo="Taxa de retorno"
+          valor={g(tipo, "returning") / Math.max(1, g(tipo, "new") + g(tipo, "returning"))}
+          anterior={g(tipoAn, "returning") / Math.max(1, g(tipoAn, "new") + g(tipoAn, "returning"))}
+          formato="pct"
+        />
+        <Kpi rotulo="Celular" valor={num((r.dispositivo ?? []).find((l) => l.deviceCategory === "mobile")?.activeUsers) / Math.max(1, soma(r.dispositivo, "activeUsers"))} formato="pct" />
+      </Kpis>
+      <Section title="Leitores por hora do dia" subtitle="Horário de Brasília">
+        <div className="p-4"><Serie dados={horas} series={[{ chave: "leitores", nome: "Leitores" }]} /></div>
+      </Section>
+      <Grade>
+        <Section title="Cidade do leitor"><div className="p-4">
+          <Barras itens={(r.cidade ?? []).filter((l) => !VAZIO(l.city)).slice(0, 15).map((l) => ({ rotulo: `${l.city}${/paran/i.test(String(l.region)) ? "" : ` (${l.region})`}`, valor: num(l.activeUsers), detalhe: `engaj. ${pct(num(l.engagementRate))}` }))} />
+        </div></Section>
+        <Section title="Estado"><div className="p-4">
+          <Barras itens={(r.estado ?? []).map((l) => ({ rotulo: VAZIO(l.region) ? "(não identificado)" : String(l.region), valor: num(l.activeUsers) }))} />
+        </div></Section>
+        <Section title="Dispositivo"><div className="p-4">
+          <Tabela
+            linhas={r.dispositivo ?? []}
+            colunas={[
+              { rotulo: "Dispositivo", valor: (l) => dispositivoPt(String(l.deviceCategory)) },
+              { rotulo: "Leitores", num: true, valor: (l) => inteiro(num(l.activeUsers)) },
+              { rotulo: "Engajamento", num: true, valor: (l) => pct(num(l.engagementRate)) },
+              { rotulo: "Duração", num: true, valor: (l) => duracao(num(l.averageSessionDuration)) },
+            ]}
+          />
+        </div></Section>
+        <Section title="Dia da semana"><div className="p-4">
+          <Barras itens={(r.diaSemana ?? []).map((l) => ({ rotulo: DIA_SEMANA[Number(l.dayOfWeek)] ?? String(l.dayOfWeek), valor: num(l.activeUsers) }))} />
+        </div></Section>
+        <Section title="Sistema"><div className="p-4">
+          <Barras itens={(r.sistema ?? []).map((l) => ({ rotulo: String(l.operatingSystem), valor: num(l.activeUsers) }))} />
+        </div></Section>
+        <Section title="Navegador"><div className="p-4">
+          <Barras itens={(r.navegador ?? []).map((l) => ({ rotulo: String(l.browser), valor: num(l.activeUsers) }))} />
+        </div></Section>
+      </Grade>
+    </>
+  );
+}
+
+function AbaConteudo({ r }: { r: Relatorios }) {
+  const ev = eventosPor(r.conclusao, "pagePath");
+  const aut = eventosPor(r.autoria, "customEvent:autoria");
+  const AUTORIA: Record<string, string> = { ia: "IA", redacao: "Redação", imprensa: "Portal da Imprensa" };
+  const autoriaLinhas = Object.entries(aut).filter(([k]) => !VAZIO(k)).map(([k, e]) => ({ k, pv: e.page_view ?? 0, lc: e.leitura_completa ?? 0, sh: e.share ?? 0 }));
+  return (
+    <>
+      <Section title="Matérias e páginas" subtitle="Visualizações, tempo de leitura e quanto do público chega ao fim (75% do texto)">
+        <div className="p-4">
+          <Tabela
+            linhas={r.paginas ?? []}
+            colunas={[
+              { rotulo: "Página", valor: (l) => <span title={String(l.pagePath)}>{titulo(l.pageTitle) || String(l.pagePath)}</span> },
+              { rotulo: "Visualiz.", num: true, valor: (l) => inteiro(num(l.screenPageViews)) },
+              { rotulo: "Leitores", num: true, valor: (l) => inteiro(num(l.activeUsers)) },
+              { rotulo: "Tempo/leitor", num: true, valor: (l) => duracao(num(l.userEngagementDuration) / Math.max(1, num(l.activeUsers))) },
+              { rotulo: "Leitura completa", num: true, valor: (l) => {
+                const e = ev[String(l.pagePath)];
+                return e?.page_view ? pct((e.leitura_completa ?? 0) / e.page_view) : "—";
+              } },
+              { rotulo: "Compart.", num: true, valor: (l) => inteiro(ev[String(l.pagePath)]?.share ?? 0) },
+            ]}
+          />
+        </div>
+      </Section>
+      <Grade>
+        <Section title="Autoria" subtitle="Só matérias">
+          <div className="p-4">
+            <Tabela
+              linhas={autoriaLinhas as unknown as Linha[]}
+              vazio="Sem matérias com autoria medida."
+              colunas={[
+                { rotulo: "Autoria", valor: (l) => AUTORIA[String(l.k)] ?? String(l.k) },
+                { rotulo: "Visualiz.", num: true, valor: (l) => inteiro(num(l.pv)) },
+                { rotulo: "Leitura completa", num: true, valor: (l) => (num(l.pv) ? pct(num(l.lc) / num(l.pv)) : "—") },
+                { rotulo: "Compart.", num: true, valor: (l) => inteiro(num(l.sh)) },
+              ]}
+            />
+          </div>
+        </Section>
+        <Section title="Tipo de página"><div className="p-4">
+          <Barras itens={(r.tipo ?? []).map((l) => ({ rotulo: rotuloSlug(l["customEvent:tipo_conteudo"]), valor: num(l.screenPageViews), detalhe: duracao(num(l.userEngagementDuration) / Math.max(1, num(l.activeUsers))) }))} />
+        </div></Section>
+        <Section title="Idade da matéria lida" subtitle="Dias entre a publicação e a leitura"><div className="p-4">
+          <Barras itens={faixasDeIdade(r.frescor ?? [])} />
+        </div></Section>
+      </Grade>
+    </>
+  );
+}
+
+function faixasDeIdade(linhas: Linha[]) {
+  const faixas = [
+    { rotulo: "Mesmo dia", ate: 1 }, { rotulo: "1 a 2 dias", ate: 3 }, { rotulo: "3 a 7 dias", ate: 8 },
+    { rotulo: "8 a 30 dias", ate: 31 }, { rotulo: "Mais de 30 dias", ate: Infinity },
+  ].map((f) => ({ ...f, valor: 0 }));
+  const hoje = Date.now();
+  for (const l of linhas) {
+    const d = new Date(String(l["customEvent:data_publicacao"]));
+    if (Number.isNaN(d.getTime())) continue;
+    const idade = (hoje - d.getTime()) / 86_400_000;
+    const f = faixas.find((x) => idade < x.ate);
+    if (f) f.valor += num(l.screenPageViews);
+  }
+  return faixas.filter((f) => f.valor > 0).map(({ rotulo, valor }) => ({ rotulo, valor }));
+}
+
+function AbaSegmento({ r, dim, nome, producao, cidades }: {
+  r: Relatorios; dim: string; nome: string; producao?: Record<string, number>; cidades?: boolean;
+}) {
+  const at = periodo(r.audiencia, "atual").filter((l) => !VAZIO(l[dim]));
+  const an = periodo(r.audiencia, "anterior");
+  const ev = eventosPor(r.eventos, dim);
+  const totPv = soma(at, "screenPageViews");
+  const totProd = Object.values(producao ?? {}).reduce((a, b) => a + b, 0);
+  const chaves = new Set([...at.map((l) => String(l[dim])), ...Object.keys(producao ?? {})]);
+  const linhas: Linha[] = [...chaves].map((k) => {
+    const l = at.find((x) => String(x[dim]) === k) ?? {};
+    const e = ev[k] ?? {};
+    const pv = num(l.screenPageViews);
+    return {
+      k, pv, usuarios: num(l.activeUsers), tempo: num(l.userEngagementDuration) / Math.max(1, num(l.activeUsers)),
+      ant: num(an.find((x) => String(x[dim]) === k)?.screenPageViews),
+      lc: (e.leitura_completa ?? 0) / Math.max(1, e.page_view ?? pv), sh: e.share ?? 0,
+      conv: (e.generate_lead ?? 0) + (e.clique_whatsapp ?? 0) + (e.comentario_enviado ?? 0),
+      prod: producao?.[k] ?? 0,
+    };
+  }).sort((a, b) => num(b.pv) - num(a.pv));
+  // Canal por segmento: os 3 maiores canais de cada um.
+  const canais: Record<string, Array<[string, number]>> = {};
+  for (const l of r.canais ?? []) {
+    const k = String(l[dim]);
+    if (VAZIO(k)) continue;
+    (canais[k] ??= []).push([canalPt(String(l.sessionDefaultChannelGroup)), num(l.screenPageViews)]);
+  }
+  return (
+    <>
+      <Section title={`${nome}: audiência × produção`} subtitle="Produção = matérias publicadas no período (banco do Vozes). Visualizações por matéria mostram o rendimento de cada pauta.">
+        <div className="p-4">
+          <Tabela
+            linhas={linhas}
+            colunas={[
+              { rotulo: nome, valor: (l) => rotuloSlug(l.k) },
+              { rotulo: "Visualiz.", num: true, valor: (l) => inteiro(num(l.pv)) },
+              { rotulo: "vs. anterior", num: true, valor: (l) => pctTexto(variacao(num(l.pv), num(l.ant))) },
+              { rotulo: "% audiência", num: true, valor: (l) => (totPv ? pct(num(l.pv) / totPv) : "—") },
+              { rotulo: "Matérias", num: true, valor: (l) => inteiro(num(l.prod)) },
+              { rotulo: "% produção", num: true, valor: (l) => (totProd ? pct(num(l.prod) / totProd) : "—") },
+              { rotulo: "Visualiz./matéria", num: true, valor: (l) => (num(l.prod) ? (num(l.pv) / num(l.prod)).toFixed(1).replace(".", ",") : "—") },
+              { rotulo: "Leitura completa", num: true, valor: (l) => (num(l.pv) ? pct(num(l.lc)) : "—") },
+              { rotulo: "Tempo/leitor", num: true, valor: (l) => duracao(num(l.tempo)) },
+              { rotulo: "Compart.", num: true, valor: (l) => inteiro(num(l.sh)) },
+              { rotulo: "Conv.", num: true, valor: (l) => inteiro(num(l.conv)) },
+            ]}
+          />
+        </div>
+      </Section>
+      <Grade>
+        <Section title={`Por onde chega cada ${nome.toLowerCase()}`}><div className="p-4">
+          <Tabela
+            linhas={linhas.filter((l) => canais[String(l.k)]).slice(0, 12)}
+            colunas={[
+              { rotulo: nome, valor: (l) => rotuloSlug(l.k) },
+              { rotulo: "Principais canais", valor: (l) => (canais[String(l.k)] ?? []).sort((a, b) => b[1] - a[1]).slice(0, 3).map(([c, v]) => `${c} ${inteiro(v)}`).join(" · ") },
+            ]}
+          />
+        </div></Section>
+        {cidades ? (
+          <>
+            <Section title="Cidade da matéria" subtitle="Cidade principal das matérias lidas"><div className="p-4">
+              <Barras itens={(r.cidades ?? []).filter((l) => !VAZIO(l["customEvent:cidade"])).slice(0, 20).map((l) => ({ rotulo: rotuloSlug(l["customEvent:cidade"]), valor: num(l.screenPageViews) }))} />
+            </div></Section>
+            <Section title="Cidade de quem lê" subtitle="Localização do leitor (GA)"><div className="p-4">
+              <Barras itens={(r.leitores ?? []).filter((l) => !VAZIO(l.city)).slice(0, 20).map((l) => ({ rotulo: String(l.city), valor: num(l.activeUsers) }))} />
+            </div></Section>
+          </>
+        ) : (
+          <Section title="Rendimento por matéria" subtitle="Visualizações por matéria publicada"><div className="p-4">
+            <Barras itens={linhas.filter((l) => num(l.prod) > 0).map((l) => ({ rotulo: rotuloSlug(l.k), valor: num(l.pv) / num(l.prod) })).sort((a, b) => b.valor - a.valor)} formato={(v) => v.toFixed(1).replace(".", ",")} />
+          </div></Section>
+        )}
+      </Grade>
+    </>
+  );
+}
+
+const EVENTO_PT: Record<string, string> = {
+  page_view: "Visualização de página", session_start: "Início de sessão", first_visit: "Primeira visita",
+  user_engagement: "Engajamento", scroll: "Rolagem até 90%", click: "Clique para fora", leitura_completa: "Leitura completa (75%)",
+  share: "Compartilhamento", clique_relacionada: "Clique em relacionada", generate_lead: "Lead",
+  clique_whatsapp: "Clique de WhatsApp", comentario_enviado: "Comentário", view_search_results: "Busca no site",
+  file_download: "Download", form_start: "Formulário iniciado", form_submit: "Formulário enviado", video_start: "Vídeo iniciado",
+  link_copiado: "Link copiado", compartilhamento_nativo: "Compartilhar do celular",
+};
+
+function AbaEngajamento({ r }: { r: Relatorios }) {
+  const at = periodo(r.metricas, "atual")[0] ?? {};
+  const an = periodo(r.metricas, "anterior")[0] ?? {};
+  const ev = agrupar(periodo(r.eventos, "atual"), "eventName", "eventCount");
+  const evAn = agrupar(periodo(r.eventos, "anterior"), "eventName", "eventCount");
+  const pv = ev.page_view ?? 0;
+  const pvAn = evAn.page_view ?? 0;
+  const taxa = (e: Record<string, number>, n: string, base: number) => (base ? (e[n] ?? 0) / base : 0);
+  return (
+    <>
+      <Kpis>
+        <Kpi rotulo="Taxa de engajamento" valor={num(at.engagementRate)} anterior={num(an.engagementRate)} formato="pct" />
+        <Kpi rotulo="Páginas por sessão" valor={num(at.screenPageViewsPerSession)} anterior={num(an.screenPageViewsPerSession)} formato="decimal" />
+        <Kpi rotulo="Tempo de engajamento por leitor" valor={num(at.userEngagementDuration) / Math.max(1, num(at.activeUsers))} anterior={num(an.userEngagementDuration) / Math.max(1, num(an.activeUsers))} formato="duracao" />
+        <Kpi rotulo="Leitura completa / visualização" valor={taxa(ev, "leitura_completa", pv)} anterior={taxa(evAn, "leitura_completa", pvAn)} formato="pct" />
+        <Kpi rotulo="Compartilhamento / visualização" valor={taxa(ev, "share", pv)} anterior={taxa(evAn, "share", pvAn)} formato="pct" />
+        <Kpi rotulo="Clique em relacionada / visualização" valor={taxa(ev, "clique_relacionada", pv)} anterior={taxa(evAn, "clique_relacionada", pvAn)} formato="pct" />
+      </Kpis>
+      <Section title="Todos os eventos">
+        <div className="p-4">
+          <Tabela
+            linhas={periodo(r.eventos, "atual")}
+            colunas={[
+              { rotulo: "Evento", valor: (l) => EVENTO_PT[String(l.eventName)] ?? String(l.eventName) },
+              { rotulo: "Nome técnico", valor: (l) => <code className="text-xs text-slate-500">{String(l.eventName)}</code> },
+              { rotulo: "Vezes", num: true, valor: (l) => inteiro(num(l.eventCount)) },
+              { rotulo: "vs. anterior", num: true, valor: (l) => pctTexto(variacao(num(l.eventCount), evAn[String(l.eventName)] ?? 0)) },
+              { rotulo: "Leitores", num: true, valor: (l) => inteiro(num(l.totalUsers)) },
+            ]}
+          />
+        </div>
+      </Section>
+      <Grade>
+        <Section title="Blocos de relacionadas clicados"><div className="p-4">
+          <Barras itens={(r.blocos ?? []).filter((l) => !VAZIO(l["customEvent:bloco"])).map((l) => ({ rotulo: rotuloSlug(l["customEvent:bloco"]), valor: num(l.eventCount) }))} vazio="Sem cliques em relacionadas no período (a dimensão foi criada em 30/10)." />
+        </div></Section>
+        <Section title="Matérias mais compartilhadas"><div className="p-4">
+          <Barras itens={(r.compartilhadas ?? []).map((l) => ({ rotulo: titulo(l.pageTitle), valor: num(l.eventCount) }))} vazio="Nenhum compartilhamento no período." />
+        </div></Section>
+      </Grade>
+    </>
+  );
+}
+
+const LEAD_PT: Record<string, string> = {
+  contato: "Contato", portal_imprensa: "Portal da Imprensa", newsletter_whatsapp: "Newsletter WhatsApp",
+  classificado: "Classificado", vitrine_pessoal: "Vitrine Pessoal", publieditorial: "Publieditorial", chat_anuncios: "Chat de anúncios",
+};
+
+function AbaConversoes({ r }: { r: Relatorios }) {
+  const at = agrupar(periodo(r.totais, "atual"), "eventName", "eventCount");
+  const an = agrupar(periodo(r.totais, "anterior"), "eventName", "eventCount");
+  const sess = num(periodo(r.sessoes, "atual")[0]?.sessions);
+  const sessAn = num(periodo(r.sessoes, "anterior")[0]?.sessions);
+  const porFonte: Record<string, Record<string, number>> = eventosPor(r.fonte, "sessionSourceMedium");
+  const porPagina: Record<string, Record<string, number>> = eventosPor(r.pagina, "pagePath");
+  const tabelaEventos = (m: Record<string, Record<string, number>>) =>
+    Object.entries(m).map(([k, e]) => ({ k, lead: e.generate_lead ?? 0, wpp: e.clique_whatsapp ?? 0, com: e.comentario_enviado ?? 0 }))
+      .sort((a, b) => b.lead + b.wpp + b.com - (a.lead + a.wpp + a.com)) as unknown as Linha[];
+  const colunasEv = (rotulo: string): Coluna[] => [
+    { rotulo, valor: (l) => String(l.k) },
+    { rotulo: "Leads", num: true, valor: (l) => inteiro(num(l.lead)) },
+    { rotulo: "WhatsApp", num: true, valor: (l) => inteiro(num(l.wpp)) },
+    { rotulo: "Coment.", num: true, valor: (l) => inteiro(num(l.com)) },
+  ];
+  return (
+    <>
+      <Kpis>
+        <Kpi rotulo="Leads" valor={at.generate_lead ?? 0} anterior={an.generate_lead ?? 0} />
+        <Kpi rotulo="Leads por mil sessões" valor={sess ? ((at.generate_lead ?? 0) / sess) * 1000 : 0} anterior={sessAn ? ((an.generate_lead ?? 0) / sessAn) * 1000 : 0} formato="decimal" />
+        <Kpi rotulo="Cliques de WhatsApp" valor={at.clique_whatsapp ?? 0} anterior={an.clique_whatsapp ?? 0} />
+        <Kpi rotulo="Comentários" valor={at.comentario_enviado ?? 0} anterior={an.comentario_enviado ?? 0} />
+      </Kpis>
+      <Grade>
+        <Section title="Leads por produto"><div className="p-4">
+          <Barras itens={(r.leadTipo ?? []).filter((l) => !VAZIO(l["customEvent:lead_tipo"])).map((l) => ({ rotulo: LEAD_PT[String(l["customEvent:lead_tipo"])] ?? String(l["customEvent:lead_tipo"]), valor: num(l.eventCount) }))} vazio="Nenhum lead no período (os eventos de conversão entram com a publicação de 30/10)." />
+        </div></Section>
+        <Section title="WhatsApp: comunidade × comercial"><div className="p-4">
+          <Barras itens={(r.whatsapp ?? []).filter((l) => !VAZIO(l["customEvent:destino"])).map((l) => ({ rotulo: rotuloSlug(l["customEvent:destino"]), valor: num(l.eventCount) }))} vazio="Nenhum clique de WhatsApp no período." />
+        </div></Section>
+        <Section title="Conversões por fonte / mídia"><div className="p-4">
+          <Tabela linhas={tabelaEventos(porFonte)} colunas={colunasEv("Fonte / mídia")} vazio="Sem conversões no período." />
+        </div></Section>
+        <Section title="Conversões por página"><div className="p-4">
+          <Tabela linhas={tabelaEventos(porPagina)} colunas={colunasEv("Página")} vazio="Sem conversões no período." />
+        </div></Section>
+      </Grade>
+    </>
+  );
+}
+
+function AbaBusca({ r }: { r: Relatorios }) {
+  const serie = (r.serie ?? []).map((l) => ({ rotulo: dataGA(String(l.date)), buscas: num(l.eventCount) }));
+  return (
+    <>
+      <Kpis>
+        <Kpi rotulo="Buscas no período" valor={soma(r.termos, "eventCount")} />
+        <Kpi rotulo="Termos diferentes" valor={(r.termos ?? []).filter((l) => !VAZIO(l.searchTerm)).length} />
+      </Kpis>
+      <Section title="Buscas por dia"><div className="p-4"><Serie dados={serie} series={[{ chave: "buscas", nome: "Buscas" }]} /></div></Section>
+      <Section title="Termos buscados" subtitle="Termo frequente é pauta ou atalho que falta"><div className="p-4">
+        <Tabela
+          linhas={(r.termos ?? []).filter((l) => !VAZIO(l.searchTerm))}
+          vazio="Nenhuma busca registrada ainda (a página /busca entra no ar com a publicação de 30/10)."
+          colunas={[
+            { rotulo: "Termo", valor: (l) => String(l.searchTerm) },
+            { rotulo: "Buscas", num: true, valor: (l) => inteiro(num(l.eventCount)) },
+            { rotulo: "Leitores", num: true, valor: (l) => inteiro(num(l.totalUsers)) },
+            { rotulo: "", valor: (l) => <a className="text-xs text-[#B5651D] underline" href={`/busca?q=${encodeURIComponent(String(l.searchTerm))}`} target="_blank" rel="noreferrer">ver resultado</a> },
+          ]}
+        />
+      </div></Section>
+    </>
+  );
+}
+
+function AbaQualidade({ r, ex, dias }: { r: Relatorios; ex: Extras; dias: number }) {
+  const c = ex.consentimento;
+  const pv = num(r.pageviews?.[0]?.screenPageViews);
+  const vaziaPct = (rel: string, dim: string) => {
+    const t = soma(r[rel], "screenPageViews");
+    return t ? soma((r[rel] ?? []).filter((l) => VAZIO(l[dim])), "screenPageViews") / t : 0;
+  };
+  return (
+    <>
+      <Kpis>
+        <Kpi rotulo="Banner de cookies exibido" valor={c?.exibido ?? 0} />
+        <Kpi rotulo="Aceitaram" valor={c && c.exibido ? c.aceito / c.exibido : 0} formato="pct" />
+        <Kpi rotulo="Recusaram" valor={c && c.exibido ? c.recusado / c.exibido : 0} formato="pct" />
+        <Kpi rotulo="Não responderam" valor={c && c.exibido ? Math.max(0, c.exibido - c.aceito - c.recusado) / c.exibido : 0} formato="pct" />
+        <Kpi rotulo="Visualizações no GA4" valor={pv} />
+        <Kpi rotulo="Visualizações na base própria" valor={ex.pageviewsBase ?? 0} />
+        <Kpi rotulo="Visualizações sem editoria" valor={vaziaPct("editoriaVazia", "customEvent:editoria")} formato="pct" />
+        <Kpi rotulo="Visualizações sem região" valor={vaziaPct("regiaoVazia", "customEvent:regiao")} formato="pct" />
+      </Kpis>
+      <Section title="Como ler os números deste painel">
+        <ul className="list-disc space-y-1.5 p-5 pl-9 text-sm text-slate-600">
+          <li>O GA4 roda com Consent Mode: sem "Aceitar", o Google recebe só um sinal sem cookie e <strong>não conta o leitor</strong>. Os números são a fração que aceitou ({c && c.exibido ? pct(c.aceito / c.exibido) : "medição começando"} nos últimos {dias} dias).</li>
+          <li>A modelagem do Google, que estimaria quem recusou, só liga com cerca de mil leitores por dia que aceitam.</li>
+          <li>Visualizações sem editoria/região são da home, busca e páginas institucionais — normal.</li>
+          <li>Páginas do /admin nunca entram nos relatórios. O navegador da equipe é marcado como tráfego interno; enquanto o filtro do GA estiver em "Teste", ele ainda soma nos totais.</li>
+        </ul>
+      </Section>
+    </>
   );
 }
