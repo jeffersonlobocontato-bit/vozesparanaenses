@@ -752,7 +752,7 @@ export const listRankedArticles = createServerFn({ method: "GET" })
     regiaoSlug: d.regiaoSlug ?? null,
     limit: d.limit ?? 12,
   }))
-  .handler(async ({ data }): Promise<RankedArticle[]> => {
+  .handler(async ({ data }): Promise<RankedArticle[]> => memo(`listRankedArticles:${JSON.stringify(data)}`, 60_000, async () => {
     const { getExternalSupabase } = await import("./external-supabase.server");
     const sb = getExternalSupabase();
     // Puxamos um pool maior para reordenar em memória.
@@ -871,7 +871,7 @@ export const listRankedArticles = createServerFn({ method: "GET" })
       cidade_principal: row.cidade_principal,
     }));
     return sortWithPinned(ranked);
-  });
+  }));
 
 export const listArticlesByRegion = createServerFn({ method: "GET" })
   .inputValidator((d: { regionSlug: string; limit?: number }) => ({
@@ -936,7 +936,7 @@ export const listArticlesByRegion = createServerFn({ method: "GET" })
  * nunca uma manchete inventada).
  */
 export const listUltimaPorRegiao = createServerFn({ method: "GET" }).handler(
-  async (): Promise<Record<string, ArticleListItem>> => {
+  async (): Promise<Record<string, ArticleListItem>> => memo("listUltimaPorRegiao", 120_000, async () => {
     const { getExternalSupabase } = await import("./external-supabase.server");
     const sb = getExternalSupabase();
     const desde = new Date(Date.now() - 7 * 86_400_000).toISOString();
@@ -958,7 +958,7 @@ export const listUltimaPorRegiao = createServerFn({ method: "GET" }).handler(
       out[slug] = mapMateria(row);
     }
     return out;
-  },
+  }),
 );
 
 /**
@@ -971,7 +971,7 @@ export const listMostReadArticles = createServerFn({ method: "GET" })
     days: Math.min(Math.max(d.days ?? 7, 1), 30),
     limit: Math.min(Math.max(d.limit ?? 5, 1), 20),
   }))
-  .handler(async ({ data }): Promise<ArticleListItem[]> => {
+  .handler(async ({ data }): Promise<ArticleListItem[]> => memo(`listMostReadArticles:${JSON.stringify(data)}`, 300_000, async () => {
     const { getExternalServiceRole } = await import("./external-supabase.server");
     // Sem a chave de serviço (ex.: ambiente local), a lista fica vazia em vez
     // de derrubar a home inteira.
@@ -1042,7 +1042,7 @@ export const listMostReadArticles = createServerFn({ method: "GET" })
       if (ordered.length >= data.limit) break;
     }
     return ordered;
-  });
+  }));
 
 /**
  * Notícias publicadas SEM foto de capa — módulo "VAPT-VUPT".
@@ -1050,7 +1050,7 @@ export const listMostReadArticles = createServerFn({ method: "GET" })
  */
 export const listArticlesWithoutImage = createServerFn({ method: "GET" })
   .inputValidator((d: { limit?: number }) => ({ limit: d.limit ?? 8 }))
-  .handler(async ({ data }): Promise<ArticleListItem[]> => {
+  .handler(async ({ data }): Promise<ArticleListItem[]> => memo(`listArticlesWithoutImage:${JSON.stringify(data)}`, 60_000, async () => {
     const { getExternalSupabase } = await import("./external-supabase.server");
     const sb = getExternalSupabase();
     const run = (cols: string) =>
@@ -1076,7 +1076,7 @@ export const listArticlesWithoutImage = createServerFn({ method: "GET" })
       ...mapMateria(m),
       cidade_principal: m.cidade_principal ?? null,
     }));
-  });
+  }));
 
 /** Item da primeira dobra: matéria ou nota da coluna da cidade. */
 export type ItemDobra = ArticleListItem & {
@@ -1109,7 +1109,7 @@ export const getPrimeiraDobra = createServerFn({ method: "GET" })
     cidade: d.cidade ?? null,
     regiaoSlug: d.regiaoSlug ?? null,
   }))
-  .handler(async ({ data }): Promise<PrimeiraDobra> => {
+  .handler(async ({ data }): Promise<PrimeiraDobra> => memo(`getPrimeiraDobra:${JSON.stringify(data)}`, 60_000, async () => {
     const { getExternalSupabase } = await import("./external-supabase.server");
     const sb = getExternalSupabase();
     const muni = data.cidade ? findMunicipio(data.cidade) : null;
@@ -1219,7 +1219,7 @@ export const getPrimeiraDobra = createServerFn({ method: "GET" })
       if (item) side.push(item);
     });
     return { hero, side };
-  });
+  }));
 
 export type SlotNacional = "politica" | "nacional" | "internacional" | "esportes";
 
@@ -1385,7 +1385,7 @@ export const listArticlesByCategoryGlobal = createServerFn({ method: "GET" })
     limit: d.limit ?? 30,
     requireImage: d.requireImage ?? true,
   }))
-  .handler(async ({ data }): Promise<ArticleListItem[]> => {
+  .handler(async ({ data }): Promise<ArticleListItem[]> => memo(`listArticlesByCategoryGlobal:${JSON.stringify(data)}`, 120_000, async () => {
     const { getExternalSupabase } = await import("./external-supabase.server");
     const sb = getExternalSupabase();
     const { data: category } = await sb
@@ -1408,7 +1408,7 @@ export const listArticlesByCategoryGlobal = createServerFn({ method: "GET" })
       throw new Error(error.message);
     }
     return ((rows ?? []) as unknown as MateriaRow[]).map(mapMateria);
-  });
+  }));
 
 export const getArticle = createServerFn({ method: "GET" })
   .inputValidator((d: { regionSlug: string; slug: string }) => d)
@@ -1726,7 +1726,7 @@ export const COLUNA_FIXA_SLUG = "vozes-politicas";
  * post por último. Coluna regional: o "post" é a última nota publicada.
  */
 export const listColunasAtalhos = createServerFn({ method: "GET" })
-  .handler(async (): Promise<ColunaAtalho[]> => {
+  .handler(async (): Promise<ColunaAtalho[]> => memo("listColunasAtalhos", 300_000, async () => {
     const { getExternalSupabase } = await import("./external-supabase.server");
     const sb = getExternalSupabase();
     const { data: colunas, error } = await sb
@@ -1829,7 +1829,7 @@ export const listColunasAtalhos = createServerFn({ method: "GET" })
         if (b.slug === COLUNA_FIXA_SLUG) return 1;
         return quando(b) - quando(a);
       });
-  });
+  }));
 
 type ColunaRow = {
   id: string;

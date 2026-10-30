@@ -124,21 +124,20 @@ export const Route = createFileRoute("/")({
     ],
   }),
   loader: async ({ context }) => {
-    const [loc] = await Promise.all([
-      context.queryClient.ensureQueryData(viewerLocQO),
-      context.queryClient.ensureQueryData(regionsQO),
+    // Tudo em paralelo (antes eram 8 esperas em fila: ~5–10 s para montar a
+    // home). Só a manchete e o ranking dependem da cidade do leitor, que sai
+    // do cookie/IP sem ir ao banco.
+    const qc = context.queryClient;
+    const locP = qc.ensureQueryData(viewerLocQO);
+    await Promise.all([
+      qc.ensureQueryData(regionsQO),
+      locP.then((loc) => Promise.all([qc.ensureQueryData(rankedQO(loc)), qc.ensureQueryData(dobraQO(loc))])),
+      ...HOME_EDITORIAS.map((e) => qc.ensureQueryData(editoriaQO(e.slug))),
+      qc.ensureQueryData(vaptVuptQO),
+      qc.ensureQueryData(mostReadQO),
+      qc.ensureQueryData(colunasAtalhosQO),
+      qc.ensureQueryData(ultimaPorRegiaoQO),
     ]);
-    await context.queryClient.ensureQueryData(rankedQO(loc));
-    await Promise.all(
-      HOME_EDITORIAS.map((e) =>
-        context.queryClient.ensureQueryData(editoriaQO(e.slug)),
-      ),
-    );
-    await context.queryClient.ensureQueryData(dobraQO(loc));
-    await context.queryClient.ensureQueryData(vaptVuptQO);
-    await context.queryClient.ensureQueryData(mostReadQO);
-    await context.queryClient.ensureQueryData(colunasAtalhosQO);
-    await context.queryClient.ensureQueryData(ultimaPorRegiaoQO);
   },
   component: Home,
   errorComponent: ({ error }) => (
