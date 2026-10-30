@@ -1,25 +1,32 @@
-== /toledo
-HTTP/2 301 
-location: /oeste/cidade/toledo?utm_source=atalho&utm_medium=url-curta&utm_campaign=cidade-toledo
-bytes 0
-== /toledo?utm_source=whatsapp&utm_medium=social
-HTTP/2 301 
-location: /oeste/cidade/toledo?utm_source=whatsapp&utm_medium=social
-bytes 0
-== /Foz%20do%20Igua%C3%A7u
-HTTP/2 301 
-location: /oeste/cidade/foz-do-iguacu?utm_source=atalho&utm_medium=url-curta&utm_campaign=cidade-foz-do-iguacu
-bytes 0
-== /oeste/cidade/toledo
-HTTP/2 200 
-bytes 62563
-grep: /tmp/p.html: binary file matches
-== /geo-pr-municipios.json
-HTTP/2 200 
-bytes 85582
-== /admin/cobertura
-HTTP/2 200 
-bytes 8571
-== /admin/resumo-regional
-HTTP/2 200 
-bytes 8699
+Fri Oct 30 00:11:12 UTC 2026
+== rodada 1
+200 dns=0.469253 conn=0.471112 tls=0.501048 ttfb=6.236560 total=6.238283 bytes=96993 /
+200 dns=0.311779 conn=0.313448 tls=0.334255 ttfb=1.450510 total=1.451164 bytes=58335 /oeste
+200 dns=0.458472 conn=0.460289 tls=0.480845 ttfb=1.596563 total=1.598903 bytes=71077 /oeste/cidade/toledo
+200 dns=0.311554 conn=0.314343 tls=0.334828 ttfb=1.019599 total=1.020111 bytes=58374 /oeste/mulher-e-presa-com-319-ampolas-de-medicamentos-emagrecedores
+200 dns=0.374951 conn=0.376978 tls=0.404751 ttfb=1.016745 total=1.018414 bytes=60601 /metropolitana
+200 dns=0.329678 conn=0.331486 tls=0.353488 ttfb=0.828349 total=0.829784 bytes=20686 /sitemap.xml
+200 dns=0.167875 conn=0.169868 tls=0.192639 ttfb=0.602321 total=0.606361 bytes=340901 /fotos-genericas/pm-viatura-1.jpg
+== rodada 2
+200 dns=0.313735 conn=0.315432 tls=0.335923 ttfb=2.135975 total=2.138349 bytes=96993 /
+200 dns=0.330091 conn=0.331732 tls=0.352703 ttfb=0.781707 total=0.783137 bytes=58335 /oeste
+200 dns=0.001985 conn=0.003696 tls=0.024899 ttfb=0.721378 total=0.723439 bytes=71077 /oeste/cidade/toledo
+200 dns=0.314361 conn=0.316211 tls=0.336918 ttfb=1.059823 total=1.061561 bytes=58374 /oeste/mulher-e-presa-com-319-ampolas-de-medicamentos-emagrecedores
+200 dns=0.002297 conn=0.003912 tls=0.024984 ttfb=0.459242 total=0.460449 bytes=60601 /metropolitana
+200 dns=0.003203 conn=0.004998 tls=0.025969 ttfb=0.367090 total=0.367811 bytes=20686 /sitemap.xml
+200 dns=0.001925 conn=0.003807 tls=0.024435 ttfb=0.258481 total=0.263753 bytes=340901 /fotos-genericas/pm-viatura-1.jpg
+== rodada 3
+200 dns=0.002632 conn=0.004498 tls=0.025138 ttfb=2.136458 total=2.139698 bytes=96993 /
+200 dns=0.313016 conn=0.314804 tls=0.335604 ttfb=1.216289 total=1.218124 bytes=58335 /oeste
+200 dns=0.002108 conn=0.003965 tls=0.024472 ttfb=0.563745 total=0.566522 bytes=71077 /oeste/cidade/toledo
+200 dns=0.002098 conn=0.003840 tls=0.024633 ttfb=0.775144 total=0.776336 bytes=58374 /oeste/mulher-e-presa-com-319-ampolas-de-medicamentos-emagrecedores
+200 dns=0.002243 conn=0.004096 tls=0.024796 ttfb=0.651901 total=0.655925 bytes=60601 /metropolitana
+200 dns=0.002207 conn=0.003833 tls=0.024546 ttfb=0.409336 total=0.410177 bytes=20686 /sitemap.xml
+200 dns=0.002418 conn=0.004314 tls=0.025027 ttfb=0.246795 total=0.251066 bytes=340901 /fotos-genericas/pm-viatura-1.jpg
+== cabeçalhos da home
+cache-control: no-cache, must-revalidate, max-age=0
+strict-transport-security: max-age=31536000; includeSubDomains
+x-content-type-options: nosniff
+x-deployment-id: psr2.bda9de20-86ec-4f62-8b6e-118ae2701edb.1793923897.p5hze2XsFFNQx8um5F0ee2teJrIoheBo6cclCAamZ6Y
+server: cloudflare
+cf-ray: a5263426995d8467-SJC
