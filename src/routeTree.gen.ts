@@ -36,6 +36,7 @@ import { Route as EmailUnsubscribeRouteImport } from './routes/email/unsubscribe
 import { Route as EditoriaCategoriaRouteImport } from './routes/editoria.$categoria'
 import { Route as AutorSlugRouteImport } from './routes/autor.$slug'
 import { Route as AdminVitrinePessoalRouteImport } from './routes/admin.vitrine-pessoal'
+import { Route as AdminUsuariosRouteImport } from './routes/admin.usuarios'
 import { Route as AdminSobreRouteImport } from './routes/admin.sobre'
 import { Route as AdminSenhaRouteImport } from './routes/admin.senha'
 import { Route as AdminResumoRegionalRouteImport } from './routes/admin.resumo-regional'
@@ -211,6 +212,11 @@ const AutorSlugRoute = AutorSlugRouteImport.update({
 const AdminVitrinePessoalRoute = AdminVitrinePessoalRouteImport.update({
   id: '/vitrine-pessoal',
   path: '/vitrine-pessoal',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminUsuariosRoute = AdminUsuariosRouteImport.update({
+  id: '/usuarios',
+  path: '/usuarios',
   getParentRoute: () => AdminRoute,
 } as any)
 const AdminSobreRoute = AdminSobreRouteImport.update({
@@ -463,6 +469,7 @@ export interface FileRoutesByFullPath {
   '/admin/resumo-regional': typeof AdminResumoRegionalRoute
   '/admin/senha': typeof AdminSenhaRoute
   '/admin/sobre': typeof AdminSobreRoute
+  '/admin/usuarios': typeof AdminUsuariosRoute
   '/admin/vitrine-pessoal': typeof AdminVitrinePessoalRoute
   '/autor/$slug': typeof AutorSlugRoute
   '/editoria/$categoria': typeof EditoriaCategoriaRoute
@@ -531,6 +538,7 @@ export interface FileRoutesByTo {
   '/admin/resumo-regional': typeof AdminResumoRegionalRoute
   '/admin/senha': typeof AdminSenhaRoute
   '/admin/sobre': typeof AdminSobreRoute
+  '/admin/usuarios': typeof AdminUsuariosRoute
   '/admin/vitrine-pessoal': typeof AdminVitrinePessoalRoute
   '/autor/$slug': typeof AutorSlugRoute
   '/editoria/$categoria': typeof EditoriaCategoriaRoute
@@ -602,6 +610,7 @@ export interface FileRoutesById {
   '/admin/resumo-regional': typeof AdminResumoRegionalRoute
   '/admin/senha': typeof AdminSenhaRoute
   '/admin/sobre': typeof AdminSobreRoute
+  '/admin/usuarios': typeof AdminUsuariosRoute
   '/admin/vitrine-pessoal': typeof AdminVitrinePessoalRoute
   '/autor/$slug': typeof AutorSlugRoute
   '/editoria/$categoria': typeof EditoriaCategoriaRoute
@@ -674,6 +683,7 @@ export interface FileRouteTypes {
     | '/admin/resumo-regional'
     | '/admin/senha'
     | '/admin/sobre'
+    | '/admin/usuarios'
     | '/admin/vitrine-pessoal'
     | '/autor/$slug'
     | '/editoria/$categoria'
@@ -742,6 +752,7 @@ export interface FileRouteTypes {
     | '/admin/resumo-regional'
     | '/admin/senha'
     | '/admin/sobre'
+    | '/admin/usuarios'
     | '/admin/vitrine-pessoal'
     | '/autor/$slug'
     | '/editoria/$categoria'
@@ -812,6 +823,7 @@ export interface FileRouteTypes {
     | '/admin/resumo-regional'
     | '/admin/senha'
     | '/admin/sobre'
+    | '/admin/usuarios'
     | '/admin/vitrine-pessoal'
     | '/autor/$slug'
     | '/editoria/$categoria'
@@ -1082,6 +1094,13 @@ declare module '@tanstack/react-router' {
       path: '/vitrine-pessoal'
       fullPath: '/admin/vitrine-pessoal'
       preLoaderRoute: typeof AdminVitrinePessoalRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/usuarios': {
+      id: '/admin/usuarios'
+      path: '/usuarios'
+      fullPath: '/admin/usuarios'
+      preLoaderRoute: typeof AdminUsuariosRouteImport
       parentRoute: typeof AdminRoute
     }
     '/admin/sobre': {
@@ -1413,6 +1432,7 @@ interface AdminRouteChildren {
   AdminResumoRegionalRoute: typeof AdminResumoRegionalRoute
   AdminSenhaRoute: typeof AdminSenhaRoute
   AdminSobreRoute: typeof AdminSobreRoute
+  AdminUsuariosRoute: typeof AdminUsuariosRoute
   AdminVitrinePessoalRoute: typeof AdminVitrinePessoalRoute
   AdminIndexRoute: typeof AdminIndexRoute
 }
@@ -1437,6 +1457,7 @@ const AdminRouteChildren: AdminRouteChildren = {
   AdminResumoRegionalRoute: AdminResumoRegionalRoute,
   AdminSenhaRoute: AdminSenhaRoute,
   AdminSobreRoute: AdminSobreRoute,
+  AdminUsuariosRoute: AdminUsuariosRoute,
   AdminVitrinePessoalRoute: AdminVitrinePessoalRoute,
   AdminIndexRoute: AdminIndexRoute,
 }

@@ -1,10 +1,11 @@
 import { createFileRoute, Outlet, Link, useNavigate, useLocation } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
-import { Wallet, Home, Inbox, NotebookPen, Columns3, Radio, Map as MapIcon, Bot, BookOpen, Megaphone, UserRound, Newspaper, BarChart3, Info, ExternalLink, KeyRound, LogOut, LayoutDashboard, Instagram, Activity, MessageSquareText, MapPinned } from "lucide-react";
+import { Wallet, Home, Inbox, NotebookPen, Columns3, Radio, Map as MapIcon, Bot, BookOpen, Megaphone, UserRound, Newspaper, BarChart3, Info, ExternalLink, KeyRound, LogOut, LayoutDashboard, Instagram, Activity, MessageSquareText, MapPinned, Users, Eye } from "lucide-react";
 import { getExternalBrowser } from "@/lib/external-supabase-browser";
 import { Logo } from "@/components/Logo";
 import { situacao, type Assinatura } from "@/lib/custos";
 import { marcarNavegadorDaEquipe } from "@/lib/cookie-consent";
+import { podeAbrir, type Papel } from "@/lib/papeis";
 
 export const Route = createFileRoute("/admin")({
   ssr: false,
@@ -17,6 +18,7 @@ function AdminLayout() {
   const loc = useLocation();
   const [state, setState] = useState<"loading" | "anon" | "ok" | "forbidden">("loading");
   const [email, setEmail] = useState<string | null>(null);
+  const [papel, setPapel] = useState<Papel | null>(null);
 
   useEffect(() => {
     let alive = true;
@@ -32,20 +34,25 @@ function AdminLayout() {
         return;
       }
       setEmail(sess.session.user.email ?? null);
-      const { data: isAdmin } = await sb.rpc("has_role", {
-        _user_id: sess.session.user.id,
-        _role: "admin",
-      });
-      const { data: isEditor } = await sb.rpc("has_role", {
-        _user_id: sess.session.user.id,
-        _role: "editor",
-      });
+      const uid = sess.session.user.id;
+      const [{ data: isAdmin }, { data: isEditor }, { data: isViewer }] = await Promise.all([
+        sb.rpc("has_role", { _user_id: uid, _role: "admin" }),
+        sb.rpc("has_role", { _user_id: uid, _role: "editor" }),
+        sb.rpc("has_role", { _user_id: uid, _role: "viewer" }),
+      ]);
       if (!alive) return;
-      if (!isAdmin && !isEditor) {
+      const p: Papel | null = isAdmin ? "admin" : isEditor ? "editor" : isViewer ? "viewer" : null;
+      if (!p) {
         setState("forbidden");
         return;
       }
+      setPapel(p);
       setState("ok");
+      // Consulta só abre as páginas de informação; Usuários só para admin.
+      if (!podeAbrir(p, loc.pathname) && loc.pathname !== "/admin/login") {
+        nav({ to: "/admin/painel", replace: true });
+        return;
+      }
       marcarNavegadorDaEquipe();
       if (loc.pathname === "/admin/login") nav({ to: "/admin", replace: true });
     })();
@@ -71,12 +78,22 @@ function AdminLayout() {
       </div>
     );
   }
-  if (state !== "ok") return null;
+  if (state !== "ok" || !papel) return null;
+  if (!podeAbrir(papel, loc.pathname)) return null;
 
   return (
     <div className="min-h-screen bg-[#F4F7FB] md:flex">
-      <AdminSidebar email={email} onSair={async () => { const sb = await getExternalBrowser(); await sb.auth.signOut(); nav({ to: "/admin/login", replace: true }); }} />
-      <main className="min-w-0 flex-1 px-4 py-6 sm:px-6 md:py-8 lg:px-10"><div className="mx-auto max-w-6xl"><Outlet /></div></main>
+      <AdminSidebar email={email} papel={papel} onSair={async () => { const sb = await getExternalBrowser(); await sb.auth.signOut(); nav({ to: "/admin/login", replace: true }); }} />
+      <main className="min-w-0 flex-1 px-4 py-6 sm:px-6 md:py-8 lg:px-10">
+        <div className="mx-auto max-w-6xl">
+          {papel === "viewer" && (
+            <p className="mb-4 flex items-center gap-2 rounded-lg bg-slate-100 px-3 py-2 text-xs text-slate-600">
+              <Eye className="h-3.5 w-3.5" /> Acesso de consulta: você vê os painéis e números, mas não altera nada.
+            </p>
+          )}
+          <Outlet />
+        </div>
+      </main>
     </div>
   );
 }
@@ -129,9 +146,16 @@ const GRUPOS: { titulo: string; itens: ItemNav[] }[] = [
       { to: "/admin/sobre", label: "Página Sobre", icon: Info },
     ],
   },
+  {
+    titulo: "Conta",
+    itens: [
+      { to: "/admin/usuarios", label: "Usuários", icon: Users },
+    ],
+  },
 ];
 
-function AdminSidebar({ email, onSair }: { email: string | null; onSair: () => void }) {
+function AdminSidebar({ email, papel, onSair }: { email: string | null; papel: Papel; onSair: () => void }) {
+  const grupos = GRUPOS.map((g) => ({ ...g, itens: g.itens.filter((it) => podeAbrir(papel, it.to)) })).filter((g) => g.itens.length);
   const loc = useLocation();
   const [badges, setBadges] = useState<{ materias: number; notas: number; custos: number }>({ materias: 0, notas: 0, custos: 0 });
 
@@ -168,7 +192,7 @@ function AdminSidebar({ email, onSair }: { email: string | null; onSair: () => v
         </div>
 
         <nav className="flex gap-4 overflow-x-auto px-3 pb-3 text-sm md:flex-1 md:flex-col md:gap-5 md:overflow-y-auto md:pb-6">
-          {GRUPOS.map((g) => (
+          {grupos.map((g) => (
             <div key={g.titulo} className="flex shrink-0 gap-1 md:flex-col">
               <p className="hidden px-3 pb-1 text-[10px] font-semibold uppercase tracking-[0.16em] text-slate-400 md:block">{g.titulo}</p>
               {g.itens.map((it) => {
