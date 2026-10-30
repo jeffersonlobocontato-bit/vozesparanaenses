@@ -1,0 +1,35 @@
+erro 55182045926 HTTP Error 403: Forbidden
+erro 55182044841 HTTP Error 403: Forbidden
+erro 55182036811 HTTP Error 403: Forbidden
+erro 55181147352 HTTP Error 403: Forbidden
+erro 55182438965 HTTP Error 403: Forbidden
+erro 55182295094 HTTP Error 403: Forbidden
+erro 55182204248 HTTP Error 403: Forbidden
+erro 55182424765 HTTP Error 403: Forbidden
+erro 55181132807 HTTP Error 403: Forbidden
+erro 55181127132 HTTP Error 403: Forbidden
+erro 55181118632 HTTP Error 403: Forbidden
+erro 55182008931 HTTP Error 403: Forbidden
+erro 55029749737 HTTP Error 403: Forbidden
+erro 54687379534 HTTP Error 403: Forbidden
+erro 53922188697 HTTP Error 403: Forbidden
+erro 53923435104 HTTP Error 403: Forbidden
+erro 53923333448 HTTP Error 403: Forbidden
+erro 53923434969 HTTP Error 403: Forbidden
+erro 53922189087 HTTP Error 403: Forbidden
+erro 53923080441 HTTP Error 403: Forbidden
+erro 53646561432 HTTP Error 403: Forbidden
+erro 53647775564 HTTP Error 403: Forbidden
+erro 53647775374 HTTP Error 403: Forbidden
+Traceback (most recent call last):
+  File "/home/runner/work/vozesparanaenses/vozesparanaenses/scripts/fotos-genericas/prf.py", line 29, in <module>
+    sheet.save("scripts/fotos-genericas/prf/folha.jpg", quality=80)
+  File "/home/runner/.local/lib/python3.12/site-packages/PIL/Image.py", line 2712, in save
+    save_handler(self, fp, filename)
+  File "/home/runner/.local/lib/python3.12/site-packages/PIL/JpegImagePlugin.py", line 871, in _save
+    ImageFile._save(
+  File "/home/runner/.local/lib/python3.12/site-packages/PIL/ImageFile.py", line 671, in _save
+    _encode_tile(im, fp, tile, bufsize, fh)
+  File "/home/runner/.local/lib/python3.12/site-packages/PIL/ImageFile.py", line 691, in _encode_tile
+    encoder.setimage(im.im, extents)
+ValueError: cannot write empty image
