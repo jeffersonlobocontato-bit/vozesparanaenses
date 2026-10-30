@@ -1,5 +1,5 @@
 // Testes das leituras do painel de Analytics (rode: npx deno run scripts/analytics-leituras_test.ts)
-import { leituras, periodo, medicaoRecente } from "../src/lib/analytics-leituras.ts";
+import { leituras, periodo, medicaoRecente, periodoComecaAntes } from "../src/lib/analytics-leituras.ts";
 import { corpoDoRelatorio, intervalos, relatoriosDaAba, ABAS } from "../src/lib/ga4-relatorios.ts";
 
 let falhas = 0;
@@ -68,6 +68,12 @@ ok("qualidade: aceite baixo é crítico", tem(ls, "Aceite de cookies baixo", "cr
 ok("qualidade: banner ignorado", tem(ls, "Banner ignorado"));
 ok("qualidade: GA × base", tem(ls, "GA × base"));
 ok("qualidade: tráfego interno", tem(ls, "Tráfego da equipe"));
+
+// dimensões só existem desde 27/10
+ok("28 dias a partir de 30/10 começa antes de 27/10", periodoComecaAntes("2026-10-27", 28, Date.parse("2026-10-30T15:00:00Z")));
+ok("7 dias a partir de 10/11 não", !periodoComecaAntes("2026-10-27", 7, Date.parse("2026-11-10T15:00:00Z")));
+ls = leituras("qualidade", { editoriaVazia: [{ "customEvent:editoria": "(not set)", screenPageViews: 940 }, { "customEvent:editoria": "cidades", screenPageViews: 60 }] }, { dias: 28 });
+ok("qualidade: editoria vazia por causa da data vira explicação", periodoComecaAntes("2026-10-27", 28) ? tem(ls, "vazia no período", "insight") : tem(ls, "vazia demais"), ls);
 
 // relatórios
 ok("período: 28 dias inclui hoje", JSON.stringify(intervalos(28, true)) === JSON.stringify([{ startDate: "27daysAgo", endDate: "today", name: "atual" }, { startDate: "55daysAgo", endDate: "28daysAgo", name: "anterior" }]));

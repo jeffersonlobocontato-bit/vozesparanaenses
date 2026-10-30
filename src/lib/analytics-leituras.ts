@@ -113,7 +113,13 @@ export const AMOSTRA_MINIMA = 100;
 export const MEDICAO_DESDE = {
   conversoes: "2026-10-30", // generate_lead, clique_whatsapp, comentario_enviado
   leituraCompleta: "2026-10-30", // passou a medir o fim do texto (antes: 75% do <article>)
+  dimensoes: "2026-10-27", // região, editoria, cidade, autoria… no page_view (o GA não preenche o passado)
 } as const;
+
+/** O período de `dias` começa antes da data (parte dele não tem a medição). */
+export function periodoComecaAntes(desde: string, dias: number, agora = Date.now()): boolean {
+  return agora - dias * 86_400_000 < new Date(`${desde}T03:00:00Z`).getTime();
+}
 
 /** A medição começou há menos de 7 dias (ou começa dentro do período). */
 export function medicaoRecente(desde: string, agora = Date.now()): boolean {
@@ -314,7 +320,8 @@ export function leituras(aba: Aba, r: Relatorios, x: Extras): Leitura[] {
       }
       const vazio = soma(periodo(r.audiencia, "atual").filter((l) => VAZIO(l[dim]) ), "screenPageViews");
       const todo = soma(periodo(r.audiencia, "atual"), "screenPageViews");
-      if (todo >= 50 && vazio / todo > 0.5) add("insight", `Páginas sem ${nome}`, `${pct(vazio / todo)} das visualizações são de páginas sem ${nome} (home, busca, institucionais). As leituras desta aba consideram só as páginas com ${nome}.`);
+      if (todo >= 50 && vazio / todo > 0.5 && periodoComecaAntes(MEDICAO_DESDE.dimensoes, x.dias)) add("alerta", "Período anterior à medição", `Parte do período é anterior a 27/10, quando o GA passou a gravar a ${nome}: ${pct(vazio / todo)} das visualizações estão sem ela. Para esta aba, use 7 dias.`);
+      else if (todo >= 50 && vazio / todo > 0.5) add("insight", `Páginas sem ${nome}`, `${pct(vazio / todo)} das visualizações são de páginas sem ${nome} (home, busca, institucionais). As leituras desta aba consideram só as páginas com ${nome}.`);
       if (aba === "regioes") {
         const cid = (r.cidades ?? []).filter((l) => !VAZIO(l["customEvent:cidade"]));
         if (cid.length) add("insight", "Cidades mais lidas (da matéria)", cid.slice(0, 6).map((l) => `${l["customEvent:cidade"]} (${inteiro(num(l.screenPageViews))})`).join(", ") + ". Use no pitch do Portal da Imprensa para essas prefeituras.");
@@ -415,11 +422,14 @@ export function leituras(aba: Aba, r: Relatorios, x: Extras): Leitura[] {
         if (razao < 0.7 || razao > 1.3) add("alerta", "GA × base própria", `GA: ${inteiro(pv)} visualizações; nossa base: ${inteiro(x.pageviewsBase)}. Diferença acima de 30% indica falha de um dos dois rastreadores.`);
         else add("insight", "GA e base própria batem", `GA ${inteiro(pv)} × base ${inteiro(x.pageviewsBase)} visualizações no período.`);
       }
+      const antesDasDimensoes = periodoComecaAntes(MEDICAO_DESDE.dimensoes, x.dias);
       const chk = (rel: string, dim: string, nome: string) => {
         const linhas = r[rel] ?? [];
         const tot = soma(linhas, "screenPageViews");
         const vaz = soma(linhas.filter((l) => VAZIO(l[dim])), "screenPageViews");
-        if (tot >= 50 && vaz / tot > 0.7) add("alerta", `${nome} vazia demais`, `${pct(vaz / tot)} das visualizações sem ${nome}. Esperado na home e nas páginas fixas; se as matérias também saem vazias, o contexto da página não está chegando ao GA.`);
+        if (tot < 50 || vaz / tot <= 0.7) return;
+        if (antesDasDimensoes) add("insight", `${nome[0].toUpperCase()}${nome.slice(1)} vazia no período`, `${pct(vaz / tot)} das visualizações sem ${nome}: o GA grava ${nome}, editoria, cidade e autoria só desde 27/10 e não preenche o passado. Use o período de 7 dias nas abas Editorias e Regiões.`);
+        else add("alerta", `${nome} vazia demais`, `${pct(vaz / tot)} das visualizações sem ${nome}. Esperado na home e nas páginas fixas; se as matérias também saem vazias, o contexto da página não está chegando ao GA.`);
       };
       chk("editoriaVazia", "customEvent:editoria", "editoria");
       chk("regiaoVazia", "customEvent:regiao", "região");
