@@ -123,8 +123,9 @@ export function SiteHeader() {
               {item.label}
             </Link>
           ))}
-          <button
-            type="button"
+          <Link
+            to="/busca"
+            search={{ q: "" }}
             aria-label="Buscar"
             className="flex h-8 w-8 items-center justify-center text-white/80 transition-colors hover:text-white"
           >
@@ -132,7 +133,7 @@ export function SiteHeader() {
               <circle cx="11" cy="11" r="7" />
               <line x1="21" y1="21" x2="16.65" y2="16.65" />
             </svg>
-          </button>
+          </Link>
         </div>
       </div>
 

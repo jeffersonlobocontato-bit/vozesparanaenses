@@ -174,7 +174,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
           inLanguage: "pt-BR",
           potentialAction: {
             "@type": "SearchAction",
-            target: "/?q={search_term_string}",
+            target: "https://vozesparanaenses.com.br/busca?q={search_term_string}",
             "query-input": "required name=search_term_string",
           },
         }),

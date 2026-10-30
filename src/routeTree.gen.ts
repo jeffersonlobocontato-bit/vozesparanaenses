@@ -19,6 +19,7 @@ import { Route as InstagramRouteImport } from './routes/instagram'
 import { Route as CorrecoesRouteImport } from './routes/correcoes'
 import { Route as ContatoRouteImport } from './routes/contato'
 import { Route as CidadesdoparanaRouteImport } from './routes/cidadesdoparana'
+import { Route as BuscaRouteImport } from './routes/busca'
 import { Route as AdminRouteImport } from './routes/admin'
 import { Route as RegionRouteImport } from './routes/$region'
 import { Route as IndexRouteImport } from './routes/index'
@@ -127,6 +128,11 @@ const ContatoRoute = ContatoRouteImport.update({
 const CidadesdoparanaRoute = CidadesdoparanaRouteImport.update({
   id: '/cidadesdoparana',
   path: '/cidadesdoparana',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const BuscaRoute = BuscaRouteImport.update({
+  id: '/busca',
+  path: '/busca',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AdminRoute = AdminRouteImport.update({
@@ -438,6 +444,7 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/$region': typeof RegionRouteWithChildren
   '/admin': typeof AdminRouteWithChildren
+  '/busca': typeof BuscaRoute
   '/cidadesdoparana': typeof CidadesdoparanaRoute
   '/contato': typeof ContatoRoute
   '/correcoes': typeof CorrecoesRoute
@@ -507,6 +514,7 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/busca': typeof BuscaRoute
   '/cidadesdoparana': typeof CidadesdoparanaRoute
   '/contato': typeof ContatoRoute
   '/correcoes': typeof CorrecoesRoute
@@ -579,6 +587,7 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/$region': typeof RegionRouteWithChildren
   '/admin': typeof AdminRouteWithChildren
+  '/busca': typeof BuscaRoute
   '/cidadesdoparana': typeof CidadesdoparanaRoute
   '/contato': typeof ContatoRoute
   '/correcoes': typeof CorrecoesRoute
@@ -652,6 +661,7 @@ export interface FileRouteTypes {
     | '/'
     | '/$region'
     | '/admin'
+    | '/busca'
     | '/cidadesdoparana'
     | '/contato'
     | '/correcoes'
@@ -721,6 +731,7 @@ export interface FileRouteTypes {
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
+    | '/busca'
     | '/cidadesdoparana'
     | '/contato'
     | '/correcoes'
@@ -792,6 +803,7 @@ export interface FileRouteTypes {
     | '/'
     | '/$region'
     | '/admin'
+    | '/busca'
     | '/cidadesdoparana'
     | '/contato'
     | '/correcoes'
@@ -864,6 +876,7 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   RegionRoute: typeof RegionRouteWithChildren
   AdminRoute: typeof AdminRouteWithChildren
+  BuscaRoute: typeof BuscaRoute
   CidadesdoparanaRoute: typeof CidadesdoparanaRoute
   ContatoRoute: typeof ContatoRoute
   CorrecoesRoute: typeof CorrecoesRoute
@@ -975,6 +988,13 @@ declare module '@tanstack/react-router' {
       path: '/cidadesdoparana'
       fullPath: '/cidadesdoparana'
       preLoaderRoute: typeof CidadesdoparanaRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/busca': {
+      id: '/busca'
+      path: '/busca'
+      fullPath: '/busca'
+      preLoaderRoute: typeof BuscaRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/admin': {
@@ -1468,6 +1488,7 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   RegionRoute: RegionRouteWithChildren,
   AdminRoute: AdminRouteWithChildren,
+  BuscaRoute: BuscaRoute,
   CidadesdoparanaRoute: CidadesdoparanaRoute,
   ContatoRoute: ContatoRoute,
   CorrecoesRoute: CorrecoesRoute,

@@ -292,6 +292,7 @@ function AdminAnalytics() {
       />
 
       {err && <ErrorBanner>{err}</ErrorBanner>}
+      <TaxaDeAceite dias={periodo} />
       {!rows && !err && <p className="text-sm text-slate-500">Carregando…</p>}
 
       {rows && (
@@ -475,6 +476,39 @@ function KpiCard({ label, valor, variacao, semComparacao }: {
         )}
       </div>
       {!semComparacao && <p className="text-[10px] text-slate-500">em relação ao período anterior</p>}
+    </div>
+  );
+}
+
+// Taxa de aceite do banner de cookies (contagem anônima, migração 098):
+// é a fração dos leitores que o GA4 e o nosso analytics_events enxergam.
+type LinhaConsent = { dia: string; exibido: number; aceito: number; recusado: number };
+
+function TaxaDeAceite({ dias }: { dias: number }) {
+  const [linhas, setLinhas] = useState<LinhaConsent[] | null>(null);
+  useEffect(() => {
+    let vivo = true;
+    getExternalBrowser()
+      .then((sb) => sb.rpc("consentimento_resumo", { p_dias: dias }))
+      .then(({ data, error }) => { if (vivo) setLinhas(error ? null : ((data ?? []) as LinhaConsent[])); });
+    return () => { vivo = false; };
+  }, [dias]);
+  if (!linhas) return null;
+  const soma = linhas.reduce(
+    (a, l) => ({ exibido: a.exibido + l.exibido, aceito: a.aceito + l.aceito, recusado: a.recusado + l.recusado }),
+    { exibido: 0, aceito: 0, recusado: 0 },
+  );
+  const semResposta = Math.max(0, soma.exibido - soma.aceito - soma.recusado);
+  const p = (n: number) => (soma.exibido ? `${Math.round((n / soma.exibido) * 100)}%` : "—");
+  return (
+    <div className="rounded-xl border border-slate-200 bg-white px-4 py-3 text-xs text-slate-600 shadow-sm">
+      <strong className="text-slate-900">Banner de cookies no período:</strong>{" "}
+      exibido a <strong className="text-slate-900">{soma.exibido}</strong> leitores
+      {" · "}aceitaram <strong className="text-[#B5651D]">{soma.aceito} ({p(soma.aceito)})</strong>
+      {" · "}recusaram <strong className="text-slate-900">{soma.recusado} ({p(soma.recusado)})</strong>
+      {" · "}não responderam <strong className="text-slate-900">{semResposta} ({p(semResposta)})</strong>.
+      {" "}Só quem aceita entra nos números abaixo e no GA4 — leia os totais como uma amostra.
+      {soma.exibido === 0 && " (A contagem começa a partir da publicação do site com a migração 098.)"}
     </div>
   );
 }
