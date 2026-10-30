@@ -142,7 +142,7 @@ export const Route = createFileRoute("/")({
   component: Home,
   errorComponent: ({ error }) => (
     <div className="p-8 text-center text-sm text-muted-foreground">
-      Não foi possível carregar. {error.message}
+      Não foi possível carregar. {(error as Error).message}
     </div>
   ),
 });

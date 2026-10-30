@@ -48,7 +48,7 @@ export const Route = createFileRoute("/$region/classificados")({
   component: ClassificadosPage,
   notFoundComponent: () => <div className="p-8 text-center">Região não encontrada.</div>,
   errorComponent: ({ error }) => (
-    <div className="p-8 text-center text-sm text-slate-600">Erro: {error.message}</div>
+    <div className="p-8 text-center text-sm text-slate-600">Erro: {(error as Error).message}</div>
   ),
 });
 

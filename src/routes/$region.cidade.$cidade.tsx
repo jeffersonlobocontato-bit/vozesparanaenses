@@ -146,7 +146,7 @@ export const Route = createFileRoute("/$region/cidade/$cidade")({
     <div className="p-8 text-center text-sm text-muted-foreground">Cidade não encontrada.</div>
   ),
   errorComponent: ({ error }) => (
-    <div className="p-8 text-center text-sm text-muted-foreground">Erro: {error.message}</div>
+    <div className="p-8 text-center text-sm text-muted-foreground">Erro: {(error as Error).message}</div>
   ),
 });
 

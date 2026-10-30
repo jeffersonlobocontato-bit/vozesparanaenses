@@ -32,7 +32,7 @@ export const Route = createFileRoute("/whatsapp")({
   component: WhatsappPage,
   errorComponent: ({ error }) => (
     <div className="p-8 text-center text-sm text-slate-600">
-      Erro ao carregar. {error.message}
+      Erro ao carregar. {(error as Error).message}
     </div>
   ),
 });

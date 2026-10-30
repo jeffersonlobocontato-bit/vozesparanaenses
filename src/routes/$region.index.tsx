@@ -106,7 +106,7 @@ export const Route = createFileRoute("/$region/")({
   ),
   errorComponent: ({ error }) => (
     <div className="p-8 text-center text-sm text-muted-foreground">
-      Erro ao carregar região: {error.message}
+      Erro ao carregar região: {(error as Error).message}
     </div>
   ),
 });
