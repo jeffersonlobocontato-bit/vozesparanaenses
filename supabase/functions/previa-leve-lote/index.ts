@@ -42,7 +42,7 @@ Deno.serve(async (req) => {
     .gte("publicado_em", new Date(Date.now() - dias * 86_400_000).toISOString())
     .like("og_image_url", "%/storage/v1/object/public/%")
     .not("og_image_url", "like", "%/previa.jpg%")
-    .not("og_image_url", "like", "%/leve-ok%");
+    .not("og_image_url", "like", "%#leve-ok%");
   const { data, count, error } = await base().order("publicado_em", { ascending: false }).limit(limite);
   if (error) return json({ error: error.message }, 500);
 
