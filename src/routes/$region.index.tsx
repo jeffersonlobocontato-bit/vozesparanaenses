@@ -42,6 +42,9 @@ export const Route = createFileRoute("/$region/")({
         : { ...atual, utm_source: "atalho", utm_medium: "url-curta", utm_campaign: `cidade-${m.slug}` };
       throw redirect({ to: "/$region/cidade/$cidade", params: { region: m.region, cidade: m.slug }, search: search as never, statusCode: 301 });
     }
+    // Nem região nem cidade: página não encontrada (antes saía uma "região"
+    // vazia com o nome digitado e status 200 — ruim para o leitor e para o Google).
+    throw notFound();
   },
   loader: async ({ context, params }) => {
     const region = await context.queryClient.ensureQueryData(
@@ -314,4 +317,3 @@ function RegionPage() {
 }
 
 // avoid unused import warning
-void notFound;

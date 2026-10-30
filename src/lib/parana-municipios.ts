@@ -429,6 +429,11 @@ const BY_SLUG: Map<string, Municipio> = new Map(
 const BY_NAME_NORM: Map<string, Municipio> = new Map(
   PARANA_MUNICIPIOS.map((m) => [normalize(m.name), m as Municipio]),
 );
+// Sem hífen nem espaço: "pontagrossa", "fozdoiguacu" (endereço digitado
+// junto, como em cartaz, rádio e perfil de rede social).
+const BY_COMPACTO: Map<string, Municipio> = new Map(
+  PARANA_MUNICIPIOS.map((m) => [m.slug.replace(/-/g, ""), m as Municipio]),
+);
 
 /** Retorna o município pelo slug canônico, ou null. */
 export function findMunicipioBySlug(slug: string): Municipio | null {
@@ -444,7 +449,7 @@ export function findMunicipio(input: string): Municipio | null {
   const bySlug = BY_SLUG.get(slug);
   if (bySlug) return bySlug;
   const norm = normalize(raw);
-  return BY_NAME_NORM.get(norm) ?? null;
+  return BY_NAME_NORM.get(norm) ?? BY_COMPACTO.get(slug.replace(/-/g, "")) ?? null;
 }
 
 /** Faz o parse de "Cascavel, Toledo; Medianeira\nFoz do Iguaçu".
