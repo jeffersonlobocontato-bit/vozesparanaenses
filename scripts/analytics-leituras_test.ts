@@ -44,7 +44,7 @@ ls = leituras("aquisicao", {
   fontes: [{ sessionSourceMedium: "(direct) / (none)" }],
 }, { dias: 28 });
 ok("aquisição: dependência de canal", tem(ls, "Dependência", "critico"), ls);
-ok("aquisição: sem classificação", tem(ls, "sem classificação"));
+ok("aquisição: sem classificação explica a causa", ls.some((l) => /sem classifica/i.test(l.titulo) && /utm_medium/.test(l.texto)), ls);
 ok("aquisição: Google orgânico ausente", tem(ls, "Google orgânico ausente"));
 ok("aquisição: WhatsApp sem UTM", tem(ls, "WhatsApp sem UTM"));
 

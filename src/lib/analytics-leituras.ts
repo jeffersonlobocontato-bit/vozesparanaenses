@@ -114,6 +114,7 @@ export const MEDICAO_DESDE = {
   conversoes: "2026-10-30", // generate_lead, clique_whatsapp, comentario_enviado
   leituraCompleta: "2026-10-30", // passou a medir o fim do texto (antes: 75% do <article>)
   dimensoes: "2026-10-27", // região, editoria, cidade, autoria… no page_view (o GA não preenche o passado)
+  utmSocial: "2026-10-31", // compartilhar passou de utm_medium=compartilhamento (sem classificação) para social
 } as const;
 
 /** O período de `dias` começa antes da data (parte dele não tem a medição). */
@@ -181,9 +182,13 @@ export function leituras(aba: Aba, r: Relatorios, x: Extras): Leitura[] {
       const lider = porCanal[0];
       if (lider && lider.s / total > 0.6) add("critico", "Dependência de um canal", `${canalPt(lider.canal)} traz ${pct(lider.s / total)} das sessões. Se esse canal oscilar (algoritmo, grupo de WhatsApp parado), o portal perde a maior parte da audiência.`);
       const semClass = porCanal.find((c) => c.canal === "Unassigned");
-      if (semClass && semClass.s / total > 0.1) add("alerta", "Tráfego sem classificação", `${pct(semClass.s / total)} das sessões chegam sem canal identificado. Quase sempre é link sem UTM: use os links do Resumo regional e do Instagram, que já saem com UTM.`);
+      if (semClass && semClass.s / total > 0.1) {
+        const causa = "Não é falta de UTM: é UTM com utm_medium que o GA não conhece. Os botões de compartilhar mandavam utm_medium=compartilhamento até 31/10 (agora mandam social, que vira Redes sociais); o atalho de cidade (/pontagrossa, digitado de cartaz ou rádio) manda url-curta e continua aqui de propósito. Link novo com UTM: use sempre utm_medium=social.";
+        if (medicaoRecente(MEDICAO_DESDE.utmSocial)) add("insight", "Sem classificação: correção em andamento", `${pct(semClass.s / total)} das sessões. ${causa}`);
+        else add("alerta", "Tráfego sem classificação", `${pct(semClass.s / total)} das sessões. ${causa}`);
+      }
       const direto = porCanal.find((c) => c.canal === "Direct");
-      if (direto && direto.s / total > 0.4) add("alerta", "Muito tráfego direto", `${pct(direto.s / total)} das sessões aparecem como "Direto". Parte disso é WhatsApp sem UTM (o app não envia de onde veio): todo link enviado em grupo deve sair com utm_source=whatsapp.`);
+      if (direto && direto.s / total > 0.4) add("alerta", "Muito tráfego direto", `${pct(direto.s / total)} das sessões aparecem como "Direto". Três causas: (1) link copiado da barra do navegador e colado no WhatsApp — o app não informa de onde veio; prefira o botão Compartilhar da matéria ou os links do Resumo regional, que já levam UTM; (2) a própria equipe navegando, enquanto o filtro "Internal Traffic" do GA estiver em teste; (3) quem digita o endereço. Ative o filtro de tráfego interno para separar a (2).`);
       const comVolume = porCanal.filter((c) => c.s >= Math.max(10, total * 0.05));
       const melhor = [...comVolume].sort((a, b) => b.eng - a.eng)[0];
       const pior = [...comVolume].sort((a, b) => a.eng - b.eng)[0];

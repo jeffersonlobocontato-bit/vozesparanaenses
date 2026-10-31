@@ -62,8 +62,10 @@ export function ShareButtons({ url, title, compact = false, campanha = "comparti
 
   // Link compartilhado leva a origem (UTM): o app do WhatsApp/Telegram não
   // informa de onde o leitor veio, e sem isso a visita cai em "direto".
+  // utm_medium=social: é o valor que o GA4 reconhece como "Redes sociais"
+  // (até 31/10 era "compartilhamento", que o GA jogava em "Sem classificação").
   const comOrigem = (rede: string) =>
-    `${url}${url.includes("?") ? "&" : "?"}utm_source=${rede}&utm_medium=compartilhamento&utm_campaign=${campanha}`;
+    `${url}${url.includes("?") ? "&" : "?"}utm_source=${rede}&utm_medium=social&utm_campaign=${campanha}`;
   const u = (rede: string) => encodeURIComponent(comOrigem(rede));
   const encodedTitle = encodeURIComponent(title);
 

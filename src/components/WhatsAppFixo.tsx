@@ -23,7 +23,7 @@ export function WhatsAppFixo({ url, title }: { url: string; title: string }) {
     return () => window.removeEventListener("scroll", medir);
   }, [url]);
 
-  const link = `${url}${url.includes("?") ? "&" : "?"}utm_source=whatsapp&utm_medium=compartilhamento&utm_campaign=botao-fixo`;
+  const link = `${url}${url.includes("?") ? "&" : "?"}utm_source=whatsapp&utm_medium=social&utm_campaign=botao-fixo`;
   const href = `https://api.whatsapp.com/send?text=${encodeURIComponent(title)}%20${encodeURIComponent(link)}`;
 
   return (
