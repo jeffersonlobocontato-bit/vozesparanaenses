@@ -1,0 +1,460 @@
+{
+ "fps": 30,
+ "audio": "audio/mix.wav",
+ "data": "2026-10-30",
+ "cenas": [
+  {
+   "tipo": "abertura",
+   "dur": 3.6,
+   "data": "Sexta-feira, 30 de outubro",
+   "chamadas": [
+    "PR-090 tem interdição total entre Ventania",
+    "Campanha itinerante vacina 137 cães e",
+    "PRF inicia Operação Finados nas rodovias",
+    "Desligamentos de energia afetam bairros e",
+    "Convênio habilita 15 guardas municipais para"
+   ],
+   "narracao": "Resumo do dia. Vozes Paranaenses.",
+   "voz_dur": 3.29,
+   "voz": "audio/voz-0.wav"
+  },
+  {
+   "tipo": "noticia",
+   "dur": 6.91,
+   "estilo": "foto",
+   "chapeu": "Ventania · Cidades",
+   "cor": "#F0B07A",
+   "titulo": "PR-090 tem interdição total entre Ventania e Curiúva neste sábado",
+   "linhaFina": "Bloqueio no km 243 começa às 9h e dura cerca de quatro horas para retirada de carga com 34 metros",
+   "foto": "fotos/n0.jpg",
+   "video": null,
+   "videoDur": null,
+   "credito": "DER",
+   "numero": null,
+   "palavras": [
+    {
+     "t": 0.495,
+     "fim": 0.863,
+     "texto": "PR"
+    },
+    {
+     "t": 0.874,
+     "fim": 1.622,
+     "texto": "090"
+    },
+    {
+     "t": 1.633,
+     "fim": 1.756,
+     "texto": "tem"
+    },
+    {
+     "t": 1.767,
+     "fim": 2.358,
+     "texto": "interdição"
+    },
+    {
+     "t": 2.37,
+     "fim": 2.716,
+     "texto": "total"
+    },
+    {
+     "t": 2.727,
+     "fim": 2.917,
+     "texto": "entre"
+    },
+    {
+     "t": 2.928,
+     "fim": 3.452,
+     "texto": "Ventania"
+    },
+    {
+     "t": 3.475,
+     "fim": 3.541,
+     "texto": "e"
+    },
+    {
+     "t": 3.553,
+     "fim": 4.055,
+     "texto": "Curiúva"
+    },
+    {
+     "t": 4.066,
+     "fim": 4.323,
+     "texto": "neste"
+    },
+    {
+     "t": 4.334,
+     "fim": 4.836,
+     "texto": "sábado"
+    }
+   ],
+   "transicao": "balao",
+   "narracao": "PR 090 tem interdição total entre Ventania e Curiúva neste sábado.",
+   "voz_dur": 5.21,
+   "voz": "audio/voz-1.wav"
+  },
+  {
+   "tipo": "noticia",
+   "dur": 6.4,
+   "estilo": "foto",
+   "chapeu": "Morretes · Saúde",
+   "cor": "#F0B07A",
+   "titulo": "Campanha itinerante vacina 137 cães e gatos em Morretes",
+   "linhaFina": "Ação do programa Vetmóvel imuniza animais domésticos na comunidade de Sambaqui em parceria com o Estado",
+   "foto": "fotos/n1.jpg",
+   "video": null,
+   "videoDur": null,
+   "credito": "Divulgação/Prefeitura de Morretes",
+   "numero": null,
+   "palavras": [
+    {
+     "t": 0.495,
+     "fim": 0.919,
+     "texto": "Campanha"
+    },
+    {
+     "t": 0.93,
+     "fim": 1.488,
+     "texto": "itinerante"
+    },
+    {
+     "t": 1.499,
+     "fim": 1.923,
+     "texto": "vacina"
+    },
+    {
+     "t": 1.934,
+     "fim": 3.14,
+     "texto": "137 cães"
+    },
+    {
+     "t": 3.151,
+     "fim": 3.263,
+     "texto": "e"
+    },
+    {
+     "t": 3.274,
+     "fim": 3.575,
+     "texto": "gatos"
+    },
+    {
+     "t": 3.586,
+     "fim": 3.72,
+     "texto": "em"
+    },
+    {
+     "t": 3.731,
+     "fim": 4.323,
+     "texto": "Morretes"
+    }
+   ],
+   "transicao": "chicote",
+   "narracao": "Campanha itinerante vacina 137 cães e gatos em Morretes.",
+   "voz_dur": 4.7,
+   "voz": "audio/voz-2.wav"
+  },
+  {
+   "tipo": "noticia",
+   "dur": 7.44,
+   "estilo": "foto",
+   "chapeu": "Norte · Segurança",
+   "cor": "#6FBF98",
+   "titulo": "PRF inicia Operação Finados nas rodovias federais nesta sexta-feira",
+   "linhaFina": null,
+   "foto": "fotos/n2.jpg",
+   "video": null,
+   "videoDur": null,
+   "credito": "Ilustração gerada por IA",
+   "numero": null,
+   "palavras": [
+    {
+     "t": 0.495,
+     "fim": 0.997,
+     "texto": "Norte"
+    },
+    {
+     "t": 1.226,
+     "fim": 1.817,
+     "texto": "PRF"
+    },
+    {
+     "t": 1.829,
+     "fim": 2.197,
+     "texto": "inicia"
+    },
+    {
+     "t": 2.208,
+     "fim": 2.654,
+     "texto": "Operação"
+    },
+    {
+     "t": 2.666,
+     "fim": 3.168,
+     "texto": "Finados"
+    },
+    {
+     "t": 3.179,
+     "fim": 3.313,
+     "texto": "nas"
+    },
+    {
+     "t": 3.324,
+     "fim": 3.804,
+     "texto": "rodovias"
+    },
+    {
+     "t": 3.815,
+     "fim": 4.306,
+     "texto": "federais"
+    },
+    {
+     "t": 4.317,
+     "fim": 4.585,
+     "texto": "nesta"
+    },
+    {
+     "t": 4.596,
+     "fim": 5.344,
+     "texto": "sexta-feira"
+    }
+   ],
+   "transicao": "iris",
+   "narracao": "Norte. PRF inicia Operação Finados nas rodovias federais nesta sexta-feira.",
+   "voz_dur": 5.74,
+   "voz": "audio/voz-3.wav"
+  },
+  {
+   "tipo": "noticia",
+   "dur": 7.32,
+   "estilo": "foto",
+   "chapeu": "Campo Largo · Cidades",
+   "cor": "#F0B07A",
+   "titulo": "Desligamentos de energia afetam bairros e interior até 6 de novembro",
+   "linhaFina": null,
+   "foto": "fotos/n3.jpg",
+   "video": null,
+   "videoDur": null,
+   "credito": "Divulgação/Prefeitura de Campo Largo",
+   "numero": null,
+   "palavras": [
+    {
+     "t": 0.495,
+     "fim": 0.785,
+     "texto": "Campo"
+    },
+    {
+     "t": 0.796,
+     "fim": 1.198,
+     "texto": "Largo"
+    },
+    {
+     "t": 1.427,
+     "fim": 2.175,
+     "texto": "Desligamentos"
+    },
+    {
+     "t": 2.186,
+     "fim": 2.253,
+     "texto": "de"
+    },
+    {
+     "t": 2.264,
+     "fim": 2.766,
+     "texto": "energia"
+    },
+    {
+     "t": 2.788,
+     "fim": 3.179,
+     "texto": "afetam"
+    },
+    {
+     "t": 3.19,
+     "fim": 3.536,
+     "texto": "bairros"
+    },
+    {
+     "t": 3.547,
+     "fim": 3.648,
+     "texto": "e"
+    },
+    {
+     "t": 3.681,
+     "fim": 4.15,
+     "texto": "interior"
+    },
+    {
+     "t": 4.161,
+     "fim": 4.34,
+     "texto": "até"
+    },
+    {
+     "t": 4.351,
+     "fim": 5.244,
+     "texto": "6 de novembro"
+    }
+   ],
+   "transicao": "luz",
+   "narracao": "Campo Largo. Desligamentos de energia afetam bairros e interior até 6 de novembro.",
+   "voz_dur": 5.62,
+   "voz": "audio/voz-4.wav"
+  },
+  {
+   "tipo": "noticia",
+   "dur": 7.03,
+   "estilo": "foto",
+   "chapeu": "Cascavel · Cidades",
+   "cor": "#F0B07A",
+   "titulo": "Convênio habilita 15 guardas municipais para fiscalização de trânsito em Cascavel",
+   "linhaFina": "Acordo integra agentes à Transitar e libera uso de etilômetros e sistemas operacionais para operações viárias",
+   "foto": "fotos/n4.jpg",
+   "video": null,
+   "videoDur": null,
+   "credito": "Divulgação/Prefeitura de Cascavel",
+   "numero": null,
+   "palavras": [
+    {
+     "t": 0.495,
+     "fim": 0.885,
+     "texto": "Convênio"
+    },
+    {
+     "t": 0.896,
+     "fim": 1.343,
+     "texto": "habilita"
+    },
+    {
+     "t": 1.365,
+     "fim": 2.124,
+     "texto": "15 guardas"
+    },
+    {
+     "t": 2.135,
+     "fim": 2.771,
+     "texto": "municipais"
+    },
+    {
+     "t": 2.783,
+     "fim": 2.972,
+     "texto": "para"
+    },
+    {
+     "t": 2.983,
+     "fim": 3.709,
+     "texto": "fiscalização"
+    },
+    {
+     "t": 3.72,
+     "fim": 3.832,
+     "texto": "de"
+    },
+    {
+     "t": 3.843,
+     "fim": 4.267,
+     "texto": "trânsito"
+    },
+    {
+     "t": 4.278,
+     "fim": 4.345,
+     "texto": "em"
+    },
+    {
+     "t": 4.356,
+     "fim": 4.937,
+     "texto": "Cascavel"
+    }
+   ],
+   "transicao": "glitch",
+   "narracao": "Convênio habilita 15 guardas municipais para fiscalização de trânsito em Cascavel.",
+   "voz_dur": 5.33,
+   "voz": "audio/voz-5.wav"
+  },
+  {
+   "tipo": "noticia",
+   "dur": 8.54,
+   "estilo": "foto",
+   "chapeu": "Metropolitana · Saúde",
+   "cor": "#6FBF98",
+   "titulo": "Nove cidades do Paraná ofertam teste de DNA-HPV pelo SUS em 2026",
+   "linhaFina": null,
+   "foto": "fotos/n5.jpg",
+   "video": null,
+   "videoDur": null,
+   "credito": "Divulgação/MS",
+   "numero": null,
+   "palavras": [
+    {
+     "t": 0.495,
+     "fim": 1.421,
+     "texto": "Metropolitana"
+    },
+    {
+     "t": 1.65,
+     "fim": 1.929,
+     "texto": "Nove"
+    },
+    {
+     "t": 1.94,
+     "fim": 2.431,
+     "texto": "cidades"
+    },
+    {
+     "t": 2.442,
+     "fim": 2.543,
+     "texto": "do"
+    },
+    {
+     "t": 2.554,
+     "fim": 2.945,
+     "texto": "Paraná"
+    },
+    {
+     "t": 2.956,
+     "fim": 3.425,
+     "texto": "ofertam"
+    },
+    {
+     "t": 3.436,
+     "fim": 3.748,
+     "texto": "teste"
+    },
+    {
+     "t": 3.759,
+     "fim": 3.849,
+     "texto": "de"
+    },
+    {
+     "t": 3.86,
+     "fim": 4.764,
+     "texto": "DNA-HPV"
+    },
+    {
+     "t": 4.797,
+     "fim": 5.009,
+     "texto": "pelo"
+    },
+    {
+     "t": 5.021,
+     "fim": 5.199,
+     "texto": "SUS"
+    },
+    {
+     "t": 5.21,
+     "fim": 6.471,
+     "texto": "em 2026"
+    }
+   ],
+   "transicao": "balao",
+   "narracao": "Metropolitana. Nove cidades do Paraná ofertam teste de DNA-HPV pelo SUS em 2026.",
+   "voz_dur": 6.84,
+   "voz": "audio/voz-6.wav"
+  },
+  {
+   "tipo": "assinatura",
+   "dur": 10.18,
+   "transicao": "balao",
+   "narracao": "Vozes Paranaenses: o portal com sotaque de todas as regiões. Siga o perfil e acompanhe o Paraná todo dia.",
+   "voz_dur": 7.08,
+   "voz": "audio/voz-7.wav"
+  }
+ ]
+}
