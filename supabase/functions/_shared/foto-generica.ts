@@ -57,6 +57,16 @@ const PM = [
 export const GRUPOS: Grupo[] = [
   {
     editoria: "seguranca",
+    // Helicóptero da PM (BPMOA, "Falcão"): só quando a aeronave da polícia é
+    // o assunto (vem antes de bombeiros/resgate: "helicóptero da PM resgata") — queda de avião/ultraleve NÃO casa aqui (31/10/2026).
+    gatilho: /\b(helicoptero d[ao] (pm|pmpr|policia militar|sesp)|bpmoa|operacoes aereas|falcao \d+|apoio aereo d[ao] (pm|policia))/,
+    fotos: [
+      f("aereo-1", "Foto: Ricardo Almeida/Sesp", "Helicóptero da Polícia Militar do Paraná"),
+      f("aereo-2", "Foto: Ricardo Almeida/Sesp", "Helicóptero da PM e equipe com cão de faro"),
+    ],
+  },
+  {
+    editoria: "seguranca",
     gatilho: /\b(afoga|correnteza|arrastad[oa] pel[oa] (rio|agua)|guarda-vidas|salva-vidas)/,
     fotos: [
       f("cbm-agua-1", "Foto: Corpo de Bombeiros do Paraná", "Equipe de resgate aquático do Corpo de Bombeiros"),
@@ -107,6 +117,17 @@ export const GRUPOS: Grupo[] = [
       f("samu-1", "Foto: Sesa", "Atendimento do Samu"),
       f("samu-2", "Foto: Sesa", "Ambulância do Samu"),
       f("samu-3", "Foto: Secom", "Ambulância do Samu"),
+    ],
+  },
+  {
+    editoria: "seguranca",
+    // Apreensão de drogas: agentes de costas e cão de faro junto à carga
+    // apreendida (BPFron/PMPR). Esgotada a foto, vale o banco da PM. Caso
+    // da Polícia Civil/Denarc não entra (a foto mostraria a corporação errada).
+    gatilho: /^(?!.*\b(policia civil|pcpr|denarc|delegad))(?=.*\b(maconha|cocaina|crack|haxixe|skunk|entorpecente|trafico de drogas|drogas? (apreendid|escondid)))/,
+    fotos: [
+      f("drogas-1", "Foto: PMPR", "Policiais militares e cão de faro com droga apreendida"),
+      ...PM,
     ],
   },
   {

@@ -405,6 +405,16 @@ ok("só Polícia Federal → sem foto", gid("seguranca", "Polícia Federal cumpr
   const r3 = escolherFotoGenerica("seguranca", "A ocorrência foi atendida pela Polícia Militar.", "abc", "Incêndio destrói casa em Toledo");
   ok("título de incêndio vence a PM do resumo", !!r3 && /^cbm-/.test(r3.id), r3);
 }
+// Helicóptero da PM e apreensão de drogas (31/10/2026)
+ok("helicóptero da PM → aéreo", gid("seguranca", "Helicóptero da PM resgata ferido em Guarapuava").startsWith("aereo-"));
+ok("queda de avião não é helicóptero da PM", !gid("seguranca", "Queda de aeronave agrícola em Palotina").startsWith("aereo-"));
+ok("PM apreende maconha → drogas/PM", /^(drogas|pm)-/.test(gid("seguranca", "PM apreende 2 toneladas de maconha em Guaíra")));
+ok("Polícia Civil apreende cocaína → não usa foto da PM", !/^(drogas|pm)-/.test(gid("seguranca", "Polícia Civil apreende cocaína em Londrina")));
+{
+  const usada = new Set([urlFotoGenerica("drogas-1")]);
+  const r = escolherFotoGenericaInedita("seguranca", "", "abc", usada, "PM apreende maconha em caminhão em Guaíra");
+  ok("drogas-1 em uso → cai no banco da PM", !!r && "foto" in r && r.foto.id.startsWith("pm-"), JSON.stringify(r));
+}
 // Foto única por assunto: pula as já usadas; tudo em uso → vira nota
 {
   const t = "Colisão na PR-456 deixa dois feridos";
