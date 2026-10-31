@@ -396,6 +396,15 @@ ok("BR (federal) → PRF", gid("seguranca", "Colisão na BR-277 deixa dois ferid
 ok("operação da PRF → foto da PRF", gid("seguranca", "PRF inicia Operação Finados nas rodovias federais").startsWith("prf-"));
 ok("PRF e PF juntas → foto da PRF", gid("seguranca", "PRF e PF apreendem dinheiro em veículo na BR-277").startsWith("prf-"));
 ok("só Polícia Federal → sem foto", gid("seguranca", "Polícia Federal cumpre mandados em Cascavel") === "nenhuma");
+// Assunto pelo título; "periciado" de passagem não vira laboratório
+{
+  const r = escolherFotoGenerica("seguranca", "A Patrulha Rural da Polícia Militar recuperou um Fiat Uno com alerta de furto em Ponta Grossa. O veículo foi periciado e encaminhado à Delegacia de Polícia Civil.", "abc", "Patrulha Rural recupera Fiat Uno com alerta de furto escondido em vegetação");
+  ok("patrulha da PM com carro periciado → foto da PM", !!r && /^pm-/.test(r.id), r);
+  const r2 = escolherFotoGenerica("seguranca", "O corpo foi levado ao IML.", "abc", "Corpo é encontrado em área de mata em Castro");
+  ok("corpo encontrado → perícia", !!r2 && /^pci-/.test(r2.id), r2);
+  const r3 = escolherFotoGenerica("seguranca", "A ocorrência foi atendida pela Polícia Militar.", "abc", "Incêndio destrói casa em Toledo");
+  ok("título de incêndio vence a PM do resumo", !!r3 && /^cbm-/.test(r3.id), r3);
+}
 // Foto única por assunto: pula as já usadas; tudo em uso → vira nota
 {
   const t = "Colisão na PR-456 deixa dois feridos";

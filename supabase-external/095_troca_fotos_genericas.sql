@@ -78,7 +78,7 @@ alvo as (
       when b.t ~ '(\mprf\M|policia rodoviaria federal|rodovias? federa|\mbr-?[0-9]{3})' then 'prf'
       when b.t ~ '(incendio|pegou fogo|chamas|bombeir|siate|resgat|soterr|desab|afoga)' then 'bombeiros'
       when b.t ~ '(acidente de transito|colisao|colidi|capot|atropel|tomba|motociclista|motoboy)' then 'samu'
-      when b.t ~ '(pericia|perito|\miml\M|necropsia|cientifica|corpo (e |foi )?encontrado|ossada|cadaver)' then 'cientifica'
+      when b.t ~ '(\mpericias?\M|\mperitos?\M|\miml\M|necropsia|policia cientifica|corpo (e |foi )?encontrado|ossada|cadaver)' then 'cientifica'
       when b.t ~ '(presidio|penitenciar|cadeia publica|detento|policia penal|depen|rebeliao|sistema prisional)' then 'penal'
       when b.t ~ '(policia federal|\mpf\M|receita federal|gaeco)' then null  -- caso federal: sem foto
       when b.t ~ '(estupr|abuso sexual|importunacao sexual|assedio sexual|violencia sexual|infantojuvenil|pedofil|maus-tratos|vulneravel)' then null

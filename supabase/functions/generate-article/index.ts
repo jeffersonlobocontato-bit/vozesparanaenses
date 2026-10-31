@@ -718,7 +718,7 @@ Você é repórter, não comentarista. Relate o fato; não tome partido.
   // (banco curado em _shared/foto-generica.ts, crédito institucional,
   // legenda de imagem de arquivo). Não conta como foto real do fato.
   if (fotoOrigem === "nenhuma") {
-    const escolha = escolherFotoGenericaInedita(categoriaSlug ?? null, `${parsed.titulo} ${parsed.resumo ?? ""}`, inserted.id, emUso.urls);
+    const escolha = escolherFotoGenericaInedita(categoriaSlug ?? null, parsed.resumo ?? "", inserted.id, emUso.urls, parsed.titulo);
     if (escolha && "repetida" in escolha) fotoRepetida = true;
     const generica = escolha && "foto" in escolha ? escolha.foto : null;
     if (generica) {

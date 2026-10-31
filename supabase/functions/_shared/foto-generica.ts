@@ -111,7 +111,16 @@ export const GRUPOS: Grupo[] = [
   },
   {
     editoria: "seguranca",
-    gatilho: /\b(pericia|perito|iml|necropsia|cientifica|corpo (e |foi )?encontrado|ossada|cadaver)/,
+    // PM em ação (patrulha, batalhão, Rotam…): a cena é a PM, mesmo que o
+    // texto diga depois que o caso foi "periciado" ou levado à delegacia
+    // (caso de 31/10/2026: Patrulha Rural recupera carro → saía foto de laboratório).
+    gatilho: /\b(policia militar|pmpr|policiais militares|patrulha|batalhao|bpm\b|rotam|choque|bpfron|canil da pm)/,
+    fotos: PM,
+  },
+  {
+    editoria: "seguranca",
+    // Só quando a perícia é o assunto ("periciado" de passagem não conta).
+    gatilho: /\b(pericia\b|pericias\b|peritos?\b|iml\b|necropsia|policia cientifica|corpo (e |foi )?encontrado|ossada|cadaver)/,
     fotos: [
       f("pci-1", "Foto: Paulo Henrique/Sesp", "Laboratório da Polícia Científica"),
       f("pci-2", "Foto: Paulo Henrique/Sesp", "Análise pericial em laboratório da Polícia Científica"),
@@ -224,8 +233,9 @@ export function escolherFotoGenerica(
   editoria: string | null | undefined,
   texto: string,
   semente: string,
+  titulo?: string,
 ): (FotoGenerica & { url: string }) | null {
-  const r = escolherFotoGenericaInedita(editoria, texto, semente, new Set());
+  const r = escolherFotoGenericaInedita(editoria, texto, semente, new Set(), titulo);
   return r && "foto" in r ? r.foto : null;
 }
 
@@ -243,12 +253,17 @@ export function escolherFotoGenericaInedita(
   texto: string,
   semente: string,
   evitar: Set<string>,
+  titulo?: string,
 ): { foto: FotoGenerica & { url: string } } | { repetida: true } | null {
-  const t = norm(texto);
+  const t = norm(`${titulo ?? ""} ${texto}`);
   if (SEM_FOTO.test(t)) return null;
   const ehPrf = editoria === "seguranca" && PRF.test(t);
   if (editoria === "seguranca" && !ehPrf && FEDERAL.test(t)) return null;
-  const grupo = GRUPOS.find((g) => (g.editoria === editoria || g.editoria === "qualquer") && (!g.gatilho || g.gatilho.test(t)));
+  const serve = (g: Grupo) => g.editoria === editoria || g.editoria === "qualquer";
+  // O título decide primeiro (é o assunto); o resumo só quando o título não diz.
+  const tt = titulo ? norm(titulo) : "";
+  const grupo = (tt && GRUPOS.find((g) => serve(g) && g.gatilho && g.gatilho.test(tt))) ||
+    GRUPOS.find((g) => serve(g) && (!g.gatilho || g.gatilho.test(t)));
   if (!grupo) return null;
   const n = grupo.fotos.length;
   const inicio = hash(semente) % n;
