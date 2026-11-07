@@ -1,0 +1,465 @@
+{
+ "fps": 30,
+ "audio": "audio/mix.wav",
+ "data": "2026-11-06",
+ "cenas": [
+  {
+   "tipo": "abertura",
+   "dur": 3.6,
+   "data": "Sexta-feira, 6 de novembro",
+   "chamadas": [
+    "Temporal com suspeita de tornado atinge",
+    "BR-376 tem interdição parcial após deslizamento",
+    "Temporal causa destelhamentos e queda de",
+    "Cambé encerra prazo para isenção do",
+    "Caminhos do Peabiru recebe oficina de"
+   ],
+   "narracao": "Resumo do dia. Vozes Paranaenses.",
+   "voz_dur": 3.29,
+   "voz": "audio/voz-0.wav"
+  },
+  {
+   "tipo": "noticia",
+   "dur": 6.26,
+   "estilo": "foto",
+   "chapeu": "Cascavel · Cidades",
+   "cor": "#F0B07A",
+   "titulo": "Temporal com suspeita de tornado atinge comunidades rurais em Cascavel",
+   "linhaFina": "Força-tarefa distribui lonas e telhas e desobstrui vias após destruição de casas; não há feridos",
+   "foto": "fotos/n0.jpg",
+   "video": null,
+   "videoDur": null,
+   "credito": "José Fernando Ogura/AEN",
+   "numero": null,
+   "palavras": [
+    {
+     "t": 0.495,
+     "fim": 0.941,
+     "texto": "Temporal"
+    },
+    {
+     "t": 0.952,
+     "fim": 1.075,
+     "texto": "com"
+    },
+    {
+     "t": 1.086,
+     "fim": 1.555,
+     "texto": "suspeita"
+    },
+    {
+     "t": 1.566,
+     "fim": 1.655,
+     "texto": "de"
+    },
+    {
+     "t": 1.666,
+     "fim": 2.124,
+     "texto": "tornado"
+    },
+    {
+     "t": 2.135,
+     "fim": 2.492,
+     "texto": "atinge"
+    },
+    {
+     "t": 2.504,
+     "fim": 3.129,
+     "texto": "comunidades"
+    },
+    {
+     "t": 3.14,
+     "fim": 3.475,
+     "texto": "rurais"
+    },
+    {
+     "t": 3.486,
+     "fim": 3.62,
+     "texto": "em"
+    },
+    {
+     "t": 3.631,
+     "fim": 4.178,
+     "texto": "Cascavel"
+    }
+   ],
+   "transicao": "balao",
+   "narracao": "Temporal com suspeita de tornado atinge comunidades rurais em Cascavel.",
+   "voz_dur": 4.56,
+   "voz": "audio/voz-1.wav"
+  },
+  {
+   "tipo": "noticia",
+   "dur": 8.28,
+   "estilo": "foto",
+   "chapeu": "Mauá da Serra · Cidades",
+   "cor": "#F0B07A",
+   "titulo": "BR-376 tem interdição parcial após deslizamento de encosta",
+   "linhaFina": null,
+   "foto": "fotos/n1.jpg",
+   "video": null,
+   "videoDur": null,
+   "credito": "DER-PR",
+   "numero": null,
+   "palavras": [
+    {
+     "t": 0.495,
+     "fim": 0.796,
+     "texto": "Mauá"
+    },
+    {
+     "t": 0.807,
+     "fim": 0.919,
+     "texto": "da"
+    },
+    {
+     "t": 0.93,
+     "fim": 1.354,
+     "texto": "Serra"
+    },
+    {
+     "t": 1.583,
+     "fim": 2.007,
+     "texto": "BR"
+    },
+    {
+     "t": 2.018,
+     "fim": 3.48,
+     "texto": "376 tem"
+    },
+    {
+     "t": 3.491,
+     "fim": 4.072,
+     "texto": "interdição"
+    },
+    {
+     "t": 4.083,
+     "fim": 4.563,
+     "texto": "parcial"
+    },
+    {
+     "t": 4.574,
+     "fim": 4.887,
+     "texto": "após"
+    },
+    {
+     "t": 4.898,
+     "fim": 5.579,
+     "texto": "deslizamento"
+    },
+    {
+     "t": 5.59,
+     "fim": 5.668,
+     "texto": "de"
+    },
+    {
+     "t": 5.679,
+     "fim": 6.204,
+     "texto": "encosta"
+    }
+   ],
+   "transicao": "chicote",
+   "narracao": "Mauá da Serra. BR 376 tem interdição parcial após deslizamento de encosta.",
+   "voz_dur": 6.58,
+   "voz": "audio/voz-2.wav"
+  },
+  {
+   "tipo": "noticia",
+   "dur": 5.59,
+   "estilo": "foto",
+   "chapeu": "Rolândia · Cidades",
+   "cor": "#F0B07A",
+   "titulo": "Temporal causa destelhamentos e queda de galhos em Rolândia",
+   "linhaFina": "Chuva e vento atingem escola municipal, residências e vias públicas nesta quarta-feira (04)",
+   "foto": "fotos/n2.jpg",
+   "video": null,
+   "videoDur": null,
+   "credito": "Divulgação/Prefeitura de Rolândia",
+   "numero": null,
+   "palavras": [
+    {
+     "t": 0.495,
+     "fim": 0.941,
+     "texto": "Temporal"
+    },
+    {
+     "t": 0.952,
+     "fim": 1.298,
+     "texto": "causa"
+    },
+    {
+     "t": 1.309,
+     "fim": 1.968,
+     "texto": "destelhamentos"
+    },
+    {
+     "t": 1.979,
+     "fim": 2.113,
+     "texto": "e"
+    },
+    {
+     "t": 2.124,
+     "fim": 2.392,
+     "texto": "queda"
+    },
+    {
+     "t": 2.403,
+     "fim": 2.504,
+     "texto": "de"
+    },
+    {
+     "t": 2.515,
+     "fim": 2.827,
+     "texto": "galhos"
+    },
+    {
+     "t": 2.838,
+     "fim": 2.972,
+     "texto": "em"
+    },
+    {
+     "t": 2.983,
+     "fim": 3.508,
+     "texto": "Rolândia"
+    }
+   ],
+   "transicao": "iris",
+   "narracao": "Temporal causa destelhamentos e queda de galhos em Rolândia.",
+   "voz_dur": 3.89,
+   "voz": "audio/voz-3.wav"
+  },
+  {
+   "tipo": "noticia",
+   "dur": 7.03,
+   "estilo": "foto",
+   "chapeu": "Cambé · Cidades",
+   "cor": "#F0B07A",
+   "titulo": "Cambé encerra prazo para isenção do IPTU de 2027 em 30 de novembro",
+   "linhaFina": "Moradores que têm direito ao benefício total ou parcial devem protocolar o pedido na Secretaria de Fazenda ou no CRAS",
+   "foto": "fotos/n3.jpg",
+   "video": null,
+   "videoDur": null,
+   "credito": "Primeiro pedido da isenção pode ser feito na Secretaria de…",
+   "numero": null,
+   "palavras": [
+    {
+     "t": 0.495,
+     "fim": 0.774,
+     "texto": "Cambé"
+    },
+    {
+     "t": 0.785,
+     "fim": 1.198,
+     "texto": "encerra"
+    },
+    {
+     "t": 1.209,
+     "fim": 1.6,
+     "texto": "prazo"
+    },
+    {
+     "t": 1.611,
+     "fim": 1.767,
+     "texto": "para"
+    },
+    {
+     "t": 1.778,
+     "fim": 2.213,
+     "texto": "isenção"
+    },
+    {
+     "t": 2.225,
+     "fim": 2.314,
+     "texto": "do"
+    },
+    {
+     "t": 2.325,
+     "fim": 2.749,
+     "texto": "IPTU"
+    },
+    {
+     "t": 2.76,
+     "fim": 2.85,
+     "texto": "de"
+    },
+    {
+     "t": 2.861,
+     "fim": 4.055,
+     "texto": "2027 em"
+    },
+    {
+     "t": 4.066,
+     "fim": 4.948,
+     "texto": "30 de novembro"
+    }
+   ],
+   "transicao": "luz",
+   "narracao": "Cambé encerra prazo para isenção do IPTU de 2027 em 30 de novembro.",
+   "voz_dur": 5.33,
+   "voz": "audio/voz-4.wav"
+  },
+  {
+   "tipo": "noticia",
+   "dur": 6.91,
+   "estilo": "foto",
+   "chapeu": "Foz do Iguaçu · Cidades",
+   "cor": "#F0B07A",
+   "titulo": "Caminhos do Peabiru recebe oficina de sinalização rústica",
+   "linhaFina": null,
+   "foto": "fotos/n4.jpg",
+   "video": null,
+   "videoDur": null,
+   "credito": "SETU",
+   "numero": null,
+   "palavras": [
+    {
+     "t": 0.495,
+     "fim": 0.796,
+     "texto": "Foz"
+    },
+    {
+     "t": 0.807,
+     "fim": 0.908,
+     "texto": "do"
+    },
+    {
+     "t": 0.919,
+     "fim": 1.432,
+     "texto": "Iguaçu"
+    },
+    {
+     "t": 1.661,
+     "fim": 2.063,
+     "texto": "Caminhos"
+    },
+    {
+     "t": 2.074,
+     "fim": 2.163,
+     "texto": "do"
+    },
+    {
+     "t": 2.175,
+     "fim": 2.61,
+     "texto": "Peabiru"
+    },
+    {
+     "t": 2.621,
+     "fim": 3.012,
+     "texto": "recebe"
+    },
+    {
+     "t": 3.023,
+     "fim": 3.491,
+     "texto": "oficina"
+    },
+    {
+     "t": 3.503,
+     "fim": 3.592,
+     "texto": "de"
+    },
+    {
+     "t": 3.603,
+     "fim": 4.306,
+     "texto": "sinalização"
+    },
+    {
+     "t": 4.317,
+     "fim": 4.831,
+     "texto": "rústica"
+    }
+   ],
+   "transicao": "glitch",
+   "narracao": "Foz do Iguaçu. Caminhos do Peabiru recebe oficina de sinalização rústica.",
+   "voz_dur": 5.21,
+   "voz": "audio/voz-5.wav"
+  },
+  {
+   "tipo": "noticia",
+   "dur": 6.4,
+   "estilo": "foto",
+   "chapeu": "Londrina · Cidades",
+   "cor": "#F0B07A",
+   "titulo": "Concha Acústica de Londrina recebe show de rock e gastronomia nesta sexta",
+   "linhaFina": "Programação reúne Banda Nébula, feira gastronômica e espaço infantil a partir das 18h. Temporada segue até dezembro",
+   "foto": "fotos/n5.jpg",
+   "video": null,
+   "videoDur": null,
+   "credito": "Divulgação",
+   "numero": null,
+   "palavras": [
+    {
+     "t": 0.495,
+     "fim": 0.751,
+     "texto": "Concha"
+    },
+    {
+     "t": 0.762,
+     "fim": 1.231,
+     "texto": "Acústica"
+    },
+    {
+     "t": 1.242,
+     "fim": 1.309,
+     "texto": "de"
+    },
+    {
+     "t": 1.321,
+     "fim": 1.778,
+     "texto": "Londrina"
+    },
+    {
+     "t": 1.789,
+     "fim": 2.146,
+     "texto": "recebe"
+    },
+    {
+     "t": 2.158,
+     "fim": 2.414,
+     "texto": "show"
+    },
+    {
+     "t": 2.425,
+     "fim": 2.526,
+     "texto": "de"
+    },
+    {
+     "t": 2.537,
+     "fim": 2.872,
+     "texto": "rock"
+    },
+    {
+     "t": 2.894,
+     "fim": 2.961,
+     "texto": "e"
+    },
+    {
+     "t": 2.972,
+     "fim": 3.608,
+     "texto": "gastronomia"
+    },
+    {
+     "t": 3.62,
+     "fim": 3.899,
+     "texto": "nesta"
+    },
+    {
+     "t": 3.91,
+     "fim": 4.334,
+     "texto": "sexta"
+    }
+   ],
+   "transicao": "balao",
+   "narracao": "Concha Acústica de Londrina recebe show de rock e gastronomia nesta sexta.",
+   "voz_dur": 4.7,
+   "voz": "audio/voz-6.wav"
+  },
+  {
+   "tipo": "assinatura",
+   "dur": 10.18,
+   "transicao": "balao",
+   "narracao": "Vozes Paranaenses: o portal com sotaque de todas as regiões. Siga o perfil e acompanhe o Paraná todo dia.",
+   "voz_dur": 7.08,
+   "voz": "audio/voz-7.wav"
+  }
+ ]
+}
