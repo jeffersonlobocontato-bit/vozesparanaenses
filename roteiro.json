@@ -1,0 +1,490 @@
+{
+ "fps": 30,
+ "audio": "audio/mix.wav",
+ "data": "2026-11-13",
+ "cenas": [
+  {
+   "tipo": "abertura",
+   "dur": 3.6,
+   "data": "Sexta-feira, 13 de novembro",
+   "chamadas": [
+    "Simepar emite alerta de tempestades e",
+    "Finais de futebol amador têm reforço",
+    "Novo britador entra em operação para",
+    "Apucarana lança programa com geradores a",
+    "Jovens recebem orientação sobre regras para"
+   ],
+   "narracao": "Resumo do dia. Vozes Paranaenses.",
+   "voz_dur": 3.29,
+   "voz": "audio/voz-0.wav"
+  },
+  {
+   "tipo": "noticia",
+   "dur": 8.01,
+   "estilo": "foto",
+   "chapeu": "Cerro Azul · Cidades",
+   "cor": "#F0B07A",
+   "titulo": "Simepar emite alerta de tempestades e calor acima de 30°C no Paraná",
+   "linhaFina": null,
+   "foto": "fotos/n0.jpg",
+   "video": null,
+   "videoDur": null,
+   "credito": "Roberto Dziura Jr/Arquivo AEN",
+   "numero": null,
+   "palavras": [
+    {
+     "t": 0.495,
+     "fim": 0.841,
+     "texto": "Cerro"
+    },
+    {
+     "t": 0.852,
+     "fim": 1.231,
+     "texto": "Azul"
+    },
+    {
+     "t": 1.46,
+     "fim": 1.94,
+     "texto": "Simepar"
+    },
+    {
+     "t": 1.951,
+     "fim": 2.241,
+     "texto": "emite"
+    },
+    {
+     "t": 2.253,
+     "fim": 2.621,
+     "texto": "alerta"
+    },
+    {
+     "t": 2.632,
+     "fim": 2.721,
+     "texto": "de"
+    },
+    {
+     "t": 2.733,
+     "fim": 3.346,
+     "texto": "tempestades"
+    },
+    {
+     "t": 3.358,
+     "fim": 3.48,
+     "texto": "e"
+    },
+    {
+     "t": 3.547,
+     "fim": 3.826,
+     "texto": "calor"
+    },
+    {
+     "t": 3.838,
+     "fim": 4.195,
+     "texto": "acima"
+    },
+    {
+     "t": 4.206,
+     "fim": 4.329,
+     "texto": "de"
+    },
+    {
+     "t": 4.34,
+     "fim": 5.4,
+     "texto": "30°C"
+    },
+    {
+     "t": 5.411,
+     "fim": 5.512,
+     "texto": "no"
+    },
+    {
+     "t": 5.523,
+     "fim": 5.925,
+     "texto": "Paraná"
+    }
+   ],
+   "transicao": "balao",
+   "narracao": "Cerro Azul. Simepar emite alerta de tempestades e calor acima de 30°C no Paraná.",
+   "voz_dur": 6.31,
+   "voz": "audio/voz-1.wav"
+  },
+  {
+   "tipo": "noticia",
+   "dur": 7.1,
+   "estilo": "foto",
+   "chapeu": "Arapongas · Segurança",
+   "cor": "#F0B07A",
+   "titulo": "Finais de futebol amador têm reforço de segurança no José Chiappin",
+   "linhaFina": "Polícia Militar e administração municipal atuam no interior e no entorno do estádio neste domingo (15)",
+   "foto": "fotos/n1.jpg",
+   "video": null,
+   "videoDur": null,
+   "credito": "Divulgação/Prefeitura de Arapongas",
+   "numero": null,
+   "palavras": [
+    {
+     "t": 0.495,
+     "fim": 1.242,
+     "texto": "Arapongas"
+    },
+    {
+     "t": 1.471,
+     "fim": 1.873,
+     "texto": "Finais"
+    },
+    {
+     "t": 1.884,
+     "fim": 1.951,
+     "texto": "de"
+    },
+    {
+     "t": 1.962,
+     "fim": 2.431,
+     "texto": "futebol"
+    },
+    {
+     "t": 2.442,
+     "fim": 2.844,
+     "texto": "amador"
+    },
+    {
+     "t": 2.855,
+     "fim": 2.978,
+     "texto": "têm"
+    },
+    {
+     "t": 2.989,
+     "fim": 3.436,
+     "texto": "reforço"
+    },
+    {
+     "t": 3.447,
+     "fim": 3.525,
+     "texto": "de"
+    },
+    {
+     "t": 3.536,
+     "fim": 4.061,
+     "texto": "segurança"
+    },
+    {
+     "t": 4.072,
+     "fim": 4.15,
+     "texto": "no"
+    },
+    {
+     "t": 4.161,
+     "fim": 4.451,
+     "texto": "José"
+    },
+    {
+     "t": 4.462,
+     "fim": 5.021,
+     "texto": "Chiappin"
+    }
+   ],
+   "transicao": "chicote",
+   "narracao": "Arapongas. Finais de futebol amador têm reforço de segurança no José Chiappin.",
+   "voz_dur": 5.4,
+   "voz": "audio/voz-2.wav"
+  },
+  {
+   "tipo": "noticia",
+   "dur": 6.26,
+   "estilo": "foto",
+   "chapeu": "Tibagi · Cidades",
+   "cor": "#F0B07A",
+   "titulo": "Novo britador entra em operação para recuperar estradas rurais de Tibagi",
+   "linhaFina": "Equipamento instalado na pedreira municipal prevê o processamento de 50 mil metros de cascalho",
+   "foto": "fotos/n2.jpg",
+   "video": null,
+   "videoDur": null,
+   "credito": "Divulgação/Prefeitura de Tibagi",
+   "numero": null,
+   "palavras": [
+    {
+     "t": 0.495,
+     "fim": 0.751,
+     "texto": "Novo"
+    },
+    {
+     "t": 0.762,
+     "fim": 1.22,
+     "texto": "britador"
+    },
+    {
+     "t": 1.231,
+     "fim": 1.477,
+     "texto": "entra"
+    },
+    {
+     "t": 1.488,
+     "fim": 1.555,
+     "texto": "em"
+    },
+    {
+     "t": 1.566,
+     "fim": 2.113,
+     "texto": "operação"
+    },
+    {
+     "t": 2.124,
+     "fim": 2.269,
+     "texto": "para"
+    },
+    {
+     "t": 2.28,
+     "fim": 2.771,
+     "texto": "recuperar"
+    },
+    {
+     "t": 2.783,
+     "fim": 3.24,
+     "texto": "estradas"
+    },
+    {
+     "t": 3.251,
+     "fim": 3.631,
+     "texto": "rurais"
+    },
+    {
+     "t": 3.642,
+     "fim": 3.72,
+     "texto": "de"
+    },
+    {
+     "t": 3.731,
+     "fim": 4.178,
+     "texto": "Tibagi"
+    }
+   ],
+   "transicao": "iris",
+   "narracao": "Novo britador entra em operação para recuperar estradas rurais de Tibagi.",
+   "voz_dur": 4.56,
+   "voz": "audio/voz-3.wav"
+  },
+  {
+   "tipo": "noticia",
+   "dur": 7.08,
+   "estilo": "foto",
+   "chapeu": "Apucarana · Cidades",
+   "cor": "#F0B07A",
+   "titulo": "Apucarana lança programa com geradores a R$ 50 ao mês para produtores de leite",
+   "linhaFina": null,
+   "foto": "fotos/n3.jpg",
+   "video": null,
+   "videoDur": null,
+   "credito": "Divulgação/Prefeitura de Apucarana",
+   "numero": null,
+   "palavras": [
+    {
+     "t": 0.496,
+     "fim": 1.032,
+     "texto": "Apucarana"
+    },
+    {
+     "t": 1.043,
+     "fim": 1.355,
+     "texto": "lança"
+    },
+    {
+     "t": 1.367,
+     "fim": 1.802,
+     "texto": "programa"
+    },
+    {
+     "t": 1.813,
+     "fim": 1.936,
+     "texto": "com"
+    },
+    {
+     "t": 1.947,
+     "fim": 2.471,
+     "texto": "geradores"
+    },
+    {
+     "t": 2.483,
+     "fim": 2.572,
+     "texto": "a"
+    },
+    {
+     "t": 2.605,
+     "fim": 3.32,
+     "texto": "R$ 50"
+    },
+    {
+     "t": 3.331,
+     "fim": 3.509,
+     "texto": "ao"
+    },
+    {
+     "t": 3.521,
+     "fim": 3.755,
+     "texto": "mês"
+    },
+    {
+     "t": 3.766,
+     "fim": 3.945,
+     "texto": "para"
+    },
+    {
+     "t": 3.956,
+     "fim": 4.514,
+     "texto": "produtores"
+    },
+    {
+     "t": 4.525,
+     "fim": 4.603,
+     "texto": "de"
+    },
+    {
+     "t": 4.614,
+     "fim": 4.994,
+     "texto": "leite"
+    }
+   ],
+   "transicao": "luz",
+   "narracao": "Apucarana lança programa com geradores a R$ 50 ao mês para produtores de leite.",
+   "voz_dur": 5.38,
+   "voz": "audio/voz-4.wav"
+  },
+  {
+   "tipo": "noticia",
+   "dur": 6.86,
+   "estilo": "foto",
+   "chapeu": "Apucarana · Cidades",
+   "cor": "#F0B07A",
+   "titulo": "Jovens recebem orientação sobre regras para bicicletas elétricas em Apucarana",
+   "linhaFina": null,
+   "foto": "fotos/n4.jpg",
+   "video": null,
+   "videoDur": null,
+   "credito": "Divulgação/Prefeitura de Apucarana",
+   "numero": null,
+   "palavras": [
+    {
+     "t": 0.495,
+     "fim": 0.952,
+     "texto": "Jovens"
+    },
+    {
+     "t": 0.963,
+     "fim": 1.41,
+     "texto": "recebem"
+    },
+    {
+     "t": 1.421,
+     "fim": 1.979,
+     "texto": "orientação"
+    },
+    {
+     "t": 1.99,
+     "fim": 2.258,
+     "texto": "sobre"
+    },
+    {
+     "t": 2.269,
+     "fim": 2.682,
+     "texto": "regras"
+    },
+    {
+     "t": 2.693,
+     "fim": 2.872,
+     "texto": "para"
+    },
+    {
+     "t": 2.883,
+     "fim": 3.43,
+     "texto": "bicicletas"
+    },
+    {
+     "t": 3.441,
+     "fim": 4.021,
+     "texto": "elétricas"
+    },
+    {
+     "t": 4.033,
+     "fim": 4.178,
+     "texto": "em"
+    },
+    {
+     "t": 4.189,
+     "fim": 4.769,
+     "texto": "Apucarana"
+    }
+   ],
+   "transicao": "glitch",
+   "narracao": "Jovens recebem orientação sobre regras para bicicletas elétricas em Apucarana.",
+   "voz_dur": 5.16,
+   "voz": "audio/voz-5.wav"
+  },
+  {
+   "tipo": "noticia",
+   "dur": 6.62,
+   "estilo": "foto",
+   "chapeu": "Pinhão · Cidades",
+   "cor": "#F0B07A",
+   "titulo": "Secretarias municipais reduzem horário de atendimento presencial",
+   "linhaFina": null,
+   "foto": "fotos/n5.jpg",
+   "video": null,
+   "videoDur": null,
+   "credito": "Divulgação/Prefeitura de Pinhão",
+   "numero": null,
+   "palavras": [
+    {
+     "t": 0.495,
+     "fim": 0.941,
+     "texto": "Pinhão"
+    },
+    {
+     "t": 1.17,
+     "fim": 1.873,
+     "texto": "Secretarias"
+    },
+    {
+     "t": 1.884,
+     "fim": 2.476,
+     "texto": "municipais"
+    },
+    {
+     "t": 2.487,
+     "fim": 2.878,
+     "texto": "reduzem"
+    },
+    {
+     "t": 2.889,
+     "fim": 3.246,
+     "texto": "horário"
+    },
+    {
+     "t": 3.257,
+     "fim": 3.324,
+     "texto": "de"
+    },
+    {
+     "t": 3.335,
+     "fim": 3.871,
+     "texto": "atendimento"
+    },
+    {
+     "t": 3.882,
+     "fim": 4.541,
+     "texto": "presencial"
+    }
+   ],
+   "transicao": "balao",
+   "narracao": "Pinhão. Secretarias municipais reduzem horário de atendimento presencial.",
+   "voz_dur": 4.92,
+   "voz": "audio/voz-6.wav"
+  },
+  {
+   "tipo": "assinatura",
+   "dur": 10.18,
+   "transicao": "balao",
+   "narracao": "Vozes Paranaenses: o portal com sotaque de todas as regiões. Siga o perfil e acompanhe o Paraná todo dia.",
+   "voz_dur": 7.08,
+   "voz": "audio/voz-7.wav"
+  }
+ ]
+}
