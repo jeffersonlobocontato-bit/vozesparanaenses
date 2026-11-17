@@ -5,6 +5,7 @@
 - [x] Adicionar ontem, últimos 7 dias e custo por matéria em Custos.
 - [x] Testar localmente registro de sucesso/falha, cálculo, privacidade, concorrência e guardas existentes.
 - [ ] Aplicar a migração 099 no banco externo — sem ferramenta autorizada para esse banco nesta conversa.
+- [x] Confirmar destino Rede de Portais: configuração externa aponta para o banco informado; conteúdo acessível e ia_uso/ia_precos ainda ausentes na API.
 - [ ] Implantar as funções e publicar o app — aguardam a migração externa para começar a registrar.
 - [ ] Validar registro real e leitura admin/editor no painel — aguardam a migração e sessão do banco externo.
 - [ ] Conferir tarifas do catálogo autenticado do Gateway — chave disponível apenas no serviço hospedado.
