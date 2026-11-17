@@ -34,9 +34,11 @@ export function criarChamarIA(deps: { contexto: () => ContextoIA; preco: (modelo
       gravado = true;
       const usage = payload?.usage ?? null;
       const imagens = (payload?.choices ?? []).reduce((n: number, c: Objeto) => n + (c.message?.images?.length ?? (typeof c.message?.content === "string" && c.message.content.startsWith("data:image") ? 1 : 0)), 0);
+      const duracao = Date.now() - inicio;
+      let preco: PrecoIA | null = null;
+      try { preco = await deps.preco(modelo); } catch { /* usage still recorded without a price */ }
       try {
-        const preco = await deps.preco(modelo);
-        await deps.gravar({ ...contexto, etapa, modelo, tokens_entrada: usage?.prompt_tokens ?? usage?.input_tokens ?? usage?.total_tokens ?? null, tokens_saida: usage?.completion_tokens ?? usage?.output_tokens ?? (usage?.total_tokens != null ? 0 : null), imagens, custo_usd: calcularCustoIA(preco, usage, imagens), sucesso: ok, erro, duracao_ms: Date.now() - inicio });
+        await deps.gravar({ ...contexto, etapa, modelo, tokens_entrada: usage?.prompt_tokens ?? usage?.input_tokens ?? usage?.total_tokens ?? null, tokens_saida: usage?.completion_tokens ?? usage?.output_tokens ?? (usage?.total_tokens != null ? 0 : null), imagens, custo_usd: calcularCustoIA(preco, usage, imagens), sucesso: ok, erro, duracao_ms: duracao });
       } catch { console.warn("[ia_uso] registro indisponível", contexto.funcao, etapa); }
     }
     let resposta: Response;
@@ -57,7 +59,17 @@ export function criarChamarIA(deps: { contexto: () => ContextoIA; preco: (modelo
       try { const text = await textOriginal(); let payload = null; try { payload = JSON.parse(text); } catch { /* unknown usage */ } await registrar(resposta.ok, payload, resposta.ok ? null : `http_${resposta.status}`); return text; }
       catch (e) { await registrar(false, null, "response_read_error"); throw e; }
     };
-    if (!resposta.ok) await registrar(false, null, `http_${resposta.status}`);
+    if (!resposta.ok) {
+      // Some callers return a fallback without reading the error body. Capture usage once
+      // even on that path, then restore an equivalent response for the existing handler.
+      try {
+        const text = await textOriginal();
+        let payload = null;
+        try { payload = JSON.parse(text); } catch { /* safe error code only */ }
+        await registrar(false, payload, `http_${resposta.status}`);
+        return new Response(text, { status: resposta.status, statusText: resposta.statusText, headers: resposta.headers });
+      } catch { await registrar(false, null, `http_${resposta.status}`); }
+    }
     return resposta;
   };
 }

@@ -1,4 +1,4 @@
-import { comContextoIA } from "../_shared/ia-uso.ts";
+import { comContextoIA, noContextoIA } from "../_shared/ia-uso.ts";
 // Vozes Paranaenses — instagram-selecionar
 //
 // Roda depois dos ciclos (cron da 086, a cada 30 min das 7h às 21h):
@@ -215,7 +215,7 @@ Deno.serve(comContextoIA("instagram-selecionar", async (req) => {
   async function cardDaMateria(l: Linha, classe: Classe, lamina?: { atual: number; total: number }, quando?: Date): Promise<{ card: Card; red: Awaited<ReturnType<typeof redigir>> | null; fotoUrl?: string | null; credito?: string | null }> {
     const m = paraMateria(l);
     const ch = chapeuDe(m, l.categoria?.nome ?? null, l.regiao ? (NOME_REGIAO[l.regiao.slug] ?? l.regiao.nome) : null);
-    const red = lamina ? null : await redigir({ apiKey: aiKey, classe, titulo: l.titulo, subtitulo: l.subtitulo, texto: [l.tldr, l.resumo].filter(Boolean).join("\n") || l.subtitulo || "" });
+    const red = lamina ? null : await noContextoIA({ artigo_id: l.id }, () => redigir({ apiKey: aiKey, classe, titulo: l.titulo, subtitulo: l.subtitulo, texto: [l.tldr, l.resumo].filter(Boolean).join("\n") || l.subtitulo || "" }));
     const titulo = red?.titulo ?? limitar(l.titulo, 100);
     const linhaFina = red?.linhaFina ?? (l.subtitulo ? limitar(l.subtitulo, 150) : null);
     const cardAlerta = () => {

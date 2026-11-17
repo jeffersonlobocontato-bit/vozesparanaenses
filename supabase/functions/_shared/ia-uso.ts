@@ -26,6 +26,9 @@ async function gravar(linha: RegistroIA) {
 }
 export const chamarIA = criarChamarIA({ contexto: () => contexto.getStore() ?? { funcao: "outro" }, preco, gravar });
 export function identificarIA(ids: Partial<ContextoIA>) { const atual = contexto.getStore(); if (atual) Object.assign(atual, ids); }
+export function noContextoIA<T>(ids: Partial<ContextoIA>, tarefa: () => T): T {
+  return contexto.run({ ...(contexto.getStore() ?? { funcao: "outro" }), ...ids }, tarefa);
+}
 export function comContextoIA(funcao: string, handler: (req: Request) => Response | Promise<Response>) {
   return (req: Request) => contexto.run({ funcao }, async () => {
     if (req.method === "POST" && req.headers.get("content-type")?.includes("application/json")) {

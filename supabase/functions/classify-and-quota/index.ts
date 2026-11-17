@@ -1,4 +1,4 @@
-import { comContextoIA } from "../_shared/ia-uso.ts";
+import { comContextoIA, noContextoIA } from "../_shared/ia-uso.ts";
 import { chamarIA } from "../_shared/ia-uso.ts";
 // Vozes Paranaenses — classify-and-quota
 // Para cada cluster novo:
@@ -131,7 +131,7 @@ async function processClusters(
       .map((r: { titulo: string | null; corpo_limpo: string | null }) => `${r.titulo ?? ""}\n${(r.corpo_limpo ?? "").slice(0, 400)}`)
       .join("\n\n---\n\n")
       .slice(0, 3000);
-    const crivo = await classify(excerpt, categoriasElegiveis, aiKey);
+    const crivo = await noContextoIA({ cluster_id: c.id }, () => classify(excerpt, categoriasElegiveis, aiKey));
     const catSlug = crivo.categoria ?? "";
     // Curadoria que já nasceu com editoria (esportes) mantém a dela.
     const cat = (c.categoria_id ? categorias.find((k) => k.id === c.categoria_id) : null)

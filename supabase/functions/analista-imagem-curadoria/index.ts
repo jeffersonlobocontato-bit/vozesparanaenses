@@ -1,4 +1,4 @@
-import { comContextoIA } from "../_shared/ia-uso.ts";
+import { comContextoIA, identificarIA } from "../_shared/ia-uso.ts";
 // Vozes Paranaenses — analista-imagem-curadoria
 //
 // Garante pelo menos 1 matéria NACIONAL e 1 INTERNACIONAL (temas gerais e
@@ -133,6 +133,7 @@ async function analisarMateria(
   m: Materia,
   escopo: string,
 ): Promise<{ decisao: "foto_commons" | "ilustracao_ia" | "sem_imagem"; motivo: string }> {
+  identificarIA({ artigo_id: m.id });
   const plano = await planejarImagem(aiKey, { titulo: m.titulo, resumo: m.resumo, escopo });
   const analise: Record<string, unknown> = { em: new Date().toISOString(), escopo, plano };
 

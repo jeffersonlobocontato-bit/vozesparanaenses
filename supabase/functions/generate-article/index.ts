@@ -1,4 +1,4 @@
-import { comContextoIA } from "../_shared/ia-uso.ts";
+import { comContextoIA, identificarIA } from "../_shared/ia-uso.ts";
 import { chamarIA } from "../_shared/ia-uso.ts";
 // Vozes Paranaenses — generate-article
 // Etapa 2 de 2 do pipeline editorial (separada de extract-facts em
@@ -195,6 +195,7 @@ Deno.serve(comContextoIA("generate-article", async (req) => {
   }
 
   const clusterId = facts.cluster_id;
+  identificarIA({ cluster_id: clusterId });
 
   // Segunda camada de proteção contra escrita duplicada: se esse cluster
   // já tem matéria gerada (de uma chamada concorrente, um retry, ou outro
@@ -589,6 +590,7 @@ Você é repórter, não comentarista. Relate o fato; não tome partido.
     }
   }
   if (!inserted) return json({ error: "insert_failed", detail: "inserção sem retorno de dados" }, 500);
+  identificarIA({ artigo_id: inserted.id });
 
   // A partir daqui a matéria já existe. Marca o cluster como concluído ANTES
   // de qualquer tarefa auxiliar (ex.: copiar foto externa), para uma demora de
