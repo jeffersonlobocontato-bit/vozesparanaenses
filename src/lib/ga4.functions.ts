@@ -1,6 +1,7 @@
 import { createServerFn } from "@tanstack/react-start";
 import { ABAS, corpoDoRelatorio, relatoriosDaAba, type Aba } from "./ga4-relatorios";
 import type { LinhaGA } from "./ga4.server";
+import { createResolvedCache } from "./resolved-cache";
 
 // Painel /admin/analytics: busca no GA4 os relatórios de uma aba.
 // Só para a equipe (admin, editor ou consulta): o navegador manda o token da
@@ -18,7 +19,7 @@ export type RespostaAba = {
   motivo?: string;
 };
 
-const cache = new Map<string, { ate: number; valor: Promise<RespostaAba> }>();
+const cache = createResolvedCache<RespostaAba>();
 
 async function papelDaEquipe(token: string): Promise<string | null> {
   if (!token) return null;
@@ -62,10 +63,6 @@ export const relatorioAnalytics = createServerFn({ method: "POST" })
     const papel = await papelDaEquipe(data.token);
     if (!papel) throw new Error("Acesso só para a equipe do painel.");
     const chave = `${data.aba}:${data.dias}`;
-    const agora = Date.now();
-    const hit = cache.get(chave);
-    if (hit && hit.ate > agora && !data.atualizar) return hit.valor;
-    const valor = montar(data.aba, data.dias).catch((e) => { cache.delete(chave); throw e; });
-    cache.set(chave, { ate: agora + (data.aba === "tempo-real" ? 45_000 : 600_000), valor });
-    return valor;
+    return cache(chave, data.aba === "tempo-real" ? 45_000 : 600_000,
+      () => montar(data.aba, data.dias), data.atualizar);
   });

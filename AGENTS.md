@@ -13,3 +13,4 @@
 - All Gateway calls use the shared Web-standard metering core and request-scoped Deno context; this preserves prompts and isolates concurrent function/cluster attribution without persisting content.
 - AI costs are immutable per-call snapshots from database prices; unknown usage stays NULL and reports show incomplete coverage rather than claiming zero spend.
 - External schema changes are staged in supabase-external and require application to that database; the managed migration tool must never be used for external content tables.
+- Server caches retain only completed data; create external database clients per call and never share pending promises across requests, because Worker requests own asynchronous work.

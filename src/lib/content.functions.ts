@@ -2,6 +2,7 @@ import { createServerFn } from "@tanstack/react-start";
 import { notFound } from "@tanstack/react-router";
 import { REGION_NAME_OVERRIDES, displayRegionName } from "./region-labels";
 import { findMunicipio } from "./parana-municipios";
+import { createResolvedCache } from "./resolved-cache";
 export { REGION_NAME_OVERRIDES, displayRegionName };
 
 /**
@@ -23,14 +24,9 @@ function isMissingSchema(err: { message?: string; code?: string } | null): boole
 // Cache em memória do servidor para listas que quase não mudam (regiões,
 // editorias, cidades com matéria). Vale enquanto o processo do servidor
 // estiver vivo; evita repetir as consultas a cada página aberta.
-const memoCache = new Map<string, { ate: number; valor: Promise<unknown> }>();
-function memo<T>(chave: string, ttlMs: number, fn: () => Promise<T>): Promise<T> {
-  const agora = Date.now();
-  const hit = memoCache.get(chave);
-  if (hit && hit.ate > agora) return hit.valor as Promise<T>;
-  const valor = fn().catch((e) => { memoCache.delete(chave); throw e; });
-  memoCache.set(chave, { ate: agora + ttlMs, valor });
-  return valor;
+const memoCache = createResolvedCache<unknown>();
+async function memo<T>(chave: string, ttlMs: number, fn: () => Promise<T>): Promise<T> {
+  return await memoCache(chave, ttlMs, fn) as T;
 }
 
 export type TemaConfig = {

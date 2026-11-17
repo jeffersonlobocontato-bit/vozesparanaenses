@@ -1,4 +1,5 @@
 # Medição do consumo de IA
+- [x] Corrigir falha de carregamento entre requisições: cache só de dados concluídos, clientes por chamada; 4 testes e 3 visitas reais à home passaram.
 - [x] Inventariar modelos e verificar preços oficiais dos provedores.
 - [x] Preparar tabelas, permissões e visões na migração externa 099.
 - [x] Instrumentar todas as chamadas sem mudar modelos, prompts ou decisões editoriais.
