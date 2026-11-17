@@ -1,3 +1,4 @@
+import { chamarIA } from "./ia-uso.ts";
 // Escopo do Portal da Imprensa para prefeituras: só publica matéria cujo fato
 // central é uma AÇÃO DA PREFEITURA. Um agente de IA avalia o texto antes da
 // redação (imprensa-gerar-rascunho) e de novo antes de publicar
@@ -40,7 +41,7 @@ export function interpretarAvaliacao(conteudo: string): AvaliacaoPauta | null {
 
 export async function avaliarPauta(texto: string, municipio: string | null, aiKey: string): Promise<AvaliacaoPauta> {
   try {
-    const res = await fetch(AI_URL, {
+    const res = await chamarIA("imprensa", AI_URL, {
       method: "POST",
       headers: { "Content-Type": "application/json", Authorization: `Bearer ${aiKey}` },
       body: JSON.stringify({

@@ -1,3 +1,4 @@
+import { comContextoIA } from "../_shared/ia-uso.ts";
 // Vozes Paranaenses — instagram-selecionar
 //
 // Roda depois dos ciclos (cron da 086, a cada 30 min das 7h às 21h):
@@ -65,7 +66,7 @@ type Linha = {
   regiao: { slug: string; nome: string } | null; categoria: { slug: string; nome: string } | null;
 };
 
-Deno.serve(async (req) => {
+Deno.serve(comContextoIA("instagram-selecionar", async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: cors });
   {
     const negado = await exigirInterno(req);
@@ -377,7 +378,7 @@ Deno.serve(async (req) => {
   }
 
   return json({ ok: true, plano, resultado, ms: Date.now() - inicio });
-});
+}));
 
 /** Endereço curto da cidade da matéria (só cidade do Paraná). */
 function atalhoDaCidade(cidade: string | null | undefined, regiaoSlug: string | null | undefined): string | null {

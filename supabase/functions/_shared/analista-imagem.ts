@@ -1,3 +1,4 @@
+import { chamarIA } from "./ia-uso.ts";
 // Vozes Paranaenses — analista de risco de imagem (nacional e internacional)
 //
 // Nacional e internacional saem só com texto (fotos de G1, CNN, AFP, Reuters
@@ -55,7 +56,7 @@ Retorne APENAS JSON: {"avaliacoes": [{"indice": 0, "risco": "baixo"|"medio"|"alt
 
 async function chamarIa(apiKey: string, messages: unknown[], maxTokens = 400): Promise<string | null> {
   try {
-    const res = await fetch(AI_URL, {
+    const res = await chamarIA("imagem_analise", AI_URL, {
       method: "POST",
       headers: { "Content-Type": "application/json", Authorization: `Bearer ${apiKey}` },
       body: JSON.stringify({ model: MODEL, temperature: 0, max_tokens: maxTokens, response_format: { type: "json_object" }, messages }),

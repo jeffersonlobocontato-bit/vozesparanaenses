@@ -1,3 +1,5 @@
+import { comContextoIA } from "../_shared/ia-uso.ts";
+import { chamarIA } from "../_shared/ia-uso.ts";
 // Vozes Paranaenses — publieditorial-chat
 // Agente IA que entrevista o cliente pelo link público /publieditorial/:token.
 // Faz uma pergunta por vez, aprofunda quando a resposta é rasa, e, quando tem
@@ -80,7 +82,7 @@ Nos campos consolidados, escreva em PROSA (não bullets), preservando os fatos q
 
 Se ainda é a primeira mensagem da conversa (sem histórico do usuário), se apresente em 1–2 frases e faça a primeira pergunta (item A).`;
 
-Deno.serve(async (req) => {
+Deno.serve(comContextoIA("publieditorial-chat", async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: cors });
   if (req.method !== "POST") return json({ error: "method_not_allowed" }, 405);
 
@@ -156,7 +158,7 @@ Deno.serve(async (req) => {
     ...historico,
   ];
 
-  const aiRes = await fetch(AI_URL, {
+  const aiRes = await chamarIA("chat", AI_URL, {
     method: "POST",
     headers: { "Content-Type": "application/json", Authorization: `Bearer ${aiKey}` },
     body: JSON.stringify({ model: MODEL, messages, response_format: { type: "json_object" } }),
@@ -226,7 +228,7 @@ Deno.serve(async (req) => {
   }
 
   return json({ mensagem: respostaAgente, finalizado: Boolean(finalizado), aviso });
-});
+}));
 
 function json(payload: unknown, status = 200) {
   return new Response(JSON.stringify(payload), { status, headers: { ...cors, "Content-Type": "application/json" } });

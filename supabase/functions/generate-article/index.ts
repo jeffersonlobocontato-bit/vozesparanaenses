@@ -1,3 +1,5 @@
+import { comContextoIA } from "../_shared/ia-uso.ts";
+import { chamarIA } from "../_shared/ia-uso.ts";
 // Vozes Paranaenses — generate-article
 // Etapa 2 de 2 do pipeline editorial (separada de extract-facts em
 // 2026-07): recebe { cluster_id } ou { extracted_facts_id }, lê os fatos
@@ -137,7 +139,7 @@ type GeneratedPayload = {
   faq?: Array<{ pergunta: string; resposta: string }>;
 };
 
-Deno.serve(async (req) => {
+Deno.serve(comContextoIA("generate-article", async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: cors });
   {
     const negado = await exigirInterno(req);
@@ -855,7 +857,7 @@ Você é repórter, não comentarista. Relate o fato; não tome partido.
     foto_origem: fotoOrigem,
     criticidade: { nivel: crit.nivel, revisao: crit.revisao || possivelDuplicata, motivos },
   });
-});
+}));
 
 // deno-lint-ignore no-explicit-any
 async function carregConfig(sb: any) {
@@ -964,7 +966,7 @@ async function generateArticleJson(
   };
 
   for (let attempt = 1; attempt <= 2; attempt++) {
-    const res = await fetch(AI_URL, {
+    const res = await chamarIA("redacao", AI_URL, {
       method: "POST",
       headers: { "Content-Type": "application/json", Authorization: `Bearer ${apiKey}` },
       body: JSON.stringify(attempt === 1

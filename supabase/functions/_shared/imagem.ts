@@ -1,3 +1,4 @@
+import { chamarIA } from "./ia-uso.ts";
 // Vozes Paranaenses — imagens sem risco de direito autoral (out/2026)
 //
 // Duas fontes de imagem para matéria de PORTAL que veio sem foto liberada:
@@ -64,7 +65,7 @@ export async function gerarIlustracaoTematica(p: {
 }): Promise<string | null> {
   if (ehTemaPolicial(p.tema, p.categoriaSlug)) return null;
   try {
-    const res = await fetch(AI_URL, {
+    const res = await chamarIA("imagem_geracao", AI_URL, {
       method: "POST",
       headers: { "Content-Type": "application/json", Authorization: `Bearer ${p.aiKey}` },
       body: JSON.stringify({

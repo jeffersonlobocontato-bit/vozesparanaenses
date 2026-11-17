@@ -1,3 +1,4 @@
+import { comContextoIA } from "../_shared/ia-uso.ts";
 // Vozes Paranaenses — imprensa-publicar
 // Publica a matéria revisada pelo cliente. Exige aceite explícito do termo
 // de responsabilidade (registra hora, IP e o texto exato aceito) — sem
@@ -33,7 +34,7 @@ function slugify(s: string): string {
     .toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "").slice(0, 90);
 }
 
-Deno.serve(async (req) => {
+Deno.serve(comContextoIA("imprensa-publicar", async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: cors });
   if (req.method !== "POST") return json({ error: "method_not_allowed" }, 405);
 
@@ -210,4 +211,4 @@ Deno.serve(async (req) => {
     slug: artigo.slug,
     regiao_slug: regiao?.slug ?? null,
   });
-});
+}));

@@ -1,3 +1,5 @@
+import { comContextoIA } from "../_shared/ia-uso.ts";
+import { chamarIA } from "../_shared/ia-uso.ts";
 // Vozes Paranaenses — imprensa-gerar-rascunho
 // Recebe o conteúdo bruto (release colado ou respostas do cliente),
 // detecta sozinho a editoria mais provável, e gera o rascunho usando o
@@ -28,7 +30,7 @@ function json(payload: unknown, status = 200) {
   return new Response(JSON.stringify(payload), { status, headers: { ...cors, "content-type": "application/json" } });
 }
 
-Deno.serve(async (req) => {
+Deno.serve(comContextoIA("imprensa-gerar-rascunho", async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: cors });
   if (req.method !== "POST") return json({ error: "method_not_allowed" }, 405);
 
@@ -86,7 +88,7 @@ Deno.serve(async (req) => {
   if (!categorias?.length) return json({ error: "sem_categorias_cadastradas" }, 500);
 
   const listaCategorias = categorias.map((c) => `${c.slug} — ${c.nome}`).join("\n");
-  const classResp = await fetch(AI_URL, {
+  const classResp = await chamarIA("imprensa", AI_URL, {
     method: "POST",
     headers: { "Content-Type": "application/json", Authorization: `Bearer ${aiKey}` },
     body: JSON.stringify({
@@ -120,7 +122,7 @@ Deno.serve(async (req) => {
     : "";
 
   // 3. Gera o rascunho seguindo o DNA da editoria.
-  const draftResp = await fetch(AI_URL, {
+  const draftResp = await chamarIA("imprensa", AI_URL, {
     method: "POST",
     headers: { "Content-Type": "application/json", Authorization: `Bearer ${aiKey}` },
     body: JSON.stringify({
@@ -197,4 +199,4 @@ Deno.serve(async (req) => {
     subtitulo: draft.subtitulo,
     corpo: draft.corpo,
   });
-});
+}));

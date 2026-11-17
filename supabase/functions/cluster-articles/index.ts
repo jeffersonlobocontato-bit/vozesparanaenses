@@ -1,3 +1,5 @@
+import { comContextoIA } from "../_shared/ia-uso.ts";
+import { chamarIA } from "../_shared/ia-uso.ts";
 // Vozes Paranaenses — cluster-articles
 // Agrupa `raw_articles` não processados sobre o MESMO fato usando embeddings
 // (openai/text-embedding-3-small via Lovable AI Gateway) + similaridade
@@ -29,7 +31,7 @@ type Raw = {
   fonte: { tipo: string; curadoria_editoria: string | null } | { tipo: string; curadoria_editoria: string | null }[] | null;
 };
 
-Deno.serve(async (req) => {
+Deno.serve(comContextoIA("cluster-articles", async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: cors });
   {
     const negado = await exigirInterno(req);
@@ -403,7 +405,7 @@ Deno.serve(async (req) => {
         ? `${embedFalhas}/${needEmbed.length} embeddings falharam. Último erro: ${ultimoErroEmbed}`
         : undefined,
   });
-});
+}));
 
 function json(body: unknown, status = 200) {
   return new Response(JSON.stringify(body), {
@@ -424,7 +426,7 @@ function cidadeMaisCitada(g: Raw[]): string | null {
 
 async function embed(text: string, apiKey: string): Promise<{ vetor: number[] | null; erro?: string }> {
   try {
-    const res = await fetch(AI_URL, {
+    const res = await chamarIA("embedding_coleta", AI_URL, {
       method: "POST",
       headers: {
         "content-type": "application/json",

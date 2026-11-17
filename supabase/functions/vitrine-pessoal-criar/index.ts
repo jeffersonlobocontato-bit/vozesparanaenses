@@ -1,3 +1,5 @@
+import { comContextoIA } from "../_shared/ia-uso.ts";
+import { chamarIA } from "../_shared/ia-uso.ts";
 // Vozes Paranaenses — vitrine-pessoal-criar
 // Recebe o formulário do profissional liberal, valida o filtro
 // pessoa/empresa, redige o rascunho com o agente de IA em modo "vitrine
@@ -22,7 +24,7 @@ type Payload = {
   regiao_id: string; categoria_id?: string | null; briefing_texto: string;
 };
 
-Deno.serve(async (req) => {
+Deno.serve(comContextoIA("vitrine-pessoal-criar", async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: cors });
   {
     const negado = await exigirServicoOuEquipe(req);
@@ -78,7 +80,7 @@ Redija a Vitrine Pessoal no schema JSON:
   "seo_description": "string até 155 chars"
 }`;
 
-  const aiRes = await fetch(AI_URL, {
+  const aiRes = await chamarIA("redacao", AI_URL, {
     method: "POST",
     headers: { "Content-Type": "application/json", Authorization: `Bearer ${aiKey}` },
     body: JSON.stringify({
@@ -154,7 +156,7 @@ Redija a Vitrine Pessoal no schema JSON:
   if (pedErr || !pedido) return json({ error: "pedido_insert_failed", detail: pedErr?.message }, 500);
 
   return json({ ok: true, token: pedido.token });
-});
+}));
 
 function slugify(s: string) {
   return s.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "")

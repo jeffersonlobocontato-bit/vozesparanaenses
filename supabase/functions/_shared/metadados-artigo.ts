@@ -1,3 +1,4 @@
+import { chamarIA } from "./ia-uso.ts";
 // Metadados de SEO/GEO/AEO de uma matéria já escrita: a IA só lê o texto e
 // devolve seo_title, seo_description, resumo, tl;dr, 5W1H, FAQ e cidades —
 // nunca reescreve o corpo. Usado por publish-article e imprensa-publicar.
@@ -48,7 +49,7 @@ export async function gerarMetadados(
   for (let attempt = 0; attempt < 3; attempt++) {
     let res: Response;
     try {
-      res = await fetch(AI_URL, {
+      res = await chamarIA("seo", AI_URL, {
         method: "POST",
         headers: { "Content-Type": "application/json", Authorization: `Bearer ${aiKey}` },
         body: JSON.stringify({

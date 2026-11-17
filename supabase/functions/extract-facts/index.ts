@@ -1,3 +1,5 @@
+import { comContextoIA } from "../_shared/ia-uso.ts";
+import { chamarIA } from "../_shared/ia-uso.ts";
 // Vozes Paranaenses — extract-facts
 // Etapa 1 de 2 do pipeline editorial (separada de generate-article em
 // 2026-07): recebe { cluster_id } (ou { raw_article_ids }), extrai
@@ -54,7 +56,7 @@ type FactsPayload = {
   citacoes?: Array<{ autor?: string; texto?: string }>;
 };
 
-Deno.serve(async (req) => {
+Deno.serve(comContextoIA("extract-facts", async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: cors });
   {
     const negado = await exigirInterno(req);
@@ -123,7 +125,7 @@ Deno.serve(async (req) => {
   let content: string | null = null;
   let ultimoErro = "";
   for (let tentativa = 1; tentativa <= 3; tentativa++) {
-    const aiRes = await fetch(AI_URL, {
+    const aiRes = await chamarIA("fatos", AI_URL, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -207,7 +209,7 @@ Deno.serve(async (req) => {
     fatos: parsed,
     model: MODEL,
   });
-});
+}));
 
 type FonteRef = { nome?: string; url_base?: string };
 function buildUserPrompt(raws: Array<{ url: string; titulo: string | null; corpo_limpo: string | null; fontes?: FonteRef[] | FonteRef | null }>) {

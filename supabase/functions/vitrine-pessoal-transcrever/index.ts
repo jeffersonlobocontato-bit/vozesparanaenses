@@ -1,3 +1,5 @@
+import { comContextoIA } from "../_shared/ia-uso.ts";
+import { chamarIA } from "../_shared/ia-uso.ts";
 // Vozes Paranaenses — vitrine-pessoal-transcrever
 // Recebe um arquivo de áudio (multipart) e devolve { text } transcrito via Lovable AI.
 
@@ -20,7 +22,7 @@ function extFromMime(mime: string): string {
   return "webm";
 }
 
-Deno.serve(async (req) => {
+Deno.serve(comContextoIA("vitrine-pessoal-transcrever", async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: cors });
   try {
     const apiKey = Deno.env.get("LOVABLE_API_KEY");
@@ -38,7 +40,7 @@ Deno.serve(async (req) => {
     upstream.append("language", "pt");
     upstream.append("file", file, `resposta.${ext}`);
 
-    const resp = await fetch(STT_URL, {
+    const resp = await chamarIA("chat", STT_URL, {
       method: "POST",
       headers: { Authorization: `Bearer ${apiKey}` },
       body: upstream,
@@ -62,4 +64,4 @@ Deno.serve(async (req) => {
       headers: { ...cors, "content-type": "application/json" },
     });
   }
-});
+}));

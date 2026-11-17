@@ -1,3 +1,5 @@
+import { comContextoIA } from "../_shared/ia-uso.ts";
+import { chamarIA } from "../_shared/ia-uso.ts";
 // Vozes Paranaenses — sales-chat
 // Chatbot de vendas: conversa com o visitante usando SOMENTE o catálogo de
 // preços real do banco (nunca inventa valor). Pode discutir valores e
@@ -20,7 +22,7 @@ const WHATSAPP_COMERCIAL_DISPLAY = "(45) 99986-4213";
 type Msg = { role: "user" | "assistant"; content: string };
 type Payload = { sessao_id: string; mensagens: Msg[]; contexto?: { regiao_slug?: string; pagina?: string } };
 
-Deno.serve(async (req) => {
+Deno.serve(comContextoIA("sales-chat", async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: cors });
   if (req.method !== "POST") return json({ error: "method_not_allowed" }, 405);
 
@@ -138,7 +140,7 @@ Responda SEMPRE em JSON válido, neste schema exato:
       .map((m) => ({ role: m.role, content: m.content.slice(0, 2000) })),
   ];
 
-  const aiRes = await fetch(AI_URL, {
+  const aiRes = await chamarIA("chat", AI_URL, {
     method: "POST",
     headers: { "Content-Type": "application/json", Authorization: `Bearer ${aiKey}` },
     body: JSON.stringify({ model: MODEL, messages, response_format: { type: "json_object" } }),
@@ -166,7 +168,7 @@ Responda SEMPRE em JSON válido, neste schema exato:
     resposta: parsed.resposta,
     mostrar_whatsapp: parsed.mostrar_whatsapp ?? false,
   });
-});
+}));
 
 function json(payload: unknown, status = 200) {
   return new Response(JSON.stringify(payload), { status, headers: { ...cors, "Content-Type": "application/json" } });

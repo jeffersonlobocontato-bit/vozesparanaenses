@@ -1,3 +1,4 @@
+import { chamarIA } from "./ia-uso.ts";
 // Vozes Paranaenses — nota na coluna regional "Vozes {Região}"
 //
 // Todo release de PREFEITURA sai como NOTA curta na coluna da região da
@@ -49,7 +50,7 @@ export async function escreverNota(
   const usuario = `Cidade: ${cidadeNome} (região ${regiaoNome})\nFatos apurados:\n${JSON.stringify(fatos).slice(0, 5000)}`;
   for (let tentativa = 1; tentativa <= 2; tentativa++) {
     try {
-      const res = await fetch(AI_URL, {
+      const res = await chamarIA("nota_cidade", AI_URL, {
         method: "POST",
         headers: { "Content-Type": "application/json", Authorization: `Bearer ${aiKey}` },
         body: JSON.stringify({

@@ -1,3 +1,5 @@
+import { comContextoIA } from "../_shared/ia-uso.ts";
+import { chamarIA } from "../_shared/ia-uso.ts";
 // Vozes Paranaenses — classify-and-quota
 // Para cada cluster novo:
 //  1. Classifica a categoria editorial E o crivo editorial (tema/prioridade/
@@ -26,7 +28,7 @@ const cors = {
 const AI_URL = "https://ai.gateway.lovable.dev/v1/chat/completions";
 const MODEL = "google/gemini-2.5-flash-lite";
 
-Deno.serve(async (req) => {
+Deno.serve(comContextoIA("classify-and-quota", async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: cors });
   {
     const negado = await exigirInterno(req);
@@ -84,7 +86,7 @@ Deno.serve(async (req) => {
   const task = runPipeline().catch((e) => console.error("[classify-and-quota] background error", (e as Error).message));
   if (rt && typeof rt.waitUntil === "function") rt.waitUntil(task);
   return json({ ok: true, mode: "background", clusters: clusters.length });
-});
+}));
 
 async function processClusters(
   { clusters, categorias, sb, aiKey, url, key }: {
@@ -333,7 +335,7 @@ ${CRIVO_PROMPT}
 Responda APENAS com JSON: ${CRIVO_SCHEMA}`;
   const fallback = (): ResultadoCrivo => ({ ...parseCrivo("", excerpt), categoria: fallbackSlug(categorias) });
   try {
-    const res = await fetch(AI_URL, {
+    const res = await chamarIA("crivo", AI_URL, {
       method: "POST",
       headers: { "content-type": "application/json", authorization: `Bearer ${apiKey}` },
       body: JSON.stringify({

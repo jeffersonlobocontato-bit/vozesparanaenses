@@ -1,3 +1,4 @@
+import { comContextoIA } from "../_shared/ia-uso.ts";
 // Vozes Paranaenses — publish-article
 // Card "Publicar matéria" do /admin/painel.
 //
@@ -36,7 +37,7 @@ type Payload = {
 
 
 
-Deno.serve(async (req) => {
+Deno.serve(comContextoIA("publish-article", async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: cors });
   {
     const negado = await exigirEquipe(req);
@@ -123,7 +124,7 @@ Deno.serve(async (req) => {
   if (row.og_image_url) await garantirPreviaLeve(sb, inserted.id, row.og_image_url as string);
 
   return json({ ok: true, article: inserted, slug: inserted.slug, publicado: publicar, model: MODEL });
-});
+}));
 
 function slugify(s: string) {
   return s

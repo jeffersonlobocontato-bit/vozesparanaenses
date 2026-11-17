@@ -1,3 +1,4 @@
+import { comContextoIA } from "../_shared/ia-uso.ts";
 // Vozes Paranaenses — analista-imagem-curadoria
 //
 // Garante pelo menos 1 matéria NACIONAL e 1 INTERNACIONAL (temas gerais e
@@ -48,7 +49,7 @@ function json(body: unknown, status = 200) {
   return new Response(JSON.stringify(body), { status, headers: { ...cors, "content-type": "application/json" } });
 }
 
-Deno.serve(async (req) => {
+Deno.serve(comContextoIA("analista-imagem-curadoria", async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: cors });
   {
     const negado = await exigirInterno(req);
@@ -123,7 +124,7 @@ Deno.serve(async (req) => {
   }
 
   return json({ ok: true, relatorio });
-});
+}));
 
 async function analisarMateria(
   // deno-lint-ignore no-explicit-any

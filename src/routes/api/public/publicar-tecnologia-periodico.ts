@@ -43,6 +43,8 @@ function autorizado(req: Request): boolean {
 }
 
 async function run(): Promise<Response> {
+  const { criarChamarIAServidor } = await import("@/lib/ia-uso.server");
+  const chamarIA = criarChamarIAServidor("publicar-tecnologia-periodico");
   const url = process.env.EXTERNAL_SUPABASE_URL;
   const serviceKey = process.env.EXTERNAL_SUPABASE_SERVICE_ROLE_KEY;
   const aiKey = process.env.LOVABLE_API_KEY;
@@ -122,7 +124,7 @@ async function run(): Promise<Response> {
       (recentes ?? []).map((r: { titulo: string }) => `- ${r.titulo}`).join("\n") ||
       "Nenhuma matéria de Tecnologia publicada ainda esta semana.";
 
-    const resp = await fetch(AI_URL, {
+    const resp = await chamarIA("redacao", AI_URL, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",

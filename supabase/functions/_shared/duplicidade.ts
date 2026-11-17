@@ -1,3 +1,4 @@
+import { chamarIA } from "./ia-uso.ts";
 // Duplicidade entre o que o assessor enviou e o que o portal já publicou
 // (a varredura automática dos sites das prefeituras costuma chegar antes).
 // Compara palavras significativas e números do título/subtítulo enviados com
@@ -66,7 +67,7 @@ export function candidatoDuplicata(a: string, b: string): boolean {
  */
 export async function mesmoFato(a: string, b: string, aiKey: string): Promise<boolean> {
   try {
-    const res = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+    const res = await chamarIA("duplicidade", "https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",
       headers: { "Content-Type": "application/json", Authorization: `Bearer ${aiKey}` },
       body: JSON.stringify({

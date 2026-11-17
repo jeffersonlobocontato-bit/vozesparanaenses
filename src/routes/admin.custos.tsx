@@ -3,6 +3,7 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { ExternalLink, Plus } from "lucide-react";
 import { getExternalBrowser } from "@/lib/external-supabase-browser";
 import { situacao, type Assinatura } from "@/lib/custos";
+import { CustosIA } from "@/components/admin/CustosIA";
 import {
   PageHeader,
   Section,
@@ -18,6 +19,14 @@ import {
 } from "@/components/admin/ui";
 
 export const Route = createFileRoute("/admin/custos")({
+  head: () => ({ meta: [
+    { title: "Consumo de IA e Custos — Vozes Paranaenses" },
+    { name: "description", content: "Consumo medido de IA por etapa, custo por matéria e despesas do Vozes Paranaenses." },
+    { property: "og:title", content: "Consumo de IA e Custos — Vozes Paranaenses" },
+    { property: "og:description", content: "Acompanhamento do consumo de IA e das despesas do portal." },
+    { property: "og:type", content: "website" },
+    { name: "twitter:card", content: "summary" },
+  ] }),
   component: AdminCustos,
 });
 
@@ -141,6 +150,8 @@ function AdminCustos() {
       {erro && <ErrorBanner>{erro}</ErrorBanner>}
       {aviso && <Aviso tipo={/salvo|atualizado/i.test(aviso) ? "ok" : "erro"}>{aviso}</Aviso>}
       {carregando && !resumo && <p className="text-sm text-slate-500">Carregando…</p>}
+
+      <CustosIA atualizacao={carregando} />
 
       {resumo && (
         <>
@@ -331,7 +342,7 @@ function AdminCustos() {
                 <button type="button" className={btn("ghost")} onClick={() => setEditando(null)}>Cancelar</button>
                 {editando.id && (
                   <span className="ml-auto">
-                    <ConfirmButton confirmLabel="Confirmar exclusão" onConfirm={() => { const id = editando.id!; setEditando(null); return excluirAssinatura(id); }}>
+                    <ConfirmButton confirmLabel="Confirmar exclusão" onConfirm={() => { const id = editando.id; if (!id) return; setEditando(null); return excluirAssinatura(id); }}>
                       Excluir
                     </ConfirmButton>
                   </span>

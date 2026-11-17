@@ -1,3 +1,4 @@
+import { chamarIA } from "./ia-uso.ts";
 // Vozes Paranaenses — agente de criticidade
 //
 // Avalia o RISCO do texto final (matéria ou nota) antes de publicar. Risco
@@ -153,7 +154,7 @@ Título: ${p.titulo}
 ${p.corpo.slice(0, 9000)}`;
 
   try {
-    const res = await fetch(AI_URL, {
+    const res = await chamarIA("criticidade", AI_URL, {
       method: "POST",
       headers: { "Content-Type": "application/json", Authorization: `Bearer ${aiKey}` },
       body: JSON.stringify({

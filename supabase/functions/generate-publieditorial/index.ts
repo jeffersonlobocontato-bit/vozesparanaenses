@@ -1,3 +1,5 @@
+import { comContextoIA } from "../_shared/ia-uso.ts";
+import { chamarIA } from "../_shared/ia-uso.ts";
 // Vozes Paranaenses — generate-publieditorial
 // Gera uma matéria de publieditorial a partir de um BRIEFING de anunciante
 // (não de fonte raspada). Sempre cai em 'rascunho' — publieditorial nunca
@@ -20,7 +22,7 @@ const MODEL = "google/gemini-2.5-pro";
 
 type Payload = { briefing_id: string };
 
-Deno.serve(async (req) => {
+Deno.serve(comContextoIA("generate-publieditorial", async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: cors });
   {
     const negado = await exigirServicoOuEquipe(req);
@@ -105,7 +107,7 @@ Redija o publieditorial seguindo essa mesma progressão (Tese → Contexto → E
   "seo_description": "string até 155 chars"
 }`;
 
-  const aiRes = await fetch(AI_URL, {
+  const aiRes = await chamarIA("redacao", AI_URL, {
     method: "POST",
     headers: { "Content-Type": "application/json", Authorization: `Bearer ${aiKey}` },
     body: JSON.stringify({
@@ -172,7 +174,7 @@ Redija o publieditorial seguindo essa mesma progressão (Tese → Contexto → E
     .eq("id", briefing.id);
 
   return json({ ok: true, article: inserted, model: MODEL, titulo: parsed.titulo });
-});
+}));
 
 function slugify(s: string) {
   return s

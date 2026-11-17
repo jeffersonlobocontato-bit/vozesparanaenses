@@ -1,3 +1,4 @@
+import { chamarIA } from "./ia-uso.ts";
 // Vozes Paranaenses — legenda e campos do card do Instagram.
 //
 // A IA resume a matéria para o card (título curto, linha-fina) e escreve a
@@ -50,7 +51,7 @@ export async function redigir(p: {
   };
   if (!p.apiKey) return base;
   try {
-    const res = await fetch(AI_URL, {
+    const res = await chamarIA("instagram", AI_URL, {
       method: "POST",
       headers: { "Content-Type": "application/json", Authorization: `Bearer ${p.apiKey}` },
       body: JSON.stringify({

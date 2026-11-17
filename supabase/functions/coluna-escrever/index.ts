@@ -1,3 +1,5 @@
+import { comContextoIA } from "../_shared/ia-uso.ts";
+import { chamarIA } from "../_shared/ia-uso.ts";
 // Vozes Paranaenses — coluna-escrever
 //
 // Escreve uma edição da coluna Vozes Políticas a partir das pautas que o
@@ -56,7 +58,7 @@ async function lerFonte(url: string) {
   }
 }
 
-Deno.serve(async (req) => {
+Deno.serve(comContextoIA("coluna-escrever", async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: cors });
   {
     const negado = await exigirEquipe(req);
@@ -116,7 +118,7 @@ Deno.serve(async (req) => {
   const { system, user } = montarPrompt({ agente, exemplos, pautas: comFontes });
   let raw: unknown = null;
   try {
-    const res = await fetch(AI_URL, {
+    const res = await chamarIA("coluna", AI_URL, {
       method: "POST",
       headers: { "Content-Type": "application/json", Authorization: `Bearer ${aiKey}` },
       body: JSON.stringify({
@@ -151,4 +153,4 @@ Deno.serve(async (req) => {
       fontes: p.fontes.map((f) => ({ url: f.url, titulo: f.titulo, erro: f.erro ?? null })),
     })),
   });
-});
+}));

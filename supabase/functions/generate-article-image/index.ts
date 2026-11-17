@@ -1,3 +1,5 @@
+import { comContextoIA } from "../_shared/ia-uso.ts";
+import { chamarIA } from "../_shared/ia-uso.ts";
 // Vozes Paranaenses — generate-article-image
 // Modos:
 //   { article_id, mode: "ai" }              → ilustração editorial gerada por IA
@@ -36,7 +38,7 @@ type Body = {
   mime?: string;
 };
 
-Deno.serve(async (req) => {
+Deno.serve(comContextoIA("generate-article-image", async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: cors });
   {
     const negado = await exigirEquipe(req);
@@ -103,7 +105,7 @@ Deno.serve(async (req) => {
     credito = CREDITO_IA;
 
     const callAI = async (msgContent: Array<Record<string, unknown>>) => {
-      const r = await fetch(AI_URL, {
+      const r = await chamarIA("imagem_geracao", AI_URL, {
         method: "POST",
         headers: { "Content-Type": "application/json", Authorization: `Bearer ${aiKey}` },
         body: JSON.stringify({
@@ -177,7 +179,7 @@ Deno.serve(async (req) => {
   await garantirPreviaLeve(sb, body.article_id, publicUrl);
 
   return json({ ok: true, url: publicUrl, credito, mode: body.mode });
-});
+}));
 
 function base64ToBytes(b64: string): Uint8Array {
   const clean = b64.replace(/^data:[^,]+,/, "").replace(/\s+/g, "");

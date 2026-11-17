@@ -1,3 +1,4 @@
+import { chamarIA } from "./ia-uso.ts";
 // Vozes Paranaenses — regra de título (out/2026)
 //
 //   1. NUNCA "Prefeitura" (nem "Município de", "Administração municipal",
@@ -86,7 +87,7 @@ Retorne APENAS JSON: {"titulo": "..."}`;
 Problema: ${p.motivos.join("; ")}
 Contexto da notícia: ${p.contexto.slice(0, 1200)}`;
   try {
-    const res = await fetch(AI_URL, {
+    const res = await chamarIA("redacao", AI_URL, {
       method: "POST",
       headers: { "Content-Type": "application/json", Authorization: `Bearer ${p.aiKey}` },
       body: JSON.stringify({
