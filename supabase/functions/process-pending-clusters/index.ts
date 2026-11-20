@@ -76,7 +76,13 @@ Deno.serve(async (req) => {
   if (bloqueados.size) {
     await markClustersDone(sb, [...bloqueados]);
   }
-  const fila = pendentes.filter((c) => !bloqueados.has(c.id)).slice(0, limit);
+  // Fase 1 (20/11/2026): pauta com coleta de mais de 24h já seria descartada
+  // como "fora_do_dia" pelo generate-article, mas só DEPOIS de extrair fatos
+  // (a etapa mais cara). Descarta antes, sem chamar a IA.
+  const livres = pendentes.filter((c) => !bloqueados.has(c.id));
+  const vencidas = await pautasVencidas(sb, livres.map((c) => c.id));
+  if (vencidas.size) await descartar(sb, [...vencidas]);
+  const fila = livres.filter((c) => !vencidas.has(c.id)).slice(0, limit);
 
   const runAll = async () => {
     const CONCURRENCY = body.sync ? 2 : 3;
@@ -95,7 +101,11 @@ Deno.serve(async (req) => {
               headers: { "Content-Type": "application/json", Authorization: `Bearer ${selfKey}` },
               body: JSON.stringify({ cluster_id: c.id }),
             });
-            if (!ef.ok) { erros.push({ cluster_id: c.id, etapa: "extract-facts", detalhe: (await ef.text()).slice(0, 300) }); continue; }
+            if (!ef.ok) {
+              erros.push({ cluster_id: c.id, etapa: "extract-facts", detalhe: (await ef.text()).slice(0, 300) });
+              await registrarFalha(sb, c.id, ef.status);
+              continue;
+            }
             extraidas++;
           }
           const ga = await fetch(`${selfUrl}/functions/v1/generate-article`, {
@@ -105,7 +115,11 @@ Deno.serve(async (req) => {
             // dia e publicação pela criticidade — ver generate-article.
             body: JSON.stringify({ cluster_id: c.id, modo: "automatico" }),
           });
-          if (!ga.ok) { erros.push({ cluster_id: c.id, etapa: "generate-article", detalhe: (await ga.text()).slice(0, 300) }); continue; }
+          if (!ga.ok) {
+            erros.push({ cluster_id: c.id, etapa: "generate-article", detalhe: (await ga.text()).slice(0, 300) });
+            await registrarFalha(sb, c.id, ga.status);
+            continue;
+          }
           // Correção: sem isso, o cluster continuava com status
           // "selecionado_cota"/"fatos_extraidos" mesmo já tendo virado
           // matéria — qualquer chamada seguinte (o dreno de segurança do
@@ -152,4 +166,45 @@ async function markClustersDone(sb: any, ids: string[]) {
   if (invalidEnum) {
     await sb.from("article_clusters").update({ status: "descartado" }).in("id", ids);
   }
+}
+
+// Fase 1 (20/11/2026) — trava contra pauta em loop. Antes, uma pauta que
+// falhava (JSON truncado, nota inválida) continuava pendente e era repetida a
+// cada 4 minutos: duas pautas chegaram a ~500 extrações de fatos cada.
+const MAX_TENTATIVAS = 3;
+// Falta de crédito, limite de taxa e IA pausada não são culpa da pauta.
+const STATUS_NAO_CONTA = new Set([402, 403, 429, 503]);
+
+// deno-lint-ignore no-explicit-any
+async function registrarFalha(sb: any, clusterId: string, httpStatus: number) {
+  if (STATUS_NAO_CONTA.has(httpStatus)) return;
+  const { data } = await sb.from("article_clusters").select("tentativas_ia").eq("id", clusterId).maybeSingle();
+  const tentativas = ((data as { tentativas_ia?: number } | null)?.tentativas_ia ?? 0) + 1;
+  if (tentativas >= MAX_TENTATIVAS) {
+    console.warn(`[process-pending-clusters] pauta ${clusterId} descartada após ${tentativas} falhas`);
+    await descartar(sb, [clusterId]);
+  }
+  await sb.from("article_clusters").update({ tentativas_ia: tentativas }).eq("id", clusterId);
+}
+
+// deno-lint-ignore no-explicit-any
+async function pautasVencidas(sb: any, ids: string[]): Promise<Set<string>> {
+  if (!ids.length) return new Set();
+  const { data } = await sb.from("cluster_articles").select("cluster_id, raw_articles(coletado_em)").in("cluster_id", ids);
+  const ultima = new Map<string, number>();
+  for (const l of (data ?? []) as Array<{ cluster_id: string; raw_articles: { coletado_em: string | null } | null }>) {
+    const t = l.raw_articles?.coletado_em ? Date.parse(l.raw_articles.coletado_em) : 0;
+    ultima.set(l.cluster_id, Math.max(ultima.get(l.cluster_id) ?? 0, t));
+  }
+  const limite = Date.now() - 24 * 3600_000;
+  return new Set([...ultima].filter(([, t]) => t > 0 && t < limite).map(([id]) => id));
+}
+
+// deno-lint-ignore no-explicit-any
+async function descartar(sb: any, ids: string[]) {
+  if (!ids.length) return;
+  await sb.from("article_clusters").update({ status: "descartado" }).in("id", ids);
+  const { data } = await sb.from("cluster_articles").select("raw_article_id").in("cluster_id", ids);
+  const raws = ((data ?? []) as Array<{ raw_article_id: string }>).map((r) => r.raw_article_id);
+  if (raws.length) await sb.from("raw_articles").update({ processado: true }).in("id", raws);
 }

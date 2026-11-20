@@ -11,7 +11,10 @@ import { chamarIA } from "./ia-uso.ts";
 import type { ResultadoCriticidade } from "./criticidade.ts";
 
 const AI_URL = "https://ai.gateway.lovable.dev/v1/chat/completions";
-const MODEL = "google/gemini-2.5-flash";
+// Fase 1 (20/11/2026): Flash-Lite. Com o Flash, o raciocínio interno consumia o
+// teto de 400 tokens e 48% das notas voltavam truncadas (JSON inválido), o que
+// deixava a pauta presa e repetida a cada ciclo.
+const MODEL = "google/gemini-2.5-flash-lite";
 
 const NOTA_PROMPT = `Você escreve NOTAS curtas para a coluna "Vozes {REGIAO}" do portal regional
 "Vozes Paranaenses". A coluna reúne notas de várias cidades da região; esta nota
@@ -56,7 +59,7 @@ export async function escreverNota(
         body: JSON.stringify({
           model: MODEL,
           temperature: 0.1,
-          max_tokens: 400,
+          max_tokens: 800,
           response_format: { type: "json_object" },
           messages: [{ role: "system", content: sistema }, { role: "user", content: usuario }],
         }),

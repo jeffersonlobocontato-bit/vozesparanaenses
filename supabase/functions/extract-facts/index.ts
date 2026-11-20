@@ -134,7 +134,9 @@ Deno.serve(comContextoIA("extract-facts", async (req) => {
       body: JSON.stringify({
         model: MODEL,
         temperature: 0,
-        max_tokens: 2200,
+        // Fase 1: 2200 truncava a ficha quando o modelo raciocinava muito (JSON inválido
+        // e pauta repetida a cada ciclo). 4000 cobre a ficha com folga.
+        max_tokens: 4000,
         messages: [
           { role: "system", content: SYSTEM_PROMPT },
           { role: "user", content: userPrompt },

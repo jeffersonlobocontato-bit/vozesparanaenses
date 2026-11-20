@@ -323,16 +323,23 @@ Deno.serve(comContextoIA("generate-article", async (req) => {
   const logos = new Set<string>();
   // Foto de prefeitura com marca num canto: recorta na cópia (ver recorte-marca.ts).
   const marcasPorRaw = new Map<string, Caixa[]>();
-  for (const r of raws) {
+  // Fase 1 (20/11/2026): no máximo 3 candidatas analisadas por pauta, prefeitura
+  // primeiro (eram 8,3 análises de IA por pauta). As demais não viram capa.
+  const MAX_ANALISES_FOTO = 3;
+  const candidatasFoto = [...raws]
+    .filter((r) => r.imagem_original_url && statusFoto(r) === "autorizada")
+    .sort((a, b) => (tipoFonte(a) === "prefeitura" ? -1 : 0) - (tipoFonte(b) === "prefeitura" ? -1 : 0));
+  const naoAnalisadas = new Set(candidatasFoto.slice(MAX_ANALISES_FOTO).map((r) => r.id));
+  for (const r of candidatasFoto.slice(0, MAX_ANALISES_FOTO)) {
     // Só as candidatas a capa (as proibidas já não entram) — poupa a IA.
-    if (r.imagem_original_url && statusFoto(r) === "autorizada" && await naoEhFotoDeVerdade(sb, aiKey, r, marcasPorRaw)) {
+    if (await naoEhFotoDeVerdade(sb, aiKey, r, marcasPorRaw)) {
       logos.add(r.id);
       console.log(`[generate-article] imagem descartada (não é foto limpa: logomarca, marca d'água, nome de veículo ou padrão do site): ${r.imagem_original_url}`);
     }
   }
   const rawFotoAutorizada = [...raws]
     .sort((a, b) => (tipoFonte(a) === "prefeitura" ? -1 : 0) - (tipoFonte(b) === "prefeitura" ? -1 : 0))
-    .find((r) => !logos.has(r.id) && statusFoto(r) === "autorizada" && r.imagem_original_url) ?? null;
+    .find((r) => !logos.has(r.id) && !naoAnalisadas.has(r.id) && statusFoto(r) === "autorizada" && r.imagem_original_url) ?? null;
   const fotoStatus: FotoStatus = rawFotoAutorizada
     ? "autorizada"
     : raws.some((r) => r.imagem_original_url && !logos.has(r.id)) ? "proibida" : "sem_foto";
