@@ -70,7 +70,7 @@ export const Route = createFileRoute("/editoria/$categoria")({
   ),
   errorComponent: ({ error }) => (
     <div className="p-8 text-center text-sm text-muted-foreground">
-      Erro ao carregar: {error.message}
+      Erro ao carregar: {(error as Error).message}
     </div>
   ),
 });
