@@ -71,3 +71,15 @@ try {
   if (originalUrl === undefined) Deno.env.delete("EXTERNAL_SUPABASE_URL"); else Deno.env.set("EXTERNAL_SUPABASE_URL", originalUrl);
   if (originalKey === undefined) Deno.env.delete("EXTERNAL_SUPABASE_SERVICE_ROLE_KEY"); else Deno.env.set("EXTERNAL_SUPABASE_SERVICE_ROLE_KEY", originalKey);
 }
+Deno.test("limite de créditos pausa e a chamada seguinte nem chega ao Gateway", async () => {
+  let chamadas = 0; let motivo: string | null = null;
+  const chamar = criarChamarIA({
+    contexto: () => ({ funcao: "teste" }), preco: async () => null, gravar: async () => {},
+    pausado: async () => motivo, pausar: async (m) => { motivo = m; },
+    fetch: async () => { chamadas++; return new Response(JSON.stringify({ type: "credit_limit_reached" }), { status: 403 }); },
+  });
+  const r1 = await chamar("fatos", "https://x", { method: "POST", body: JSON.stringify({ model: "m" }) });
+  if (r1.status !== 403 || motivo !== "credit_limit_reached") throw new Error("não pausou");
+  const r2 = await chamar("fatos", "https://x", { method: "POST", body: JSON.stringify({ model: "m" }) });
+  if (r2.status !== 402 || chamadas !== 1) throw new Error("chamou o Gateway mesmo pausado");
+});

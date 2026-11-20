@@ -9,4 +9,6 @@
 - [x] Confirmar destino Rede de Portais: configuração externa aponta para o banco informado; conteúdo acessível e ia_uso/ia_precos ainda ausentes na API.
 - [ ] Implantar as funções e publicar o app — aguardam a migração externa para começar a registrar.
 - [ ] Validar registro real e leitura admin/editor no painel — aguardam a migração e sessão do banco externo.
-- [ ] Conferir tarifas do catálogo autenticado do Gateway — chave disponível apenas no serviço hospedado.
+- [ ] Conferir tarifas do catálogo autenticado do Gateway — chave disponível apenas no serviço hospedado.- [x] Pausa global da IA no limite de créditos (sem novas tentativas) — funções publicadas
+- [ ] Aplicar `supabase-external/100_ia_pausa.sql` no banco externo (sem ela a pausa vale só por instância)
+- [ ] Reduzir tamanho de pedidos/respostas por etapa — aguarda dados de `ia_uso` (099)

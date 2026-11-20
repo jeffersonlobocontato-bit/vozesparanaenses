@@ -14,3 +14,4 @@
 - AI costs are immutable per-call snapshots from database prices; unknown usage stays NULL and reports show incomplete coverage rather than claiming zero spend.
 - External schema changes are staged in supabase-external and require application to that database; the managed migration tool must never be used for external content tables.
 - Server caches retain only completed data; create external database clients per call and never share pending promises across requests, because Worker requests own asynchronous work.
+- AI calls pause globally (ia_pausa, 30 min) on Gateway 402/credit-limit 403 inside chamarIA; callers must not retry 402/403, because each retry burns quota or hammers a blocked gateway.

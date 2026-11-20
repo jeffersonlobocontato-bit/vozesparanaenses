@@ -22,11 +22,17 @@ export function calcularCustoIA(preco: PrecoIA | null, usage: Objeto | null, ima
 }
 
 export type RegistroIA = ContextoIA & { etapa: EtapaIA; modelo: string; tokens_entrada: number | null; tokens_saida: number | null; imagens: number; custo_usd: number | null; sucesso: boolean; erro: string | null; duracao_ms: number };
-export function criarChamarIA(deps: { contexto: () => ContextoIA; preco: (modelo: string) => Promise<PrecoIA | null>; gravar: (linha: RegistroIA) => Promise<void>; fetch?: typeof fetch }) {
+export function criarChamarIA(deps: { contexto: () => ContextoIA; preco: (modelo: string) => Promise<PrecoIA | null>; gravar: (linha: RegistroIA) => Promise<void>; fetch?: typeof fetch; pausado?: () => Promise<string | null>; pausar?: (motivo: string) => Promise<void> }) {
   return async function chamarIA(etapa: EtapaIA, url: string, init: RequestInit): Promise<Response> {
     const contexto = { ...deps.contexto() };
     let modelo = "desconhecido";
     try { modelo = typeof init.body === "string" ? JSON.parse(init.body).model : init.body instanceof FormData ? String(init.body.get("model")) : modelo; } catch { /* preserve original request */ }
+    // Limite/créditos esgotados: pausa o pipeline inteiro em vez de insistir chamada a chamada.
+    if (deps.pausado) {
+      let motivo: string | null = null;
+      try { motivo = await deps.pausado(); } catch { /* sem pausa conhecida */ }
+      if (motivo) return new Response(JSON.stringify({ error: "ai_paused", type: motivo, message: "IA pausada: limite de créditos atingido. Retoma sozinha no próximo ciclo." }), { status: 402, headers: { "Content-Type": "application/json" } });
+    }
     const inicio = Date.now();
     let gravado = false;
     async function registrar(ok: boolean, payload: Objeto | null, erro: string | null) {
@@ -67,6 +73,10 @@ export function criarChamarIA(deps: { contexto: () => ContextoIA; preco: (modelo
         let payload = null;
         try { payload = JSON.parse(text); } catch { /* safe error code only */ }
         await registrar(false, payload, `http_${resposta.status}`);
+        const tipo = payload?.type ?? payload?.error?.type;
+        if (deps.pausar && (resposta.status === 402 || (resposta.status === 403 && /credit|limit|ai_disabled/i.test(String(tipo ?? text.slice(0, 300)))))) {
+          try { await deps.pausar(String(tipo ?? `http_${resposta.status}`)); } catch { /* pausa só em memória */ }
+        }
         return new Response(text, { status: resposta.status, statusText: resposta.statusText, headers: resposta.headers });
       } catch { await registrar(false, null, `http_${resposta.status}`); }
     }

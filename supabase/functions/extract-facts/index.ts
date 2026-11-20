@@ -145,6 +145,8 @@ Deno.serve(comContextoIA("extract-facts", async (req) => {
 
     if (aiRes.status === 429) return json({ error: "rate_limited" }, 429);
     if (aiRes.status === 402) return json({ error: "ai_credits_exhausted" }, 402);
+    // Limite de créditos/acesso negado não é soluço: não repete.
+    if (aiRes.status === 403) return json({ error: "ai_credit_limit", detail: (await aiRes.text()).slice(0, 300) }, 403);
     if (!aiRes.ok) {
       ultimoErro = `http ${aiRes.status}: ${(await aiRes.text()).slice(0, 300)}`;
     } else {
