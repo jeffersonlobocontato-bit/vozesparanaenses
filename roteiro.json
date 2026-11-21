@@ -1,0 +1,182 @@
+{
+ "fps": 30,
+ "audio": "audio/mix.wav",
+ "data": "2026-11-20",
+ "cenas": [
+  {
+   "tipo": "abertura",
+   "dur": 3.6,
+   "data": "Sexta-feira, 20 de novembro",
+   "chamadas": [
+    "Feriado no Paraná tem calor e",
+    "Programa estadual de turismo encerra segunda"
+   ],
+   "narracao": "Resumo do dia. Vozes Paranaenses.",
+   "voz_dur": 3.29,
+   "voz": "audio/voz-0.wav"
+  },
+  {
+   "tipo": "noticia",
+   "dur": 6.62,
+   "estilo": "foto",
+   "chapeu": "Paraná · Cidades",
+   "cor": "#6FBF98",
+   "titulo": "Feriado no Paraná tem calor e temporais com até 50 mm de chuva",
+   "linhaFina": "Simepar prevê instabilidades a partir de quinta-feira e queda de temperatura para 17°C em Curitiba nos próximos dias",
+   "foto": "fotos/n0.jpg",
+   "video": null,
+   "videoDur": null,
+   "credito": "Roberto Dziura Jr/AEN",
+   "numero": null,
+   "palavras": [
+    {
+     "t": 0.495,
+     "fim": 1.008,
+     "texto": "Feriado"
+    },
+    {
+     "t": 1.019,
+     "fim": 1.12,
+     "texto": "no"
+    },
+    {
+     "t": 1.131,
+     "fim": 1.499,
+     "texto": "Paraná"
+    },
+    {
+     "t": 1.51,
+     "fim": 1.655,
+     "texto": "tem"
+    },
+    {
+     "t": 1.666,
+     "fim": 1.968,
+     "texto": "calor"
+    },
+    {
+     "t": 1.979,
+     "fim": 2.035,
+     "texto": "e"
+    },
+    {
+     "t": 2.046,
+     "fim": 2.593,
+     "texto": "temporais"
+    },
+    {
+     "t": 2.604,
+     "fim": 2.749,
+     "texto": "com"
+    },
+    {
+     "t": 2.76,
+     "fim": 2.939,
+     "texto": "até"
+    },
+    {
+     "t": 2.95,
+     "fim": 3.988,
+     "texto": "50 milímetros"
+    },
+    {
+     "t": 3.999,
+     "fim": 4.077,
+     "texto": "de"
+    },
+    {
+     "t": 4.088,
+     "fim": 4.535,
+     "texto": "chuva"
+    }
+   ],
+   "transicao": "balao",
+   "narracao": "Feriado no Paraná tem calor e temporais com até 50 milímetros de chuva.",
+   "voz_dur": 4.92,
+   "voz": "audio/voz-1.wav"
+  },
+  {
+   "tipo": "noticia",
+   "dur": 8.35,
+   "estilo": "foto",
+   "chapeu": "Apucarana · Cidades",
+   "cor": "#F0B07A",
+   "titulo": "Programa estadual de turismo encerra segunda fase com 216 idosos atendidos",
+   "linhaFina": "Iniciativa oferece viagens gratuitas com transporte, hospedagem e alimentação para participantes paranaenses",
+   "foto": "fotos/n1.jpg",
+   "video": null,
+   "videoDur": null,
+   "credito": "Divulgação/Prefeitura de Apucarana",
+   "numero": null,
+   "palavras": [
+    {
+     "t": 0.495,
+     "fim": 1.164,
+     "texto": "Apucarana"
+    },
+    {
+     "t": 1.393,
+     "fim": 1.762,
+     "texto": "Programa"
+    },
+    {
+     "t": 1.773,
+     "fim": 2.264,
+     "texto": "estadual"
+    },
+    {
+     "t": 2.275,
+     "fim": 2.375,
+     "texto": "de"
+    },
+    {
+     "t": 2.387,
+     "fim": 2.811,
+     "texto": "turismo"
+    },
+    {
+     "t": 2.822,
+     "fim": 3.201,
+     "texto": "encerra"
+    },
+    {
+     "t": 3.212,
+     "fim": 3.603,
+     "texto": "segunda"
+    },
+    {
+     "t": 3.614,
+     "fim": 3.971,
+     "texto": "fase"
+    },
+    {
+     "t": 3.983,
+     "fim": 4.128,
+     "texto": "com"
+    },
+    {
+     "t": 4.139,
+     "fim": 5.5,
+     "texto": "216 idosos"
+    },
+    {
+     "t": 5.512,
+     "fim": 6.259,
+     "texto": "atendidos"
+    }
+   ],
+   "transicao": "chicote",
+   "narracao": "Apucarana. Programa estadual de turismo encerra segunda fase com 216 idosos atendidos.",
+   "voz_dur": 6.65,
+   "voz": "audio/voz-2.wav"
+  },
+  {
+   "tipo": "assinatura",
+   "dur": 10.18,
+   "transicao": "balao",
+   "narracao": "Vozes Paranaenses: o portal com sotaque de todas as regiões. Siga o perfil e acompanhe o Paraná todo dia.",
+   "voz_dur": 7.08,
+   "voz": "audio/voz-3.wav"
+  }
+ ]
+}
