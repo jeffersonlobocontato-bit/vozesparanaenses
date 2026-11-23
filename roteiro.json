@@ -1,0 +1,422 @@
+{
+ "fps": 30,
+ "audio": "audio/mix.wav",
+ "data": "2026-11-22",
+ "cenas": [
+  {
+   "tipo": "abertura",
+   "dur": 3.6,
+   "data": "Domingo, 22 de novembro",
+   "chamadas": [
+    "Alerta laranja prevê tempestade com ventos",
+    "Copel religa energia de 96,5% dos",
+    "Incêndio atinge depósito de supermercado em",
+    "Alertas preveem tempestade com ventos de",
+    "Licenciamento 2026 vence em 27 de"
+   ],
+   "narracao": "Resumo do dia. Vozes Paranaenses.",
+   "voz_dur": 3.29,
+   "voz": "audio/voz-0.wav"
+  },
+  {
+   "tipo": "noticia",
+   "dur": 8.49,
+   "estilo": "foto",
+   "chapeu": "Guarapuava · Cidades",
+   "cor": "#F0B07A",
+   "titulo": "Alerta laranja prevê tempestade com ventos de até 100 km/h e granizo no Paraná",
+   "linhaFina": "Inmet emite aviso para Guarapuava e região neste domingo após Simepar confirmar dois tornados no estado",
+   "foto": "fotos/n0.jpg",
+   "video": null,
+   "videoDur": null,
+   "credito": "José Fernando Ogura/AEN",
+   "numero": null,
+   "palavras": [
+    {
+     "t": 0.495,
+     "fim": 1.187,
+     "texto": "Guarapuava"
+    },
+    {
+     "t": 1.416,
+     "fim": 1.817,
+     "texto": "Alerta"
+    },
+    {
+     "t": 1.829,
+     "fim": 2.286,
+     "texto": "laranja"
+    },
+    {
+     "t": 2.297,
+     "fim": 2.565,
+     "texto": "prevê"
+    },
+    {
+     "t": 2.576,
+     "fim": 3.201,
+     "texto": "tempestade"
+    },
+    {
+     "t": 3.212,
+     "fim": 3.391,
+     "texto": "com"
+    },
+    {
+     "t": 3.402,
+     "fim": 3.782,
+     "texto": "ventos"
+    },
+    {
+     "t": 3.793,
+     "fim": 3.86,
+     "texto": "de"
+    },
+    {
+     "t": 3.871,
+     "fim": 4.061,
+     "texto": "até"
+    },
+    {
+     "t": 4.072,
+     "fim": 5.355,
+     "texto": "100 quilômetros por hora"
+    },
+    {
+     "t": 5.378,
+     "fim": 5.433,
+     "texto": "e"
+    },
+    {
+     "t": 5.445,
+     "fim": 5.902,
+     "texto": "granizo"
+    },
+    {
+     "t": 5.913,
+     "fim": 6.003,
+     "texto": "no"
+    },
+    {
+     "t": 6.014,
+     "fim": 6.404,
+     "texto": "Paraná"
+    }
+   ],
+   "transicao": "balao",
+   "narracao": "Guarapuava. Alerta laranja prevê tempestade com ventos de até 100 quilômetros por hora e granizo no Paraná.",
+   "voz_dur": 6.79,
+   "voz": "audio/voz-1.wav"
+  },
+  {
+   "tipo": "noticia",
+   "dur": 10.41,
+   "estilo": "foto",
+   "chapeu": "Campos Gerais · Cidades",
+   "cor": "#6FBF98",
+   "titulo": "Copel religa energia de 96,5% dos imóveis; 16,7 mil seguem sem luz no Paraná",
+   "linhaFina": null,
+   "foto": "fotos/n1.jpg",
+   "video": null,
+   "videoDur": null,
+   "credito": "Gilson Abreu/AEN",
+   "numero": null,
+   "palavras": [
+    {
+     "t": 0.495,
+     "fim": 0.841,
+     "texto": "Campos"
+    },
+    {
+     "t": 0.852,
+     "fim": 1.376,
+     "texto": "Gerais"
+    },
+    {
+     "t": 1.605,
+     "fim": 1.907,
+     "texto": "Copel"
+    },
+    {
+     "t": 1.918,
+     "fim": 2.264,
+     "texto": "religa"
+    },
+    {
+     "t": 2.275,
+     "fim": 2.721,
+     "texto": "energia"
+    },
+    {
+     "t": 2.733,
+     "fim": 2.822,
+     "texto": "de"
+    },
+    {
+     "t": 2.833,
+     "fim": 4.652,
+     "texto": "96,5%"
+    },
+    {
+     "t": 4.663,
+     "fim": 4.753,
+     "texto": "dos"
+    },
+    {
+     "t": 4.764,
+     "fim": 5.333,
+     "texto": "imóveis"
+    },
+    {
+     "t": 5.512,
+     "fim": 6.94,
+     "texto": "16,7 mil"
+    },
+    {
+     "t": 6.951,
+     "fim": 7.375,
+     "texto": "seguem"
+    },
+    {
+     "t": 7.387,
+     "fim": 7.588,
+     "texto": "sem"
+    },
+    {
+     "t": 7.599,
+     "fim": 7.833,
+     "texto": "luz"
+    },
+    {
+     "t": 7.844,
+     "fim": 7.933,
+     "texto": "no"
+    },
+    {
+     "t": 7.945,
+     "fim": 8.324,
+     "texto": "Paraná"
+    }
+   ],
+   "transicao": "chicote",
+   "narracao": "Campos Gerais. Copel religa energia de 96,5% dos imóveis; 16,7 mil seguem sem luz no Paraná.",
+   "voz_dur": 8.71,
+   "voz": "audio/voz-2.wav"
+  },
+  {
+   "tipo": "noticia",
+   "dur": 5.71,
+   "estilo": "foto",
+   "chapeu": "Salgado Filho · Segurança",
+   "cor": "#F0B07A",
+   "titulo": "Incêndio atinge depósito de supermercado em Salgado Filho",
+   "linhaFina": "Chamas atingem o setor de bebidas durante a madrugada. Moradores e bombeiros atuam no combate ao fogo",
+   "foto": "fotos/n2.jpg",
+   "video": null,
+   "videoDur": null,
+   "credito": "Corpo de Bombeiros do Paraná",
+   "numero": null,
+   "palavras": [
+    {
+     "t": 0.495,
+     "fim": 0.986,
+     "texto": "Incêndio"
+    },
+    {
+     "t": 0.997,
+     "fim": 1.365,
+     "texto": "atinge"
+    },
+    {
+     "t": 1.376,
+     "fim": 1.923,
+     "texto": "depósito"
+    },
+    {
+     "t": 1.934,
+     "fim": 2.013,
+     "texto": "de"
+    },
+    {
+     "t": 2.024,
+     "fim": 2.749,
+     "texto": "supermercado"
+    },
+    {
+     "t": 2.76,
+     "fim": 2.827,
+     "texto": "em"
+    },
+    {
+     "t": 2.838,
+     "fim": 3.251,
+     "texto": "Salgado"
+    },
+    {
+     "t": 3.262,
+     "fim": 3.62,
+     "texto": "Filho"
+    }
+   ],
+   "transicao": "iris",
+   "narracao": "Incêndio atinge depósito de supermercado em Salgado Filho.",
+   "voz_dur": 4.01,
+   "voz": "audio/voz-3.wav"
+  },
+  {
+   "tipo": "noticia",
+   "dur": 7.44,
+   "estilo": "alerta",
+   "chapeu": "Maringá · Cidades",
+   "cor": "#F0B07A",
+   "titulo": "Alertas preveem tempestade com ventos de até 100 km/h no Paraná",
+   "linhaFina": "Avisos meteorológicos abrangem municípios paranaenses com risco de chuvas intensas, granizo e alagamentos",
+   "foto": null,
+   "video": null,
+   "videoDur": null,
+   "credito": null,
+   "numero": null,
+   "dados": [],
+   "palavras": [
+    {
+     "t": 0.495,
+     "fim": 1.041,
+     "texto": "Maringá"
+    },
+    {
+     "t": 1.271,
+     "fim": 1.739,
+     "texto": "Alertas"
+    },
+    {
+     "t": 1.75,
+     "fim": 2.141,
+     "texto": "preveem"
+    },
+    {
+     "t": 2.152,
+     "fim": 2.733,
+     "texto": "tempestade"
+    },
+    {
+     "t": 2.744,
+     "fim": 2.922,
+     "texto": "com"
+    },
+    {
+     "t": 2.934,
+     "fim": 3.302,
+     "texto": "ventos"
+    },
+    {
+     "t": 3.313,
+     "fim": 3.38,
+     "texto": "de"
+    },
+    {
+     "t": 3.391,
+     "fim": 3.57,
+     "texto": "até"
+    },
+    {
+     "t": 3.581,
+     "fim": 4.831,
+     "texto": "100 quilômetros por hora"
+    },
+    {
+     "t": 4.842,
+     "fim": 4.942,
+     "texto": "no"
+    },
+    {
+     "t": 4.954,
+     "fim": 5.355,
+     "texto": "Paraná"
+    }
+   ],
+   "transicao": "glitch",
+   "narracao": "Maringá. Alertas preveem tempestade com ventos de até 100 quilômetros por hora no Paraná.",
+   "voz_dur": 5.74,
+   "voz": "audio/voz-4.wav"
+  },
+  {
+   "tipo": "noticia",
+   "dur": 7.92,
+   "estilo": "alerta",
+   "chapeu": "Paraná · Cidades",
+   "cor": "#6FBF98",
+   "titulo": "Licenciamento 2026 vence em 27 de novembro para placas com final 0 no Paraná",
+   "linhaFina": null,
+   "foto": null,
+   "video": null,
+   "videoDur": null,
+   "credito": null,
+   "numero": null,
+   "dados": [],
+   "palavras": [
+    {
+     "t": 0.496,
+     "fim": 1.266,
+     "texto": "Licenciamento"
+    },
+    {
+     "t": 1.277,
+     "fim": 2.605,
+     "texto": "2026 vence"
+    },
+    {
+     "t": 2.616,
+     "fim": 2.739,
+     "texto": "em"
+    },
+    {
+     "t": 2.75,
+     "fim": 3.9,
+     "texto": "27 de novembro"
+    },
+    {
+     "t": 3.945,
+     "fim": 4.134,
+     "texto": "para"
+    },
+    {
+     "t": 4.146,
+     "fim": 4.547,
+     "texto": "placas"
+    },
+    {
+     "t": 4.559,
+     "fim": 4.704,
+     "texto": "com"
+    },
+    {
+     "t": 4.715,
+     "fim": 5.05,
+     "texto": "final"
+    },
+    {
+     "t": 5.061,
+     "fim": 5.44,
+     "texto": "0 no"
+    },
+    {
+     "t": 5.451,
+     "fim": 5.842,
+     "texto": "Paraná"
+    }
+   ],
+   "transicao": "glitch",
+   "narracao": "Licenciamento 2026 vence em 27 de novembro para placas com final 0 no Paraná.",
+   "voz_dur": 6.22,
+   "voz": "audio/voz-5.wav"
+  },
+  {
+   "tipo": "assinatura",
+   "dur": 10.18,
+   "transicao": "balao",
+   "narracao": "Vozes Paranaenses: o portal com sotaque de todas as regiões. Siga o perfil e acompanhe o Paraná todo dia.",
+   "voz_dur": 7.08,
+   "voz": "audio/voz-6.wav"
+  }
+ ]
+}
